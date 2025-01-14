@@ -1,6 +1,8 @@
 .container {
     min-height: 100vh;
     height: auto;
+    background-color: #add8e6;
+    color: black;
 }
 
 .justified {
@@ -41,4 +43,17 @@
     justify-content: center;
     width: 20%;
     min-width: min-content;
+}
+
+.logo-image {
+    width: 300px;
+    height: auto;
+    max-width: 100%;
+}
+
+#bottom-left-image {
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    width: 200px;
 }
