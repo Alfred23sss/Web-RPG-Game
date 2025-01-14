@@ -1,44 +1,20 @@
 .container {
-    min-height: 100vh;
-    height: auto;
-}
-
-.justified {
+    height: 100%;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
 }
 
-.button {
-    margin-top: 10px;
-    text-align: center;
+.play-area-container {
+    overflow: auto;
+    flex: 1 1 auto;
 }
 
-.team-name {
-    margin-top: 0.25em;
-    margin-bottom: 0.25em;
-    color: green;
+.play-area {
+    display: grid;
+    outline: none;
+    height: 100vh;
 }
 
-.header-item {
-    justify-content: center;
-    text-align: center;
-}
-
-.footer-item {
-    text-align: center;
-}
-
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
-}
-
-.server-message {
-    justify-content: center;
-    width: 20%;
-    min-width: min-content;
+#sidebar {
+    flex-basis: 350px;
+    min-width: 200px;
 }
