@@ -1,1 +1,35 @@
-<div class="container">title</div>
+<div class="page">
+    <div class="game-info">
+        <label for="game-name">Nom du jeu :</label>
+        <input id="game-name" type="text" [(ngModel)]="gameName" placeholder="Entrez le nom du jeu" />
+
+        <label for="game-description">Description du jeu :</label>
+        <textarea id="game-description" [(ngModel)]="gameDescription" placeholder="Entrez une description du jeu"></textarea>
+    </div>
+
+    <div class="tool-container">
+        <h1 class="header-item">{{ activeTool }}</h1>
+        <div class="tool" id="wall-tool" title="Mur : Bloque le passage." (click)="selectTool('wall')">
+            <img src="assets/images/wall.png" alt="Mur" />
+            <span>Mur</span>
+        </div>
+        <div class="tool" id="door-tool" title="Porte : Permet le passage." (click)="selectTool('door')">
+            <img src="assets/images/door.png" alt="Porte" />
+            <span>Porte</span>
+        </div>
+        <div class="tool" id="water-tool" title="Eau : Bloque certaines unités." (click)="selectTool('water')">
+            <img src="assets/images/water.png" alt="Eau" />
+            <span>Eau</span>
+        </div>
+        <div class="tool" id="ice-tool" title="Glace : Réduit la vitesse de déplacement." (click)="selectTool('ice')">
+            <img src="assets/images/ice.png" alt="Glace" />
+            <span>Glace</span>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div *ngFor="let row of grid; let rowIndex = index" class="grid-row">
+            <div *ngFor="let cell of row; let colIndex = index" class="grid-cell"></div>
+        </div>
+    </div>
+</div>
