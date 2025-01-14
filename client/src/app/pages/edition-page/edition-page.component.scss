@@ -88,6 +88,8 @@
     height: 100%;
     cursor: pointer;
     transition: background-color 0.2s ease-in-out;
+    background-size: cover;
+    background-position: center;
 }
 
 .grid-cell:hover {

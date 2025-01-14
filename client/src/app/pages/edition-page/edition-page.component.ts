@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class EditionPageComponent {
     activeTool: string | null = null;
+    activeToolImage: string = '';
     grid: string[][];
     gameName: string = '';
     gameDescription: string = '';
@@ -19,8 +20,9 @@ export class EditionPageComponent {
         this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
     }
 
-    selectTool(tool: string): void {
+    selectTool(tool: string, imageURL: string): void {
         this.activeTool = tool;
+        this.activeToolImage = imageURL;
     }
 
     isToolActive(tool: string): boolean {
@@ -29,5 +31,15 @@ export class EditionPageComponent {
 
     private generateGrid(rows: number, cols: number): string[][] {
         return Array.from({ length: rows }, () => Array(cols).fill(''));
+    }
+
+    addItem(rowIndex: number, colIndex: number): void {
+        this.grid[rowIndex][colIndex] = this.activeToolImage;
+    }
+
+    getImageFromCell(rowIndex: number, colIndex: number): string {
+        const image = this.grid[rowIndex][colIndex];
+        console.log(image);
+        return image ? `url(${image})` : '';
     }
 }
