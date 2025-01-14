@@ -1,12 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { CommunicationService } from '@app/services/communication.service';
 import { Message } from '@common/message';
 import { BehaviorSubject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { MatDialog } from '@angular/material/dialog';
-import { PopUpUnavailableComponent } from '@app/components/pop-up-unavailable/pop-up-unavailable.component';
 
 @Component({
     selector: 'app-main-page',
@@ -18,7 +17,10 @@ export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(private readonly communicationService: CommunicationService, private dialogRef: MatDialog) {}
+    constructor(
+        private readonly communicationService: CommunicationService,
+        private dialogRef: MatDialog,
+    ) {}
 
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
@@ -49,8 +51,4 @@ export class MainPageComponent {
             )
             .subscribe(this.message);
     }
-
-openDialog(){
-    (this.dialogRef.open(PopUpUnavailableComponent));
-}
 }
