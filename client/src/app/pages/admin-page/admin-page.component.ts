@@ -10,8 +10,8 @@ import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
     styleUrls: ['./admin-page.component.scss'],
     imports: [RouterLink],
 })
-export class AdminPageComponent {
 
+export class AdminPageComponent {
     exampleGame = [
         {
             name: 'exampleGame',
@@ -26,7 +26,7 @@ export class AdminPageComponent {
 
     constructor(private dialogRef: MatDialog) {}
 
-    openDialog(){(
-        this.dialogRef.open(PopUpComponent));
+    openDialog() {
+        this.dialogRef.open(PopUpComponent);
     }
 }
