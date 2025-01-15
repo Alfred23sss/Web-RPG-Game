@@ -27,12 +27,13 @@
         </div>
     </div>
 
-    <div class="grid-container">
+    <div class="grid-container" (mousedown)="startDrag()" (mouseup)="stopDrag()" (mouseleave)="stopDrag()">
         <div *ngFor="let row of grid; let rowIndex = index" class="grid-row">
             <div
                 *ngFor="let cell of row; let colIndex = index"
                 class="grid-cell"
-                (click)="addItem(rowIndex, colIndex)"
+                (mousedown)="addItem(rowIndex, colIndex)"
+                (mousemove)="dragItem(rowIndex, colIndex)"
                 [ngStyle]="{
                     'background-image': getImageFromCell(rowIndex, colIndex)
                 }"

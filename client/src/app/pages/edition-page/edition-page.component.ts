@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 })
 export class EditionPageComponent {
     activeTool: string | null = null;
+    isDragging = false;
     activeToolImage: string = '';
     grid: string[][];
     gameName: string = '';
@@ -29,6 +30,20 @@ export class EditionPageComponent {
         return this.activeTool === tool;
     }
 
+    startDrag() {
+        this.isDragging = true;
+    }
+
+    stopDrag() {
+        this.isDragging = false;
+    }
+
+    dragItem(rowIndex: number, colIndex: number) {
+        if (this.isDragging) {
+            this.addItem(rowIndex, colIndex);
+        }
+    }
+
     private generateGrid(rows: number, cols: number): string[][] {
         return Array.from({ length: rows }, () => Array(cols).fill(''));
     }
@@ -39,7 +54,6 @@ export class EditionPageComponent {
 
     getImageFromCell(rowIndex: number, colIndex: number): string {
         const image = this.grid[rowIndex][colIndex];
-        console.log(image);
-        return image ? `url(${image})` : '';
+        return image ? `url(${image})` : `url(${`assets/images/clay.png`})`;
     }
 }
