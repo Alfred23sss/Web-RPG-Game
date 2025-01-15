@@ -1,13 +1,20 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-pop-up',
-  imports: [],
   templateUrl: './pop-up.component.html',
-  styleUrl: './pop-up.component.scss'
+  styleUrls: ['./pop-up.component.scss'],
+  standalone: true,
+  imports: [RouterLink],
 })
 export class PopUpComponent {
+  isPopupVisible = true;
 
+  constructor(private dialogRef: MatDialog) {}
+
+  closePopup() {
+    this.dialogRef.closeAll();
+  }
 }
-
-
