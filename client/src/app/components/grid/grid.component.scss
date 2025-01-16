@@ -12,3 +12,10 @@
     justify-content: space-between;
     max-width: 800px;
 }
+
+app-tile {
+    background-color: #f11414;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    flex-basis: 100%;
+}
