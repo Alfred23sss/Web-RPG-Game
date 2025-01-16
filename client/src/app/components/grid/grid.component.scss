@@ -1,0 +1,14 @@
+.grid-container {
+    width: 800px; /* Fixed width */
+    height: 800px; /* Fixed height */
+    display: grid;
+    gap: 2px; /* Spacing between tiles */
+    background-color: #ddd; /* Optional background for the grid */
+    border: 2px solid #000; /* Optional border for the grid */
+}
+
+.grid-row {
+    display: flex;
+    justify-content: space-between;
+    max-width: 800px;
+}

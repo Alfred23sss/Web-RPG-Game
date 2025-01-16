@@ -115,3 +115,13 @@ label {
     font-weight: bold;
     margin-bottom: 5px;
 }
+
+app-tile {
+    background-color: #f11414; /* Example background color for tiles */
+    padding: 20px; /* Optional: padding for the tiles */
+    display: flex; /* Center content inside the tile */
+    justify-content: center; /* Horizontally center content */
+    align-items: center; /* Vertically center content */
+    border: 1px solid #ccc; /* Optional: border for tiles */
+    box-sizing: border-box;
+}

@@ -2,12 +2,13 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { GridComponent } from '@app/components/grid/grid.component';
 
 @Component({
     selector: 'app-edition-page',
     templateUrl: './edition-page.component.html',
     styleUrls: ['./edition-page.component.scss'],
-    imports: [CommonModule, FormsModule],
+    imports: [CommonModule, FormsModule, GridComponent],
 })
 export class EditionPageComponent {
     activeTool: string | null = null;
@@ -18,7 +19,7 @@ export class EditionPageComponent {
     gameDescription: string = '';
 
     constructor() {
-        this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
+        this.grid = this.generateGrid(20, 20); // Générer une grille 10x10 par défaut
     }
 
     selectTool(tool: string, imageURL: string): void {

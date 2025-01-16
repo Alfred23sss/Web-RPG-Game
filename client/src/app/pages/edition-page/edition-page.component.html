@@ -27,20 +27,8 @@
         </div>
     </div>
 
-    <div class="grid-container">
-        @for(row of grid;let rowIndex = $index; track $index) {
-        <div class="grid-row">
-            @for(cell of row;let colIndex = $index; track $index) {
-            <div
-                class="grid-cell"
-                (mousedown)="addItem(rowIndex, colIndex)"
-                (mousemove)="dragItem(rowIndex, colIndex)"
-                [ngStyle]="{
-                    'background-image': getImageFromCell(rowIndex, colIndex)
-                }"
-            ></div>
-            }
-        </div>
-        }
+    <div class="page-container">
+        <h1>Grid Editor</h1>
+        <app-grid [rows]="5" [cols]="10"></app-grid>
     </div>
 </div>

@@ -1,0 +1,12 @@
+<div class="grid-container">
+    <div class="grid-row" *ngFor="let row of grid">
+        <app-tile
+            *ngFor="let tile of row"
+            [id]="tile.id"
+            [imageSrc]="tile.imageSrc"
+            [isOccupied]="tile.isOccupied"
+            [type]="tile.type"
+            [isOpen]="tile.isOpen"
+        ></app-tile>
+    </div>
+</div>
