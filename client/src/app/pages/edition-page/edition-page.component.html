@@ -27,10 +27,11 @@
         </div>
     </div>
 
-    <div class="grid-container" (mousedown)="startDrag()" (mouseup)="stopDrag()" (mouseleave)="stopDrag()">
-        <div *ngFor="let row of grid; let rowIndex = index" class="grid-row">
+    <div class="grid-container">
+        @for(row of grid;let rowIndex = $index; track $index) {
+        <div class="grid-row">
+            @for(cell of row;let colIndex = $index; track $index) {
             <div
-                *ngFor="let cell of row; let colIndex = index"
                 class="grid-cell"
                 (mousedown)="addItem(rowIndex, colIndex)"
                 (mousemove)="dragItem(rowIndex, colIndex)"
@@ -38,6 +39,8 @@
                     'background-image': getImageFromCell(rowIndex, colIndex)
                 }"
             ></div>
+            }
         </div>
+        }
     </div>
 </div>
