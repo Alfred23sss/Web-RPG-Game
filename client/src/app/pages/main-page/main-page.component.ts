@@ -1,6 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { CommunicationService } from '@app/services/communication.service';
 import { Message } from '@common/message';
@@ -17,10 +16,7 @@ export class MainPageComponent {
     readonly title: string = 'LOG2990';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
 
-    constructor(
-        private readonly communicationService: CommunicationService,
-        private dialogRef: MatDialog,
-    ) {}
+    constructor(private readonly communicationService: CommunicationService) {}
 
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
