@@ -1,21 +1,21 @@
 .grid-container {
-    width: 800px; /* Fixed width */
-    height: 800px; /* Fixed height */
+    width: 600px;
+    height: 600px;
     display: grid;
-    gap: 2px; /* Spacing between tiles */
-    background-color: #ddd; /* Optional background for the grid */
-    border: 2px solid #000; /* Optional border for the grid */
+    background-color: #ddd;
+    border: 2px solid #000;
 }
 
 .grid-row {
     display: flex;
     justify-content: space-between;
-    max-width: 800px;
+    max-width: 100%;
+    object-fit: contain;
 }
 
 app-tile {
-    background-color: #f11414;
-    border: 1px solid #ccc;
+    display: inline-block;
     box-sizing: border-box;
-    flex-basis: 100%;
+    position: relative;
+    border: 2px solid #333;
 }

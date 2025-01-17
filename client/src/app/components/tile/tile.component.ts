@@ -8,7 +8,7 @@ import { Component, Input } from '@angular/core';
 })
 export class TileComponent {
     @Input() id: string = '';
-    @Input() imageSrc: string = '';
+    @Input() imageSrc: string = `assets/images/clay.png`;
     @Input() isOccupied: boolean = false;
     @Input() type: string = 'default';
     @Input() isOpen: boolean = true;

@@ -1,12 +1,9 @@
 <div class="grid-container">
-    <div class="grid-row" *ngFor="let row of grid">
-        <app-tile
-            *ngFor="let tile of row"
-            [id]="tile.id"
-            [imageSrc]="tile.imageSrc"
-            [isOccupied]="tile.isOccupied"
-            [type]="tile.type"
-            [isOpen]="tile.isOpen"
-        ></app-tile>
+    @for(row of grid; let rowIndex = $index;track $index){
+    <div class="grid-row">
+        @for (tile of row; let colIndex = $index;track $index){
+        <app-tile></app-tile>
+        }
     </div>
+    }
 </div>
