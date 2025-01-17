@@ -3,8 +3,9 @@
   <ul class="game-list">
       @for(game of exampleGames; let index = $index; track $index) {
       <li class="game-item">
+        @if(game.isVisible) {
           <div class="game-preview">
-              <img [src]="game.previewImage" />
+              <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
           </div>
 
           <div class="game-info">
@@ -15,11 +16,14 @@
 
               <button class="button" routerLink="/edit">Modifier le jeu</button>
               <button class="button" (click)="deleteGame(index)">Supprimer le jeu</button>
-              <button class="button" (click)="toggleVisibility(index)">{{ game.isVisible ? 'Cacher' : 'Afficher' }} le jeu</button>
+              <button class="button" (click)="toggleVisibility(index)">Cacher le jeu</button>
           </div>
+        }
+        @else {
+            <button class="button" (click)="toggleVisibility(index)">Afficher le jeu</button>
+        }
       </li>
       }
   </ul>
-
   <button (click)="openDialog()">Créer un jeu, WIP, pop-up</button>
 </div>
