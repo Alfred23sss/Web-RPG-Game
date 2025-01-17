@@ -19,3 +19,7 @@ app-tile {
     position: relative;
     border: 2px solid #333;
 }
+
+app-tile:hover {
+    border-color: #00f; /* Change la couleur de la bordure au survol (ici bleu) */
+}
