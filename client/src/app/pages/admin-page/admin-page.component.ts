@@ -1,8 +1,8 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'app-admin-page',
@@ -36,5 +36,15 @@ export class AdminPageComponent {
 
     openDialog() {
         this.dialogRef.open(PopUpComponent);
+    }
+
+    deleteGame(index: number) {
+        if (confirm('Êtes-vous sûr de vouloir supprimer ce jeu ?')) {
+            this.exampleGames.splice(index, 1);
+        }
+    }
+
+    toggleVisibility(index: number) {
+        this.exampleGames[index].isVisible = !this.exampleGames[index].isVisible;
     }
 }
