@@ -4,26 +4,18 @@
         <h2>Création de partie</h2>
       </div>
       <div class="popup-row">
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">Classique - Petite (10x10, 2 joueurs, 2 items)</button>
-        </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">Classique - Moyenne (15x15, 2-4 joueurs, 4 items)</button>
-        </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">Classique - Grande (20x20, 2-6 joueurs, 6 items)</button>
-        </div>
+        @for(gameMode of classicGameModes; track gameMode.gameMode) {
+            <div class="popup-column">
+              <button class="popup-button" routerLink="/edit" (click)="selectGameMode(gameMode.gameMode)"> {{gameMode.gameMode}}</button>
+            </div>
+        }
       </div>
       <div class="popup-row">
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">CTF - Petite (10x10, 2 joueurs, 2 items)</button>
-        </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">CTF - Moyenne (15x15, 2-4 joueurs, 4 items)</button>
-        </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">CTF - Grande (20x20, 2-6 joueurs, 6 items)</button>
-        </div>
+        @for(gameMode of captureTheFlagGameModes; track gameMode.gameMode) {
+            <div class="popup-column">
+              <button class="popup-button" routerLink="/edit" (click)="selectGameMode(gameMode.gameMode)"> {{gameMode.gameMode}}</button>
+            </div>
+        }
       </div>
     </div>
   </div>

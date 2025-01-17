@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 
-
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -11,10 +10,8 @@ import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
     imports: [RouterLink],
 })
 export class AdminPageComponent {
-
     constructor(private dialogRef: MatDialog) {}
-
-    openDialog(){(
-        this.dialogRef.open(PopUpComponent));
+    openDialog() {
+        this.dialogRef.open(PopUpComponent);
     }
 }
