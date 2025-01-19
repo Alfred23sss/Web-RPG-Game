@@ -1,0 +1,59 @@
+<div [class.gray-background]="showForm" class="form-container">
+    @if(showForm === true){
+        <h1>Create a Character</h1>
+        <input type="text" placeholder="Character Name" [(ngModel)]="characterName" />
+
+        <div class="avatars">
+            <img src="assets/avatars/avatar1.png" 
+            (click)="selectedAvatar = 'assets/avatars/avatar1.png'" 
+            [class.selected]="selectedAvatar === 'assets/avatars/avatar1.png'" 
+            alt="Avatar"/>
+            <img src="assets/avatars/avatar2.png" 
+            (click)="selectedAvatar = 'assets/avatars/avatar2.png'" 
+            [class.selected]="selectedAvatar === 'assets/avatars/avatar2.png'" 
+            alt="Avatar"/>
+            <img src="assets/avatars/avatar3.png" 
+            (click)="selectedAvatar = 'assets/avatars/avatar3.png'" 
+            [class.selected]="selectedAvatar === 'assets/avatars/avatar3.png'" 
+            alt="Avatar"/>
+            <img src="assets/avatars/avatar4.png" 
+            (click)="selectedAvatar = 'assets/avatars/avatar4.png'" 
+            [class.selected]="selectedAvatar === 'assets/avatars/avatar4.png'" 
+            alt="Avatar"/>
+        </div>
+        <div class="attributes">
+            <div>
+                <span>Vitality: {{ attributes.vitality }}</span> 
+                <button (click)="assignBonus('vitality')" [disabled]="bonusAssigned.vitality">+2 Vitality</button> <!-- 'Vie' -> 'Vitality' -->
+            </div>
+            <div>
+                <span>Speed: {{ attributes.speed }}</span>
+                <button (click)="assignBonus('speed')" [disabled]="bonusAssigned.speed">+2 Speed</button> <!-- 'Rapidité' -> 'Speed' -->
+            </div>
+            <div>
+                <span>Attack: {{ attributes.attack }}
+                    @if(diceAssigned.attack) {
+                        <span>+D6</span>
+                    }
+                    @if(!diceAssigned.attack && diceAssigned.defense) {
+                        <span>+D4</span>
+                    }
+                </span>
+                <button (click)="assignDice('attack')">D6 Attack</button>
+            </div>
+            <div>
+                <span>Defense: {{ attributes.defense }}
+                    @if(diceAssigned.defense) {
+                        <span>+D6</span>
+                    }
+                    @if(!diceAssigned.defense && diceAssigned.attack) {
+                        <span>+D4</span>
+                    }
+                </span>
+                <button (click)="assignDice('defense')">D6 Defense</button>
+            </div>
+        </div>
+
+        <button (click)="submitCharacter()">Confirm</button>
+    }
+</div>
