@@ -3,12 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GridComponent } from '@app/components/grid/grid.component';
+import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 
 @Component({
     selector: 'app-edition-page',
     templateUrl: './edition-page.component.html',
     styleUrls: ['./edition-page.component.scss'],
-    imports: [CommonModule, FormsModule, GridComponent],
+    imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent],
 })
 export class EditionPageComponent {
     activeTool: string | null = null;
@@ -19,7 +20,7 @@ export class EditionPageComponent {
     gameDescription: string = '';
 
     constructor() {
-        this.grid = this.generateGrid(20, 20); // Générer une grille 10x10 par défaut
+        this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
     }
 
     selectTool(tool: string, imageURL: string): void {
@@ -57,4 +58,28 @@ export class EditionPageComponent {
         const image = this.grid[rowIndex][colIndex];
         return image ? `url(${image})` : `url(${`assets/images/clay.png`})`;
     }
+
+    /*
+    Empty() {
+        for(int i = 0; i < row; ++i )
+        {
+            for(int i = 0; i < col; ++i )
+            {
+                grid = null;
+            }
+        }
+    }
+    */
+
+    /*
+    Reset() {
+        for(int i = 0; i < row; ++i )
+        {
+            for(int i = 0; i < col; ++i )
+            {
+                grid = grid sauvegarder;
+            }
+        }
+    }
+    */
 }
