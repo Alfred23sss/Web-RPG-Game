@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-admin-page',
@@ -12,26 +12,25 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     imports: [RouterLink, CommonModule, MatTooltipModule],
 })
 export class AdminPageComponent {
-    exampleGames = [
-        {
-            name: 'exampleGame',
-            size: '10x10',
-            mode: 'Multijoueur',
-            lastModified: new Date(),
-            isVisible: true,
-            previewImage: 'assets/images/example.png',
-            description: 'Ceci est une description',
-        },
-        {
-            name: 'exampleGame2',
-            size: '15x15',
-            mode: 'Multijoueur',
-            lastModified: new Date(),
-            isVisible: true,
-            previewImage: 'assets/images/example.png',
-            description: 'Ceci est une description encore',
-        },
-    ];
+    game1 = {
+        name: 'exampleGame',
+        size: '10x10',
+        mode: 'Multijoueur',
+        lastModified: new Date(),
+        isVisible: true,
+        previewImage: 'assets/images/example.png',
+        description: 'Ceci est une description',
+    };
+    game2 = {
+        name: 'exampleGame2',
+        size: '15x15',
+        mode: 'Multijoueur',
+        lastModified: new Date(),
+        isVisible: true,
+        previewImage: 'assets/images/example.png',
+        description: 'Ceci est une description encore',
+    };
+    exampleGames = [this.game1, this.game2];
 
     constructor(private dialogRef: MatDialog) {}
 

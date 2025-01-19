@@ -16,6 +16,15 @@
     max-width: 300px;
 }
 
+.game-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    width: 75%;
+    padding: 0;
+}
+
 .game-preview img {
     width: 80px;
     height: 80px;
