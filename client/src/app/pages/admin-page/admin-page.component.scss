@@ -1,20 +1,44 @@
 .container {
-    height: 100%;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
-.play-area-container {
-    overflow: auto;
-    flex: 1 1 auto;
+.game-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    border: 1px solid gray;
+    border-radius: 10px;
+    padding: 0.5rem;
+    max-width: 300px;
 }
 
-.play-area {
-    display: grid;
-    outline: none;
-    height: 100vh;
+.game-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    width: 75%;
+    padding: 0;
 }
 
-#sidebar {
-    flex-basis: 350px;
-    min-width: 200px;
+.game-preview img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
 }
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.game-info > * {
+    margin-bottom: 0.2rem;
+}
+ 
