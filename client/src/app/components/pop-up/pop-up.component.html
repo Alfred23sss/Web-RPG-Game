@@ -1,30 +1,40 @@
+<div class="popup-overlay">
 <div class="popup" id="popup">
     <div class="popup-grid">
-      <div class="popup-row">
-        <h2>Création de partie</h2>
-      </div>
-      <div class="popup-row">
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">Classique - Petite (10x10, 2 joueurs, 2 items)</button>
+            <div class="header">
+                <div class="popup-cancel">
+                    <button class="cancel-button" (click)="closePopup()"></button>
+                </div>
+            <h2 >Game creation</h2>
+            </div>
+        <div class="map-size-select">
+            <button class="map-button" data-info="Grid: 10x10, Players: 2, Items: 2" (click)="setGameSmall()">Small</button>
+            <button class="map-button" data-info="Grid: 15x15, Players: 4, Items: 4"(click)="setGameMedium()">Medium</button>
+            <button class="map-button" data-info="Grid: 20x20, Players: 6, Items: 6"(click)="setGameMedium()">Large</button>
+          </div>
+          <div class="popup-game-select">
+            <button class="popup-button classic" (click)="setClassicGame()">
+                <div class="popup-content">
+                    <h3>Classic</h3>
+                    <p>A traditional game mode where strategy is key.</p>
+                </div>
+            </button>
+            <button class="popup-button ctf" (click)="setCTFGame()">
+                <div class="popup-content">
+                    <h3>Capture The Flag</h3>
+                    <p>Compete to secure your opponent's flag!</p>
+                </div>
+            </button>
         </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">Classique - Moyenne (15x15, 2-4 joueurs, 4 items)</button>
+        
+        <div class="popup-confirm">
+            <button class="confirm-button">
+                <h3>Confirm</h3>
+              </button>
         </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">Classique - Grande (20x20, 2-6 joueurs, 6 items)</button>
-        </div>
-      </div>
-      <div class="popup-row">
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">CTF - Petite (10x10, 2 joueurs, 2 items)</button>
-        </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">CTF - Moyenne (15x15, 2-4 joueurs, 4 items)</button>
-        </div>
-        <div class="popup-column">
-          <button class="popup-button" routerLink="/edit" (click)="closePopup()">CTF - Grande (20x20, 2-6 joueurs, 6 items)</button>
-        </div>
-      </div>
     </div>
   </div>
-  
+</div>
+
+<!-- cancel button needs to reset the if the gamemodes state's been changed
+ add font medieval style papyrus maybe -->
