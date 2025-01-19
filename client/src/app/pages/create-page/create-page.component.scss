@@ -1,20 +1,36 @@
 .container {
-    height: 100%;
     display: flex;
-}
-
-.play-area-container {
-    overflow: auto;
-    flex: 1 1 auto;
-}
-
-.play-area {
-    display: grid;
-    outline: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     height: 100vh;
-}
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
-#sidebar {
-    flex-basis: 350px;
-    min-width: 200px;
+    h2 {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .create-button {
+        background-color: #6200ea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+
+        &:hover {
+            background-color: #3700b3;
+        }
+
+        &:focus {
+            outline: none;
+        }
+    }
 }

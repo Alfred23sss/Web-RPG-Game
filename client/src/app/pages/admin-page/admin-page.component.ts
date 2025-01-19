@@ -11,10 +11,7 @@ import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 })
 export class AdminPageComponent {
     constructor(private dialogRef: MatDialog) {}
-<<<<<<< HEAD
 
-=======
->>>>>>> 9841d6dd1f280d2c4d4dca0d93aa36f5a5dacda3
     openDialog() {
         this.dialogRef.open(PopUpComponent);
     }
