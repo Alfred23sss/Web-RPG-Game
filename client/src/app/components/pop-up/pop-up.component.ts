@@ -1,6 +1,13 @@
+<<<<<<< HEAD
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink, Router } from '@angular/router';
+=======
+import { Component, inject } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { RouterLink } from '@angular/router';
+import { GameModeService } from '@app/services/game-mode.service';
+>>>>>>> 9841d6dd1f280d2c4d4dca0d93aa36f5a5dacda3
 
 @Component({
     selector: 'app-pop-up',
@@ -10,6 +17,7 @@ import { RouterLink, Router } from '@angular/router';
     imports: [RouterLink],
 })
 export class PopUpComponent {
+<<<<<<< HEAD
     isPopupVisible = true;
 
     isGameSmall = false;
@@ -57,4 +65,27 @@ export class PopUpComponent {
     }
     //changer pr que setGame il update un bool et que qd un truc et cliquer il reste highlight et apr confirm change de page 
     // CTF mettre unavaible chek dn document cquon doit faire
+=======
+    classicGameModes = [
+        { gameMode: 'Classique - Petite (10x10, 2 joueurs, 2 items)' },
+        { gameMode: 'Classique - Moyenne (15x15, 2-4 joueurs, 4 items)' },
+        { gameMode: 'Classique - Grande (20x20, 2-6 joueurs, 6 items)' },
+    ];
+    captureTheFlagGameModes = [
+        { gameMode: 'CTF - Petite (10x10, 2 joueurs, 2 items)' },
+        { gameMode: 'CTF - Moyenne (15x15, 2-4 joueurs, 4 items)' },
+        { gameMode: 'CTF - Grande (20x20, 2-6 joueurs, 6 items)' },
+    ];
+    private gameModeService = inject(GameModeService);
+    constructor(private dialogRef: MatDialog) {}
+
+    selectGameMode(gameMode: string) {
+        this.gameModeService.setGameMode(gameMode);
+        this.closePopupAndSaveGameChoice();
+    }
+
+    closePopupAndSaveGameChoice() {
+        this.dialogRef.closeAll();
+    }
+>>>>>>> 9841d6dd1f280d2c4d4dca0d93aa36f5a5dacda3
 }
