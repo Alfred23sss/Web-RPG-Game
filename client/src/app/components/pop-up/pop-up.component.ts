@@ -75,6 +75,8 @@ export class PopUpComponent {
             alert('Please select game size first!');
         }
     }
+    // changer pr que setGame il update un bool et que qd un truc et cliquer il reste highlight et apr confirm change de page
+    // CTF mettre unavaible chek dn document cquon doit faire
 
     selectGameMode(gameMode: string) {
         this.gameModeService.setGameMode(gameMode);
