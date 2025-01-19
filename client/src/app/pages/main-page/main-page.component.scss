@@ -1,6 +1,7 @@
 .container {
     min-height: 100vh;
     height: auto;
+    color: black;
 }
 
 .justified {
@@ -13,6 +14,20 @@
 .button {
     margin-top: 10px;
     text-align: center;
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: linear-gradient(#6b73ff, #000dff);
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#disabled-button {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.button:hover {
+    transform: scale(1.04);
 }
 
 .team-name {
@@ -41,4 +56,17 @@
     justify-content: center;
     width: 20%;
     min-width: min-content;
+}
+
+.logo-image {
+    width: 300px;
+    height: auto;
+    max-width: 100%;
+}
+
+#bottom-left-image {
+    position: fixed;
+    bottom: 5px;
+    left: 5px;
+    width: 200px;
 }
