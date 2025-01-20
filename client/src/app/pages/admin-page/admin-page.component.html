@@ -11,7 +11,7 @@
             <div class="game-info">
                 <h3>{{ game.name }}</h3>
                 <p>Size: {{ game.size }}</p>
-                <p>GameMode: {{ game.mode }}</p>
+                <p>Game Mode: {{ game.mode }}</p>
                 <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
 
                 <button class="button" routerLink="/edit" [state]="{ game: game }">Modifier le jeu</button>
@@ -25,37 +25,6 @@
         }
     </ul>
 
-    <button class="button" routerLink="/edit">Modifier un jeu</button>
+    <!-- <button class="button" routerLink="/edit">Modifier un jeu</button> -->
     <button (click)="openDialog()">Créer un jeu</button>
 </div>
-
-<!-- <div class="container">
-    <h1 class="header-item">Administrer les jeux</h1>
-    <ul class="game-list">
-        @for(game of exampleGames; let index = $index; track $index) {
-        <li class="game-item">
-            @if(game.isVisible) {
-            <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
-            </div>
-
-            <div class="game-info">
-                <h2>{{ game.name }}</h2>
-                <p>Taille: {{ game.size }}</p>
-                <p>Mode: {{ game.mode }}</p>
-                <p>Dernière modification: {{ game.lastModified | date: 'short' }}</p>
-
-                <button class="button" routerLink="/edit" [state]="{ game: game }">Modifier le jeu</button>
-                <button class="button" (click)="deleteGame(index)">Supprimer le jeu</button>
-                <button class="button" (click)="toggleVisibility(index)">Cacher le jeu</button>
-            </div>
-            } @else {
-            <button class="button" (click)="toggleVisibility(index)">Afficher le jeu</button>
-            }
-        </li>
-        }
-    </ul>
-
-    <button class="button" routerLink="/edit">Modifier un jeu</button>
-    <button (click)="openDialog()">Créer un jeu</button>
-</div> -->

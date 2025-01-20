@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { GameService } from '@app/services/game.service';
+
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -44,7 +45,7 @@ export class AdminPageComponent {
     deleteGame(name: string) {
         if (confirm(`Confirm deleting ${name}?`)) {
             this.gameService.removeGame(name);
-            // this.exampleGames.splice(index, 1);
+            // this.exampleGames.splice(index, 1); Ancien code pour l'affichage a enlever bientot
         }
     }
 
