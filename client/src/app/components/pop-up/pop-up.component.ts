@@ -24,7 +24,7 @@ export class PopUpComponent {
 
     setGameType(mode: string) {
         this.gameModeService.setGameMode(mode);
-        if (this.gameModeService.getGameMode() === 'ctf') {
+        if (this.gameModeService.getGameMode() === 'CTF') {
             alert('CTF gamemode is currently unavailable!');
             this.gameModeService.setGameMode('');
         }
@@ -36,7 +36,7 @@ export class PopUpComponent {
 
         if (gameSize && gameMode) {
             const newGame: Game = {
-                name: `NewGame_${Date.now()}`,
+                name: `NewGame_${new Date().toISOString().split('T')[0]}`,
                 size: gameSize === 'small' ? '10x10' : gameSize === 'medium' ? '15x15' : '20x20',
                 mode: gameMode,
                 lastModified: new Date(),

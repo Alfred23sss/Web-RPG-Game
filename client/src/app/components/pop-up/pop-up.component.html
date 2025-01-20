@@ -34,13 +34,13 @@
                 </button>
             </div>
             <div class="popup-game-select">
-                <button class="popup-button classic" (click)="setGameType('classic')" [class.active]="gameModeService.getGameMode() === 'classic'">
+                <button class="popup-button classic" (click)="setGameType('Classic')" [class.active]="gameModeService.getGameMode() === 'Classic'">
                     <div class="popup-content">
                         <h3>Classic</h3>
                         <p>A traditional game mode where strategy is key.</p>
                     </div>
                 </button>
-                <button class="popup-button ctf" (click)="setGameType('ctf')" [class.active]="gameModeService.getGameMode() === 'ctf'">
+                <button class="popup-button ctf" (click)="setGameType('CTF')" [class.active]="gameModeService.getGameMode() === 'CTF'">
                     <div class="popup-content">
                         <h3>Capture The Flag</h3>
                         <p>Compete to secure your opponent's flag!</p>

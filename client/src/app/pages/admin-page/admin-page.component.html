@@ -7,7 +7,6 @@
             <div class="game-preview">
                 <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
             </div>
-
             <div class="game-info">
                 <h3>{{ game.name }}</h3>
                 <p>Size: {{ game.size }}</p>
@@ -24,7 +23,5 @@
         </li>
         }
     </ul>
-
-    <!-- <button class="button" routerLink="/edit">Modifier un jeu</button> -->
     <button class="create-button" (click)="openDialog()">Create Game</button>
 </div>

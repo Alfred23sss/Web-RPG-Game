@@ -13,26 +13,6 @@ import { GameService } from '@app/services/game.service';
     imports: [RouterLink, CommonModule, MatTooltipModule],
 })
 export class AdminPageComponent {
-    // game1 = {
-    //     name: 'exampleGame',
-    //     size: '10x10',
-    //     mode: 'Multijoueur',
-    //     lastModified: new Date(),
-    //     isVisible: true,
-    //     previewImage: 'assets/images/example.png',
-    //     description: 'Ceci est une description',
-    // };
-    // game2 = {
-    //     name: 'exampleGame2',
-    //     size: '15x15',
-    //     mode: 'Multijoueur',
-    //     lastModified: new Date(),
-    //     isVisible: true,
-    //     previewImage: 'assets/images/example.png',
-    //     description: 'Ceci est une description encore',
-    // };
-    // exampleGames = [this.game1, this.game2];
-
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,
@@ -45,7 +25,6 @@ export class AdminPageComponent {
     deleteGame(name: string) {
         if (confirm(`Confirm deleting ${name}?`)) {
             this.gameService.removeGame(name);
-            // this.exampleGames.splice(index, 1); Ancien code pour l'affichage a enlever bientot
         }
     }
 
@@ -56,3 +35,5 @@ export class AdminPageComponent {
         }
     }
 }
+
+// si plusieurs games page scroll et l'image n'est pas la , FIX!!
