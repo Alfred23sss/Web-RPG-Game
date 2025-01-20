@@ -1,21 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ToolService } from '@app/services/tool.service';
 
 @Component({
     selector: 'app-toolbar',
-    standalone: true,
     templateUrl: './toolbar.component.html',
     styleUrls: ['./toolbar.component.scss'],
 })
-export class ToolbarComponent {
-    activeTool: string | null = null;
-    activeToolImage: string = '';
+export class ToolbarComponent implements OnInit {
+    activeTool: { tool: string; image: string } | null = null;
 
-    selectTool(tool: string, imageURL: string): void {
-        this.activeTool = tool;
-        this.activeToolImage = imageURL;
+    constructor(private toolService: ToolService) {}
+
+    ngOnInit(): void {
+        this.toolService.selectedTool$.subscribe((tool) => {
+            this.activeTool = tool;
+        });
+
+        this.activeTool = this.toolService.getSelectedTool();
     }
 
-    isToolActive(tool: string): boolean {
-        return this.activeTool === tool;
+    selectTool(tool: string, image: string): void {
+        this.toolService.setSelectedTool(tool, image);
     }
 }

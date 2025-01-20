@@ -10,25 +10,23 @@ import { CommonModule } from '@angular/common';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    @Input() rows: number = 10; // Comment lutiliser: <app-grid [rows]="10" [cols]="10"></app-grid>
-    @Input() cols: number = 10; // Comment lutiliser: <app-grid [rows]="10" [cols]="10"></app-grid>
-    grid: TileComponent[][] = [];
+    @Input() rows: number = 10;
+    @Input() cols: number = 10;
+    grid: { id: string; imageSrc: string; isOccupied: boolean; type: string; isOpen: boolean }[][] = [];
 
     ngOnInit() {
-        this.grid = this.generateGrid(this.rows, this.cols); //ngOnInit() appele apres la construction du component
+        this.grid = this.generateGrid(this.rows, this.cols);
     }
 
-    private generateGrid(rows: number, cols: number): TileComponent[][] {
+    private generateGrid(rows: number, cols: number): any[][] {
         return Array.from({ length: rows }, (_, rowIndex) =>
-            Array.from({ length: cols }, (_, colIndex) => {
-                const tile = new TileComponent();
-                tile.id = `tile-${rowIndex}-${colIndex}`;
-                tile.imageSrc = '';
-                tile.isOccupied = false;
-                tile.type = 'default';
-                tile.isOpen = true;
-                return tile;
-            }),
+            Array.from({ length: cols }, (_, colIndex) => ({
+                id: `tile-${rowIndex}-${colIndex}`,
+                imageSrc: 'assets/images/clay.png',
+                isOccupied: false,
+                type: 'default',
+                isOpen: true,
+            })),
         );
     }
 }
