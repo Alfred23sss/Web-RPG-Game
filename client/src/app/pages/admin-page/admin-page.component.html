@@ -1,5 +1,5 @@
 <div class="container">
-    <h1 class="header-item">Administrer les jeux</h1>
+    <h1 class="header-item">Game Manager</h1>
     <ul class="game-list">
         @for(game of gameService.getGames(); let index = $index; track $index) {
         <li class="game-item">
@@ -14,17 +14,17 @@
                 <p>Game Mode: {{ game.mode }}</p>
                 <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
 
-                <button class="button" routerLink="/edit" [state]="{ game: game }">Modifier le jeu</button>
+                <button class="button" routerLink="/edit" [state]="{ game: game }">Modify Game</button>
                 <button class="button" (click)="deleteGame(game.name)">Delete</button>
-                <button class="button" (click)="toggleVisibility(game.name)">Cacher le jeu</button>
+                <button class="button" (click)="toggleVisibility(game.name)">Hide Game</button>
             </div>
             } @else {
-            <button class="button" (click)="toggleVisibility(game.name)">Afficher le jeu</button>
+            <button class="button" (click)="toggleVisibility(game.name)">Show Game</button>
             }
         </li>
         }
     </ul>
 
     <!-- <button class="button" routerLink="/edit">Modifier un jeu</button> -->
-    <button (click)="openDialog()">Créer un jeu</button>
+    <button class="create-button" (click)="openDialog()">Create Game</button>
 </div>

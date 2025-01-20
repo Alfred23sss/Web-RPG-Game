@@ -1,7 +1,48 @@
+:host {
+    display: block;
+    height: 100vh;
+    margin: 0;
+    background-image: url('/assets/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.header-item {
+    justify-content: center;
+    text-align: center;
+    color: #ffd700;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 60px;
+    text-shadow: 2px 2px 4px #ff8c00;
+    margin: 20px 0;
+}
+
+.create-button {
+    margin-top: 10px;
+    text-align: center;
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.create-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffc700, #ff8c00);
 }
 
 .game-item {
