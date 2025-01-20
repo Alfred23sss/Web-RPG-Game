@@ -2,12 +2,12 @@
     padding: 20px;
     width: 800px;
     height: 500px;
-    z-index: 100;
+    z-index: 1000;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    position: fixed;
-    top: 50%;
+    position: absolute;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -50%);
     background: none;
@@ -38,7 +38,8 @@
 }
 
 .header h2 {
-    font-size: 28px;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 30px;
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
@@ -53,14 +54,15 @@
 }
 
 .map-button {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
     background: none;
     color: white;
-    font-size: 18px;
+    font-size: 20px;
     font-weight: bold;
     border: none;
     cursor: pointer;
     position: relative;
-    padding: 10px 20px;
+    padding: 5px 20px;
     border: 2px solid transparent;
     transition:
         transform 0.3s ease,
@@ -155,7 +157,6 @@
 .confirm-button {
     background: none;
     color: white;
-    font-size: 18px;
     font-weight: bold;
     border: none;
     padding: 10px 20px;
@@ -172,8 +173,9 @@
 }
 
 .confirm-button h3 {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
     margin: 0;
-    font-size: 18px;
+    font-size: 25px;
     font-weight: bold;
 }
 

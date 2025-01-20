@@ -1,3 +1,13 @@
+:host {
+    display: block;
+    height: 100vh;
+    margin: 0;
+    background-image: url('/assets/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
 .container {
     min-height: 100vh;
     height: auto;
@@ -16,42 +26,67 @@
     text-align: center;
     padding: 10px 20px;
     font-size: 1rem;
-    background: linear-gradient(#6b73ff, #000dff);
-    color: white;
-    border-radius: 5px;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
     cursor: pointer;
+    font-weight: bold;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
 }
 #disabled-button {
+    background: linear-gradient(135deg, #f0e68c, #d3d3d3);
     cursor: not-allowed;
     opacity: 0.6;
+    color: #555555;
 }
 
 .button:hover {
-    transform: scale(1.04);
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffc700, #ff8c00);
 }
 
 .team-name {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
     margin-top: 0.25em;
     margin-bottom: 0.25em;
-    color: green;
+    color: #ffa500;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+    text-align: center;
 }
 
 .header-item {
     justify-content: center;
     text-align: center;
+    color: #ffd700;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 60px;
+    text-shadow: 2px 2px 4px #ff8c00;
+    margin: 20px 0;
 }
 
 .footer-item {
     text-align: center;
 }
 
-.footer-item p :nth-child(even) {
-    color: orange;
-}
-.footer-item p :nth-child(odd) {
-    color: blue;
+.footer-item p span:nth-child(odd) {
+    color: #ffa500;
 }
 
+.footer-item p span:nth-child(even) {
+    color: #ffd700;
+}
+
+.footer-item p span {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 2px #000;
+}
 .server-message {
     justify-content: center;
     width: 20%;
@@ -62,6 +97,8 @@
     width: 300px;
     height: auto;
     max-width: 100%;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 #bottom-left-image {
