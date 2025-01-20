@@ -1,67 +1,65 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { GameModeService } from '@app/services/game-mode.service';
+import { Game, GameService } from '@app/services/game.service';
 
 @Component({
     selector: 'app-pop-up',
     templateUrl: './pop-up.component.html',
     styleUrls: ['./pop-up.component.scss'],
     standalone: true,
-    imports: [],
 })
 export class PopUpComponent {
-    isPopupVisible = true;
-
-    isGameSmall = false;
-    isGameMedium = false;
-    isGameLarge = false;
-    // manque logique des boutons !!
-
-    // changer pr que setGame il update un bool et que qd un truc et cliquer il reste highlight et apr confirm change de page
-    // CTF mettre unavaible chek dn document cquon doit faire
-
     constructor(
         private dialogRef: MatDialog,
+        public gameModeService: GameModeService,
+        private gameService: GameService,
         private router: Router,
     ) {}
 
-    setGameSmall() {
-        this.isGameSmall = true;
-        this.isGameMedium = false;
-        this.isGameLarge = false;
+    setGameSize(size: string) {
+        this.gameModeService.setGameSize(size);
     }
-    setGameMedium() {
-        this.isGameMedium = true;
-        this.isGameSmall = false;
-        this.isGameLarge = false;
+
+    setGameType(mode: string) {
+        this.gameModeService.setGameMode(mode);
+        if (this.gameModeService.getGameMode() === 'ctf') {
+            alert('CTF gamemode is currently unavailable!');
+            this.gameModeService.setGameMode('');
+        }
     }
-    setGameLarge() {
-        this.isGameLarge = true;
-        this.isGameSmall = false;
-        this.isGameMedium = false;
+
+    confirm() {
+        const gameSize = this.gameModeService.getGameSize();
+        const gameMode = this.gameModeService.getGameMode();
+
+        if (gameSize && gameMode) {
+            const newGame: Game = {
+                name: `NewGame_${Date.now()}`,
+                size: gameSize === 'small' ? '10x10' : gameSize === 'medium' ? '15x15' : '20x20',
+                mode: gameMode,
+                lastModified: new Date(),
+                isVisible: true,
+                previewImage: 'assets/images/example.png',
+                description: `A ${gameMode} game on a ${gameSize} map.`,
+            };
+
+            this.gameService.addGame(newGame);
+            this.closePopup();
+            this.router.navigate(['/edit']);
+        } else {
+            alert('Please select both game size and game type!');
+        }
     }
+
     closePopup() {
-        this.isGameSmall = false;
-        this.isGameMedium = false;
-        this.isGameLarge = false;
+        this.resetSelections();
         this.dialogRef.closeAll();
     }
-    setClassicGame() {
-        if (this.isGameSmall || this.isGameMedium || this.isGameLarge) {
-            this.dialogRef.closeAll();
-            this.router.navigate(['/edit']);
-        } else {
-            alert('Please select game size first!');
-        }
+
+    private resetSelections() {
+        this.gameModeService.setGameMode('');
+        this.gameModeService.setGameSize('');
     }
-    setCTFGame() {
-        if (this.isGameSmall || this.isGameMedium || this.isGameLarge) {
-            this.dialogRef.closeAll();
-            this.router.navigate(['/edit']);
-        } else {
-            alert('Please select game size first!');
-        }
-    }
-    // changer pr que setGame il update un bool et que qd un truc et cliquer il reste highlight et apr confirm change de page
-    // CTF mettre unavaible chek dn document cquon doit faire
 }

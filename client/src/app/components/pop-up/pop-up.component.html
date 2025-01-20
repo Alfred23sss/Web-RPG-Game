@@ -1,40 +1,57 @@
 <div class="popup-overlay">
-<div class="popup" id="popup">
-    <div class="popup-grid">
+    <div class="popup" id="popup">
+        <div class="popup-grid">
             <div class="header">
                 <div class="popup-cancel">
                     <button class="cancel-button" (click)="closePopup()"></button>
                 </div>
-            <h2 >Game creation</h2>
+                <h2>Game creation</h2>
             </div>
-        <div class="map-size-select">
-            <button class="map-button" data-info="Grid: 10x10, Players: 2, Items: 2" (click)="setGameSmall()">Small</button>
-            <button class="map-button" data-info="Grid: 15x15, Players: 4, Items: 4"(click)="setGameMedium()">Medium</button>
-            <button class="map-button" data-info="Grid: 20x20, Players: 6, Items: 6"(click)="setGameMedium()">Large</button>
-          </div>
-          <div class="popup-game-select">
-            <button class="popup-button classic" (click)="setClassicGame()">
-                <div class="popup-content">
-                    <h3>Classic</h3>
-                    <p>A traditional game mode where strategy is key.</p>
-                </div>
-            </button>
-            <button class="popup-button ctf" (click)="setCTFGame()">
-                <div class="popup-content">
-                    <h3>Capture The Flag</h3>
-                    <p>Compete to secure your opponent's flag!</p>
-                </div>
-            </button>
-        </div>
-        
-        <div class="popup-confirm">
-            <button class="confirm-button">
-                <h3>Confirm</h3>
-              </button>
+            <div class="map-size-select">
+                <button
+                    class="map-button"
+                    data-info="Grid: 10x10, Players: 2, Items: 2"
+                    [class.active]="gameModeService.getGameSize() === 'small'"
+                    (click)="setGameSize('small')"
+                >
+                    Small
+                </button>
+                <button
+                    class="map-button"
+                    data-info="Grid: 15x15, Players: 4, Items: 4"
+                    [class.active]="gameModeService.getGameSize() === 'medium'"
+                    (click)="setGameSize('medium')"
+                >
+                    Medium
+                </button>
+                <button
+                    class="map-button"
+                    data-info="Grid: 20x20, Players: 6, Items: 6"
+                    [class.active]="gameModeService.getGameSize() === 'large'"
+                    (click)="setGameSize('large')"
+                >
+                    Large
+                </button>
+            </div>
+            <div class="popup-game-select">
+                <button class="popup-button classic" (click)="setGameType('classic')" [class.active]="gameModeService.getGameMode() === 'classic'">
+                    <div class="popup-content">
+                        <h3>Classic</h3>
+                        <p>A traditional game mode where strategy is key.</p>
+                    </div>
+                </button>
+                <button class="popup-button ctf" (click)="setGameType('ctf')" [class.active]="gameModeService.getGameMode() === 'ctf'">
+                    <div class="popup-content">
+                        <h3>Capture The Flag</h3>
+                        <p>Compete to secure your opponent's flag!</p>
+                    </div>
+                </button>
+            </div>
+            <div class="popup-confirm">
+                <button class="confirm-button" (click)="confirm()">
+                    <h3>Confirm</h3>
+                </button>
+            </div>
         </div>
     </div>
-  </div>
 </div>
-
-<!-- cancel button needs to reset the if the gamemodes state's been changed
- add font medieval style papyrus maybe -->
