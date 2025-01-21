@@ -2,43 +2,58 @@
     <h1 class="header-item">{{ activeItem?.name || 'None' }}</h1>
     <span>Attributes</span>
     <div class="item" id="attributs-object">
-        <img class="image" src="assets/images/wall.png" alt="a1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'lightning' })" />
+        <img
+            class="image"
+            src="assets/images/Lightning.png"
+            alt="a1"
+            (click)="selectObject({ imageSrc: 'assets/images/Lightning.png', name: 'lightning' })"
+        />
 
-        <img class="image" src="assets/images/wall.png" alt="a2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'potion' })" />
+        <img class="image" src="assets/images/potion.png" alt="a2" (click)="selectObject({ imageSrc: 'assets/images/potion.png', name: 'potion' })" />
     </div>
     <span>Conditions</span>
     <div class="item" id="condition-object">
-        <img class="image" src="assets/images/wall.png" alt="b1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'spikes' })" />
+        <img class="image" src="assets/images/spikes.png" alt="b1" (click)="selectObject({ imageSrc: 'assets/images/spikes.png', name: 'spikes' })" />
 
-        <img class="image" src="assets/images/wall.png" alt="b2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'stop' })" />
+        <img class="image" src="assets/images/stop.png" alt="b2" (click)="selectObject({ imageSrc: 'assets/images/stop.png', name: 'stop' })" />
     </div>
     <span>Functions</span>
     <div class="item" id="fonctionnement-object">
-        <img class="image" src="assets/images/wall.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'fonct1' })" />
+        <img
+            class="image"
+            src="assets/images/question.png"
+            alt="c1"
+            (click)="selectObject({ imageSrc: 'assets/images/question.png', name: 'fonct1' })"
+        />
 
-        <img class="image" src="assets/images/wall.png" alt="c2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'fonct2' })" />
+        <img
+            class="image"
+            src="assets/images/question.png"
+            alt="c2"
+            (click)="selectObject({ imageSrc: 'assets/images/question.png', name: 'fonct2' })"
+        />
     </div>
 
     <span>Random</span>
     <div class="loop-container">
         @for(row of [].constructor(itemCount); let rowIndex = $index; track $index) {
         <div class="item">
-            <img src="assets/images/wall.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/random.png', name: 'clay' })" />
+            <img src="assets/images/question.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/question.png', name: 'clay' })" />
         </div>
-    }
+        }
     </div>
 
     <span>Start</span>
     <div class="loop-container">
         @for(row of [].constructor(itemCount); let rowIndex = $index; track $index) {
         <div class="item">
-            <img src="assets/images/wall.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/random.png', name: 'clay' })" />
+            <img src="assets/images/home.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/home.png', name: 'clay' })" />
         </div>
         }
     </div>
 
     <span>Flag</span>
     <div class="item" id="drapeau-object">
-        <img class="image" src="assets/images/wall.png" alt="f1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'clay' })" />
+        <img class="image" src="assets/images/flag.png" alt="f1" (click)="selectObject({ imageSrc: 'assets/images/flag.png', name: 'clay' })" />
     </div>
 </div>
