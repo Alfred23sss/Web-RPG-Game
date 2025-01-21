@@ -27,6 +27,9 @@ export class CharacterFormComponent {
     };
 
     showForm = true;
+    showErrorPopup = false; // Contrôle l'affichage du popup d'erreur
+    errorMessage = ''; // Message d'erreur affiché dans le popup
+
     constructor(private router: Router) {}
 
     assignBonus(attribute: 'vitality' | 'speed') {
@@ -55,8 +58,33 @@ export class CharacterFormComponent {
         }
     }
 
+    // submitCharacter() {
+    //     this.showForm = false;
+    //     this.router.navigate(['/waiting-view']);
+    // }
+
     submitCharacter() {
+        // Vérifier si le nom et l'avatar sont remplis
+        if (!this.characterName.trim()) {
+            this.errorMessage = 'Please enter the character name.';
+            this.showErrorPopup = true;
+            return;
+        }
+        if (!this.selectedAvatar) {
+            this.errorMessage = 'Please select a character.';
+            this.showErrorPopup = true;
+            return;
+        }
+
+        // Si tout est correct, soumettre le formulaire
         this.showForm = false;
         this.router.navigate(['/waiting-view']);
     }
+
+    // Fermer le popup
+    closeErrorPopup() {
+        this.showErrorPopup = false;
+    }
+
 }
+
