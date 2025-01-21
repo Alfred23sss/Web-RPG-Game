@@ -21,6 +21,7 @@ export class EditionPageComponent implements OnInit {
     gameDescription: string = '';
     selectedGameSize: string = '';
     selectedGameMode: string = '';
+    selectedGameSizeInt: number = 0;
 
     constructor(private gameService: GameService) {
         this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
@@ -31,6 +32,7 @@ export class EditionPageComponent implements OnInit {
         if (currentGame) {
             this.selectedGameMode = currentGame.mode;
             this.selectedGameSize = currentGame.size;
+            this.selectedGameSizeInt = parseInt(this.selectedGameSize, 10);
         }
     }
 

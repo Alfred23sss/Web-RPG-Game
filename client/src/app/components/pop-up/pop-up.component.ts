@@ -39,7 +39,7 @@ export class PopUpComponent {
         if (gameSize && gameMode) {
             const newGame: Game = {
                 name: `NewGame_${Math.floor(Date.now() / secondDivider) % secondModulo}`,
-                size: gameSize === 'small' ? '10x10' : gameSize === 'medium' ? '15x15' : '20x20',
+                size: gameSize === 'small' ? '10' : gameSize === 'medium' ? '15' : '20',
                 mode: gameMode,
                 lastModified: new Date(),
                 isVisible: true,
