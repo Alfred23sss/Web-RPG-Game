@@ -33,10 +33,12 @@ export class PopUpComponent {
     confirm() {
         const gameSize = this.gameModeService.getGameSize();
         const gameMode = this.gameModeService.getGameMode();
+        const secondDivider = 1000;
+        const secondModulo = 60;
 
         if (gameSize && gameMode) {
             const newGame: Game = {
-                name: `NewGame_${new Date().toISOString().split('T')[0]}`,
+                name: `NewGame_${Math.floor(Date.now() / secondDivider) % secondModulo}`,
                 size: gameSize === 'small' ? '10x10' : gameSize === 'medium' ? '15x15' : '20x20',
                 mode: gameMode,
                 lastModified: new Date(),
@@ -44,22 +46,26 @@ export class PopUpComponent {
                 previewImage: 'assets/images/example.png',
                 description: `A ${gameMode} game on a ${gameSize} map.`,
             };
-
+            this.gameService.updateCurrentGame(newGame);
             this.gameService.addGame(newGame);
             this.closePopup();
-            this.router.navigate(['/edit']);
+            this.router.navigate(['/edition']);
         } else {
             alert('Please select both game size and game type!');
         }
     }
 
     closePopup() {
-        //this.resetSelections(); il faut peut etre changer cela
+        this.resetSelections();
         this.dialogRef.closeAll();
     }
 
-    //private resetSelections() {
-    //    this.gameModeService.setGameMode('');
-    //    this.gameModeService.setGameSize('');
-    //}
+    confirmPopup() {
+        this.resetSelections();
+        this.dialogRef.closeAll();
+    }
+    private resetSelections() {
+        this.gameModeService.setGameMode('');
+        this.gameModeService.setGameSize('');
+    }
 }
