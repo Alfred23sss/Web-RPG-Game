@@ -54,12 +54,12 @@ export class PopUpComponent {
     }
 
     closePopup() {
-        this.resetSelections();
+        //this.resetSelections(); il faut peut etre changer cela
         this.dialogRef.closeAll();
     }
 
-    private resetSelections() {
-        this.gameModeService.setGameMode('');
-        this.gameModeService.setGameSize('');
-    }
+    //private resetSelections() {
+    //    this.gameModeService.setGameMode('');
+    //    this.gameModeService.setGameSize('');
+    //}
 }

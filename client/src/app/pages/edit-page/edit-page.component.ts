@@ -8,11 +8,13 @@ import { GameModeService } from '@app/services/game-mode.service';
     imports: [],
 })
 export class EditPageComponent implements OnInit {
+    selectedGameSize: string = '';
     selectedGameMode: string = '';
 
     constructor(private gameModeService: GameModeService) {}
 
     ngOnInit() {
         this.selectedGameMode = this.gameModeService.getGameMode();
+        this.selectedGameSize = this.gameModeService.getGameSize();
     }
 }
