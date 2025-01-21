@@ -44,11 +44,22 @@
     border-color: #007bff;
     background-color: #cce5ff;
 }
-
+.toolbar-container {
+    display: flex;
+    width: 300px;
+    justify-content: center;
+    background-color: #999;
+}
 .page {
     display: flex;
+    justify-content: space-between;
+}
+
+.button-grid {
+    display: flex;
     flex-direction: row;
-    height: 100vh;
+    justify-content: space-between;
+    margin-top: 20px;
 }
 
 .tool-container {
@@ -96,11 +107,18 @@
     background-color: #b81a1a; /* Couleur au survol */
 }
 
+.info-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
 .game-info {
     margin: 20px;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: row;
+    flex-basis: 100%;
+    width: 100%;
 }
 
 input,
