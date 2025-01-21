@@ -2,8 +2,15 @@ img {
     width: 100px;
 }
 
-.Object-Container {
+.loop-container {
     display: flex;
     flex-wrap: wrap;
+    gap: 0.5rem;
+    width: 50%;
     justify-content: left;
+}
+
+
+.image {
+    margin-right: 8px;
 }
