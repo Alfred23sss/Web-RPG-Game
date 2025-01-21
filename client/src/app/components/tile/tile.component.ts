@@ -1,4 +1,4 @@
-import { Component, Input, HostListener } from '@angular/core';
+import { Component, HostListener, Input } from '@angular/core';
 import { ToolService } from '@app/services/tool.service';
 
 @Component({
@@ -13,6 +13,7 @@ export class TileComponent {
     @Input() isOccupied: boolean = false;
     @Input() type: string = 'default';
     @Input() isOpen: boolean = true;
+    //item : Object = ;
 
     static isDragging = false;
     static isRightClickDown = false; // Track if right-click is held down
