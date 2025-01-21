@@ -1,0 +1,41 @@
+<div class="Object-container">
+    <h1 class="header-item">{{ activeItem?.name || 'None' }}</h1>
+    <span>attributs</span>
+    <div class="item" id="attributs-object">
+        <img src="assets/images/wall.png" alt="a1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'lightning' })" />
+
+        <img src="assets/images/wall.png" alt="a2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'potion' })" />
+    </div>
+    <span>condition</span>
+    <div class="item" id="condition-object">
+        <img src="assets/images/wall.png" alt="b1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'spikes' })" />
+
+        <img src="assets/images/wall.png" alt="b2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'stop' })" />
+    </div>
+    <span>fonctionnement</span>
+    <div class="item" id="fonctionnement-object">
+        <img src="assets/images/wall.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'fonct1' })" />
+
+        <img src="assets/images/wall.png" alt="c2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'fonct2' })" />
+    </div>
+
+    <span>aléatoires</span>
+    @for(row of [].constructor(itemCount); let rowIndex = $index;track $index) {
+    <div class="item" id="aléatoires-object">
+        <img src="assets/images/wall.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/random.png', name: 'clay' })" />
+    </div>
+    }
+
+    <span>départ</span>
+    @for(row of [].constructor(itemCount); let rowIndex = $index;track $index) {
+    <div class="item" id="départ-object">
+        <img src="assets/images/wall.png" alt="c1" (click)="selectObject({ imageSrc: 'assets/images/random.png', name: 'clay' })" />
+    </div>
+    }
+    <span>drapeau</span>
+    <div class="item" id="drapeau-object">
+        <img src="assets/images/wall.png" alt="f1" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'clay' })" />
+
+        <img src="assets/images/wall.png" alt="f2" (click)="selectObject({ imageSrc: 'assets/images/clay.png', name: 'clay' })" />
+    </div>
+</div>
