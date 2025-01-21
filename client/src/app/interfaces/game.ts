@@ -1,3 +1,4 @@
+import { Tile } from './tile';
 export interface Game {
     name: string;
     size: string;
@@ -6,4 +7,5 @@ export interface Game {
     isVisible: boolean;
     previewImage: string;
     description: string;
+    grid: Tile[][];
 }
