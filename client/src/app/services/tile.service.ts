@@ -6,19 +6,13 @@ import { v4 as uuidv4 } from 'uuid';
     providedIn: 'root',
 })
 export class TileService {
-    private tile: Tile;
-    constructor() {
-        this.tile.id = uuidv4();
-        this.tile.isOccupied = false;
-        this.tile.isOpen = false;
-        this.tile.type = 'clay';
-    }
-
-    public getTile() {
-        return this.tile;
-    }
-
-    public setTile(tile: Tile) {
-        this.tile = tile;
+    createTile(): Tile {
+        return {
+            id: uuidv4(),
+            img: '/assets/images/clay.png',
+            isOccupied: false,
+            isOpen: false,
+            type: 'clay',
+        };
     }
 }

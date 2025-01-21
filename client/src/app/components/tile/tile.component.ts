@@ -1,4 +1,5 @@
-import { Component, Input, HostListener } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
+import { Tile } from '@app/interfaces/tile';
 import { ToolService } from '@app/services/tool.service';
 
 @Component({
@@ -8,24 +9,10 @@ import { ToolService } from '@app/services/tool.service';
     styleUrls: ['./tile.component.scss'],
 })
 export class TileComponent {
-    @Input() id: string = '';
-    @Input() imageSrc: string = `assets/images/clay.png`;
-    @Input() isOccupied: boolean = false;
-    @Input() type: string = 'default';
-    @Input() isOpen: boolean = true;
-
     static isDragging = false;
+    private tile: Tile;
 
     constructor(private toolService: ToolService) {}
-
-    applyTool(): void {
-        const selectedTool = this.toolService.getSelectedTool();
-        if (selectedTool) {
-            this.imageSrc = selectedTool.image;
-            this.type = selectedTool.tool;
-            this.isOccupied = true;
-        }
-    }
 
     @HostListener('mousedown')
     onMouseDown(): void {
@@ -43,5 +30,13 @@ export class TileComponent {
     @HostListener('document:mouseup')
     onMouseUp(): void {
         TileComponent.isDragging = false;
+    }
+    applyTool(): void {
+        const selectedTool = this.toolService.getSelectedTool();
+        if (selectedTool) {
+            this.tile.img = selectedTool.image;
+            this.tile.type = selectedTool.tool;
+            this.tile.isOccupied = true;
+        }
     }
 }

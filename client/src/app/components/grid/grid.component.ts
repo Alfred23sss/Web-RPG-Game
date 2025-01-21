@@ -1,24 +1,25 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { TileComponent } from '../tile/tile.component';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { Tile } from '@app/interfaces/tile';
+import { GridService } from '@app/services/grid.service';
+import { Game } from '@app/interfaces/game';
+// import { TileComponent } from '../tile/tile.component';
 
 @Component({
     selector: 'app-grid',
     standalone: true,
-    imports: [TileComponent, CommonModule],
+    imports: [CommonModule],
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    @Input() rows: number = 10;
-    @Input() cols: number = 10;
-    grid: { id: string; imageSrc: string; isOccupied: boolean; type: string; isOpen: boolean }[][] = [];
+    grid: Tile[][] = [];
+    game: Game;
+
+    constructor(private gridService: GridService) {}
 
     ngOnInit() {
-        this.grid = this.generateGrid(this.rows, this.cols);
+        this.grid = 
     }
 
-    private generateGrid(rows: number, cols: number): any[][] {
-        return Array.from({ length: rows }, (_, rowIndex) => Array.from({ length: cols }, (_, colIndex) => ({})));
-    }
 }

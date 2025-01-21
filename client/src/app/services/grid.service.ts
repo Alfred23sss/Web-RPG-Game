@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
-import { Tile } from '@app/interfaces/tile';
+import { TileService } from './tile.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GridService {
-    private grid: Tile[][];
-    constructor() {}
+    constructor(private tileService: TileService) {}
+
+    createGrid(size: number) {
+        return Array.from({ length: size }, () => Array.from({ length: size }, () => this.tileService.createTile()));
+    }
 }
