@@ -39,20 +39,21 @@
     transition:
     transform 0.2s ease,
     background-color 0.2s ease;
+}
 
-    :hover {
-        transform: scale(1.05);
-        background: linear-gradient(135deg, black, black);
-    }
+.create-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffc700, #ff8c00);
 }
 
 .game-item {
     display: flex;
     align-items: center;
-    border: 3px solid gray;
-    border-radius: 10px;
+    //border: 3px solid gray;
+    //border-radius: 10px;
     padding: 0.75rem;
     flex-direction: column;
+    background: linear-gradient(135deg, #6e77d776, #7b2eff70);
 }
 
 .game-title {
@@ -62,8 +63,8 @@
 }
 
 .game-preview img {
-    width: 120px;
-    height: 120px;
+    width: 200px;
+    height: 200px;
     object-fit: cover;
     border: 3px solid;
 }
@@ -87,6 +88,11 @@
     cursor: pointer;
 }
 
+.button:hover {
+    transform: scale(1.03);
+    background: linear-gradient(#6b73ff, #000dff);
+}
+
 .game-list {
     display: flex;
     flex-wrap: wrap;
@@ -94,6 +100,6 @@
     width: 75%;
     padding: 0;
     justify-content: center;
-    max-height: 55vh;
+    max-height: 58vh;
     overflow-y: auto;
 }

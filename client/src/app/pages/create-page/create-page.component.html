@@ -2,19 +2,19 @@
     <h1 class="header-item">Create Game</h1>
     <ul class="game-list">
         @for(game of gameService.getGames(); let index = $index; track $index) {
-        <li class="game-item">
             @if(game.isVisible) {
-            <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
-            </div>
-            <div class="game-info">
-                <h3>{{ game.name }}</h3>
-                <p>Size: {{ game.size }}</p>
-                <p>Game Mode: {{ game.mode }}</p>
-                <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
-            </div>
+                <li class="game-item">
+                <div class="game-preview">
+                    <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
+                </div>
+                <div class="game-info">
+                    <h3>{{ game.name }}</h3>
+                    <p>Size: {{ game.size }}</p>
+                    <p>Game Mode: {{ game.mode }}</p>
+                    <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
+                </div>
+                </li>
             }
-        </li>
         }
     </ul>
     <button class="create-button" (click)="openDialog()">Create Game</button>
