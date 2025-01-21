@@ -27,6 +27,12 @@ export class TileComponent {
         }
     }
 
+    resetTile(): void {
+        this.imageSrc = `assets/images/clay.png`;
+        this.type = 'default';
+        this.isOccupied = false;
+    }
+
     @HostListener('mousedown')
     onMouseDown(): void {
         TileComponent.isDragging = true;
@@ -43,5 +49,11 @@ export class TileComponent {
     @HostListener('document:mouseup')
     onMouseUp(): void {
         TileComponent.isDragging = false;
+    }
+
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent): void {
+        event.preventDefault();
+        this.resetTile();
     }
 }
