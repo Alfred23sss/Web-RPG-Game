@@ -103,3 +103,20 @@
     max-height: 70vh;
     overflow-y: auto;
 }
+
+.game-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.game-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.game-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ffeb39, #ff8c00);
+    border-radius: 4px;
+}
+
+.game-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #8a7c00, #ff8c00);
+}
