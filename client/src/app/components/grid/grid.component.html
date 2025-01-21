@@ -1,0 +1,9 @@
+<div class="grid-container">
+    @for(row of grid; let rowIndex = $index;track $index){
+    <div class="grid-row">
+        @for (tile of row; let colIndex = $index;track $index){
+        <app-tile></app-tile>
+        }
+    </div>
+    }
+</div>
