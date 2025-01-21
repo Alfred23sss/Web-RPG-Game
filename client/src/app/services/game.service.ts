@@ -16,6 +16,15 @@ export interface Game {
 })
 export class GameService {
     private games: Game[] = [];
+    private currentGame: Game | undefined;
+
+    updateCurrentGame(game: Game) {
+        this.currentGame = game;
+    }
+
+    getCurrentGame() {
+        return this.currentGame;
+    }
 
     addGame(game: Game) {
         this.games.push(game);
