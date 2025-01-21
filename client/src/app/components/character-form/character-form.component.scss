@@ -1,118 +1,133 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+.form-container {
+    background-color: rgba(33, 6, 58, 0.904);
+
+    padding: 80px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(169, 215, 18, 0.3);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    transform: translate(35%, 1%);
+    gap: 20px;
+}
+
+.gray-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8); /* Overlay sombre */
+    z-index: 99;
 }
 
 h1 {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 2.5em;
-  color: #333;
-}
-
-form {
-  width: 800px;
-  background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin: 0;
 }
 
 .avatars {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
 }
 
 .avatars img {
-  width: 100px;
-  height: 100px;
-  cursor: pointer;
-  border: 3px solid transparent;
-  border-radius: 10px;
+    width: 120px;
+    height: 120px;
+    cursor: pointer;
+    border: 3px solid transparent;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease;
 }
 
 .avatars img:hover {
-  transform: scale(1.1);
+    transform: scale(1.1);
 }
 
 .avatars img.selected {
-  border: 3px solid #4caf50; 
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    border: 3px solid #ffd700;
 }
 
-input[type="text"] {
-  width: 100%;
-  padding: 15px;
-  margin-bottom: 30px;
-  font-size: 1.2em;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  box-sizing: border-box;
-  background-color: #f9f9f9;
+input[type='text'] {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 30px;
+    font-size: 1.2em;
+    border: 2px solid #ffd700; /* Couleur dorée pour la bordure */
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: white; /* Texte blanc */
+    outline: none;
+    transition:
+        border-color 0.3s ease,
+        background-color 0.3s ease;
+    background-color: rgba(38, 33, 42, 0.137); /* Légèrement moins transparent au focus */
 }
 
-input[type="text"]:focus {
-  border-color: #4caf50;
-  outline: none;
+input[type='text']:focus {
+    border-color: #ffdf00; /* Bordure dorée plus vive au focus */
+    background-color: rgba(38, 33, 42, 0.137); /* Légèrement moins transparent au focus */
 }
 
 .attributes {
-  margin-bottom: 30px;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
 }
 
-.attributes .attribute {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.attributes div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    max-width: 600px;
+    color: white;
 }
 
-.attributes .label {
-  font-size: 1.2em;
-  color: #333;
+.attributes span {
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
 button {
-  padding: 10px 20px;
-  font-size: 1.1em;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-left: 10px;
+    width: 200px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition:
+        transform 0.2s ease,
+        background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #45a049;
+    // background-color: #45a049;
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffc700, #ff8c00);
 }
 
 button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 15px;
-  background-color: #2196f3;
-  font-size: 1.3em;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.submit-btn:hover {
-  background-color: #1976d2;
+    background: linear-gradient(135deg, #f0e68c, #d3d3d3);
+    cursor: not-allowed;
+    opacity: 0.6;
 }
