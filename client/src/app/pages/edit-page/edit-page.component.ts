@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GameModeService } from '@app/services/game-mode.service';
+import { GameService } from '@app/services/game.service';
 
 @Component({
     selector: 'app-edit-page',
@@ -11,10 +11,13 @@ export class EditPageComponent implements OnInit {
     selectedGameSize: string = '';
     selectedGameMode: string = '';
 
-    constructor(private gameModeService: GameModeService) {}
+    constructor(private gameService: GameService) {}
 
     ngOnInit() {
-        this.selectedGameMode = this.gameModeService.getGameMode();
-        this.selectedGameSize = this.gameModeService.getGameSize();
+        const currentGame = this.gameService.getCurrentGame();
+        if (currentGame) {
+            this.selectedGameMode = currentGame.mode;
+            this.selectedGameSize = currentGame.size;
+        }
     }
 }
