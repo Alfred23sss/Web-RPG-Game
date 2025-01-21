@@ -19,14 +19,6 @@ export class GridComponent implements OnInit {
     }
 
     private generateGrid(rows: number, cols: number): any[][] {
-        return Array.from({ length: rows }, (_, rowIndex) =>
-            Array.from({ length: cols }, (_, colIndex) => ({
-                id: `tile-${rowIndex}-${colIndex}`,
-                imageSrc: 'assets/images/clay.png',
-                isOccupied: false,
-                type: 'default',
-                isOpen: true,
-            })),
-        );
+        return Array.from({ length: rows }, (_, rowIndex) => Array.from({ length: cols }, (_, colIndex) => ({})));
     }
 }
