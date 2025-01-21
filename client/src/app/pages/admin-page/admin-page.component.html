@@ -13,7 +13,7 @@
                 <p>Game Mode: {{ game.mode }}</p>
                 <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
 
-                <button class="button" routerLink="/edit" [state]="{ game: game }">Modify Game</button>
+                <button class="button" routerLink="/edition" [state]="{ game: game }">Modify Game</button>
                 <button class="button" (click)="deleteGame(game.name)">Delete</button>
                 <button class="button" (click)="toggleVisibility(game.name)">Hide Game</button>
             </div>

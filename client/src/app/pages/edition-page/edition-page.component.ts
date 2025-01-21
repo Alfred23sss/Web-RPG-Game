@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
+import { GameService } from '@app/services/game.service';
 
 @Component({
     selector: 'app-edition-page',
@@ -11,16 +12,26 @@ import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
     styleUrls: ['./edition-page.component.scss'],
     imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent],
 })
-export class EditionPageComponent {
+export class EditionPageComponent implements OnInit {
     activeTool: string | null = null;
     isDragging = false;
     activeToolImage: string = '';
     grid: string[][];
     gameName: string = '';
     gameDescription: string = '';
+    selectedGameSize: string = '';
+    selectedGameMode: string = '';
 
-    constructor() {
+    constructor(private gameService: GameService) {
         this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
+    }
+
+    ngOnInit() {
+        const currentGame = this.gameService.getCurrentGame();
+        if (currentGame) {
+            this.selectedGameMode = currentGame.mode;
+            this.selectedGameSize = currentGame.size;
+        }
     }
 
     selectTool(tool: string, imageURL: string): void {
@@ -46,17 +57,17 @@ export class EditionPageComponent {
         }
     }
 
-    private generateGrid(rows: number, cols: number): string[][] {
-        return Array.from({ length: rows }, () => Array(cols).fill(''));
-    }
-
     addItem(rowIndex: number, colIndex: number): void {
         this.grid[rowIndex][colIndex] = this.activeToolImage;
     }
 
     getImageFromCell(rowIndex: number, colIndex: number): string {
         const image = this.grid[rowIndex][colIndex];
-        return image ? `url(${image})` : `url(${`assets/images/clay.png`})`;
+        return image ? `url(${image})` : `url(${'assets/images/clay.png'})`;
+    }
+
+    private generateGrid(rows: number, cols: number): string[][] {
+        return Array.from({ length: rows }, () => Array(cols).fill(''));
     }
 
     /*

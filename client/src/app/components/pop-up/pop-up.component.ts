@@ -49,7 +49,7 @@ export class PopUpComponent {
             this.gameService.updateCurrentGame(newGame);
             this.gameService.addGame(newGame);
             this.closePopup();
-            this.router.navigate(['/edit']);
+            this.router.navigate(['/edition']);
         } else {
             alert('Please select both game size and game type!');
         }
