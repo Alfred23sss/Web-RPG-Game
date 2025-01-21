@@ -43,14 +43,12 @@
 
 .create-button:hover {
     transform: scale(1.05);
-    background: linear-gradient(135deg, #ffc700, #ff8c00);
+    background: linear-gradient(135deg, #ffdc5d, #ff8c00);
 }
 
 .game-item {
     display: flex;
     align-items: center;
-    //border: 3px solid gray;
-    //border-radius: 10px;
     padding: 0.75rem;
     flex-direction: column;
     background: linear-gradient(135deg, #3c70de98, #7b2eff9e);
@@ -66,24 +64,27 @@
     width: 200px;
     height: 200px;
     object-fit: cover;
-    border: 3px solid;
+    border: 2px solid;
 }
 
 .game-info {
     display: flex;
     flex-direction: column;
     text-align: center;
+    color: #ffd700;
+    font-family: 'Comic Sans MS';
+    font-size: 14px;
 }
 
 .game-info > * {
-    margin-bottom: 0.2rem;
+    margin: 0.3rem;
 }
 
 .button {
-    margin-top: 0.5rem;
     text-align: center;
     background: linear-gradient(#6b73ff, #000dff);
-    color: white;
+    color: #ffd700;
+    font-family: 'Comic Sans MS';
     border-radius: 5px;
     cursor: pointer;
 }
@@ -118,5 +119,5 @@
 }
 
 .game-list::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #8a7c00, #ff8c00);
+    background: linear-gradient(135deg, #ffc04c, #ff9a00);
 }
