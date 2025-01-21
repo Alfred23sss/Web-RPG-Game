@@ -1,36 +1,80 @@
+:host {
+    display: block;
+    height: 100vh;
+    margin: 0;
+    background-image: url('/assets/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.header-item {
+    justify-content: center;
+    text-align: center;
+    color: #ffd700;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 60px;
+    text-shadow: 2px 2px 4px #ff8c00;
+    margin: 20px 0;
+}
+
 .container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: #f5f5f5;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
 
-    h2 {
+.game-item {
+    display: flex;
+    align-items: center;
+    border: 3px solid gray;
+    border-radius: 10px;
+    padding: 0.75rem;
+    flex-direction: column;
+}
+
+.game-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.game-preview img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 3px solid;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.game-info > * {
+    margin-bottom: 0.2rem;
+}
+
+    /*h2 {
         font-size: 24px;
         margin-bottom: 20px;
         color: #333;
-    }
-
-    .create-button {
-        background-color: #6200ea;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 10px 20px;
-        font-size: 16px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-
-        &:hover {
-            background-color: #3700b3;
-        }
-
-        &:focus {
-            outline: none;
-        }
-    }
+    }*/
+    
+.create-button {
+    margin-top: 10px;
+    text-align: center;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition:
+    transform 0.2s ease,
+    background-color 0.2s ease;
 }

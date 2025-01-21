@@ -8,13 +8,6 @@
     background-repeat: no-repeat;
 }
 
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-}
-
 .header-item {
     justify-content: center;
     text-align: center;
@@ -23,6 +16,13 @@
     font-size: 60px;
     text-shadow: 2px 2px 4px #ff8c00;
     margin: 20px 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
 }
 
 .create-button {
@@ -37,13 +37,13 @@
     cursor: pointer;
     font-weight: bold;
     transition:
-        transform 0.2s ease,
-        background-color 0.2s ease;
-}
+    transform 0.2s ease,
+    background-color 0.2s ease;
 
-.create-button:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #ffc700, #ff8c00);
+    :hover {
+        transform: scale(1.05);
+        background: linear-gradient(135deg, black, black);
+    }
 }
 
 .game-item {

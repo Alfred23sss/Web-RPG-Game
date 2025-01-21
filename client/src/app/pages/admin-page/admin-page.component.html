@@ -3,7 +3,6 @@
     <ul class="game-list">
         @for(game of gameService.getGames(); let index = $index; track $index) {
         <li class="game-item">
-            @if(game.isVisible) {
             <div class="game-preview">
                 <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
             </div>
@@ -15,11 +14,11 @@
 
                 <button class="button" routerLink="/edit" [state]="{ game: game }">Modify Game</button>
                 <button class="button" (click)="deleteGame(game.name)">Delete</button>
-                <button class="button" (click)="toggleVisibility(game.name)">Hide Game</button>
+                <label>
+                    <input type="checkbox" [checked]="game.isVisible" 
+                    (change)="toggleVisibility(game.name, $event)"/> Show Game
+                </label>
             </div>
-            } @else {
-            <button class="button" (click)="toggleVisibility(game.name)">Show Game</button>
-            }
         </li>
         }
     </ul>
