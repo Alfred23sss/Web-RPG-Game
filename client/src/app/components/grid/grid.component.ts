@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { Tile, TileType } from '@app/interfaces/tile';
+import { Tile } from '@app/interfaces/tile';
+import { GridService } from '@app/services/grid-service.service';
 import { TileComponent } from '../tile/tile.component';
 
 @Component({
@@ -15,22 +16,10 @@ export class GridComponent implements OnInit {
     @Input() cols: number = 10;
     grid: Tile[][] = [];
 
-    ngOnInit() {
-        this.grid = this.generateGrid(this.rows, this.cols);
-    }
+    constructor(private gridService: GridService) {}
 
-    private generateGrid(rows: number, cols: number): Tile[][] {
-        return Array.from({ length: rows }, (_, rowIndex) =>
-            Array.from(
-                { length: cols },
-                (_, colIndex): Tile => ({
-                    id: `tile-${rowIndex}-${colIndex}`,
-                    imageSrc: 'assets/images/clay.png',
-                    isOccupied: false,
-                    type: TileType.Default,
-                    isOpen: true,
-                }),
-            ),
-        );
+    ngOnInit() {
+        this.gridService.initializeGrid(this.rows, this.cols);
+        this.grid = this.gridService.getGrid();
     }
 }

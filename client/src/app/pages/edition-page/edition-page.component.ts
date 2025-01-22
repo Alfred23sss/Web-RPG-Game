@@ -23,7 +23,7 @@ export class EditionPageComponent implements OnInit {
     selectedGameMode: string = '';
 
     constructor(private gameService: GameService) {
-        this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
+        // this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
     }
 
     ngOnInit() {
@@ -34,41 +34,41 @@ export class EditionPageComponent implements OnInit {
         }
     }
 
-    selectTool(tool: string, imageURL: string): void {
-        this.activeTool = tool;
-        this.activeToolImage = imageURL;
-    }
+    // selectTool(tool: string, imageURL: string): void {
+    //     this.activeTool = tool;
+    //     this.activeToolImage = imageURL;
+    // }
 
-    isToolActive(tool: string): boolean {
-        return this.activeTool === tool;
-    }
+    // isToolActive(tool: string): boolean {
+    //     return this.activeTool === tool;
+    // }
 
-    startDrag() {
-        this.isDragging = true;
-    }
+    // startDrag() {
+    //     this.isDragging = true;
+    // }
 
-    stopDrag() {
-        this.isDragging = false;
-    }
+    // stopDrag() {
+    //     this.isDragging = false;
+    // }
 
-    dragItem(rowIndex: number, colIndex: number) {
-        if (this.isDragging) {
-            this.addItem(rowIndex, colIndex);
-        }
-    }
+    // dragItem(rowIndex: number, colIndex: number) {
+    //     if (this.isDragging) {
+    //         this.addItem(rowIndex, colIndex);
+    //     }
+    // }
 
-    addItem(rowIndex: number, colIndex: number): void {
-        this.grid[rowIndex][colIndex] = this.activeToolImage;
-    }
+    // addItem(rowIndex: number, colIndex: number): void {
+    //     this.grid[rowIndex][colIndex] = this.activeToolImage;
+    // }
 
-    getImageFromCell(rowIndex: number, colIndex: number): string {
-        const image = this.grid[rowIndex][colIndex];
-        return image ? `url(${image})` : `url(${'assets/images/clay.png'})`;
-    }
+    // getImageFromCell(rowIndex: number, colIndex: number): string {
+    //     const image = this.grid[rowIndex][colIndex];
+    //     return image ? `url(${image})` : `url(${'assets/images/clay.png'})`;
+    // }
 
-    private generateGrid(rows: number, cols: number): string[][] {
-        return Array.from({ length: rows }, () => Array(cols).fill(''));
-    }
+    // private generateGrid(rows: number, cols: number): string[][] {
+    //     return Array.from({ length: rows }, () => Array(cols).fill(''));
+    // }
 
     /*
     Empty() {
