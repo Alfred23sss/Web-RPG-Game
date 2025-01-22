@@ -1,6 +1,11 @@
 <div [class.gray-background]="showForm" class="form-container">
     @if(showForm === true){
-    <h1>Create a Character</h1>
+    <div class="header-container">
+        <div class="popup-cancel">
+            <button class="cancel-button" (click)="closePopup()"></button>
+        </div>
+        <h1>Create a Character</h1>
+    </div>
     <input type="text" placeholder="Character Name" [(ngModel)]="characterName" />
 
     <div class="avatars">
@@ -99,7 +104,7 @@
                 <span>+D4</span>
                 }
             </span>
-            <button (click)="assignDice('attack')">D6 Attack</button>
+            <button (click)="assignDice('attack')" [disabled]="diceAssigned.attack">D6 Attack</button>
         </div>
         <div>
             <span
@@ -110,7 +115,7 @@
                 <span>+D4</span>
                 }
             </span>
-            <button (click)="assignDice('defense')">D6 Defense</button>
+            <button (click)="assignDice('defense')" [disabled]="diceAssigned.defense">D6 Defense</button>
         </div>
     </div>
 

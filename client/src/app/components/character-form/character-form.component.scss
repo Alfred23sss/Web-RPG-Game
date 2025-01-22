@@ -1,17 +1,11 @@
 .form-container {
     background-color: rgba(33, 6, 58, 0.904);
-
-    padding: 80px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(169, 215, 18, 0.3);
-    margin-top: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: absolute;
-    top: 10%;
-    left: 10%;
-    transform: translate(35%, 1%);
+    justify-content: center;
+    width: 100%;
+    height: 100%;
     gap: 20px;
 }
 
@@ -19,10 +13,19 @@
     position: fixed;
     top: 0;
     left: 0;
-    width: 50%;
+    width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8); /* Overlay sombre */
+    background: rgba(0, 0, 0, 0.8);
     z-index: 99;
+}
+
+.header-container {
+    position: relative; /* Permet de positionner le bouton relativement au conteneur */
+    width: 100%; /* Occupe toute la largeur de la page */
+    display: flex;
+    justify-content: center; /* Centre le titre horizontalement */
+    align-items: center; /* Aligne verticalement les éléments */
+    margin-bottom: 20px; /* Espace sous le conteneur */
 }
 
 h1 {
@@ -32,21 +35,43 @@ h1 {
     color: white;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
     margin: 0;
+    text-align: center;
+}
+
+input[type='text'] {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    padding: 10px;
+    margin: 10px 0 40px 0;
+    font-size: 1em;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: white;
+    outline: none;
+    background-color: rgba(38, 33, 42, 0.137);
+    transition:
+        border-color 0.3s ease,
+        background-color 0.3s ease;
+}
+
+input[type='text']:focus {
+    border-color: #ffdf00;
+    background-color: rgba(38, 33, 42, 0.2);
+    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
 .avatars {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 10px;
 }
 
 .avatars img {
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
     cursor: pointer;
     border: 3px solid transparent;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
     transition:
         transform 0.3s ease,
         box-shadow 0.3s ease;
@@ -54,32 +79,13 @@ h1 {
 
 .avatars img:hover {
     transform: scale(1.1);
+    border: 3px solid #ffd700;
+    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
 .avatars img.selected {
     border: 3px solid #ffd700;
-}
-
-input[type='text'] {
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 30px;
-    font-size: 1.2em;
-    border: 2px solid #ffd700; /* Couleur dorée pour la bordure */
-    border-radius: 8px;
-    box-sizing: border-box;
-    color: white; /* Texte blanc */
-    outline: none;
-    transition:
-        border-color 0.3s ease,
-        background-color 0.3s ease;
-    background-color: rgba(38, 33, 42, 0.137); /* Légèrement moins transparent au focus */
-}
-
-input[type='text']:focus {
-    border-color: #ffdf00; /* Bordure dorée plus vive au focus */
-    background-color: rgba(38, 33, 42, 0.137); /* Légèrement moins transparent au focus */
+    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
 .attributes {
@@ -87,7 +93,7 @@ input[type='text']:focus {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     width: 100%;
 }
 
@@ -121,13 +127,41 @@ button {
 }
 
 button:hover {
-    // background-color: #45a049;
     transform: scale(1.05);
-    background: linear-gradient(135deg, #ffc700, #ff8c00);
 }
 
 button:disabled {
     background: linear-gradient(135deg, #f0e68c, #d3d3d3);
     cursor: not-allowed;
     opacity: 0.6;
+}
+
+.popup-cancel {
+    position: relative; /* Positionne le bouton de manière indépendante */
+    left: 20px; /* Distance depuis le bord gauche */
+    top: 50%; /* Centre verticalement le bouton dans le conteneur */
+    transform: translateY(-1000%); /* Ajuste pour un vrai centrage vertical */
+    transform: translateX(-900%);
+}
+
+.cancel-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    border: 2px solid;
+    background-image: url('/assets/X-sword.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: rgb(255, 255, 255);
+    color: white;
+    cursor: pointer;
+}
+
+.cancel-button:hover {
+    background-color: rgb(255, 255, 255);
+    transform: none;
 }

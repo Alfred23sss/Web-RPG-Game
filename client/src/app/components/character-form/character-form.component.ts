@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 @Component({
@@ -28,7 +29,10 @@ export class CharacterFormComponent {
 
     showForm = true;
 
-    constructor(private router: Router) {}
+    constructor(
+        private router: Router,
+        private dialogRef: MatDialogRef<CharacterFormComponent>,
+    ) {}
 
     assignBonus(attribute: 'vitality' | 'speed') {
         if (!this.bonusAssigned[attribute]) {
@@ -46,7 +50,6 @@ export class CharacterFormComponent {
     assignDice(attribute: 'attack' | 'defense') {
         if (!this.diceAssigned[attribute]) {
             this.diceAssigned[attribute] = true;
-
             const otherAttribute = attribute === 'attack' ? 'defense' : 'attack';
             if (this.diceAssigned[otherAttribute]) {
                 this.diceAssigned[otherAttribute] = false;
@@ -57,11 +60,39 @@ export class CharacterFormComponent {
     }
 
     submitCharacter() {
-        if (this.characterName && this.selectedAvatar) {
+        const hasBonus = this.bonusAssigned.vitality || this.bonusAssigned.speed;
+        const hasDice = this.diceAssigned.attack || this.diceAssigned.defense;
+        if (this.characterName && this.selectedAvatar && hasBonus && hasDice) {
             this.showForm = false;
             this.router.navigate(['/waiting-view']);
         } else {
-            alert('Please pick a name and select your character.');
+            alert(
+                'Please ensure you have:\n- Assigned +2 to one attribute (Vitality or Speed).\n- Assigned a D6 to one attribute (Attack or Defense).\n- Entered a name and selected an avatar.',
+            );
         }
+    }
+
+    closePopup() {
+        this.resetSelections();
+        this.dialogRef.close();
+    }
+
+    private resetSelections() {
+        this.characterName = '';
+        this.selectedAvatar = '';
+        this.attributes = {
+            vitality: 4,
+            speed: 4,
+            attack: 4,
+            defense: 4,
+        };
+        this.bonusAssigned = {
+            vitality: false,
+            speed: false,
+        };
+        this.diceAssigned = {
+            attack: false,
+            defense: false,
+        };
     }
 }
