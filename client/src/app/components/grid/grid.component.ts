@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { TileComponent } from '../tile/tile.component';
 import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit } from '@angular/core';
+import { Tile } from '@app/interfaces/tile';
+import { TileComponent } from '../tile/tile.component';
 
 @Component({
     selector: 'app-grid',
@@ -12,21 +13,24 @@ import { CommonModule } from '@angular/common';
 export class GridComponent implements OnInit {
     @Input() rows: number = 10;
     @Input() cols: number = 10;
-    grid: { id: string; imageSrc: string; isOccupied: boolean; type: string; isOpen: boolean }[][] = [];
+    grid: Tile[][] = [];
 
     ngOnInit() {
         this.grid = this.generateGrid(this.rows, this.cols);
     }
 
-    private generateGrid(rows: number, cols: number): any[][] {
+    private generateGrid(rows: number, cols: number): Tile[][] {
         return Array.from({ length: rows }, (_, rowIndex) =>
-            Array.from({ length: cols }, (_, colIndex) => ({
-                id: `tile-${rowIndex}-${colIndex}`,
-                imageSrc: 'assets/images/clay.png',
-                isOccupied: false,
-                type: 'default',
-                isOpen: true,
-            })),
+            Array.from(
+                { length: cols },
+                (_, colIndex): Tile => ({
+                    id: `tile-${rowIndex}-${colIndex}`,
+                    imageSrc: 'assets/images/clay.png',
+                    isOccupied: false,
+                    type: 'default',
+                    isOpen: true,
+                }),
+            ),
         );
     }
 }
