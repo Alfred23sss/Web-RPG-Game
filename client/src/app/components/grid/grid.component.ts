@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { Tile } from '@app/interfaces/tile';
+import { Tile, TileType } from '@app/interfaces/tile';
 import { TileComponent } from '../tile/tile.component';
 
 @Component({
@@ -27,7 +27,7 @@ export class GridComponent implements OnInit {
                     id: `tile-${rowIndex}-${colIndex}`,
                     imageSrc: 'assets/images/clay.png',
                     isOccupied: false,
-                    type: 'default',
+                    type: TileType.Default,
                     isOpen: true,
                 }),
             ),

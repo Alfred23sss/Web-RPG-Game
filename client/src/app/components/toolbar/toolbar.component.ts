@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { TileType } from '@app/interfaces/tile';
 import { ToolService } from '@app/services/tool.service';
 
 @Component({
@@ -7,7 +8,8 @@ import { ToolService } from '@app/services/tool.service';
     styleUrls: ['./toolbar.component.scss'],
 })
 export class ToolbarComponent implements OnInit {
-    activeTool: { tool: string; image: string } | null = null;
+    activeTool: { tool: TileType; image: string } | null = null;
+    TileType = TileType;
 
     constructor(private toolService: ToolService) {}
 
@@ -19,7 +21,7 @@ export class ToolbarComponent implements OnInit {
         this.activeTool = this.toolService.getSelectedTool();
     }
 
-    selectTool(tool: string, image: string): void {
+    selectTool(tool: TileType, image: string): void {
         this.toolService.setSelectedTool(tool, image);
     }
 }
