@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { Game } from '@app/interfaces/game';
 import { GameModeService } from '@app/services/game-mode.service';
-import { Game, GameService } from '@app/services/game.service';
-
+import { GameService } from '@app/services/game.service';
 @Component({
     selector: 'app-pop-up',
     templateUrl: './pop-up.component.html',

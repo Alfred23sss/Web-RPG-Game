@@ -1,16 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { Injectable } from '@angular/core';
-
-export interface Game {
-    name: string;
-    size: string;
-    mode: string;
-    lastModified: Date;
-    isVisible: boolean;
-    previewImage: string; // path to img
-    description: string;
-}
-
+import { Game } from '@app/interfaces/game';
 @Injectable({
     providedIn: 'root',
 })

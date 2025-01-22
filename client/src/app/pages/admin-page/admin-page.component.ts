@@ -28,6 +28,12 @@ export class AdminPageComponent {
         }
     }
 
+    updateCurrentGame(name: string) {
+        const game = this.gameService.getGameByName(name);
+        if (game) {
+            this.gameService.updateCurrentGame(game);
+        }
+    }
     toggleVisibility(name: string) {
         const game = this.gameService.getGameByName(name);
         if (game) {
