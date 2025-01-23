@@ -1,6 +1,6 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
+
 @Injectable({
     providedIn: 'root',
 })

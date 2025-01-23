@@ -1,7 +1,9 @@
 <div class="grid-container">
-    <div class="grid-row" *ngFor="let row of grid">
-        <app-tile *ngFor="let tile of row" [tile]="tile"></app-tile>
+    @for (row of grid; track $index){
+    <div class="grid-row">
+        @for (tile of row;track $index){
+        <app-tile [tile]="tile"></app-tile>
+        }
     </div>
+    }
 </div>
-
-<!-- changer for loop pour @for -->

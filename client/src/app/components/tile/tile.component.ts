@@ -40,13 +40,13 @@ export class TileComponent {
         const selectedTool = this.toolService.getSelectedTool();
         if (selectedTool) {
             const [row, col] = this.tile.id.split('-').slice(1).map(Number);
-            console.log(this.gridService.getTile(row, col).type);
+            // console.log(this.gridService.getTile(row, col).type);
             this.gridService.updateTile(row, col, {
                 imageSrc: selectedTool.image,
                 type: selectedTool.tool,
                 isOccupied: true,
             });
-            console.log(this.gridService.getTile(row, col).type);
+            // console.log(this.gridService.getTile(row, col).type);
         }
     }
 }

@@ -9,7 +9,7 @@ import { ToolService } from '@app/services/tool.service';
 })
 export class ToolbarComponent implements OnInit {
     activeTool: { tool: TileType; image: string } | null = null;
-    TileType = TileType;
+    tileType = TileType;
 
     constructor(private toolService: ToolService) {}
 

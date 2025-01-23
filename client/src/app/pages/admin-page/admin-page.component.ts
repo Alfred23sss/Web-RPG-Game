@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { GameService } from '@app/services/game.service';
+import { GridService } from '@app/services/grid-service.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -16,6 +17,7 @@ export class AdminPageComponent {
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,
+        public gridService: GridService,
     ) {}
 
     openDialog() {
@@ -31,6 +33,7 @@ export class AdminPageComponent {
     updateCurrentGame(name: string) {
         const game = this.gameService.getGameByName(name);
         if (game) {
+            this.gridService.setGrid(game.grid);
             this.gameService.updateCurrentGame(game);
         }
     }
@@ -41,5 +44,3 @@ export class AdminPageComponent {
         }
     }
 }
-
-// si plusieurs games page scroll et l'image n'est pas la , FIX!!

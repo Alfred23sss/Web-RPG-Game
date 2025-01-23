@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { TileComponent } from '@app/components//tile/tile.component';
 import { Tile } from '@app/interfaces/tile';
-import { GridService } from '@app/services/grid-service.service';
-import { TileComponent } from '../tile/tile.component';
+import { GameService } from '@app/services/game.service';
 
 @Component({
     selector: 'app-grid',
@@ -12,14 +12,13 @@ import { TileComponent } from '../tile/tile.component';
     styleUrls: ['./grid.component.scss'],
 })
 export class GridComponent implements OnInit {
-    @Input() rows: number = 10;
-    @Input() cols: number = 10;
-    grid: Tile[][] = [];
+    @Input() rows: number;
+    @Input() cols: number;
+    grid: Tile[][] | undefined = [];
 
-    constructor(private gridService: GridService) {}
+    constructor(private gameService: GameService) {}
 
     ngOnInit() {
-        this.gridService.initializeGrid(this.rows, this.cols);
-        this.grid = this.gridService.getGrid();
+        this.grid = this.gameService.getCurrentGame()?.grid;
     }
 }

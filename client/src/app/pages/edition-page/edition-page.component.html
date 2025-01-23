@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="page-container">
-            <app-grid [rows]="10" [cols]="10"></app-grid>
+            <app-grid [rows]="+(game?.size ?? 0)" [cols]="+(game?.size ?? 0)"></app-grid>
         </div>
         <div class="button-grid">
             <button class="button">Save</button>
@@ -25,6 +25,6 @@
     <p>CECI SERA LES ITEMS</p>
     <div>
         <p><strong>Selected Game Mode:</strong> {{ selectedGameMode }}</p>
-        <p><strong>Selected Game Size:</strong> {{ selectedGameSize }}</p>
+        <p><strong>Selected Game Size:</strong> {{ selectedGameSize }}x{{ selectedGameSize }}</p>
     </div>
 </div>

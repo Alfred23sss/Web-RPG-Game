@@ -7,10 +7,11 @@ import { Tile, TileType } from '@app/interfaces/tile';
 export class GridService {
     private grid: Tile[][] = [];
 
-    initializeGrid(rows: number, cols: number): void {
-        this.grid = Array.from({ length: rows }, (_, rowIndex) =>
+    createGrid(rows: number, cols: number): Tile[][] {
+        return Array.from({ length: rows }, (_, rowIndex) =>
             Array.from(
                 { length: cols },
+                // eslint-disable-next-line @typescript-eslint/no-shadow
                 (_, colIndex): Tile => ({
                     id: `tile-${rowIndex}-${colIndex}`,
                     imageSrc: 'assets/images/clay.png',
@@ -20,6 +21,10 @@ export class GridService {
                 }),
             ),
         );
+    }
+
+    setGrid(grid: Tile[][]): void {
+        this.grid = grid;
     }
 
     getGrid(): Tile[][] {
