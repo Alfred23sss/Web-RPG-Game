@@ -1,22 +1,22 @@
 import { Injectable } from '@angular/core';
-import { TileType } from '@app/interfaces/tile';
+import { ImageType, TileType } from '@app/interfaces/tile';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ToolService {
-    private selectedToolSubject = new BehaviorSubject<{ tool: TileType; image: string }>({
+    private selectedToolSubject = new BehaviorSubject<{ tool: TileType; image: ImageType }>({
         tool: TileType.Default,
-        image: 'assets/images/clay.png',
+        image: ImageType.Default,
     });
     selectedTool$ = this.selectedToolSubject.asObservable();
 
-    setSelectedTool(tool: TileType, image: string): void {
+    setSelectedTool(tool: TileType, image: ImageType): void {
         this.selectedToolSubject.next({ tool, image });
     }
 
-    getSelectedTool(): { tool: TileType; image: string } | null {
+    getSelectedTool(): { tool: TileType; image: ImageType } | null {
         return this.selectedToolSubject.value;
     }
 }

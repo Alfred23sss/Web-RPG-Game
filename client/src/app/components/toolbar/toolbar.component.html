@@ -1,18 +1,18 @@
 <div class="tool-container">
     <h1 class="header-item">{{ activeTool?.tool || 'None' }}</h1>
-    <div class="tool" id="wall-tool" title="Mur : Bloque le passage." (click)="selectTool(tileType.Wall, 'assets/images/wall.png')">
+    <div class="tool" id="wall-tool" title="Mur : Bloque le passage." (click)="selectTool(tileType.Wall, imageType.Wall)">
         <span>Mur</span>
         <img src="assets/images/wall.png" alt="Mur" />
     </div>
-    <div class="tool" id="door-tool" title="Porte : Permet le passage." (click)="selectTool(tileType.Door, 'assets/images/door.png')">
+    <div class="tool" id="door-tool" title="Porte : Permet le passage." (click)="selectTool(tileType.Door, imageType.Door)">
         <span>Porte</span>
         <img src="assets/images/door.png" alt="Porte" />
     </div>
-    <div class="tool" id="water-tool" title="Eau : Bloque certaines unités." (click)="selectTool(tileType.Water, 'assets/images/water.png')">
+    <div class="tool" id="water-tool" title="Eau : Bloque certaines unités." (click)="selectTool(tileType.Water, imageType.Water)">
         <span>Eau</span>
         <img src="assets/images/water.png" alt="Eau" />
     </div>
-    <div class="tool" id="ice-tool" title="Glace : Réduit la vitesse de déplacement." (click)="selectTool(tileType.Ice, 'assets/images/ice.png')">
+    <div class="tool" id="ice-tool" title="Glace : Réduit la vitesse de déplacement." (click)="selectTool(tileType.Ice, imageType.Ice)">
         <span>Glace</span>
         <img src="assets/images/ice.png" alt="Glace" />
     </div>

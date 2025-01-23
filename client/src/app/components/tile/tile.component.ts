@@ -1,5 +1,5 @@
 import { Component, HostListener, Input } from '@angular/core';
-import { Tile } from '@app/interfaces/tile';
+import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { GridService } from '@app/services/grid-service.service';
 import { ToolService } from '@app/services/tool.service';
 
@@ -31,6 +31,12 @@ export class TileComponent {
         }
     }
 
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent): void {
+        event.preventDefault();
+        this.removeTileType();
+    }
+
     @HostListener('document:mouseup')
     onMouseUp(): void {
         TileComponent.isDragging = false;
@@ -44,9 +50,19 @@ export class TileComponent {
             this.gridService.updateTile(row, col, {
                 imageSrc: selectedTool.image,
                 type: selectedTool.tool,
-                isOccupied: true,
             });
             // console.log(this.gridService.getTile(row, col).type);
+        }
+    }
+
+    private removeTileType(): void {
+        const selectedTool = this.toolService.getSelectedTool();
+        if (selectedTool) {
+            const [row, col] = this.tile.id.split('-').slice(1).map(Number);
+            this.gridService.updateTile(row, col, {
+                imageSrc: ImageType.Default,
+                type: TileType.Default,
+            });
         }
     }
 }

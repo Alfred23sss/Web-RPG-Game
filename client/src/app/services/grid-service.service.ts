@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Tile, TileType } from '@app/interfaces/tile';
+import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 
 @Injectable({
     providedIn: 'root',
@@ -14,7 +14,7 @@ export class GridService {
                 // eslint-disable-next-line @typescript-eslint/no-shadow
                 (_, colIndex): Tile => ({
                     id: `tile-${rowIndex}-${colIndex}`,
-                    imageSrc: 'assets/images/clay.png',
+                    imageSrc: ImageType.Default,
                     isOccupied: false,
                     type: TileType.Default,
                     isOpen: true,
