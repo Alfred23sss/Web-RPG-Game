@@ -1,34 +1,35 @@
 .form-container {
-    background-color: rgba(33, 6, 58, 0.904);
+    width: 100%;
+    height: 90%;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    gap: 20px;
+    padding-bottom: 100px;
+    padding-top: 30px;
 }
 
 .gray-background {
-    position: fixed;
+    position:fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
     background: rgba(0, 0, 0, 0.8);
-    z-index: 99;
 }
 
 .header-container {
-    position: relative; /* Permet de positionner le bouton relativement au conteneur */
-    width: 100%; /* Occupe toute la largeur de la page */
+    position: relative;
+    width: 100%;
     display: flex;
-    justify-content: center; /* Centre le titre horizontalement */
-    align-items: center; /* Aligne verticalement les éléments */
-    margin-bottom: 20px; /* Espace sous le conteneur */
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
 h1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     font-family: 'Papyrus', 'Comic Sans MS', cursive;
     font-size: 30px;
     font-weight: bold;
@@ -60,18 +61,27 @@ input[type='text']:focus {
     box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
+.avatars-and-attributes {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
 .avatars {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
 }
 
 .avatars img {
-    width: 150px;
-    height: 150px;
-    cursor: pointer;
-    border: 3px solid transparent;
+    width: 12%;
+    max-width: 150px;
+    height: auto;
+    border: 2px solid transparent;
     border-radius: 10px;
+    cursor: pointer;
     transition:
         transform 0.3s ease,
         box-shadow 0.3s ease;
@@ -79,12 +89,12 @@ input[type='text']:focus {
 
 .avatars img:hover {
     transform: scale(1.1);
-    border: 3px solid #ffd700;
+    border-color: #ffd700;
     box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
 .avatars img.selected {
-    border: 3px solid #ffd700;
+    border-color: #ffd700;
     box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
@@ -92,9 +102,10 @@ input[type='text']:focus {
     font-family: 'Papyrus', 'Comic Sans MS', cursive;
     display: flex;
     flex-direction: column;
-    align-items: center;
     gap: 10px;
     width: 100%;
+    max-width: 90%;
+    margin: 0 auto;
 }
 
 .attributes div {
@@ -102,18 +113,17 @@ input[type='text']:focus {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    max-width: 600px;
-    color: white;
 }
 
 .attributes span {
     font-size: 1.5rem;
     font-weight: bold;
+    color: white;
 }
 
 button {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
     width: 200px;
-    padding: 10px 20px;
     font-size: 1rem;
     background: linear-gradient(135deg, #ffd700, #ff8c00);
     color: black;
@@ -124,6 +134,11 @@ button {
     transition:
         transform 0.2s ease,
         background-color 0.3s ease;
+    // box-sizing: border-box;
+}
+
+button:hover {
+    transform: scale(1.05);
 }
 
 button:hover {
@@ -137,10 +152,10 @@ button:disabled {
 }
 
 .popup-cancel {
-    position: relative; /* Positionne le bouton de manière indépendante */
-    left: 20px; /* Distance depuis le bord gauche */
-    top: 50%; /* Centre verticalement le bouton dans le conteneur */
-    transform: translateY(-1000%); /* Ajuste pour un vrai centrage vertical */
+    position: relative;
+    left: 20px;
+    top: 10%;
+    transform: translateY(-1000%);
     transform: translateX(-900%);
 }
 
@@ -164,4 +179,24 @@ button:disabled {
 .cancel-button:hover {
     background-color: rgb(255, 255, 255);
     transform: none;
+}
+
+@media (max-width: 768px) {
+    .avatars img {
+        width: 20%;
+    }
+
+    .form-container {
+        gap: 10px;
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 20px;
+    }
+
+    button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
 }
