@@ -5,12 +5,12 @@
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 100px;
+    padding-bottom: 300px;
     padding-top: 30px;
 }
 
 .gray-background {
-    position:fixed;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -152,11 +152,11 @@ button:disabled {
 }
 
 .popup-cancel {
-    position: relative;
+    position: absolute;
     left: 20px;
-    top: 10%;
-    transform: translateY(-1000%);
-    transform: translateX(-900%);
+    // top: 10%;
+    // transform: translateY(-1000%);
+    // transform: translateX(-900%);
 }
 
 .cancel-button {

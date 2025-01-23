@@ -1,10 +1,9 @@
 <div [class.gray-background]="showForm" class="form-container">
     @if(showForm === true){
+    <div class="header-container">
         <div class="popup-cancel">
             <button class="cancel-button" (click)="closePopup()"></button>
         </div>
-    <div class="header-container">
-
         <h1>Create a Character</h1>
     </div>
     <input type="text" placeholder="Character Name" [(ngModel)]="characterName" />
@@ -118,8 +117,7 @@
                 </span>
                 <button (click)="assignDice('defense')" [disabled]="diceAssigned.defense">D6 Defense</button>
             </div>
-    </div>
-    
+        </div>
     </div>
 
     <button (click)="submitCharacter()">Confirm</button>
