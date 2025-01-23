@@ -10,8 +10,7 @@ import { ToolService } from '@app/services/tool.service';
     styleUrls: ['./tile.component.scss'],
 })
 export class TileComponent {
-    static isDragging = false;
-    static isRightClicking = false;
+    static activeButton: number | null = null;
     @Input() tile!: Tile;
 
     constructor(
@@ -21,20 +20,22 @@ export class TileComponent {
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
-        if (event.button === 2) {
-            TileComponent.isRightClicking = true;
-            this.removeTileType();
-        } else if (event.button === 0) {
-            TileComponent.isDragging = true;
-            this.applyTool();
+        if (TileComponent.activeButton === null) {
+            TileComponent.activeButton = event.button;
+
+            if (event.button === 2) {
+                this.removeTileType();
+            } else if (event.button === 0) {
+                this.applyTool();
+            }
         }
     }
 
     @HostListener('mouseenter')
     onMouseEnter(): void {
-        if (TileComponent.isDragging) {
+        if (TileComponent.activeButton === 0) {
             this.applyTool();
-        } else if (TileComponent.isRightClicking) {
+        } else if (TileComponent.activeButton === 2) {
             this.removeTileType();
         }
     }
@@ -44,13 +45,16 @@ export class TileComponent {
         event.preventDefault();
     }
 
-    @HostListener('document:mouseup')
-    onMouseUp(): void {
-        TileComponent.isDragging = false;
-        TileComponent.isRightClicking = false;
+    @HostListener('document:mouseup', ['$event'])
+    onMouseUp(event: MouseEvent): void {
+        if (TileComponent.activeButton === event.button) {
+            TileComponent.activeButton = null;
+        }
     }
 
     private applyTool(): void {
+        if (TileComponent.activeButton !== 0) return;
+
         const selectedTool = this.toolService.getSelectedTool();
         if (selectedTool) {
             const [row, col] = this.tile.id.split('-').slice(1).map(Number);
@@ -62,6 +66,8 @@ export class TileComponent {
     }
 
     private removeTileType(): void {
+        if (TileComponent.activeButton !== 2) return;
+
         const [row, col] = this.tile.id.split('-').slice(1).map(Number);
         this.gridService.updateTile(row, col, {
             imageSrc: ImageType.Default,
