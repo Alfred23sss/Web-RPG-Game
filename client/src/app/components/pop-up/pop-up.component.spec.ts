@@ -4,7 +4,7 @@ import { GameModeService } from '@app/services/game-mode.service';
 import { GameService } from '@app/services/game.service';
 import { PopUpComponent } from './pop-up.component';
 
-describe('PopUpComponent', () => {
+fdescribe('PopUpComponent', () => {
     let component: PopUpComponent;
     let fixture: ComponentFixture<PopUpComponent>;
 
@@ -31,5 +31,22 @@ describe('PopUpComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should set the game ');
+    it('gameModeService should set the game size', () => {
+        component.setGameSize('medium');
+        expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('medium');
+    });
+
+    it('gameModeService should set the game type', () => {
+        mockGameModeService.getGameMode.and.returnValue('Classic');
+        component.setGameType('Classic');
+        expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('Classic');
+    });
+
+    it('should alert if CTF mode is selected and reset the mode', () => {
+        spyOn(window, 'alert');
+        mockGameModeService.getGameMode.and.returnValue('CTF');
+        component.setGameType('CTF');
+        expect(window.alert).toHaveBeenCalledWith('CTF gamemode is currently unavailable!');
+        expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
+    });
 });

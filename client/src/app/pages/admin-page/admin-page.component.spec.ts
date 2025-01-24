@@ -1,17 +1,24 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
+import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { GameService } from '@app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
 fdescribe('AdminPageComponent', () => {
     let mockGameService: jasmine.SpyObj<GameService>;
+    let mockDialog: jasmine.SpyObj<MatDialog>;
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
 
     beforeEach(async () => {
         mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName']);
+        mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
         await TestBed.configureTestingModule({
             imports: [AdminPageComponent],
-            providers: [{ provide: GameService, useValue: mockGameService }],
+            providers: [
+                { provide: GameService, useValue: mockGameService },
+                { provide: MatDialog, useValue: mockDialog },
+            ],
         }).compileComponents();
     });
 
@@ -73,9 +80,8 @@ fdescribe('AdminPageComponent', () => {
         expect(testGame.isVisible).toBeFalse();
     });
 
-    it('openDialog should be called', () => {
-        spyOn(component, 'openDialog');
+    it('openDialog should open the dialog with PopUpComponent', () => {
         component.openDialog();
-        expect(component.openDialog).toHaveBeenCalled();
+        expect(mockDialog.open).toHaveBeenCalledWith(PopUpComponent);
     });
 });
