@@ -38,5 +38,3 @@ export class AdminPageComponent {
         }
     }
 }
-
-// si plusieurs games page scroll et l'image n'est pas la , FIX!!
