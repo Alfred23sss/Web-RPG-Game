@@ -64,6 +64,7 @@ export class PopUpComponent {
         this.resetSelections();
         this.dialogRef.closeAll();
     }
+
     private resetSelections() {
         this.gameModeService.setGameMode('');
         this.gameModeService.setGameSize('');

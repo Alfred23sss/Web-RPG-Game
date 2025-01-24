@@ -55,7 +55,7 @@ fdescribe('AdminPageComponent', () => {
         description: 'Description Test',
     };
 
-    it('should update game visibility to true when checkbox is checked', () => {
+    it('checkbox should update game visibility to true when checked', () => {
         mockGameService.getGameByName.and.returnValue(testGame);
 
         const event = { target: { checked: true } } as unknown as InputEvent;
@@ -64,7 +64,7 @@ fdescribe('AdminPageComponent', () => {
         expect(testGame.isVisible).toBeTrue();
     });
 
-    it('should update game visibility to false when checkbox is unchecked', () => {
+    it('checkbox should update game visibility to false unchecked', () => {
         mockGameService.getGameByName.and.returnValue(testGame);
 
         const event = { target: { checked: false } } as unknown as InputEvent;
@@ -73,7 +73,7 @@ fdescribe('AdminPageComponent', () => {
         expect(testGame.isVisible).toBeFalse();
     });
 
-    it('Should call openDialog', () => {
+    it('openDialog should be called', () => {
         spyOn(component, 'openDialog');
         component.openDialog();
         expect(component.openDialog).toHaveBeenCalled();
