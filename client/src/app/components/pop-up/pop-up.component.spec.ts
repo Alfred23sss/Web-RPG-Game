@@ -6,6 +6,8 @@ describe('PopUpComponent', () => {
     let component: PopUpComponent;
     let fixture: ComponentFixture<PopUpComponent>;
 
+    let mockGameService;
+
     beforeEach(async () => {
         await TestBed.configureTestingModule({
             imports: [PopUpComponent],

@@ -3,15 +3,15 @@ import { GameService } from '@app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
 fdescribe('AdminPageComponent', () => {
-    let gameServiceSpy: jasmine.SpyObj<GameService>;
+    let mockGameService: jasmine.SpyObj<GameService>;
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
 
     beforeEach(async () => {
-        gameServiceSpy = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName']);
+        mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName']);
         await TestBed.configureTestingModule({
             imports: [AdminPageComponent],
-            providers: [{ provide: GameService, useValue: gameServiceSpy }],
+            providers: [{ provide: GameService, useValue: mockGameService }],
         }).compileComponents();
     });
 
@@ -32,7 +32,7 @@ fdescribe('AdminPageComponent', () => {
         component.deleteGame(gameName);
 
         expect(window.confirm).toHaveBeenCalledWith(`Confirm deleting ${gameName}?`);
-        expect(gameServiceSpy.removeGame).toHaveBeenCalledWith(gameName);
+        expect(mockGameService.removeGame).toHaveBeenCalledWith(gameName);
     });
 
     it('should not call removeGame on gameService if confirm dialog is canceled', () => {
@@ -42,7 +42,7 @@ fdescribe('AdminPageComponent', () => {
         component.deleteGame(gameName);
 
         expect(window.confirm).toHaveBeenCalledWith(`Confirm deleting ${gameName}?`);
-        expect(gameServiceSpy.removeGame).not.toHaveBeenCalled();
+        expect(mockGameService.removeGame).not.toHaveBeenCalled();
     });
 
     const testGame = {
@@ -56,7 +56,7 @@ fdescribe('AdminPageComponent', () => {
     };
 
     it('should update game visibility to true when checkbox is checked', () => {
-        gameServiceSpy.getGameByName.and.returnValue(testGame);
+        mockGameService.getGameByName.and.returnValue(testGame);
 
         const event = { target: { checked: true } } as unknown as InputEvent;
         component.toggleVisibility(testGame.name, event);
@@ -65,7 +65,7 @@ fdescribe('AdminPageComponent', () => {
     });
 
     it('should update game visibility to false when checkbox is unchecked', () => {
-        gameServiceSpy.getGameByName.and.returnValue(testGame);
+        mockGameService.getGameByName.and.returnValue(testGame);
 
         const event = { target: { checked: false } } as unknown as InputEvent;
         component.toggleVisibility(testGame.name, event);
