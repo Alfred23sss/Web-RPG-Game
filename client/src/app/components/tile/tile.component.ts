@@ -11,6 +11,7 @@ import { ToolService } from '@app/services/tool.service';
 })
 export class TileComponent {
     static activeButton: number | null = null;
+    static doubleClicked = false;
     @Input() tile!: Tile;
 
     constructor(
@@ -57,21 +58,36 @@ export class TileComponent {
 
         const selectedTool = this.toolService.getSelectedTool();
         if (selectedTool) {
-            const [row, col] = this.tile.id.split('-').slice(1).map(Number);
-            this.gridService.updateTile(row, col, {
-                imageSrc: selectedTool.image,
-                type: selectedTool.tool,
-            });
+            if (selectedTool.tool === TileType.Door) {
+                if (this.tile.type === TileType.Default) {
+                    this.tile.imageSrc = selectedTool.image;
+                    this.tile.type = selectedTool.tool;
+                    this.tile.isOpen = false;
+                } else {
+                    this.tile.isOpen = !this.tile.isOpen;
+                    if (this.tile.isOpen) {
+                        this.tile.imageSrc = ImageType.OpenDoor;
+                    } else {
+                        this.tile.imageSrc = ImageType.ClosedDoor;
+                    }
+                }
+            } else {
+                this.tile.imageSrc = selectedTool.image;
+                this.tile.type = selectedTool.tool;
+            }
         }
+        this.printGridServiceTest();
+    }
+
+    private printGridServiceTest() {
+        let tileTest = this.gridService.getTile(0, 0);
+        console.log(tileTest.type);
+        console.log('in');
     }
 
     private removeTileType(): void {
-        if (TileComponent.activeButton !== 2) return;
-
-        const [row, col] = this.tile.id.split('-').slice(1).map(Number);
-        this.gridService.updateTile(row, col, {
-            imageSrc: ImageType.Default,
-            type: TileType.Default,
-        });
+        this.tile.imageSrc = ImageType.Default;
+        this.tile.type = TileType.Default;
+        this.tile.isOpen = false;
     }
 }
