@@ -2,7 +2,7 @@
     <h1 class="header-item">{{ activeTool?.tool || 'Aucun outil sélectionné' }}</h1>
     <div class="tool" id="wall-tool" title="Mur : Bloque le passage." (click)="selectTool(tileType.Wall, imageType.Wall)">
         <span>Mur</span>
-        <img src="assets/images/wall.png" alt="Mur" />
+        <img src="assets/images/wall.png" alt="Mur" (click)="selectTool('wall', 'assets/images/wall.png')" />
     </div>
     <div class="tool" id="door-tool" title="Porte : Permet le passage." (click)="selectTool(tileType.Door, imageType.ClosedDoor)">
         <span>Porte</span>
@@ -10,10 +10,10 @@
     </div>
     <div class="tool" id="water-tool" title="Eau : Bloque certaines unités." (click)="selectTool(tileType.Water, imageType.Water)">
         <span>Eau</span>
-        <img src="assets/images/water.png" alt="Eau" />
+        <img src="assets/images/water.png" alt="Eau" (click)="selectTool('water', 'assets/images/water.png')" />
     </div>
     <div class="tool" id="ice-tool" title="Glace : Réduit la vitesse de déplacement." (click)="selectTool(tileType.Ice, imageType.Ice)">
         <span>Glace</span>
-        <img src="assets/images/ice.png" alt="Glace" />
+        <img src="assets/images/ice.png" alt="Glace" (click)="selectTool('ice', 'assets/images/ice.png')" />
     </div>
 </div>
