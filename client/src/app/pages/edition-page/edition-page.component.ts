@@ -50,7 +50,6 @@ export class EditionPageComponent implements OnInit {
         // a finir apres persistance etablie
         this.gameService.updateCurrentGame(this.originalGame);
         // this.cdr.detectChanges();
-        // window.location.reload();
     }
 
     save() {
