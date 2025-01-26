@@ -33,7 +33,7 @@ export class AdminPageComponent {
     updateCurrentGame(name: string) {
         const game = this.gameService.getGameByName(name);
         if (game) {
-            this.gridService.setGrid(game.grid);
+            // this.gridService.setGrid(game.grid);
             this.gameService.updateCurrentGame(game);
         }
     }

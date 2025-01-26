@@ -14,11 +14,11 @@
             </div>
         </div>
         <div class="page-container">
-            <app-grid [rows]="+(game?.size ?? 0)" [cols]="+(game?.size ?? 0)"></app-grid>
+            <app-grid [grid]="tempGame?.grid"></app-grid>
         </div>
         <div class="button-grid">
-            <button class="button">Save</button>
-            <button class="button">Reset</button>
+            <button class="button" (click)="save()">Save</button>
+            <button class="button" (click)="reset()">Reset</button>
             <button class="button">Empty</button>
         </div>
     </div>

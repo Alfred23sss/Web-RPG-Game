@@ -20,5 +20,5 @@ export interface Game {
     isVisible: boolean;
     previewImage: string; // path to img
     description: string;
-    grid: Tile[][];
+    grid: Tile[][] | undefined;
 }

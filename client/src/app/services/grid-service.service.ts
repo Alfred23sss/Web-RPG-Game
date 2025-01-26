@@ -5,7 +5,7 @@ import { ImageType, Tile, TileType } from '@app/interfaces/tile';
     providedIn: 'root',
 })
 export class GridService {
-    private grid: Tile[][] = [];
+    private grid: Tile[][] | undefined = [];
 
     createGrid(rows: number, cols: number): Tile[][] {
         return Array.from({ length: rows }, (_, rowIndex) =>
@@ -23,22 +23,28 @@ export class GridService {
         );
     }
 
-    setGrid(grid: Tile[][]): void {
+    setGrid(grid: Tile[][] | undefined): void {
         this.grid = grid;
     }
 
-    getGrid(): Tile[][] {
+    getGrid() {
         return this.grid;
     }
 
-    getTile(row: number, col: number): Tile {
-        return this.grid[row][col];
+    getTile(row: number, col: number) {
+        if (this.grid) {
+            return this.grid[row][col];
+        } else {
+            return;
+        }
     }
 
     updateTile(row: number, col: number, newTile: Partial<Tile>): void {
-        const tile = this.grid[row]?.[col];
-        if (tile) {
-            Object.assign(tile, newTile);
+        if (this.grid) {
+            const tile = this.grid[row]?.[col];
+            if (tile) {
+                Object.assign(tile, newTile);
+            }
         }
     }
 }

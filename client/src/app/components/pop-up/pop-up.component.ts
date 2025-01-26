@@ -54,9 +54,9 @@ export class PopUpComponent {
                 grid: this.gridService.createGrid(gridSize, gridSize),
             };
 
-            this.gridService.setGrid(newGame.grid);
-            this.gameService.updateCurrentGame(newGame);
+            // this.gridService.setGrid(newGame.grid);
             this.gameService.addGame(newGame);
+            this.gameService.updateCurrentGame(newGame);
             this.closePopup();
             this.router.navigate(['/edition']);
         } else {
