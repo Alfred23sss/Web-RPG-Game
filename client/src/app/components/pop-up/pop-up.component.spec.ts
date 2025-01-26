@@ -61,48 +61,48 @@ fdescribe('PopUpComponent', () => {
         expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
     });
 
-    it('confirm should create a new game and bring to the edition page', () => {
-        mockGameModeService.getGameSize.and.returnValue('small');
-        mockGameModeService.getGameMode.and.returnValue('Classic');
+    const games = [
+        { input: 'small', gameSize: '10x10' },
+        { input: 'medium', gameSize: '15x15' },
+        { input: 'large', gameSize: '20x20' },
+    ];
 
-        component.confirm();
+    games.forEach(({ input, gameSize }) => {
+        it(`confirm should create a new game with size ${gameSize} and bring to the edition page`, () => {
+            mockGameModeService.getGameSize.and.returnValue(input);
+            mockGameModeService.getGameMode.and.returnValue('Classic');
 
-        const testGame = {
-            name: jasmine.stringMatching(/^NewGame_\d+$/),
-            size: '10x10',
-            mode: 'Classic',
-            isVisible: true,
-        };
+            component.confirm();
 
-        expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(jasmine.objectContaining(testGame));
-        expect(mockGameService.addGame).toHaveBeenCalledWith(jasmine.objectContaining(testGame));
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/edition']);
+            const testGame = {
+                name: jasmine.stringMatching(/^NewGame_\d+$/),
+                size: gameSize,
+                mode: 'Classic',
+                isVisible: true,
+            };
+
+            expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(jasmine.objectContaining(testGame));
+            expect(mockGameService.addGame).toHaveBeenCalledWith(jasmine.objectContaining(testGame));
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edition']);
+        });
     });
 
-    it('should alert if size is not selected in popup', () => {
-        spyOn(window, 'alert');
-        mockGameModeService.getGameSize.and.returnValue('');
-        mockGameModeService.getGameMode.and.returnValue('Classic');
+    [
+        { size: '', mode: 'Classic' },
+        { size: 'small', mode: '' },
+    ].forEach(({ size, mode }) => {
+        it('should alert if mode or size is not selected in popup', () => {
+            spyOn(window, 'alert');
+            mockGameModeService.getGameSize.and.returnValue(size);
+            mockGameModeService.getGameMode.and.returnValue(mode);
 
-        component.confirm();
+            component.confirm();
 
-        expect(window.alert).toHaveBeenCalledWith('Please select both game size and game type!');
-        expect(mockGameService.updateCurrentGame).not.toHaveBeenCalled();
-        expect(mockGameService.addGame).not.toHaveBeenCalled();
-        expect(mockRouter.navigate).not.toHaveBeenCalled();
-    });
-
-    it('should alert if mode is not selected in popup', () => {
-        spyOn(window, 'alert');
-        mockGameModeService.getGameSize.and.returnValue('small');
-        mockGameModeService.getGameMode.and.returnValue('');
-
-        component.confirm();
-
-        expect(window.alert).toHaveBeenCalledWith('Please select both game size and game type!');
-        expect(mockGameService.updateCurrentGame).not.toHaveBeenCalled();
-        expect(mockGameService.addGame).not.toHaveBeenCalled();
-        expect(mockRouter.navigate).not.toHaveBeenCalled();
+            expect(window.alert).toHaveBeenCalledWith('Please select both game size and game type!');
+            expect(mockGameService.updateCurrentGame).not.toHaveBeenCalled();
+            expect(mockGameService.addGame).not.toHaveBeenCalled();
+            expect(mockRouter.navigate).not.toHaveBeenCalled();
+        });
     });
 
     it('closePopup should reset selections and close popup', () => {
@@ -117,11 +117,5 @@ fdescribe('PopUpComponent', () => {
         expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
         expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('');
         expect(mockDialog.closeAll).toHaveBeenCalled();
-    });
-
-    it('should reset game size and mode via GameModeService', () => {
-        component['resetSelections']();
-        expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
-        expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('');
     });
 });
