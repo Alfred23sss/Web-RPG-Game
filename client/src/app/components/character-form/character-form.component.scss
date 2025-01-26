@@ -1,4 +1,4 @@
-.form-container {
+.character-form-container {
     width: 100%;
     height: 90%;
     display: flex;
@@ -18,7 +18,7 @@
     background: rgba(0, 0, 0, 0.8);
 }
 
-.header-container {
+.character-form_header {
     position: relative;
     width: 100%;
     display: flex;
@@ -27,7 +27,7 @@
     margin-bottom: 20px;
 }
 
-h1 {
+#character-form_title {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -51,9 +51,7 @@ input[type='text'] {
     color: white;
     outline: none;
     background-color: rgba(38, 33, 42, 0.137);
-    transition:
-        border-color 0.3s ease,
-        background-color 0.3s ease;
+    text-align: center;
 }
 
 input[type='text']:focus {
@@ -62,44 +60,47 @@ input[type='text']:focus {
     box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
-.avatars-and-attributes {
+input[type='text']:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
+}
+
+.character-form_body {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
 }
 
-.avatars {
+.character-form_avatars {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
 }
 
-.avatars img {
+.character-form_avatars img {
     width: 12%;
     max-width: 120px;
     height: auto;
     border: 2px solid transparent;
     border-radius: 10px;
     cursor: pointer;
-    transition:
-        transform 0.3s ease,
-        box-shadow 0.3s ease;
+    transition: transform 0.3s ease;
 }
 
-.avatars img:hover {
+.character-form_avatars img:hover {
     transform: scale(1.1);
     border-color: #ffd700;
     box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
-.avatars img.selected {
+.character-form_avatars img.selected {
     border-color: #ffd700;
     box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
-.attributes {
+.character-form_attributes {
     font-family: 'Papyrus', 'Comic Sans MS', cursive;
     display: flex;
     flex-direction: column;
@@ -109,14 +110,14 @@ input[type='text']:focus {
     margin: 0 auto;
 }
 
-.attributes div {
+.character-form_attributes div {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
 }
 
-.attributes span {
+.character-form_attributes span {
     font-size: 1.3rem;
     font-weight: bold;
     color: white;
@@ -132,10 +133,7 @@ button {
     border-radius: 8px;
     cursor: pointer;
     font-weight: bold;
-    transition:
-        transform 0.2s ease,
-        background-color 0.3s ease;
-    // box-sizing: border-box;
+    transition: transform 0.2s ease;
 }
 
 button:hover {
@@ -152,15 +150,9 @@ button:disabled {
     opacity: 0.6;
 }
 
-.popup-cancel {
+.character-form_cancel-button {
     position: absolute;
     left: 20px;
-    // top: 10%;
-    // transform: translateY(-1000%);
-    // transform: translateX(-900%);
-}
-
-.cancel-button {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -180,24 +172,6 @@ button:disabled {
 .cancel-button:hover {
     background-color: rgb(255, 255, 255);
     transform: none;
-}
-
-@media (max-width: 768px) {
-    .avatars img {
-        width: 20%;
-    }
-
-    .form-container {
-        gap: 10px;
-        padding: 10px;
-    }
-
-    h1 {
-        font-size: 20px;
-    }
-
-    button {
-        padding: 8px 15px;
-        font-size: 0.9rem;
-    }
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
 }

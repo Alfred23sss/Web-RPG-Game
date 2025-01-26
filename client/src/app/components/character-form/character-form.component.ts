@@ -12,6 +12,23 @@ import { Router } from '@angular/router';
 export class CharacterFormComponent {
     characterName = '';
     selectedAvatar = '';
+    showForm = true;
+
+    avatars: string[] = [
+        'assets/avatars/avatar1.png',
+        'assets/avatars/avatar2.png',
+        'assets/avatars/avatar3.png',
+        'assets/avatars/avatar4.png',
+        'assets/avatars/avatar5.png',
+        'assets/avatars/avatar6.png',
+        'assets/avatars/avatar7.png',
+        'assets/avatars/avatar8.png',
+        'assets/avatars/avatar9.png',
+        'assets/avatars/avatar10.png',
+        'assets/avatars/avatar11.png',
+        'assets/avatars/avatar12.png',
+    ];
+
     attributes = {
         vitality: 4,
         speed: 4,
@@ -26,8 +43,36 @@ export class CharacterFormComponent {
         attack: false,
         defense: false,
     };
-
-    showForm = true;
+    attributesList = [
+        {
+            key: 'vitality',
+            label: 'Vitality',
+            value: () => this.attributes.vitality,
+            bonusDisabled: () => this.bonusAssigned.vitality,
+            assignBonus: () => this.assignBonus('vitality'),
+        },
+        {
+            key: 'speed',
+            label: 'Speed',
+            value: () => this.attributes.speed,
+            bonusDisabled: () => this.bonusAssigned.speed,
+            assignBonus: () => this.assignBonus('speed'),
+        },
+        {
+            key: 'attack',
+            label: 'Attack',
+            value: () => this.attributes.attack,
+            bonusDisabled: () => this.diceAssigned.attack,
+            assignDice: () => this.assignDice('attack'),
+        },
+        {
+            key: 'defense',
+            label: 'Defense',
+            value: () => this.attributes.defense,
+            bonusDisabled: () => this.diceAssigned.defense,
+            assignDice: () => this.assignDice('defense'),
+        },
+    ];
 
     constructor(
         private router: Router,
@@ -73,26 +118,26 @@ export class CharacterFormComponent {
     }
 
     closePopup() {
-        this.resetSelections();
+        // this.resetSelections();
         this.dialogRef.close();
     }
 
-    private resetSelections() {
-        this.characterName = '';
-        this.selectedAvatar = '';
-        this.attributes = {
-            vitality: 4,
-            speed: 4,
-            attack: 4,
-            defense: 4,
-        };
-        this.bonusAssigned = {
-            vitality: false,
-            speed: false,
-        };
-        this.diceAssigned = {
-            attack: false,
-            defense: false,
-        };
-    }
+    // private resetSelections() {
+    //     this.characterName = '';
+    //     this.selectedAvatar = '';
+    //     this.attributes = {
+    //         vitality: 4,
+    //         speed: 4,
+    //         attack: 4,
+    //         defense: 4,
+    //     };
+    //     this.bonusAssigned = {
+    //         vitality: false,
+    //         speed: false,
+    //     };
+    //     this.diceAssigned = {
+    //         attack: false,
+    //         defense: false,
+    //     };
+    // }
 }
