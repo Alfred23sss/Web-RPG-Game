@@ -1,11 +1,13 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { TileComponent } from '../tile/tile.component';
 import { CommonModule } from '@angular/common';
+import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
+import { ItemComponent } from '../item/item.component';
 
 @Component({
     selector: 'app-grid',
     standalone: true,
-    imports: [TileComponent, CommonModule],
+    imports: [TileComponent, CommonModule, DragDropModule],
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
@@ -29,4 +31,8 @@ export class GridComponent implements OnInit {
             })),
         );
     }
+
+    drop(event: CdkDragDrop<ItemComponent[]>): void {
+        console.log(event);
+      }
 }
