@@ -1,59 +1,40 @@
-<div [class.gray-background]="showForm" class="form-container">
+<div [class.gray-background]="showForm" class="character-form-container">
     @if(showForm === true){
-        <h1>Create a Character</h1>
-        <input type="text" placeholder="Character Name" [(ngModel)]="characterName" />
-
-        <div class="avatars">
-            <img src="assets/avatars/avatar1.png" 
-            (click)="selectedAvatar = 'assets/avatars/avatar1.png'" 
-            [class.selected]="selectedAvatar === 'assets/avatars/avatar1.png'" 
-            alt="Avatar"/>
-            <img src="assets/avatars/avatar2.png" 
-            (click)="selectedAvatar = 'assets/avatars/avatar2.png'" 
-            [class.selected]="selectedAvatar === 'assets/avatars/avatar2.png'" 
-            alt="Avatar"/>
-            <img src="assets/avatars/avatar3.png" 
-            (click)="selectedAvatar = 'assets/avatars/avatar3.png'" 
-            [class.selected]="selectedAvatar === 'assets/avatars/avatar3.png'" 
-            alt="Avatar"/>
-            <img src="assets/avatars/avatar4.png" 
-            (click)="selectedAvatar = 'assets/avatars/avatar4.png'" 
-            [class.selected]="selectedAvatar === 'assets/avatars/avatar4.png'" 
-            alt="Avatar"/>
-        </div>
-        <div class="attributes">
-            <div>
-                <span>Vitality: {{ attributes.vitality }}</span> 
-                <button (click)="assignBonus('vitality')" [disabled]="bonusAssigned.vitality">+2 Vitality</button> <!-- 'Vie' -> 'Vitality' -->
-            </div>
-            <div>
-                <span>Speed: {{ attributes.speed }}</span>
-                <button (click)="assignBonus('speed')" [disabled]="bonusAssigned.speed">+2 Speed</button> <!-- 'Rapidité' -> 'Speed' -->
-            </div>
-            <div>
-                <span>Attack: {{ attributes.attack }}
-                    @if(diceAssigned.attack) {
-                        <span>+D6</span>
-                    }
-                    @if(!diceAssigned.attack && diceAssigned.defense) {
-                        <span>+D4</span>
-                    }
-                </span>
-                <button (click)="assignDice('attack')">D6 Attack</button>
-            </div>
-            <div>
-                <span>Defense: {{ attributes.defense }}
-                    @if(diceAssigned.defense) {
-                        <span>+D6</span>
-                    }
-                    @if(!diceAssigned.defense && diceAssigned.attack) {
-                        <span>+D4</span>
-                    }
-                </span>
-                <button (click)="assignDice('defense')">D6 Defense</button>
-            </div>
+    <div class="character-form_header">
+        <div class="character-form_cancel">
+            <button class="character-form_cancel-button" (click)="closePopup()"></button>
         </div>
 
-        <button (click)="submitCharacter()">Confirm</button>
+        <h1 id="character-form_title">Create a Character</h1>
+    </div>
+
+    <input type="text" placeholder="Character Name" [(ngModel)]="characterName" />
+
+    <div class="character-form_body">
+        <div class="character-form_avatars">
+            @for (avatar of avatars; track avatar) {
+            <img [src]="avatar" (click)="selectedAvatar = avatar" [class.selected]="selectedAvatar === avatar" alt="Avatar" />
+            }
+        </div>
+
+        <div class="character-form_attributes">
+            @for (attribute of attributesList; track attribute) {
+            <div>
+                @if (attribute.assignBonus) {
+                <span>{{ attribute.label }} : {{ attribute.value() }}</span>
+                <button (click)="attribute.assignBonus()" [disabled]="attribute.bonusDisabled()">+2 {{ attribute.label }}</button>
+                } @if (attribute.assignDice) {
+                <span
+                    >{{ attribute.label }} : {{ attribute.value() }}
+                    {{ attribute.bonusDisabled() ? '+ D6' : !attribute.bonusDisabled() ? '+ D4' : '' }}</span
+                >
+                <button (click)="attribute.assignDice()" [disabled]="attribute.bonusDisabled()">D6 {{ attribute.label }}</button>
+                }
+            </div>
+            }
+        </div>
+    </div>
+
+    <button (click)="submitCharacter()">Confirm</button>
     }
 </div>

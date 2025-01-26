@@ -39,8 +39,9 @@ export class AdminPageComponent {
     }
     toggleVisibility(name: string) {
         const game = this.gameService.getGameByName(name);
+
         if (game) {
-            game.isVisible = !game.isVisible;
+            game.isVisible = isVisible;
         }
     }
 }
