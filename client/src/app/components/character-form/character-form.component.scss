@@ -1,118 +1,177 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f4f4;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+.character-form-container {
+    width: 100%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1000px;
+    padding-top: 30px;
+    overflow: scroll;
 }
 
-h1 {
-  text-align: center;
-  margin-top: 30px;
-  font-size: 2.5em;
-  color: #333;
+.gray-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.8);
 }
 
-form {
-  width: 800px;
-  background-color: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  margin-top: 20px;
+.character-form_header {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-.avatars {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 30px;
+#character-form_title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin: 0;
+    text-align: center;
 }
 
-.avatars img {
-  width: 100px;
-  height: 100px;
-  cursor: pointer;
-  border: 3px solid transparent;
-  border-radius: 10px;
+input[type='text'] {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    padding: 10px;
+    margin: 10px 0 40px 0;
+    font-size: 1em;
+    border: 2px solid #ffd700;
+    border-radius: 8px;
+    box-sizing: border-box;
+    color: white;
+    outline: none;
+    background-color: rgba(38, 33, 42, 0.137);
+    text-align: center;
 }
 
-.avatars img:hover {
-  transform: scale(1.1);
+input[type='text']:focus {
+    border-color: #ffdf00;
+    background-color: rgba(38, 33, 42, 0.2);
+    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
-.avatars img.selected {
-  border: 3px solid #4caf50; 
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+input[type='text']:hover {
+    transform: scale(1.05);
+    transition: transform 0.3s ease;
 }
 
-input[type="text"] {
-  width: 100%;
-  padding: 15px;
-  margin-bottom: 30px;
-  font-size: 1.2em;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  box-sizing: border-box;
-  background-color: #f9f9f9;
+.character-form_body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
 }
 
-input[type="text"]:focus {
-  border-color: #4caf50;
-  outline: none;
+.character-form_avatars {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
-.attributes {
-  margin-bottom: 30px;
+.character-form_avatars img {
+    width: 12%;
+    max-width: 120px;
+    height: auto;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
 }
 
-.attributes .attribute {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
+.character-form_avatars img:hover {
+    transform: scale(1.1);
+    border-color: #ffd700;
+    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
 }
 
-.attributes .label {
-  font-size: 1.2em;
-  color: #333;
+.character-form_avatars img.selected {
+    border-color: #ffd700;
+    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
+}
+
+.character-form_attributes {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 90%;
+    margin: 0 auto;
+}
+
+.character-form_attributes div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.character-form_attributes span {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
 }
 
 button {
-  padding: 10px 20px;
-  font-size: 1.1em;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-left: 10px;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    width: 200px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: transform 0.2s ease;
 }
 
 button:hover {
-  background-color: #45a049;
+    transform: scale(1.05);
+}
+
+button:hover {
+    transform: scale(1.05);
 }
 
 button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+    background: linear-gradient(135deg, #f0e68c, #d3d3d3);
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
-.submit-btn {
-  width: 100%;
-  padding: 15px;
-  background-color: #2196f3;
-  font-size: 1.3em;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+.character-form_cancel-button {
+    position: absolute;
+    left: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    border: 2px solid;
+    background-image: url('/assets/X-sword.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: rgb(255, 255, 255);
+    color: white;
+    cursor: pointer;
 }
 
-.submit-btn:hover {
-  background-color: #1976d2;
+.cancel-button:hover {
+    background-color: rgb(255, 255, 255);
+    transform: none;
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
 }

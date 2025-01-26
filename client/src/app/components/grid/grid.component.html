@@ -1,8 +1,8 @@
 <div class="grid-container">
-    @for(row of grid; let rowIndex = $index;track $index){
+    @for (row of grid; track $index){
     <div class="grid-row">
-        @for (tile of row; let colIndex = $index;track $index){
-        <app-tile></app-tile>
+        @for (tile of row;track $index){
+        <app-tile [tile]="tile"></app-tile>
         }
     </div>
     }

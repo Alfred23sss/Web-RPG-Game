@@ -1,4 +1,5 @@
-import { Component, Input, HostListener } from '@angular/core';
+import { Component, HostListener, Input } from '@angular/core';
+import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ToolService } from '@app/services/tool.service';
 
 @Component({
@@ -8,40 +9,81 @@ import { ToolService } from '@app/services/tool.service';
     styleUrls: ['./tile.component.scss'],
 })
 export class TileComponent {
-    @Input() id: string = '';
-    @Input() imageSrc: string = `assets/images/clay.png`;
-    @Input() isOccupied: boolean = false;
-    @Input() type: string = 'default';
-    @Input() isOpen: boolean = true;
-
-    static isDragging = false;
+    static activeButton: number | null = null;
+    static doubleClicked = false;
+    @Input() tile!: Tile;
 
     constructor(private toolService: ToolService) {}
 
-    applyTool(): void {
-        const selectedTool = this.toolService.getSelectedTool();
-        if (selectedTool) {
-            this.imageSrc = selectedTool.image;
-            this.type = selectedTool.tool;
-            this.isOccupied = true;
-        }
-    }
+    @HostListener('mousedown', ['$event'])
+    onMouseDown(event: MouseEvent): void {
+        if (TileComponent.activeButton === null) {
+            TileComponent.activeButton = event.button;
 
-    @HostListener('mousedown')
-    onMouseDown(): void {
-        TileComponent.isDragging = true;
-        this.applyTool();
+            if (event.button === 2) {
+                this.removeTileType();
+            } else if (event.button === 0) {
+                this.applyTool();
+            }
+        }
     }
 
     @HostListener('mouseenter')
     onMouseEnter(): void {
-        if (TileComponent.isDragging) {
+        if (TileComponent.activeButton === 0) {
             this.applyTool();
+        } else if (TileComponent.activeButton === 2) {
+            this.removeTileType();
         }
     }
 
-    @HostListener('document:mouseup')
-    onMouseUp(): void {
-        TileComponent.isDragging = false;
+    @HostListener('contextmenu', ['$event'])
+    onRightClick(event: MouseEvent): void {
+        event.preventDefault();
+    }
+
+    @HostListener('document:mouseup', ['$event'])
+    onMouseUp(event: MouseEvent): void {
+        if (TileComponent.activeButton === event.button) {
+            TileComponent.activeButton = null;
+        }
+    }
+
+    private applyTool(): void {
+        if (TileComponent.activeButton !== 0) return;
+
+        const selectedTool = this.toolService.getSelectedTool();
+        if (selectedTool) {
+            if (selectedTool.tool === TileType.Door) {
+                if (this.tile.type !== TileType.Door) {
+                    this.tile.imageSrc = selectedTool.image;
+                    this.tile.type = selectedTool.tool;
+                    this.tile.isOpen = false;
+                } else {
+                    this.tile.isOpen = !this.tile.isOpen;
+                    if (this.tile.isOpen) {
+                        this.tile.imageSrc = ImageType.OpenDoor;
+                    } else {
+                        this.tile.imageSrc = ImageType.ClosedDoor;
+                    }
+                }
+            } else {
+                this.tile.imageSrc = selectedTool.image;
+                this.tile.type = selectedTool.tool;
+            }
+        }
+        // this.printGridServiceTest();
+    }
+
+    // private printGridServiceTest() {
+    //     const tileTest = this.gridService.getTile(0, 0);
+    //     // console.log(tileTest.type);
+    //     // console.log('in');
+    // }
+
+    private removeTileType(): void {
+        this.tile.imageSrc = ImageType.Default;
+        this.tile.type = TileType.Default;
+        this.tile.isOpen = false;
     }
 }
