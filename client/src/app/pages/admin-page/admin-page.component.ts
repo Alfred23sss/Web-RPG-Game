@@ -37,10 +37,14 @@ export class AdminPageComponent {
             this.gameService.updateCurrentGame(game);
         }
     }
-    toggleVisibility(name: string) {
+
+    toggleVisibility(name: string, event: Event) {
+        const inputElement = event.target as HTMLInputElement;
+        const isVisible = inputElement.checked;
         const game = this.gameService.getGameByName(name);
+
         if (game) {
-            game.isVisible = !game.isVisible;
+            game.isVisible = isVisible;
         }
     }
 }

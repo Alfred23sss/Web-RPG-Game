@@ -14,10 +14,7 @@
 
                 <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.name)">Modify Game</button>
                 <button class="button" (click)="deleteGame(game.name)">Delete</button>
-                <label>
-                    <input type="checkbox" [checked]="game.isVisible" 
-                    (change)="toggleVisibility(game.name)"/> Show Game
-                </label>
+                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.name, $event)" /> Show Game </label>
             </div>
         </li>
         }

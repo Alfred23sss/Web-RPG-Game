@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
+import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
@@ -52,7 +53,7 @@ fdescribe('AdminPageComponent', () => {
         expect(mockGameService.removeGame).not.toHaveBeenCalled();
     });
 
-    const testGame = {
+    const testGame: Game = {
         name: 'Test Game',
         isVisible: false,
         size: '15x15',
@@ -60,6 +61,7 @@ fdescribe('AdminPageComponent', () => {
         lastModified: new Date(),
         previewImage: 'image.jpg',
         description: 'Description Test',
+        grid: [],
     };
 
     it('checkbox should update game visibility to true when checked', () => {
