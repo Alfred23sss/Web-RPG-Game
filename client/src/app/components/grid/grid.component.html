@@ -1,9 +1,9 @@
 <div class="grid-container">
     <ul class="drop-area" cdkDropList (cdkDropListDropped)="drop($event)">
-        @for(row of grid; let rowIndex = $index;track $index){
+        @for (row of grid; track $index){
         <div class="grid-row">
-            @for (tile of row; let colIndex = $index;track $index){
-            <app-tile cdkDrag></app-tile>
+            @for (tile of row;track $index){
+            <app-tile [tile]="tile" cdkDrag></app-tile>
             }
         </div>
         }

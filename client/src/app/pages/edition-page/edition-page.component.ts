@@ -5,8 +5,9 @@ import { FormsModule } from '@angular/forms';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
+import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game.service';
-
+import { GridService } from '@app/services/grid-service.service';
 @Component({
     selector: 'app-edition-page',
     templateUrl: './edition-page.component.html',
@@ -14,86 +15,49 @@ import { GameService } from '@app/services/game.service';
     imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent],
 })
 export class EditionPageComponent implements OnInit {
-    activeTool: string | null = null;
-    isDragging = false;
-    activeToolImage: string = '';
-    grid: string[][];
     gameName: string = '';
     gameDescription: string = '';
     selectedGameSize: string = '';
     selectedGameMode: string = '';
-    selectedGameSizeInt: number = 0;
+    game: Game | undefined;
+    tempGame: Game | undefined;
+    private originalGame: Game | undefined;
 
-    constructor(private gameService: GameService) {
-        this.grid = this.generateGrid(10, 10); // Générer une grille 10x10 par défaut
+    constructor(
+        private gameService: GameService,
+        private gridService: GridService,
+    ) {
+        const currentGame = this.gameService.getCurrentGame();
+        if (currentGame) {
+            this.tempGame = JSON.parse(JSON.stringify(currentGame));
+            this.originalGame = JSON.parse(JSON.stringify(currentGame));
+            this.gridService.setGrid(this.tempGame?.grid);
+        } else {
+            this.originalGame = undefined;
+        }
     }
 
     ngOnInit() {
+        // changer possiblement pour og game pr garder logique
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.selectedGameMode = currentGame.mode;
             this.selectedGameSize = currentGame.size;
-            this.selectedGameSizeInt = parseInt(this.selectedGameSize, 10);
         }
     }
 
-    selectTool(tool: string, imageURL: string): void {
-        this.activeTool = tool;
-        this.activeToolImage = imageURL;
+    reset() {
+        // a finir apres persistance etablie
+        this.gameService.updateCurrentGame(this.originalGame);
+        // this.cdr.detectChanges();
     }
 
-    isToolActive(tool: string): boolean {
-        return this.activeTool === tool;
+    save() {
+        // manque logique des contraintes de save
+        this.gameService.updateCurrentGame(this.tempGame);
     }
 
-    startDrag() {
-        this.isDragging = true;
+    empty() {
+        // empty
     }
-
-    stopDrag() {
-        this.isDragging = false;
-    }
-
-    dragItem(rowIndex: number, colIndex: number) {
-        if (this.isDragging) {
-            this.addItem(rowIndex, colIndex);
-        }
-    }
-
-    addItem(rowIndex: number, colIndex: number): void {
-        this.grid[rowIndex][colIndex] = this.activeToolImage;
-    }
-
-    getImageFromCell(rowIndex: number, colIndex: number): string {
-        const image = this.grid[rowIndex][colIndex];
-        return image ? `url(${image})` : `url(${'assets/images/clay.png'})`;
-    }
-
-    private generateGrid(rows: number, cols: number): string[][] {
-        return Array.from({ length: rows }, () => Array(cols).fill(''));
-    }
-
-    /*
-    Empty() {
-        for(int i = 0; i < row; ++i )
-        {
-            for(int i = 0; i < col; ++i )
-            {
-                grid = null;
-            }
-        }
-    }
-    */
-
-    /*
-    Reset() {
-        for(int i = 0; i < row; ++i )
-        {
-            for(int i = 0; i < col; ++i )
-            {
-                grid = grid sauvegarder;
-            }
-        }
-    }
-    */
 }

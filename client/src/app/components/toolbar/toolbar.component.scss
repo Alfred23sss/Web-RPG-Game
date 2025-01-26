@@ -1,12 +1,49 @@
 .tool {
-    width: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 5px 0;
+    padding: 5px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 10px; /* Rounded corners */
+    background: #003366; /* Slightly lighter blue */
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
 }
 
-img {
-    width: 100px;
+.tool:hover {
+    background: #006eff; /* Yellow-orange on hover */
+    color: #001f3f; /* Dark blue text color */
+    transform: scale(1.1); /* Slight zoom effect */
+    border-color: #ffd700; /* Bright yellow border */
 }
 
-span {
+.tool img {
+    height: 100px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 5px #ffd700); /* Glow effect for icons */
+}
+
+.tool span {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #ffd700; /* Yellow-orange text */
+}
+
+.tool.active {
+    border-color: #ffd700; /* Highlight the active tool */
+    background: #ffa500; /* Yellow-orange background */
+    color: #001f3f; /* Dark blue text color */
+}
+
+.header-item {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ffa500; /* Yellow-orange for the header */
+    margin-bottom: 20px;
+    text-shadow: 1px 1px 2px #000; /* Subtle shadow for depth */
 }
 
 .tool-container {

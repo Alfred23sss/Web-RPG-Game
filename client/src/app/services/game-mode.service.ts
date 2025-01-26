@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
+import { GameMode, GameSize } from '@app/interfaces/game';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameModeService {
-    private gameSize: string = '';
-    private gameMode: string = '';
+    private gameSize: string = GameSize.None;
+    private gameMode: string = GameMode.None;
 
     setGameMode(newGameMode: string) {
         this.gameMode = newGameMode;

@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { GameService } from '@app/services/game.service';
+import { GridService } from '@app/services/grid-service.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -16,6 +17,7 @@ export class AdminPageComponent {
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,
+        public gridService: GridService,
     ) {}
 
     openDialog() {
@@ -28,12 +30,21 @@ export class AdminPageComponent {
         }
     }
 
-    toggleVisibility(name: string) {
+    updateCurrentGame(name: string) {
         const game = this.gameService.getGameByName(name);
         if (game) {
-            game.isVisible = !game.isVisible;
+            // this.gridService.setGrid(game.grid);
+            this.gameService.updateCurrentGame(game);
+        }
+    }
+
+    toggleVisibility(name: string, event: Event) {
+        const inputElement = event.target as HTMLInputElement;
+        const isVisible = inputElement.checked;
+        const game = this.gameService.getGameByName(name);
+
+        if (game) {
+            game.isVisible = isVisible;
         }
     }
 }
-
-// si plusieurs games page scroll et l'image n'est pas la , FIX!!
