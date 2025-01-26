@@ -55,7 +55,7 @@ export class TileComponent {
         const selectedTool = this.toolService.getSelectedTool();
         if (selectedTool) {
             if (selectedTool.tool === TileType.Door) {
-                if (this.tile.type === TileType.Default) {
+                if (this.tile.type !== TileType.Door) {
                     this.tile.imageSrc = selectedTool.image;
                     this.tile.type = selectedTool.tool;
                     this.tile.isOpen = false;
