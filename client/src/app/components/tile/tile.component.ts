@@ -1,6 +1,5 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
-import { GridService } from '@app/services/grid-service.service';
 import { ToolService } from '@app/services/tool.service';
 
 @Component({
@@ -14,10 +13,7 @@ export class TileComponent {
     static doubleClicked = false;
     @Input() tile!: Tile;
 
-    constructor(
-        private toolService: ToolService,
-        private gridService: GridService,
-    ) {}
+    constructor(private toolService: ToolService) {}
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
@@ -76,14 +72,14 @@ export class TileComponent {
                 this.tile.type = selectedTool.tool;
             }
         }
-        this.printGridServiceTest();
+        // this.printGridServiceTest();
     }
 
-    private printGridServiceTest() {
-        let tileTest = this.gridService.getTile(0, 0);
-        console.log(tileTest.type);
-        console.log('in');
-    }
+    // private printGridServiceTest() {
+    //     const tileTest = this.gridService.getTile(0, 0);
+    //     // console.log(tileTest.type);
+    //     // console.log('in');
+    // }
 
     private removeTileType(): void {
         this.tile.imageSrc = ImageType.Default;
