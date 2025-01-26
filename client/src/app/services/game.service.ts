@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
 
@@ -7,6 +8,12 @@ import { Game } from '@app/interfaces/game';
 export class GameService {
     private games: Game[] = [];
     private currentGame: Game | undefined;
+
+    private readonly API_BASE_URL = 'http://localhost:3000/api';
+
+    constructor(private http: HttpClient) {
+        this.loadGamesFromServer();
+    }
 
     updateCurrentGame(game: Game | undefined) {
         this.currentGame = game;
@@ -28,6 +35,30 @@ export class GameService {
 
     getGames(): Game[] {
         return this.games;
+    }
+
+    loadGamesFromServer(): void {
+        this.http.get<Game[]>(`${this.API_BASE_URL}/game`).subscribe({
+            next: (fetchedGames) => {
+                this.games = fetchedGames;
+            },
+            error: (err) => {
+                console.error('Error fetching games from server:', err);
+            },
+        });
+        console.log(this.games);
+    }
+
+    saveGame(gameToAdd: Game) {
+        this.http.post<Game>(`${this.API_BASE_URL}/game`, gameToAdd).subscribe({
+            next: (createdGame) => {
+                this.games.push(createdGame);
+            },
+            error: (err) => {
+                console.error('Error adding game to server:', err);
+            },
+        });
+        console.log('saved');
     }
 
     getGameByName(name: string): Game | undefined {

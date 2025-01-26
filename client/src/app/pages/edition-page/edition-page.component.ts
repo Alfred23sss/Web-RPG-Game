@@ -54,7 +54,10 @@ export class EditionPageComponent implements OnInit {
 
     save() {
         // manque logique des contraintes de save
-        this.gameService.updateCurrentGame(this.tempGame);
+        // this.gameService.updateCurrentGame(this.tempGame);
+        if (this.tempGame) {
+            this.gameService.saveGame(this.tempGame);
+        }
     }
 
     empty() {

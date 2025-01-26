@@ -9,6 +9,9 @@ import { ExampleService } from '@app/services/example/example.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { GameController } from './controllers/game/game.controller';
+import { Game, gameSchema } from './model/database/game';
+import { GameService } from './services/game/game.service';
 
 @Module({
     imports: [
@@ -21,8 +24,9 @@ import { MongooseModule } from '@nestjs/mongoose';
             }),
         }),
         MongooseModule.forFeature([{ name: Course.name, schema: courseSchema }]),
+        MongooseModule.forFeature([{ name: Game.name, schema: gameSchema }]),
     ],
-    controllers: [CourseController, DateController, ExampleController],
-    providers: [ChatGateway, CourseService, DateService, ExampleService, Logger],
+    controllers: [CourseController, DateController, ExampleController, GameController],
+    providers: [ChatGateway, CourseService, DateService, ExampleService, Logger, GameService],
 })
 export class AppModule {}
