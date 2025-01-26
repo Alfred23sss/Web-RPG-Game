@@ -7,6 +7,9 @@ import { Component } from '@angular/core';
     styleUrls: ['./item.component.scss'],
 })
 export class ItemComponent {
+    id: string = '';
     imageSrc: string = '';
+    imageSrcGrey: string = '';
     name: string = '';
+    itemCounter: number = 0;
 }
