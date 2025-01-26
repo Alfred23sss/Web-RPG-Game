@@ -16,7 +16,7 @@
                 <button class="button" (click)="deleteGame(game.name)">Delete</button>
                 <label>
                     <input type="checkbox" [checked]="game.isVisible" 
-                    (change)="toggleVisibility(game.name, $event)"/> Show Game
+                    (change)="toggleVisibility(game.name)"/> Show Game
                 </label>
             </div>
         </li>
