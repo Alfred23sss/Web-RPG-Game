@@ -1,22 +1,52 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, MaxLength } from 'class-validator';
-import { GAME_NAME_MAX_LENGTH } from './game.dto.constants';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+
+//Explication: Permet de verifier que Game est bel et bien la bonne structure
+
+export class TileDto {
+    @ApiProperty()
+    @IsString()
+    value: string;
+
+    @ApiProperty()
+    @IsBoolean()
+    isActive: boolean;
+}
 
 export class CreateGameDto {
-    @ApiProperty({ maxLength: GAME_NAME_MAX_LENGTH })
+    @ApiProperty()
     @IsString()
-    @MaxLength(GAME_NAME_MAX_LENGTH)
     name: string;
 
     @ApiProperty()
     @IsString()
-    teacher: string;
+    size: string;
 
     @ApiProperty()
     @IsString()
-    subjectCode: string;
+    mode: string;
 
     @ApiProperty()
-    @IsNumber()
-    credits: number;
+    @IsDate()
+    @Type(() => Date)
+    lastModified: Date;
+
+    @ApiProperty()
+    @IsBoolean()
+    isVisible: boolean;
+
+    @ApiProperty()
+    @IsUrl()
+    previewImage: string;
+
+    @ApiProperty()
+    @IsString()
+    description: string;
+
+    @ApiProperty({ type: () => [[TileDto]], required: false })
+    @ValidateNested({ each: true })
+    @Type(() => TileDto)
+    @IsOptional()
+    grid?: TileDto[][];
 }

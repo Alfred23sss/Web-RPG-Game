@@ -1,25 +1,57 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString, MaxLength } from 'class-validator';
-import { GAME_NAME_MAX_LENGTH } from './game.dto.constants';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+
+export class TileDto {
+    @ApiProperty()
+    @IsString()
+    value: string;
+
+    @ApiProperty()
+    @IsBoolean()
+    isActive: boolean;
+}
 
 export class UpdateGameDto {
-    @ApiProperty({ maxLength: GAME_NAME_MAX_LENGTH, required: false })
+    @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
-    @MaxLength(GAME_NAME_MAX_LENGTH)
     name?: string;
 
     @ApiProperty({ required: false })
     @IsOptional()
     @IsString()
-    teacher?: string;
-
-    @ApiProperty()
-    @IsString()
-    subjectCode: string;
+    size?: string;
 
     @ApiProperty({ required: false })
     @IsOptional()
-    @IsNumber()
-    credits?: number;
+    @IsString()
+    mode?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsDate()
+    @Type(() => Date)
+    lastModified?: Date;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsBoolean()
+    isVisible?: boolean;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsUrl()
+    previewImage?: string;
+
+    @ApiProperty({ required: false })
+    @IsOptional()
+    @IsString()
+    description?: string;
+
+    @ApiProperty({ type: () => [[TileDto]], required: false })
+    @ValidateNested({ each: true })
+    @Type(() => TileDto)
+    @IsOptional()
+    grid?: TileDto[][];
 }

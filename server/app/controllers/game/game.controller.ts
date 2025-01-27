@@ -20,7 +20,7 @@ export class GameController {
         description: 'Return NOT_FOUND http status when request fails',
     })
     @Get('/')
-    async allCourses(@Res() response: Response) {
+    async allGames(@Res() response: Response) {
         try {
             const allGames = await this.gameService.getAllGames();
             response.status(HttpStatus.OK).json(allGames);
@@ -36,16 +36,15 @@ export class GameController {
     @ApiNotFoundResponse({
         description: 'Return NOT_FOUND http status when request fails',
     })
-    @Get('/:subjectCode')
-    async subjectCode(@Param('subjectCode') subjectCode: string, @Res() response: Response) {
-        try {
-            const course = await this.gameService.getCourse(subjectCode);
-            response.status(HttpStatus.OK).json(course);
-        } catch (error) {
-            response.status(HttpStatus.NOT_FOUND).send(error.message);
-        }
-    }
-
+    // @Get('/:subjectCode')
+    // async subjectCode(@Param('subjectCode') subjectCode: string, @Res() response: Response) {
+    //     try {
+    //         const course = await this.gameService.getGame(subjectCode);
+    //         response.status(HttpStatus.OK).json(course);
+    //     } catch (error) {
+    //         response.status(HttpStatus.NOT_FOUND).send(error.message);
+    //     }
+    // }
     @ApiCreatedResponse({
         description: 'Add new course',
     })
@@ -53,9 +52,9 @@ export class GameController {
         description: 'Return NOT_FOUND http status when request fails',
     })
     @Post('/')
-    async addCourse(@Body() gameDto: CreateGameDto, @Res() response: Response) {
+    async addGame(@Body() gameDto: CreateGameDto, @Res() response: Response) {
         try {
-            await this.gameService.addCourse(gameDto);
+            await this.gameService.addGame(gameDto);
             response.status(HttpStatus.CREATED).send();
         } catch (error) {
             response.status(HttpStatus.NOT_FOUND).send(error.message);
@@ -72,7 +71,7 @@ export class GameController {
     @Patch('/')
     async modifyCourse(@Body() gameDto: UpdateGameDto, @Res() response: Response) {
         try {
-            await this.gameService.modifyCourse(gameDto);
+            await this.gameService.modifyGame(gameDto);
             response.status(HttpStatus.OK).send();
         } catch (error) {
             response.status(HttpStatus.NOT_FOUND).send(error.message);
@@ -88,43 +87,8 @@ export class GameController {
     @Delete('/:subjectCode')
     async deleteCourse(@Param('subjectCode') subjectCode: string, @Res() response: Response) {
         try {
-            await this.gameService.deleteCourse(subjectCode);
+            await this.gameService.deleteGame(subjectCode);
             response.status(HttpStatus.OK).send();
-        } catch (error) {
-            response.status(HttpStatus.NOT_FOUND).send(error.message);
-        }
-    }
-
-    @ApiOkResponse({
-        description: 'Get a specific course teacher',
-        type: String,
-    })
-    @ApiNotFoundResponse({
-        description: 'Return NOT_FOUND http status when request fails',
-    })
-    @Get('/teachers/code/:subjectCode')
-    async getCourseTeacher(@Param('subjectCode') subjectCode: string, @Res() response: Response) {
-        try {
-            const teacher = await this.gameService.getCourseTeacher(subjectCode);
-            response.status(HttpStatus.OK).json(teacher);
-        } catch (error) {
-            response.status(HttpStatus.NOT_FOUND).send(error.message);
-        }
-    }
-
-    @ApiOkResponse({
-        description: 'Get specific teacher courses',
-        type: Game,
-        isArray: true,
-    })
-    @ApiNotFoundResponse({
-        description: 'Return NOT_FOUND http status when request fails',
-    })
-    @Get('/teachers/name/:name')
-    async getCoursesByTeacher(@Param('name') name: string, @Res() response: Response) {
-        try {
-            const games = await this.gameService.getCoursesByTeacher(name);
-            response.status(HttpStatus.OK).json(games);
         } catch (error) {
             response.status(HttpStatus.NOT_FOUND).send(error.message);
         }

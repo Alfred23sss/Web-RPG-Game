@@ -41,12 +41,12 @@ export class GameService {
         this.http.get<Game[]>(`${this.API_BASE_URL}/game`).subscribe({
             next: (fetchedGames) => {
                 this.games = fetchedGames;
+                console.log(this.games);
             },
             error: (err) => {
                 console.error('Error fetching games from server:', err);
             },
         });
-        console.log(this.games);
     }
 
     saveGame(gameToAdd: Game) {
