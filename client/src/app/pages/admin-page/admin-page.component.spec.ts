@@ -5,7 +5,7 @@ import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
-fdescribe('AdminPageComponent', () => {
+describe('AdminPageComponent', () => {
     let mockGameService: jasmine.SpyObj<GameService>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
     let component: AdminPageComponent;

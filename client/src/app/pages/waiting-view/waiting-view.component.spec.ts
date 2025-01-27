@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { WaitingViewComponent } from './waiting-view.component';
 
-fdescribe('WaitingViewComponent', () => {
+describe('WaitingViewComponent', () => {
     let component: WaitingViewComponent;
     let fixture: ComponentFixture<WaitingViewComponent>;
 

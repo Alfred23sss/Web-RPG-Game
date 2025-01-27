@@ -6,7 +6,7 @@ import { GameModeService } from '@app/services/game-mode.service';
 import { GameService } from '@app/services/game.service';
 import { PopUpComponent } from './pop-up.component';
 
-fdescribe('PopUpComponent', () => {
+describe('PopUpComponent', () => {
     let component: PopUpComponent;
     let fixture: ComponentFixture<PopUpComponent>;
 
