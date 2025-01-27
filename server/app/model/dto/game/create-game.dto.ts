@@ -1,17 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsBoolean, IsDate, IsOptional, IsString, IsUrl, ValidateNested } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsDate, IsOptional, IsString, ValidateNested } from 'class-validator';
 
 //Explication: Permet de verifier que Game est bel et bien la bonne structure
 
 export class TileDto {
     @ApiProperty()
     @IsString()
-    value: string;
+    id: string; // Replace `value` with `id`
+
+    @ApiProperty()
+    @IsString()
+    imageSrc: string; // Add `imageSrc`
 
     @ApiProperty()
     @IsBoolean()
-    isActive: boolean;
+    isOccupied: boolean; // Replace `isActive` with `isOccupied`
+
+    @ApiProperty()
+    @IsString()
+    type: string; // Add `type`
+
+    @ApiProperty()
+    @IsBoolean()
+    isOpen: boolean; // Add `isOpen`
 }
 
 export class CreateGameDto {
@@ -29,7 +41,7 @@ export class CreateGameDto {
 
     @ApiProperty()
     @IsDate()
-    @Type(() => Date)
+    @Transform(({ value }) => new Date(value))
     lastModified: Date;
 
     @ApiProperty()
@@ -37,7 +49,7 @@ export class CreateGameDto {
     isVisible: boolean;
 
     @ApiProperty()
-    @IsUrl()
+    @IsString()
     previewImage: string;
 
     @ApiProperty()

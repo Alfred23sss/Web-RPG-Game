@@ -50,6 +50,7 @@ export class GameService {
     }
 
     saveGame(gameToAdd: Game) {
+        console.log('Sending game data:', gameToAdd);
         this.http.post<Game>(`${this.API_BASE_URL}/game`, gameToAdd).subscribe({
             next: (createdGame) => {
                 this.games.push(createdGame);

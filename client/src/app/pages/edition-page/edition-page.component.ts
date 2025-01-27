@@ -8,6 +8,7 @@ import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game.service';
 import { GridService } from '@app/services/grid-service.service';
+
 @Component({
     selector: 'app-edition-page',
     templateUrl: './edition-page.component.html',
@@ -55,6 +56,7 @@ export class EditionPageComponent implements OnInit {
     save() {
         // manque logique des contraintes de save
         // this.gameService.updateCurrentGame(this.tempGame);
+        console.log(this.tempGame);
         if (this.tempGame) {
             this.gameService.saveGame(this.tempGame);
         }

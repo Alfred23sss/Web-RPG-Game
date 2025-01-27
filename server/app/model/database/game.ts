@@ -6,57 +6,27 @@ import { Document } from 'mongoose';
 
 export type GameDocument = Game & Document;
 
-export enum GameMode {
-    Classic = 'Classic',
-    CTF = 'CTF',
-    None = '',
-}
-
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
-}
-
-export enum TileType {
-    Water = 'water',
-    Ice = 'ice',
-    Wall = 'wall',
-    Door = 'door',
-    Default = 'default',
-}
-
-export enum ImageType {
-    Water = 'assets/images/water.png',
-    Wall = 'assets/images/wall.png',
-    OpenDoor = 'assets/images/porte-ouverte.png',
-    ClosedDoor = 'assets/images/porte-ferme.png',
-    Ice = 'assets/images/ice.png',
-    Default = 'assets/images/clay.png',
-}
-
 @Schema()
 export class Tile {
     @ApiProperty()
     @Prop({ required: true })
-    id: string;
-
-    @ApiProperty()
-    @Prop({ type: String, enum: ImageType, required: true })
-    imageSrc: ImageType;
+    id: string; // Replace `value` with `id`
 
     @ApiProperty()
     @Prop({ required: true })
-    isOccupied: boolean;
-
-    @ApiProperty({ enum: TileType })
-    @Prop({ type: String, enum: TileType, required: true })
-    type: TileType;
+    imageSrc: string; // Add `imageSrc`
 
     @ApiProperty()
     @Prop({ required: true })
-    isOpen: boolean;
+    isOccupied: boolean; // Replace `isActive` with `isOccupied`
+
+    @ApiProperty()
+    @Prop({ required: true })
+    type: string; // Add `type`
+
+    @ApiProperty()
+    @Prop({ required: true })
+    isOpen: boolean; // Add `isOpen`
 }
 
 export const TileSchema = SchemaFactory.createForClass(Tile);
@@ -67,13 +37,13 @@ export class Game {
     @Prop({ required: true })
     name: string;
 
-    @ApiProperty({ enum: GameSize })
-    @Prop({ type: String, enum: GameSize, required: true })
-    size: GameSize;
+    @ApiProperty()
+    @Prop({ required: true })
+    size: string;
 
-    @ApiProperty({ enum: GameMode })
-    @Prop({ type: String, enum: GameMode, required: true })
-    mode: GameMode;
+    @ApiProperty()
+    @Prop({ required: true })
+    mode: string;
 
     @ApiProperty()
     @Prop({ required: true })
@@ -85,21 +55,25 @@ export class Game {
 
     @ApiProperty()
     @Prop({ required: true })
-    previewImage: string; // path to image
+    previewImage: string;
 
     @ApiProperty()
     @Prop({ required: true })
     description: string;
 
-    @ApiProperty({
-        type: () => [[Tile]],
-        isArray: true,
+    @ApiProperty({ type: () => [[Tile]], required: false })
+    @Prop({
+        type: [[TileSchema]],
         required: false,
+        default: [],
+        validate: {
+            validator: (grid: Tile[][]) => Array.isArray(grid) && grid.every((row) => Array.isArray(row)),
+            message: 'Grid must be a 2D array of tiles',
+        },
     })
-    @Prop({ type: [[Tile]], required: false })
     @ValidateNested({ each: true })
     @Type(() => Tile)
-    grid?: Tile[][]; // Tile grid (optional)
+    grid?: Tile[][];
 }
 
 export const gamesSchema = SchemaFactory.createForClass(Game);
