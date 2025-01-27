@@ -12,7 +12,7 @@ describe('AdminPageComponent', () => {
     let fixture: ComponentFixture<AdminPageComponent>;
 
     beforeEach(async () => {
-        mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName']);
+        mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName', 'updateCurrentGame']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
         await TestBed.configureTestingModule({
             imports: [AdminPageComponent],
@@ -80,6 +80,14 @@ describe('AdminPageComponent', () => {
         component.toggleVisibility(testGame.name, event);
 
         expect(testGame.isVisible).toBeFalse();
+    });
+
+    it('should call updateCurrentGame when updateCurrentGame is called with a game', () => {
+        const gameName = 'Test Game';
+        mockGameService.getGameByName.and.returnValue(testGame);
+
+        component.updateCurrentGame(gameName);
+        expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(testGame);
     });
 
     it('openDialog should open the dialog with PopUpComponent', () => {
