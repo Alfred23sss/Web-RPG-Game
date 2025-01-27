@@ -56,7 +56,7 @@ fdescribe('AdminPageComponent', () => {
     const testGame: Game = {
         name: 'Test Game',
         isVisible: false,
-        size: '15x15',
+        size: '15',
         mode: 'Singleplayer',
         lastModified: new Date(),
         previewImage: 'image.jpg',

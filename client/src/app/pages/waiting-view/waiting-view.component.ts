@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
+const MIN_VALUE = 1000;
+const RANGE = 9000;
+
 @Component({
     selector: 'app-waiting-view',
     templateUrl: './waiting-view.component.html',
@@ -13,6 +16,6 @@ export class WaitingViewComponent implements OnInit {
     }
 
     generateAccessCode() {
-        this.accessCode = Math.floor(1000 + Math.random() * 9000).toString();
+        this.accessCode = Math.floor(MIN_VALUE + Math.random() * RANGE).toString();
     }
 }
