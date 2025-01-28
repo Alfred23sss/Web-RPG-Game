@@ -1,6 +1,7 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { ItemDragService } from '@app/services/ItemDrag.service';
 import { ItemComponent } from '../item/item.component';
 
 @Component({
@@ -12,13 +13,15 @@ import { ItemComponent } from '../item/item.component';
 })
 export class ItemBarComponent {
     @Input() itemCount: number = 4;
-    activeItem: ItemComponent | null = null;
+    activeItem: ItemComponent | undefined = undefined;
     items: ItemComponent[] = [];
+
+    constructor(private itemDragService: ItemDragService) {}
 
     ngOnInit() {
         this.items = [
             { id: '0', name: 'lightning', imageSrc: 'assets/images/Lightning.png', imageSrcGrey: 'assets/images/lightning-grey.png', itemCounter: 1 },
-            { id: '1', name: 'potion', imageSrc: 'assets/images/potion.png', imageSrcGrey: 'assets/images/potion-grey.png', itemCounter: 1 },
+            { id: '1', name: 'potion', imageSrc: 'assets/images/potion.png', imageSrcGrey: 'assets/images/spikes.png', itemCounter: 1 },
             { id: '2', name: 'spikes', imageSrc: 'assets/images/spikes.png', imageSrcGrey: 'assets/images/spikes-grey.png', itemCounter: 1 },
             { id: '3', name: 'stop', imageSrc: 'assets/images/stop.png', imageSrcGrey: 'assets/images/stop-grey.png', itemCounter: 1 },
             { id: '4', name: 'home', imageSrc: 'assets/images/home.png', imageSrcGrey: 'assets/images/home-grey.png', itemCounter: 1 },
@@ -41,7 +44,12 @@ export class ItemBarComponent {
     }
 
     selectObject(item: ItemComponent): void {
-        this.activeItem = item;
+        this.itemDragService.setSelectedItem(item);
+        this.activeItem = this.itemDragService.getSelectedItem();
+    }
+
+    removeObject(): void {
+        this.itemDragService.setSelectedItem(undefined);
     }
 
     isDragDisabled(item: ItemComponent): boolean {
