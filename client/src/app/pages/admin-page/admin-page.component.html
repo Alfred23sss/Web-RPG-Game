@@ -6,7 +6,9 @@
         <li class="game-item">
             <div class="game-preview">
                 <!-- <img [src]="game.gr" matTooltip="{{ game.description }}" /> -->
-                <app-grid [grid]="game?.grid"></app-grid>
+                <div class="app-grid-wrapper">
+                    <app-grid [grid]="game?.grid"></app-grid>
+                </div>
             </div>
             <div class="game-info">
                 <h3>{{ game.name }}</h3>

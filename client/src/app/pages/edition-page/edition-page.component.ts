@@ -19,9 +19,9 @@ export class EditionPageComponent implements OnInit {
     gameDescription: string = '';
     selectedGameSize: string = '';
     selectedGameMode: string = '';
-    game: Game | undefined;
-    tempGame: Game | undefined;
-    private originalGame: Game | undefined;
+    game: Game;
+    tempGame: Game;
+    private originalGame: Game;
 
     constructor(
         private gameService: GameService,
@@ -32,13 +32,12 @@ export class EditionPageComponent implements OnInit {
             this.tempGame = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
             this.gridService.setGrid(this.tempGame?.grid);
-        } else {
-            this.originalGame = undefined;
         }
     }
 
     ngOnInit() {
         // changer possiblement pour og game pr garder logique
+        this.gameService.fetchGames();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.selectedGameMode = currentGame.mode;
@@ -55,6 +54,7 @@ export class EditionPageComponent implements OnInit {
     save() {
         // manque logique des contraintes de save
         this.gameService.updateCurrentGame(this.tempGame);
+        // window.location.reload();
     }
 
     empty() {

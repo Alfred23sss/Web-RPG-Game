@@ -55,7 +55,7 @@ export class PopUpComponent {
             };
 
             // this.gridService.setGrid(newGame.grid);
-            this.gameService.addGame(newGame);
+            // this.gameService.addGame(newGame);
             this.gameService.updateCurrentGame(newGame);
             this.closePopup();
             this.router.navigate(['/edition']);

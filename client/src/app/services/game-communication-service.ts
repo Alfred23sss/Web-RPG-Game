@@ -16,6 +16,6 @@ export class GameCommunicationService {
     }
 
     saveGame(gameToAdd: Game): Observable<Game> {
-        return this.http.post<Game>(`${this.apiUrl}/game`, gameToAdd);
+        return this.http.post<Game>(`${this.apiUrl}`, gameToAdd);
     }
 }
