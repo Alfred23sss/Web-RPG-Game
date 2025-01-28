@@ -2,17 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { Game } from '@app/interfaces/game';
-import { GameService } from '@app/services/game.service';
+import { GameService } from '@app/services/game/game.service';
 import { AdminPageComponent } from './admin-page.component';
 
-fdescribe('AdminPageComponent', () => {
+describe('AdminPageComponent', () => {
     let mockGameService: jasmine.SpyObj<GameService>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
 
     beforeEach(async () => {
-        mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName']);
+        mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName', 'updateCurrentGame']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
         await TestBed.configureTestingModule({
             imports: [AdminPageComponent],
@@ -56,7 +56,7 @@ fdescribe('AdminPageComponent', () => {
     const testGame: Game = {
         name: 'Test Game',
         isVisible: false,
-        size: '15x15',
+        size: '15',
         mode: 'Singleplayer',
         lastModified: new Date(),
         previewImage: 'image.jpg',
@@ -80,6 +80,14 @@ fdescribe('AdminPageComponent', () => {
         component.toggleVisibility(testGame.name, event);
 
         expect(testGame.isVisible).toBeFalse();
+    });
+
+    it('should call updateCurrentGame when updateCurrentGame is called with a game', () => {
+        const gameName = 'Test Game';
+        mockGameService.getGameByName.and.returnValue(testGame);
+
+        component.updateCurrentGame(gameName);
+        expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(testGame);
     });
 
     it('openDialog should open the dialog with PopUpComponent', () => {

@@ -11,7 +11,6 @@ import { AdminPageComponent } from '@app/pages/admin-page/admin-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
 import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { environment } from './environments/environment';
-import { EditPageComponent } from '@app/pages/edit-page/edit-page.component';
 import { WaitingViewComponent } from '@app/pages/waiting-view/waiting-view.component';
 
 if (environment.production) {
@@ -25,7 +24,6 @@ const routes: Routes = [
     { path: 'edition', component: EditionPageComponent },
     { path: 'create', component: CreatePageComponent },
     { path: 'admin', component: AdminPageComponent },
-    { path: 'edit', component: EditPageComponent },
     { path: 'material', component: MaterialPageComponent },
     { path: 'waiting-view', component: WaitingViewComponent },
     { path: '**', redirectTo: '/home' },

@@ -1,6 +1,6 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
-import { ToolService } from '@app/services/tool.service';
+import { ToolService } from '@app/services/tool/tool.service';
 
 @Component({
     selector: 'app-tile',
