@@ -1,14 +1,15 @@
 import { CdkDrag } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
-import { ItemComponent } from '../item/item.component';
+import { Component, Input, OnInit } from '@angular/core';
+import { ItemComponent } from '@app/components/item/item.component';
+
 @Component({
     selector: 'app-item-bar',
     templateUrl: './item-bar.component.html',
     styleUrls: ['./item-bar.component.scss'],
     imports: [CommonModule, CdkDrag],
 })
-export class ItemBarComponent {
+export class ItemBarComponent implements OnInit {
     @Input() itemCount: number = 4;
     activeItem: ItemComponent | null = null;
     items: ItemComponent[] = [];

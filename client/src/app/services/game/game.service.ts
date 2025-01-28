@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
+import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { tap } from 'rxjs';
-import { GameCommunicationService } from './game-communication.service';
 
 @Injectable({
     providedIn: 'root',
