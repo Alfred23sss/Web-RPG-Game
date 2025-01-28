@@ -10,14 +10,36 @@ export class GameService {
 
     async createGame(game: CreateGameDto): Promise<GameDocument> {
         try {
+            const existingGame = await this.gameModel.findOne({ name: game.name });
+            if (existingGame) {
+                throw new Error(`Game with name "${game.name}" already exists.`);
+            }
+
             return await this.gameModel.create(game);
         } catch (error) {
-            throw new Error(`Failed to add game: ${error.message}`);
+            throw new Error(`Failed to create game: ${error.message}`);
+        }
+    }
+
+    async updateGame(gameName: string, data: Partial<Game>): Promise<GameDocument> {
+        try {
+            const existingGame = await this.gameModel.findOneAndUpdate({ name: gameName }, { $set: data }, { new: true, runValidators: true });
+            if (!existingGame) {
+                throw new Error(`Game with name "${gameName}" not found.`);
+            }
+
+            return existingGame;
+        } catch (error) {
+            throw new Error(`Failed to update game: ${error.message}`);
         }
     }
 
     async getGames(): Promise<Game[]> {
-        return await this.gameModel.find({});
+        try {
+            return await this.gameModel.find({});
+        } catch (error) {
+            throw new Error(`Failed to fetch games: ${error.message}`);
+        }
     }
 
     async getGameByName(gameName: string): Promise<GameDocument> {
