@@ -1,10 +1,14 @@
 <div class="container">
     <h1 class="header-item">Game Manager</h1>
+    <!-- @if(games && games.length > 0) { -->
     <ul class="game-list">
-        @for(game of gameService.getGames(); let index = $index; track $index) {
+        @for(game of games; let index = $index; track $index) {
         <li class="game-item">
             <div class="game-preview">
                 <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
+                <!-- <div class="app-grid-wrapper">
+                    <app-grid [grid]="game?.grid"></app-grid>
+                </div> -->
             </div>
             <div class="game-info">
                 <h3>{{ game.name }}</h3>
@@ -19,5 +23,9 @@
         </li>
         }
     </ul>
+    <!-- } @else {
+    <p>No games available. Please add a game.</p>
+    } -->
+
     <button class="create-button" (click)="openDialog()">Create Game</button>
 </div>

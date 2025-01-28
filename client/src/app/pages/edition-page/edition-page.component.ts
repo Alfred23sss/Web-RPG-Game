@@ -19,21 +19,20 @@ export class EditionPageComponent implements OnInit {
     gameDescription: string = '';
     selectedGameSize: string = '';
     selectedGameMode: string = '';
-    game: Game | undefined;
-    tempGame: Game | undefined;
-    private originalGame: Game | undefined;
+    game: Game;
+    tempGame: Game;
+    private originalGame: Game;
 
     constructor(
         private gameService: GameService,
         private gridService: GridService,
     ) {
+        this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.tempGame = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
             this.gridService.setGrid(this.tempGame?.grid);
-        } else {
-            this.originalGame = undefined;
         }
     }
 
@@ -55,6 +54,10 @@ export class EditionPageComponent implements OnInit {
     save() {
         // manque logique des contraintes de save
         this.gameService.updateCurrentGame(this.tempGame);
+        this.gameService.saveGame(this.tempGame);
+        // wait???
+        this.gameService.fetchGames();
+        // window.location.reload();
     }
 
     empty() {

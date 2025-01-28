@@ -1,24 +1,33 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { GridComponent } from '@app/components/grid/grid.component';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { GameService } from '@app/services/game/game.service';
-import { GridService } from '@app/services/grid/grid-service.service';
+import { Game } from '@app/interfaces/game';
+import { GameService } from '@app/services/game.service';
+import { GridService } from '@app/services/grid-service.service';
 
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
     styleUrls: ['./admin-page.component.scss'],
-    imports: [RouterLink, CommonModule, MatTooltipModule],
+    imports: [RouterLink, CommonModule, MatTooltipModule, GridComponent],
 })
-export class AdminPageComponent {
+export class AdminPageComponent implements OnInit {
+    games: Game[];
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,
         public gridService: GridService,
     ) {}
+
+    ngOnInit(): void {
+        this.gameService.fetchGames().subscribe((response) => {
+            this.games = response;
+        });
+    }
 
     openDialog() {
         this.dialogRef.open(PopUpComponent);

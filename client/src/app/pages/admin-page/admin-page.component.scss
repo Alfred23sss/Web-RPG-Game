@@ -37,8 +37,8 @@
     cursor: pointer;
     font-weight: bold;
     transition:
-    transform 0.2s ease,
-    background-color 0.2s ease;
+        transform 0.2s ease,
+        background-color 0.2s ease;
 }
 
 .create-button:hover {
@@ -105,6 +105,29 @@
     overflow-y: auto;
 }
 
+.game-preview {
+    position: relative;
+    width: 100%; /* Allow the preview to take up available space */
+    height: auto; /* Allow height to adjust based on content */
+    overflow: visible; /* Ensure nothing is clipped */
+    border: 1px solid #ccc; /* Optional: Add a border for clarity */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.app-grid-wrapper {
+    width: auto; /* Allow the wrapper to adjust to the grid's size */
+    height: auto; /* Allow the wrapper to adjust to the grid's size */
+    display: inline-block; /* Ensure it wraps around the grid */
+    overflow: visible; /* Ensure nothing is clipped */
+}
+
+app-grid {
+    display: block; /* Ensure the grid behaves as a block element */
+    pointer-events: none; /* Makes it behave more like an image */
+    object-fit: cover; /* Ensures the content fits well (if needed) */
+}
 .game-list::-webkit-scrollbar {
     width: 8px;
 }
