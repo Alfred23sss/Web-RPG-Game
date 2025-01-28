@@ -61,10 +61,10 @@ export class Game {
     @Prop({ required: true })
     description: string;
 
-    @ApiProperty({ type: () => [[Tile]], required: false })
+    @ApiProperty({ type: () => [[Tile]], required: true })
     @Prop({
         type: [[TileSchema]],
-        required: false,
+        required: true,
         default: [],
         validate: {
             validator: (grid: Tile[][]) => Array.isArray(grid) && grid.every((row) => Array.isArray(row)),
