@@ -1,6 +1,6 @@
 import { TileType } from '@app/model/database/game';
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
 import { IsArray, IsBoolean, IsDate, IsEnum, IsString } from 'class-validator';
 
 export class TileDto {
@@ -30,9 +30,9 @@ export class CreateGameDto {
     @IsString()
     mode: string;
 
-    @ApiProperty({ type: Date })
+    @ApiProperty()
     @IsDate()
-    @Type(() => Date)
+    @Transform(({ value }) => new Date(value))
     lastModified: Date;
 
     @IsBoolean()
