@@ -1,4 +1,4 @@
-import { ItemComponent } from "@app/components/item/item.component";
+import { Item } from '@app/interfaces/item';
 
 export enum TileType {
     Water = 'water',
@@ -23,5 +23,5 @@ export interface Tile {
     isOccupied: boolean;
     type: TileType;
     isOpen: boolean;
-    item?: ItemComponent;
+    item?: Item;
 }

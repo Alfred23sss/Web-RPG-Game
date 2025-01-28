@@ -1,5 +1,5 @@
 import { Component, HostListener, Input } from '@angular/core';
-import { ItemComponent } from '@app/components/item/item.component';
+import { Item } from '@app/interfaces/item';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { ToolService } from '@app/services/tool.service';
@@ -57,9 +57,12 @@ export class TileComponent {
     @HostListener('drop', ['$event'])
     onDrop(event: DragEvent): void {
         event.preventDefault();
-        const selectedItem = this.itemDragService.getSelectedItem();
-        if (selectedItem) {
-            this.applyItem(selectedItem);
+        if (!this.tile.item) {
+            const selectedItem = this.itemDragService.getSelectedItem()?.clone();
+
+            if (selectedItem) {
+                this.applyItem(selectedItem);
+            }
         }
     }
 
@@ -68,10 +71,12 @@ export class TileComponent {
         event.preventDefault();
     }
 
-    private applyItem(item: ItemComponent): void {
+    private applyItem(item: Item): void {
         console.log('Item applied:', item, this.tile.id);
         this.itemDragService.modifyItemCounter();
-        this.tile.item = this.itemDragService.getSelectedItem();
+        this.tile.item = item;
+        console.log(this.tile.item);
+        console.log(this.tile);
     }
 
     private applyTool(): void {

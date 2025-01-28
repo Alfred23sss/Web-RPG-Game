@@ -6,3 +6,16 @@ img {
     height: 100%;
     object-fit: contain;
 }
+
+.base-image {
+    width: 100%; /* Ajuste selon tes besoins */
+}
+
+.overlay-image {
+    position: absolute;
+    top: 0; /* Ajuste la position */
+    left: 0;
+    width: 100%; /* Ajuste la taille */
+    height: 100%;
+    pointer-events: none; /* Permet de ne pas interférer avec les événements de l'image de base */
+}

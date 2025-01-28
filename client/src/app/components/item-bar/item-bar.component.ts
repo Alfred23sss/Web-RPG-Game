@@ -1,8 +1,8 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
+import { Item } from '@app/interfaces/item';
 import { ItemDragService } from '@app/services/ItemDrag.service';
-import { ItemComponent } from '../item/item.component';
 
 @Component({
     selector: 'app-item-bar',
@@ -13,8 +13,8 @@ import { ItemComponent } from '../item/item.component';
 })
 export class ItemBarComponent {
     @Input() itemCount: number = 4;
-    activeItem: ItemComponent | undefined = undefined;
-    items: ItemComponent[] = [];
+    activeItem: Item | undefined = undefined;
+    items: Item[] = [];
 
     constructor(private itemDragService: ItemDragService) {}
 
@@ -26,13 +26,13 @@ export class ItemBarComponent {
             { id: '3', name: 'stop', imageSrc: 'assets/images/stop.png', imageSrcGrey: 'assets/images/stop-grey.png', itemCounter: 1 },
             { id: '4', name: 'home', imageSrc: 'assets/images/home.png', imageSrcGrey: 'assets/images/home-grey.png', itemCounter: 1 },
             { id: '5', name: 'question', imageSrc: 'assets/images/question.png', imageSrcGrey: 'assets/images/question-grey.png', itemCounter: 1 },
-        ].map((data) => Object.assign(new ItemComponent(), data));
+        ].map((data) => Object.assign(new Item(), data));
 
         const flag = false;
 
         if (flag) {
             this.items.push(
-                Object.assign(new ItemComponent(), {
+                Object.assign(new Item(), {
                     id: '6',
                     name: 'flag',
                     imageSrc: 'assets/images/flag.png',
@@ -43,7 +43,7 @@ export class ItemBarComponent {
         }
     }
 
-    selectObject(item: ItemComponent): void {
+    selectObject(item: Item): void {
         this.itemDragService.setSelectedItem(item);
         this.activeItem = this.itemDragService.getSelectedItem();
     }
@@ -52,7 +52,7 @@ export class ItemBarComponent {
         this.itemDragService.setSelectedItem(undefined);
     }
 
-    isDragDisabled(item: ItemComponent): boolean {
+    isDragDisabled(item: Item): boolean {
         return item.itemCounter <= 0;
     }
 }

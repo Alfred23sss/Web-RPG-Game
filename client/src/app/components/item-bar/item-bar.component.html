@@ -3,7 +3,11 @@
     <span>Attributes</span>
     @for (item of items; track item.id) {
     <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()">
+        @if(item.itemCounter > 0) {
         <img draggable="true" [src]="item.imageSrc || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
+        } @else {
+        <img draggable="false" [src]="item.imageSrcGrey || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
+        }
     </div>
     }
 </div>

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Tile } from '@app/interfaces/tile';
-import { ItemComponent } from '../item/item.component';
 
 @Component({
     selector: 'app-grid',
@@ -14,5 +13,4 @@ import { ItemComponent } from '../item/item.component';
 })
 export class GridComponent {
     @Input() grid: Tile[][] | undefined = [];
-    @Input() items: ItemComponent[] = []; // Items passed from item-bar
 }

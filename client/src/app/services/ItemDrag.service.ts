@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
-import { ItemComponent } from '@app/components/item/item.component'; // Make sure the correct path is imported
+import { Item } from '@app/interfaces/item'; // Make sure the correct path is imported
 
 @Injectable({
     providedIn: 'root',
 })
 export class ItemDragService {
-    private selectedItem: ItemComponent | undefined = undefined;
+    private selectedItem: Item | undefined = undefined;
 
-    setSelectedItem(item: ItemComponent | undefined): void {
+    setSelectedItem(item: Item | undefined): void {
         this.selectedItem = item;
     }
 
-    getSelectedItem(): ItemComponent | undefined {
+    getSelectedItem(): Item | undefined {
         return this.selectedItem;
     }
 
