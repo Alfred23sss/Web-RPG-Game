@@ -1,6 +1,9 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ToolbarComponent } from './toolbar.component';
+import { ToolService } from '@app/services/tool/tool.service';
+import { ImageType, TileType } from '@app/interfaces/tile';
+import { of } from 'rxjs';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;
