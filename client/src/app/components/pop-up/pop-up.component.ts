@@ -2,9 +2,9 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game';
-import { GameModeService } from '@app/services/game-mode.service';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid-service.service';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid-service.service';
 
 @Component({
     selector: 'app-pop-up',

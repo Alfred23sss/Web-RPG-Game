@@ -25,7 +25,6 @@ const routes: Routes = [
     { path: 'edition', component: EditionPageComponent },
     { path: 'create', component: CreatePageComponent },
     { path: 'admin', component: AdminPageComponent },
-    { path: 'edit', component: EditPageComponent },
     { path: 'material', component: MaterialPageComponent },
     { path: 'waiting-view', component: WaitingViewComponent },
     { path: '**', redirectTo: '/home' },

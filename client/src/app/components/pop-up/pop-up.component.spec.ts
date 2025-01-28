@@ -2,11 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GameModeService } from '@app/services/game-mode.service';
-import { GameService } from '@app/services/game.service';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
+import { GameService } from '@app/services/game/game.service';
 import { PopUpComponent } from './pop-up.component';
 
-fdescribe('PopUpComponent', () => {
+describe('PopUpComponent', () => {
     let component: PopUpComponent;
     let fixture: ComponentFixture<PopUpComponent>;
 
@@ -62,27 +62,33 @@ fdescribe('PopUpComponent', () => {
     });
 
     const games = [
-        { input: 'small', gameSize: '10x10' },
-        { input: 'medium', gameSize: '15x15' },
-        { input: 'large', gameSize: '20x20' },
+        { input: 'small', gameSize: '10' },
+        { input: 'medium', gameSize: '15' },
+        { input: 'large', gameSize: '20' },
     ];
 
     games.forEach(({ input, gameSize }) => {
         it(`confirm should create a new game with size ${gameSize} and bring to the edition page`, () => {
             mockGameModeService.getGameSize.and.returnValue(input);
             mockGameModeService.getGameMode.and.returnValue('Classic');
-
             component.confirm();
 
-            const testGame = {
-                name: jasmine.stringMatching(/^NewGame_\d+$/),
-                size: gameSize,
-                mode: 'Classic',
-                isVisible: true,
-            };
+            expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(
+                jasmine.objectContaining({
+                    size: gameSize,
+                    mode: 'Classic',
+                    isVisible: true,
+                    description: jasmine.stringMatching(`A Classic game on a ${input} map.`),
+                }),
+            );
 
-            expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(jasmine.objectContaining(testGame));
-            expect(mockGameService.addGame).toHaveBeenCalledWith(jasmine.objectContaining(testGame));
+            expect(mockGameService.addGame).toHaveBeenCalledWith(
+                jasmine.objectContaining({
+                    size: gameSize,
+                    mode: 'Classic',
+                }),
+            );
+
             expect(mockRouter.navigate).toHaveBeenCalledWith(['/edition']);
         });
     });
