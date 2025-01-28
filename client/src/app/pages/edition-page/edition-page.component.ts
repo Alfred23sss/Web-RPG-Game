@@ -27,6 +27,7 @@ export class EditionPageComponent implements OnInit {
         private gameService: GameService,
         private gridService: GridService,
     ) {
+        this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.tempGame = JSON.parse(JSON.stringify(currentGame));
@@ -37,7 +38,6 @@ export class EditionPageComponent implements OnInit {
 
     ngOnInit() {
         // changer possiblement pour og game pr garder logique
-        this.gameService.fetchGames();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.selectedGameMode = currentGame.mode;

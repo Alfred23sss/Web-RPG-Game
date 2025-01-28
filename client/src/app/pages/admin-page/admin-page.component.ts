@@ -24,7 +24,7 @@ export class AdminPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.gameService.fetchGames();
+        this.gameService.fetchGames().subscribe();
     }
 
     openDialog() {

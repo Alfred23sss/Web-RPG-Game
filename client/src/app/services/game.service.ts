@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
+import { tap } from 'rxjs';
 import { GameCommunicationService } from './game-communication.service';
 
 @Injectable({
@@ -10,16 +11,14 @@ export class GameService {
     private currentGame: Game | undefined;
 
     constructor(private gameCommunicationService: GameCommunicationService) {}
-
+    // subscribe in component
+    // game.service.ts
     fetchGames() {
-        this.gameCommunicationService.getAllGames().subscribe(
-            (response) => {
-                console.log('Received games:', response);
-                this.games = response;
-            },
-            (error) => {
-                console.error('Error fetching games:', error);
-            },
+        return this.gameCommunicationService.getAllGames().pipe(
+            tap((response) => {
+                console.log('Games fetched, updating games array in service:', response);
+                this.games = response; // Update the games array in the service
+            }),
         );
     }
 
