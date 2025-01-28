@@ -1,11 +1,18 @@
 <div class="grid-container">
-    <ul class="drop-area" cdkDropList (cdkDropListDropped)="drop($event)">
-        @for (row of grid; track $index){
+    <div class="drop-area" cdkDropList id="grid-drop-area"  [cdkDropListConnectedTo]="['item-bar']" 
+    (cdkDropListDropped)="drop($event)">
+        @for (row of grid; track $index) {
         <div class="grid-row">
-            @for (tile of row;track $index){
-            <app-tile [tile]="tile" cdkDrag></app-tile>
+            @for (tile of row; track $index) {
+            <app-tile
+                [tile]="tile"
+                [ngClass]="{
+                    'invalid-drop': tile.type === 'wall' || tile.isOccupied,
+                    'valid-drop': tile.type !== 'wall' && !tile.isOccupied
+                }">
+            </app-tile>
             }
         </div>
         }
-    </ul>
+    </div>
 </div>

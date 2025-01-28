@@ -1,10 +1,24 @@
 <div class="Object-container">
     <h1 class="header-item">{{ activeItem?.name || 'None' }}</h1>
     <span>Attributes</span>
-    <div class="loop-container">
+    <div
+    class="loop-container"
+    cdkDropList
+    id="item-bar"
+    [cdkDropListData]="items"
+    [cdkDropListConnectedTo]="['grid-drop-area']"
+>
         @for (item of items; track item.id) {
-        <div class="item">
-            <img src="assets/images/question.png" alt="a{{ item.id }}" cdkDrag />
+        <div 
+            class="item" 
+            (click)="selectObject(item)" 
+            cdkDrag 
+            [cdkDragData]="item" 
+            [cdkDragDisabled]="isDragDisabled(item)">
+            <img 
+                [src]="item.imageSrc || 'assets/images/default.png'" 
+                [alt]="item.name || 'Item'" 
+            />
         </div>
         }
     </div>
