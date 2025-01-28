@@ -118,26 +118,6 @@ export class CharacterFormComponent {
     }
 
     closePopup() {
-        // this.resetSelections();
         this.dialogRef.close();
     }
-
-    // private resetSelections() {
-    //     this.characterName = '';
-    //     this.selectedAvatar = '';
-    //     this.attributes = {
-    //         vitality: 4,
-    //         speed: 4,
-    //         attack: 4,
-    //         defense: 4,
-    //     };
-    //     this.bonusAssigned = {
-    //         vitality: false,
-    //         speed: false,
-    //     };
-    //     this.diceAssigned = {
-    //         attack: false,
-    //         defense: false,
-    //     };
-    // }
 }
