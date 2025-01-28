@@ -16,7 +16,7 @@ import { GridService } from '@app/services/grid-service.service';
     imports: [RouterLink, CommonModule, MatTooltipModule, GridComponent],
 })
 export class AdminPageComponent implements OnInit {
-    games: Game[] = this.gameService.games;
+    games: Game[];
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,
@@ -24,7 +24,9 @@ export class AdminPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.gameService.fetchGames().subscribe();
+        this.gameService.fetchGames().subscribe((response) => {
+            this.games = response;
+        });
     }
 
     openDialog() {
