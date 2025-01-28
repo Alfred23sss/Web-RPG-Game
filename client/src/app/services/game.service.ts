@@ -1,20 +1,37 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
-import { Observable } from 'rxjs';
+import { GameCommunicationService } from './game-communication-service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameService {
-    private apiUrl = 'http://localhost:3000/api/games';
-    private games: Game[] = [];
+    games: Game[];
     private currentGame: Game | undefined;
 
-    constructor(private http: HttpClient) {}
+    constructor(private gameCommunicationService: GameCommunicationService) {}
 
-    getAllGames(): Observable<Game[]> {
-        return this.http.get<Game[]>(this.apiUrl);
+    fetchGames() {
+        this.gameCommunicationService.getAllGames().subscribe(
+            (response) => {
+                console.log('Received games:', response);
+                this.games = response;
+            },
+            (error) => {
+                console.error('Error fetching games:', error);
+            },
+        );
+    }
+
+    saveGame(gameToAdd: Game) {
+        this.gameCommunicationService.saveGame(gameToAdd).subscribe({
+            next: (createdGame) => {
+                console.log('Game successfully saved:', createdGame);
+            },
+            error: (err) => {
+                console.error('Error saving game:', err);
+            },
+        });
     }
 
     updateCurrentGame(game: Game | undefined) {

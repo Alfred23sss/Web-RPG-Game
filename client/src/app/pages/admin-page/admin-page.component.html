@@ -5,7 +5,8 @@
         @for(game of games; let index = $index; track $index) {
         <li class="game-item">
             <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
+                <!-- <img [src]="game.gr" matTooltip="{{ game.description }}" /> -->
+                <app-grid [grid]="game?.grid"></app-grid>
             </div>
             <div class="game-info">
                 <h3>{{ game.name }}</h3>

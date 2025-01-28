@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { GridComponent } from '@app/components/grid/grid.component';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game.service';
@@ -12,10 +13,10 @@ import { GridService } from '@app/services/grid-service.service';
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
     styleUrls: ['./admin-page.component.scss'],
-    imports: [RouterLink, CommonModule, MatTooltipModule],
+    imports: [RouterLink, CommonModule, MatTooltipModule, GridComponent],
 })
 export class AdminPageComponent implements OnInit {
-    games: Game[] = [];
+    games: Game[] = this.gameService.games;
     loading: boolean = true;
     constructor(
         private dialogRef: MatDialog,
@@ -24,21 +25,7 @@ export class AdminPageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.fetchGames();
-    }
-    fetchGames(): void {
-        this.loading = true;
-        this.gameService.getAllGames().subscribe(
-            (response) => {
-                console.log('Received games:', response);
-                this.games = response;
-                this.loading = false;
-            },
-            (error) => {
-                console.error('Error fetching games:', error);
-                this.loading = false;
-            },
-        );
+        this.gameService.fetchGames();
     }
 
     openDialog() {
