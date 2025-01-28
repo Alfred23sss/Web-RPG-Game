@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GameModeService } from '@app/services/game-mode.service';
-import { GameService } from '@app/services/game.service';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
+import { GameService } from '@app/services/game/game.service';
 import { PopUpComponent } from './pop-up.component';
 
 describe('PopUpComponent', () => {

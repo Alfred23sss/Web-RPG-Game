@@ -4,8 +4,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid-service.service';
+import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid-service.service';
 
 @Component({
     selector: 'app-admin-page',

@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
-import { GameModeService } from './game-mode.service';
 import { GameMode, GameSize } from '@app/interfaces/game';
+import { GameModeService } from './game-mode.service';
 
 describe('GameModeService', () => {
     let service: GameModeService;
