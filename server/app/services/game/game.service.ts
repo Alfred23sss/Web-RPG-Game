@@ -1,5 +1,6 @@
 import { Game, GameDocument } from '@app/model/database/game';
 import { CreateGameDto } from '@app/model/dto/game/create-game.dto';
+import { UpdateGameDto } from '@app/model/dto/game/update-game.dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -21,14 +22,23 @@ export class GameService {
         }
     }
 
-    async updateGame(gameName: string, data: Partial<Game>): Promise<GameDocument> {
+    async updateGame(gameName: string, gameDto: Partial<UpdateGameDto>): Promise<GameDocument> {
         try {
-            const existingGame = await this.gameModel.findOneAndUpdate({ name: gameName }, { $set: data }, { new: true, runValidators: true });
-            if (!existingGame) {
+            // Ensure gameDto has valid data, and no unnecessary fields are passed
+            const sanitizedGameDto = Object.fromEntries(Object.entries(gameDto).filter(([_, v]) => v !== undefined));
+
+            // Perform the update
+            const updatedGame = await this.gameModel.findOneAndUpdate(
+                { name: gameName },
+                { $set: sanitizedGameDto },
+                { new: true, runValidators: true },
+            );
+
+            if (!updatedGame) {
                 throw new Error(`Game with name "${gameName}" not found.`);
             }
 
-            return existingGame;
+            return updatedGame;
         } catch (error) {
             throw new Error(`Failed to update game: ${error.message}`);
         }

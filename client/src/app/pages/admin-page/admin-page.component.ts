@@ -17,7 +17,6 @@ import { GridService } from '@app/services/grid-service.service';
 })
 export class AdminPageComponent implements OnInit {
     games: Game[] = this.gameService.games;
-    loading: boolean = true;
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,

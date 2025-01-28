@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
-import { GameCommunicationService } from './game-communication-service';
+import { GameCommunicationService } from './game-communication.service';
 
 @Injectable({
     providedIn: 'root',
@@ -24,19 +24,35 @@ export class GameService {
     }
 
     saveGame(gameToAdd: Game) {
-        this.gameCommunicationService.saveGame(gameToAdd).subscribe({
-            next: (createdGame) => {
-                console.log('Game successfully saved:', createdGame);
-            },
-            error: (err) => {
-                console.error('Error saving game:', err);
-            },
-        });
+        if (this.getGameByName(gameToAdd.name)) {
+            this.gameCommunicationService.updateGame(gameToAdd.name, gameToAdd).subscribe({
+                next: (savedGame) => {
+                    console.log('Game successfully updated', savedGame);
+                    const index = this.games.findIndex((game) => game.name === gameToAdd.name);
+                    if (index !== -1) {
+                        this.games[index] = savedGame; // Replace old game with updated one
+                    }
+                },
+                error: (err) => {
+                    console.error('Error updating game:', err);
+                },
+            });
+        } else {
+            this.gameCommunicationService.saveGame(gameToAdd).subscribe({
+                next: (createdGame) => {
+                    console.log('Game successfully saved:', createdGame);
+                    this.addGame(createdGame);
+                },
+                error: (err) => {
+                    console.error('Error saving game:', err);
+                },
+            });
+        }
     }
 
     updateCurrentGame(game: Game) {
         this.currentGame = game;
-        this.saveGame(game);
+        // this.saveGame(game);
 
         // if (this.currentGame) {
         //     const gameIndex = this.games.findIndex((g) => g.name === this.currentGame?.name);

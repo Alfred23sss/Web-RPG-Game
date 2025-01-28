@@ -21,6 +21,7 @@ export class TileDto {
 }
 
 export class CreateGameDto {
+    // possible upodateGameDTo a faire
     @IsString()
     name: string;
 

@@ -16,6 +16,11 @@ export class GameCommunicationService {
     }
 
     saveGame(gameToAdd: Game): Observable<Game> {
-        return this.http.post<Game>(`${this.apiUrl}`, gameToAdd);
+        return this.http.post<Game>(`${this.apiUrl}/create`, gameToAdd);
+    }
+
+    updateGame(gameName: string, game: Partial<Game>) {
+        console.log('Updating game with payload:', game);
+        return this.http.put<Game>(`${this.apiUrl}/update/${gameName}`, game);
     }
 }
