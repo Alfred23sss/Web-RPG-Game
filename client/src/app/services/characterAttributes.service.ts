@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
     providedIn: 'root',
 })
-export class CharacterAttributsService {
+export class CharacterAttributesService {
     assignBonus(attributeKey: string, attributes: any, bonusAssigned: any): void {
         if (!bonusAssigned[attributeKey]) {
             attributes[attributeKey] += 2;
