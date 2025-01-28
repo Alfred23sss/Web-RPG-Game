@@ -4,20 +4,18 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { Router, RouterModule } from '@angular/router';
 import { CharacterFormComponent } from './character-form.component';
 
+const DEFAULT_ATTRIBUTE_VALUE = 4;
+const BONUS_ATTRIBUTE_VALUE = 6;
+
 describe('CharacterFormComponent', () => {
     let component: CharacterFormComponent;
     let fixture: ComponentFixture<CharacterFormComponent>;
     let mockDialogRef: MatDialogRef<CharacterFormComponent>;
-    let mockRouter: any;
+    let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(async () => {
-        mockDialogRef = {
-            close: jasmine.createSpy('close'),
-        } as any;
-
-        mockRouter = {
-            navigate: jasmine.createSpy('navigate'),
-        };
+        mockDialogRef = jasmine.createSpyObj('MatDialog', ['close']);
+        mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         await TestBed.configureTestingModule({
             imports: [FormsModule, MatDialogModule, RouterModule.forRoot([]), CharacterFormComponent],
@@ -37,10 +35,10 @@ describe('CharacterFormComponent', () => {
     });
 
     it('should initialize attributes correctly', () => {
-        expect(component.attributes.vitality).toBe(4);
-        expect(component.attributes.speed).toBe(4);
-        expect(component.attributes.attack).toBe(4);
-        expect(component.attributes.defense).toBe(4);
+        expect(component.attributes.vitality).toBe(DEFAULT_ATTRIBUTE_VALUE);
+        expect(component.attributes.speed).toBe(DEFAULT_ATTRIBUTE_VALUE);
+        expect(component.attributes.attack).toBe(DEFAULT_ATTRIBUTE_VALUE);
+        expect(component.attributes.defense).toBe(DEFAULT_ATTRIBUTE_VALUE);
     });
 
     it('should call assignBonus for vitality from attributesList', () => {
@@ -84,15 +82,15 @@ describe('CharacterFormComponent', () => {
 
     it('should assign a bonus and reset the other attribute', () => {
         component.assignBonus('vitality');
-        expect(component.attributes.vitality).toBe(6);
+        expect(component.attributes.vitality).toBe(BONUS_ATTRIBUTE_VALUE);
         expect(component.bonusAssigned.vitality).toBe(true);
-        expect(component.attributes.speed).toBe(4);
+        expect(component.attributes.speed).toBe(DEFAULT_ATTRIBUTE_VALUE);
         expect(component.bonusAssigned.speed).toBe(false);
 
         component.assignBonus('speed');
-        expect(component.attributes.speed).toBe(6);
+        expect(component.attributes.speed).toBe(BONUS_ATTRIBUTE_VALUE);
         expect(component.bonusAssigned.speed).toBe(true);
-        expect(component.attributes.vitality).toBe(4);
+        expect(component.attributes.vitality).toBe(DEFAULT_ATTRIBUTE_VALUE);
         expect(component.bonusAssigned.vitality).toBe(false);
     });
 
@@ -115,7 +113,8 @@ describe('CharacterFormComponent', () => {
         component.diceAssigned.attack = false;
         component.submitCharacter();
         expect(window.alert).toHaveBeenCalledWith(
-            'Please ensure you have:\n- Assigned +2 to one attribute (Vitality or Speed).\n- Assigned a D6 to one attribute (Attack or Defense).\n- Entered a name and selected an avatar.',
+            // eslint-disable-next-line max-len
+            'Please ensure you have:\n- Assigned +2 to Vitality or Speed.\n- Assigned a D6 to Attack or Defense.\n- Entered a name and selected an avatar.',
         );
     });
 

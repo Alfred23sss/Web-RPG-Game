@@ -112,7 +112,8 @@ export class CharacterFormComponent {
             this.router.navigate(['/waiting-view']);
         } else {
             alert(
-                'Please ensure you have:\n- Assigned +2 to one attribute (Vitality or Speed).\n- Assigned a D6 to one attribute (Attack or Defense).\n- Entered a name and selected an avatar.',
+                // eslint-disable-next-line max-len
+                'Please ensure you have:\n- Assigned +2 to Vitality or Speed.\n- Assigned a D6 to Attack or Defense.\n- Entered a name and selected an avatar.',
             );
         }
     }
