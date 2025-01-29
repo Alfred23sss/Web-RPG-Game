@@ -63,6 +63,7 @@ export class AdminPageComponent implements OnInit {
 
         if (game) {
             game.isVisible = isVisible;
+            this.gameService.saveGame(game);
         }
     }
 }

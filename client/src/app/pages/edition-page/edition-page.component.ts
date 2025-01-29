@@ -40,9 +40,10 @@ export class EditionPageComponent implements OnInit {
     }
 
     reset() {
-        // a finir apres persistance etablie
+        // manque logique des objets
         this.gameService.updateCurrentGame(this.originalGame);
-        // this.cdr.detectChanges();
+        this.gameService.saveGame(this.originalGame);
+        window.location.reload();
     }
 
     save() {
@@ -51,6 +52,7 @@ export class EditionPageComponent implements OnInit {
         this.tempGame.description = this.gameDescription;
         this.gameService.updateCurrentGame(this.tempGame);
         this.gameService.saveGame(this.tempGame);
+        window.location.reload();
     }
 
     empty() {
