@@ -9,59 +9,21 @@ import { tap } from 'rxjs';
 export class GameService {
     games: Game[];
     private currentGame: Game | undefined;
-
-    constructor(private gameCommunicationService: GameCommunicationService) {}
-    // subscribe in component
-    // game.service.ts
-    fetchGames() {
-        return this.gameCommunicationService.getAllGames().pipe(
-            tap((response) => {
-                console.log('Games fetched, updating games array in service:', response);
-                this.games = response; // Update the games array in the service
-            }),
-        );
-    }
-
-    saveGame(gameToAdd: Game) {
-        if (this.getGameByName(gameToAdd.name)) {
-            this.gameCommunicationService.updateGame(gameToAdd.name, gameToAdd).subscribe({
-                next: (savedGame) => {
-                    console.log('Game successfully updated', savedGame);
-                    const index = this.games.findIndex((game) => game.name === gameToAdd.name);
-                    if (index !== -1) {
-                        this.games[index] = savedGame; // Replace old game with updated one
-                    }
-                },
-                error: (err) => {
-                    console.error('Error updating game:', err);
-                },
-            });
-        } else {
-            this.gameCommunicationService.saveGame(gameToAdd).subscribe({
-                next: (createdGame) => {
-                    console.log('Game successfully saved:', createdGame);
-                    this.addGame(createdGame);
-                },
-                error: (err) => {
-                    console.error('Error saving game:', err);
-                },
-            });
-        }
+    constructor(private gameCommunicationService: GameCommunicationService) {
+        this.loadCurrentGame();
     }
 
     updateCurrentGame(game: Game) {
         this.currentGame = game;
-        // this.saveGame(game);
-
-        // if (this.currentGame) {
-        //     const gameIndex = this.games.findIndex((g) => g.name === this.currentGame?.name);
-        //     if (gameIndex !== -1) {
-        //         this.games[gameIndex] = this.currentGame;
-        //     }
-        // }
+        sessionStorage.setItem('currentGame', JSON.stringify(game));
     }
-    getCurrentGame() {
-        return this.currentGame;
+
+    deleteGame(id: string) {
+        return this.gameCommunicationService.deleteGame(id).pipe(
+            tap(() => {
+                this.removeGame(id);
+            }),
+        );
     }
 
     addGame(game: Game) {
@@ -72,11 +34,77 @@ export class GameService {
         return this.games;
     }
 
-    getGameByName(name: string): Game | undefined {
-        return this.games.find((game) => game.name === name);
+    getGameById(id: string): Game | undefined {
+        return this.games.find((game) => game.id === id);
     }
 
-    removeGame(name: string) {
-        this.games = this.games.filter((game) => game.name !== name);
+    removeGame(id: string) {
+        this.games = this.games.filter((game) => game.id !== id);
+    }
+
+    fetchGames() {
+        return this.gameCommunicationService.getAllGames().pipe(
+            tap((response) => {
+                console.log('Games fetched, updating games array in service:', response);
+                this.games = response;
+            }),
+        );
+    }
+
+    saveGame(gameToAdd: Game): void {
+        const existingGame = this.getGameById(gameToAdd.id);
+        if (existingGame) {
+            this.updateExistingGame(gameToAdd);
+        } else {
+            this.saveNewGame(gameToAdd);
+        }
+    }
+
+    getCurrentGame(): Game | undefined {
+        if (!this.currentGame) {
+            this.loadCurrentGame();
+        }
+        return this.currentGame;
+    }
+
+    clearCurrentGame() {
+        this.currentGame = undefined;
+        sessionStorage.removeItem('currentGame');
+    }
+
+    private loadCurrentGame() {
+        const savedGame = sessionStorage.getItem('currentGame');
+        if (savedGame) {
+            this.currentGame = JSON.parse(savedGame);
+        }
+    }
+
+    private updateExistingGame(gameToUpdate: Game): void {
+        this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
+            next: (updatedGame) => {
+                console.log('Game successfully updated:', updatedGame);
+
+                const index = this.games.findIndex((game) => game.id === gameToUpdate.id);
+                if (index !== -1) {
+                    this.games[index] = gameToUpdate;
+                }
+            },
+            error: (err) => {
+                console.error('Error updating game:', err);
+            },
+        });
+    }
+
+    private saveNewGame(gameToAdd: Game): void {
+        this.gameCommunicationService.saveGame(gameToAdd).subscribe({
+            next: (newGame) => {
+                console.log('Game successfully saved:', newGame);
+
+                this.addGame(gameToAdd);
+            },
+            error: (err) => {
+                console.error('Error saving game:', err);
+            },
+        });
     }
 }

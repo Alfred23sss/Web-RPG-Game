@@ -5,6 +5,7 @@ import { Game } from '@app/interfaces/game';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+import { v4 as uuidv4 } from 'uuid';
 
 @Component({
     selector: 'app-pop-up',
@@ -44,6 +45,7 @@ export class PopUpComponent {
         const gridSize = gameSize === 'small' ? small : gameSize === 'medium' ? medium : large;
         if (gameSize && gameMode) {
             const newGame: Game = {
+                id: uuidv4(), // verify if creation ok, maybe need specific function for id creation
                 name: `NewGame_${Math.floor(Date.now() / secondDivider) % secondModulo}`,
                 size: gameSize === 'small' ? '10' : gameSize === 'medium' ? '15' : '20',
                 mode: gameMode,
