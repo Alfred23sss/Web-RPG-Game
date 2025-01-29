@@ -4,6 +4,10 @@ import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 export class UpdateGameDto {
     @IsOptional()
     @IsString()
+    id: string;
+
+    @IsOptional()
+    @IsString()
     name?: string;
 
     @IsOptional()

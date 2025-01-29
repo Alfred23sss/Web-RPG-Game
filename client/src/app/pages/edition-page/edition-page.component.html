@@ -6,18 +6,18 @@
         <div class="game-info">
             <div class="info-title">
                 <label for="game-name">Nom du jeu :</label>
-                <input id="game-name" type="text" [(ngModel)]="gameName" placeholder="Entrez le nom du jeu" />
+                <input id="game-name" type="text" [(ngModel)]="gameName" placeholder="Entrez le nom du jeu"  required/>
             </div>
             <div class="info-title">
                 <label for="game-description">Description du jeu :</label>
-                <textarea id="game-description" [(ngModel)]="gameDescription" placeholder="Entrez une description du jeu"></textarea>
+                <textarea id="game-description" [(ngModel)]="gameDescription" placeholder="Entrez une description du jeu" required></textarea>
             </div>
         </div>
         <div class="page-container">
             <app-grid [grid]="tempGame.grid"></app-grid>
         </div>
         <div class="button-grid">
-            <button class="button" (click)="save()">Save</button>
+            <button class="button" (click)="save()">Save</button> 
             <button class="button" (click)="reset()">Reset</button>
             <button class="button">Empty</button>
         </div>

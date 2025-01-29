@@ -18,31 +18,24 @@ import { GridService } from '@app/services/grid/grid-service.service';
 export class EditionPageComponent implements OnInit {
     gameName: string = '';
     gameDescription: string = '';
-    selectedGameSize: string = '';
-    selectedGameMode: string = '';
-    game: Game;
     tempGame: Game;
     private originalGame: Game;
 
     constructor(
         private gameService: GameService,
         private gridService: GridService,
-    ) {
+    ) {}
+
+    ngOnInit() {
+        // changer possiblement pour og game pr garder logique
         this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.tempGame = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
             this.gridService.setGrid(this.tempGame?.grid);
-        }
-    }
-
-    ngOnInit() {
-        // changer possiblement pour og game pr garder logique
-        const currentGame = this.gameService.getCurrentGame();
-        if (currentGame) {
-            this.selectedGameMode = currentGame.mode;
-            this.selectedGameSize = currentGame.size;
+            this.gameName = this.tempGame.name;
+            this.gameDescription = this.tempGame.description;
         }
     }
 
@@ -54,11 +47,10 @@ export class EditionPageComponent implements OnInit {
 
     save() {
         // manque logique des contraintes de save
+        this.tempGame.name = this.gameName;
+        this.tempGame.description = this.gameDescription;
         this.gameService.updateCurrentGame(this.tempGame);
         this.gameService.saveGame(this.tempGame);
-        // wait???
-        this.gameService.fetchGames();
-        // window.location.reload();
     }
 
     empty() {

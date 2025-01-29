@@ -41,6 +41,10 @@ export const tileSchema = SchemaFactory.createForClass(Tile);
 export class Game {
     @ApiProperty()
     @Prop({ required: true })
+    id: string;
+
+    @ApiProperty()
+    @Prop({ required: true })
     name: string;
 
     @ApiProperty()

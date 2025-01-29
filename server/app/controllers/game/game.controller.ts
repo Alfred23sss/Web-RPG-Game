@@ -1,7 +1,7 @@
 import { CreateGameDto } from '@app/model/dto/game/create-game.dto';
 import { UpdateGameDto } from '@app/model/dto/game/update-game.dto';
 import { GameService } from '@app/services/game/game.service';
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
@@ -20,13 +20,26 @@ export class GameController {
         }
     }
 
-    @Put('update/:name')
-    async updateGame(@Param('name') gameName: string, @Body() game: Partial<UpdateGameDto>) {
+    @Put('update/:id')
+    async updateGame(@Param('id') id: string, @Body() game: Partial<UpdateGameDto>) {
         try {
-            await this.gameService.updateGame(gameName, game);
+            await this.gameService.updateGame(id, game);
             return { message: 'Game updated successfully' };
         } catch (error) {
             throw new HttpException({ message: 'Failed to update game', error: error.message }, HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Delete('delete/:id')
+    async deleteGame(@Param('id') id: string) {
+        try {
+            const result = await this.gameService.deleteGame(id);
+            if (!result) {
+                throw new HttpException(`Game with id ${id} not found`, HttpStatus.NOT_FOUND);
+            }
+            return { message: `Game with id ${id} deleted successfully` };
+        } catch (error) {
+            throw new HttpException({ message: 'Failed to delete game', error: error.message }, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -44,9 +57,9 @@ export class GameController {
     }
 
     @Get()
-    async getGame(@Body() gameName: string, @Res() response: Response) {
+    async getGame(@Body() id: string, @Res() response: Response) {
         try {
-            const game = await this.gameService.getGameByName(gameName);
+            const game = await this.gameService.getGameById(id);
             response.status(HttpStatus.OK).json(game);
         } catch (error) {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

@@ -22,25 +22,36 @@ export class GameService {
         }
     }
 
-    async updateGame(gameName: string, gameDto: Partial<UpdateGameDto>): Promise<GameDocument> {
+    async updateGame(id: string, gameDto: Partial<UpdateGameDto>): Promise<GameDocument> {
         try {
             // Ensure gameDto has valid data, and no unnecessary fields are passed
             const sanitizedGameDto = Object.fromEntries(Object.entries(gameDto).filter(([_, v]) => v !== undefined));
 
             // Perform the update
-            const updatedGame = await this.gameModel.findOneAndUpdate(
-                { name: gameName },
-                { $set: sanitizedGameDto },
-                { new: true, runValidators: true },
-            );
+            const updatedGame = await this.gameModel.findOneAndUpdate({ id }, { $set: sanitizedGameDto }, { new: true, runValidators: true });
 
             if (!updatedGame) {
-                throw new Error(`Game with name "${gameName}" not found.`);
+                throw new Error(`Game with id "${id}" not found.`);
             }
 
             return updatedGame;
         } catch (error) {
             throw new Error(`Failed to update game: ${error.message}`);
+        }
+    }
+
+    async deleteGame(id: string): Promise<boolean> {
+        try {
+            // Attempt to delete the game directly
+            const result = await this.gameModel.deleteOne({ id }).exec();
+
+            if (result.deletedCount > 0) {
+                return true;
+            } else {
+                throw new Error(`Game with id ${id} doesn't exist`);
+            }
+        } catch (error) {
+            throw new Error(`Failed to delete game: ${error.message}`);
         }
     }
 
@@ -52,8 +63,8 @@ export class GameService {
         }
     }
 
-    async getGameByName(gameName: string): Promise<GameDocument> {
-        const foundGame = await this.gameModel.findOne({ name: gameName });
+    async getGameById(id: string): Promise<GameDocument> {
+        const foundGame = await this.gameModel.findOne({ id });
         if (!foundGame) {
             throw new Error('Game not found');
         }
