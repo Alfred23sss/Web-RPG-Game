@@ -68,6 +68,7 @@ export class TileComponent {
 
     @HostListener('dragover', ['$event'])
     onDragOver(event: DragEvent): void {
+        console.log("debug");
         event.preventDefault();
     }
 
