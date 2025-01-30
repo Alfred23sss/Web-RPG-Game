@@ -7,12 +7,12 @@ export enum TileType {
 }
 
 export enum ImageType {
-    Water = 'assets/images/water.png',
-    Wall = 'assets/images/wall.png',
-    OpenDoor = 'assets/images/porte-ouverte.png',
-    ClosedDoor = 'assets/images/porte-ferme.png',
-    Ice = 'assets/images/ice.png',
-    Default = 'assets/images/clay.png',
+    Water = 'assets/tile-items/water.png',
+    Wall = 'assets/tile-items/wall.png',
+    OpenDoor = 'assets/tile-items/closed-door.png',
+    ClosedDoor = 'assets/tile-items/opened-door.png',
+    Ice = 'assets/tile-items/ice.png',
+    Default = 'assets/tile-items/clay.png',
 }
 
 export interface Tile {

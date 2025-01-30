@@ -27,7 +27,7 @@ export class EditionPageComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        // changer possiblement pour og game pr garder logique
+        // maybe change for og game to keep logic
         this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
@@ -40,13 +40,13 @@ export class EditionPageComponent implements OnInit {
     }
 
     reset() {
-        // a finir apres persistance etablie
+        // finish when persistence is done
         this.gameService.updateCurrentGame(this.originalGame);
         // this.cdr.detectChanges();
     }
 
     save() {
-        // manque logique des contraintes de save
+        // needs save logic
         this.tempGame.name = this.gameName;
         this.tempGame.description = this.gameDescription;
         this.gameService.updateCurrentGame(this.tempGame);

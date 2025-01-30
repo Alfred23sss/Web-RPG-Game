@@ -15,18 +15,18 @@ export class CharacterFormComponent {
     showForm = true;
 
     avatars: string[] = [
-        'assets/avatars/avatar1.png',
-        'assets/avatars/avatar2.png',
-        'assets/avatars/avatar3.png',
-        'assets/avatars/avatar4.png',
-        'assets/avatars/avatar5.png',
-        'assets/avatars/avatar6.png',
-        'assets/avatars/avatar7.png',
-        'assets/avatars/avatar8.png',
-        'assets/avatars/avatar9.png',
-        'assets/avatars/avatar10.png',
-        'assets/avatars/avatar11.png',
-        'assets/avatars/avatar12.png',
+        'assets/avatars/avatar_archer.png',
+        'assets/avatars/avatar_wizard.png',
+        'assets/avatars/avatar_barbarian.png',
+        'assets/avatars/avatar_assassin.png',
+        'assets/avatars/avatar_paladin.png',
+        'assets/avatars/avatar_druid.png',
+        'assets/avatars/avatar_ranger.png',
+        'assets/avatars/avatar_alchemist.png',
+        'assets/avatars/avatar_valkyrie.png',
+        'assets/avatars/avatar_bard.png',
+        'assets/avatars/avatar_wizard.png',
+        'assets/avatars/avatar_vampire.png',
     ];
 
     attributes = {
