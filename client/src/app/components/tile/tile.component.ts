@@ -26,7 +26,11 @@ export class TileComponent {
             TileComponent.activeButton = event.button;
 
             if (event.button === 2) {
-                this.removeTileType();
+                if(this.tile.item != undefined){
+                    this.removeTileObject();
+                }else{
+                    this.removeTileType();
+                }
             } else if (event.button === 0) {
                 this.applyTool();
             }
@@ -38,7 +42,12 @@ export class TileComponent {
         if (TileComponent.activeButton === 0) {
             this.applyTool();
         } else if (TileComponent.activeButton === 2) {
-            this.removeTileType();
+               if(this.tile.item != undefined){
+                    this.removeTileObject();
+                }
+                else{
+                    this.removeTileType();
+                }        
         }
     }
 
@@ -111,7 +120,13 @@ export class TileComponent {
     //     // console.log(tileTest.type);
     //     // console.log('in');
     // }
-
+    private removeTileObject(): void {
+        if (this.tile.item) {
+            this.tile.item = undefined;
+        } else {
+            console.log("No item to remove.");
+        }
+    }
     private removeTileType(): void {
         this.tile.imageSrc = ImageType.Default;
         this.tile.type = TileType.Default;
