@@ -4,6 +4,7 @@ export class Item {
     imageSrcGrey: string = '';
     name: string = '';
     itemCounter: number = 0;
+    originalReference?: Item;
 
     constructor(init?: Partial<Item>) {
         if (init) {
@@ -14,10 +15,11 @@ export class Item {
     clone(): Item {
         return new Item({
             ...this,
-            id: this.generateUniqueId(), // Ensure cloned item has a unique ID
+            id: this.generateUniqueId(),
+            originalReference: this,
         });
     }
-
+    
     private generateUniqueId(): string {
         return `${this.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
     }

@@ -67,13 +67,15 @@ export class TileComponent {
     onDrop(event: DragEvent): void {
         event.preventDefault();
         if (!this.tile.item) {
-            const selectedItem = this.itemDragService.getSelectedItem()?.clone();
-
+            const selectedItem = this.itemDragService.getSelectedItem();
+    
             if (selectedItem) {
-                this.applyItem(selectedItem);
+                const clonedItem = selectedItem.clone();
+                this.applyItem(clonedItem);
             }
         }
     }
+    
 
     @HostListener('dragover', ['$event'])
     onDragOver(event: DragEvent): void {
@@ -122,11 +124,13 @@ export class TileComponent {
     // }
     private removeTileObject(): void {
         if (this.tile.item) {
+            if (this.tile.item.originalReference) {
+                this.tile.item.originalReference.itemCounter++;
+            }
             this.tile.item = undefined;
-        } else {
-            console.log("No item to remove.");
-        }
+        } 
     }
+    
     private removeTileType(): void {
         this.tile.imageSrc = ImageType.Default;
         this.tile.type = TileType.Default;
