@@ -13,7 +13,7 @@ export class ScreenshotService {
         return this.captureElement(elementId);
     }
 
-    // Génère une preview optimisée (JPEG compressé) pour ameliorer performance
+    // Génère une preview optimisée (JPEG compressé) pour ameliorer performance peut baissser scale et quality si trop lent encore
     async generatePreview(elementId: string): Promise<string> {
         return this.captureElement(elementId, {
             scale: 0.8,
