@@ -47,6 +47,7 @@ export class ItemBarComponent {
     }
 
     selectObject(item: Item): void {
+        console.log("test");
         this.itemDragService.setSelectedItem(item);
         this.activeItem = this.itemDragService.getSelectedItem();
     }
