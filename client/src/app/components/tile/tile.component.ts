@@ -116,7 +116,7 @@ export class TileComponent {
                             this.tile.imageSrc = ImageType.ClosedDoor;
                         }}
                     else{
-                        console.log("Note: you can't open or close a door while an item is on the door")
+                        console.log("Please note that you can't open or close a door while an item is on the door")
                     }
                 }
             } else {
