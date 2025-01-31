@@ -7,6 +7,7 @@ import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 
 @Component({
@@ -24,6 +25,7 @@ export class EditionPageComponent implements OnInit {
     constructor(
         private gameService: GameService,
         private gridService: GridService,
+        private screenshotService: ScreenshotService,
     ) {}
 
     ngOnInit() {
@@ -45,12 +47,19 @@ export class EditionPageComponent implements OnInit {
         // this.cdr.detectChanges();
     }
 
-    save() {
-        // manque logique des contraintes de save
-        this.tempGame.name = this.gameName;
-        this.tempGame.description = this.gameDescription;
-        this.gameService.updateCurrentGame(this.tempGame);
-        this.gameService.saveGame(this.tempGame);
+    async save() {
+        try {
+            const previewUrl = await this.screenshotService.generatePreview('game-preview');
+
+            this.tempGame.name = this.gameName;
+            this.tempGame.description = this.gameDescription;
+            this.tempGame.previewImage = previewUrl;
+
+            this.gameService.updateCurrentGame(this.tempGame);
+            this.gameService.saveGame(this.tempGame);
+        } catch (error) {
+            console.error('Erreur lors de la capture:', error);
+        }
     }
 
     empty() {
