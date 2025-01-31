@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/interfaces/item';
-import { Tile } from '@app/interfaces/tile'; // Ensure correct path
+import { Tile } from '@app/interfaces/tile'; 
 
 @Injectable({
     providedIn: 'root',
 })
 export class ItemDragService {
     private selectedItem: Item | undefined = undefined;
-    private previousTile: Tile | undefined = undefined; // Store the previous tile
+    private previousTile: Tile | undefined = undefined; 
 
     setSelectedItem(item: Item | undefined, tile: Tile | undefined): void {
         this.selectedItem = item;
-        this.previousTile = tile; // Store the tile where the item was originally placed
+        this.previousTile = tile; 
     }
 
     getSelectedItem(): Item | undefined {

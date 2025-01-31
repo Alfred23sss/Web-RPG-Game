@@ -76,12 +76,30 @@ export class ItemBarComponent {
 
     onDrop(event: DragEvent, item: Item): void {
         event.preventDefault();
-        console.log('debug');
+    
+        const draggedItem = this.itemDragService.getSelectedItem();
+        const previousTile = this.itemDragService.getPreviousTile();
+    
+        if (!draggedItem) {
+            return;
+        }
+        if (draggedItem.name !== item.name) {
+            return;
+        }
+        if (draggedItem.id === item.id){
+            return;
+        }
+
         item.itemCounter++;
+
+        if (previousTile && previousTile.item === draggedItem) {
+            previousTile.item = undefined;
+        }
+        this.itemDragService.clearSelection();
     }
+    
 
     onDragOver(event: DragEvent): void {
-        console.log('Item being dragged');
         event.preventDefault();
     }
 }
