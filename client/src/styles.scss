@@ -67,9 +67,12 @@ $indigo-pink-theme: mat.m2-define-light-theme(
 
 html,
 body {
+    display: block;
     height: 100%;
-}
-body {
     margin: 0;
+    background-image: url('/assets/game-decorations/background.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
 }

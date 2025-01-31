@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
+import { AvatarType } from '@app/interfaces/images';
 
 @Component({
     selector: 'app-character-form',
@@ -14,20 +15,7 @@ export class CharacterFormComponent {
     selectedAvatar = '';
     showForm = true;
 
-    avatars: string[] = [
-        'assets/avatars/avatar_archer.png',
-        'assets/avatars/avatar_wizard.png',
-        'assets/avatars/avatar_barbarian.png',
-        'assets/avatars/avatar_assassin.png',
-        'assets/avatars/avatar_paladin.png',
-        'assets/avatars/avatar_druid.png',
-        'assets/avatars/avatar_ranger.png',
-        'assets/avatars/avatar_alchemist.png',
-        'assets/avatars/avatar_valkyrie.png',
-        'assets/avatars/avatar_bard.png',
-        'assets/avatars/avatar_wizard.png',
-        'assets/avatars/avatar_vampire.png',
-    ];
+    avatars = Object.values(AvatarType);
 
     attributes = {
         vitality: 4,

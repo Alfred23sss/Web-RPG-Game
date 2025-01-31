@@ -54,6 +54,7 @@ describe('AdminPageComponent', () => {
     });
 
     const testGame: Game = {
+        id: '',
         name: 'Test Game',
         isVisible: false,
         size: '15',

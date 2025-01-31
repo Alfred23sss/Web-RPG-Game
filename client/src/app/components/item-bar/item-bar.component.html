@@ -4,7 +4,7 @@
     <div class="loop-container">
         @for (item of items; track item.id) {
         <div class="item">
-            <img src="assets/images/question.png" alt="a{{ item.id }}" cdkDrag />
+            <img [src]="itemType.Default" alt="a{{ item.id }}" cdkDrag />
         </div>
         }
     </div>

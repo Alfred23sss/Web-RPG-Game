@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GameDecorations } from '@app/interfaces/images';
 import { CommunicationService } from '@app/services/communication/communication.service';
 import { Message } from '@common/message';
 import { BehaviorSubject } from 'rxjs';
@@ -15,9 +16,8 @@ import { map } from 'rxjs/operators';
 export class MainPageComponent {
     readonly title: string = 'Game Name...';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
-
+    gameDecorations = GameDecorations;
     constructor(private readonly communicationService: CommunicationService) {}
-
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
             title: 'Hello from the client',

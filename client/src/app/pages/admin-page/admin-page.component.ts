@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { Game } from '@app/interfaces/game';
+import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 @Component({
@@ -15,6 +16,7 @@ import { GridService } from '@app/services/grid/grid-service.service';
 })
 export class AdminPageComponent implements OnInit {
     games: Game[] = this.gameService.games;
+    backgroundImage = GameDecorations.Background;
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,

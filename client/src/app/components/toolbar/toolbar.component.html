@@ -2,18 +2,18 @@
     <h1 class="header-item">{{ activeTool?.tool || 'No selected tool' }}</h1>
     <div class="tool" id="wall-tool" title="Wall : Prevents passage">
         <span>Wall</span>
-        <img src="assets/tile-items/wall.png" alt="Wall" (click)="selectTool(tileType.Wall, imageType.Wall)" />
+        <img [src]="imageType.Wall" alt="Wall" (click)="selectTool(tileType.Wall, imageType.Wall)" />
     </div>
     <div class="tool" id="door-tool" title="Door : Allows passage.">
         <span>Door</span>
-        <img src="assets/tile-items/closed-Door.png" alt="Door" (click)="selectTool(tileType.Door, imageType.ClosedDoor)" />
+        <img [src]="imageType.ClosedDoor" alt="Door" (click)="selectTool(tileType.Door, imageType.ClosedDoor)" />
     </div>
     <div class="tool" id="water-tool" title="Water : Blocks certain units.">
         <span>Water</span>
-        <img src="assets/tile-items/water.png" alt="Water" (click)="selectTool(tileType.Water, imageType.Water)" />
+        <img [src]="imageType.Water" alt="Water" (click)="selectTool(tileType.Water, imageType.Water)" />
     </div>
     <div class="tool" id="ice-tool" title="Ice : Lowers moving speed.">
         <span>Ice</span>
-        <img src="assets/tile-items/ice.png" alt="Ice" (click)="selectTool(tileType.Ice, imageType.Ice)" />
+        <img [src]="imageType.Ice" alt="Ice" (click)="selectTool(tileType.Ice, imageType.Ice)" />
     </div>
 </div>
