@@ -9,7 +9,6 @@ import { CreatePageComponent } from '@app/pages/create-page/create-page.componen
 import { EditionPageComponent } from '@app/pages/edition-page/edition-page.component';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
 import { MainPageComponent } from '@app/pages/main-page/main-page.component';
-import { MaterialPageComponent } from '@app/pages/material-page/material-page.component';
 import { WaitingViewComponent } from '@app/pages/waiting-view/waiting-view.component';
 import { environment } from './environments/environment';
 
@@ -24,7 +23,6 @@ const routes: Routes = [
     { path: 'edition', component: EditionPageComponent },
     { path: 'create', component: CreatePageComponent },
     { path: 'admin', component: AdminPageComponent },
-    { path: 'material', component: MaterialPageComponent },
     { path: 'waiting-view', component: WaitingViewComponent },
     { path: '**', redirectTo: '/home' },
 ];

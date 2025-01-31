@@ -15,6 +15,16 @@ export enum ImageType {
     Default = 'assets/tile-items/clay.png',
 }
 
+export enum ItemType {
+    Home = 'assets/items/home.png',
+    Lightning = 'assets/items/lightning.png',
+    Potion = 'assets/items/potion.png',
+    Spikes = 'assets/items/spikes.png',
+    Stop = 'assets/items/stop.png',
+    Question = 'assets/items/question.png',
+    Default = 'assets/items/question.png',
+}
+
 export interface Tile {
     id: string;
     imageSrc: string;
