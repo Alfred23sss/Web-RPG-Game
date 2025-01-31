@@ -6,9 +6,9 @@ import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game.service';
 
 enum GameSize {
-    Small = "10",
-    Medium = "15",
-    Large = "20",
+    Small = '10',
+    Medium = '15',
+    Large = '20',
 }
 
 const ITEM_COUNTS: Record<GameSize, number> = {
@@ -17,7 +17,7 @@ const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.Large]: 6,
 };
 
-const ITEMS_TO_UPDATE = new Set(["home", "question"]);
+const ITEMS_TO_UPDATE = new Set(['home', 'question']);
 
 @Component({
     selector: 'app-item-bar',
@@ -31,7 +31,10 @@ export class ItemBarComponent {
     activeItem: Item | undefined = undefined;
     items: Item[] = [];
 
-    constructor(private itemDragService: ItemDragService, private gameService: GameService) {}
+    constructor(
+        private itemDragService: ItemDragService,
+        private gameService: GameService,
+    ) {}
 
     ngOnInit() {
         this.items = [
@@ -40,14 +43,14 @@ export class ItemBarComponent {
             { id: '2', name: 'spikes', imageSrc: 'assets/images/spikes.png', imageSrcGrey: 'assets/images/spikes-grey.png', itemCounter: 2 },
             { id: '3', name: 'stop', imageSrc: 'assets/images/stop.png', imageSrcGrey: 'assets/images/stop-grey.png', itemCounter: 2 },
             { id: '4', name: 'home', imageSrc: 'assets/images/home.png', imageSrcGrey: 'assets/images/home-grey.png', itemCounter: 2 },
-            { id: '5', name: 'question', imageSrc: 'assets/images/question.png', imageSrcGrey: 'assets/images/question-grey.png', itemCounter: 2},
+            { id: '5', name: 'question', imageSrc: 'assets/images/question.png', imageSrcGrey: 'assets/images/question-grey.png', itemCounter: 2 },
         ].map((data) => Object.assign(new Item(), data));
 
         this.setItemCount();
     }
 
     selectObject(item: Item): void {
-        console.log("test");
+        console.log('test');
         this.itemDragService.setSelectedItem(item, undefined);
         this.activeItem = this.itemDragService.getSelectedItem();
     }
@@ -69,5 +72,16 @@ export class ItemBarComponent {
                 item.itemCounter = count;
             }
         });
+    }
+
+    onDrop(event: DragEvent, item: Item): void {
+        event.preventDefault();
+        console.log('debug');
+        item.itemCounter++;
+    }
+
+    onDragOver(event: DragEvent): void {
+        console.log('Item being dragged');
+        event.preventDefault();
     }
 }

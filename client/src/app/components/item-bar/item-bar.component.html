@@ -2,15 +2,15 @@
     <h1 class="header-item">{{ activeItem?.name || 'None' }}</h1>
     <span>Attributes</span>
     @for (item of items; track item.id) {
-        <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()">
-            <div class="item-content">
-                @if(item.itemCounter > 0) {
-                    <img draggable="true" [src]="item.imageSrc || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
-                } @else {
-                    <img draggable="false" [src]="item.imageSrcGrey || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
-                }
-                <span class="counter">{{ item.itemCounter }}</span>
-            </div>
+    <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()" (drop)="onDrop($event, item)" (dragover)="onDragOver($event)">
+        <div class="item-content">
+            @if(item.itemCounter > 0) {
+            <img draggable="true" [src]="item.imageSrc || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
+            } @else {
+            <img draggable="false" [src]="item.imageSrcGrey || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
+            }
+            <span class="counter">{{ item.itemCounter }}</span>
         </div>
+    </div>
     }
 </div>
