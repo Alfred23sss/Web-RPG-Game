@@ -13,7 +13,7 @@ import { ToolService } from '@app/services/tool.service';
 export class TileComponent {
     static activeButton: number | null = null;
     static doubleClicked = false;
-    static isDraggedTest = false; // Flag to track if an item is being dragged
+    static isDraggedTest = false;
     activeItem: Item | undefined = undefined;
     @Input() tile!: Tile;
 
@@ -22,13 +22,11 @@ export class TileComponent {
         private itemDragService: ItemDragService,
     ) {}
 
-    // Prevent tool application during dragging
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
         if (TileComponent.activeButton === null) {
             TileComponent.activeButton = event.button;
 
-            // If dragging, don't apply the tool
             if (TileComponent.isDraggedTest) {
                 return;
             }
@@ -82,14 +80,22 @@ export class TileComponent {
     @HostListener('drop', ['$event'])
     onDrop(event: DragEvent): void {
         event.preventDefault();
-
+        console.log("debug");
         const draggedItem = this.itemDragService.getSelectedItem();
+        const previousTile = this.itemDragService.getPreviousTile();
 
         if (draggedItem && !this.tile.item) {
             const clonedItem = draggedItem.clone();
             this.applyItem(clonedItem);
+            if (previousTile) {
+                previousTile.item = undefined;
+                console.log("Removed item from previous tile:", previousTile);
+            }
+
+            this.itemDragService.clearSelection();
         }
     }
+
 
     private applyItem(item: Item): void {
         console.log('Item applied:', item, this.tile.id);
@@ -127,9 +133,11 @@ export class TileComponent {
     }
 
     selectObject(item: Item): void {
-        this.itemDragService.setSelectedItem(item);
+        console.log("Selected item for dragging:", item);
+        this.itemDragService.setSelectedItem(item, this.tile); // Store the previous tile
         this.activeItem = this.itemDragService.getSelectedItem();
     }
+    
 
     private removeTileObject(): void {
         if (this.tile.item) {

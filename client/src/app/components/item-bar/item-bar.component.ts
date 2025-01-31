@@ -48,12 +48,12 @@ export class ItemBarComponent {
 
     selectObject(item: Item): void {
         console.log("test");
-        this.itemDragService.setSelectedItem(item);
+        this.itemDragService.setSelectedItem(item, undefined);
         this.activeItem = this.itemDragService.getSelectedItem();
     }
 
     removeObject(): void {
-        this.itemDragService.setSelectedItem(undefined);
+        this.itemDragService.setSelectedItem(undefined, undefined);
     }
 
     isDragDisabled(item: Item): boolean {
