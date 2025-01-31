@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -24,6 +25,7 @@ export class EditionPageComponent implements OnInit {
     constructor(
         private gameService: GameService,
         private gridService: GridService,
+        private snackBar: MatSnackBar,
     ) {}
 
     ngOnInit() {
@@ -48,14 +50,34 @@ export class EditionPageComponent implements OnInit {
 
     save() {
         // manque logique des contraintes de save
-        this.tempGame.name = this.gameName;
-        this.tempGame.description = this.gameDescription;
-        this.gameService.updateCurrentGame(this.tempGame);
-        this.gameService.saveGame(this.tempGame);
-        window.location.reload();
+        if (this.saveTitleAndDescription()) {
+            this.gameService.updateCurrentGame(this.tempGame);
+            this.gameService.saveGame(this.tempGame);
+            // window.location.reload();
+        }
+    }
+    // nom obligatoire et unique, description obliogatoire, limite de taille pour le titre
+
+    private showError(message: string) {
+        this.snackBar.open(message, 'Close', { duration: 3000 });
     }
 
-    empty() {
-        // empty
+    private validateTitle() {
+        const isLengthValid = this.gameName?.length > 0 && this.gameName.length <= 30;
+        const isUniqueTitle = !this.gameService.isGameNameUsed(this.gameName); // Ensure the name is NOT already used
+
+        return isLengthValid && isUniqueTitle;
+    }
+
+    private saveTitleAndDescription(): boolean {
+        if (this.validateTitle()) {
+            console.log('✅ Valid title!');
+            this.tempGame.name = this.gameName;
+            this.tempGame.description = this.gameDescription;
+            return true;
+        }
+
+        this.showError('❌ Please write a valid name');
+        return false;
     }
 }

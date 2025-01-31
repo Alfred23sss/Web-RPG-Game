@@ -44,7 +44,7 @@ export class Game {
     id: string;
 
     @ApiProperty()
-    @Prop({ required: true })
+    @Prop({ required: false })
     name: string;
 
     @ApiProperty()

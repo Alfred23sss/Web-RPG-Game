@@ -55,7 +55,7 @@ export class PopUpComponent {
     confirm() {
         const gameSize = this.gameModeService.getGameSize();
         const gameMode = this.gameModeService.getGameMode();
-        const gridSize = this.getGridSize(gameSize); // change!!!!!!!!!!!!!!!!!!!!!11
+        const gridSize = this.getGridSize(gameSize);
 
         if (!gameSize || !gameMode) {
             this.showError('Please select both game size and game type!');
@@ -86,8 +86,8 @@ export class PopUpComponent {
         return Object.keys(this.gameSizes).includes(size);
     }
 
-    private getGridSize(gameSize: 'small' | 'medium' | 'large'): number {
-        return this.gameSizes[gameSize] || this.gameSizes.small;
+    private getGridSize(gameSize: string): number {
+        return this.gameSizes[gameSize as keyof typeof this.gameSizes] || this.gameSizes.small;
     }
 
     private buildNewGame(gameSize: string, gameMode: string, gridSize: number): Game {

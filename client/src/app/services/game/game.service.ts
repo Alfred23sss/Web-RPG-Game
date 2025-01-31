@@ -72,6 +72,11 @@ export class GameService {
         sessionStorage.removeItem('currentGame');
     }
 
+    isGameNameUsed(name: string): boolean {
+        const isUsed = this.games.find((game) => game.name === name);
+        return Boolean(isUsed);
+    }
+
     private loadCurrentGame() {
         const savedGame = sessionStorage.getItem('currentGame');
         if (savedGame) {
