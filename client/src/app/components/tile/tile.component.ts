@@ -31,13 +31,15 @@ export class TileComponent {
                 return;
             }
 
-            if (event.button === 2) {  // Right-click (button 2)
+            if (event.button === 2) {
+                // Right-click (button 2)
                 if (this.tile.item != undefined) {
                     this.removeTileObject();
                 } else {
                     this.removeTileType();
                 }
-            } else if (event.button === 0) {  // Left-click (button 0)
+            } else if (event.button === 0) {
+                // Left-click (button 0)
                 this.applyTool();
             }
         }
@@ -67,12 +69,11 @@ export class TileComponent {
             TileComponent.activeButton = null;
         }
         TileComponent.isDraggedTest = false;
-
     }
 
     @HostListener('dragover', ['$event'])
     onDragOver(event: DragEvent): void {
-        console.log("Item being dragged");
+        console.log('Item being dragged');
         event.preventDefault();
         TileComponent.isDraggedTest = true;
     }
@@ -80,22 +81,21 @@ export class TileComponent {
     @HostListener('drop', ['$event'])
     onDrop(event: DragEvent): void {
         event.preventDefault();
-        console.log("debug");
+        console.log('debug');
         const draggedItem = this.itemDragService.getSelectedItem();
         const previousTile = this.itemDragService.getPreviousTile();
 
-        if (draggedItem && !this.tile.item) {
+        if (draggedItem && !this.tile.item && this.tile.type !== TileType.Door && this.tile.type !== TileType.Wall) {
             const clonedItem = draggedItem.clone();
             this.applyItem(clonedItem);
             if (previousTile) {
                 previousTile.item = undefined;
-                console.log("Removed item from previous tile:", previousTile);
+                console.log('Removed item from previous tile:', previousTile);
             }
 
             this.itemDragService.clearSelection();
         }
     }
-
 
     private applyItem(item: Item): void {
         console.log('Item applied:', item, this.tile.id);
@@ -107,22 +107,22 @@ export class TileComponent {
         if (TileComponent.activeButton !== 0 || TileComponent.isDraggedTest) return; // Don't apply tool if dragging
 
         const selectedTool = this.toolService.getSelectedTool();
-        if (selectedTool) {
+        if (selectedTool && !((selectedTool.tool === TileType.Door || selectedTool.tool === TileType.Wall) && this.tile.item)) {
             if (selectedTool.tool === TileType.Door) {
                 if (this.tile.type !== TileType.Door) {
                     this.tile.imageSrc = selectedTool.image;
                     this.tile.type = selectedTool.tool;
                     this.tile.isOpen = false;
                 } else {
-                    if(!this.tile.item){
+                    if (!this.tile.item) {
                         this.tile.isOpen = !this.tile.isOpen;
                         if (this.tile.isOpen) {
                             this.tile.imageSrc = ImageType.OpenDoor;
                         } else {
                             this.tile.imageSrc = ImageType.ClosedDoor;
-                        }}
-                    else{
-                        console.log("Please note that you can't open or close a door while an item is on the door")
+                        }
+                    } else {
+                        console.log("Please note that you can't open or close a door while an item is on the door");
                     }
                 }
             } else {
@@ -133,11 +133,10 @@ export class TileComponent {
     }
 
     selectObject(item: Item): void {
-        console.log("Selected item for dragging:", item);
+        console.log('Selected item for dragging:', item);
         this.itemDragService.setSelectedItem(item, this.tile); // Store the previous tile
         this.activeItem = this.itemDragService.getSelectedItem();
     }
-    
 
     private removeTileObject(): void {
         if (this.tile.item) {
