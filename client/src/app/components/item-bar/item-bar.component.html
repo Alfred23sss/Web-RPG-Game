@@ -1,6 +1,4 @@
 <div class="Object-container">
-    <h1 class="header-item">{{ activeItem?.name || 'None' }}</h1>
-    <span>Attributes</span>
     @for (item of items; track item.id) {
     <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()" (drop)="onDrop($event, item)" (dragover)="onDragOver($event)">
         <div class="item-content">

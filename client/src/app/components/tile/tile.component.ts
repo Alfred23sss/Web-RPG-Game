@@ -32,14 +32,12 @@ export class TileComponent {
             }
 
             if (event.button === 2) {
-                // Right-click (button 2)
                 if (this.tile.item != undefined) {
                     this.removeTileObject();
                 } else {
                     this.removeTileType();
                 }
             } else if (event.button === 0) {
-                // Left-click (button 0)
                 this.applyTool();
             }
         }
@@ -104,7 +102,7 @@ export class TileComponent {
     }
 
     private applyTool(): void {
-        if (TileComponent.activeButton !== 0 || TileComponent.isDraggedTest) return; // Don't apply tool if dragging
+        if (TileComponent.activeButton !== 0 || TileComponent.isDraggedTest) return;
 
         const selectedTool = this.toolService.getSelectedTool();
         if (selectedTool && !((selectedTool.tool === TileType.Door || selectedTool.tool === TileType.Wall) && this.tile.item)) {
@@ -134,7 +132,7 @@ export class TileComponent {
 
     selectObject(item: Item): void {
         console.log('Selected item for dragging:', item);
-        this.itemDragService.setSelectedItem(item, this.tile); // Store the previous tile
+        this.itemDragService.setSelectedItem(item, this.tile);
         this.activeItem = this.itemDragService.getSelectedItem();
     }
 
