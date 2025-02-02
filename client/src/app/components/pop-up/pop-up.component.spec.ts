@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
+import { ERROR_MESSAGES, GAME_MODES, SNACKBAR_CONFIG } from '../../constants/global.constants';
 import { PopUpComponent } from './pop-up.component';
 
 describe('PopUpComponent', () => {
@@ -14,12 +16,14 @@ describe('PopUpComponent', () => {
     let mockGameModeService: jasmine.SpyObj<GameModeService>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
     let mockRouter: jasmine.SpyObj<Router>;
+    let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
 
     beforeEach(async () => {
         mockGameService = jasmine.createSpyObj('gameService', ['updateCurrentGame', 'addGame']);
         mockGameModeService = jasmine.createSpyObj('gameModeService', ['getGameMode', 'setGameMode', 'setGameSize', 'getGameSize']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['closeAll']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+        mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
 
         await TestBed.configureTestingModule({
             imports: [PopUpComponent],
@@ -28,6 +32,7 @@ describe('PopUpComponent', () => {
                 { provide: GameModeService, useValue: mockGameModeService },
                 { provide: MatDialog, useValue: mockDialog },
                 { provide: Router, useValue: mockRouter },
+                { provide: MatSnackBar, useValue: mockSnackBar },
             ],
         }).compileComponents();
 
@@ -53,11 +58,14 @@ describe('PopUpComponent', () => {
         expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('Classic');
     });
 
-    it('should alert if CTF mode is selected and reset the mode', () => {
-        spyOn(window, 'alert');
-        mockGameModeService.getGameMode.and.returnValue('CTF');
-        component.setGameType('CTF');
-        expect(window.alert).toHaveBeenCalledWith('CTF gamemode is currently unavailable!');
+    it('should show a snackbar message and reset game mode when selecting CTF', () => {
+        mockGameModeService.getGameMode.and.returnValue(GAME_MODES.CTF);
+
+        component.setGameType(GAME_MODES.CTF);
+
+        expect(mockSnackBar.open).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAMEMODE, SNACKBAR_CONFIG.ACTION, {
+            duration: SNACKBAR_CONFIG.DURATION,
+        });
         expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
     });
 
@@ -113,13 +121,6 @@ describe('PopUpComponent', () => {
 
     it('closePopup should reset selections and close popup', () => {
         component.closePopup();
-        expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
-        expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('');
-        expect(mockDialog.closeAll).toHaveBeenCalled();
-    });
-
-    it('confirmPopup should reset selections and close popup', () => {
-        component.confirmPopup();
         expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
         expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('');
         expect(mockDialog.closeAll).toHaveBeenCalled();
