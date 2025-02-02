@@ -40,7 +40,7 @@ export class ItemBarComponent {
         this.items = [
             { id: '0', name: 'lightning', imageSrc: 'assets/images/lightning.png', imageSrcGrey: 'assets/images/lightning-grey.png', itemCounter: 1 },
             { id: '1', name: 'potion', imageSrc: 'assets/images/potion.png', imageSrcGrey: 'assets/images/potion-grey.png', itemCounter: 1 },
-            { id: '2', name: 'spikes', imageSrc: 'assets/images/spikes.png', imageSrcGrey: 'assets/images/spikes-grey.png', itemCounter: 1 },
+            { id: '2', name: 'rubik', imageSrc: 'assets/images/rubik.png', imageSrcGrey: 'assets/images/rubik-grey.png', itemCounter: 1 },
             { id: '3', name: 'stop', imageSrc: 'assets/images/stop.png', imageSrcGrey: 'assets/images/stop-grey.png', itemCounter: 1 },
             { id: '4', name: 'fire', imageSrc: 'assets/images/fire.png', imageSrcGrey: 'assets/images/fire-grey.png', itemCounter: 1 },
             { id: '5', name: 'swap', imageSrc: 'assets/images/swap.png', imageSrcGrey: 'assets/images/swap-grey.png', itemCounter: 1 },
