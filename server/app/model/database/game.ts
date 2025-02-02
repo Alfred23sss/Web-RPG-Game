@@ -64,7 +64,7 @@ export class Game {
     isVisible: boolean;
 
     @ApiProperty()
-    @Prop({ required: true })
+    @Prop({ required: false })
     previewImage: string;
 
     @ApiProperty()
