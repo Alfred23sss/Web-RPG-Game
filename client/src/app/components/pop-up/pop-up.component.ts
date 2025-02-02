@@ -98,7 +98,7 @@ export class PopUpComponent {
             mode: gameMode,
             lastModified: new Date(),
             isVisible: true,
-            previewImage: 'assets/images/example.png',
+            previewImage: '',
             description: `A ${gameMode} game on a ${gameSize} map.`,
             grid: this.gridService.createGrid(gridSize, gridSize),
         };

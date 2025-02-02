@@ -73,8 +73,7 @@ export class GameService {
     }
 
     isGameNameUsed(name: string): boolean {
-        const isUsed = this.games.find((game) => game.name === name);
-        return Boolean(isUsed);
+        return this.games.some((game) => game.name === name && game.id !== this.currentGame?.id);
     }
 
     private loadCurrentGame() {

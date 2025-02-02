@@ -2,17 +2,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
+import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
 import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 
 @Component({
     selector: 'app-edition-page',
+    standalone: true,
     templateUrl: './edition-page.component.html',
     styleUrls: ['./edition-page.component.scss'],
     imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent],
@@ -26,7 +27,9 @@ export class EditionPageComponent implements OnInit {
     constructor(
         private gameService: GameService,
         private gridService: GridService,
-        private snackBar: MatSnackBar,
+        // private snackBar: MatSnackBar,
+        private screenShotService: ScreenshotService,
+        private gameValidationService: GameValidationService,
     ) {}
 
     ngOnInit() {
@@ -51,34 +54,36 @@ export class EditionPageComponent implements OnInit {
 
     save() {
         // manque logique des contraintes de save
-        if (this.saveTitleAndDescription()) {
-            this.gameService.updateCurrentGame(this.tempGame);
-            this.gameService.saveGame(this.tempGame);
-            // window.location.reload();
+        // mettre toute la validation focntion separe dans une fonction appeler ici qui return si pas valider sinon fait les saves
+        if (!this.gameValidationService.isHalfTerrain(this.tempGame)) {
+            return;
         }
+        if (this.saveTitleAndDescription()) {
+            return;
+            // rajouter feedback quue le jeu a ete saved(snackbar ou revien a admin page?)
+        }
+        this.savePreviewImage();
+        this.gameService.updateCurrentGame(this.tempGame);
+        this.gameService.saveGame(this.tempGame);
     }
-    // nom obligatoire et unique, description obliogatoire, limite de taille pour le titre
 
-    private showError(message: string) {
-        this.snackBar.open(message, 'Close', { duration: 3000 });
-    }
-
-    private validateTitle() {
-        const isLengthValid = this.gameName?.length > 0 && this.gameName.length <= 30;
-        const isUniqueTitle = !this.gameService.isGameNameUsed(this.gameName); // Ensure the name is NOT already used
-
-        return isLengthValid && isUniqueTitle;
+    private async savePreviewImage() {
+        try {
+            const previewUrl = await this.screenShotService.generatePreview('game-preview');
+            this.tempGame.previewImage = previewUrl;
+            console.log('saved image');
+        } catch (error) {
+            console.error('Erreur lors de la capture:', error);
+        }
     }
 
     private saveTitleAndDescription(): boolean {
-        if (this.validateTitle()) {
-            console.log('✅ Valid title!');
+        if (this.gameValidationService.isTitleAndDescriptionValid(this.gameName, this.gameDescription)) {
             this.tempGame.name = this.gameName;
             this.tempGame.description = this.gameDescription;
             return true;
         }
 
-        this.showError('❌ Please write a valid name');
         return false;
     }
 }
