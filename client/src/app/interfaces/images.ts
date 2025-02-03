@@ -6,7 +6,6 @@ export enum GameDecorations {
     Forge = 'assets/game-decorations/medieval-forge.png',
     XSwords = 'assets/game-decorations/X-sword.png',
     X = 'assets/game-decorations/X.png',
-    LogoPoly = 'assets/game-decorations/logo-poly.png',
     Default = 'assets/game-decorations/logo.png',
 }
 

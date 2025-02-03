@@ -66,7 +66,7 @@ describe('AdminPageComponent', () => {
     };
 
     it('checkbox should update game visibility to true when checked', () => {
-        mockGameService.getGameByName.and.returnValue(testGame);
+        // mockGameService.getGameByName.and.returnValue(testGame);
 
         const event = { target: { checked: true } } as unknown as InputEvent;
         component.toggleVisibility(testGame.name, event);
@@ -75,7 +75,7 @@ describe('AdminPageComponent', () => {
     });
 
     it('checkbox should update game visibility to false unchecked', () => {
-        mockGameService.getGameByName.and.returnValue(testGame);
+        // mockGameService.getGameByName.and.returnValue(testGame);
 
         const event = { target: { checked: false } } as unknown as InputEvent;
         component.toggleVisibility(testGame.name, event);
@@ -85,7 +85,7 @@ describe('AdminPageComponent', () => {
 
     it('should call updateCurrentGame when updateCurrentGame is called with a game', () => {
         const gameName = 'Test Game';
-        mockGameService.getGameByName.and.returnValue(testGame);
+        // mockGameService.getGameByName.and.returnValue(testGame);
 
         component.updateCurrentGame(gameName);
         expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(testGame);

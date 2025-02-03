@@ -62,7 +62,6 @@ export class AdminPageComponent implements OnInit {
         const inputElement = event.target as HTMLInputElement;
         const isVisible = inputElement.checked;
         const game = this.gameService.getGameById(id);
-
         if (game) {
             game.isVisible = isVisible;
         }
