@@ -20,7 +20,6 @@ export class GameCommunicationService {
     }
 
     updateGame(id: string, game: Partial<Game>) {
-        console.log('Updating game with payload:', game);
         return this.http.put<Game>(`${this.apiUrl}/update/${id}`, game);
     }
 
