@@ -7,7 +7,7 @@ import html2canvas from 'html2canvas';
 })
 export class ScreenshotService {
     constructor(@Inject(DOCUMENT) private document: Document) {}
-    
+
     async generateScreenshot(elementId: string): Promise<string> {
         return this.captureElement(elementId);
     }
@@ -33,7 +33,7 @@ export class ScreenshotService {
         const target = this.document.getElementById(elementId);
 
         if (!target) {
-            return Promise.reject(`Élément '${elementId}' introuvable`);
+            return Promise.reject(`Element '${elementId}' not found`);
         }
 
         try {
@@ -48,7 +48,7 @@ export class ScreenshotService {
 
             return canvas.toDataURL(options?.imageFormat || 'image/png', options?.quality);
         } catch (error) {
-            return Promise.reject(`Échec de capture: ${error}`);
+            return Promise.reject(`Failed to capture: ${error}`);
         }
     }
 }
