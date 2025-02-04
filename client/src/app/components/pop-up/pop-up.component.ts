@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
@@ -11,13 +10,13 @@ import {
     DEFAULT_GAME_IMAGE,
     ERROR_MESSAGES,
     GAME_MODES,
+    GAME_MODES_LIST,
+    GAME_SIZES_LIST,
     GRID_DIMENSIONS,
     ROUTES,
-    SNACKBAR_CONFIG,
     TIME_CONSTANTS,
-    GAME_SIZES_LIST,
-    GAME_MODES_LIST
 } from '../../constants/global.constants';
+import { SnackbarService } from '../../services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-pop-up',
@@ -34,7 +33,7 @@ export class PopUpComponent {
         private gameService: GameService,
         private router: Router,
         private gridService: GridService,
-        private snackBar: MatSnackBar,
+        private snackbarService: SnackbarService,
     ) {}
 
     setGameSize(size: string) {
@@ -44,7 +43,7 @@ export class PopUpComponent {
     setGameType(mode: string) {
         this.gameModeService.setGameMode(mode);
         if (this.gameModeService.getGameMode() === GAME_MODES.CTF) {
-            this.snackBar.open(ERROR_MESSAGES.UNAVAILABLE_GAMEMODE, SNACKBAR_CONFIG.ACTION, { duration: SNACKBAR_CONFIG.DURATION });
+            this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAMEMODE);
             this.gameModeService.setGameMode('');
         }
     }
@@ -72,7 +71,7 @@ export class PopUpComponent {
             this.closePopup();
             this.router.navigate([ROUTES.EDITION_VIEW]);
         } else {
-            this.snackBar.open(ERROR_MESSAGES.MISSING_GAME_DETAILS, SNACKBAR_CONFIG.ACTION, { duration: SNACKBAR_CONFIG.DURATION });
+            this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_GAME_DETAILS);
         }
     }
 

@@ -76,15 +76,24 @@ export const GAME_SIZES_LIST = [
 ];
 
 export const GAME_MODES_LIST = [
-    { key: 'Classic', label: 'Classic', description: 'A traditional game mode where strategy is key.',  backgroundImage: "url('/assets/classic-game.png')" },
-    { key: GAME_MODES.CTF, label: 'Capture The Flag', description: "Compete to secure your opponent's flag!", backgroundImage: "url('/assets/CTF-game.png')" },
+    {
+        key: 'Classic',
+        label: 'Classic',
+        description: 'A traditional game mode where strategy is key.',
+        backgroundImage: "url('/assets/classic-game.png')",
+    },
+    {
+        key: GAME_MODES.CTF,
+        label: 'Capture The Flag',
+        description: "Compete to secure your opponent's flag!",
+        backgroundImage: "url('/assets/CTF-game.png')",
+    },
 ];
-
 
 //global
 export const ERROR_MESSAGES = {
     MISSING_CHARACTER_DETAILS: 'Please ensure you have assigned bonuses and dice, and entered a name and avatar.',
-    UNAVAILABLE_GAMEMODE : 'CTF gamemode is currently unavailable!',
+    UNAVAILABLE_GAMEMODE: 'CTF gamemode is currently unavailable!',
     MISSING_GAME_DETAILS: 'Please select both game size and game type!',
 };
 
@@ -97,5 +106,3 @@ export const SNACKBAR_CONFIG = {
     DURATION: 3000,
     ACTION: 'Close',
 };
-
-

@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, AVATARS, DICE_TYPES, INITIAL_VALUES, ROUTES, ERROR_MESSAGES,SNACKBAR_CONFIG } from '../../constants/global.constants';
+import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, AVATARS, DICE_TYPES, ERROR_MESSAGES, INITIAL_VALUES, ROUTES } from '../../constants/global.constants';
+import { SnackbarService } from '../../services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-character-form',
@@ -12,9 +12,9 @@ import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, AVATARS, DICE_TYPES, INITIAL_VALUES, R
     imports: [FormsModule],
 })
 export class CharacterFormComponent {
-    ATTRIBUTE_KEYS = ATTRIBUTE_KEYS;
-    ATTRIBUTE_TYPES = ATTRIBUTE_TYPES;
-    DICE_TYPES = DICE_TYPES;
+    protected ATTRIBUTE_KEYS = ATTRIBUTE_KEYS;
+    protected ATTRIBUTE_TYPES = ATTRIBUTE_TYPES;
+    protected DICE_TYPES = DICE_TYPES;
     characterName = '';
     selectedAvatar = '';
     showForm = true;
@@ -31,7 +31,7 @@ export class CharacterFormComponent {
     constructor(
         private router: Router,
         private dialogRef: MatDialogRef<CharacterFormComponent>,
-        private snackBar: MatSnackBar,
+        private snackbarService: SnackbarService,
     ) {}
 
     assignBonus(attribute: string) {
@@ -47,7 +47,7 @@ export class CharacterFormComponent {
     assignDice(attribute: string, dice: string) {
         this.diceAssigned[attribute] = true;
         this.diceAssigned[attribute === ATTRIBUTE_TYPES.ATTACK ? ATTRIBUTE_TYPES.DEFENSE : ATTRIBUTE_TYPES.ATTACK] = false;
-        if (attribute === ATTRIBUTE_TYPES.ATTACK) {
+        if (attribute === ATTRIBUTE_TYPES.ATTACK) {//repetition if/else (maybe)
             this.selectedAttackDice = dice;
             this.selectedDefenseDice = dice === DICE_TYPES.D4 ? DICE_TYPES.D6 : DICE_TYPES.D4;
         } else {
@@ -57,17 +57,23 @@ export class CharacterFormComponent {
     }
 
     submitCharacter(): void {
-        if (this.characterName && this.selectedAvatar && (this.bonusAssigned.vitality || this.bonusAssigned.speed) && (this.diceAssigned.attack || this.diceAssigned.defense)) {
+        if (this.characterName && this.selectedAvatar && this.isBonusAssigned() && this.isDiceAssigned()) {
             this.showForm = false;
             this.router.navigate([ROUTES.WAITING_VIEW]);
         } else {
-            this.snackBar.open(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS, SNACKBAR_CONFIG.ACTION, {
-                duration: SNACKBAR_CONFIG.DURATION,
-            });
+            this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
         }
     }
 
     closePopup(): void {
         this.dialogRef.close();
+    }
+
+    private isBonusAssigned() : boolean{
+        return this.bonusAssigned.vitality || this.bonusAssigned.speed;
+    }
+
+    private isDiceAssigned() : boolean{
+        return this.diceAssigned.attack || this.diceAssigned.defense;
     }
 }
