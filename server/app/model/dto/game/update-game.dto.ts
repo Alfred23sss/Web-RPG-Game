@@ -1,4 +1,4 @@
-import { TileType } from '@app/model/database/game';
+import { TileType } from '@app/model/database/tile';
 import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class UpdateGameDto {
