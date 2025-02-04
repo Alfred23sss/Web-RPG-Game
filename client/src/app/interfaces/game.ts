@@ -19,7 +19,7 @@ export interface Game {
     mode: string;
     lastModified: Date;
     isVisible: boolean;
-    previewImage: string; // path to img
+    previewImage: string; 
     description: string;
     grid: Tile[][] | undefined;
 }

@@ -19,12 +19,22 @@ export enum ImageType {
 
 export enum ItemType {
     Home = 'assets/items/home.png',
+    HomeGray = 'assets/items/home-gray.png',
     Lightning = 'assets/items/lightning.png',
+    LightningGray = 'assets/items/lightning-gray.png',
     Potion = 'assets/items/potion.png',
-    Spikes = 'assets/items/spikes.png',
+    PotionGray = 'assets/items/potion-gray.png',
     Stop = 'assets/items/stop.png',
-    Question = 'assets/items/question.png',
-    Default = 'assets/items/question.png',
+    StopGray = 'assets/items/stop-gray.png',
+    QuestionMark = 'assets/items/question-mark.png',
+    QuestionMarkGray = 'assets/items/question-mark-gray.png',
+    Fire = 'assets/items/fire.png',
+    FireGray = 'assets/items/fire-gray.png',
+    Rubik = 'assets/items/rubik.png',
+    RubikGray = 'assets/items/rubik-gray.png',
+    Swap = 'assets/items/swap.png',
+    SwapGray = 'assets/items/swap-gray.png',
+    Default = 'assets/items/question-mark.png',
 }
 
 export interface Tile {
