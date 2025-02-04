@@ -64,13 +64,13 @@ export const GAME_MODES_LIST = [
         key: 'Classic',
         label: 'Classic',
         description: 'A traditional game mode where strategy is key.',
-        backgroundImage: "url('/assets/classic-game.png')",
+        backgroundImage: "url('/assets/gamemodes/classic-game.png')",
     },
     {
         key: GAME_MODES.CTF,
         label: 'Capture The Flag',
         description: "Compete to secure your opponent's flag!",
-        backgroundImage: "url('/assets/CTF-game.png')",
+        backgroundImage: "url('/assets/gamemodes/CTF-game.png')",
     },
 ];
 

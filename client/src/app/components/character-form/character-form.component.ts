@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
-import { AvatarType } from '@app/interfaces/images';
+import { AvatarType, GameDecorations } from '@app/interfaces/images';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
@@ -19,6 +19,7 @@ export class CharacterFormComponent {
     selectedCharacter: string | null = null;
     selectedAttackDice: string | null = null;
     selectedDefenseDice: string | null = null;
+    xSword: GameDecorations.XSwords;
 
     avatarTypes = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
 

@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
-import { ERROR_MESSAGES, GAME_MODES, SNACKBAR_CONFIG } from '../../constants/global.constants';
+import { ERROR_MESSAGES, GAME_MODES, SNACKBAR_CONFIG } from '@app/constants/global.constants';
 import { PopUpComponent } from './pop-up.component';
 
 describe('PopUpComponent', () => {
