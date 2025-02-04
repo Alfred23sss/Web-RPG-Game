@@ -3,7 +3,9 @@
         <div class="popup-grid">
             <div class="header">
                 <div class="popup-cancel">
-                    <button class="cancel-button" (click)="closePopup()"></button>
+                    <button class="cancel-button" (click)="closePopup()">
+                        <img [src]="xSword" alt="xSword" class="cancel-swords" />
+                    </button>
                 </div>
                 <h2>Game creation</h2>
             </div>
@@ -60,6 +62,7 @@
                     </div>
                 </button>
                 <button class="popup-button ctf" (click)="setGameType('CTF')" [class.active]="gameModeService.getGameMode() === 'CTF'">
+                    <img [src]="gameModes.CTF" alt="CTF" class="game-mode-image" />
                     <div class="popup-content">
                         <h3>Capture The Flag</h3>
                         <p>Compete to secure your opponent's flag!</p>

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game';
+import { GameDecorations, GameModeType } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
@@ -35,7 +36,6 @@ export class PopUpComponent {
         private gridService: GridService,
         private snackbarService: SnackbarService,
     ) {}
-
     setGameSize(size: string) {
         this.gameModeService.setGameSize(size);
     }

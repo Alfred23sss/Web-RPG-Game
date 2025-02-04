@@ -23,11 +23,13 @@
     "@angular/platform-browser": "19.0.4",
     "@angular/platform-browser-dynamic": "19.0.4",
     "@angular/router": "19.0.4",
+    "cdk": "^2.177.0",
     "html2canvas": "^1.4.1",
     "mongoose": "^8.9.5",
     "rxjs": "7.8.1",
     "socket.io-client": "4.8.1",
     "tslib": "2.4.0",
+    "uuid": "^11.0.5",
     "zone.js": "0.15.0"
   },
   "devDependencies": {

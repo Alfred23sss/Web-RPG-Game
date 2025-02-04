@@ -7,7 +7,7 @@ import html2canvas from 'html2canvas';
 })
 export class ScreenshotService {
     constructor(@Inject(DOCUMENT) private document: Document) {}
-    
+
     async generateScreenshot(elementId: string): Promise<string> {
         return this.captureElement(elementId);
     }
@@ -19,7 +19,7 @@ export class ScreenshotService {
             imageFormat: 'image/jpeg',
         });
     }
-    //inspire de cette video youtube: https://www.youtube.com/watch?v=5TUvcep_bX8&ab_channel=BenNadel
+    // Inspired by this YouTube video: https://www.youtube.com/watch?v=5TUvcep_bX8&ab_channel=BenNadel
     private async captureElement(
         elementId: string,
         options?: {

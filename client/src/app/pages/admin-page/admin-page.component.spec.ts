@@ -1,24 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { of, throwError } from 'rxjs';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid-service.service';
 import { AdminPageComponent } from './admin-page.component';
+import { ActivatedRoute } from '@angular/router';
+import { MOCK_GAMES } from '@app/global.constants';
 
 describe('AdminPageComponent', () => {
-    let mockGameService: jasmine.SpyObj<GameService>;
-    let mockDialog: jasmine.SpyObj<MatDialog>;
     let component: AdminPageComponent;
     let fixture: ComponentFixture<AdminPageComponent>;
+    let mockGameService: jasmine.SpyObj<GameService>;
+    let mockGridService: jasmine.SpyObj<GridService>;
+    let mockDialog: jasmine.SpyObj<MatDialog>;
 
     beforeEach(async () => {
-        mockGameService = jasmine.createSpyObj('GameService', ['removeGame', 'getGames', 'getGameByName', 'updateCurrentGame']);
+        mockGameService = jasmine.createSpyObj('GameService', ['fetchGames', 'deleteGame', 'getGameById', 'updateCurrentGame']);
+        mockGridService = jasmine.createSpyObj('GridService', ['setGrid']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+
+        mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES));
+
         await TestBed.configureTestingModule({
             imports: [AdminPageComponent],
             providers: [
                 { provide: GameService, useValue: mockGameService },
+                { provide: GridService, useValue: mockGridService },
                 { provide: MatDialog, useValue: mockDialog },
+                { provide: ActivatedRoute, useValue: { snapshot: { params: {} } } },
             ],
         }).compileComponents();
     });
@@ -33,65 +43,67 @@ describe('AdminPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should call removeGame on gameService if confirm dialog is accepted', () => {
-        spyOn(window, 'confirm').and.returnValue(true);
-        const gameName = 'Test Game';
-
-        component.deleteGame(gameName);
-
-        expect(window.confirm).toHaveBeenCalledWith(`Confirm deleting ${gameName}?`);
-        expect(mockGameService.removeGame).toHaveBeenCalledWith(gameName);
+    it('should fetch games on ngOnInit', () => {
+        expect(mockGameService.fetchGames).toHaveBeenCalled();
+        expect(component.games).toEqual(MOCK_GAMES);
     });
 
-    it('should not call removeGame on gameService if confirm dialog is canceled', () => {
-        spyOn(window, 'confirm').and.returnValue(false);
-        const gameName = 'Test Game';
-
-        component.deleteGame(gameName);
-
-        expect(window.confirm).toHaveBeenCalledWith(`Confirm deleting ${gameName}?`);
-        expect(mockGameService.removeGame).not.toHaveBeenCalled();
-    });
-
-    const testGame: Game = {
-        name: 'Test Game',
-        isVisible: false,
-        size: '15',
-        mode: 'Singleplayer',
-        lastModified: new Date(),
-        previewImage: 'image.jpg',
-        description: 'Description Test',
-        grid: [],
-    };
-
-    it('checkbox should update game visibility to true when checked', () => {
-        mockGameService.getGameByName.and.returnValue(testGame);
-
-        const event = { target: { checked: true } } as unknown as InputEvent;
-        component.toggleVisibility(testGame.name, event);
-
-        expect(testGame.isVisible).toBeTrue();
-    });
-
-    it('checkbox should update game visibility to false unchecked', () => {
-        mockGameService.getGameByName.and.returnValue(testGame);
-
-        const event = { target: { checked: false } } as unknown as InputEvent;
-        component.toggleVisibility(testGame.name, event);
-
-        expect(testGame.isVisible).toBeFalse();
-    });
-
-    it('should call updateCurrentGame when updateCurrentGame is called with a game', () => {
-        const gameName = 'Test Game';
-        mockGameService.getGameByName.and.returnValue(testGame);
-
-        component.updateCurrentGame(gameName);
-        expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(testGame);
-    });
-
-    it('openDialog should open the dialog with PopUpComponent', () => {
+    it('should open dialog with PopUpComponent when openDialog is called', () => {
         component.openDialog();
         expect(mockDialog.open).toHaveBeenCalledWith(PopUpComponent);
+    });
+
+    it('should call deleteGame on gameService and remove game from list if confirm is true', () => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        mockGameService.deleteGame.and.returnValue(of(MOCK_GAMES[1]));
+
+        component.deleteGame('1');
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete 1?');
+        expect(mockGameService.deleteGame).toHaveBeenCalledWith('1');
+        expect(component.games).toEqual([MOCK_GAMES[1]]);
+    });
+
+    it('should not call deleteGame on gameService if confirm is false', () => {
+        spyOn(window, 'confirm').and.returnValue(false);
+
+        component.deleteGame('1');
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete 1?');
+        expect(mockGameService.deleteGame).not.toHaveBeenCalled();
+        expect(component.games).toEqual(MOCK_GAMES);
+    });
+
+    it('should update current game when updateCurrentGame is called', () => {
+        const game = MOCK_GAMES[0];
+        mockGameService.getGameById.and.returnValue(game);
+
+        component.updateCurrentGame('1');
+
+        expect(mockGameService.getGameById).toHaveBeenCalledWith('1');
+        expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(game);
+    });
+
+    it('should toggle game visibility when toggleVisibility is called', () => {
+        mockGameService.getGameById.and.returnValue(MOCK_GAMES[0]);
+        const event = { target: { checked: true } } as unknown as Event;
+
+        component.toggleVisibility('1', event);
+
+        expect(mockGameService.getGameById).toHaveBeenCalledWith('1');
+        expect(MOCK_GAMES[0].isVisible).toBeTrue();
+    });
+
+    it('should log an error alert when deleteGame fails', () => {
+        spyOn(window, 'confirm').and.returnValue(true);
+        spyOn(window, 'alert');
+        const errorResponse = new Error('Deletion failed');
+        mockGameService.deleteGame.and.returnValue(throwError(() => errorResponse));
+
+        component.deleteGame('1');
+
+        expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete 1?');
+        expect(mockGameService.deleteGame).toHaveBeenCalledWith('1');
+        expect(window.alert).toHaveBeenCalledWith('Deletion failed.');
     });
 });

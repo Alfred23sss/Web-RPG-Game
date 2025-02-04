@@ -1,9 +1,9 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
 import { GameService } from '@app/services/game/game.service';
-import { CommonModule } from '@angular/common';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-create-page',
@@ -13,7 +13,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 })
 export class CreatePageComponent {
     constructor(
-        private dialog: MatDialog,
+        private readonly dialog: MatDialog,
         public gameService: GameService,
     ) {}
 

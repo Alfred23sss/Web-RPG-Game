@@ -1,24 +1,32 @@
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { CreatePageComponent } from './create-page.component';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
+import { GameService } from '@app/services/game/game.service';
+import { CreatePageComponent } from './create-page.component';
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
-    let mockDialog: jasmine.SpyObj<MatDialog>;
+    let dialog: MatDialog;
+    let mockGameService: jasmine.SpyObj<GameService>;
 
     beforeEach(async () => {
-        mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+        mockGameService = jasmine.createSpyObj('GameService', ['getGames']);
+
         await TestBed.configureTestingModule({
-            imports: [CreatePageComponent],
-            providers: [{ provide: MatDialog, useValue: mockDialog }],
+            imports: [MatDialogModule, MatTooltipModule, CommonModule, CreatePageComponent],
+            providers: [{ provide: GameService, useValue: mockGameService }],
         }).compileComponents();
     });
 
     beforeEach(() => {
         fixture = TestBed.createComponent(CreatePageComponent);
         component = fixture.componentInstance;
+        dialog = TestBed.inject(MatDialog);
+        mockGameService.getGames.and.returnValue([]);
+
         fixture.detectChanges();
     });
 
@@ -26,8 +34,11 @@ describe('CreatePageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('openDialog should open the dialog with PopUpComponent', () => {
+    it('should open dialog with CharacterFormComponent when openDialog is called', () => {
+        const dialogOpenSpy = spyOn(dialog, 'open').and.callThrough();
+
         component.openDialog();
-        expect(mockDialog.open).toHaveBeenCalledWith(CharacterFormComponent);
+
+        expect(dialogOpenSpy).toHaveBeenCalledWith(CharacterFormComponent);
     });
 });
