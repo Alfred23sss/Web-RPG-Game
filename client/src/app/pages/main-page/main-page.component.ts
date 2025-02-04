@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { GameDecorations } from '@app/interfaces/images';
 import { CommunicationService } from '@app/services/communication/communication.service';
 import { Message } from '@common/message';
 import { BehaviorSubject } from 'rxjs';
@@ -13,9 +14,9 @@ import { map } from 'rxjs/operators';
     imports: [RouterLink],
 })
 export class MainPageComponent {
-    readonly title: string = 'Nom Jeux...';
+    readonly title: string = 'Game Name...';
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
-
+    gameDecorations = GameDecorations;
     constructor(private readonly communicationService: CommunicationService) {}
 
     sendTimeToServer(): void {
@@ -23,14 +24,14 @@ export class MainPageComponent {
             title: 'Hello from the client',
             body: 'Time is : ' + new Date().toString(),
         };
-        // Important de ne pas oublier "subscribe" ou l'appel ne sera jamais lancé puisque personne l'observe
+        // It is important not to forget "subscribe," or the call will never be made since no one is observing it
         this.communicationService.basicPost(newTimeMessage).subscribe({
             next: (response) => {
-                const responseString = `Le serveur a reçu la requête a retourné un code ${response.status} : ${response.statusText}`;
+                const responseString = `The server received the request and returned a code ${response.status} : ${response.statusText}`;
                 this.message.next(responseString);
             },
             error: (err: HttpErrorResponse) => {
-                const responseString = `Le serveur ne répond pas et a retourné : ${err.message}`;
+                const responseString = `The server is not responding and returned: ${err.message}`;
                 this.message.next(responseString);
             },
         });
@@ -39,7 +40,7 @@ export class MainPageComponent {
     getMessagesFromServer(): void {
         this.communicationService
             .basicGet()
-            // Cette étape transforme l'objet Message en un seul string
+            // This step transforms the Message object into a single string
             .pipe(
                 map((message: Message) => {
                     return `${message.title} ${message.body}`;
