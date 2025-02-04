@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import html2canvas from 'html2canvas';
+import { Html2CanvasWrapper } from './html2canvas-wrapper';
 
 @Injectable({
     providedIn: 'root',
@@ -19,6 +19,7 @@ export class ScreenshotService {
             imageFormat: 'image/jpeg',
         });
     }
+    // eslint-disable-next-line spaced-comment
     //inspire de cette video youtube: https://www.youtube.com/watch?v=5TUvcep_bX8&ab_channel=BenNadel
     private async captureElement(
         elementId: string,
@@ -37,7 +38,7 @@ export class ScreenshotService {
         }
 
         try {
-            const canvas = await html2canvas(target, {
+            const canvas = await Html2CanvasWrapper.captureElement(target, {
                 logging: false,
                 scale: options?.scale || 1,
                 onclone: (clonedDoc) => {

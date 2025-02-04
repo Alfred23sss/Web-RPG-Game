@@ -1,53 +1,94 @@
-import { DOCUMENT } from '@angular/common';
 import { TestBed } from '@angular/core/testing';
 import { ScreenshotService } from './generate-screenshots.service';
+import { Html2CanvasWrapper } from './html2canvas-wrapper';
 
 describe('ScreenshotService', () => {
     let service: ScreenshotService;
-    let mockHtml2Canvas: jasmine.Spy;
-    let mockElement: HTMLElement;
-    let mockDocument: { getElementById: (id: string) => HTMLElement | null };
 
     beforeEach(() => {
-        mockDocument = {
-            getElementById: (id: string) => null,
-        };
-
-        mockHtml2Canvas = jasmine.createSpy('html2canvas').and.callFake((element, options) => {
-            if (options?.onclone) {
-                const clonedDoc = {
-                    getElementById: (id: string) => (id === element.id ? element : null),
-                } as unknown as Document;
-                options.onclone(clonedDoc);
-            }
-
-            return Promise.resolve({
-                toDataURL: () => 'data:image/png;base64,...',
-            });
-        });
-
-        TestBed.configureTestingModule({
-            providers: [ScreenshotService, { provide: DOCUMENT, useValue: mockDocument }, { provide: 'HTML2CANVAS', useValue: mockHtml2Canvas }],
-        });
-
+        TestBed.configureTestingModule({});
         service = TestBed.inject(ScreenshotService);
     });
 
-    describe('Element found', () => {
-        beforeEach(() => {
-            mockElement = document.createElement('div');
-            mockElement.id = 'test';
-            mockDocument.getElementById = jasmine.createSpy('getElementById').and.returnValue(mockElement);
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
+
+    it('should call captureElement() when generateScreenshot is called', async () => {
+        const spy = spyOn(service as unknown as { captureElement: () => Promise<string> }, 'captureElement').and.returnValue(
+            Promise.resolve('mock-data-url'),
+        );
+
+        await service.generateScreenshot('test');
+
+        expect(spy).toHaveBeenCalled();
+    });
+
+    it('should call captureElement() when generatePreview is called with specified options', async () => {
+        const spy = spyOn(
+            service as unknown as { captureElement: (id: string, options: unknown) => Promise<string> },
+            'captureElement',
+        ).and.returnValue(Promise.resolve('mock-data-url'));
+
+        await service.generatePreview('test');
+
+        expect(spy).toHaveBeenCalledWith('test', {
+            scale: 0.8,
+            quality: 0.7,
+            imageFormat: 'image/jpeg',
+        });
+    });
+
+    it('should fail when captureElement is called with an invalid id', async () => {
+        await expectAsync(service.generateScreenshot('invalid-id')).toBeRejectedWith("Element 'invalid-id' not found");
+    });
+
+    it('should reject with a formatted error message when captureElement fails', async () => {
+        spyOn(Html2CanvasWrapper, 'captureElement').and.callFake(async () => {
+            return Promise.reject('Internal Error');
+        });
+        await expectAsync(service.generateScreenshot('test')).toBeRejectedWithError('Failed to capture: Internal Error');
+    });
+
+    it('should call Html2CanvasWrapper.captureElement with correct options', async () => {
+        const captureElementSpy = spyOn(Html2CanvasWrapper, 'captureElement').and.returnValue(Promise.resolve(document.createElement('canvas')));
+
+        const testElement = document.createElement('div');
+        testElement.id = 'test';
+
+        spyOn(document, 'getElementById').and.returnValue(testElement);
+        await service.generateScreenshot('test');
+
+        expect(captureElementSpy).toHaveBeenCalledWith(jasmine.any(HTMLElement), {
+            logging: false,
+            scale: 1,
+            onclone: jasmine.any(Function),
+        });
+    });
+
+    it('should add "html2canvas" class to the cloned element in onclone callback', async () => {
+        const dummyElement = document.createElement('div');
+        dummyElement.id = 'test';
+        document.body.appendChild(dummyElement);
+        spyOn(Html2CanvasWrapper, 'captureElement').and.callFake(async (element, options = {}) => {
+            const clonedDoc = document.implementation.createHTMLDocument();
+            const clonedElement = clonedDoc.createElement('div');
+            clonedElement.id = 'test';
+            clonedDoc.body.appendChild(clonedElement);
+
+            options.onclone?.(clonedDoc, element);
+
+            expect(clonedElement.classList.contains('html2canvas')).toBeTrue();
+
+            return Promise.resolve(document.createElement('canvas'));
         });
 
-        it('should call html2canvas with default options', async () => {
-            await service.generateScreenshot('test');
+        await service.generateScreenshot('test');
+    });
 
-            expect(mockHtml2Canvas).toHaveBeenCalledWith(mockElement, {
-                logging: false,
-                scale: 1,
-                onclone: jasmine.any(Function),
-            });
-        });
+    it('should reject with an error when the element is not found', async () => {
+        spyOn(document, 'getElementById').and.returnValue(null);
+
+        await expectAsync(service.generateScreenshot('invalid-id')).toBeRejectedWith("Element 'invalid-id' not found");
     });
 });
