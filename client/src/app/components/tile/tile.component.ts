@@ -43,6 +43,9 @@ export class TileComponent {
         if (TileComponent.activeButton === 0) {
             this.applyTool();
         }
+        if (TileComponent.activeButton === 2) {
+            this.removeTileType();
+        }
     }
 
     @HostListener('contextmenu', ['$event'])

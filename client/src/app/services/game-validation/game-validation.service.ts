@@ -12,6 +12,24 @@ enum DescriptionLength {
     Min = 0,
     Max = 100,
 }
+
+enum GameSize {
+    Small = "10",
+    Medium = "15",
+    Large = "20",
+}
+
+enum ClassicItemCount {
+    Small = 10,
+    Medium = 14,
+    Large = 18,
+}
+
+enum OtherModeItemCount {
+    Small = 11,
+    Medium = 15,
+    Large = 19,
+}
 @Injectable({
     providedIn: 'root',
 })
@@ -21,20 +39,27 @@ export class GameValidationService {
         private snackBar: MatSnackBar,
     ) {}
 
-    isDoorPositionValid(game: Game) {
+    isDoorPositionValid(game: Game): boolean {
         if (!game.grid) {
-            return;
+            return false;
         }
-
-        for (let i = 0; i < game.grid.length; i++) {
-            for (let j = 0; j < game.grid[i].length; j++) {
+    
+        const numRows = game.grid.length;
+        const numCols = game.grid[0].length;
+    
+        for (let i = 0; i < numRows; i++) {
+            for (let j = 0; j < numCols; j++) {
                 const tile = game.grid[i][j];
-
+    
                 if (tile.type === TileType.Door) {
+                    if (i === 0 || j === 0 || i === numRows - 1 || j === numCols - 1) {
+                        this.showError(`❌ Door at (${i + 1}, ${j + 1}) cannot be placed on the edge.`);
+                        return false;
+                    }
+    
                     const hasWallOnSameAxis = this.hasWallsOnSameAxis(game, i, j);
-
                     const hasTerrainOnOtherAxis = this.hasTerrainOnOtherAxis(game, i, j);
-
+    
                     if (!hasWallOnSameAxis || !hasTerrainOnOtherAxis) {
                         this.showError(`❌ Door at (${i + 1}, ${j + 1}) is not correctly placed.`);
                         return false;
@@ -44,7 +69,7 @@ export class GameValidationService {
         }
         return true;
     }
-
+  
     isHalfTerrain(game: Game) {
         if (!game.grid) {
             return;
@@ -71,6 +96,152 @@ export class GameValidationService {
 
     isTitleAndDescriptionValid(title: string, description: string) {
         return this.isTitleValid(title) && this.isDescriptionValid(description);
+    }
+
+    isItemCountValid(game: Game): boolean {
+        if (!game.grid) {
+            return false;
+        }
+    
+        let itemCount = 0;
+        for (const row of game.grid) {
+            for (const tile of row) {
+                if (tile.item) {
+                    itemCount++;
+                }
+            }
+        }
+    
+        const expectedItemCount =
+            game.size === GameSize.Small
+                ? game.mode === "Classic"
+                    ? ClassicItemCount.Small
+                    : OtherModeItemCount.Small
+                : game.size === GameSize.Large
+                ? game.mode === "Classic"
+                    ? ClassicItemCount.Large
+                    : OtherModeItemCount.Large
+                : game.mode === "Classic"
+                ? ClassicItemCount.Medium
+                : OtherModeItemCount.Medium;
+    
+        return itemCount === expectedItemCount;
+    }
+    
+    isFlagPlaced(game: Game): boolean {
+        if (!game.grid) {
+            return false;
+        }
+    
+        for (const row of game.grid) {
+            for (const tile of row) {
+                if (tile.item?.name === "flag") {
+                    return true;
+                }
+            }
+        }
+    
+        this.showError("❌ Flag must be placed on the map.");
+        return false;
+    }
+    
+    areHomeItemsPlaced(game: Game): boolean {
+        if (!game.grid) {
+            return false;
+        }
+    
+        const requiredHomeItems =
+            game.size === GameSize.Small ? 2 : game.size === GameSize.Medium ? 4 : 6;
+        let homeItemCount = 0;
+    
+        for (const row of game.grid) {
+            for (const tile of row) {
+                if (tile.item?.name === "home") {
+                    homeItemCount++;
+                }
+            }
+        }
+    
+        if (homeItemCount < requiredHomeItems) {
+            this.showError(`❌ ${requiredHomeItems} home items must be placed.`);
+            return false;
+        }
+    
+        return true;
+    }
+    
+    isItemValid(game: Game): boolean {
+        return this.isItemCountValid(game) && this.isFlagPlaced(game) && this.areHomeItemsPlaced(game);
+    }
+  
+    isAllTerrainAccessible(game: Game): boolean {
+        if (!game.grid || game.grid.length === 0) {
+        return false;
+        }
+
+        const numRows = game.grid.length;
+        const numCols = game.grid[0].length;
+
+        let startRow = -1;
+        let startCol = -1;
+        for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+            if (game.grid[i][j].type !== TileType.Wall) {
+            startRow = i;
+            startCol = j;
+            break;
+            }
+        }
+        if (startRow !== -1) {
+            break;
+        }
+        }
+
+        if (startRow === -1) {
+        return false;
+        }
+
+        const visited: boolean[][] = Array.from({ length: numRows }, () => Array(numCols).fill(false));
+
+        const queue: { row: number; col: number }[] = [{ row: startRow, col: startCol }];
+        visited[startRow][startCol] = true;
+
+        const directions = [
+        { dr: -1, dc: 0 },
+        { dr: 1, dc: 0 },
+        { dr: 0, dc: -1 },
+        { dr: 0, dc: 1 },
+        ];
+
+        while (queue.length > 0) {
+        const { row, col } = queue.shift()!;
+        for (const { dr, dc } of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+
+            if (newRow < 0 || newRow >= numRows || newCol < 0 || newCol >= numCols) {
+            continue;
+            }
+
+            if (visited[newRow][newCol] || game.grid[newRow][newCol].type === TileType.Wall) {
+            continue;
+            }
+
+            visited[newRow][newCol] = true;
+            queue.push({ row: newRow, col: newCol });
+        }
+        }
+
+        for (let i = 0; i < numRows; i++) {
+        for (let j = 0; j < numCols; j++) {
+            if (game.grid[i][j].type !== TileType.Wall && !visited[i][j]) {
+                this.showError(`❌ La tuile à la position (${i}, ${j}) est inaccessible.`);
+            return false;
+            }
+        }
+        }
+
+        return true;
     }
 
     private hasWallsOnSameAxis(game: Game, i: number, j: number): boolean {

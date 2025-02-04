@@ -4,6 +4,7 @@ import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/interfaces/item';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
+import { Tile } from '@app/interfaces/tile';
 
 enum GameSize {
     Small = '10',
@@ -77,6 +78,20 @@ export class ItemBarComponent implements OnInit {
             if (ITEMS_TO_UPDATE.has(item.name)) {
                 item.itemCounter = count;
             }
+        });
+        const grid = this.gameService.getCurrentGame()?.grid as Tile[][] | undefined;
+
+        if (!grid) return;
+
+        grid.forEach((row) => {
+            row.forEach((tile) => {
+                if (tile.item) {
+                    const item = this.items.find((i) => i.name === tile.item!.name);
+                    if (item) {
+                        item.itemCounter = Math.max(0, item.itemCounter - 1);
+                    }
+                }
+            });
         });
     }
 

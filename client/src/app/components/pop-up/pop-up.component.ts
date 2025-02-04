@@ -99,7 +99,7 @@ export class PopUpComponent {
             lastModified: new Date(),
             isVisible: true,
             previewImage: '',
-            description: `A ${gameMode} game on a ${gameSize} map.`,
+            description: '',
             grid: this.gridService.createGrid(gridSize, gridSize),
         };
     }

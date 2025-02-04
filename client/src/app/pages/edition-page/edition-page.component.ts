@@ -63,6 +63,10 @@ export class EditionPageComponent implements OnInit {
 
         if (!this.gameValidationService.isDoorPositionValid(this.tempGame)) return;
 
+        if(!this.gameValidationService.isAllTerrainAccessible(this.tempGame)) return;
+
+        if(!this.gameValidationService.isItemValid(this.tempGame)) return;
+
         this.savePreviewImage();
         this.gameService.updateCurrentGame(this.tempGame);
         this.gameService.saveGame(this.tempGame);
