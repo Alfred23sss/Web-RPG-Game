@@ -11,6 +11,27 @@ img {
     justify-content: left;
 }
 
-.image {
-    margin-right: 8px;
+.item-content {
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: 10px;
+    margin: 10px;
+}
+
+.counter {
+    font-size: 14px;
+    font-weight: bold;
+    background-color: red;
+    color: white;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: absolute;
+    top: 10px;
+    right: 0px;
+    transform: translate(50%, -50%);
 }

@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game';
+import { GameDecorations, GameModeType } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
@@ -14,6 +15,8 @@ import { v4 as uuidv4 } from 'uuid';
     standalone: true,
 })
 export class PopUpComponent {
+    xSword = GameDecorations.XSwords;
+    gameModes = GameModeType;
     constructor(
         private dialogRef: MatDialog,
         public gameModeService: GameModeService,
@@ -21,7 +24,6 @@ export class PopUpComponent {
         private router: Router,
         private gridService: GridService,
     ) {}
-
     setGameSize(size: string) {
         this.gameModeService.setGameSize(size);
     }

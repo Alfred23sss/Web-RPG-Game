@@ -1,11 +1,14 @@
 <div class="Object-container">
-    <h1 class="header-item">{{ activeItem?.name || 'None' }}</h1>
-    <span>Attributes</span>
-    <div class="loop-container">
-        @for (item of items; track item.id) {
-        <div class="item">
-            <img src="assets/images/question.png" alt="a{{ item.id }}" cdkDrag />
+    @for (item of items; track item.id) {
+    <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()" (drop)="onDrop($event, item)" (dragover)="onDragOver($event)">
+        <div class="item-content">
+            @if(item.itemCounter > 0) {
+            <img draggable="true" [src]="item.imageSrc" [alt]="item.name || 'Item'" />
+            } @else {
+            <img draggable="false" [src]="item.imageSrcGrey" [alt]="item.name || 'Item'" />
+            }
+            <span class="counter">{{ item.itemCounter }}</span>
         </div>
-        }
     </div>
+    }
 </div>

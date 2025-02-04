@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +19,7 @@ export class EditionPageComponent implements OnInit {
     gameName: string = '';
     gameDescription: string = '';
     tempGame: Game;
-    private originalGame: Game;
+    originalGame: Game;
 
     constructor(
         private gameService: GameService,
@@ -29,7 +28,6 @@ export class EditionPageComponent implements OnInit {
     ) {}
 
     ngOnInit() {
-        // changer possiblement pour og game pr garder logique
         this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
@@ -42,9 +40,7 @@ export class EditionPageComponent implements OnInit {
     }
 
     reset() {
-        // a finir apres persistance etablie
         this.gameService.updateCurrentGame(this.originalGame);
-        // this.cdr.detectChanges();
     }
 
     async save() {
@@ -58,7 +54,7 @@ export class EditionPageComponent implements OnInit {
             this.gameService.updateCurrentGame(this.tempGame);
             this.gameService.saveGame(this.tempGame);
         } catch (error) {
-            console.error('Erreur lors de la capture:', error);
+            console.error('Error when saving:', error);
         }
     }
 

@@ -1,16 +1,17 @@
-/* Fichier CSS */
+@use 'src/styles.scss';
+
 .toolbar-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start; /* Align tools to the top */
-    height: 100vh; /* Full height of the viewport */
-    width: 220px; /* Slightly wider for a modern look */
-    background: linear-gradient(180deg, #001f3f, #004080); /* Dark blue gradient */
-    color: #ffd700; /* Yellow-orange text color */
+    justify-content: flex-start;
+    height: 100vh;
+    width: 220px;
+    background: linear-gradient(180deg, #001f3f, #004080);
+    color: #ffd700;
     padding: 20px 10px;
-    border-right: 3px solid #ffa500; /* Yellow-orange border */
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow */
+    border-right: 3px solid #ffa500;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     box-sizing: border-box;
 }
 
@@ -18,7 +19,6 @@
     display: block;
     height: 100vh;
     margin: 0;
-    background-image: url('/assets/background.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;

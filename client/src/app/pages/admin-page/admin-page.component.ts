@@ -5,8 +5,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { Game } from '@app/interfaces/game';
+import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -15,13 +17,14 @@ import { GridService } from '@app/services/grid/grid-service.service';
 })
 export class AdminPageComponent implements OnInit {
     games: Game[] = this.gameService.games;
+    backgroundImage = GameDecorations.Background;
     constructor(
         private dialogRef: MatDialog,
         public gameService: GameService,
         public gridService: GridService,
     ) {}
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.gameService.fetchGames().subscribe((response) => {
             this.games = response;
         });
@@ -35,23 +38,18 @@ export class AdminPageComponent implements OnInit {
         if (confirm(`Are you sure you want to delete ${id}?`)) {
             this.gameService.deleteGame(id).subscribe({
                 next: () => {
-                    console.log(`${id} was deleted successfully.`);
                     this.removeGame(id);
                 },
-                error: (err) => {
-                    console.error('Error deleting game:', err);
+                error: () => {
+                    alert('Deletion failed.'); // CHANGE TO SNACKBAR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 },
             });
         }
     }
 
-    removeGame(id: string) {
-        this.games = this.games.filter((game) => game.id !== id);
-    }
     updateCurrentGame(id: string) {
         const game = this.gameService.getGameById(id);
         if (game) {
-            // this.gridService.setGrid(game.grid);
             this.gameService.updateCurrentGame(game);
         }
     }
@@ -60,9 +58,12 @@ export class AdminPageComponent implements OnInit {
         const inputElement = event.target as HTMLInputElement;
         const isVisible = inputElement.checked;
         const game = this.gameService.getGameById(id);
-
         if (game) {
             game.isVisible = isVisible;
         }
+    }
+
+    private removeGame(id: string) {
+        this.games = this.games.filter((game) => game.id !== id);
     }
 }
