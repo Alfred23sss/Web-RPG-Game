@@ -41,7 +41,7 @@ export class AdminPageComponent implements OnInit {
                     this.removeGame(id);
                 },
                 error: () => {
-                    alert('Deletion failed.');
+                    alert('Deletion failed.'); // CHANGE TO SNACKBAR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 },
             });
         }

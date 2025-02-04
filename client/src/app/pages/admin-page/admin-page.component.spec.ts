@@ -2,11 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { of, throwError } from 'rxjs';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { AdminPageComponent } from './admin-page.component';
 import { ActivatedRoute } from '@angular/router';
+import { MOCK_GAMES } from '@app/global.constants';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
@@ -15,37 +15,12 @@ describe('AdminPageComponent', () => {
     let mockGridService: jasmine.SpyObj<GridService>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
 
-    const mockGames: Game[] = [
-        {
-            id: '1',
-            name: 'Game 1',
-            isVisible: false,
-            size: '15',
-            mode: 'Singleplayer',
-            lastModified: new Date(),
-            previewImage: 'image1.jpg',
-            description: 'Description 1',
-            grid: [],
-        },
-        {
-            id: '2',
-            name: 'Game 2',
-            isVisible: true,
-            size: '20',
-            mode: 'Multiplayer',
-            lastModified: new Date(),
-            previewImage: 'image2.jpg',
-            description: 'Description 2',
-            grid: [],
-        },
-    ];
-
     beforeEach(async () => {
         mockGameService = jasmine.createSpyObj('GameService', ['fetchGames', 'deleteGame', 'getGameById', 'updateCurrentGame']);
         mockGridService = jasmine.createSpyObj('GridService', ['setGrid']);
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
-        mockGameService.fetchGames.and.returnValue(of(mockGames));
+        mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES));
 
         await TestBed.configureTestingModule({
             imports: [AdminPageComponent],
@@ -70,7 +45,7 @@ describe('AdminPageComponent', () => {
 
     it('should fetch games on ngOnInit', () => {
         expect(mockGameService.fetchGames).toHaveBeenCalled();
-        expect(component.games).toEqual(mockGames);
+        expect(component.games).toEqual(MOCK_GAMES);
     });
 
     it('should open dialog with PopUpComponent when openDialog is called', () => {
@@ -80,24 +55,13 @@ describe('AdminPageComponent', () => {
 
     it('should call deleteGame on gameService and remove game from list if confirm is true', () => {
         spyOn(window, 'confirm').and.returnValue(true);
-        const deletedGame: Game = {
-            id: '1',
-            name: 'Game 1',
-            isVisible: false,
-            size: '15',
-            mode: 'Singleplayer',
-            lastModified: new Date(),
-            previewImage: 'image1.jpg',
-            description: 'Description 1',
-            grid: [],
-        };
-        mockGameService.deleteGame.and.returnValue(of(deletedGame));
+        mockGameService.deleteGame.and.returnValue(of(MOCK_GAMES[1]));
 
         component.deleteGame('1');
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete 1?');
         expect(mockGameService.deleteGame).toHaveBeenCalledWith('1');
-        expect(component.games).toEqual([mockGames[1]]);
+        expect(component.games).toEqual([MOCK_GAMES[1]]);
     });
 
     it('should not call deleteGame on gameService if confirm is false', () => {
@@ -107,11 +71,11 @@ describe('AdminPageComponent', () => {
 
         expect(window.confirm).toHaveBeenCalledWith('Are you sure you want to delete 1?');
         expect(mockGameService.deleteGame).not.toHaveBeenCalled();
-        expect(component.games).toEqual(mockGames);
+        expect(component.games).toEqual(MOCK_GAMES);
     });
 
     it('should update current game when updateCurrentGame is called', () => {
-        const game = mockGames[0];
+        const game = MOCK_GAMES[0];
         mockGameService.getGameById.and.returnValue(game);
 
         component.updateCurrentGame('1');
@@ -121,14 +85,13 @@ describe('AdminPageComponent', () => {
     });
 
     it('should toggle game visibility when toggleVisibility is called', () => {
-        const game = mockGames[0];
-        mockGameService.getGameById.and.returnValue(game);
+        mockGameService.getGameById.and.returnValue(MOCK_GAMES[0]);
         const event = { target: { checked: true } } as unknown as Event;
 
         component.toggleVisibility('1', event);
 
         expect(mockGameService.getGameById).toHaveBeenCalledWith('1');
-        expect(game.isVisible).toBeTrue();
+        expect(MOCK_GAMES[0].isVisible).toBeTrue();
     });
 
     it('should log an error alert when deleteGame fails', () => {
