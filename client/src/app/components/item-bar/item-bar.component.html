@@ -1,6 +1,13 @@
 <div class="Object-container">
     @for (item of items; track item.id) {
-    <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()" (drop)="onDrop($event, item)" (dragover)="onDragOver($event)">
+    <div
+        class="item"
+        (mousedown)="selectObject(item)"
+        (mouseup)="removeObject()"
+        (drop)="onDrop($event, item)"
+        (dragover)="onDragOver($event)"
+        [title]="item.description"
+    >
         <div class="item-content">
             @if(item.itemCounter > 0) {
             <img draggable="true" [src]="item.imageSrc" [alt]="item.name || 'Item'" />
