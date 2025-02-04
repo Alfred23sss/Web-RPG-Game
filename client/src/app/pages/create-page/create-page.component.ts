@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
@@ -15,7 +16,7 @@ import { GameService } from '@app/services/game/game.service';
 export class CreatePageComponent implements OnInit {
     games: Game[] = this.gameService.games;
     constructor(
-        private dialog: MatDialog,
+        private readonly dialog: MatDialog,
         public gameService: GameService,
     ) {}
 

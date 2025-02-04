@@ -1,8 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
-const MIN_VALUE = 1000;
-const RANGE = 9000;
-
+import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/global.constants';
 @Component({
     selector: 'app-waiting-view',
     templateUrl: './waiting-view.component.html',
@@ -11,11 +8,11 @@ const RANGE = 9000;
 export class WaitingViewComponent implements OnInit {
     accessCode: string;
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.generateAccessCode();
     }
 
-    generateAccessCode() {
-        this.accessCode = Math.floor(MIN_VALUE + Math.random() * RANGE).toString();
+    private generateAccessCode(): void {
+        this.accessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
     }
 }

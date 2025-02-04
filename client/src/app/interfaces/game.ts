@@ -12,8 +12,6 @@ export enum GameSize {
     None = '',
 }
 
-// change size and mode for enums and change in the rest of the code
-
 export interface Game {
     id: string;
     name: string;
@@ -21,7 +19,7 @@ export interface Game {
     mode: string;
     lastModified: Date;
     isVisible: boolean;
-    previewImage: string; // path to img
+    previewImage: string;
     description: string;
     grid: Tile[][] | undefined;
 }

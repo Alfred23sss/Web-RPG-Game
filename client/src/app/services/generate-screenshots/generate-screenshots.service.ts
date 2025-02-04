@@ -1,6 +1,6 @@
 import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
-import html2canvas from 'html2canvas';
+import { Html2CanvasWrapper } from './html2canvas-wrapper';
 
 @Injectable({
     providedIn: 'root',
@@ -19,7 +19,8 @@ export class ScreenshotService {
             imageFormat: 'image/jpeg',
         });
     }
-    // inspire de cette video youtube: https://www.youtube.com/watch?v=5TUvcep_bX8&ab_channel=BenNadel
+    // eslint-disable-next-line spaced-comment
+    //inspire de cette video youtube: https://www.youtube.com/watch?v=5TUvcep_bX8&ab_channel=BenNadel
     private async captureElement(
         elementId: string,
         options?: {
@@ -33,11 +34,11 @@ export class ScreenshotService {
         const target = this.document.getElementById(elementId);
 
         if (!target) {
-            return Promise.reject(`Élément '${elementId}' introuvable`);
+            return Promise.reject(`Element '${elementId}' not found`);
         }
 
         try {
-            const canvas = await html2canvas(target, {
+            const canvas = await Html2CanvasWrapper.captureElement(target, {
                 logging: false,
                 scale: options?.scale || 1,
                 onclone: (clonedDoc) => {
@@ -48,7 +49,7 @@ export class ScreenshotService {
 
             return canvas.toDataURL(options?.imageFormat || 'image/png', options?.quality);
         } catch (error) {
-            return Promise.reject(`Échec de capture: ${error}`);
+            return Promise.reject(`Failed to capture: ${error}`);
         }
     }
 }

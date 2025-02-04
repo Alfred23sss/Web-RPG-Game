@@ -21,7 +21,7 @@ const modules = [
 
 /**
  * Material module
- * IMPORTANT : Retirer les modules non utilisés et ajouter seulement ceux vraiment utilisés
+ * IMPORTANT : Remove unused modules and only keep actual used ones.
  */
 @NgModule({
     imports: [...modules],

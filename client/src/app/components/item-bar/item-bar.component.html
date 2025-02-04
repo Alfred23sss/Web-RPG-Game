@@ -3,9 +3,9 @@
     <div class="item" (mousedown)="selectObject(item)" (mouseup)="removeObject()" (drop)="onDrop($event, item)" (dragover)="onDragOver($event)">
         <div class="item-content">
             @if(item.itemCounter > 0) {
-            <img draggable="true" [src]="item.imageSrc || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
+            <img draggable="true" [src]="item.imageSrc" [alt]="item.name || 'Item'" />
             } @else {
-            <img draggable="false" [src]="item.imageSrcGrey || 'assets/images/default.png'" [alt]="item.name || 'Item'" />
+            <img draggable="false" [src]="item.imageSrcGrey" [alt]="item.name || 'Item'" />
             }
             <span class="counter">{{ item.itemCounter }}</span>
         </div>

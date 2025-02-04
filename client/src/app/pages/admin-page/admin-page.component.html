@@ -5,7 +5,6 @@
         @for(game of games; let index = $index; track $index) {
         <li class="game-item">
             <div class="game-preview">
-                <!-- on hover should display description -->
                 <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
             </div>
             <div class="game-info">
@@ -23,7 +22,6 @@
     </ul>
     } @else {
     <p>No games available. Please add a game.</p>
-    <!-- add css if no games available -->
     }
 
     <button class="create-button" (click)="openDialog()">Create Game</button>

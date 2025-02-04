@@ -11,7 +11,6 @@ export class GridService {
         return Array.from({ length: rows }, (_, rowIndex) =>
             Array.from(
                 { length: cols },
-                // eslint-disable-next-line @typescript-eslint/no-shadow
                 (_, colIndex): Tile => ({
                     id: `tile-${rowIndex}-${colIndex}`,
                     imageSrc: ImageType.Default,
@@ -32,19 +31,10 @@ export class GridService {
     }
 
     getTile(row: number, col: number) {
-        if (this.grid) {
-            return this.grid[row][col];
-        } else {
-            return;
-        }
+        return this.grid?.[row]?.[col];
     }
 
     updateTile(row: number, col: number, newTile: Partial<Tile>): void {
-        if (this.grid) {
-            const tile = this.grid[row]?.[col];
-            if (tile) {
-                Object.assign(tile, newTile);
-            }
-        }
+        this.grid?.[row]?.[col] && Object.assign(this.grid[row][col], newTile);
     }
 }
