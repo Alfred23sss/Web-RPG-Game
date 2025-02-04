@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
+import { MOCK_GAMES } from '@app/global.constants';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+import { of, throwError } from 'rxjs';
 import { AdminPageComponent } from './admin-page.component';
-import { ActivatedRoute } from '@angular/router';
-import { MOCK_GAMES } from '@app/global.constants';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;
