@@ -21,6 +21,30 @@ export class GameValidationService {
         private snackBar: MatSnackBar,
     ) {}
 
+    isDoorPositionValid(game: Game) {
+        if (!game.grid) {
+            return;
+        }
+
+        for (let i = 0; i < game.grid.length; i++) {
+            for (let j = 0; j < game.grid[i].length; j++) {
+                const tile = game.grid[i][j];
+
+                if (tile.type === TileType.Door) {
+                    const hasWallOnSameAxis = this.hasWallsOnSameAxis(game, i, j);
+
+                    const hasTerrainOnOtherAxis = this.hasTerrainOnOtherAxis(game, i, j);
+
+                    if (!hasWallOnSameAxis || !hasTerrainOnOtherAxis) {
+                        this.showError(`❌ Door at (${i + 1}, ${j + 1}) is not correctly placed.`);
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
     isHalfTerrain(game: Game) {
         if (!game.grid) {
             return;
@@ -47,6 +71,25 @@ export class GameValidationService {
 
     isTitleAndDescriptionValid(title: string, description: string) {
         return this.isTitleValid(title) && this.isDescriptionValid(description);
+    }
+
+    private hasWallsOnSameAxis(game: Game, i: number, j: number): boolean {
+        return (this.isWall(game, i - 1, j) && this.isWall(game, i + 1, j)) || (this.isWall(game, i, j - 1) && this.isWall(game, i, j + 1)); // Horizontal check
+    }
+
+    private hasTerrainOnOtherAxis(game: Game, i: number, j: number): boolean {
+        return (
+            (!this.isWallOrDoor(game, i - 1, j) && !this.isWallOrDoor(game, i + 1, j)) ||
+            (!this.isWallOrDoor(game, i, j - 1) && !this.isWallOrDoor(game, i, j + 1))
+        );
+    }
+
+    private isWall(game: Game, i: number, j: number): boolean {
+        return !!game.grid?.[i]?.[j] && game.grid[i][j].type === TileType.Wall;
+    }
+
+    private isWallOrDoor(game: Game, i: number, j: number): boolean {
+        return !!game.grid?.[i]?.[j] && (game.grid[i][j].type === TileType.Wall || game.grid[i][j].type === TileType.Door);
     }
 
     private isTitleValid(title: string): boolean {

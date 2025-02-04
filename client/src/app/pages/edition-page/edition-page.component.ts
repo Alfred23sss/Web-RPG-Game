@@ -55,23 +55,25 @@ export class EditionPageComponent implements OnInit {
     save() {
         // manque logique des contraintes de save
         // mettre toute la validation focntion separe dans une fonction appeler ici qui return si pas valider sinon fait les saves
+
         if (!this.gameValidationService.isHalfTerrain(this.tempGame)) {
             return;
         }
-        if (this.saveTitleAndDescription()) {
-            return;
-            // rajouter feedback quue le jeu a ete saved(snackbar ou revien a admin page?)
-        }
+        if (!this.saveTitleAndDescription()) return;
+
+        if (!this.gameValidationService.isDoorPositionValid(this.tempGame)) return;
+
         this.savePreviewImage();
         this.gameService.updateCurrentGame(this.tempGame);
         this.gameService.saveGame(this.tempGame);
+        // route vers admin, mettre snackbar, saving ... until le save est fini
     }
 
     private async savePreviewImage() {
         try {
             const previewUrl = await this.screenShotService.generatePreview('game-preview');
             this.tempGame.previewImage = previewUrl;
-            console.log('saved image');
+            console.log('saved');
         } catch (error) {
             console.error('Erreur lors de la capture:', error);
         }
