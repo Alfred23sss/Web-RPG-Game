@@ -1,6 +1,6 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/interfaces/item';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
@@ -26,8 +26,7 @@ const ITEMS_TO_UPDATE = new Set(['home', 'question']);
     standalone: true,
     imports: [CommonModule, DragDropModule],
 })
-export class ItemBarComponent {
-    @Input() itemCount: number = 4;
+export class ItemBarComponent implements OnInit {
     activeItem: Item | undefined = undefined;
     items: Item[] = [];
 
@@ -45,14 +44,19 @@ export class ItemBarComponent {
             { id: '4', name: 'fire', imageSrc: 'assets/images/fire.png', imageSrcGrey: 'assets/images/fire-grey.png', itemCounter: 1 },
             { id: '5', name: 'swap', imageSrc: 'assets/images/swap.png', imageSrcGrey: 'assets/images/swap-grey.png', itemCounter: 1 },
             { id: '6', name: 'home', imageSrc: 'assets/images/home.png', imageSrcGrey: 'assets/images/home-grey.png', itemCounter: 2 },
-            { id: '7', name: 'question', imageSrc: 'assets/images/question-mark.png', imageSrcGrey: 'assets/images/question-mark-grey.png', itemCounter: 2 },
+            {
+                id: '7',
+                name: 'question',
+                imageSrc: 'assets/images/question-mark.png',
+                imageSrcGrey: 'assets/images/question-mark-grey.png',
+                itemCounter: 2,
+            },
         ].map((data) => Object.assign(new Item(), data));
 
         this.setItemCount();
     }
 
     selectObject(item: Item): void {
-        console.log('test');
         this.itemDragService.setSelectedItem(item, undefined);
         this.activeItem = this.itemDragService.getSelectedItem();
     }
@@ -78,17 +82,17 @@ export class ItemBarComponent {
 
     onDrop(event: DragEvent, item: Item): void {
         event.preventDefault();
-    
+
         const draggedItem = this.itemDragService.getSelectedItem();
         const previousTile = this.itemDragService.getPreviousTile();
-    
+
         if (!draggedItem) {
             return;
         }
         if (draggedItem.name !== item.name) {
             return;
         }
-        if (draggedItem.id === item.id){
+        if (draggedItem.id === item.id) {
             return;
         }
 
@@ -99,7 +103,6 @@ export class ItemBarComponent {
         }
         this.itemDragService.clearSelection();
     }
-    
 
     onDragOver(event: DragEvent): void {
         event.preventDefault();

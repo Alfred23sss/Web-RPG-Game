@@ -13,8 +13,8 @@ import { ToolService } from '@app/services/tool/tool.service';
 export class TileComponent {
     static activeButton: number | null = null;
     static isDraggedTest = false;
-    activeItem: Item | undefined = undefined;
     @Input() tile!: Tile;
+    activeItem: Item | undefined = undefined;
 
     constructor(
         private toolService: ToolService,
@@ -84,6 +84,11 @@ export class TileComponent {
         TileComponent.isDraggedTest = false;
     }
 
+    selectObject(item: Item): void {
+        this.itemDragService.setSelectedItem(item, this.tile);
+        this.activeItem = this.itemDragService.getSelectedItem();
+    }
+
     private applyItem(item: Item): void {
         this.tile.item = item;
         this.itemDragService.modifyItemCounter();
@@ -103,8 +108,6 @@ export class TileComponent {
                     if (!this.tile.item) {
                         this.tile.isOpen = !this.tile.isOpen;
                         this.tile.imageSrc = this.tile.isOpen ? ImageType.OpenDoor : ImageType.ClosedDoor;
-                    } else {
-                        console.log("You can't open or close a door while an item is on it");
                     }
                 }
             } else {
@@ -112,11 +115,6 @@ export class TileComponent {
                 this.tile.type = selectedTool.tool;
             }
         }
-    }
-
-    selectObject(item: Item): void {
-        this.itemDragService.setSelectedItem(item, this.tile);
-        this.activeItem = this.itemDragService.getSelectedItem();
     }
 
     private removeTileObject(): void {
