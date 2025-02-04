@@ -18,6 +18,7 @@ export class MainPageComponent {
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
     gameDecorations = GameDecorations;
     constructor(private readonly communicationService: CommunicationService) {}
+
     sendTimeToServer(): void {
         const newTimeMessage: Message = {
             title: 'Hello from the client',

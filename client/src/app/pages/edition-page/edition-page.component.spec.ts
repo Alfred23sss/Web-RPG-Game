@@ -5,7 +5,7 @@ import { GridService } from '@app/services/grid/grid-service.service';
 import { of } from 'rxjs';
 import { EditionPageComponent } from './edition-page.component';
 
-fdescribe('EditionPageComponent', () => {
+describe('EditionPageComponent', () => {
     let component: EditionPageComponent;
     let fixture: ComponentFixture<EditionPageComponent>;
     let gameServiceSpy: jasmine.SpyObj<GameService>;

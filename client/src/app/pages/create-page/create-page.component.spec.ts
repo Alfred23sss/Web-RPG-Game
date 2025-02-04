@@ -10,13 +10,14 @@ describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
     let dialog: MatDialog;
+    let mockGameService: jasmine.SpyObj<GameService>;
 
     beforeEach(async () => {
+        mockGameService = jasmine.createSpyObj('GameService', ['getGames']);
+
         await TestBed.configureTestingModule({
             imports: [MatDialogModule, MatTooltipModule, CommonModule, CreatePageComponent],
-            providers: [
-                { provide: GameService, useValue: {} }, // Mock GameService if needed
-            ],
+            providers: [{ provide: GameService, useValue: mockGameService }],
         }).compileComponents();
     });
 
@@ -24,6 +25,8 @@ describe('CreatePageComponent', () => {
         fixture = TestBed.createComponent(CreatePageComponent);
         component = fixture.componentInstance;
         dialog = TestBed.inject(MatDialog);
+        mockGameService.getGames.and.returnValue([]);
+
         fixture.detectChanges();
     });
 

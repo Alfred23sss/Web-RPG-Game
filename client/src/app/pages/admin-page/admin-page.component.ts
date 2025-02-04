@@ -8,6 +8,7 @@ import { Game } from '@app/interfaces/game';
 import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+
 @Component({
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
@@ -23,7 +24,7 @@ export class AdminPageComponent implements OnInit {
         public gridService: GridService,
     ) {}
 
-    ngOnInit(): void {
+    ngOnInit() {
         this.gameService.fetchGames().subscribe((response) => {
             this.games = response;
         });
@@ -37,23 +38,18 @@ export class AdminPageComponent implements OnInit {
         if (confirm(`Are you sure you want to delete ${id}?`)) {
             this.gameService.deleteGame(id).subscribe({
                 next: () => {
-                    console.log(`${id} was deleted successfully.`);
                     this.removeGame(id);
                 },
-                error: (err) => {
-                    console.error('Error deleting game:', err);
+                error: () => {
+                    alert('Deletion failed.');
                 },
             });
         }
     }
 
-    removeGame(id: string) {
-        this.games = this.games.filter((game) => game.id !== id);
-    }
     updateCurrentGame(id: string) {
         const game = this.gameService.getGameById(id);
         if (game) {
-            // this.gridService.setGrid(game.grid);
             this.gameService.updateCurrentGame(game);
         }
     }
@@ -65,5 +61,9 @@ export class AdminPageComponent implements OnInit {
         if (game) {
             game.isVisible = isVisible;
         }
+    }
+
+    private removeGame(id: string) {
+        this.games = this.games.filter((game) => game.id !== id);
     }
 }
