@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game';
-import { GameDecorations, GameModeType } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
@@ -16,8 +15,9 @@ import {
     GRID_DIMENSIONS,
     ROUTES,
     TIME_CONSTANTS,
-} from '../../constants/global.constants';
-import { SnackbarService } from '../../services/snackbar/snackbar.service';
+} from '@app/constants/global.constants';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { GameDecorations } from '@app/interfaces/images';
 
 @Component({
     selector: 'app-pop-up',
@@ -28,6 +28,7 @@ import { SnackbarService } from '../../services/snackbar/snackbar.service';
 export class PopUpComponent {
     gameSizes = GAME_SIZES_LIST;
     gameModes = GAME_MODES_LIST;
+    xSword: GameDecorations.XSwords;
     constructor(
         private dialogRef: MatDialog,
         public gameModeService: GameModeService,

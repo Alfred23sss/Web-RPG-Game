@@ -12,28 +12,28 @@
 
     <div class="character-form_body">
         <div class="character-form_avatars">
-            @for (avatar of avatars; track avatar) {
+            @for (avatar of avatarTypes; track avatar) {
             <img [src]="avatar" (click)="selectedAvatar = avatar" [class.selected]="selectedAvatar === avatar" alt="Avatar" />
             }
         </div>
 
         <div class="character-form_attributes">
-            @for (attribute of ATTRIBUTE_KEYS; track attribute) {
+            @for (attribute of attributeKeys; track attribute) {
             <div>
                 <span>
                     {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} @if (attribute ===
-                    ATTRIBUTE_TYPES.ATTACK && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === ATTRIBUTE_TYPES.DEFENSE &&
+                    attributeTypes.ATTACK && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === attributeTypes.DEFENSE &&
                     selectedDefenseDice) { + {{ selectedDefenseDice }}
                     }
                 </span>
 
-                @if (attribute === ATTRIBUTE_TYPES.VITALITY || attribute === ATTRIBUTE_TYPES.SPEED) {
+                @if (attribute === attributeTypes.VITALITY || attribute === attributeTypes.SPEED) {
                 <button (click)="assignBonus(attribute)" [disabled]="bonusAssigned[attribute]">
                     +2 {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
                 </button>
-                } @if (attribute === ATTRIBUTE_TYPES.ATTACK || attribute === ATTRIBUTE_TYPES.DEFENSE) {
-                <button (click)="assignDice(attribute, DICE_TYPES.D6)" [disabled]="diceAssigned[attribute]">
-                    {{ DICE_TYPES.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
+                } @if (attribute === attributeTypes.ATTACK || attribute === attributeTypes.DEFENSE) {
+                <button (click)="assignDice(attribute, diceTypes.D6)" [disabled]="diceAssigned[attribute]">
+                    {{ diceTypes.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
                 </button>
                 }
             </div>
