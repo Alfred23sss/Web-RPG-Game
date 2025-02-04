@@ -10,46 +10,26 @@
                 <h2>Game creation</h2>
             </div>
             <div class="map-size-select">
-                <button
-                    class="map-button"
-                    data-info="Grid: 10x10, Players: 2, Items: 2"
-                    [class.active]="gameModeService.getGameSize() === 'small'"
-                    (click)="setGameSize('small')"
-                >
-                    Small
-                </button>
-                <button
-                    class="map-button"
-                    data-info="Grid: 15x15, Players: 4, Items: 4"
-                    [class.active]="gameModeService.getGameSize() === 'medium'"
-                    (click)="setGameSize('medium')"
-                >
-                    Medium
-                </button>
-                <button
-                    class="map-button"
-                    data-info="Grid: 20x20, Players: 6, Items: 6"
-                    [class.active]="gameModeService.getGameSize() === 'large'"
-                    (click)="setGameSize('large')"
-                >
-                    Large
-                </button>
+                @for (size of gameSizes; track size.key) {
+                    <button
+                        class="map-button"
+                        [attr.data-info]="size.info"
+                        [class.active]="gameModeService.getGameSize() === size.key"
+                        (click)="setGameSize(size.key)"
+                    >
+                        {{ size.label }}
+                    </button>
+                }
             </div>
             <div class="popup-game-select">
-                <button class="popup-button classic" (click)="setGameType('Classic')" [class.active]="gameModeService.getGameMode() === 'Classic'">
-                    <img [src]="gameModes.Classic" alt="Classic" class="game-mode-image" />
-                    <div class="popup-content">
-                        <h3>Classic</h3>
-                        <p>A traditional game mode where strategy is key.</p>
-                    </div>
-                </button>
-                <button class="popup-button ctf" (click)="setGameType('CTF')" [class.active]="gameModeService.getGameMode() === 'CTF'">
-                    <img [src]="gameModes.CTF" alt="CTF" class="game-mode-image" />
-                    <div class="popup-content">
-                        <h3>Capture The Flag</h3>
-                        <p>Compete to secure your opponent's flag!</p>
-                    </div>
-                </button>
+                @for (mode of gameModes; track mode.key) {
+                    <button class="popup-button" [class.active]="gameModeService.getGameMode() === mode.key" (click)="setGameType(mode.key)" [style.backgroundImage]="mode.backgroundImage">
+                        <div class="popup-content">
+                            <h3>{{ mode.label }}</h3>
+                            <p>{{ mode.description }}</p>
+                        </div>
+                    </button>
+                }
             </div>
             <div class="popup-confirm">
                 <button class="confirm-button" (click)="confirm()">
