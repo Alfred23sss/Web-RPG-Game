@@ -1,5 +1,4 @@
-<div class="tool-container">
-    <h1 class="header-item">{{ activeTool?.tool || 'No selected tool' }}</h1>
+<div class="tool-container"><h1 class="header-item">{{ activeTool?.tool || 'No selected tool' }}</h1>
     <div class="tool" id="wall-tool" title="Wall : Prevents passage">
         <span>Wall</span>
         <img [src]="imageType.Wall" alt="Wall" (click)="selectTool(tileType.Wall, imageType.Wall)" />

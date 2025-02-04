@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +6,7 @@ import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 
 @Component({
@@ -24,6 +24,7 @@ export class EditionPageComponent implements OnInit {
     constructor(
         private gameService: GameService,
         private gridService: GridService,
+        private screenshotService: ScreenshotService,
     ) {}
 
     ngOnInit() {
@@ -42,11 +43,19 @@ export class EditionPageComponent implements OnInit {
         this.gameService.updateCurrentGame(this.originalGame);
     }
 
-    save() {
-        this.tempGame.name = this.gameName;
-        this.tempGame.description = this.gameDescription;
-        this.gameService.updateCurrentGame(this.tempGame);
-        this.gameService.saveGame(this.tempGame);
+    async save() {
+        try {
+            const previewUrl = await this.screenshotService.generatePreview('game-preview');
+
+            this.tempGame.name = this.gameName;
+            this.tempGame.description = this.gameDescription;
+            this.tempGame.previewImage = previewUrl;
+
+            this.gameService.updateCurrentGame(this.tempGame);
+            this.gameService.saveGame(this.tempGame);
+        } catch (error) {
+            console.error('Error when saving:', error);
+        }
     }
 
     empty() {

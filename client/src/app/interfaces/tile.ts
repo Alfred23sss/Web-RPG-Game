@@ -1,3 +1,5 @@
+import { Item } from '@app/interfaces/item';
+
 export enum TileType {
     Water = 'water',
     Ice = 'ice',
@@ -31,4 +33,5 @@ export interface Tile {
     isOccupied: boolean;
     type: TileType;
     isOpen: boolean;
+    item?: Item;
 }
