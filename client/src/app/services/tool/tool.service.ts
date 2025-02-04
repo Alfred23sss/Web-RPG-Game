@@ -10,6 +10,7 @@ export class ToolService {
         tool: TileType.Default,
         image: ImageType.Default,
     });
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     selectedTool$ = this.selectedToolSubject.asObservable();
 
     setSelectedTool(tool: TileType, image: ImageType): void {

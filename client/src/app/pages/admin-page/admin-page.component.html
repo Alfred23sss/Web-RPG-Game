@@ -1,10 +1,12 @@
 <div class="container">
     <h1 class="header-item">Game Manager</h1>
+    @if(games && games.length > 0) {
     <ul class="game-list">
-        @for(game of gameService.getGames(); let index = $index; track $index) {
+        @for(game of games; let index = $index; track $index) {
         <li class="game-item">
             <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
+                <!-- on hover should display description -->
+                <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
             </div>
             <div class="game-info">
                 <h3>{{ game.name }}</h3>
@@ -12,12 +14,17 @@
                 <p>Game Mode: {{ game.mode }}</p>
                 <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
 
-                <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.name)">Modify Game</button>
-                <button class="button" (click)="deleteGame(game.name)">Delete</button>
-                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.name, $event)" /> Show Game </label>
+                <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">Modify Game</button>
+                <button class="button" (click)="deleteGame(game.id)">Delete</button>
+                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Show Game </label>
             </div>
         </li>
         }
     </ul>
+    } @else {
+    <p>No games available. Please add a game.</p>
+    <!-- add css if no games available -->
+    }
+
     <button class="create-button" (click)="openDialog()">Create Game</button>
 </div>

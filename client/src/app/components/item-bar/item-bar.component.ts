@@ -26,7 +26,7 @@ const ITEMS_TO_UPDATE = new Set(['home', 'question']);
     standalone: true,
     imports: [CommonModule, DragDropModule],
 })
-export class ItemBarComponent {
+export class ItemBarComponent implements OnInit {
     @Input() itemCount: number = 4;
     activeItem: Item | undefined = undefined;
     items: Item[] = [];

@@ -6,8 +6,10 @@ import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
-import { GameService } from '@app/services/game.service';
-import { GridService } from '@app/services/grid-service.service';
+import { GameService } from '@app/services/game/game.service';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
+import { GridService } from '@app/services/grid/grid-service.service';
+
 @Component({
     selector: 'app-edition-page',
     templateUrl: './edition-page.component.html',
@@ -17,32 +19,25 @@ import { GridService } from '@app/services/grid-service.service';
 export class EditionPageComponent implements OnInit {
     gameName: string = '';
     gameDescription: string = '';
-    selectedGameSize: string = '';
-    selectedGameMode: string = '';
-    game: Game | undefined;
-    tempGame: Game | undefined;
-    private originalGame: Game | undefined;
+    tempGame: Game;
+    private originalGame: Game;
 
     constructor(
         private gameService: GameService,
         private gridService: GridService,
-    ) {
+        private screenshotService: ScreenshotService,
+    ) {}
+
+    ngOnInit() {
+        // changer possiblement pour og game pr garder logique
+        this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.tempGame = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
             this.gridService.setGrid(this.tempGame?.grid);
-        } else {
-            this.originalGame = undefined;
-        }
-    }
-
-    ngOnInit() {
-        // changer possiblement pour og game pr garder logique
-        const currentGame = this.gameService.getCurrentGame();
-        if (currentGame) {
-            this.selectedGameMode = currentGame.mode;
-            this.selectedGameSize = currentGame.size;
+            this.gameName = this.tempGame.name;
+            this.gameDescription = this.tempGame.description;
         }
     }
 
@@ -52,9 +47,19 @@ export class EditionPageComponent implements OnInit {
         // this.cdr.detectChanges();
     }
 
-    save() {
-        // manque logique des contraintes de save
-        this.gameService.updateCurrentGame(this.tempGame);
+    async save() {
+        try {
+            const previewUrl = await this.screenshotService.generatePreview('game-preview');
+
+            this.tempGame.name = this.gameName;
+            this.tempGame.description = this.gameDescription;
+            this.tempGame.previewImage = previewUrl;
+
+            this.gameService.updateCurrentGame(this.tempGame);
+            this.gameService.saveGame(this.tempGame);
+        } catch (error) {
+            console.error('Erreur lors de la capture:', error);
+        }
     }
 
     empty() {

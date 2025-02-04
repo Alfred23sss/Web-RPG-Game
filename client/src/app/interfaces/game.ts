@@ -12,7 +12,10 @@ export enum GameSize {
     None = '',
 }
 
+// change size and mode for enums and change in the rest of the code
+
 export interface Game {
+    id: string;
     name: string;
     size: string;
     mode: string;
