@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Item } from '@app/interfaces/item';
 import { ItemDragService } from '@app/services/ItemDrag.service';
-import { GameService } from '@app/services/game.service';
+import { GameService } from '@app/services/game/game.service';
 
 enum GameSize {
     Small = '10',
@@ -26,7 +26,7 @@ const ITEMS_TO_UPDATE = new Set(['home', 'question']);
     standalone: true,
     imports: [CommonModule, DragDropModule],
 })
-export class ItemBarComponent implements OnInit {
+export class ItemBarComponent {
     @Input() itemCount: number = 4;
     activeItem: Item | undefined = undefined;
     items: Item[] = [];
