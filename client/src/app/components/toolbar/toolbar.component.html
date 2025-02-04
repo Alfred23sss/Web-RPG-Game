@@ -2,7 +2,7 @@
     <h1 class="header-item">{{ activeTool?.tool || 'Aucun outil sélectionné' }}</h1>
     <div class="tool" id="wall-tool" title="Mur : Bloque le passage.">
         <span>Mur</span>
-        <img src="assets/images/wall.png" alt="Mur" (click)="selectTool(tileType.Wall, imageType.Wall)" />
+        <img src="assets/images/wall.png" alt="Mur" (click)="selectTool(tileType.Wall, imageType.Wall)" draggable="false" />
     </div>
     <div class="tool" id="door-tool" title="Porte : Permet le passage.">
         <span>Porte</span>

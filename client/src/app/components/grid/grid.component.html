@@ -1,8 +1,15 @@
 <div class="grid-container">
-    @for (row of grid; track $index){
+    @for (row of grid; track $index) {
     <div class="grid-row">
-        @for (tile of row;track $index){
-        <app-tile [tile]="tile"></app-tile>
+        @for (tile of row; track $index) {
+        <app-tile
+            [tile]="tile"
+            [ngClass]="{
+                'invalid-drop': tile.type === 'wall' || tile.isOccupied,
+                'valid-drop': tile.type !== 'wall' && !tile.isOccupied
+            }"
+        >
+        </app-tile>
         }
     </div>
     }
