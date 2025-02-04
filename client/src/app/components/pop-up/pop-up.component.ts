@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { Game } from '@app/interfaces/game';
+import { GameDecorations } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
@@ -15,6 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
     standalone: true,
 })
 export class PopUpComponent {
+    xSword = GameDecorations.XSwords;
     private readonly gameModes = ['Classic', 'CTF'];
     private readonly gameSizes = {
         small: 10,
