@@ -1,7 +1,7 @@
 import { CreateGameDto } from '@app/model/dto/game/create-game.dto';
 import { UpdateGameDto } from '@app/model/dto/game/update-game.dto';
 import { GameService } from '@app/services/game/game.service';
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
@@ -20,11 +20,11 @@ export class GameController {
         }
     }
 
-    @Put('update/:id')
+    @Patch('update/:id')
     async updateGame(@Param('id') id: string, @Body() game: Partial<UpdateGameDto>) {
         try {
-            await this.gameService.updateGame(id, game);
-            return { message: 'Game updated successfully' };
+            const updatedGame = await this.gameService.updateGame(id, game);
+            return { message: 'Game updated successfully', updatedGame };
         } catch (error) {
             throw new HttpException({ message: 'Failed to update game', error: error.message }, HttpStatus.BAD_REQUEST);
         }
