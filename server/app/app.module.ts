@@ -2,7 +2,7 @@ import { CourseController } from '@app/controllers/course/course.controller';
 import { DateController } from '@app/controllers/date/date.controller';
 import { ExampleController } from '@app/controllers/example/example.controller';
 import { ChatGateway } from '@app/gateways/chat/chat.gateway';
-import { gameSchema } from '@app/model/database/game';
+import { Game, gameSchema } from '@app/model/database/game';
 import { CourseService } from '@app/services/course/course.service';
 import { DateService } from '@app/services/date/date.service';
 import { ExampleService } from '@app/services/example/example.service';
@@ -11,6 +11,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { GameController } from './controllers/game/game.controller';
 import { Course, courseSchema } from './model/database/course';
+import { Item, itemSchema } from './model/database/item';
 import { GameService } from './services/game/game.service';
 @Module({
     imports: [
@@ -24,7 +25,8 @@ import { GameService } from './services/game/game.service';
         }),
         MongooseModule.forFeature([
             { name: Course.name, schema: courseSchema },
-            { name: 'Game', schema: gameSchema },
+            { name: Game.name, schema: gameSchema },
+            { name: Item.name, schema: itemSchema },
         ]),
     ],
     controllers: [CourseController, DateController, ExampleController, GameController],

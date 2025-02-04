@@ -1,4 +1,5 @@
 import { Game, GameDocument } from '@app/model/database/game';
+import { Item, ItemDocument } from '@app/model/database/item';
 import { CreateGameDto } from '@app/model/dto/game/create-game.dto';
 import { UpdateGameDto } from '@app/model/dto/game/update-game.dto';
 import { Injectable } from '@nestjs/common';
@@ -7,7 +8,10 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class GameService {
-    constructor(@InjectModel(Game.name) public gameModel: Model<GameDocument>) {}
+    constructor(
+        @InjectModel(Game.name) public gameModel: Model<GameDocument>,
+        @InjectModel(Item.name) private readonly itemModel: Model<ItemDocument>,
+    ) {}
 
     async createGame(game: CreateGameDto): Promise<GameDocument> {
         try {
@@ -15,6 +19,14 @@ export class GameService {
             if (existingGame) {
                 throw new Error(`Game with name "${game.name}" already exists.`);
             }
+
+            // Convert raw TileDto[][] into schema-compatible objects
+            game.grid = game.grid.map((row) =>
+                row.map((tile) => ({
+                    ...tile,
+                    item: tile.item ? new this.itemModel(tile.item) : undefined,
+                })),
+            );
 
             return await this.gameModel.create(game);
         } catch (error) {
@@ -24,10 +36,20 @@ export class GameService {
 
     async updateGame(id: string, gameDto: Partial<UpdateGameDto>): Promise<GameDocument> {
         try {
-            // Ensure gameDto has valid data, and no unnecessary fields are passed
             const sanitizedGameDto = Object.fromEntries(Object.entries(gameDto).filter(([_, v]) => v !== undefined));
 
-            // Perform the update
+            // Ensure grid is an array before using map()
+            if (Array.isArray(sanitizedGameDto.grid)) {
+                sanitizedGameDto.grid = sanitizedGameDto.grid.map((row) =>
+                    Array.isArray(row)
+                        ? row.map((tile) => ({
+                              ...tile,
+                              item: tile.item ? new this.itemModel(tile.item) : undefined,
+                          }))
+                        : row,
+                );
+            }
+
             const updatedGame = await this.gameModel.findOneAndUpdate({ id }, { $set: sanitizedGameDto }, { new: true, runValidators: true });
 
             if (!updatedGame) {
@@ -64,7 +86,11 @@ export class GameService {
     }
 
     async getGameById(id: string): Promise<GameDocument> {
-        const foundGame = await this.gameModel.findOne({ id });
+        const foundGame = await this.gameModel.findOne({ id }).populate({
+            path: 'grid.item', // Populate nested item references
+            model: 'Item',
+        });
+
         if (!foundGame) {
             throw new Error('Game not found');
         }

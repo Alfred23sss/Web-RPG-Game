@@ -1,5 +1,6 @@
-import { TileType } from '@app/model/database/tile';
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsBoolean, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { TileDto } from './tile.dto';
 
 export class UpdateGameDto {
     @IsOptional()
@@ -35,5 +36,7 @@ export class UpdateGameDto {
 
     @IsOptional()
     @IsArray()
-    grid?: { id: string; imageSrc: string; isOccupied: boolean; type: TileType; isOpen: boolean }[][];
+    @ValidateNested({ each: true }) // Validate each TileDto inside the array
+    @Type(() => TileDto) // Use class-transformer to correctly transform the array elements into TileDto objects
+    grid?: TileDto[][];
 }
