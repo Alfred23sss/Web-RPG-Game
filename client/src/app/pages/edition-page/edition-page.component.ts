@@ -52,10 +52,11 @@ export class EditionPageComponent implements OnInit {
         window.location.reload();
     }
 
-    save() {
+    async save() {
+        // SAVE ITEMS
         // manque logique des contraintes de save
         // mettre toute la validation focntion separe dans une fonction appeler ici qui return si pas valider sinon fait les saves
-
+        
         if (!this.gameValidationService.isHalfTerrain(this.tempGame)) {
             return;
         }
@@ -67,7 +68,7 @@ export class EditionPageComponent implements OnInit {
 
         if(!this.gameValidationService.isItemValid(this.tempGame)) return;
 
-        this.savePreviewImage();
+        await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.tempGame);
         this.gameService.saveGame(this.tempGame);
         // route vers admin, mettre snackbar, saving ... until le save est fini

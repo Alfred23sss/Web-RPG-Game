@@ -18,47 +18,45 @@ export class CourseService {
     }
 
     async start() {
-        if ((await this.courseModel.countDocuments()) === 0) {
-            await this.populateDB();
-        }
-    }
-
-    async populateDB(): Promise<void> {
-        const courses: CreateCourseDto[] = [
-            {
-                name: 'Object Oriented Programming',
-                credits: 3,
-                subjectCode: 'INF1010',
-                teacher: 'Samuel Kadoury',
-            },
-            {
-                name: 'Intro to Software Engineering',
-                credits: 3,
-                subjectCode: 'LOG1000',
-                teacher: 'Bram Adams',
-            },
-            {
-                name: 'Project I',
-                credits: 4,
-                subjectCode: 'INF1900',
-                teacher: 'Jerome Collin',
-            },
-            {
-                name: 'Project II',
-                credits: 3,
-                subjectCode: 'LOG2990',
-                teacher: 'Levis Theriault',
-            },
-            {
-                name: 'Web Semantics and Ontology',
-                credits: 2,
-                subjectCode: 'INF8410',
-                teacher: 'Michel Gagnon',
-            },
-        ];
-
-        this.logger.log('THIS ADDS DATA TO THE DATABASE, DO NOT USE OTHERWISE');
-        await this.courseModel.insertMany(courses);
+        //     if ((await this.courseModel.countDocuments()) === 0) {
+        //         await this.populateDB();
+        //     }
+        // }
+        // async populateDB(): Promise<void> {
+        //     const courses: CreateCourseDto[] = [
+        //         {
+        //             name: 'Object Oriented Programming',
+        //             credits: 3,
+        //             subjectCode: 'INF1010',
+        //             teacher: 'Samuel Kadoury',
+        //         },
+        //         {
+        //             name: 'Intro to Software Engineering',
+        //             credits: 3,
+        //             subjectCode: 'LOG1000',
+        //             teacher: 'Bram Adams',
+        //         },
+        //         {
+        //             name: 'Project I',
+        //             credits: 4,
+        //             subjectCode: 'INF1900',
+        //             teacher: 'Jerome Collin',
+        //         },
+        //         {
+        //             name: 'Project II',
+        //             credits: 3,
+        //             subjectCode: 'LOG2990',
+        //             teacher: 'Levis Theriault',
+        //         },
+        //         {
+        //             name: 'Web Semantics and Ontology',
+        //             credits: 2,
+        //             subjectCode: 'INF8410',
+        //             teacher: 'Michel Gagnon',
+        //         },
+        //     ];
+        //     this.logger.log('THIS ADDS DATA TO THE DATABASE, DO NOT USE OTHERWISE');
+        //     await this.courseModel.insertMany(courses);
     }
 
     async getAllCourses(): Promise<Course[]> {
