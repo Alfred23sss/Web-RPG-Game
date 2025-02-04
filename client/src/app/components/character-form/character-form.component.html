@@ -1,5 +1,5 @@
 <div [class.gray-background]="showForm" class="character-form-container">
-    @if(showForm === true){
+    @if (showForm) {
     <div class="character-form_header">
         <div class="character-form_cancel">
             <button class="character-form_cancel-button" (click)="closePopup()"></button>
@@ -12,23 +12,29 @@
 
     <div class="character-form_body">
         <div class="character-form_avatars">
-            @for (avatar of avatars; track avatar) {
+            @for (avatar of avatarTypes; track avatar) {
             <img [src]="avatar" (click)="selectedAvatar = avatar" [class.selected]="selectedAvatar === avatar" alt="Avatar" />
             }
         </div>
 
         <div class="character-form_attributes">
-            @for (attribute of attributesList; track attribute) {
+            @for (attribute of attributeKeys; track attribute) {
             <div>
-                @if (attribute.assignBonus) {
-                <span>{{ attribute.label }} : {{ attribute.value() }}</span>
-                <button (click)="attribute.assignBonus()" [disabled]="attribute.bonusDisabled()">+2 {{ attribute.label }}</button>
-                } @if (attribute.assignDice) {
-                <span
-                    >{{ attribute.label }} : {{ attribute.value() }}
-                    {{ attribute.bonusDisabled() ? '+ D6' : !attribute.bonusDisabled() ? '+ D4' : '' }}</span
-                >
-                <button (click)="attribute.assignDice()" [disabled]="attribute.bonusDisabled()">D6 {{ attribute.label }}</button>
+                <span>
+                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} @if (attribute ===
+                    attributeTypes.ATTACK && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === attributeTypes.DEFENSE &&
+                    selectedDefenseDice) { + {{ selectedDefenseDice }}
+                    }
+                </span>
+
+                @if (attribute === attributeTypes.VITALITY || attribute === attributeTypes.SPEED) {
+                <button (click)="assignBonus(attribute)" [disabled]="bonusAssigned[attribute]">
+                    +2 {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
+                </button>
+                } @if (attribute === attributeTypes.ATTACK || attribute === attributeTypes.DEFENSE) {
+                <button (click)="assignDice(attribute, diceTypes.D6)" [disabled]="diceAssigned[attribute]">
+                    {{ diceTypes.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
+                </button>
                 }
             </div>
             }

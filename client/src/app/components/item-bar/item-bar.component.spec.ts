@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ItemBarComponent } from './item-bar.component';
 
-fdescribe('ItemBarComponent', () => {
+describe('ItemBarComponent', () => {
     let component: ItemBarComponent;
     let fixture: ComponentFixture<ItemBarComponent>;
 
