@@ -32,7 +32,7 @@ export class TileComponent {
                 } else {
                     this.removeTileType();
                 }
-            } else if (event.button === 0) {
+            } else if (event.button === 0 && !this.tile.item) {
                 this.applyTool();
             }
         }
@@ -78,6 +78,10 @@ export class TileComponent {
             }
             this.itemDragService.clearSelection();
         }
+        if (TileComponent.activeButton === event.button) {
+            TileComponent.activeButton = null;
+        }
+        TileComponent.isDraggedTest = false;
     }
 
     private applyItem(item: Item): void {
