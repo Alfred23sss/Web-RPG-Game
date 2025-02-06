@@ -19,7 +19,7 @@ export class CharacterFormComponent {
     selectedCharacter: string | null = null;
     selectedAttackDice: string | null = null;
     selectedDefenseDice: string | null = null;
-    xSword: GameDecorations.XSwords;
+    xSword = GameDecorations.XSwords;
 
     avatarTypes = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
 
@@ -50,7 +50,8 @@ export class CharacterFormComponent {
     assignDice(attribute: string, dice: string) {
         this.diceAssigned[attribute] = true;
         this.diceAssigned[attribute === ATTRIBUTE_TYPES.ATTACK ? ATTRIBUTE_TYPES.DEFENSE : ATTRIBUTE_TYPES.ATTACK] = false;
-        if (attribute === ATTRIBUTE_TYPES.ATTACK) {// repetition if/else (maybe)
+        if (attribute === ATTRIBUTE_TYPES.ATTACK) {
+            // repetition if/else (maybe)
             this.selectedAttackDice = dice;
             this.selectedDefenseDice = dice === DICE_TYPES.D4 ? DICE_TYPES.D6 : DICE_TYPES.D4;
         } else {

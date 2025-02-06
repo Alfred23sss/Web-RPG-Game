@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, RouterModule } from '@angular/router';
-import { ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, ROUTES } from '../../constants/global.constants';
+import { ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, ROUTES } from '@app/constants/global.constants';
 import { CharacterFormComponent } from './character-form.component';
 
 const DEFAULT_ATTRIBUTE_VALUE = 4;
