@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
-import { Document, Types } from 'mongoose';
+import { Document } from 'mongoose';
 import { Item } from './item';
 
 export type GameDocument = Tile & Document;
@@ -35,9 +35,9 @@ export class Tile {
     @Prop({ required: true, default: false })
     isOpen: boolean;
 
-    @ApiProperty({ type: () => Item }) // Make sure it’s the Item schema reference
-    @Prop({ type: Types.ObjectId, ref: 'Item', required: false })
-    item?: Item; // Reference to the Item model (optional)
+    @ApiProperty({ type: () => Item }) // Store the full Item object, not just the reference
+    @Prop({ type: Item, required: false }) // Change from ObjectId reference to embedded object
+    item?: Item;
 }
 
 export const tileSchema = SchemaFactory.createForClass(Tile);
