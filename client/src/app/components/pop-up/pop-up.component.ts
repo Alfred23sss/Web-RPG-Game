@@ -22,13 +22,6 @@ export class PopUpComponent {
     gameSizes = GAME_SIZES_LIST;
     gameModes = GAME_MODES_LIST;
 
-    // private readonly gameModes = ['Classic', 'CTF'];
-    // private readonly gameSizes = {
-    //     small: 10,
-    //     medium: 15,
-    //     large: 20,
-    // };
-
     // eslint-disable-next-line max-params
     constructor(
         private dialogRef: MatDialog,
@@ -36,7 +29,6 @@ export class PopUpComponent {
         private gameService: GameService,
         private router: Router,
         private gridService: GridService,
-        // private snackBar: MatSnackBar,
         private snackbarService: SnackbarService,
     ) {}
 
@@ -58,7 +50,6 @@ export class PopUpComponent {
         } else {
             this.gameModeService.setGameMode(mode);
             console.log(this.gameModeService);
-            // this.showError(ERROR_MESSAGES.INVALID_GAME_MODE);
         }
     }
 
@@ -93,12 +84,10 @@ export class PopUpComponent {
     }
 
     private isValidSize(size: string): boolean {
-        // return Object.keys(this.gameSizes).includes(size);
         return Object.values(GAME_SIZES).includes(size);
     }
 
     private getGridSize(gameSize: string): number {
-        // return this.gameSizes[gameSize as keyof typeof this.gameSizes] || this.gameSizes.small;
         return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.SMALL];
     }
 
@@ -107,7 +96,6 @@ export class PopUpComponent {
             id: uuidv4(),
             name: '',
             size: gridSize.toString(),
-            //size: this.gameSizes[gameSize as keyof typeof this.gameSizes].toString(),
             mode: gameMode,
             lastModified: new Date(),
             isVisible: true,

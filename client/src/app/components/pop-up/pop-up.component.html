@@ -19,31 +19,6 @@
                         {{ size.label }}
                     </button>
                 }
-
-                <!-- <button
-                    class="map-button"
-                    data-info="Grid: 10x10, Players: 2, Items: 2"
-                    [class.active]="gameModeService.getGameSize() === 'small'"
-                    (click)="setGameSize('small')"
-                >
-                    Small
-                </button>
-                <button
-                    class="map-button"
-                    data-info="Grid: 15x15, Players: 4, Items: 4"
-                    [class.active]="gameModeService.getGameSize() === 'medium'"
-                    (click)="setGameSize('medium')"
-                >
-                    Medium
-                </button>
-                <button
-                    class="map-button"
-                    data-info="Grid: 20x20, Players: 6, Items: 6"
-                    [class.active]="gameModeService.getGameSize() === 'large'"
-                    (click)="setGameSize('large')"
-                >
-                    Large
-                </button> -->
             </div>
             <div class="popup-game-select">
                 @for (mode of gameModes; track mode.key) {
@@ -54,19 +29,6 @@
                         </div>
                     </button>
                 }
-
-                <!-- <button class="popup-button classic" (click)="setGameType('Classic')" [class.active]="gameModeService.getGameMode() === 'Classic'">
-                    <div class="popup-content">
-                        <h3>Classic</h3>
-                        <p>A traditional game mode where strategy is key.</p>
-                    </div>
-                </button>
-                <button class="popup-button ctf" (click)="setGameType('CTF')" [class.active]="gameModeService.getGameMode() === 'CTF'">
-                    <div class="popup-content">
-                        <h3>Capture The Flag</h3>
-                        <p>Compete to secure your opponent's flag!</p>
-                    </div>
-                </button> -->
             </div>
             <div class="popup-confirm">
                 <button class="confirm-button" (click)="confirm()">
