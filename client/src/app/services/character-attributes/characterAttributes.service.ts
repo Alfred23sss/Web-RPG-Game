@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
     providedIn: 'root',
 })
 export class CharacterAttributesService {
-    assignBonus(attributeKey: string, attributes: any, bonusAssigned: any): void {
+    assignBonus(attributeKey: string, attributes: unknown, bonusAssigned: unknown): void {
         if (!bonusAssigned[attributeKey]) {
             attributes[attributeKey] += 2;
             bonusAssigned[attributeKey] = true;
@@ -17,7 +17,7 @@ export class CharacterAttributesService {
         }
     }
 
-    assignDice(attributeKey: string, diceAssigned: any): void {
+    assignDice(attributeKey: string, diceAssigned: unknown): void {
         if (!diceAssigned[attributeKey]) {
             diceAssigned[attributeKey] = true;
 
