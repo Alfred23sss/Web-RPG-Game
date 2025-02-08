@@ -49,11 +49,9 @@ export class EditionPageComponent implements OnInit {
   }
 
   async save() {
-    // Update title and description from user input
     this.tempGame.name = this.gameName;
     this.tempGame.description = this.gameDescription;
     
-    // Run all validations and show combined errors if any exist.
     if (!this.gameValidationService.validateGame(this.tempGame)) {
       return;
     }
