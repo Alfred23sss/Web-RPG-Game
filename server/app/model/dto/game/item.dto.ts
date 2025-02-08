@@ -17,6 +17,9 @@ export class ItemDto {
     @IsNumber()
     itemCounter: number;
 
+    @IsString()
+    description: string;
+
     @IsOptional()
     @ValidateNested() // Validate the nested ItemDto
     @IsObject() // Ensure that originalReference is an object

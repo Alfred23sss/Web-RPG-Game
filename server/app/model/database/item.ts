@@ -20,6 +20,9 @@ export class Item {
     @Prop({ required: true })
     itemCounter: number;
 
+    @Prop({ required: true })
+    description: string;
+
     @Prop({ type: Types.ObjectId, ref: 'Item', required: false })
     originalReference?: Item;
 }
