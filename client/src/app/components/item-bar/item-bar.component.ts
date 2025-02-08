@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { GameSize } from '@app/interfaces/game';
 import { Item } from '@app/interfaces/item';
-import { ItemType, Tile } from '@app/interfaces/tile';
+import { ItemDescription, ItemType, Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
 
@@ -34,14 +34,42 @@ export class ItemBarComponent implements OnInit {
 
     ngOnInit() {
         this.items = [
-            { id: '0', name: 'lightning', imageSrc: ItemType.Lightning, imageSrcGrey: ItemType.LightningGray, itemCounter: 1 },
-            { id: '1', name: 'potion', imageSrc: ItemType.Potion, imageSrcGrey: ItemType.PotionGray, itemCounter: 1 },
-            { id: '2', name: 'rubik', imageSrc: ItemType.Rubik, imageSrcGrey: ItemType.RubikGray, itemCounter: 1 },
-            { id: '3', name: 'stop', imageSrc: ItemType.Stop, imageSrcGrey: ItemType.StopGray, itemCounter: 1 },
-            { id: '4', name: 'fire', imageSrc: ItemType.Fire, imageSrcGrey: ItemType.FireGray, itemCounter: 1 },
-            { id: '5', name: 'swap', imageSrc: ItemType.Swap, imageSrcGrey: ItemType.SwapGray, itemCounter: 1 },
-            { id: '6', name: 'home', imageSrc: ItemType.Home, imageSrcGrey: ItemType.HomeGray, itemCounter: 2 },
-            { id: '7', name: 'question', imageSrc: ItemType.QuestionMark, imageSrcGrey: ItemType.QuestionMarkGray, itemCounter: 2 },
+            {
+                id: '0',
+                name: 'lightning',
+                imageSrc: ItemType.Lightning,
+                imageSrcGrey: ItemType.LightningGray,
+                itemCounter: 1,
+                description: ItemDescription.Lightning,
+            },
+            {
+                id: '1',
+                name: 'potion',
+                imageSrc: ItemType.Potion,
+                imageSrcGrey: ItemType.PotionGray,
+                itemCounter: 1,
+                description: ItemDescription.Potion,
+            },
+            {
+                id: '2',
+                name: 'rubik',
+                imageSrc: ItemType.Rubik,
+                imageSrcGrey: ItemType.RubikGray,
+                itemCounter: 1,
+                description: ItemDescription.Rubik,
+            },
+            { id: '3', name: 'stop', imageSrc: ItemType.Stop, imageSrcGrey: ItemType.StopGray, itemCounter: 1, description: ItemDescription.Stop },
+            { id: '4', name: 'fire', imageSrc: ItemType.Fire, imageSrcGrey: ItemType.FireGray, itemCounter: 1, description: ItemDescription.Fire },
+            { id: '5', name: 'swap', imageSrc: ItemType.Swap, imageSrcGrey: ItemType.SwapGray, itemCounter: 1, description: ItemDescription.Swap },
+            { id: '6', name: 'home', imageSrc: ItemType.Home, imageSrcGrey: ItemType.HomeGray, itemCounter: 2, description: ItemDescription.Home },
+            {
+                id: '7',
+                name: 'question',
+                imageSrc: ItemType.QuestionMark,
+                imageSrcGrey: ItemType.QuestionMarkGray,
+                itemCounter: 2,
+                description: ItemDescription.QuestionMark,
+            },
         ].map((data) => Object.assign(new Item(), data));
 
         this.setItemCount();

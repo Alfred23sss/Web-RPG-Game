@@ -8,6 +8,7 @@ export class Item {
     imageSrcGrey: string = '';
     name: string = '';
     itemCounter: number = 0;
+    description: string = '';
     originalReference?: Item;
 
     constructor(init?: Partial<Item>) {

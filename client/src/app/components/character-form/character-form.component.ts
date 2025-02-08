@@ -67,6 +67,7 @@ export class CharacterFormComponent {
         } else {
             this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
         }
+        this.closePopup();
     }
 
     closePopup(): void {
