@@ -68,6 +68,6 @@ export class TileService {
 
     private applyItem(tile: Tile, item: Item): void {
         tile.item = item;
-        this.itemDragService.modifyItemCounter();
+        this.itemDragService.decreaseItemCounter();
     }
 }
