@@ -3,10 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { GameSize } from '@app/interfaces/game';
 import { Item } from '@app/interfaces/item';
-import { ItemType } from '@app/interfaces/tile';
+import { ItemType, Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
-import { Tile } from '@app/interfaces/tile';
 
 const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.Small]: 2,

@@ -29,7 +29,7 @@ export const INITIAL_VALUES = {
 
 export const ATTRIBUTE_KEYS = Object.values(ATTRIBUTE_TYPES);
 
-//game creation pop-up
+// game creation pop-up
 export const GAME_SIZES = {
     SMALL: 'small',
     MEDIUM: 'medium',
@@ -74,7 +74,7 @@ export const GAME_MODES_LIST = [
     },
 ];
 
-//global
+// global
 export const ERROR_MESSAGES = {
     MISSING_CHARACTER_DETAILS: 'Please ensure you have assigned bonuses and dice, and entered a name and avatar.',
     UNAVAILABLE_GAMEMODE: 'CTF gamemode is currently unavailable!',
