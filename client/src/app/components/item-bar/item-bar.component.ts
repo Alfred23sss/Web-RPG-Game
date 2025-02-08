@@ -41,9 +41,10 @@ export class ItemBarComponent implements OnInit {
             { id: '3', name: 'stop', imageSrc: ItemType.Stop, imageSrcGrey: ItemType.StopGray, itemCounter: 1 },
             { id: '4', name: 'fire', imageSrc: ItemType.Fire, imageSrcGrey: ItemType.FireGray, itemCounter: 1 },
             { id: '5', name: 'swap', imageSrc: ItemType.Swap, imageSrcGrey: ItemType.SwapGray, itemCounter: 1 },
-            { id: '6', name: 'home', imageSrc: ItemType.Home, imageSrcGrey: ItemType.Home, itemCounter: 2 },
-            { id: '7', name: 'question', imageSrc: ItemType.QuestionMark, imageSrcGrey: ItemType.QuestionMark, itemCounter: 2 },
+            { id: '6', name: 'home', imageSrc: ItemType.Home, imageSrcGrey: ItemType.HomeGray, itemCounter: 2 },
+            { id: '7', name: 'question', imageSrc: ItemType.QuestionMark, imageSrcGrey: ItemType.QuestionMarkGray, itemCounter: 2 },
         ].map((data) => Object.assign(new Item(), data));
+
         this.setItemCount();
     }
 
@@ -61,16 +62,28 @@ export class ItemBarComponent implements OnInit {
     }
 
     setItemCount() {
-        const size = this.gameService.getCurrentGame()?.size as GameSize;
-        const count = ITEM_COUNTS[size] ?? ITEM_COUNTS[GameSize.Small];
+        const currentGame = this.gameService.getCurrentGame();
+        if (!currentGame) {
+            console.warn('No game found.');
+            return;
+        }
+
+        const rawSize = currentGame.size as unknown as number;
+        const sizeMapping: Record<number, GameSize> = {
+            10: GameSize.Small,
+            15: GameSize.Medium,
+            20: GameSize.Large,
+        };
+        const mappedSize = sizeMapping[rawSize] ?? GameSize.Small;
+        const count = ITEM_COUNTS[mappedSize];
 
         this.items.forEach((item) => {
             if (ITEMS_TO_UPDATE.has(item.name)) {
                 item.itemCounter = count;
             }
         });
-        const grid = this.gameService.getCurrentGame()?.grid as Tile[][] | undefined;
 
+        const grid = currentGame.grid as Tile[][] | undefined;
         if (!grid) return;
 
         grid.forEach((row) => {
