@@ -27,9 +27,15 @@ export class ItemDragService {
         this.previousTile = undefined;
     }
 
-    modifyItemCounter(): void {
+    decreaseItemCounter(): void {
         if (this.selectedItem && this.selectedItem.itemCounter > 0) {
             this.selectedItem.itemCounter--;
+        }
+    }
+
+    increaseItemCounter(): void {
+        if (this.selectedItem) {
+            this.selectedItem.itemCounter++;
         }
     }
 }

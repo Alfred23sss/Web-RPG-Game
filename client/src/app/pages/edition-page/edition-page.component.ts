@@ -62,6 +62,7 @@ export class EditionPageComponent implements OnInit {
         if (!this.gameValidationService.validateGame(this.tempGame)) {
             return;
         }
+
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.tempGame);
         this.gameService.saveGame(this.tempGame);
