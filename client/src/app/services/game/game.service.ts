@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
+import { GridService } from '@app/services/grid/grid-service.service';
 import { tap } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
     providedIn: 'root',
@@ -9,13 +11,30 @@ import { tap } from 'rxjs';
 export class GameService {
     games: Game[];
     private currentGame: Game | undefined;
-    constructor(private gameCommunicationService: GameCommunicationService) {
+    constructor(
+        private gameCommunicationService: GameCommunicationService,
+        private gridService: GridService,
+    ) {
         this.loadCurrentGame();
     }
 
     updateCurrentGame(game: Game) {
         this.currentGame = game;
         sessionStorage.setItem('currentGame', JSON.stringify(game));
+    }
+
+    createNewGame(gameSize: string, gameMode: string, gridSize: number): Game {
+        return {
+            id: uuidv4(),
+            name: '',
+            size: gridSize.toString(),
+            mode: gameMode,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: '',
+            description: '',
+            grid: this.gridService.createGrid(gridSize, gridSize),
+        };
     }
 
     deleteGame(id: string) {
@@ -45,10 +64,17 @@ export class GameService {
     fetchGames() {
         return this.gameCommunicationService.getAllGames().pipe(
             tap((response) => {
-                console.log('Games fetched, updating games array in service:', response);
                 this.games = response;
             }),
         );
+    }
+
+    updateGameVisibility(id: string, isVisible: boolean) {
+        const game = this.getGameById(id);
+        if (game) {
+            game.isVisible = isVisible;
+            this.saveGame(game);
+        }
     }
 
     saveGame(gameToAdd: Game): void {
@@ -86,11 +112,9 @@ export class GameService {
     private updateExistingGame(gameToUpdate: Game): void {
         this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
             next: (updatedGame) => {
-                console.log('Game successfully updated:', updatedGame);
-
                 const index = this.games.findIndex((game) => game.id === gameToUpdate.id);
                 if (index !== -1) {
-                    this.games[index] = gameToUpdate;
+                    this.games[index] = updatedGame;
                 }
             },
             error: (err) => {
@@ -101,10 +125,8 @@ export class GameService {
 
     private saveNewGame(gameToAdd: Game): void {
         this.gameCommunicationService.saveGame(gameToAdd).subscribe({
-            next: (newGame) => {
-                console.log('Game successfully saved:', newGame);
-
-                this.addGame(gameToAdd);
+            next: (game) => {
+                this.addGame(game);
             },
             error: (err) => {
                 console.error('Error saving game:', err);
