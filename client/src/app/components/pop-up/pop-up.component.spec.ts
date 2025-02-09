@@ -1,38 +1,46 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-// import { ERROR_MESSAGES, GAME_MODES, SNACKBAR_CONFIG } from '@app/constants/global.constants';
+import { ERROR_MESSAGES, GAME_MODES, ROUTES } from '@app/constants/global.constants';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
+import { GridService } from '@app/services/grid/grid-service.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { PopUpComponent } from './pop-up.component';
 
 describe('PopUpComponent', () => {
     let component: PopUpComponent;
     let fixture: ComponentFixture<PopUpComponent>;
-
     let mockGameService: jasmine.SpyObj<GameService>;
     let mockGameModeService: jasmine.SpyObj<GameModeService>;
     let mockDialog: jasmine.SpyObj<MatDialog>;
     let mockRouter: jasmine.SpyObj<Router>;
-    let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
+    let mockSnackbarService: jasmine.SpyObj<SnackbarService>;
+    let mockGridService: jasmine.SpyObj<GridService>;
 
     beforeEach(async () => {
-        mockGameService = jasmine.createSpyObj('gameService', ['updateCurrentGame', 'addGame']);
-        mockGameModeService = jasmine.createSpyObj('gameModeService', ['getGameMode', 'setGameMode', 'setGameSize', 'getGameSize']);
+        mockGameModeService = jasmine.createSpyObj('gameModeService', [
+            'setGameMode',
+            'setGameSize',
+            'getGameMode',
+            'getGameSize',
+            'resetModeAndSize',
+        ]);
         mockDialog = jasmine.createSpyObj('MatDialog', ['closeAll']);
+        mockGameService = jasmine.createSpyObj('GameService', ['createNewGame', 'updateCurrentGame', 'addGame']);
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
-        mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
+        mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+        mockGridService = jasmine.createSpyObj('GridService', ['getGridSize']);
 
         await TestBed.configureTestingModule({
             imports: [PopUpComponent],
             providers: [
+                { provide: MatDialog, useValue: mockDialog },
                 { provide: GameService, useValue: mockGameService },
                 { provide: GameModeService, useValue: mockGameModeService },
-                { provide: MatDialog, useValue: mockDialog },
                 { provide: Router, useValue: mockRouter },
-                { provide: MatSnackBar, useValue: mockSnackBar },
+                { provide: SnackbarService, useValue: mockSnackbarService },
+                { provide: GridService, useValue: mockGridService },
             ],
         }).compileComponents();
 
@@ -44,85 +52,89 @@ describe('PopUpComponent', () => {
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    it('gameModeService should set the game size', () => {
-        component.setGameSize('small');
-        expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('small');
-    });
+    describe('setGameSize', () => {
+        it('should be created', () => {
+            mockGameModeService.setGameSize.and.returnValue(true);
+            component.setGameSize('medium');
+            expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('medium');
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
 
-    it('gameModeService should set the game type', () => {
-        component.setGameType('Classic');
-        expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('Classic');
-    });
-
-    // it('should show a snackbar message and reset game mode when selecting CTF', () => {
-    //     mockGameModeService.getGameMode.and.returnValue(GAME_MODES.CTF);
-
-    //     component.setGameType(GAME_MODES.CTF);
-
-    //     expect(mockSnackBar.open).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAMEMODE, SNACKBAR_CONFIG.ACTION, {
-    //         duration: SNACKBAR_CONFIG.DURATION,
-    //     });
-    //     expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
-    // });
-
-    const games = [
-        { input: 'small', gameSize: '10' },
-        { input: 'medium', gameSize: '15' },
-        { input: 'large', gameSize: '20' },
-    ];
-
-    games.forEach(({ input, gameSize }) => {
-        it(`confirm should create a new game with size ${gameSize} and bring to the edition page`, () => {
-            mockGameModeService.getGameSize.and.returnValue(input);
-            mockGameModeService.getGameMode.and.returnValue('Classic');
-            component.confirm();
-
-            expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(
-                jasmine.objectContaining({
-                    size: gameSize,
-                    mode: 'Classic',
-                    isVisible: true,
-                    description: jasmine.stringMatching(`A Classic game on a ${input} map.`),
-                }),
-            );
-
-            expect(mockGameService.addGame).toHaveBeenCalledWith(
-                jasmine.objectContaining({
-                    size: gameSize,
-                    mode: 'Classic',
-                }),
-            );
-
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/edition']);
+        it('should show an error message if the size is invalid', () => {
+            mockGameModeService.setGameSize.and.returnValue(false);
+            component.setGameSize('invalid-size');
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.INVALID_GAME_SIZE);
         });
     });
 
-    [
-        { size: '', mode: 'Classic' },
-        { size: 'small', mode: '' },
-    ].forEach(({ size, mode }) => {
-        it('should alert if mode or size is not selected in popup', () => {
-            spyOn(window, 'alert');
-            mockGameModeService.getGameSize.and.returnValue(size);
-            mockGameModeService.getGameMode.and.returnValue(mode);
+    describe('setGameType', () => {
+        it('should set the game mode if valid', () => {
+            component.setGameType(GAME_MODES.CLASSIC);
+            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.CLASSIC);
+        });
 
-            component.confirm();
+        it('should reset the mode and show an error if CTF is selected', () => {
+            component.setGameType(GAME_MODES.CTF);
+            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.CTF);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAME_MODE);
+            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
+        });
 
-            expect(window.alert).toHaveBeenCalledWith('Please select both game size and game type!');
-            expect(mockGameService.updateCurrentGame).not.toHaveBeenCalled();
-            expect(mockGameService.addGame).not.toHaveBeenCalled();
-            expect(mockRouter.navigate).not.toHaveBeenCalled();
+        it('should set the mode even if it is invalid', () => {
+            component.setGameType('invalid-mode');
+            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('invalid-mode');
         });
     });
 
-    it('closePopup should reset selections and close popup', () => {
-        component.closePopup();
-        expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
-        expect(mockGameModeService.setGameSize).toHaveBeenCalledWith('');
-        expect(mockDialog.closeAll).toHaveBeenCalled();
+    describe('confirm', () => {
+        let mockGame: any;
+        beforeEach(() => {
+            mockGame = { id: 'game1' } as any;
+            mockGameModeService.getGameSize.and.returnValue('medium');
+            mockGameModeService.getGameMode.and.returnValue(GAME_MODES.CLASSIC);
+            mockGridService.getGridSize.and.returnValue(10);
+            mockGameService.createNewGame.and.returnValue(mockGame);
+        });
+
+        it('should show an error message if size or mode is missing', () => {
+            mockGameModeService.getGameSize.and.returnValue('');
+            mockGameModeService.getGameMode.and.returnValue('');
+            component.confirm();
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.MISSING_GAME_DETAILS);
+            expect(mockGameService.createNewGame).not.toHaveBeenCalled();
+        });
+
+        it('should create a new game', () => {
+            component.confirm();
+            expect(mockGameService.createNewGame).toHaveBeenCalledWith('medium', GAME_MODES.CLASSIC, 10);
+            expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(mockGame);
+        });
+
+        it('should navigate to edition view after confirming the game', () => {
+            component.confirm();
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.EDITION_VIEW]);
+        });
+    });
+
+    describe('closePopup', () => {
+        it('should reset settings', () => {
+            mockGameModeService.resetModeAndSize.and.callFake(() => {
+                mockGameModeService.getGameMode.and.returnValue('');
+                mockGameModeService.getGameSize.and.returnValue('');
+            });
+            component.closePopup();
+            expect(mockGameModeService.resetModeAndSize).toHaveBeenCalled();
+            expect(mockGameModeService.getGameMode()).toBe('');
+            expect(mockGameModeService.getGameSize()).toBe('');
+        });
+
+        it('should close the dialog', () => {
+            component.closePopup();
+            expect(mockDialog.closeAll).toHaveBeenCalled();
+        });
     });
 });

@@ -51,6 +51,7 @@ export const TIME_CONSTANTS = {
 
 export const GAME_MODES = {
     CTF: 'CTF',
+    CLASSIC: 'CLASSIC',
 };
 
 export const GAME_SIZES_LIST = [
