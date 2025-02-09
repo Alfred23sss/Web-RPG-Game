@@ -1,7 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
+import { GridService } from '@app/services/grid/grid-service.service';
 import { tap } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
     providedIn: 'root',
@@ -9,13 +11,31 @@ import { tap } from 'rxjs';
 export class GameService {
     games: Game[];
     private currentGame: Game | undefined;
-    constructor(private gameCommunicationService: GameCommunicationService) {
+    constructor(
+        private gameCommunicationService: GameCommunicationService,
+        private gridService: GridService,
+    ) {
         this.loadCurrentGame();
     }
 
     updateCurrentGame(game: Game) {
         this.currentGame = game;
         sessionStorage.setItem('currentGame', JSON.stringify(game));
+    }
+
+    // game.service.ts
+    createNewGame(gameSize: string, gameMode: string, gridSize: number): Game {
+        return {
+            id: uuidv4(),
+            name: '',
+            size: gridSize.toString(),
+            mode: gameMode,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: '',
+            description: '',
+            grid: this.gridService.createGrid(gridSize, gridSize),
+        };
     }
 
     deleteGame(id: string) {
