@@ -4,6 +4,7 @@ import { Item } from '@app/interfaces/item';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
+import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 
 @Injectable({
     providedIn: 'root',
@@ -12,6 +13,7 @@ export class TileService {
     constructor(
         private toolService: ToolService,
         private itemDragService: ItemDragService,
+        private itemBarComponent: ItemBarComponent
     ) {}
 
     applyTool(tile: Tile): void {
@@ -39,9 +41,11 @@ export class TileService {
 
     removeTileObject(tile: Tile): void {
         if (tile.item) {
-            if (tile.item.originalReference) {
-                tile.item.originalReference.itemCounter++;
+            const itemInBar = this.itemBarComponent.items.find(i => i.name === tile.item!.name);
+            if (itemInBar) {
+                itemInBar.itemCounter++;
             }
+
             tile.item = undefined;
         }
     }
