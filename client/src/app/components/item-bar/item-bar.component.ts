@@ -60,7 +60,7 @@ export class ItemBarComponent implements OnInit {
                 itemCounter: 1,
                 description: ItemDescription.Rubik,
             },
-            { 
+            {
                 id: '3',
                 name: 'stop',
                 imageSrc: ItemType.Stop,
@@ -68,15 +68,15 @@ export class ItemBarComponent implements OnInit {
                 itemCounter: 1,
                 description: ItemDescription.Stop,
             },
-            { 
+            {
                 id: '4',
                 name: 'fire',
                 imageSrc: ItemType.Fire,
                 imageSrcGrey: ItemType.FireGray,
                 itemCounter: 1,
-                description: ItemDescription.Fire ,
+                description: ItemDescription.Fire,
             },
-            { 
+            {
                 id: '5',
                 name: 'swap',
                 imageSrc: ItemType.Swap,
@@ -88,9 +88,9 @@ export class ItemBarComponent implements OnInit {
                 id: '6',
                 name: 'home',
                 imageSrc: ItemType.Home,
-                imageSrcGrey: ItemType.HomeGray, 
-                itemCounter: 2, 
-                description: ItemDescription.Home ,
+                imageSrcGrey: ItemType.HomeGray,
+                itemCounter: 2,
+                description: ItemDescription.Home,
             },
             {
                 id: '7',
