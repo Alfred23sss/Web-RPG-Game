@@ -2,7 +2,9 @@
     @if (showForm) {
     <div class="character-form_header">
         <div class="character-form_cancel">
-            <button class="character-form_cancel-button" (click)="closePopup()"></button>
+            <button class="character-form_cancel-button" (click)="closePopup()">
+                <img [src]="xSword" alt="xSword" class="cancel-swords" />
+            </button>
         </div>
 
         <h1 id="character-form_title">Create a Character</h1>

@@ -27,6 +27,7 @@ export class TileComponent {
             if (event.button === 2) {
                 if (this.tile.item !== undefined) {
                     this.tileService.removeTileObject(this.tile);
+                    TileComponent.activeButton = null;
                 } else {
                     this.tileService.removeTileType(this.tile);
                 }
@@ -49,6 +50,12 @@ export class TileComponent {
     @HostListener('contextmenu', ['$event'])
     onRightClick(event: MouseEvent): void {
         event.preventDefault();
+        event.stopPropagation();
+        if (this.tile.item) {
+            this.tileService.removeTileObject(this.tile);
+            TileComponent.activeButton = null;
+        }
+
     }
 
     @HostListener('document:mouseup', ['$event'])

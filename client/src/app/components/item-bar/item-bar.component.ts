@@ -6,6 +6,7 @@ import { Item } from '@app/interfaces/item';
 import { ItemDescription, ItemType, Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
+import { ItemService } from '@app/services/item/item.service';
 
 const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.Small]: 2,
@@ -28,6 +29,7 @@ export class ItemBarComponent implements OnInit {
     items: Item[] = [];
 
     constructor(
+        private itemService: ItemService,
         private itemDragService: ItemDragService,
         private gameService: GameService,
     ) {}
@@ -58,10 +60,38 @@ export class ItemBarComponent implements OnInit {
                 itemCounter: 1,
                 description: ItemDescription.Rubik,
             },
-            { id: '3', name: 'stop', imageSrc: ItemType.Stop, imageSrcGrey: ItemType.StopGray, itemCounter: 1, description: ItemDescription.Stop },
-            { id: '4', name: 'fire', imageSrc: ItemType.Fire, imageSrcGrey: ItemType.FireGray, itemCounter: 1, description: ItemDescription.Fire },
-            { id: '5', name: 'swap', imageSrc: ItemType.Swap, imageSrcGrey: ItemType.SwapGray, itemCounter: 1, description: ItemDescription.Swap },
-            { id: '6', name: 'home', imageSrc: ItemType.Home, imageSrcGrey: ItemType.HomeGray, itemCounter: 2, description: ItemDescription.Home },
+            { 
+                id: '3',
+                name: 'stop',
+                imageSrc: ItemType.Stop,
+                imageSrcGrey: ItemType.StopGray,
+                itemCounter: 1,
+                description: ItemDescription.Stop,
+            },
+            { 
+                id: '4',
+                name: 'fire',
+                imageSrc: ItemType.Fire,
+                imageSrcGrey: ItemType.FireGray,
+                itemCounter: 1,
+                description: ItemDescription.Fire ,
+            },
+            { 
+                id: '5',
+                name: 'swap',
+                imageSrc: ItemType.Swap,
+                imageSrcGrey: ItemType.SwapGray,
+                itemCounter: 1,
+                description: ItemDescription.Swap,
+            },
+            {
+                id: '6',
+                name: 'home',
+                imageSrc: ItemType.Home,
+                imageSrcGrey: ItemType.HomeGray, 
+                itemCounter: 2, 
+                description: ItemDescription.Home ,
+            },
             {
                 id: '7',
                 name: 'question',
@@ -73,6 +103,7 @@ export class ItemBarComponent implements OnInit {
         ].map((data) => Object.assign(new Item(), data));
 
         this.setItemCount();
+        this.itemService.setItems(this.items);
     }
 
     selectObject(item: Item): void {
@@ -125,7 +156,7 @@ export class ItemBarComponent implements OnInit {
         });
     }
 
-    onDrop(event: DragEvent, item: Item): void {
+    onContainerDrop(event: DragEvent, item: Item): void {
         event.preventDefault();
 
         const draggedItem = this.itemDragService.getSelectedItem();
