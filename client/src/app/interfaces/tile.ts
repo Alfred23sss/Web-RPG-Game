@@ -1,11 +1,11 @@
 import { Item } from '@app/interfaces/item';
 
 export enum TileType {
-    Water = 'Water',
-    Ice = 'Ice',
-    Wall = 'Wall',
-    Door = 'Door',
-    Default = 'Default',
+    Water = 'water',
+    Ice = 'ice',
+    Wall = 'wall',
+    Door = 'door',
+    Default = 'default',
 }
 
 export enum ImageType {
