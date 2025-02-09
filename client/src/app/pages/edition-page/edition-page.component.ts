@@ -43,7 +43,7 @@ export class EditionPageComponent implements OnInit {
             this.gameDescription = this.game.description;
         }
     }
-    cancel() {
+    backToAdmin() {
         this.router.navigate(['/admin']);
     }
 
@@ -67,7 +67,10 @@ export class EditionPageComponent implements OnInit {
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
-        this.router.navigate(['/admin']);
+
+        this.gameService.fetchGames().subscribe(() => {
+            this.backToAdmin();
+        });
     }
 
     private async savePreviewImage() {
