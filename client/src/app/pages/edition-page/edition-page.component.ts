@@ -10,6 +10,7 @@ import { GameValidationService } from '@app/services/game-validation/game-valida
 import { GameService } from '@app/services/game/game.service';
 import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-edition-page',
@@ -24,12 +25,14 @@ export class EditionPageComponent implements OnInit {
     game: Game;
     originalGame: Game;
 
+    // eslint-disable-next-line max-params
     constructor(
         private gameService: GameService,
         private gridService: GridService,
         private screenShotService: ScreenshotService,
         private gameValidationService: GameValidationService,
         private router: Router,
+        private snackbarService: SnackbarService,
     ) {}
 
     ngOnInit() {
@@ -47,8 +50,13 @@ export class EditionPageComponent implements OnInit {
             this.gameDescription = this.game.description;
         }
     }
+
     backToAdmin() {
-        this.router.navigate(['/admin']);
+        this.snackbarService.showConfirmation('Are you sure ? Changes will not be saved!').subscribe((confirmed) => {
+            if (confirmed) {
+                this.router.navigate(['/admin']);
+            }
+        });
     }
 
     reset() {
@@ -75,7 +83,7 @@ export class EditionPageComponent implements OnInit {
         this.gameService.saveGame(this.game);
 
         this.gameService.fetchGames().subscribe(() => {
-            this.backToAdmin();
+            this.router.navigate(['/admin']);
         });
     }
 

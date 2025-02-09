@@ -30,7 +30,7 @@ export class GameService {
             size: gridSize.toString(),
             mode: gameMode,
             lastModified: new Date(),
-            isVisible: true,
+            isVisible: false,
             previewImage: '',
             description: '',
             grid: this.gridService.createGrid(gridSize, gridSize),

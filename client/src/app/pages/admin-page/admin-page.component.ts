@@ -17,7 +17,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
     imports: [RouterLink, CommonModule, MatTooltipModule],
 })
 export class AdminPageComponent implements OnInit {
-    games: Game[]; // si ya une erreur de jeu qui affiche remmettre = games de gameservice
+    games: Game[];
     backgroundImage = GameDecorations.Background;
     constructor(
         private dialogRef: MatDialog,
