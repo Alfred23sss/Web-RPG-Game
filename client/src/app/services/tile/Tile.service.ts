@@ -67,10 +67,8 @@ export class TileService {
             tile.type = TileType.Door;
             tile.isOpen = false;
         } else {
-            if (!tile.item) {
-                tile.isOpen = !tile.isOpen;
-                tile.imageSrc = tile.isOpen ? ImageType.OpenDoor : ImageType.ClosedDoor;
-            }
+            tile.isOpen = !tile.isOpen;
+            tile.imageSrc = tile.isOpen ? ImageType.OpenDoor : ImageType.ClosedDoor;
         }
     }
 

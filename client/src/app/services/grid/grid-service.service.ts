@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { GAME_SIZES, GRID_DIMENSIONS } from '@app/constants/global.constants';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 
 @Injectable({
@@ -34,7 +35,11 @@ export class GridService {
         return this.grid?.[row]?.[col];
     }
 
-    updateTile(row: number, col: number, newTile: Partial<Tile>): void {
-        this.grid?.[row]?.[col] && Object.assign(this.grid[row][col], newTile);
+    // updateTile(row: number, col: number, newTile: Partial<Tile>): void {
+    //     this.grid?.[row]?.[col] && Object.assign(this.grid[row][col], newTile);
+    // }
+
+    getGridSize(gameSize: string): number {
+        return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.SMALL];
     }
 }

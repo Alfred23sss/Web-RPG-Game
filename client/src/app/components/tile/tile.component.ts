@@ -1,5 +1,4 @@
 import { Component, HostListener, Input } from '@angular/core';
-import { Item } from '@app/interfaces/item';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
@@ -21,6 +20,7 @@ export class TileComponent {
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
+        this.itemDragService.setSelectedItem(this.tile.item, this.tile);
         if (TileComponent.activeButton === null) {
             TileComponent.activeButton = event.button;
 
@@ -79,9 +79,5 @@ export class TileComponent {
             TileComponent.activeButton = null;
         }
         TileComponent.isDraggedTest = false;
-    }
-
-    selectObject(item: Item): void {
-        this.itemDragService.setSelectedItem(item, this.tile);
     }
 }

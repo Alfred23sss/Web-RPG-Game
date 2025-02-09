@@ -21,7 +21,7 @@ import { GridService } from '@app/services/grid/grid-service.service';
 export class EditionPageComponent implements OnInit {
     gameName: string = '';
     gameDescription: string = '';
-    tempGame: Game;
+    game: Game;
     originalGame: Game;
 
     constructor(
@@ -36,46 +36,50 @@ export class EditionPageComponent implements OnInit {
         this.gameService.fetchGames().subscribe();
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
-            this.tempGame = JSON.parse(JSON.stringify(currentGame));
+            this.game = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
-            this.gridService.setGrid(this.tempGame?.grid);
-            this.gameName = this.tempGame.name;
-            this.gameDescription = this.tempGame.description;
+            this.gridService.setGrid(this.game?.grid);
+            this.gameName = this.game.name;
+            this.gameDescription = this.game.description;
         }
     }
-    cancel() {
-        // rajouter are you sure changes wont be saved?
+    backToAdmin() {
         this.router.navigate(['/admin']);
     }
 
     reset() {
-        // rajouter are you sure changes will be reversed
-        this.gameService.updateCurrentGame(this.originalGame);
-        this.gameService.saveGame(this.originalGame);
-        window.location.reload();
+        this.game = JSON.parse(JSON.stringify(this.originalGame));
+        this.gameName = this.game.name;
+        this.gameDescription = this.game.description;
+        this.gridService.setGrid(this.game.grid);
+        this.gameService.updateCurrentGame(this.game);
+        this.gameService.saveGame(this.game);
     }
 
     async save() {
-        this.tempGame.name = this.gameName;
-        this.tempGame.description = this.gameDescription;
+        this.game.name = this.gameName;
+        this.game.description = this.gameDescription;
 
-        if (!this.gameValidationService.validateGame(this.tempGame)) {
+        if (!this.gameValidationService.validateGame(this.game)) {
             return;
         }
 
-        if (this.tempGame.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
-            console.log(this.tempGame.grid[0][0].item.itemCounter);
+        if (this.game.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
+            console.log(this.game.grid[0][0].item.itemCounter);
         }
         await this.savePreviewImage();
-        this.gameService.updateCurrentGame(this.tempGame);
-        this.gameService.saveGame(this.tempGame);
+        this.gameService.updateCurrentGame(this.game);
+        this.gameService.saveGame(this.game);
+
+        this.gameService.fetchGames().subscribe(() => {
+            this.backToAdmin();
+        });
     }
 
     private async savePreviewImage() {
         try {
             const previewUrl = await this.screenShotService.generatePreview('game-preview');
-            this.tempGame.previewImage = previewUrl;
-            console.log('saved');
+            this.game.previewImage = previewUrl;
         } catch (error) {
             console.error('Error when saving:', error);
         }
