@@ -6,6 +6,7 @@ import { Item } from '@app/interfaces/item';
 import { ItemDescription, ItemType, Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
+import { ItemService } from '@app/services/item/item.service';
 
 const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.Small]: 2,
@@ -28,6 +29,7 @@ export class ItemBarComponent implements OnInit {
     items: Item[] = [];
 
     constructor(
+        private itemService: ItemService,
         private itemDragService: ItemDragService,
         private gameService: GameService,
     ) {}
@@ -101,6 +103,7 @@ export class ItemBarComponent implements OnInit {
         ].map((data) => Object.assign(new Item(), data));
 
         this.setItemCount();
+        this.itemService.setItems(this.items);
     }
 
     selectObject(item: Item): void {
