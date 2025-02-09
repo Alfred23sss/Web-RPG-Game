@@ -17,8 +17,8 @@ enum GameSize {
     Medium = '15',
     Large = '20',
     SmallItemCount = 2,
-    MediumItemCount = 2,
-    LargeItemCount = 2,
+    MediumItemCount = 4,
+    LargeItemCount = 6,
 }
 enum ItemCount {
     Small = 8,
