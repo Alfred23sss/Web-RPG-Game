@@ -50,6 +50,12 @@ export class TileComponent {
     @HostListener('contextmenu', ['$event'])
     onRightClick(event: MouseEvent): void {
         event.preventDefault();
+        event.stopPropagation();
+        if (this.tile.item) {
+            this.tileService.removeTileObject(this.tile);
+            TileComponent.activeButton = null;
+        }
+
     }
 
     @HostListener('document:mouseup', ['$event'])
