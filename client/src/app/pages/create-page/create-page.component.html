@@ -4,8 +4,8 @@
     @if (visibleGames.length > 0) {
     <ul class="game-list">
         @for (game of visibleGames; let index = $index; track $index) {
-        <li class="game-item" (click)="openDialog(game)">
-            <div class="game-preview">
+        <li class="game-item">
+            <div class="game-preview" (click)="openDialog(game)">
                 <img [src]="game.previewImage" matTooltip="{{ game.description }}" />
             </div>
             <div class="game-info">
