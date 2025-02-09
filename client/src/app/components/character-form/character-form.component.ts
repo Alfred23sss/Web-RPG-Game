@@ -73,9 +73,13 @@ export class CharacterFormComponent {
 
     submitCharacter(): void {
         this.gameCommunicationService.getGameById(this.game.id).subscribe({
-            next: (game) => {},
+            next: (game) => {
+                console.log('Pas de brobleme retour 200 ');
+            },
             error: (error) => {
-                if (error.status === 404) {
+                if (error.status === 500) {
+                    console.log(error.status);
+                    console.log(this.game.id);
                     this.snackbarService.showMessage('Le jeu a été supprimé.');
                     //rediriger vers page creation
                     this.closePopup();
