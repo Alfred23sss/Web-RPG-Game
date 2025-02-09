@@ -23,7 +23,7 @@ export class GameService {
         sessionStorage.setItem('currentGame', JSON.stringify(game));
     }
 
-    createNewGame(gameSize: string, gameMode: string, gridSize: number): Game {
+    createNewGame(gameMode: string, gridSize: number): Game {
         return {
             id: uuidv4(),
             name: '',
@@ -110,6 +110,7 @@ export class GameService {
     }
 
     private updateExistingGame(gameToUpdate: Game): void {
+        gameToUpdate.lastModified = new Date();
         this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
             next: (updatedGame) => {
                 const index = this.games.findIndex((game) => game.id === gameToUpdate.id);

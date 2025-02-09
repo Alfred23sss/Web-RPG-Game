@@ -34,6 +34,10 @@ export class EditionPageComponent implements OnInit {
 
     ngOnInit() {
         this.gameService.fetchGames().subscribe();
+        this.cloneInitialGame();
+    }
+
+    cloneInitialGame() {
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.game = JSON.parse(JSON.stringify(currentGame));
@@ -54,6 +58,8 @@ export class EditionPageComponent implements OnInit {
         this.gridService.setGrid(this.game.grid);
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
+        this.cloneInitialGame();
+        window.location.reload();
     }
 
     async save() {
@@ -64,9 +70,6 @@ export class EditionPageComponent implements OnInit {
             return;
         }
 
-        if (this.game.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
-            console.log(this.game.grid[0][0].item.itemCounter);
-        }
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);

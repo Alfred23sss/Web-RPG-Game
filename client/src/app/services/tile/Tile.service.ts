@@ -4,7 +4,7 @@ import { Item } from '@app/interfaces/item';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
-import { ItemService } from '../item/item.service';
+import { ItemService } from '@app/services/item/item.service';
 
 @Injectable({
     providedIn: 'root',
