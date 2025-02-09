@@ -61,7 +61,6 @@ export class PopUpComponent {
         this.gameService.updateCurrentGame(newGame);
         this.router.navigate([ROUTES.EDITION_VIEW]);
         this.closePopup();
-        
     }
 
     closePopup() {

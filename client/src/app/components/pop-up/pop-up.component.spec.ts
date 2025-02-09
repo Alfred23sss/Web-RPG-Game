@@ -6,6 +6,7 @@ import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { Game } from '@app/interfaces/game';
 import { PopUpComponent } from './pop-up.component';
 
 describe('PopUpComponent', () => {
@@ -91,12 +92,13 @@ describe('PopUpComponent', () => {
     });
 
     describe('confirm', () => {
-        let mockGame: any;
+        let mockGame: Game;
+        const GRID_SIZE_MEDIUM = 10;
         beforeEach(() => {
-            mockGame = { id: 'game1' } as any;
+            mockGame = { id: 'game' } as Game;
             mockGameModeService.getGameSize.and.returnValue('medium');
             mockGameModeService.getGameMode.and.returnValue(GAME_MODES.CLASSIC);
-            mockGridService.getGridSize.and.returnValue(10);
+            mockGridService.getGridSize.and.returnValue(GRID_SIZE_MEDIUM);
             mockGameService.createNewGame.and.returnValue(mockGame);
         });
 
@@ -110,7 +112,7 @@ describe('PopUpComponent', () => {
 
         it('should create a new game', () => {
             component.confirm();
-            expect(mockGameService.createNewGame).toHaveBeenCalledWith('medium', GAME_MODES.CLASSIC, 10);
+            expect(mockGameService.createNewGame).toHaveBeenCalledWith('medium', GAME_MODES.CLASSIC, GRID_SIZE_MEDIUM);
             expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(mockGame);
         });
 
