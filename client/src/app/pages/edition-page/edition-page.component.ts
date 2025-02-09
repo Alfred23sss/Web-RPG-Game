@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -28,6 +29,7 @@ export class EditionPageComponent implements OnInit {
         private gridService: GridService,
         private screenShotService: ScreenshotService,
         private gameValidationService: GameValidationService,
+        private router: Router,
     ) {}
 
     ngOnInit() {
@@ -41,8 +43,13 @@ export class EditionPageComponent implements OnInit {
             this.gameDescription = this.tempGame.description;
         }
     }
+    cancel() {
+        // rajouter are you sure changes wont be saved?
+        this.router.navigate(['/admin']);
+    }
 
     reset() {
+        // rajouter are you sure changes will be reversed
         this.gameService.updateCurrentGame(this.originalGame);
         this.gameService.saveGame(this.originalGame);
         window.location.reload();
