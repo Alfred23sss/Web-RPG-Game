@@ -65,10 +65,17 @@ export class GameService {
     fetchGames() {
         return this.gameCommunicationService.getAllGames().pipe(
             tap((response) => {
-                console.log('Games fetched, updating games array in service:', response);
                 this.games = response;
             }),
         );
+    }
+
+    updateGameVisibility(id: string, isVisible: boolean) {
+        const game = this.getGameById(id);
+        if (game) {
+            game.isVisible = isVisible;
+            this.saveGame(game);
+        }
     }
 
     saveGame(gameToAdd: Game): void {
@@ -106,11 +113,9 @@ export class GameService {
     private updateExistingGame(gameToUpdate: Game): void {
         this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
             next: (updatedGame) => {
-                console.log('Game successfully updated:', updatedGame);
-
-                const index = this.games.findIndex((game) => game.id === gameToUpdate.id);
+                const index = this.games.findIndex((game) => game.id === updatedGame.id);
                 if (index !== -1) {
-                    this.games[index] = gameToUpdate;
+                    this.games[index] = updatedGame;
                 }
             },
             error: (err) => {
@@ -121,10 +126,8 @@ export class GameService {
 
     private saveNewGame(gameToAdd: Game): void {
         this.gameCommunicationService.saveGame(gameToAdd).subscribe({
-            next: (newGame) => {
-                console.log('Game successfully saved:', newGame);
-
-                this.addGame(gameToAdd);
+            next: (game) => {
+                this.addGame(game);
             },
             error: (err) => {
                 console.error('Error saving game:', err);
