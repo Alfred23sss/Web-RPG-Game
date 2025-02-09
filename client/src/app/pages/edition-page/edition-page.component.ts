@@ -64,8 +64,8 @@ export class EditionPageComponent implements OnInit {
             return;
         }
 
-        if (this.tempGame.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
-            console.log(this.tempGame.grid[0][0].item.itemCounter);
+        if (this.game.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
+            console.log(this.game.grid[0][0].item.itemCounter);
         }
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
