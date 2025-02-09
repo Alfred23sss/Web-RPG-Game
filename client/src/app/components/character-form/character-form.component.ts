@@ -3,8 +3,14 @@ import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
+import { Game } from '@app/interfaces/game';
 import { AvatarType, GameDecorations } from '@app/interfaces/images';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+
+import { Inject } from '@angular/core';
+import { MAT_DIALOG_DATA } from '@angular/material/dialog';
+
+import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 
 @Component({
     selector: 'app-character-form',
@@ -20,6 +26,7 @@ export class CharacterFormComponent {
     selectedAttackDice: string | null = null;
     selectedDefenseDice: string | null = null;
     xSword = GameDecorations.XSwords;
+    game: Game;
 
     avatarTypes = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
 
@@ -35,7 +42,11 @@ export class CharacterFormComponent {
         private router: Router,
         private dialogRef: MatDialogRef<CharacterFormComponent>,
         private snackbarService: SnackbarService,
-    ) {}
+        private gameCommunicationService: GameCommunicationService,
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game },
+    ) {
+        this.game = data.game;
+    }
 
     assignBonus(attribute: string) {
         if (!this.bonusAssigned[attribute]) {
@@ -61,6 +72,18 @@ export class CharacterFormComponent {
     }
 
     submitCharacter(): void {
+        this.gameCommunicationService.getGameById(this.game.id).subscribe({
+            next: (game) => {},
+            error: (error) => {
+                if (error.status === 404) {
+                    this.snackbarService.showMessage('Le jeu a été supprimé.');
+                    //rediriger vers page creation
+                    this.closePopup();
+                }
+                console.error('Erreur:', error);
+            },
+        });
+
         if (this.characterName && this.selectedAvatar && this.isBonusAssigned() && this.isDiceAssigned()) {
             this.showForm = false;
             this.router.navigate([ROUTES.WAITING_VIEW]);
