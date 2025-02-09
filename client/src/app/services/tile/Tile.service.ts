@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { Item } from '@app/interfaces/item';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/ItemDrag.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
 import { ItemService } from '../item/item.service';
 
