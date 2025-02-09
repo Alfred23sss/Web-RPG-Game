@@ -125,7 +125,7 @@ export class ItemBarComponent implements OnInit {
         });
     }
 
-    onDrop(event: DragEvent, item: Item): void {
+    onContainerDrop(event: DragEvent, item: Item): void {
         event.preventDefault();
 
         const draggedItem = this.itemDragService.getSelectedItem();

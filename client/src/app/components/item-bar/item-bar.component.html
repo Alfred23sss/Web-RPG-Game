@@ -4,7 +4,7 @@
         class="item"
         (mousedown)="selectObject(item)"
         (mouseup)="removeObject()"
-        (drop)="onDrop($event, item)"
+        (drop)="onContainerDrop($event, item)"
         (dragover)="onDragOver($event)"
         [title]="item.description"
     >
