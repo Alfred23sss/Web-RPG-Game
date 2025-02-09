@@ -3,31 +3,37 @@
         <div class="popup-grid">
             <div class="header">
                 <div class="popup-cancel">
-                    <button class="cancel-button" (click)="closePopup()"></button>
-                    <img [src]="xSword" alt="xSword" class="cancel-swords" />
+                    <button class="cancel-button" (click)="closePopup()">
+                        <img [src]="xSword" alt="xSword" class="cancel-swords" />
+                    </button>
                 </div>
                 <h2>Game creation</h2>
             </div>
             <div class="map-size-select">
                 @for (size of gameSizes; track size.key) {
-                    <button
-                        class="map-button"
-                        [attr.data-info]="size.info"
-                        [class.active]="gameModeService.getGameSize() === size.key"
-                        (click)="setGameSize(size.key)"
-                    >
-                        {{ size.label }}
-                    </button>
+                <button
+                    class="map-button"
+                    [attr.data-info]="size.info"
+                    [class.active]="gameModeService.getGameSize() === size.key"
+                    (click)="setGameSize(size.key)"
+                >
+                    {{ size.label }}
+                </button>
                 }
             </div>
             <div class="popup-game-select">
                 @for (mode of gameModes; track mode.key) {
-                    <button class="popup-button" [class.active]="gameModeService.getGameMode() === mode.key" (click)="setGameType(mode.key)" [style.backgroundImage]="mode.backgroundImage">
-                        <div class="popup-content">
-                            <h3>{{ mode.label }}</h3>
-                            <p>{{ mode.description }}</p>
-                        </div>
-                    </button>
+                <button
+                    class="popup-button"
+                    [class.active]="gameModeService.getGameMode() === mode.key"
+                    (click)="setGameType(mode.key)"
+                    [style.backgroundImage]="mode.backgroundImage"
+                >
+                    <div class="popup-content">
+                        <h3>{{ mode.label }}</h3>
+                        <p>{{ mode.description }}</p>
+                    </div>
+                </button>
                 }
             </div>
             <div class="popup-confirm">

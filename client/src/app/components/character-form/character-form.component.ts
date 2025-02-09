@@ -19,7 +19,7 @@ export class CharacterFormComponent {
     selectedCharacter: string | null = null;
     selectedAttackDice: string | null = null;
     selectedDefenseDice: string | null = null;
-    xSword: GameDecorations.XSwords;
+    xSword = GameDecorations.XSwords;
 
     avatarTypes = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
 
