@@ -13,7 +13,7 @@ export class TileService {
     constructor(
         private toolService: ToolService,
         private itemDragService: ItemDragService,
-        private itemService: ItemService
+        private itemService: ItemService,
     ) {}
 
     applyTool(tile: Tile): void {
@@ -45,9 +45,13 @@ export class TileService {
     }
 
     drop(tile: Tile): void {
-        const draggedItem = this.itemDragService.getSelectedItem();
+        let draggedItem = this.itemDragService.getSelectedItem();
         const previousTile = this.itemDragService.getPreviousTile();
         if (!(draggedItem && !tile.item && tile.type !== TileType.Door && tile.type !== TileType.Wall)) return;
+
+        if (typeof draggedItem.clone !== 'function') {
+            draggedItem = new Item(draggedItem);
+        }
 
         const clonedItem = draggedItem.clone();
         this.applyItem(tile, clonedItem);

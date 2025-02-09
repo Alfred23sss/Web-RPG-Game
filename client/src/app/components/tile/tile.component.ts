@@ -55,7 +55,6 @@ export class TileComponent {
             this.tileService.removeTileObject(this.tile);
             TileComponent.activeButton = null;
         }
-
     }
 
     @HostListener('document:mouseup', ['$event'])

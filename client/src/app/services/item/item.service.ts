@@ -16,7 +16,7 @@ export class ItemService {
     }
 
     getItemByName(name: string): Item | undefined {
-        return this.items.find(item => item.name === name);
+        return this.items.find((item) => item.name === name);
     }
 
     incrementItemCounter(name: string): void {
