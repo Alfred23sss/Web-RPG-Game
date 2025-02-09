@@ -27,6 +27,7 @@ export class TileComponent {
             if (event.button === 2) {
                 if (this.tile.item !== undefined) {
                     this.tileService.removeTileObject(this.tile);
+                    TileComponent.activeButton = null;
                 } else {
                     this.tileService.removeTileType(this.tile);
                 }
