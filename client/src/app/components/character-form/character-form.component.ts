@@ -78,10 +78,13 @@ export class CharacterFormComponent {
             },
             error: (error) => {
                 if (error.status === 500) {
-                    console.log(error.status);
-                    console.log(this.game.id);
-                    this.snackbarService.showMessage('Le jeu a été supprimé.');
-                    //rediriger vers page creation
+                    this.snackbarService.showMessage("Le jeu n'est plus disponible.");
+                    this.router.navigate([ROUTES.CREATE_VIEW]);
+                    this.closePopup();
+                }
+                else if (error.status === 403) {
+                    this.snackbarService.showMessage("Le jeu n'est plus disponible.");
+                    this.router.navigate([ROUTES.CREATE_VIEW]);
                     this.closePopup();
                 }
                 console.error('Erreur:', error);
@@ -91,10 +94,12 @@ export class CharacterFormComponent {
         if (this.characterName && this.selectedAvatar && this.isBonusAssigned() && this.isDiceAssigned()) {
             this.showForm = false;
             this.router.navigate([ROUTES.WAITING_VIEW]);
-        } else {
+            this.closePopup();
+        } 
+        else {
             this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
         }
-        this.closePopup();
+        
     }
 
     closePopup(): void {

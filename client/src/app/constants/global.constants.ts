@@ -87,6 +87,7 @@ export const ERROR_MESSAGES = {
 export const ROUTES = {
     WAITING_VIEW: '/waiting-view',
     EDITION_VIEW: '/edition',
+    CREATE_VIEW: '/create'
 };
 
 export const SNACKBAR_CONFIG = {
