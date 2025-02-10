@@ -1,8 +1,8 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { Item } from '@app/classes/item';
 import { GameSize } from '@app/interfaces/game';
-import { Item } from '@app/interfaces/item';
 import { ItemDescription, ItemType, Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { GameService } from '@app/services/game/game.service';
