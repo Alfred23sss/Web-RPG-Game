@@ -12,7 +12,7 @@ export class GridService {
         return Array.from({ length: rows }, (_, rowIndex) =>
             Array.from(
                 { length: cols },
-                (_, colIndex): Tile => ({
+                (i, colIndex): Tile => ({
                     id: `tile-${rowIndex}-${colIndex}`,
                     imageSrc: ImageType.Default,
                     isOccupied: false,
