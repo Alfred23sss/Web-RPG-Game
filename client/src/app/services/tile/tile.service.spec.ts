@@ -14,7 +14,7 @@ describe('TileService', () => {
     let itemServiceSpy: jasmine.SpyObj<ItemService>;
 
     beforeEach(() => {
-        const toolSpy = jasmine.createSpyObj('ToolService', ['getSelectedTool']);
+        const toolSpy = jasmine.createSpyObj('ToolService', ['getSelectedTool', 'setSelectedTool']);
         const itemDragSpy = jasmine.createSpyObj('ItemDragService', ['getSelectedItem', 'getPreviousTile', 'clearSelection', 'decreaseItemCounter']);
         const itemServiceSpyObj = jasmine.createSpyObj('ItemService', ['incrementItemCounter']);
 
@@ -158,6 +158,13 @@ describe('TileService', () => {
 
             expect(tile.item).toBeUndefined();
             expect(previousTile.item).toEqual(jasmine.objectContaining({ name: 'item1' }));
+        });
+    });
+
+    describe('resetTool', () => {
+        it('should reset the selected tool to default values', () => {
+            service.resetTool();
+            expect(toolServiceSpy.setSelectedTool).toHaveBeenCalledWith(TileType.Default, ImageType.Default);
         });
     });
 });
