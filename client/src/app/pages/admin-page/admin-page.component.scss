@@ -15,8 +15,14 @@
     padding: 20px;
 }
 
+.button-container {
+    display: flex;
+    gap: 40px;
+}
+
 .create-button {
     margin-top: 10px;
+    flex-direction: row;
     text-align: center;
     padding: 12px 24px;
     font-size: 1.2rem;
