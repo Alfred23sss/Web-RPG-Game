@@ -67,8 +67,8 @@ export class PopUpComponent {
 
         const newGame: Game = this.gameService.createNewGame(gameMode, gridSize);
         this.gameService.updateCurrentGame(newGame);
-        this.closePopup();
         this.router.navigate([ROUTES.EDITION_VIEW]);
+        this.closePopup();
     }
 
     closePopup() {

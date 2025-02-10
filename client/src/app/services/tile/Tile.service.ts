@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { Item } from '@app/interfaces/item';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/ItemDrag.service';
@@ -60,6 +60,10 @@ export class TileService {
             previousTile.item = undefined;
         }
         this.itemDragService.clearSelection();
+    }
+
+    resetTool() {
+        this.toolService.setSelectedTool(TileType.Default, ImageType.Default);
     }
 
     private handleDoor(tile: Tile) {

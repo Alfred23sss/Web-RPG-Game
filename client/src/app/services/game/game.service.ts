@@ -116,7 +116,9 @@ export class GameService {
     private loadCurrentGame() {
         const savedGame = sessionStorage.getItem('currentGame');
         if (savedGame) {
-            this.currentGame = JSON.parse(savedGame);
+            const parsedGame: Game = JSON.parse(savedGame);
+            parsedGame.lastModified = new Date(parsedGame.lastModified); // Convert back to Date
+            this.currentGame = parsedGame;
         }
     }
 

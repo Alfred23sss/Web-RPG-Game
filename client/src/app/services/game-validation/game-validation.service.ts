@@ -53,7 +53,7 @@ export class GameValidationService {
     private validateDoorPosition(game: Game): string[] {
         const errors: string[] = [];
         if (!game.grid) {
-            errors.push('❌ No grid found');
+            errors.push('❌ Aucune grille trouvée');
             return errors;
         }
         const numRows = game.grid.length;
@@ -75,7 +75,7 @@ export class GameValidationService {
             }
         }
         if (doorErrorFound) {
-            errors.push('❌ One or more doors are not correctly placed.');
+            errors.push('❌ Une ou plusieurs portes ne sont pas correctement placées');
         }
         return errors;
     }
@@ -83,7 +83,7 @@ export class GameValidationService {
     private validateHalfTerrain(game: Game): string[] {
         const errors: string[] = [];
         if (!game.grid) {
-            errors.push('❌ No grid found');
+            errors.push('❌ Aucune grille trouvée');
             return errors;
         }
         const terrainProportionMin = 0.5;
@@ -97,7 +97,7 @@ export class GameValidationService {
             }
         }
         if (terrainTileCount / gridSize <= terrainProportionMin) {
-            errors.push('❌ Grid must be more than 50% terrain (Default, Ice or Water)');
+            errors.push('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
         }
         return errors;
     }
@@ -105,10 +105,10 @@ export class GameValidationService {
     private validateTitleAndDescription(title: string, description: string): string[] {
         const errors: string[] = [];
         if (!this.isTitleValid(title)) {
-            errors.push('❌ Name must be between 1 and 30 characters and unique.');
+            errors.push('❌ Le nom doit être entre 1 et 30 caractères uniques');
         }
         if (!this.isDescriptionValid(description)) {
-            errors.push('❌ Description must not be empty and must be at most 100 characters.');
+            errors.push('❌La description ne peut être vide et doit être de moins de 100 caractères');
         }
         return errors;
     }
@@ -125,7 +125,7 @@ export class GameValidationService {
     }
 
     private validateFlagPlaced(game: Game): string | null {
-        if (!game.grid) return '❌ No grid found';
+        if (!game.grid) return '❌ Aucune grille trouvée';
         if (game.mode !== GameMode.CTF) return null;
         for (const row of game.grid) {
             for (const tile of row) {
@@ -134,11 +134,11 @@ export class GameValidationService {
                 }
             }
         }
-        return '❌ Flag must be placed on the map.';
+        return '❌ Le drapeau doit être placé sur la grille';
     }
 
     private validateHomeItemsPlaced(game: Game): string | null {
-        if (!game.grid) return '❌ No grid found';
+        if (!game.grid) return '❌ Aucune grille trouvée';
         const requiredHomeItems =
             game.size === GameSize.Small
                 ? GameSize.SmallItemCount
@@ -153,11 +153,11 @@ export class GameValidationService {
                 }
             }
         }
-        return homeItemCount !== requiredHomeItems ? `❌ ${requiredHomeItems} home items must be placed.` : null;
+        return homeItemCount !== requiredHomeItems ? `❌ ${requiredHomeItems} items maisons doivent être placées` : null;
     }
 
     private validateItemCount(game: Game): string | null {
-        if (!game.grid) return '❌ No grid found';
+        if (!game.grid) return '❌ Aucune grille trouvée';
         let itemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
@@ -167,17 +167,17 @@ export class GameValidationService {
             }
         }
         const requiredItemCount = game.size === GameSize.Small ? ItemCount.Small : game.size === GameSize.Medium ? ItemCount.Medium : ItemCount.Large;
-        return itemCount !== requiredItemCount ? '❌ All items must be placed.' : null;
+        return itemCount !== requiredItemCount ? '❌ Tous les items doivent être placées' : null;
     }
 
     private validateAllTerrainAccessible(game: Game): string[] {
         if (!game.grid || game.grid.length === 0) {
-            return ['❌ No grid found'];
+            return ['❌ Aucune grille trouvée'];
         }
 
         const start = this.findAccessibleStart(game);
         if (!start) {
-            return ['❌ No accessible terrain found.'];
+            return ['❌ Aucune tuile de terrain accessible trouvée'];
         }
 
         const visited = this.performBFS(game, start.row, start.col);
@@ -204,7 +204,7 @@ export class GameValidationService {
         if (!game.grid) return [];
 
         const numRows = game.grid.length;
-        const numCols = game.grid[0]?.length || 0;
+        const numCols = game.grid[0].length;
         const visited: boolean[][] = Array.from({ length: numRows }, () => Array(numCols).fill(false));
         const queue: { row: number; col: number }[] = [];
         visited[startRow][startCol] = true;
@@ -247,7 +247,7 @@ export class GameValidationService {
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < numCols; j++) {
                 if (game.grid[i]?.[j]?.type !== TileType.Wall && !visited[i][j]) {
-                    return ['❌ There are inaccessible tiles in the grid.'];
+                    return ['❌ Il y a des tuiles inaccesseibles sur le terrain'];
                 }
             }
         }
@@ -255,14 +255,19 @@ export class GameValidationService {
     }
 
     private hasWallsOnSameAxis(game: Game, i: number, j: number): boolean {
-        return (this.isWall(game, i - 1, j) && this.isWall(game, i + 1, j)) || (this.isWall(game, i, j - 1) && this.isWall(game, i, j + 1));
+        const wallAbove = this.isWall(game, i - 1, j);
+        const wallBelow = this.isWall(game, i + 1, j);
+        const wallLeft = this.isWall(game, i, j - 1);
+        const wallRight = this.isWall(game, i, j + 1);
+        return (wallAbove && wallBelow) || (wallLeft && wallRight);
     }
 
     private hasTerrainOnOtherAxis(game: Game, i: number, j: number): boolean {
-        return (
-            (!this.isWallOrDoor(game, i - 1, j) && !this.isWallOrDoor(game, i + 1, j)) ||
-            (!this.isWallOrDoor(game, i, j - 1) && !this.isWallOrDoor(game, i, j + 1))
-        );
+        const terrainAbove = !this.isWallOrDoor(game, i - 1, j);
+        const terrainBelow = !this.isWallOrDoor(game, i + 1, j);
+        const terrainLeft = !this.isWallOrDoor(game, i, j - 1);
+        const terrainRight = !this.isWallOrDoor(game, i, j + 1);
+        return (terrainAbove && terrainBelow) || (terrainLeft && terrainRight);
     }
 
     private isWall(game: Game, i: number, j: number): boolean {

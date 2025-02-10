@@ -16,7 +16,9 @@ export class TileComponent {
     constructor(
         private itemDragService: ItemDragService,
         private tileService: TileService,
-    ) {}
+    ) {
+        this.tileService.resetTool();
+    }
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {

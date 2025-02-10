@@ -32,8 +32,10 @@ export class CreatePageComponent implements OnInit {
         });
     }
 
-    openDialog() {
-        this.dialog.open(CharacterFormComponent);
+    openDialog(game: Game) {
+        this.dialog.open(CharacterFormComponent, {
+            data: { game },
+        });
     }
 
     navigateToHome() {

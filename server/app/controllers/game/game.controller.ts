@@ -59,11 +59,32 @@ export class GameController {
         }
     }
 
-    @Get()
-    async getGame(@Body() id: string, @Res() response: Response) {
+    // @Get()
+    // async getGame(@Body() id: string, @Res() response: Response) {
+    //     try {
+    //         const game = await this.gameService.getGameById(id);
+    //         response.status(HttpStatus.OK).json(game);
+    //     } catch (error) {
+    //         response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    //             message: 'Server Error',
+    //             error: error.message,
+    //         });
+    //     }
+    // }
+
+    @Get(':id')
+    async getGame(@Param('id') id: string, @Res() response: Response) {
         try {
             const game = await this.gameService.getGameById(id);
-            response.status(HttpStatus.OK).json(game);
+            if (!game ) {
+                response.status(HttpStatus.NOT_FOUND).json({ message: `Game with id ${id} not found` });
+            } 
+            if (!game.isVisible) {
+                return response.status(HttpStatus.FORBIDDEN).json({ message: `Game with id ${id} is no longer available` });
+            }
+            else {
+                response.status(HttpStatus.OK).json(game);
+            }
         } catch (error) {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
                 message: 'Server Error',

@@ -1,3 +1,5 @@
+export const BONUS_VALUE = 2;
+
 export const DICE_TYPES = {
     D4: 'D4',
     D6: 'D6',
@@ -51,6 +53,7 @@ export const TIME_CONSTANTS = {
 
 export const GAME_MODES = {
     CTF: 'CTF',
+    CLASSIC: 'CLASSIC',
 };
 
 export const GAME_SIZES_LIST = [
@@ -81,6 +84,7 @@ export const ERROR_MESSAGES = {
     UNAVAILABLE_GAME_MODE: 'CTF game mode is currently unavailable!',
     MISSING_GAME_DETAILS: 'Please select both game size and game type!',
     INVALID_GAME_MODE: 'Invalid game mode selected!',
+    UNAVAILABLE_GAME: "Le jeu n'est plus disponible.",
 };
 
 export const ROUTES = {
@@ -89,9 +93,15 @@ export const ROUTES = {
     adminPage: '/admin',
     homePage: '/home',
     createPage: '/create',
+    CREATE_VIEW: '/create',
 };
 
 export const SNACKBAR_CONFIG = {
     DURATION: 3000,
     ACTION: 'Close',
+};
+
+export const HTTP_STATUS = {
+    INTERNAL_SERVER_ERROR: 500,
+    FORBIDDEN: 403,
 };
