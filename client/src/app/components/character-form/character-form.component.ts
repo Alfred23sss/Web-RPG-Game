@@ -45,7 +45,7 @@ export class CharacterFormComponent {
     }
 
     assignDice(attribute: string, dice: string) {
-        const { attack, defense } = this.characterService.assignDice(attribute, dice, this.selectedAttackDice, this.selectedDefenseDice);
+        const { attack, defense } = this.characterService.assignDice(attribute);
         this.selectedAttackDice = attack;
         this.selectedDefenseDice = defense;
     }

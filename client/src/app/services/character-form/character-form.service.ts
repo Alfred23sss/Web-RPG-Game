@@ -29,33 +29,15 @@ export class CharacterService {
         }
     }
 
-    assignDice(
-        attribute: string,
-        dice: string,
-        selectedAttackDice: string | null,
-        selectedDefenseDice: string | null,
-    ): { attack: string | null; defense: string | null } {
+    assignDice(attribute: string): { attack: string | null; defense: string | null } {
         this.diceAssigned[attribute] = true;
         this.diceAssigned[attribute === ATTRIBUTE_TYPES.ATTACK ? ATTRIBUTE_TYPES.DEFENSE : ATTRIBUTE_TYPES.ATTACK] = false;
-
-        if (attribute === ATTRIBUTE_TYPES.ATTACK) {
-            selectedAttackDice = dice;
-            selectedDefenseDice = dice === DICE_TYPES.D4 ? DICE_TYPES.D6 : DICE_TYPES.D4;
-        } else {
-            selectedDefenseDice = dice;
-            selectedAttackDice = dice === DICE_TYPES.D4 ? DICE_TYPES.D6 : DICE_TYPES.D4;
-        }
-
-        return { attack: selectedAttackDice, defense: selectedDefenseDice };
+        return attribute === ATTRIBUTE_TYPES.ATTACK
+            ? { attack: DICE_TYPES.D6, defense: DICE_TYPES.D4 }
+            : { attack: DICE_TYPES.D4, defense: DICE_TYPES.D6 };
     }
 
-    submitCharacter(
-        characterName: string,
-        selectedAvatar: string,
-        game: Game,
-        isBonusAssigned: boolean,
-        isDiceAssigned: boolean,
-        closePopup: () => void,
+    submitCharacter(characterName: string,selectedAvatar: string,game: Game,isBonusAssigned: boolean,isDiceAssigned: boolean, closePopup: () => void,
     ) {
         this.validateGameAvailability(game, closePopup);
 
