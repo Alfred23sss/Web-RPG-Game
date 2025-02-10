@@ -183,6 +183,76 @@ describe('GameValidationService', () => {
         expect(snackBarMock.open).toHaveBeenCalledWith('❌ Flag must be placed on the map.', 'Close', { duration: 3000 });
     });
 
+    it('should return an error if no grid is found', () => {
+        const game: Game = {
+            id: '1',
+            name: 'Game Without Grid',
+            description: 'This game has no grid',
+            size: '10',
+            mode: GameMode.Classic,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: undefined,
+        };
+    
+        const result = service.validateGame(game);
+        expect(result).toBeFalse();
+        
+        const expectedMessage = '❌ No grid found\n❌ No grid found\n❌ No grid found\n❌ No grid found\n❌ No grid found\n❌ No grid found';
+        expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'Close', { duration: 3000 });
+    });
+
+    it('should return null if a flag item is placed in the grid', () => {
+        const grid: Tile[][] = createValidGrid();
+        grid[2][2].item = createDummyItem('flag');
+    
+        const game: Game = {
+            id: '9',
+            name: 'Flag Placed Game',
+            description: 'This game has a flag placed on the grid',
+            size: '10',
+            mode: GameMode.CTF,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: grid,
+        };
+        const result = service.validateGame(game);
+        expect(result).toBeTrue();
+        expect(snackBarMock.open).not.toHaveBeenCalled();
+    });
+
+    it('should return an error if no accessible terrain is found', () => {
+        const grid: Tile[][] = createBaseGrid(10);
+        for (let i = 0; i < grid.length; i++) {
+            for (let j = 0; j < grid[i].length; j++) {
+                grid[i][j].type = TileType.Wall;
+            }
+        }
+    
+        const game: Game = {
+            id: '10',
+            name: 'No Accessible Terrain Game',
+            description: 'This game has no accessible terrain',
+            size: '10',
+            mode: GameMode.Classic,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: grid,
+        };
+        const result = service.validateGame(game);
+        expect(result).toBeFalse();
+        expect(snackBarMock.open).toHaveBeenCalledWith(
+            jasmine.stringMatching(/❌ No accessible terrain found./), 
+            'Close', 
+            { duration: 3000 }
+        );
+    });
+    
+    
+
     function createBaseGrid(size: number): Tile[][] {
         return Array.from({ length: size }, (_, rowIndex) =>
             Array.from({ length: size }, (_, colIndex) => ({
