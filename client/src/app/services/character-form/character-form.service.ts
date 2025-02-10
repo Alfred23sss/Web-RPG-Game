@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
+import { ATTRIBUTE_TYPES, BONUS_VALUE, DICE_TYPES, ERROR_MESSAGES, HTTP_STATUS, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -21,7 +21,7 @@ export class CharacterService {
 
     assignBonus(attribute: string) {
         if (!this.bonusAssigned[attribute]) {
-            this.attributes[attribute] += 2;
+            this.attributes[attribute] += BONUS_VALUE;
             this.bonusAssigned[attribute] = true;
             const otherAttribute = attribute === ATTRIBUTE_TYPES.VITALITY ? ATTRIBUTE_TYPES.SPEED : ATTRIBUTE_TYPES.VITALITY;
             this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
@@ -68,16 +68,14 @@ export class CharacterService {
 
     private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({
-            next: () => {
-                console.log('Pas de problème, retour 200');
-            },
+            next: () => {},
             error: (error) => {
-                if (error.status === 500 || error.status === 403) {
-                    this.snackbarService.showMessage("Le jeu n'est plus disponible.");
+                if (error.status === HTTP_STATUS.INTERNAL_SERVER_ERROR || error.status === HTTP_STATUS.FORBIDDEN) {
+                    this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME);
                     this.router.navigate([ROUTES.CREATE_VIEW]);
                     closePopup();
                 }
-                console.error('Erreur:', error);
+                // console.error('Erreur:', error);
             },
         });
     }
