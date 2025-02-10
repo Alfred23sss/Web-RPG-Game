@@ -8,7 +8,6 @@ import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
-import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
@@ -26,11 +25,9 @@ export class EditionPageComponent implements OnInit {
     originalGame: Game;
     isSaving: boolean = false;
 
-    // eslint-disable-next-line max-params
     constructor(
         private gameService: GameService,
         private gridService: GridService,
-        private screenShotService: ScreenshotService,
         private gameValidationService: GameValidationService,
         private router: Router,
         private snackbarService: SnackbarService,
@@ -95,7 +92,7 @@ export class EditionPageComponent implements OnInit {
 
     private async savePreviewImage() {
         try {
-            const previewUrl = await this.screenShotService.generatePreview('game-preview');
+            const previewUrl = await this.gameService.savePreviewImage();
             this.game.previewImage = previewUrl;
         } catch {
             this.isSaving = false;

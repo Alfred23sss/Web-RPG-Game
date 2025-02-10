@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
+import { ROUTES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
-import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
@@ -21,9 +21,9 @@ export class AdminPageComponent implements OnInit {
     backgroundImage = GameDecorations.Background;
     constructor(
         private dialogRef: MatDialog,
-        public gameService: GameService,
-        public gridService: GridService,
+        private gameService: GameService,
         private snackbarService: SnackbarService,
+        private router: Router,
     ) {}
 
     ngOnInit() {
@@ -55,6 +55,10 @@ export class AdminPageComponent implements OnInit {
     toggleVisibility(id: string, event: Event) {
         const isVisible = (event.target as HTMLInputElement).checked;
         this.gameService.updateGameVisibility(id, isVisible);
+    }
+
+    navigateToHome() {
+        this.router.navigate([ROUTES.homePage]);
     }
 
     private loadGames() {

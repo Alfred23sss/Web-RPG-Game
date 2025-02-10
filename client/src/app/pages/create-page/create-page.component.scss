@@ -49,6 +49,11 @@
     margin: 0.3rem;
 }
 
+.button-container {
+    display: flex;
+    gap: 40px;
+}
+
 .create-button {
     margin-top: 10px;
     text-align: center;

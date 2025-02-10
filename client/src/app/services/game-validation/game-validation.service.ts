@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Game, GameMode } from '@app/interfaces/game';
 import { TileType } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 enum TitleLength {
     Min = 0,
@@ -32,7 +32,7 @@ enum ItemCount {
 export class GameValidationService {
     constructor(
         private gameService: GameService,
-        private snackBar: MatSnackBar,
+        private snackBar: SnackbarService,
     ) {}
 
     validateGame(game: Game): boolean {
@@ -286,6 +286,6 @@ export class GameValidationService {
     }
 
     private showError(message: string) {
-        this.snackBar.open(message, 'Close', { duration: 3000 });
+        this.snackBar.showMessage(message, 'Close', 10000);
     }
 }

@@ -24,6 +24,9 @@ export class GameController {
     async updateGame(@Param('id') id: string, @Body() game: Partial<UpdateGameDto>) {
         try {
             const updatedGame = await this.gameService.updateGame(id, game);
+            if (!updatedGame) {
+                throw new HttpException(`Game with id ${id} not found`, HttpStatus.NOT_FOUND);
+            }
             return updatedGame;
         } catch (error) {
             throw new HttpException({ message: 'Failed to update game', error: error.message }, HttpStatus.BAD_REQUEST);

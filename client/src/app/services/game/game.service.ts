@@ -4,6 +4,7 @@ import { GameCommunicationService } from '@app/services/game-communication/game-
 import { GridService } from '@app/services/grid/grid-service.service';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 
 @Injectable({
     providedIn: 'root',
@@ -15,6 +16,7 @@ export class GameService {
     constructor(
         private gameCommunicationService: GameCommunicationService,
         private gridService: GridService,
+        private screenShotService: ScreenshotService,
     ) {
         this.loadCurrentGame();
     }
@@ -105,6 +107,10 @@ export class GameService {
 
     isGameNameUsed(name: string): boolean {
         return this.games.some((game) => game.name === name && game.id !== this.currentGame?.id);
+    }
+
+    async savePreviewImage() {
+        return await this.screenShotService.generatePreview('game-preview');
     }
 
     private loadCurrentGame() {

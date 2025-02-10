@@ -22,7 +22,7 @@ export class PopUpComponent {
     // eslint-disable-next-line max-params
     constructor(
         private dialogRef: MatDialog,
-        public gameModeService: GameModeService,
+        private gameModeService: GameModeService,
         private gameService: GameService,
         private router: Router,
         private snackbarService: SnackbarService,
@@ -45,6 +45,14 @@ export class PopUpComponent {
         } else {
             this.gameModeService.setGameMode(mode);
         }
+    }
+
+    getGameSize() {
+        return this.gameModeService.getGameSize();
+    }
+
+    getGameMode() {
+        return this.gameModeService.getGameMode();
     }
 
     confirm() {

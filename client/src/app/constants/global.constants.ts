@@ -86,6 +86,9 @@ export const ERROR_MESSAGES = {
 export const ROUTES = {
     WAITING_VIEW: '/waiting-view',
     EDITION_VIEW: '/edition',
+    adminPage: '/admin',
+    homePage: '/home',
+    createPage: '/create',
 };
 
 export const SNACKBAR_CONFIG = {
