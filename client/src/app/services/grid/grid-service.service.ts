@@ -35,10 +35,6 @@ export class GridService {
         return this.grid?.[row]?.[col];
     }
 
-    // updateTile(row: number, col: number, newTile: Partial<Tile>): void {
-    //     this.grid?.[row]?.[col] && Object.assign(this.grid[row][col], newTile);
-    // }
-
     getGridSize(gameSize: string): number {
         return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.SMALL];
     }
