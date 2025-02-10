@@ -3,7 +3,7 @@ import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ItemService } from '@app/services/item/item.service';
-import { ItemDragService } from '@app/services/ItemDrag.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
 
 @Injectable({

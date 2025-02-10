@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, ItemDescription, ItemType, Tile, TileType } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/ItemDrag.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
 import { ToolService } from '@app/services/tool/tool.service';
 import { ItemService } from '../item/item.service';
