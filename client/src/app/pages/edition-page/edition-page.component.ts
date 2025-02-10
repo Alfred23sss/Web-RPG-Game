@@ -64,9 +64,6 @@ export class EditionPageComponent implements OnInit {
             return;
         }
 
-        if (this.game.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
-            console.log(this.game.grid[0][0].item.itemCounter);
-        }
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
@@ -77,11 +74,9 @@ export class EditionPageComponent implements OnInit {
     }
 
     private async savePreviewImage() {
-        try {
-            const previewUrl = await this.screenShotService.generatePreview('game-preview');
+        const previewUrl = await this.screenShotService.generatePreview('game-preview').catch(() => null);
+        if (previewUrl) {
             this.game.previewImage = previewUrl;
-        } catch (error) {
-            console.error('Error when saving:', error);
         }
     }
 }
