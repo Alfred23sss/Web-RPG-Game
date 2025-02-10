@@ -112,6 +112,11 @@
 //     }
 // }
 
+
+
+
+//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
 import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -119,7 +124,9 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, DICE_TYPES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { AvatarType, GameDecorations } from '@app/interfaces/images';
+// import { CharacterService } from '@app/services/character-form/character-form.service';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+
 
 @Component({
     selector: 'app-character-form',
@@ -172,6 +179,7 @@ export class CharacterFormComponent {
     }
 
     closePopup(): void {
+        this.characterService.resetAttributes();
         this.dialogRef.close();
     }
 

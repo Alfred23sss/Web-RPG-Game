@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Injectable({
     providedIn: 'root',
@@ -57,6 +57,16 @@ export class CharacterService {
         isDiceAssigned: boolean,
         closePopup: () => void,
     ) {
+        this.validateGameAvailability(game, closePopup);
+
+        if (this.isCharacterValid(characterName, selectedAvatar, isBonusAssigned, isDiceAssigned)) {
+            this.proceedToWaitingView(closePopup);
+        } else {
+            this.showMissingDetailsError();
+        }
+    }
+
+    private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             next: () => {
                 console.log('Pas de problème, retour 200');
@@ -70,12 +80,24 @@ export class CharacterService {
                 console.error('Erreur:', error);
             },
         });
+    }
 
-        if (characterName && selectedAvatar && isBonusAssigned && isDiceAssigned) {
-            this.router.navigate([ROUTES.WAITING_VIEW]);
-            closePopup();
-        } else {
-            this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
-        }
+    private isCharacterValid(characterName: string, selectedAvatar: string, isBonusAssigned: boolean, isDiceAssigned: boolean): boolean {
+        return !!characterName && !!selectedAvatar && isBonusAssigned && isDiceAssigned;
+    }
+
+    private proceedToWaitingView(closePopup: () => void) {
+        this.router.navigate([ROUTES.WAITING_VIEW]);
+        closePopup();
+    }
+
+    private showMissingDetailsError() {
+        this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
+    }
+
+    resetAttributes() {
+        this.attributes = { ...INITIAL_VALUES.attributes };
+        this.bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
+        this.diceAssigned = { ...INITIAL_VALUES.diceAssigned };
     }
 }
