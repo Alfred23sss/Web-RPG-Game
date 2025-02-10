@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ItemService } from './item.service';
 import { GameService } from '@app/services/game/game.service';
-import { Item } from '@app/interfaces/item';
+import { Item } from '@app/classes/item';
 import { TileType, Tile } from '@app/interfaces/tile';
 import { GameSize } from '@app/interfaces/game';
 
