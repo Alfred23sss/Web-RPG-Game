@@ -152,11 +152,11 @@ describe('CharacterService', () => {
             expect(service['isCharacterValid']('name', 'avatar.png', true, true)).toBeTrue();
         });
         it('should return false when at least one parameter is missing', () => {
-            expect(service['isCharacterValid']('', 'avatar.png', true, true)).toBeFalse(); // characterName est vide
-            expect(service['isCharacterValid']('name', '', true, true)).toBeFalse(); // selectedAvatar est vide (corrigé)
-            expect(service['isCharacterValid']('name', 'avatar.png', false, true)).toBeFalse(); // isBonusAssigned est false
-            expect(service['isCharacterValid']('name', 'avatar.png', true, false)).toBeFalse(); // isDiceAssigned est false
-            expect(service['isCharacterValid']('', '', false, false)).toBeFalse(); // Tout est invalide
+            expect(service['isCharacterValid']('', 'avatar.png', true, true)).toBeFalse();
+            expect(service['isCharacterValid']('name', '', true, true)).toBeFalse();
+            expect(service['isCharacterValid']('name', 'avatar.png', false, true)).toBeFalse();
+            expect(service['isCharacterValid']('name', 'avatar.png', true, false)).toBeFalse();
+            expect(service['isCharacterValid']('', '', false, false)).toBeFalse();
         });
     });
 
@@ -164,21 +164,56 @@ describe('CharacterService', () => {
         let closePopupSpy: jasmine.Spy;
 
         it('should navigate to WAITING_VIEW', () => {
+            closePopupSpy = jasmine.createSpy();
             service['proceedToWaitingView'](closePopupSpy);
             expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WAITING_VIEW]);
+            expect(closePopupSpy).toHaveBeenCalled();
         });
 
         it('should call closePopup', () => {
             closePopupSpy = jasmine.createSpy();
+            service['proceedToWaitingView'](closePopupSpy);
             expect(closePopupSpy).toHaveBeenCalled();
         });
     });
 
     describe('showMissingDetailsError', () => {
         it('should call snackbarService.showMessage with MISSING_CHARACTER_DETAILS', () => {
-            service['showMissingDetailsError'](); 
+            service['showMissingDetailsError']();
 
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
+        });
+    });
+
+    describe('submitCharacter', () => {
+        
+        let closePopupSpy: jasmine.Spy;
+        let mockGame: Game;
+
+        beforeEach(() => {
+            closePopupSpy = jasmine.createSpy('closePopup');
+            mockGame = { id: '1', name: 'Test Game' } as Game;
+
+            spyOn(service as any, 'validateGameAvailability').and.callFake(() => {});
+            spyOn(service as any, 'proceedToWaitingView');
+            spyOn(service as any, 'showMissingDetailsError');
+            spyOn(service as any, 'isCharacterValid').and.returnValue(true);
+        });
+
+        it('should proceed to waiting view if character is valid', () => {
+            service.submitCharacter('John', 'avatar.png', mockGame, true, true, closePopupSpy);
+
+            expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
+            expect(service['showMissingDetailsError']).not.toHaveBeenCalled();
+        });
+
+        it('should show missing details error if character is invalid', () => {
+            (service as any).isCharacterValid.and.returnValue(false);
+
+            service.submitCharacter('John', 'avatar.png', mockGame, false, false, closePopupSpy);
+
+            expect(service['showMissingDetailsError']).toHaveBeenCalled();
+            expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
         });
     });
 });
