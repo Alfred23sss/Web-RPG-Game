@@ -74,7 +74,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Une ou plusieurs portes ne sont pas correctement placées', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Une ou plusieurs portes ne sont pas correctement placées', 'Close', { duration: 10000 });
     });
 
     it('should fail when terrain is less than 50%', () => {
@@ -92,7 +92,7 @@ describe('GameValidationService', () => {
 
         expect(service.validateGame(game)).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', {
-            duration: 3000,
+            duration: 10000,
         });
     });
 
@@ -113,7 +113,7 @@ describe('GameValidationService', () => {
         expect(snackBarMock.open).toHaveBeenCalledWith(
             '❌ Le nom doit être entre 1 et 30 caractères uniques\n❌La description ne peut être vide et doit être de moins de 100 caractères',
             'Close',
-            { duration: 3000 },
+            { duration: 10000 },
         );
     });
 
@@ -131,7 +131,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Il y a des tuiles inaccesseibles sur le terrain', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Il y a des tuiles inaccesseibles sur le terrain', 'Close', { duration: 10000 });
     });
 
     it('should fail when not all items are placed', () => {
@@ -148,7 +148,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Tous les items doivent être placées', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Tous les items doivent être placées', 'Close', { duration: 10000 });
     });
 
     it('should fail when home items are missing', () => {
@@ -165,7 +165,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 2 items maisons doivent être placées', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 2 items maisons doivent être placées', 'Close', { duration: 10000 });
     });
 
     it('should fail when flag is missing in CTF mode', () => {
@@ -182,7 +182,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Le drapeau doit être placé sur la grille', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Le drapeau doit être placé sur la grille', 'Close', { duration: 10000 });
     });
 
     it('should return an error if no grid is found', () => {
@@ -203,7 +203,7 @@ describe('GameValidationService', () => {
 
         const expectedMessage =
             '❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée';
-        expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'Close', { duration: 10000 });
     });
 
     it('should return null if a flag item is placed in the grid', () => {
@@ -248,7 +248,7 @@ describe('GameValidationService', () => {
         const result = service.validateGame(game);
         expect(result).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith(jasmine.stringMatching(/❌ Aucune tuile de terrain accessible trouvée/), 'Close', {
-            duration: 3000,
+            duration: 10000,
         });
     });
 
@@ -303,7 +303,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 4 items maisons doivent être placées', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 4 items maisons doivent être placées', 'Close', { duration: 10000 });
     });
 
     it('should fail when home items are missing in a large grid', () => {
@@ -323,7 +323,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 6 items maisons doivent être placées', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 6 items maisons doivent être placées', 'Close', { duration: 10000 });
     });
 
     it('Should fail when door is not placed correctly', () => {
