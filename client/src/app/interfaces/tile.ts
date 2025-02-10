@@ -1,4 +1,4 @@
-import { Item } from '@app/interfaces/item';
+import { Item } from '@app/classes/item';
 
 export enum TileType {
     Water = 'water',

@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { GameValidationService } from './game-validation.service';
+import { Item } from '@app/classes/item';
 import { Game, GameMode } from '@app/interfaces/game';
 import { Tile, TileType } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
-import { Item } from '@app/interfaces/item';
+import { GameValidationService } from './game-validation.service';
 
 describe('GameValidationService', () => {
     let service: GameValidationService;

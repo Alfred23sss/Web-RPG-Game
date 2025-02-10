@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { Item } from '@app/interfaces/item';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
