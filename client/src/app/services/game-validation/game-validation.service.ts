@@ -257,15 +257,15 @@ export class GameValidationService {
     private hasWallsOnSameAxis(game: Game, i: number, j: number): boolean {
         const wallAbove = this.isWall(game, i - 1, j);
         const wallBelow = this.isWall(game, i + 1, j);
-        const wallLeft  = this.isWall(game, i, j - 1);
+        const wallLeft = this.isWall(game, i, j - 1);
         const wallRight = this.isWall(game, i, j + 1);
         return (wallAbove && wallBelow) || (wallLeft && wallRight);
     }
-    
+
     private hasTerrainOnOtherAxis(game: Game, i: number, j: number): boolean {
         const terrainAbove = !this.isWallOrDoor(game, i - 1, j);
         const terrainBelow = !this.isWallOrDoor(game, i + 1, j);
-        const terrainLeft  = !this.isWallOrDoor(game, i, j - 1);
+        const terrainLeft = !this.isWallOrDoor(game, i, j - 1);
         const terrainRight = !this.isWallOrDoor(game, i, j + 1);
         return (terrainAbove && terrainBelow) || (terrainLeft && terrainRight);
     }

@@ -2,7 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/interfaces/item';
-import { ItemDescription, ItemType} from '@app/interfaces/tile';
+import { ItemDescription, ItemType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/ItemDrag.service';
 import { ItemService } from '@app/services/item/item.service';
 

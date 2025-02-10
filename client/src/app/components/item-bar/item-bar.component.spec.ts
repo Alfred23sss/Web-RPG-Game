@@ -47,7 +47,7 @@ describe('ItemBarComponent', () => {
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
 
         itemDragServiceMock.getSelectedItem.and.returnValue(testItem);
@@ -91,7 +91,7 @@ describe('ItemBarComponent', () => {
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
 
         const draggedItem = new Item({
@@ -100,7 +100,7 @@ describe('ItemBarComponent', () => {
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
 
         itemDragServiceMock.getSelectedItem.and.returnValue(draggedItem);
@@ -126,46 +126,46 @@ describe('ItemBarComponent', () => {
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
-    
+
         const draggedItem = testItem.clone();
-    
+
         itemDragServiceMock.getSelectedItem.and.returnValue(draggedItem);
-    
+
         itemDragServiceMock.getPreviousTile.and.returnValue({
             id: 'tile-1',
             imageSrc: '',
             isOccupied: false,
             type: TileType.Default,
             isOpen: true,
-            item: draggedItem
+            item: draggedItem,
         });
-    
+
         component.onContainerDrop(new DragEvent('drop'), testItem);
-    
+
         expect(testItem.itemCounter).toBe(2);
         expect(itemDragServiceMock.clearSelection).toHaveBeenCalled();
     });
 
     it('should exit early if no dragged item is selected', () => {
         itemDragServiceMock.getSelectedItem.and.returnValue(undefined);
-        
+
         const testItem = new Item({
             id: '1',
             name: 'potion',
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
-    
+
         const event = new DragEvent('drop');
 
         component.onContainerDrop(event, testItem);
         expect(itemDragServiceMock.clearSelection).not.toHaveBeenCalled();
     });
-    
+
     it('should exit early if dragged item name does not match the target item name', () => {
         const draggedItem = new Item({
             id: '2',
@@ -173,25 +173,25 @@ describe('ItemBarComponent', () => {
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Fire'
+            description: 'Fire',
         });
-    
+
         itemDragServiceMock.getSelectedItem.and.returnValue(draggedItem);
-        
+
         const targetItem = new Item({
             id: '1',
             name: 'potion',
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
-    
+
         const event = new DragEvent('drop');
         component.onContainerDrop(event, targetItem);
         expect(itemDragServiceMock.clearSelection).not.toHaveBeenCalled();
     });
-    
+
     it('should exit early if dragged item id matches the target item id', () => {
         const draggedItem = new Item({
             id: '1',
@@ -199,24 +199,23 @@ describe('ItemBarComponent', () => {
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
-    
+
         itemDragServiceMock.getSelectedItem.and.returnValue(draggedItem);
-        
+
         const targetItem = new Item({
             id: '1',
             name: 'potion',
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion'
+            description: 'Potion',
         });
-    
+
         const event = new DragEvent('drop');
-        
+
         component.onContainerDrop(event, targetItem);
         expect(itemDragServiceMock.clearSelection).not.toHaveBeenCalled();
-    }); 
-
+    });
 });

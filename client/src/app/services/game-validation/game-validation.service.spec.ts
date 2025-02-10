@@ -91,7 +91,9 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', {
+            duration: 3000,
+        });
     });
 
     it('should fail when title or description is invalid', () => {
@@ -195,18 +197,19 @@ describe('GameValidationService', () => {
             previewImage: 'image.png',
             grid: undefined,
         };
-    
+
         const result = service.validateGame(game);
         expect(result).toBeFalse();
-        
-        const expectedMessage = '❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée';
+
+        const expectedMessage =
+            '❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée';
         expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'Close', { duration: 3000 });
     });
 
     it('should return null if a flag item is placed in the grid', () => {
         const grid: Tile[][] = createValidGrid();
         grid[2][2].item = createDummyItem('flag');
-    
+
         const game: Game = {
             id: '9',
             name: 'Flag Placed Game',
@@ -216,7 +219,7 @@ describe('GameValidationService', () => {
             lastModified: new Date(),
             isVisible: true,
             previewImage: 'image.png',
-            grid: grid,
+            grid,
         };
         const result = service.validateGame(game);
         expect(result).toBeTrue();
@@ -230,7 +233,7 @@ describe('GameValidationService', () => {
                 grid[i][j].type = TileType.Wall;
             }
         }
-    
+
         const game: Game = {
             id: '10',
             name: 'No Accessible Terrain Game',
@@ -240,15 +243,13 @@ describe('GameValidationService', () => {
             lastModified: new Date(),
             isVisible: true,
             previewImage: 'image.png',
-            grid: grid,
+            grid,
         };
         const result = service.validateGame(game);
         expect(result).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith(
-            jasmine.stringMatching(/❌ Aucune tuile de terrain accessible trouvée/), 
-            'Close', 
-            { duration: 3000 }
-        );
+        expect(snackBarMock.open).toHaveBeenCalledWith(jasmine.stringMatching(/❌ Aucune tuile de terrain accessible trouvée/), 'Close', {
+            duration: 3000,
+        });
     });
 
     it('should validate a valid medium grid', () => {
@@ -263,11 +264,11 @@ describe('GameValidationService', () => {
             previewImage: 'image.png',
             grid: createMediumValidGrid(),
         };
-    
+
         expect(service.validateGame(game)).toBeTrue();
         expect(snackBarMock.open).not.toHaveBeenCalled();
     });
-    
+
     it('should validate a valid large grid', () => {
         const game: Game = {
             id: '12',
@@ -280,15 +281,15 @@ describe('GameValidationService', () => {
             previewImage: 'image.png',
             grid: createLargeValidGrid(),
         };
-    
+
         expect(service.validateGame(game)).toBeTrue();
         expect(snackBarMock.open).not.toHaveBeenCalled();
     });
-    
+
     it('should fail when home items are missing in a medium grid', () => {
         const grid = createMediumValidGrid();
         grid[1][8].item = undefined;
-    
+
         const game: Game = {
             id: '13',
             name: 'Jeu Moyen - Maison manquante',
@@ -298,17 +299,17 @@ describe('GameValidationService', () => {
             lastModified: new Date(),
             isVisible: true,
             previewImage: 'image.png',
-            grid: grid,
+            grid,
         };
-    
+
         expect(service.validateGame(game)).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith('❌ 4 items maisons doivent être placées', 'Close', { duration: 3000 });
     });
-    
+
     it('should fail when home items are missing in a large grid', () => {
         const grid = createLargeValidGrid();
         grid[1][2].item = undefined;
-    
+
         const game: Game = {
             id: '14',
             name: 'Jeu Grand - Maison manquante',
@@ -318,38 +319,36 @@ describe('GameValidationService', () => {
             lastModified: new Date(),
             isVisible: true,
             previewImage: 'image.png',
-            grid: grid,
+            grid,
         };
-    
+
         expect(service.validateGame(game)).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith('❌ 6 items maisons doivent être placées', 'Close', { duration: 3000 });
     });
-    
+
     it('Should fail when door is not placed correctly', () => {
         const grid = [
-          [{ type: TileType.Default }, { type: TileType.Default }, { type: TileType.Default }],
-          [{ type: TileType.Default }, { type: TileType.Door }, { type: TileType.Default }],
-          [{ type: TileType.Default }, { type: TileType.Default }, { type: TileType.Default }],
+            [{ type: TileType.Default }, { type: TileType.Default }, { type: TileType.Default }],
+            [{ type: TileType.Default }, { type: TileType.Door }, { type: TileType.Default }],
+            [{ type: TileType.Default }, { type: TileType.Default }, { type: TileType.Default }],
         ];
-        const game = { grid: grid, size: '10' } as Game;
+        const game = { grid, size: '10' } as Game;
         const result = service['validateDoorPosition'](game);
         expect(result).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
-      });
-      
+    });
+
     it('should fail when terrain proportion is not sufficient in validateHalfTerrain', () => {
-        const grid = Array.from({ length: 4 }, () =>
-          Array.from({ length: 4 }, () => ({ type: TileType.Wall }))
-        );
-        const game = { grid: grid, size: '10' } as Game;
+        const grid = Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => ({ type: TileType.Wall })));
+        const game = { grid, size: '10' } as Game;
         const result = service['validateHalfTerrain'](game);
         expect(result).toContain('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
     });
-    
+
     it('performBFS should return an empty tab if game.grid is undefined', () => {
         const bfsResult = service['performBFS']({ grid: undefined } as Game, 0, 0);
         expect(bfsResult).toEqual([]);
-      });
-    
+    });
+
     it('checkForInaccessible should return an empty tab if game.grid is undefined', () => {
         const result = service['checkForInaccessible']({ grid: undefined } as Game, []);
         expect(result).toEqual([]);
@@ -357,54 +356,54 @@ describe('GameValidationService', () => {
 
     it('hasTerrainOnOtherAxis should return false if both axes are doors or walls', () => {
         const grid = [
-          [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
-          [{ type: TileType.Wall }, { type: TileType.Door }, { type: TileType.Wall }],
-          [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
+            [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
+            [{ type: TileType.Wall }, { type: TileType.Door }, { type: TileType.Wall }],
+            [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
         ];
-        const game = { grid: grid } as Game;
+        const game = { grid } as Game;
         const result = service['hasTerrainOnOtherAxis'](game, 1, 1);
         expect(result).toBeFalse();
-      });  
+    });
 
     it('should mark door as not correctly placed when doors or walls on axis', () => {
-        const grid: any[][] = [
-          [
-            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
-            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
-            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true }
-          ],
-          [
-            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
-            { type: TileType.Door,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
-            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true }
-          ],
-          [
-            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
-            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
-            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true }
-          ]
+        const grid: unknown[][] = [
+            [
+                { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+                { type: TileType.Wall, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+                { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            ],
+            [
+                { type: TileType.Wall, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+                { type: TileType.Door, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+                { type: TileType.Wall, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            ],
+            [
+                { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+                { type: TileType.Wall, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+                { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            ],
         ];
-        const game: Game = { grid: grid, size: '10' } as Game;
-        
+        const game: Game = { grid, size: '10' } as Game;
+
         const errors = service['validateDoorPosition'](game);
-        
+
         expect(errors).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
     });
-      
+
     it('findAccessibleStart should return null if grid is undefined', () => {
         const game: Game = { grid: undefined } as Game;
         const start = service['findAccessibleStart'](game);
         expect(start).toBeNull();
-      });
-    
+    });
+
     it('findAccessibleStart should return null if the grid is empty', () => {
         const game: Game = { grid: [] } as unknown as Game;
         const start = service['findAccessibleStart'](game);
         expect(start).toBeNull();
-      });
+    });
 
     it('checkForInaccessible should return empty if the first line of the grid is empty', () => {
-        const game: Game = { grid: [[]] } as unknown as Game
+        const game: Game = { grid: [[]] } as unknown as Game;
         const result = service['checkForInaccessible'](game, []);
         expect(result).toEqual([]);
     });
@@ -428,12 +427,12 @@ describe('GameValidationService', () => {
             [{ type: TileType.Wall }, { type: TileType.Default }, { type: TileType.Wall }],
         ];
         const game = { grid } as Game;
-    
+
         const errors = service['validateDoorPosition'](game);
-    
+
         expect(errors).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
-    });    
-    
+    });
+
     it('should return an error when the door does not have walls on the same axis', () => {
         const grid = [
             [{ type: TileType.Wall }, { type: TileType.Default }, { type: TileType.Wall }],
@@ -441,13 +440,12 @@ describe('GameValidationService', () => {
             [{ type: TileType.Wall }, { type: TileType.Default }, { type: TileType.Wall }],
         ];
         const game = { grid } as Game;
-    
+
         const errors = service['validateDoorPosition'](game);
-    
+
         expect(errors).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
     });
-    
-    
+
     function createDummyItem(itemName: string): Item {
         return new Item({
             id: `dummy-${itemName}`,
