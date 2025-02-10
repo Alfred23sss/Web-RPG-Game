@@ -13,7 +13,7 @@ describe('TileComponent', () => {
     let mockTile: Tile;
 
     beforeEach(async () => {
-        tileServiceSpy = jasmine.createSpyObj('TileService', ['removeTileObject', 'removeTileType', 'applyTool', 'drop']);
+        tileServiceSpy = jasmine.createSpyObj('TileService', ['removeTileObject', 'removeTileType', 'applyTool', 'drop', 'resetTool']);
         itemDragServiceSpy = jasmine.createSpyObj('ItemDragService', ['setSelectedItem']);
         TileComponent.activeButton = null;
         TileComponent.isDraggedTest = false;
