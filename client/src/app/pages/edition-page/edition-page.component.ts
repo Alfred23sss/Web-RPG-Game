@@ -24,6 +24,7 @@ export class EditionPageComponent implements OnInit {
     gameDescription: string = '';
     game: Game;
     originalGame: Game;
+    isSaving: boolean = false;
 
     // eslint-disable-next-line max-params
     constructor(
@@ -71,10 +72,13 @@ export class EditionPageComponent implements OnInit {
     }
 
     async save() {
+        if (this.isSaving) return;
+        this.isSaving = true;
         this.game.name = this.gameName;
         this.game.description = this.gameDescription;
 
         if (!this.gameValidationService.validateGame(this.game)) {
+            this.isSaving = false;
             return;
         }
 
@@ -83,7 +87,9 @@ export class EditionPageComponent implements OnInit {
         this.gameService.saveGame(this.game);
 
         this.gameService.fetchGames().subscribe(() => {
-            this.router.navigate(['/admin']);
+            this.router.navigate(['/admin']).then(() => {
+                this.isSaving = false;
+            });
         });
     }
 
@@ -91,8 +97,8 @@ export class EditionPageComponent implements OnInit {
         try {
             const previewUrl = await this.screenShotService.generatePreview('game-preview');
             this.game.previewImage = previewUrl;
-        } catch (error) {
-            console.error('Error when saving:', error);
+        } catch {
+            this.isSaving = false;
         }
     }
 }

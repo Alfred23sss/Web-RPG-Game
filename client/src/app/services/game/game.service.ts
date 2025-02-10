@@ -9,8 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
     providedIn: 'root',
 })
 export class GameService {
-    games: Game[];
+    games: Game[] = [];
     private currentGame: Game | undefined;
+
     constructor(
         private gameCommunicationService: GameCommunicationService,
         private gridService: GridService,
@@ -57,6 +58,10 @@ export class GameService {
         return this.games.find((game) => game.id === id);
     }
 
+    getGameIndexById(id: string) {
+        return this.games.findIndex((game) => game.id === id);
+    }
+
     removeGame(id: string) {
         this.games = this.games.filter((game) => game.id !== id);
     }
@@ -73,7 +78,7 @@ export class GameService {
         const game = this.getGameById(id);
         if (game) {
             game.isVisible = isVisible;
-            this.saveGame(game);
+            this.updateExistingGame(game);
         }
     }
 
@@ -113,13 +118,10 @@ export class GameService {
         gameToUpdate.lastModified = new Date();
         this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
             next: (updatedGame) => {
-                const index = this.games.findIndex((game) => game.id === gameToUpdate.id);
+                const index = this.getGameIndexById(gameToUpdate.id);
                 if (index !== -1) {
                     this.games[index] = updatedGame;
                 }
-            },
-            error: (err) => {
-                console.error('Error updating game:', err);
             },
         });
     }
@@ -128,9 +130,6 @@ export class GameService {
         this.gameCommunicationService.saveGame(gameToAdd).subscribe({
             next: (game) => {
                 this.addGame(game);
-            },
-            error: (err) => {
-                console.error('Error saving game:', err);
             },
         });
     }
