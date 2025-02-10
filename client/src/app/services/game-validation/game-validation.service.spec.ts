@@ -74,7 +74,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ One or more doors are not correctly placed.', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Une ou plusieurs portes ne sont pas correctement placées', 'Close', { duration: 3000 });
     });
 
     it('should fail when terrain is less than 50%', () => {
@@ -91,7 +91,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Grid must be more than 50% terrain (Default, Ice or Water)', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', { duration: 3000 });
     });
 
     it('should fail when title or description is invalid', () => {
@@ -109,7 +109,7 @@ describe('GameValidationService', () => {
 
         expect(service.validateGame(game)).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith(
-            '❌ Name must be between 1 and 30 characters and unique.\n❌ Description must not be empty and must be at most 100 characters.',
+            '❌ Le nom doit être entre 1 et 30 caractères uniques\n❌La description ne peut être vide et doit être de moins de 100 caractères',
             'Close',
             { duration: 3000 },
         );
@@ -129,7 +129,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ There are inaccessible tiles in the grid.', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Il y a des tuiles inaccesseibles sur le terrain', 'Close', { duration: 3000 });
     });
 
     it('should fail when not all items are placed', () => {
@@ -146,7 +146,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ All items must be placed.', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Tous les items doivent être placées', 'Close', { duration: 3000 });
     });
 
     it('should fail when home items are missing', () => {
@@ -163,7 +163,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 2 home items must be placed.', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 2 items maisons doivent être placées', 'Close', { duration: 3000 });
     });
 
     it('should fail when flag is missing in CTF mode', () => {
@@ -180,7 +180,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Flag must be placed on the map.', 'Close', { duration: 3000 });
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ Le drapeau doit être placé sur la grille', 'Close', { duration: 3000 });
     });
 
     it('should return an error if no grid is found', () => {
@@ -199,7 +199,7 @@ describe('GameValidationService', () => {
         const result = service.validateGame(game);
         expect(result).toBeFalse();
         
-        const expectedMessage = '❌ No grid found\n❌ No grid found\n❌ No grid found\n❌ No grid found\n❌ No grid found\n❌ No grid found';
+        const expectedMessage = '❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée\n❌ Aucune grille trouvée';
         expect(snackBarMock.open).toHaveBeenCalledWith(expectedMessage, 'Close', { duration: 3000 });
     });
 
@@ -245,13 +245,169 @@ describe('GameValidationService', () => {
         const result = service.validateGame(game);
         expect(result).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith(
-            jasmine.stringMatching(/❌ No accessible terrain found./), 
+            jasmine.stringMatching(/❌ Aucune tuile de terrain accessible trouvée/), 
             'Close', 
             { duration: 3000 }
         );
     });
+
+    it('should validate a valid medium grid', () => {
+        const game: Game = {
+            id: '11',
+            name: 'Jeu Moyen Valide',
+            description: 'Cas de test pour une grille moyenne valide',
+            size: '15',
+            mode: GameMode.Classic,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: createMediumValidGrid(),
+        };
     
+        expect(service.validateGame(game)).toBeTrue();
+        expect(snackBarMock.open).not.toHaveBeenCalled();
+    });
     
+    it('should validate a valid large grid', () => {
+        const game: Game = {
+            id: '12',
+            name: 'Jeu Grand Valide',
+            description: 'Cas de test pour une grille grande valide',
+            size: '20',
+            mode: GameMode.Classic,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: createLargeValidGrid(),
+        };
+    
+        expect(service.validateGame(game)).toBeTrue();
+        expect(snackBarMock.open).not.toHaveBeenCalled();
+    });
+    
+    it('should fail when home items are missing in a medium grid', () => {
+        const grid = createMediumValidGrid();
+        grid[1][8].item = undefined;
+    
+        const game: Game = {
+            id: '13',
+            name: 'Jeu Moyen - Maison manquante',
+            description: 'Il manque un item "maison" dans la grille moyenne',
+            size: '15',
+            mode: GameMode.Classic,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: grid,
+        };
+    
+        expect(service.validateGame(game)).toBeFalse();
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 4 items maisons doivent être placées', 'Close', { duration: 3000 });
+    });
+    
+    it('should fail when home items are missing in a large grid', () => {
+        const grid = createLargeValidGrid();
+        grid[1][2].item = undefined;
+    
+        const game: Game = {
+            id: '14',
+            name: 'Jeu Grand - Maison manquante',
+            description: 'Il manque un item "maison" dans la grille grande',
+            size: '20',
+            mode: GameMode.Classic,
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image.png',
+            grid: grid,
+        };
+    
+        expect(service.validateGame(game)).toBeFalse();
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ 6 items maisons doivent être placées', 'Close', { duration: 3000 });
+    });
+    
+    it('Should fail when door is not placed correctly', () => {
+        const grid = [
+          [{ type: TileType.Default }, { type: TileType.Default }, { type: TileType.Default }],
+          [{ type: TileType.Default }, { type: TileType.Door }, { type: TileType.Default }],
+          [{ type: TileType.Default }, { type: TileType.Default }, { type: TileType.Default }],
+        ];
+        const game = { grid: grid, size: '10' } as Game;
+        const result = service['validateDoorPosition'](game);
+        expect(result).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
+      });
+      
+    it('should fail when terrain proportion is not sufficient in validateHalfTerrain', () => {
+        const grid = Array.from({ length: 4 }, () =>
+          Array.from({ length: 4 }, () => ({ type: TileType.Wall }))
+        );
+        const game = { grid: grid, size: '10' } as Game;
+        const result = service['validateHalfTerrain'](game);
+        expect(result).toContain('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
+    });
+    
+    it('performBFS should return an empty tab if game.grid is undefined', () => {
+        const bfsResult = service['performBFS']({ grid: undefined } as Game, 0, 0);
+        expect(bfsResult).toEqual([]);
+      });
+    
+    it('checkForInaccessible should return an empty tab if game.grid is undefined', () => {
+        const result = service['checkForInaccessible']({ grid: undefined } as Game, []);
+        expect(result).toEqual([]);
+    });
+
+    it('hasTerrainOnOtherAxis should return false if both axes are doors or walls', () => {
+        const grid = [
+          [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
+          [{ type: TileType.Wall }, { type: TileType.Door }, { type: TileType.Wall }],
+          [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
+        ];
+        const game = { grid: grid } as Game;
+        const result = service['hasTerrainOnOtherAxis'](game, 1, 1);
+        expect(result).toBeFalse();
+      });  
+
+    it('should mark door as not correctly placed when doors or walls on axis', () => {
+        const grid: any[][] = [
+          [
+            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true }
+          ],
+          [
+            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            { type: TileType.Door,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true }
+          ],
+          [
+            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            { type: TileType.Wall,    isOccupied: false, imageSrc: 'dummy', isOpen: true },
+            { type: TileType.Default, isOccupied: false, imageSrc: 'dummy', isOpen: true }
+          ]
+        ];
+        const game: Game = { grid: grid, size: '10' } as Game;
+        
+        const errors = service['validateDoorPosition'](game);
+        
+        expect(errors).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
+    });
+      
+    it('findAccessibleStart should return null if grid is undefined', () => {
+        const game: Game = { grid: undefined } as Game;
+        const start = service['findAccessibleStart'](game);
+        expect(start).toBeNull();
+      });
+    
+    it('findAccessibleStart should return null if the grid is empty', () => {
+        const game: Game = { grid: [] } as unknown as Game;
+        const start = service['findAccessibleStart'](game);
+        expect(start).toBeNull();
+      });
+
+    it('checkForInaccessible should return empty if the first line of the grid is empty', () => {
+        const game: Game = { grid: [[]] } as unknown as Game
+        const result = service['checkForInaccessible'](game, []);
+        expect(result).toEqual([]);
+    });
 
     function createBaseGrid(size: number): Tile[][] {
         return Array.from({ length: size }, (_, rowIndex) =>
@@ -265,6 +421,33 @@ describe('GameValidationService', () => {
         );
     }
 
+    it('should return an error when the door does not have walls on the same axis', () => {
+        const grid = [
+            [{ type: TileType.Wall }, { type: TileType.Wall }, { type: TileType.Wall }],
+            [{ type: TileType.Default }, { type: TileType.Door }, { type: TileType.Default }],
+            [{ type: TileType.Wall }, { type: TileType.Default }, { type: TileType.Wall }],
+        ];
+        const game = { grid } as Game;
+    
+        const errors = service['validateDoorPosition'](game);
+    
+        expect(errors).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
+    });    
+    
+    it('should return an error when the door does not have walls on the same axis', () => {
+        const grid = [
+            [{ type: TileType.Wall }, { type: TileType.Default }, { type: TileType.Wall }],
+            [{ type: TileType.Wall }, { type: TileType.Door }, { type: TileType.Default }],
+            [{ type: TileType.Wall }, { type: TileType.Default }, { type: TileType.Wall }],
+        ];
+        const game = { grid } as Game;
+    
+        const errors = service['validateDoorPosition'](game);
+    
+        expect(errors).toContain('❌ Une ou plusieurs portes ne sont pas correctement placées');
+    });
+    
+    
     function createDummyItem(itemName: string): Item {
         return new Item({
             id: `dummy-${itemName}`,
@@ -282,6 +465,48 @@ describe('GameValidationService', () => {
         grid[3][4].item = createDummyItem('home');
         grid[3][5].item = createDummyItem('question');
         grid[3][6].item = createDummyItem('question');
+        grid[3][7].item = createDummyItem('swap');
+        grid[3][8].item = createDummyItem('lightning');
+        grid[3][9].item = createDummyItem('potion');
+        grid[3][0].item = createDummyItem('fire');
+        grid[3][1].item = createDummyItem('rubik');
+        grid[3][2].item = createDummyItem('stop');
+        return grid;
+    }
+
+    function createMediumValidGrid(): Tile[][] {
+        const grid = createBaseGrid(15);
+        grid[3][3].item = createDummyItem('home');
+        grid[3][4].item = createDummyItem('home');
+        grid[1][8].item = createDummyItem('home');
+        grid[1][9].item = createDummyItem('home');
+        grid[3][5].item = createDummyItem('question');
+        grid[3][6].item = createDummyItem('question');
+        grid[1][6].item = createDummyItem('question');
+        grid[1][7].item = createDummyItem('question');
+        grid[3][7].item = createDummyItem('swap');
+        grid[3][8].item = createDummyItem('lightning');
+        grid[3][9].item = createDummyItem('potion');
+        grid[3][0].item = createDummyItem('fire');
+        grid[3][1].item = createDummyItem('rubik');
+        grid[3][2].item = createDummyItem('stop');
+        return grid;
+    }
+
+    function createLargeValidGrid(): Tile[][] {
+        const grid = createBaseGrid(20);
+        grid[3][3].item = createDummyItem('home');
+        grid[3][4].item = createDummyItem('home');
+        grid[1][8].item = createDummyItem('home');
+        grid[1][9].item = createDummyItem('home');
+        grid[1][2].item = createDummyItem('home');
+        grid[1][3].item = createDummyItem('home');
+        grid[3][5].item = createDummyItem('question');
+        grid[3][6].item = createDummyItem('question');
+        grid[1][6].item = createDummyItem('question');
+        grid[1][7].item = createDummyItem('question');
+        grid[1][4].item = createDummyItem('question');
+        grid[1][5].item = createDummyItem('question');
         grid[3][7].item = createDummyItem('swap');
         grid[3][8].item = createDummyItem('lightning');
         grid[3][9].item = createDummyItem('potion');
