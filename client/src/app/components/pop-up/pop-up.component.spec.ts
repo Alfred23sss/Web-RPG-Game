@@ -2,11 +2,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { ERROR_MESSAGES, GAME_MODES, ROUTES } from '@app/constants/global.constants';
+import { Game } from '@app/interfaces/game';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
-import { Game } from '@app/interfaces/game';
 import { PopUpComponent } from './pop-up.component';
 
 describe('PopUpComponent', () => {
@@ -112,7 +112,7 @@ describe('PopUpComponent', () => {
 
         it('should create a new game', () => {
             component.confirm();
-            expect(mockGameService.createNewGame).toHaveBeenCalledWith('medium', GAME_MODES.CLASSIC, GRID_SIZE_MEDIUM);
+            expect(mockGameService.createNewGame).toHaveBeenCalledWith(GAME_MODES.CLASSIC, GRID_SIZE_MEDIUM);
             expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(mockGame);
         });
 
