@@ -44,6 +44,32 @@
     margin: 0.3rem;
 }
 
+.button-container {
+    display: flex;
+    gap: 40px;
+}
+
+.create-button {
+    margin-top: 10px;
+    text-align: center;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.create-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffc700, #ff8c00);
+}
+
 .game-list {
     display: flex;
     flex-wrap: wrap;

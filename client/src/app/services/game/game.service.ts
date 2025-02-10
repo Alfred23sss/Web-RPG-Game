@@ -4,6 +4,7 @@ import { GameCommunicationService } from '@app/services/game-communication/game-
 import { GridService } from '@app/services/grid/grid-service.service';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 
 @Injectable({
     providedIn: 'root',
@@ -11,9 +12,11 @@ import { v4 as uuidv4 } from 'uuid';
 export class GameService {
     games: Game[] = [];
     private currentGame: Game | undefined;
+
     constructor(
         private gameCommunicationService: GameCommunicationService,
         private gridService: GridService,
+        private screenShotService: ScreenshotService,
     ) {
         this.loadCurrentGame();
     }
@@ -30,7 +33,7 @@ export class GameService {
             size: gridSize.toString(),
             mode: gameMode,
             lastModified: new Date(),
-            isVisible: true,
+            isVisible: false,
             previewImage: '',
             description: '',
             grid: this.gridService.createGrid(gridSize, gridSize),
@@ -57,6 +60,10 @@ export class GameService {
         return this.games.find((game) => game.id === id);
     }
 
+    getGameIndexById(id: string) {
+        return this.games.findIndex((game) => game.id === id);
+    }
+
     removeGame(id: string) {
         this.games = this.games.filter((game) => game.id !== id);
     }
@@ -73,7 +80,7 @@ export class GameService {
         const game = this.getGameById(id);
         if (game) {
             game.isVisible = isVisible;
-            this.saveGame(game);
+            this.updateExistingGame(game);
         }
     }
 
@@ -102,6 +109,10 @@ export class GameService {
         return this.games.some((game) => game.name === name && game.id !== this.currentGame?.id);
     }
 
+    async savePreviewImage() {
+        return await this.screenShotService.generatePreview('game-preview');
+    }
+
     private loadCurrentGame() {
         const savedGame = sessionStorage.getItem('currentGame');
         if (savedGame) {
@@ -115,7 +126,7 @@ export class GameService {
         gameToUpdate.lastModified = new Date();
         this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
             next: (updatedGame) => {
-                const index = this.games.findIndex((game) => game.id === gameToUpdate.id);
+                const index = this.getGameIndexById(gameToUpdate.id);
                 if (index !== -1) {
                     this.games[index] = updatedGame;
                 }
