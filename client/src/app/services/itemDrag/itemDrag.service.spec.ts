@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { Item } from '@app/interfaces/item';
+import { Item } from '@app/classes/item';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 
