@@ -14,7 +14,7 @@ import { map } from 'rxjs/operators';
     imports: [RouterLink],
 })
 export class MainPageComponent {
-    readonly title: string = 'Game Name...';
+    readonly title: string = "William's Wonderland";
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
     gameDecorations = GameDecorations;
     constructor(private readonly communicationService: CommunicationService) {}
@@ -24,7 +24,6 @@ export class MainPageComponent {
             title: 'Hello from the client',
             body: 'Time is : ' + new Date().toString(),
         };
-        // It is important not to forget "subscribe," or the call will never be made since no one is observing it
         this.communicationService.basicPost(newTimeMessage).subscribe({
             next: (response) => {
                 const responseString = `The server received the request and returned a code ${response.status} : ${response.statusText}`;
@@ -40,7 +39,6 @@ export class MainPageComponent {
     getMessagesFromServer(): void {
         this.communicationService
             .basicGet()
-            // This step transforms the Message object into a single string
             .pipe(
                 map((message: Message) => {
                     return `${message.title} ${message.body}`;
