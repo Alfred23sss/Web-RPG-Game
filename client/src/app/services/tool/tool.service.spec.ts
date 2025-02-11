@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { ImageType } from '@app/interfaces/images';
+import { TileType } from '@app/interfaces/tile';
 import { ToolService } from './tool.service';
-import { ImageType, TileType } from '@app/interfaces/tile';
 
 describe('TimeService', () => {
     let service: ToolService;

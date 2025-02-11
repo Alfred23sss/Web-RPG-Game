@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ImageType, TileType } from '@app/interfaces/tile';
+import { ImageType } from '@app/interfaces/images';
+import { TileType } from '@app/interfaces/tile';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
