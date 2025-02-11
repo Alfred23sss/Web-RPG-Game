@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { ROUTES } from '@app/constants/global.constants';
+import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
 
@@ -18,8 +18,8 @@ export class CreatePageComponent implements OnInit {
     games: Game[] = this.gameService.games;
     constructor(
         private readonly dialog: MatDialog,
-        private gameService: GameService,
-        private router: Router,
+        private readonly gameService: GameService,
+        private readonly router: Router,
     ) {}
 
     get visibleGames(): Game[] {
@@ -39,6 +39,6 @@ export class CreatePageComponent implements OnInit {
     }
 
     navigateToHome() {
-        this.router.navigate([ROUTES.homePage]);
+        this.router.navigate([Routes.HomePage]);
     }
 }

@@ -34,8 +34,8 @@ describe('SnackbarService', () => {
     describe('showMessage', () => {
         it('should open a snackbar with the provided message, action, and duration', () => {
             const message = 'Test message';
-            const action = SNACKBAR_CONFIG.ACTION;
-            const duration = SNACKBAR_CONFIG.DURATION;
+            const action = SNACKBAR_CONFIG.action;
+            const duration = SNACKBAR_CONFIG.duration;
 
             service.showMessage(message);
 

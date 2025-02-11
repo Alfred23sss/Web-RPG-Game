@@ -6,8 +6,8 @@ import {
     ACCESS_CODE_MIN_VALUE,
     ACCESS_CODE_RANGE,
     CODE_EDGE_CASES,
-    ROUTES,
 } from '@app/constants/global.constants';
+import { Routes } from '@app/enums/global.enums';
 import { WaitingViewComponent } from './waiting-view.component';
 
 describe('WaitingViewComponent', () => {
@@ -68,6 +68,6 @@ describe('WaitingViewComponent', () => {
 
     it('should navigate to home when navigateToHome is called', () => {
         component.navigateToHome();
-        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.createPage]);
+        expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.CreatePage]);
     });
 });

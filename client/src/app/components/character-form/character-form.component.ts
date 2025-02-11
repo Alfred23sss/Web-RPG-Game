@@ -1,7 +1,9 @@
 import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ATTRIBUTE_KEYS, ATTRIBUTE_TYPES, DICE_TYPES } from '@app/constants/global.constants';
+import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
+import { AttributeType, DiceType } from '@app/enums/global.enums';
+
 import { Game } from '@app/interfaces/game';
 import { AvatarType, GameDecorations } from '@app/interfaces/images';
 import { CharacterService } from '@app/services/character-form/character-form.service';
@@ -16,8 +18,8 @@ export class CharacterFormComponent {
     characterName = '';
     selectedAvatar = '';
     showForm = true;
-    selectedAttackDice: string | null = null;
-    selectedDefenseDice: string | null = null;
+    selectedAttackDice: DiceType | null = null;
+    selectedDefenseDice: DiceType | null = null;
     xSword = GameDecorations.XSwords;
     game: Game;
 
@@ -28,8 +30,8 @@ export class CharacterFormComponent {
     diceAssigned = this.characterService.diceAssigned;
 
     protected attributeKeys = ATTRIBUTE_KEYS;
-    protected attributeTypes = ATTRIBUTE_TYPES;
-    protected diceTypes = DICE_TYPES;
+    protected attributeTypes = AttributeType;
+    protected diceTypes = DiceType;
 
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
@@ -39,14 +41,14 @@ export class CharacterFormComponent {
         this.game = data.game;
     }
 
-    assignBonus(attribute: string) {
+    assignBonus(attribute: AttributeType) {
         this.characterService.assignBonus(attribute);
     }
 
-    assignDice(attribute: string) {
+    assignDice(attribute: AttributeType) {
         const { attack, defense } = this.characterService.assignDice(attribute);
-        this.selectedAttackDice = attack;
-        this.selectedDefenseDice = defense;
+        this.selectedAttackDice = attack as DiceType;
+        this.selectedDefenseDice = defense as DiceType;
     }
 
     submitCharacter(): void {
@@ -68,10 +70,10 @@ export class CharacterFormComponent {
         this.dialogRef.close();
     }
     private isBonusAssigned(): boolean {
-        return this.bonusAssigned.vitality || this.bonusAssigned.speed;
+        return this.bonusAssigned[AttributeType.Vitality] || this.bonusAssigned[AttributeType.Speed];
     }
 
     private isDiceAssigned(): boolean {
-        return this.diceAssigned.attack || this.diceAssigned.defense;
+        return this.diceAssigned[AttributeType.Attack] || this.diceAssigned[AttributeType.Defense];
     }
 }

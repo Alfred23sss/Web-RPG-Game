@@ -21,23 +21,23 @@ describe('GameModeService', () => {
     });
 
     it('should set and get gameMode correctly', () => {
-        const newGameMode = 'Classic';
+        const newGameMode = GameMode.Classic;
         service.setGameMode(newGameMode);
 
         expect(service.getGameMode()).toBe(newGameMode);
     });
 
     it('should set and get gameSize correctly', () => {
-        const newGameSize = 'medium';
+        const newGameSize = GameSize.Medium;
         service.setGameSize(newGameSize);
 
         expect(service.getGameSize()).toBe(newGameSize);
     });
 
     it('should return false if size is not valid', () => {
-        const newGameSize = '0';
+        const invalidGameSize = 'invalid' as GameSize;
 
-        expect(service.setGameSize(newGameSize)).toBeFalse();
+        expect(service.setGameSize(invalidGameSize)).toBeFalse();
     });
 
     it('should reset game mode and size', () => {

@@ -1,8 +1,11 @@
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { ERROR_MESSAGES, GAME_MODES, GAME_MODES_LIST, GAME_SIZES_LIST, ROUTES } from '@app/constants/global.constants';
-import { Game } from '@app/interfaces/game';
+
+import { GAME_MODES_LIST, GAME_SIZES_LIST } from '@app/constants/global.constants';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { Game, GameMode, GameSize } from '@app/interfaces/game';
+
 import { GameDecorations } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
@@ -21,33 +24,33 @@ export class PopUpComponent {
 
     // eslint-disable-next-line max-params
     constructor(
-        private dialogRef: MatDialog,
-        private gameModeService: GameModeService,
-        private gameService: GameService,
-        private router: Router,
-        private snackbarService: SnackbarService,
-        private gridService: GridService,
+        private readonly dialogRef: MatDialog,
+        private readonly gameModeService: GameModeService,
+        private readonly gameService: GameService,
+        private readonly router: Router,
+        private readonly snackbarService: SnackbarService,
+        private readonly gridService: GridService,
     ) {}
 
-    setGameSize(size: string) {
+    setGameSize(size: GameSize) {
         if (!this.gameModeService.setGameSize(size)) {
-            this.snackbarService.showMessage(ERROR_MESSAGES.INVALID_GAME_SIZE);
+            this.snackbarService.showMessage(ErrorMessages.InvalidGameSize);
         }
     }
 
-    setGameType(mode: string) {
-        if (Object.values(GAME_MODES).includes(mode)) {
+    setGameType(mode: GameMode) {
+        if (Object.values(GameMode).includes(mode)) {
             this.gameModeService.setGameMode(mode);
-            if (mode === GAME_MODES.CTF) {
-                this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME_MODE);
-                this.gameModeService.setGameMode('');
+            if (mode === GameMode.CTF) {
+                this.snackbarService.showMessage(ErrorMessages.UnavailableGameMode);
+                this.gameModeService.setGameMode(GameMode.None);
             }
         } else {
             this.gameModeService.setGameMode(mode);
         }
     }
 
-    getGameSize() {
+    getGameSize(): GameSize | null {
         return this.gameModeService.getGameSize();
     }
 
@@ -61,13 +64,13 @@ export class PopUpComponent {
         const gridSize = this.gridService.getGridSize(gameSize);
 
         if (!gameSize || !gameMode) {
-            this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_GAME_DETAILS);
+            this.snackbarService.showMessage(ErrorMessages.MissingGameDetails);
             return;
         }
 
         const newGame: Game = this.gameService.createNewGame(gameMode, gridSize);
         this.gameService.updateCurrentGame(newGame);
-        this.router.navigate([ROUTES.EDITION_VIEW]);
+        this.router.navigate([Routes.EditionView]);
         this.closePopup();
     }
 
