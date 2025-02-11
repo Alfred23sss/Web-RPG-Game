@@ -1,6 +1,5 @@
 import { plainToInstance } from 'class-transformer';
 import { UpdateGameDto } from './update-game.dto';
-import { TileDto } from './tile.dto';
 
 describe('UpdateGameDto', () => {
     const validGame: Partial<UpdateGameDto> = {
