@@ -1,29 +1,29 @@
+import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EditionPageComponent } from './edition-page.component';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
+import { GridComponent } from '@app/components/grid/grid.component';
+import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
+import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
+import { Game } from '@app/interfaces/game';
+import { Tile, TileType } from '@app/interfaces/tile';
+import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
-import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
-import { Router } from '@angular/router';
 import { of } from 'rxjs';
-import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { GridComponent } from '@app/components/grid/grid.component';
-import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
-import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
-import { Game } from '@app/interfaces/game';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Tile, TileType } from '@app/interfaces/tile';
+import { EditionPageComponent } from './edition-page.component';
 
 function createBaseGrid(size: number): Tile[][] {
     return Array.from({ length: size }, (_, rowIndex) =>
-        Array.from({ length: size }, (_, colIndex) => ({
+        Array.from({ length: size }, (i, colIndex) => ({
             id: `${rowIndex}-${colIndex}`,
             imageSrc: 'assets/tile-items/default.png',
             isOccupied: false,
             type: TileType.Default,
             isOpen: true,
-        }))
+        })),
     );
 }
 
@@ -50,25 +50,19 @@ describe('EditionPageComponent', () => {
     };
 
     beforeEach(async () => {
-        gameServiceMock = jasmine.createSpyObj('GameService', [
-            'fetchGames',
-            'getCurrentGame',
-            'updateCurrentGame',
-            'saveGame',
-            'savePreviewImage'
-        ]);
-    
+        gameServiceMock = jasmine.createSpyObj('GameService', ['fetchGames', 'getCurrentGame', 'updateCurrentGame', 'saveGame', 'savePreviewImage']);
+
         gridServiceMock = jasmine.createSpyObj('GridService', ['setGrid']);
         gameValidationServiceMock = jasmine.createSpyObj('GameValidationService', ['validateGame']);
         snackbarServiceMock = jasmine.createSpyObj('SnackbarService', ['showConfirmation']);
         routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
         routerMock.navigate.and.returnValue(Promise.resolve(true));
-    
+
         gameServiceMock.fetchGames.and.returnValue(of([]));
         snackbarServiceMock.showConfirmation.and.returnValue(of(true));
         gameServiceMock.getCurrentGame.and.returnValue(defaultMockGame);
-    
+
         await TestBed.configureTestingModule({
             imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent, RouterTestingModule],
             providers: [
@@ -79,22 +73,22 @@ describe('EditionPageComponent', () => {
                 { provide: Router, useValue: routerMock },
             ],
         }).compileComponents();
-    
+
         fixture = TestBed.createComponent(EditionPageComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
-    
+
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-    
+
     it('should fetch games on init', () => {
         gameServiceMock.fetchGames.and.returnValue(of([]));
         component.ngOnInit();
         expect(gameServiceMock.fetchGames).toHaveBeenCalled();
     });
-    
+
     it('should clone the initial game on init', () => {
         const anotherMockDate = new Date('2025-02-11T16:48:33.205Z');
         const mockGame: Game = {
@@ -122,13 +116,13 @@ describe('EditionPageComponent', () => {
         expect(component['originalGame'].id).toEqual(mockGame.id);
         expect(gridServiceMock.setGrid).toHaveBeenCalledWith(mockGame.grid);
     });
-    
+
     it('should navigate back to admin if confirmed', () => {
         snackbarServiceMock.showConfirmation.and.returnValue(of(true));
         component.backToAdmin();
         expect(routerMock.navigate).toHaveBeenCalledWith(['/admin']);
     });
-    
+
     it('should reset the game state', () => {
         const resetMockDate = new Date('2025-02-11T16:48:33.205Z');
         const mockGame: Game = {
@@ -154,7 +148,7 @@ describe('EditionPageComponent', () => {
         expect(component.game.description).toEqual(mockGame.description);
         expect(component.game.grid).toEqual(mockGame.grid);
     });
-    
+
     it('should save the game if valid', async () => {
         const saveMockDate = new Date('2025-02-11T16:48:33.205Z');
         component.game = {
@@ -172,18 +166,34 @@ describe('EditionPageComponent', () => {
         component.gameDescription = 'Updated Description';
         gameValidationServiceMock.validateGame.and.returnValue(true);
         gameServiceMock.savePreviewImage.and.returnValue(Promise.resolve('preview-url'));
-    
+
         await component.save();
-    
+
         expect(component.game.name).toBe('Updated Game');
         expect(component.game.description).toBe('Updated Description');
         expect(gameServiceMock.updateCurrentGame).toHaveBeenCalled();
         expect(gameServiceMock.saveGame).toHaveBeenCalled();
     });
-    
+
     it('should not save the game if invalid', async () => {
         gameValidationServiceMock.validateGame.and.returnValue(false);
         await component.save();
         expect(gameServiceMock.updateCurrentGame).not.toHaveBeenCalled();
+    });
+
+    it('should handle error when savePreviewImage fails', async () => {
+        gameServiceMock.savePreviewImage.and.returnValue(Promise.reject('Error saving preview image'));
+        gameValidationServiceMock.validateGame.and.returnValue(true);
+        await component.save();
+        expect(component.isSaving).toBeFalse();
+    });
+
+    it('should return early if already saving', async () => {
+        component.isSaving = true;
+        await component.save();
+
+        expect(gameServiceMock.savePreviewImage).not.toHaveBeenCalled();
+        expect(gameServiceMock.updateCurrentGame).not.toHaveBeenCalled();
+        expect(gameServiceMock.saveGame).not.toHaveBeenCalled();
     });
 });
