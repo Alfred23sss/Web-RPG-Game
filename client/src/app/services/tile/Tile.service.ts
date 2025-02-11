@@ -27,6 +27,7 @@ export class TileService {
         if (selectedTool.tool === TileType.Door) {
             this.handleDoor(tile);
         } else {
+            if (selectedTool.tool === tile.type) return;
             tile.imageSrc = selectedTool.image;
             tile.type = selectedTool.tool;
         }
@@ -46,13 +47,9 @@ export class TileService {
     }
 
     drop(tile: Tile): void {
-        let draggedItem = this.itemDragService.getSelectedItem();
+        let draggedItem = new Item(this.itemDragService.getSelectedItem());
         const previousTile = this.itemDragService.getPreviousTile();
         if (!(draggedItem && !tile.item && tile.type !== TileType.Door && tile.type !== TileType.Wall)) return;
-
-        if (typeof draggedItem.clone !== 'function') {
-            draggedItem = new Item(draggedItem);
-        }
 
         const clonedItem = draggedItem.clone();
         this.applyItem(tile, clonedItem);

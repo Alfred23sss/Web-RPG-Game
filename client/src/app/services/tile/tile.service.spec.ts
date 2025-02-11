@@ -2,10 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, ItemDescription, ItemType, Tile, TileType } from '@app/interfaces/tile';
+import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
 import { ToolService } from '@app/services/tool/tool.service';
-import { ItemService } from '@app/services/item/item.service';
 
 describe('TileService', () => {
     let service: TileService;
@@ -63,6 +63,12 @@ describe('TileService', () => {
             expect(tile.type).toBe(TileType.Default);
         });
 
+        it('should not apply tool if selectedTool is Default', () => {
+            toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Default, image: ImageType.Default });
+            service.applyTool(tile);
+            expect(tile.type).toBe(TileType.Default);
+        });
+
         it('should not apply tool if selectedTool is door and item is present', () => {
             toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Door, image: ImageType.ClosedDoor });
             tile.item = Object.assign(new Item(), {
@@ -109,6 +115,14 @@ describe('TileService', () => {
             expect(tile.type).toBe(TileType.Wall);
             expect(tile.imageSrc).toBe(ImageType.Wall);
         });
+
+        it('should not apply tool if tool type is the same as tile type', () => {
+            toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Wall, image: ImageType.Water });
+            tile.type = TileType.Wall;
+            tile.imageSrc = ImageType.Wall;
+            service.applyTool(tile);
+            expect(tile.imageSrc).toBe(ImageType.Wall);
+        });
     });
 
     describe('removeTileObject', () => {
@@ -146,10 +160,10 @@ describe('TileService', () => {
             expect(itemDragServiceSpy.clearSelection).toHaveBeenCalled();
         });
 
-        it('should not apply item to tile if draggedItem is undefined', () => {
-            const tile: Tile = { type: TileType.Default } as Tile;
+        it('should not apply item to tile if tile is Wall', () => {
+            const tile: Tile = { type: TileType.Wall } as Tile;
             const previousTile: Tile = { item: { name: 'item1' } as Item } as Tile;
-            const draggedItem = undefined;
+            const draggedItem = { clone: jasmine.createSpy().and.returnValue({ name: 'item1' }) } as unknown as Item;
 
             itemDragServiceSpy.getSelectedItem.and.returnValue(draggedItem);
             itemDragServiceSpy.getPreviousTile.and.returnValue(previousTile);
