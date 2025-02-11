@@ -8,6 +8,7 @@ import { CharacterFormComponent } from '@app/components/character-form/character
 import { GameService } from '@app/services/game/game.service';
 import { CreatePageComponent } from './create-page.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
+import { Game } from '@app/interfaces/game';
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
@@ -73,8 +74,8 @@ describe('CreatePageComponent', () => {
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
     });
 
-    it('should return empty array on Null games', () => {
-        mockGameService.fetchGames.and.returnValue(of([]));
-        
+    it('should return empty array when no games are visible', () => {
+        component.games = undefined as unknown as Game[];
+        expect(component.visibleGames).toEqual([]);
     });
 });
