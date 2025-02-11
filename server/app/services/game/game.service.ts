@@ -19,8 +19,6 @@ export class GameService {
             if (existingGame) {
                 throw new Error(`Game with name "${game.name}" already exists.`);
             }
-
-            // Convert raw TileDto[][] into schema-compatible objects
             game.grid = game.grid.map((row) =>
                 row.map((tile) => ({
                     ...tile,
@@ -37,8 +35,6 @@ export class GameService {
     async updateGame(id: string, gameDto: Partial<UpdateGameDto>): Promise<GameDocument> {
         try {
             const sanitizedGameDto = Object.fromEntries(Object.entries(gameDto).filter(([_, v]) => v !== undefined));
-
-            // Ensure grid is an array before using map()
             if (Array.isArray(sanitizedGameDto.grid)) {
                 sanitizedGameDto.grid = sanitizedGameDto.grid.map((row) =>
                     Array.isArray(row)
@@ -64,14 +60,8 @@ export class GameService {
 
     async deleteGame(id: string): Promise<boolean> {
         try {
-            // Attempt to delete the game directly
             const result = await this.gameModel.deleteOne({ id }).exec();
-
-            if (result.deletedCount > 0) {
-                return true;
-            } else {
-                throw new Error(`Game with id ${id} doesn't exist`);
-            }
+            return result.deletedCount > 0;
         } catch (error) {
             throw new Error(`Failed to delete game: ${error.message}`);
         }
@@ -87,7 +77,7 @@ export class GameService {
 
     async getGameById(id: string): Promise<GameDocument> {
         const foundGame = await this.gameModel.findOne({ id }).populate({
-            path: 'grid.item', // Populate nested item references
+            path: 'grid.item',
             model: 'Item',
         });
 

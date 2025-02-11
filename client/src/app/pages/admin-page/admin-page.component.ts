@@ -39,7 +39,7 @@ export class AdminPageComponent implements OnInit {
             if (confirmed) {
                 this.gameService.deleteGame(id).subscribe({
                     next: () => this.loadGames(),
-                    error: () => this.snackbarService.showMessage('Deletion failed'),
+                    error: () => this.snackbarService.showMessage('Deletion failed'), //42
                 });
             }
         });
@@ -58,13 +58,13 @@ export class AdminPageComponent implements OnInit {
     }
 
     navigateToHome() {
-        this.router.navigate([ROUTES.homePage]);
+        this.router.navigate([ROUTES.homePage]); //61
     }
 
     private loadGames() {
         this.gameService.fetchGames().subscribe({
             next: (response) => (this.games = response),
-            error: () => this.snackbarService.showMessage('Failed to load games'),
+            error: () => this.snackbarService.showMessage('Failed to load games'), //67
         });
     }
 }

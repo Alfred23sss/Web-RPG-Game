@@ -49,5 +49,3 @@ export class Game {
 }
 
 export const gameSchema = SchemaFactory.createForClass(Game);
-
-// comon module maybe

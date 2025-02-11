@@ -36,7 +36,7 @@ export class UpdateGameDto {
 
     @IsOptional()
     @IsArray()
-    @ValidateNested({ each: true }) // Validate each TileDto inside the array
-    @Type(() => TileDto) // Use class-transformer to correctly transform the array elements into TileDto objects
+    @ValidateNested({ each: true })
+    @Type(() => TileDto)
     grid?: TileDto[][];
 }
