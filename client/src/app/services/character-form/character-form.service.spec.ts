@@ -191,12 +191,9 @@ describe('CharacterService', () => {
             mockGame = { id: '1', name: 'Test Game' } as Game;
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn(service as any, 'validateGameAvailability').and.callFake(() => null);
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            spyOn(service as any, 'proceedToWaitingView');
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            spyOn(service as any, 'showMissingDetailsError');
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            spyOn(service as any, 'isCharacterValid').and.returnValue(true);
+            spyOn(service as unknown as { proceedToWaitingView: jasmine.Spy }, 'proceedToWaitingView');
+            spyOn(service as unknown as { showMissingDetailsError: jasmine.Spy }, 'showMissingDetailsError');
+            spyOn(service as unknown as { isCharacterValid: jasmine.Spy }, 'isCharacterValid').and.returnValue(true);
         });
 
         it('should proceed to waiting view if character is valid', () => {
@@ -214,8 +211,7 @@ describe('CharacterService', () => {
         });
 
         it('should show missing details error if character is invalid', () => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (service as any).isCharacterValid.and.returnValue(false);
+            (service as unknown as { isCharacterValid: jasmine.Spy }).isCharacterValid.and.returnValue(false);
 
             service.submitCharacter({
                 characterName: 'name',
