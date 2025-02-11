@@ -25,6 +25,9 @@ enum ItemCount {
     Medium = 10,
     Large = 12,
 }
+enum MaxDuration {
+    MaxDuration = 10000,
+}
 
 @Injectable({
     providedIn: 'root',
@@ -291,6 +294,6 @@ export class GameValidationService {
     }
 
     private showError(message: string) {
-        this.snackBar.showMessage(message, 'Close', 10000);
+        this.snackBar.showMessage(message, 'Close', MaxDuration.MaxDuration);
     }
 }

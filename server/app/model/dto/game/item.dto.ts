@@ -21,8 +21,8 @@ export class ItemDto {
     description: string;
 
     @IsOptional()
-    @ValidateNested() // Validate the nested ItemDto
-    @IsObject() // Ensure that originalReference is an object
-    @Type(() => ItemDto) // Use class-transformer to properly handle the nested DTO
-    originalReference?: ItemDto; // This will be an actual Item object (optional)
+    @ValidateNested()
+    @IsObject()
+    @Type(() => ItemDto)
+    originalReference?: ItemDto;
 }

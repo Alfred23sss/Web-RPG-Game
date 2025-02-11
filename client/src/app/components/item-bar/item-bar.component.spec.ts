@@ -1,11 +1,11 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ItemBarComponent } from './item-bar.component';
-import { ItemDragService } from '@app/services/ItemDrag.service';
-import { ItemService } from '@app/services/item/item.service';
-import { Item } from '@app/classes/item';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Item } from '@app/classes/item';
 import { TileType } from '@app/interfaces/tile';
+import { ItemService } from '@app/services/item/item.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
+import { ItemBarComponent } from './item-bar.component';
 
 describe('ItemBarComponent', () => {
     let component: ItemBarComponent;
