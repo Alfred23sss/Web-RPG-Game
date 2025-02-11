@@ -57,8 +57,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
             this.game = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
             this.gridService.setGrid(this.game?.grid);
-            this.gameName = this.game.name;
-            this.gameDescription = this.game.description;
+            this.updateNameAndDescription();
         }
     }
 
@@ -72,8 +71,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
 
     reset() {
         this.game = JSON.parse(JSON.stringify(this.originalGame));
-        this.gameName = this.game.name;
-        this.gameDescription = this.game.description;
+        this.updateNameAndDescription();
         this.gridService.setGrid(this.game.grid);
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
@@ -88,8 +86,6 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     async save() {
         if (this.isSaving) return;
         this.isSaving = true;
-        this.game.name = this.gameName;
-        this.game.description = this.gameDescription;
 
         if (!this.gameValidationService.validateGame(this.game)) {
             this.isSaving = false;
@@ -99,7 +95,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
-
+        this.updateNameAndDescription();
         this.gameService.fetchGames().subscribe(() => {
             this.router.navigate(['/admin']).then(() => {
                 this.isSaving = false;
@@ -114,5 +110,10 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         } catch {
             this.isSaving = false;
         }
+    }
+
+    private updateNameAndDescription() {
+        this.game.name = this.gameName;
+        this.game.description = this.gameDescription;
     }
 }
