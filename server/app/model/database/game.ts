@@ -40,7 +40,7 @@ export class Game {
     description: string;
 
     @ApiProperty({
-        type: () => Tile,
+        type: [Tile],
         isArray: true,
         description: 'A two-dimensional grid of tiles',
     })

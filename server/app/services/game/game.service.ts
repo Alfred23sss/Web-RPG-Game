@@ -34,7 +34,7 @@ export class GameService {
 
     async updateGame(id: string, gameDto: Partial<UpdateGameDto>): Promise<GameDocument> {
         try {
-            const sanitizedGameDto = Object.fromEntries(Object.entries(gameDto).filter(([_, v]) => v !== undefined));
+            const sanitizedGameDto = Object.fromEntries(Object.entries(gameDto).filter(([, v]) => v !== undefined));
             if (Array.isArray(sanitizedGameDto.grid)) {
                 sanitizedGameDto.grid = sanitizedGameDto.grid.map((row) =>
                     Array.isArray(row)

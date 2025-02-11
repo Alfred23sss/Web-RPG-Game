@@ -9,7 +9,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import { Connection, Model } from 'mongoose';
 
-describe('GameService (MongoDB Integration)', () => {
+describe('GameService', () => {
     let service: GameService;
     let gameModel: Model<Game>;
     let itemModel: Model<Item>;

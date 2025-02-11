@@ -56,19 +56,6 @@ export class GameController {
         }
     }
 
-    // @Get()
-    // async getGame(@Body() id: string, @Res() response: Response) {
-    //     try {
-    //         const game = await this.gameService.getGameById(id);
-    //         response.status(HttpStatus.OK).json(game);
-    //     } catch (error) {
-    //         response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-    //             message: 'Server Error',
-    //             error: error.message,
-    //         });
-    //     }
-    // }
-
     @Get(':id')
     async getGame(@Param('id') id: string, @Res() response: Response) {
         try {
