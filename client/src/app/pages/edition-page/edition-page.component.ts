@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Item } from '@app/classes/item';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -9,6 +10,7 @@ import { Game } from '@app/interfaces/game';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+import { ItemService } from '@app/services/item/item.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
@@ -18,12 +20,14 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
     styleUrls: ['./edition-page.component.scss'],
     imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent],
 })
-export class EditionPageComponent implements OnInit {
+export class EditionPageComponent implements OnInit, AfterViewInit {
+    @ViewChild(ItemBarComponent) itemBar!: ItemBarComponent;
     gameName: string = '';
     gameDescription: string = '';
     game: Game;
-    originalGame: Game;
     isSaving: boolean = false;
+    originalGame: Game;
+    originalItemBar: string;
 
     constructor(
         private gameService: GameService,
@@ -31,6 +35,7 @@ export class EditionPageComponent implements OnInit {
         private gameValidationService: GameValidationService,
         private router: Router,
         private snackbarService: SnackbarService,
+        private itemService: ItemService,
     ) {}
 
     ngOnInit() {
@@ -38,14 +43,22 @@ export class EditionPageComponent implements OnInit {
         this.cloneInitialGame();
     }
 
+    ngAfterViewInit() {
+        setTimeout(() => {
+            if (this.itemBar && this.itemBar.items) {
+                this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
+                this.itemService.setItems(this.itemBar.items);
+            }
+        }, 0);
+    }
+
     cloneInitialGame() {
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
-            this.game = JSON.parse(JSON.stringify(currentGame));
-            this.originalGame = JSON.parse(JSON.stringify(currentGame));
+            this.game = this.makeDeepCopy(currentGame);
+            this.originalGame = this.makeDeepCopy(currentGame);
             this.gridService.setGrid(this.game?.grid);
-            this.gameName = this.game.name;
-            this.gameDescription = this.game.description;
+            this.updateGameAndDescription();
         }
     }
 
@@ -58,14 +71,16 @@ export class EditionPageComponent implements OnInit {
     }
 
     reset() {
-        this.game = JSON.parse(JSON.stringify(this.originalGame));
-        this.gameName = this.game.name;
-        this.gameDescription = this.game.description;
+        this.game = this.makeDeepCopy(this.originalGame);
+        this.updateGameAndDescription();
         this.gridService.setGrid(this.game.grid);
-        this.gameService.updateCurrentGame(this.game);
-        this.gameService.saveGame(this.game);
+        this.updateGame();
+        if (this.itemBar) {
+            const restoredItems = this.makeDeepCopy(this.originalItemBar);
+            this.itemService.setItems(restoredItems);
+            this.itemBar.items = this.itemService.getItems();
+        }
         this.cloneInitialGame();
-        window.location.reload();
     }
 
     async save() {
@@ -80,9 +95,7 @@ export class EditionPageComponent implements OnInit {
         }
 
         await this.savePreviewImage();
-        this.gameService.updateCurrentGame(this.game);
-        this.gameService.saveGame(this.game);
-
+        this.updateGame();
         this.gameService.fetchGames().subscribe(() => {
             this.router.navigate(['/admin']).then(() => {
                 this.isSaving = false;
@@ -97,5 +110,19 @@ export class EditionPageComponent implements OnInit {
         } catch {
             this.isSaving = false;
         }
+    }
+
+    private updateGameAndDescription() {
+        this.gameName = this.game.name;
+        this.gameDescription = this.game.description;
+    }
+
+    private updateGame() {
+        this.gameService.updateCurrentGame(this.game);
+        this.gameService.saveGame(this.game);
+    }
+
+    private makeDeepCopy(toCopy: string | Game | Item[]) {
+        return JSON.parse(JSON.stringify(toCopy));
     }
 }
