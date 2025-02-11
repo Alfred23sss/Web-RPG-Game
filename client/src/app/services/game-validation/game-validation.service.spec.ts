@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/prefer-for-of */
+/* eslint-disable @typescript-eslint/no-shadow */
+/* eslint-disable max-len */
+/* eslint-disable max-lines */
+
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Item } from '@app/classes/item';

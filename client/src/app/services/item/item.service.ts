@@ -29,10 +29,6 @@ export class ItemService {
         return this.items;
     }
 
-    private getItemByName(name: string): Item | undefined {
-        return this.items.find((item) => item.name === name);
-    }
-
     incrementItemCounter(name: string): void {
         const item = this.getItemByName(name);
         if (item) {
@@ -54,13 +50,14 @@ export class ItemService {
         }
 
         const rawSize = currentGame.size as unknown as number;
-        const sizeMapping: Record<number, GameSize> = {
-            10: GameSize.Small,
-            15: GameSize.Medium,
-            20: GameSize.Large,
+        const sizeMapping: Record<'size10' | 'size15' | 'size20', GameSize> = {
+            size10: GameSize.Small,
+            size15: GameSize.Medium,
+            size20: GameSize.Large,
         };
 
-        const mappedSize = sizeMapping[rawSize] ?? GameSize.Small;
+        const mappedSize = sizeMapping[`size${rawSize}` as keyof typeof sizeMapping] ?? GameSize.Small;
+
         const count = ITEM_COUNTS[mappedSize];
 
         this.items.forEach((item) => {
@@ -70,6 +67,10 @@ export class ItemService {
         });
 
         this.updateItemCountersBasedOnGrid(currentGame.grid);
+    }
+
+    private getItemByName(name: string): Item | undefined {
+        return this.items.find((item) => item.name === name);
     }
 
     private updateItemCountersBasedOnGrid(grid: Tile[][] | undefined): void {
