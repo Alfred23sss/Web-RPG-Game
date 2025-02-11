@@ -2,6 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
 
+const SMALL_GRID_SIZE = 3;
+const MEDIUM_GRID_SIZE = 5;
+const LARGE_GRID_SIZE = 7;
+
 describe('GridService', () => {
     let service: GridService;
 
@@ -15,10 +19,10 @@ describe('GridService', () => {
     });
 
     it('should create a grid with the given rows and columns', () => {
-        const grid = service.createGrid(3, 3);
+        const grid = service.createGrid(SMALL_GRID_SIZE, SMALL_GRID_SIZE);
 
-        expect(grid.length).toBe(3);
-        expect(grid[0].length).toBe(3);
+        expect(grid.length).toBe(SMALL_GRID_SIZE);
+        expect(grid[0].length).toBe(SMALL_GRID_SIZE);
 
         expect(grid[0][0].id).toBe('tile-0-0');
         expect(grid[0][0].imageSrc).toBe(ImageType.Default);
@@ -45,8 +49,8 @@ describe('GridService', () => {
     });
 
     it('should return a specific tile', () => {
-        const grid = service.createGrid(3, 3);
-        service.setGrid(grid); // Ensure the grid is set
+        const grid = service.createGrid(SMALL_GRID_SIZE, SMALL_GRID_SIZE);
+        service.setGrid(grid);
 
         const tile = service.getTile(1, 1);
 
@@ -57,5 +61,18 @@ describe('GridService', () => {
         const tile = service.getTile(1, 1);
 
         expect(tile).toBeUndefined();
+    });
+
+    it('should return the correct grid size for valid game sizes', () => {
+        expect(service.getGridSize('small')).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize('medium')).toBe(MEDIUM_GRID_SIZE);
+        expect(service.getGridSize('large')).toBe(LARGE_GRID_SIZE);
+    });
+
+    it('should return the default grid size when given an invalid game size', () => {
+        expect(service.getGridSize('invalid-size')).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize('')).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize(null as unknown as string)).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize(undefined as unknown as string)).toBe(SMALL_GRID_SIZE);
     });
 });
