@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
+import { Router, RouterModule } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -51,20 +51,18 @@ describe('EditionPageComponent', () => {
 
     beforeEach(async () => {
         gameServiceMock = jasmine.createSpyObj('GameService', ['fetchGames', 'getCurrentGame', 'updateCurrentGame', 'saveGame', 'savePreviewImage']);
-
         gridServiceMock = jasmine.createSpyObj('GridService', ['setGrid']);
         gameValidationServiceMock = jasmine.createSpyObj('GameValidationService', ['validateGame']);
         snackbarServiceMock = jasmine.createSpyObj('SnackbarService', ['showConfirmation']);
         routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
         routerMock.navigate.and.returnValue(Promise.resolve(true));
-
         gameServiceMock.fetchGames.and.returnValue(of([]));
         snackbarServiceMock.showConfirmation.and.returnValue(of(true));
         gameServiceMock.getCurrentGame.and.returnValue(defaultMockGame);
 
         await TestBed.configureTestingModule({
-            imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent, RouterTestingModule],
+            imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent, RouterModule.forRoot([])], // Updated Router import
             providers: [
                 { provide: GameService, useValue: gameServiceMock },
                 { provide: GridService, useValue: gridServiceMock },

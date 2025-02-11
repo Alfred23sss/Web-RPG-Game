@@ -11,7 +11,6 @@ import { GameValidationService } from '@app/services/game-validation/game-valida
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { ItemService } from '@app/services/item/item.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-edition-page',
@@ -34,7 +33,6 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         private gridService: GridService,
         private gameValidationService: GameValidationService,
         private router: Router,
-        private snackbarService: SnackbarService,
         private itemService: ItemService,
     ) {}
 
@@ -63,11 +61,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     }
 
     backToAdmin() {
-        this.snackbarService.showConfirmation('Are you sure ? Changes will not be saved!').subscribe((confirmed) => {
-            if (confirmed) {
-                this.router.navigate(['/admin']);
-            }
-        });
+        this.router.navigate(['/admin']);
     }
 
     reset() {

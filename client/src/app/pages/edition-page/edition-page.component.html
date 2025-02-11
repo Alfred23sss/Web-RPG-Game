@@ -15,19 +15,19 @@
     </div>
 
     <div class="game-info">
-        <h3>Game Editor</h3>
+        <h3>Éditeur de Jeu</h3>
         <div class="info-title">
-            <label for="game-name">Game name</label>
+            <label for="game-name">Nom</label>
             <input id="game-name" type="text" [(ngModel)]="gameName" placeholder="Enter game name" required />
         </div>
         <div class="info-title">
-            <label for="game-description">Game Description</label>
+            <label for="game-description">Description</label>
             <textarea id="game-description" [(ngModel)]="gameDescription" placeholder="Enter game description" required></textarea>
         </div>
         <div class="button-grid">
-            <button class="button" (click)="save()" [disabled]="isSaving">{{ isSaving ? 'Saving...' : 'Save' }}</button>
-            <button class="button" (click)="reset()">Reset</button>
-            <button class="button" (click)="backToAdmin()">Back to Admin</button>
+            <button class="button" (click)="save()" [disabled]="isSaving">{{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}</button>
+            <button class="button" (click)="reset()">Réinitialiser</button>
+            <button class="button" (click)="backToAdmin()">Page d'Administration</button>
         </div>
     </div>
 </div>
