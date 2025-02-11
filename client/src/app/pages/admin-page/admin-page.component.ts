@@ -52,12 +52,12 @@ export class AdminPageComponent implements OnInit {
         }
     }
 
-    toggleVisibility(id: string, event: Event) {
+    toggleVisibility(id: string, event: Event): void {
         const isVisible = (event.target as HTMLInputElement).checked;
         this.gameService.updateGameVisibility(id, isVisible);
     }
 
-    navigateToHome() : void{
+    navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
     }
 
