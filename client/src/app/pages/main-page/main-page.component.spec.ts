@@ -9,7 +9,7 @@ import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
 
-fdescribe('MainPageComponent', () => {
+describe('MainPageComponent', () => {
     let component: MainPageComponent;
     let fixture: ComponentFixture<MainPageComponent>;
     let communicationServiceSpy: SpyObj<CommunicationService>;
@@ -68,7 +68,7 @@ fdescribe('MainPageComponent', () => {
         component.sendTimeToServer();
         component.message.subscribe({
             next: (res) => {
-                expect(res).toContain('Server not responding');
+                expect(res).toContain('The server is not responding');
             },
         });
     });
