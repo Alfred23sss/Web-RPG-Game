@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { ROUTES } from '@app/constants/global.constants';
-import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/global.constants';
+import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE, ROUTES } from '@app/constants/global.constants';
 @Component({
     selector: 'app-waiting-view',
     templateUrl: './waiting-view.component.html',

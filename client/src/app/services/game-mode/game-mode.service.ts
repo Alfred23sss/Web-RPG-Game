@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GAME_SIZES } from '@app/constants/global.constants';
+import { GRID_DIMENSIONS } from '@app/constants/global.constants';
 import { GameMode, GameSize } from '@app/interfaces/game';
 
 @Injectable({
@@ -33,6 +33,6 @@ export class GameModeService {
     }
 
     private isValidSize(size: string): boolean {
-        return Object.values(GAME_SIZES).includes(size);
+        return Object.values(GRID_DIMENSIONS).includes(Number(size));
     }
 }
