@@ -1,4 +1,4 @@
-/*import { TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game';
 import { ImageType } from '@app/interfaces/images';
 import { Tile, TileType } from '@app/interfaces/tile';
@@ -230,16 +230,6 @@ describe('GameService', () => {
         expect(service.getCurrentGame()).toEqual(testGame1);
     });
 
-    it('should clear the current game and remove it from sessionStorage', () => {
-        spyOn(sessionStorage, 'removeItem');
-        service['currentGame'] = testGame1;
-
-        service.clearCurrentGame();
-
-        expect(service['currentGame']).toBeUndefined();
-        expect(sessionStorage.removeItem).toHaveBeenCalledWith('currentGame');
-    });
-
     it('should return true if the game name is already used by another game', () => {
         service['games'] = [testGame1, testGame2];
 
@@ -279,4 +269,4 @@ describe('GameService', () => {
         expect(screenShotServiceSpy.generatePreview).toHaveBeenCalledWith('game-preview');
         expect(result).toBe(mockPreviewImage);
     });
-});*/
+});
