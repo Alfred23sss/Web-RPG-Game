@@ -60,11 +60,11 @@ export class TileService {
         this.itemDragService.clearSelection();
     }
 
-    resetTool() {
+    resetTool(): void {
         this.toolService.setSelectedTool(TileType.Default, ImageType.Default);
     }
 
-    private handleDoor(tile: Tile) {
+    private handleDoor(tile: Tile): void {
         if (tile.type !== TileType.Door) {
             tile.imageSrc = ImageType.ClosedDoor;
             tile.type = TileType.Door;
