@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { ROUTES, MOCK_GAMES } from '@app/constants/global.constants';
+import { MOCK_GAMES, ROUTES } from '@app/constants/global.constants';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -25,9 +25,9 @@ describe('AdminPageComponent', () => {
             'updateCurrentGame',
             'updateGameVisibility',
         ]);
-        mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES)); // Ensure it returns an observable
-        mockGameService.deleteGame.and.returnValue(of(MOCK_GAMES[1])); // Simulate deletion
-        mockGameService.getGameById.and.returnValue(MOCK_GAMES[0]); // Simulate getting a game
+        mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES));
+        mockGameService.deleteGame.and.returnValue(of(MOCK_GAMES[1]));
+        mockGameService.getGameById.and.returnValue(MOCK_GAMES[0]);
         mockGameService.updateGameVisibility.and.callFake((id: string, isVisible: boolean) => {
             const game = MOCK_GAMES.find((g) => g.id === id);
             if (game) game.isVisible = isVisible;
