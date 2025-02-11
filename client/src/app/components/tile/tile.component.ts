@@ -23,19 +23,20 @@ export class TileComponent {
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
         this.itemDragService.setSelectedItem(this.tile.item, this.tile);
-        if (TileComponent.activeButton === null) {
-            TileComponent.activeButton = event.button;
 
-            if (event.button === 2) {
-                if (this.tile.item !== undefined) {
-                    this.tileService.removeTileObject(this.tile);
-                    TileComponent.activeButton = null;
-                } else {
-                    this.tileService.removeTileType(this.tile);
-                }
-            } else if (event.button === 0 && !this.tile.item) {
-                this.tileService.applyTool(this.tile);
+        if (TileComponent.activeButton !== null) return;
+
+        TileComponent.activeButton = event.button;
+
+        if (event.button === 2) {
+            if (this.tile.item !== undefined) {
+                this.tileService.removeTileObject(this.tile);
+                TileComponent.activeButton = null;
+            } else {
+                this.tileService.removeTileType(this.tile);
             }
+        } else if (event.button === 0 && !this.tile.item) {
+            this.tileService.applyTool(this.tile);
         }
     }
 

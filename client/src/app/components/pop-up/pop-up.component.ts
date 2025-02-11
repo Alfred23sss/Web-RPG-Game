@@ -1,3 +1,4 @@
+// eslint-disable max-params
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -19,7 +20,6 @@ export class PopUpComponent {
     gameSizes = GAME_SIZES_LIST;
     gameModes = GAME_MODES_LIST;
 
-    // eslint-disable-next-line max-params
     constructor(
         private dialogRef: MatDialog,
         private gameModeService: GameModeService,

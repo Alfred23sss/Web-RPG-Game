@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ImageType, ItemDescription, ItemType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType, ItemType } from '@app/interfaces/images';
+import { ItemDescription, Tile, TileType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
 import { TileComponent } from './tile.component';
