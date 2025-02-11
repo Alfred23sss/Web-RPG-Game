@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { GameSize } from '@app/interfaces/game';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
 
@@ -64,15 +65,15 @@ describe('GridService', () => {
     });
 
     it('should return the correct grid size for valid game sizes', () => {
-        expect(service.getGridSize('small')).toBe(SMALL_GRID_SIZE);
-        expect(service.getGridSize('medium')).toBe(MEDIUM_GRID_SIZE);
-        expect(service.getGridSize('large')).toBe(LARGE_GRID_SIZE);
+        expect(service.getGridSize(GameSize.Small)).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize(GameSize.Small)).toBe(MEDIUM_GRID_SIZE);
+        expect(service.getGridSize(GameSize.Small)).toBe(LARGE_GRID_SIZE);
     });
 
     it('should return the default grid size when given an invalid game size', () => {
-        expect(service.getGridSize('invalid-size')).toBe(SMALL_GRID_SIZE);
-        expect(service.getGridSize('')).toBe(SMALL_GRID_SIZE);
-        expect(service.getGridSize(null as unknown as string)).toBe(SMALL_GRID_SIZE);
-        expect(service.getGridSize(undefined as unknown as string)).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize('invalid-size' as GameSize)).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize('' as GameSize)).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize(null as unknown as GameSize)).toBe(SMALL_GRID_SIZE);
+        expect(service.getGridSize(undefined as unknown as GameSize)).toBe(SMALL_GRID_SIZE);
     });
 });
