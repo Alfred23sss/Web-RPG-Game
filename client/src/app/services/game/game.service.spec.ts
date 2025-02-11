@@ -5,6 +5,7 @@ import { GameCommunicationService } from '@app/services/game-communication/game-
 import { GridService } from '@app/services/grid/grid-service.service';
 import { of } from 'rxjs';
 import { GameService } from './game.service';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 
 const DEFAULT_SIZE_GRID = 3;
 
@@ -12,12 +13,14 @@ describe('GameService', () => {
     let service: GameService;
     let gameCommunicationServiceSpy: jasmine.SpyObj<GameCommunicationService>;
     let gridServiceSpy: jasmine.SpyObj<GridService>;
+    let screenShotServiceSpy: jasmine.SpyObj<ScreenshotService>;
 
     let testGame1: Game;
     let testGame2: Game;
 
     beforeEach(() => {
         gameCommunicationServiceSpy = jasmine.createSpyObj('GameCommunicationService', ['getAllGames', 'saveGame', 'updateGame', 'deleteGame']);
+        screenShotServiceSpy = jasmine.createSpyObj('ScreenShotService', ['generatePreview']);
 
         const testTile: Tile = {
             id: 'tile-1-1',
@@ -39,6 +42,7 @@ describe('GameService', () => {
                 GameService,
                 { provide: GameCommunicationService, useValue: gameCommunicationServiceSpy },
                 { provide: GridService, useValue: gridServiceSpy },
+                { provide: ScreenshotService, useValue: screenShotServiceSpy },
             ],
         });
 
@@ -88,15 +92,14 @@ describe('GameService', () => {
             name: '',
             size: String(DEFAULT_SIZE_GRID),
             mode: 'Classic',
-            lastModified: new Date(),
-            isVisible: true,
+            lastModified: jasmine.any(Date),
+            isVisible: false,
             previewImage: '',
             description: '',
             grid: gridServiceSpy.createGrid(DEFAULT_SIZE_GRID, DEFAULT_SIZE_GRID),
         };
 
         const newGame = service.createNewGame('Classic', DEFAULT_SIZE_GRID);
-
         expect(newGame.name).toEqual(expectedGame.name);
         expect(newGame.size).toEqual(expectedGame.size);
         expect(newGame.mode).toEqual(expectedGame.mode);
@@ -264,5 +267,15 @@ describe('GameService', () => {
 
         expect(saveGameSpy).toHaveBeenCalledWith(testGame1);
         expect(addGameSpy).toHaveBeenCalledWith(testGame1);
+    });
+
+    it('should call generatePreview and return the preview image', async () => {
+        const mockPreviewImage = 'mock-preview.png';
+        screenShotServiceSpy.generatePreview.and.returnValue(Promise.resolve(mockPreviewImage));
+
+        const result = await service.savePreviewImage();
+
+        expect(screenShotServiceSpy.generatePreview).toHaveBeenCalledWith('game-preview');
+        expect(result).toBe(mockPreviewImage);
     });
 });

@@ -2,10 +2,10 @@ import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, ItemDescription, ItemType, Tile, TileType } from '@app/interfaces/tile';
+import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
 import { ToolService } from '@app/services/tool/tool.service';
-import { ItemService } from '@app/services/item/item.service';
 
 describe('TileService', () => {
     let service: TileService;
@@ -59,6 +59,12 @@ describe('TileService', () => {
 
         it('should not apply tool if selectedTool is null', () => {
             toolServiceSpy.getSelectedTool.and.returnValue(null);
+            service.applyTool(tile);
+            expect(tile.type).toBe(TileType.Default);
+        });
+
+        it('should not apply tool if selectedTool is Default', () => {
+            toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Default, image: ImageType.Default });
             service.applyTool(tile);
             expect(tile.type).toBe(TileType.Default);
         });
@@ -146,10 +152,10 @@ describe('TileService', () => {
             expect(itemDragServiceSpy.clearSelection).toHaveBeenCalled();
         });
 
-        it('should not apply item to tile if draggedItem is undefined', () => {
-            const tile: Tile = { type: TileType.Default } as Tile;
+        it('should not apply item to tile if tile is Wall', () => {
+            const tile: Tile = { type: TileType.Wall } as Tile;
             const previousTile: Tile = { item: { name: 'item1' } as Item } as Tile;
-            const draggedItem = undefined;
+            const draggedItem = { clone: jasmine.createSpy().and.returnValue({ name: 'item1' }) } as unknown as Item;
 
             itemDragServiceSpy.getSelectedItem.and.returnValue(draggedItem);
             itemDragServiceSpy.getPreviousTile.and.returnValue(previousTile);

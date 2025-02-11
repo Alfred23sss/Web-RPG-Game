@@ -1,20 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import {
     ACCESS_CODE_LENGTH,
     ACCESS_CODE_MAX_VALUE,
     ACCESS_CODE_MIN_VALUE,
     ACCESS_CODE_RANGE,
     CODE_EDGE_CASES,
+    ROUTES,
 } from '@app/constants/global.constants';
 import { WaitingViewComponent } from './waiting-view.component';
 
 describe('WaitingViewComponent', () => {
     let component: WaitingViewComponent;
     let fixture: ComponentFixture<WaitingViewComponent>;
+    let mockRouter: jasmine.SpyObj<Router>;
 
     beforeEach(async () => {
+        mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         await TestBed.configureTestingModule({
             imports: [WaitingViewComponent],
+            providers: [{ provide: Router, useValue: mockRouter }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(WaitingViewComponent);
@@ -59,5 +64,10 @@ describe('WaitingViewComponent', () => {
         const secondCode = component.accessCode;
 
         expect(firstCode).not.toEqual(secondCode);
+    });
+
+    it('should navigate to home when navigateToHome is called', () => {
+        component.navigateToHome();
+        expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.createPage]);
     });
 });
