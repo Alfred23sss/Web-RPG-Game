@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AttributeType } from '@app/enums/global.enums';
-import { GameMode, GameSize } from '@app/interfaces/game';
+import { AttributeType, GameMode, GameSize } from '@app/enums/global.enums';
 
 export const BONUS_VALUE = 2;
 
