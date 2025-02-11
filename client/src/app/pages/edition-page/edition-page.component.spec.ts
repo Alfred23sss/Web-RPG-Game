@@ -103,7 +103,7 @@ describe('EditionPageComponent', () => {
             grid: createBaseGrid(3),
         };
         gameServiceMock.getCurrentGame.and.returnValue(mockGame);
-        component.cloneInitialGame();
+        component.ngOnInit();
         expect(component.game.id).toEqual(mockGame.id);
         expect(component.game.name).toEqual(mockGame.name);
         expect(component.game.size).toEqual(mockGame.size);

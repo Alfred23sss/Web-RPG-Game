@@ -48,24 +48,12 @@ export class GameService {
         );
     }
 
-    addGame(game: Game) {
-        this.games.push(game);
-    }
-
     getGames(): Game[] {
         return this.games;
     }
 
     getGameById(id: string): Game | undefined {
         return this.games.find((game) => game.id === id);
-    }
-
-    getGameIndexById(id: string) {
-        return this.games.findIndex((game) => game.id === id);
-    }
-
-    removeGame(id: string) {
-        this.games = this.games.filter((game) => game.id !== id);
     }
 
     fetchGames() {
@@ -100,17 +88,24 @@ export class GameService {
         return this.currentGame;
     }
 
-    clearCurrentGame() {
-        this.currentGame = undefined;
-        sessionStorage.removeItem('currentGame');
-    }
-
     isGameNameUsed(name: string): boolean {
         return this.games.some((game) => game.name === name && game.id !== this.currentGame?.id);
     }
 
     async savePreviewImage() {
         return await this.screenShotService.generatePreview('game-preview');
+    }
+
+    private getGameIndexById(id: string) {
+        return this.games.findIndex((game) => game.id === id);
+    }
+
+    private removeGame(id: string) {
+        this.games = this.games.filter((game) => game.id !== id);
+    }
+
+    private addGame(game: Game) {
+        this.games.push(game);
     }
 
     private loadCurrentGame() {

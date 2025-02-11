@@ -142,4 +142,13 @@ describe('TileComponent', () => {
 
         expect(TileComponent.activeButton).toBeNull();
     });
+
+    it('should return if active button is not null', () => {
+        TileComponent.activeButton = 1;
+
+        const event = new MouseEvent('mousedown', { button: 0, bubbles: true });
+        component.onMouseDown(event);
+
+        expect(TileComponent.activeButton).toBe(1);
+    });
 });

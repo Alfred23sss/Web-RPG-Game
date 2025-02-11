@@ -11,5 +11,4 @@ import { GameDecorations } from '@app/interfaces/images';
 export class MainPageComponent {
     readonly title: string = "William's Wonderland";
     gameDecorations = GameDecorations;
-    constructor() {}
 }
