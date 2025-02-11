@@ -17,8 +17,6 @@ export interface Game {
     name: string;
     size: string;
     mode: string;
-    // size: GameSize;
-    // mode: GameMode;
     lastModified: Date;
     isVisible: boolean;
     previewImage: string;

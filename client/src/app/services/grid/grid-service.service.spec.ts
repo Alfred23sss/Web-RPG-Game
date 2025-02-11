@@ -66,8 +66,8 @@ describe('GridService', () => {
 
     it('should return the correct grid size for valid game sizes', () => {
         expect(service.getGridSize(GameSize.Small)).toBe(SMALL_GRID_SIZE);
-        expect(service.getGridSize(GameSize.Small)).toBe(MEDIUM_GRID_SIZE);
-        expect(service.getGridSize(GameSize.Small)).toBe(LARGE_GRID_SIZE);
+        expect(service.getGridSize(GameSize.Medium)).toBe(MEDIUM_GRID_SIZE);
+        expect(service.getGridSize(GameSize.Large)).toBe(LARGE_GRID_SIZE);
     });
 
     it('should return the default grid size when given an invalid game size', () => {

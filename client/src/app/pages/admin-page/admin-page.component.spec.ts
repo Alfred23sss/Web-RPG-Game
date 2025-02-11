@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
-import { Routes } from '@app/enums/global.enums';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -26,9 +26,9 @@ describe('AdminPageComponent', () => {
             'updateCurrentGame',
             'updateGameVisibility',
         ]);
-        mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES)); // Ensure it returns an observable
-        mockGameService.deleteGame.and.returnValue(of(MOCK_GAMES[1])); // Simulate deletion
-        mockGameService.getGameById.and.returnValue(MOCK_GAMES[0]); // Simulate getting a game
+        mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES));
+        mockGameService.deleteGame.and.returnValue(of(MOCK_GAMES[1]));
+        mockGameService.getGameById.and.returnValue(MOCK_GAMES[0]);
         mockGameService.updateGameVisibility.and.callFake((id: string, isVisible: boolean) => {
             const game = MOCK_GAMES.find((g) => g.id === id);
             if (game) game.isVisible = isVisible;
@@ -80,7 +80,7 @@ describe('AdminPageComponent', () => {
         component.deleteGame('1');
         fixture.detectChanges();
 
-        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith('Are you sure you want to delete this game?');
+        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith(ErrorMessages.ConfirmDeletion);
 
         expect(mockGameService.deleteGame).toHaveBeenCalledWith('1');
 
@@ -93,7 +93,7 @@ describe('AdminPageComponent', () => {
         component.deleteGame('1');
         fixture.detectChanges();
 
-        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith('Are you sure you want to delete this game?');
+        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith(ErrorMessages.ConfirmDeletion);
         expect(mockGameService.deleteGame).not.toHaveBeenCalled();
         expect(component.games).toEqual(MOCK_GAMES);
     });
@@ -144,7 +144,7 @@ describe('AdminPageComponent', () => {
         component.deleteGame('1');
         fixture.detectChanges();
 
-        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith('Are you sure you want to delete this game?');
+        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith(ErrorMessages.ConfirmDeletion);
 
         expect(mockGameService.deleteGame).toHaveBeenCalledWith('1');
 
@@ -153,19 +153,19 @@ describe('AdminPageComponent', () => {
         expect(component.games).toEqual(updatedGames);
     });
 
-    it('should call showMessage with "Deletion failed" when deleteGame fails', () => {
+    it('should call showMessage with "Échec de la suppression" when deleteGame fails', () => {
         mockSnackbarService.showConfirmation.and.returnValue(of(true));
 
-        mockGameService.deleteGame.and.returnValue(throwError(() => new Error('Deletion failed')));
+        mockGameService.deleteGame.and.returnValue(throwError(() => new Error('Échec de la suppression')));
 
         component.deleteGame('1');
         fixture.detectChanges();
 
-        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith('Are you sure you want to delete this game?');
+        expect(mockSnackbarService.showConfirmation).toHaveBeenCalledWith(ErrorMessages.ConfirmDeletion);
 
         expect(mockGameService.deleteGame).toHaveBeenCalledWith('1');
 
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Deletion failed');
+        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.DeletionFailed);
     });
 
     it('should navigate to the home page when navigateToHome is called', () => {
@@ -178,13 +178,13 @@ describe('AdminPageComponent', () => {
     });
 
     it('should show an error message when loading games fails', () => {
-        mockGameService.fetchGames.and.returnValue(throwError(() => new Error('Failed to load games')));
+        mockGameService.fetchGames.and.returnValue(throwError(() => new Error('Échec du chargement des jeux')));
 
         component.ngOnInit();
         fixture.detectChanges();
 
         expect(mockGameService.fetchGames).toHaveBeenCalled();
 
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Failed to load games');
+        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.FailedLoad);
     });
 });

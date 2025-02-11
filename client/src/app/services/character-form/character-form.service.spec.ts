@@ -43,6 +43,12 @@ describe('CharacterService', () => {
         expect(service.attributes).toEqual(INITIAL_VALUES.attributes);
     });
 
+    it('should return null for attack and defense when attribute is not Attack or Defense', () => {
+        const result = service.assignDice('SomeOtherAttribute' as AttributeType);
+
+        expect(result).toEqual({ attack: null, defense: null });
+    });
+
     describe('assignBonus', () => {
         it('should assign a bonus to the selected attribute', () => {
             service.assignBonus(AttributeType.Vitality);
