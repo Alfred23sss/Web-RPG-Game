@@ -34,7 +34,7 @@ export class CreatePageComponent implements OnInit {
 
     openDialog(game: Game) {
         this.dialog.open(CharacterFormComponent, {
-            data: { game },,
+            data: { game },
         });
     }
 
