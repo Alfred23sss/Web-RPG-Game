@@ -61,9 +61,9 @@ export class CharacterFormComponent {
     }
 
     updateCharacterName(): void {
-        this.characterName = this.characterService.checkCharacterNameLength(this.characterName);
+        this.characterService.checkCharacterNameLength(this.characterName);
     }
-
+    
     closePopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
