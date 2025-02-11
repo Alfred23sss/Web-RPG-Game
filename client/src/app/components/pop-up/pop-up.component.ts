@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 import { GAME_MODES_LIST, GAME_SIZES_LIST } from '@app/constants/global.constants';
-import { ErrorMessages, Route } from '@app/enums/global.enums';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Game, GameMode, GameSize } from '@app/interfaces/game';
 
 import { GameDecorations } from '@app/interfaces/images';
@@ -70,7 +70,7 @@ export class PopUpComponent {
 
         const newGame: Game = this.gameService.createNewGame(gameMode, gridSize);
         this.gameService.updateCurrentGame(newGame);
-        this.router.navigate([Route.EditionView]);
+        this.router.navigate([Routes.EditionView]);
         this.closePopup();
     }
 

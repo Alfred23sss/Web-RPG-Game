@@ -21,19 +21,25 @@ export class CharacterService {
     ) {}
 
     assignBonus(attribute: AttributeType) {
-        if (!this.bonusAssigned[attribute]) {
-            this.attributes[attribute] += BONUS_VALUE;
-            this.bonusAssigned[attribute] = true;
-            const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
-            this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
-            this.bonusAssigned[otherAttribute] = false;
+        if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
+            if (!this.bonusAssigned[attribute]) {
+                this.attributes[attribute] += BONUS_VALUE;
+                this.bonusAssigned[attribute] = true;
+                const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
+                this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
+                this.bonusAssigned[otherAttribute] = false;
+            }
         }
     }
 
     assignDice(attribute: AttributeType): { attack: string | null; defense: string | null } {
-        this.diceAssigned[attribute] = true;
-        this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
-        return attribute === AttributeType.Attack ? { attack: DiceType.D6, defense: DiceType.D4 } : { attack: DiceType.D4, defense: DiceType.D6 };
+        if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
+            this.diceAssigned[attribute] = true;
+            this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
+            return attribute === AttributeType.Attack ? { attack: DiceType.D6, defense: DiceType.D4 } : { attack: DiceType.D4, defense: DiceType.D6 };
+        }
+
+        return { attack: null, defense: null };
     }
 
     submitCharacter(data: {

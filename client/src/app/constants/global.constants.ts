@@ -4,6 +4,17 @@ import { GameMode, GameSize } from '@app/interfaces/game';
 
 export const BONUS_VALUE = 2;
 
+// doit sortir de const mettre dans interface
+interface BonusAssigned {
+    [AttributeType.Vitality]: boolean;
+    [AttributeType.Speed]: boolean;
+}
+
+interface DiceAssigned {
+    [AttributeType.Attack]: boolean;
+    [AttributeType.Defense]: boolean;
+}
+
 export const INITIAL_VALUES = {
     attributes: {
         [AttributeType.Vitality]: 4,
@@ -14,11 +25,12 @@ export const INITIAL_VALUES = {
     bonusAssigned: {
         [AttributeType.Vitality]: false,
         [AttributeType.Speed]: false,
-    },
+    } as BonusAssigned,
+
     diceAssigned: {
         [AttributeType.Attack]: false,
         [AttributeType.Defense]: false,
-    },
+    } as DiceAssigned,
 };
 
 export const ATTRIBUTE_KEYS = Object.values(AttributeType);
