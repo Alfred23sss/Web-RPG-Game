@@ -1,5 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ACCESS_CODE_LENGTH, ACCESS_CODE_MAX_VALUE, ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE, CODE_EDGE_CASES } from '@app/global.constants';
+import {
+    ACCESS_CODE_LENGTH,
+    ACCESS_CODE_MAX_VALUE,
+    ACCESS_CODE_MIN_VALUE,
+    ACCESS_CODE_RANGE,
+    CODE_EDGE_CASES,
+} from '@app/constants/global.constants';
 import { WaitingViewComponent } from './waiting-view.component';
 
 describe('WaitingViewComponent', () => {
