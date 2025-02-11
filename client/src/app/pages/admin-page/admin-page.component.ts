@@ -26,26 +26,26 @@ export class AdminPageComponent implements OnInit {
         private router: Router,
     ) {}
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.loadGames();
     }
 
-    openDialog() {
+    openDialog(): void {
         this.dialogRef.open(PopUpComponent);
     }
 
-    deleteGame(id: string) {
+    deleteGame(id: string): void {
         this.snackbarService.showConfirmation('Are you sure you want to delete this game?').subscribe((confirmed) => {
             if (confirmed) {
                 this.gameService.deleteGame(id).subscribe({
                     next: () => this.loadGames(),
-                    error: () => this.snackbarService.showMessage('Deletion failed'), // 42
+                    error: () => this.snackbarService.showMessage('Deletion failed'),
                 });
             }
         });
     }
 
-    updateCurrentGame(id: string) {
+    updateCurrentGame(id: string): void {
         const game = this.gameService.getGameById(id);
         if (game) {
             this.gameService.updateCurrentGame(game);
@@ -57,14 +57,14 @@ export class AdminPageComponent implements OnInit {
         this.gameService.updateGameVisibility(id, isVisible);
     }
 
-    navigateToHome() {
-        this.router.navigate([ROUTES.homePage]); // 61
+    navigateToHome(): void {
+        this.router.navigate([ROUTES.homePage]);
     }
 
-    private loadGames() {
+    private loadGames(): void {
         this.gameService.fetchGames().subscribe({
             next: (response) => (this.games = response),
-            error: () => this.snackbarService.showMessage('Failed to load games'), // 67
+            error: () => this.snackbarService.showMessage('Failed to load games'),
         });
     }
 }

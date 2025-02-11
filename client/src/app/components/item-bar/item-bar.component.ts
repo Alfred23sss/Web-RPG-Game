@@ -23,7 +23,7 @@ export class ItemBarComponent implements OnInit {
         private itemDragService: ItemDragService,
     ) {}
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.items = [
             {
                 id: '0',

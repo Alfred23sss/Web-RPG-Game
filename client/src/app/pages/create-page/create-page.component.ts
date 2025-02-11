@@ -32,13 +32,13 @@ export class CreatePageComponent implements OnInit {
         });
     }
 
-    openDialog(game: Game) {
+    openDialog(game: Game): void {
         this.dialog.open(CharacterFormComponent, {
             data: { game },
         });
     }
 
-    navigateToHome() {
+    navigateToHome(): void {
         this.router.navigate([ROUTES.homePage]);
     }
 }

@@ -29,13 +29,13 @@ export class PopUpComponent {
         private gridService: GridService,
     ) {}
 
-    setGameSize(size: string) {
+    setGameSize(size: string): void {
         if (!this.gameModeService.setGameSize(size)) {
             this.snackbarService.showMessage(ERROR_MESSAGES.INVALID_GAME_SIZE);
         }
     }
 
-    setGameType(mode: string) {
+    setGameType(mode: string): void {
         if (Object.values(GAME_MODES).includes(mode)) {
             this.gameModeService.setGameMode(mode);
             if (mode === GAME_MODES.CTF) {
@@ -47,15 +47,15 @@ export class PopUpComponent {
         }
     }
 
-    getGameSize() {
+    getGameSize(): string {
         return this.gameModeService.getGameSize();
     }
 
-    getGameMode() {
+    getGameMode(): string {
         return this.gameModeService.getGameMode();
     }
 
-    confirm() {
+    confirm(): void {
         const gameSize = this.gameModeService.getGameSize();
         const gameMode = this.gameModeService.getGameMode();
         const gridSize = this.gridService.getGridSize(gameSize);
@@ -71,7 +71,7 @@ export class PopUpComponent {
         this.closePopup();
     }
 
-    closePopup() {
+    closePopup(): void {
         this.gameModeService.resetModeAndSize();
         this.dialogRef.closeAll();
     }

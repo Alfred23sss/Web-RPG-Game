@@ -13,15 +13,15 @@ import { CharacterService } from '@app/services/character-form/character-form.se
     imports: [FormsModule],
 })
 export class CharacterFormComponent {
-    characterName = '';
-    selectedAvatar = '';
-    showForm = true;
+    characterName: string = '';
+    selectedAvatar: string = '';
+    showForm: boolean = true;
     selectedAttackDice: string | null = null;
     selectedDefenseDice: string | null = null;
-    xSword = GameDecorations.XSwords;
+    xSword: string = GameDecorations.XSwords;
     game: Game;
 
-    avatarTypes = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
+    avatarTypes: string[] = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
 
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
@@ -39,11 +39,11 @@ export class CharacterFormComponent {
         this.game = data.game;
     }
 
-    assignBonus(attribute: string) {
+    assignBonus(attribute: string): void {
         this.characterService.assignBonus(attribute);
     }
 
-    assignDice(attribute: string) {
+    assignDice(attribute: string): void {
         const { attack, defense } = this.characterService.assignDice(attribute);
         this.selectedAttackDice = attack;
         this.selectedDefenseDice = defense;
@@ -63,10 +63,12 @@ export class CharacterFormComponent {
     checkCharacterNameLength(): void {
         this.characterService.checkCharacterNameLength(this.characterName);
     }
+
     closePopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
+
     private isBonusAssigned(): boolean {
         return this.bonusAssigned.vitality || this.bonusAssigned.speed;
     }
