@@ -1,7 +1,7 @@
 <div class="tool-container">
     <h1 class="header-item">
-        <span class="selected-header">Selected: </span>
-        <span class="selected-tool">{{ activeTool?.tool || 'None' }}</span>
+        <p class="selected-header">Selected: </p>
+        <p class="selected-tool">{{ activeTool?.tool || 'None' }}</p>
     </h1>
 
     <div class="tool" id="wall-tool" title="Wall : Prevents passage" (click)="selectTool(tileType.Wall, imageType.Wall)">
