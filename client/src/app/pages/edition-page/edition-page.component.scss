@@ -1,11 +1,13 @@
-[draggable="true"] {
+[draggable='true'] {
     -webkit-user-drag: none;
     -moz-user-drag: none;
     -o-user-drag: none;
     cursor: grab;
 }
 
-body, img, div {
+body,
+img,
+div {
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -18,45 +20,50 @@ body, img, div {
 
 .page {
     display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
     width: 100%;
 }
 
-.sidebar,
-.game-info {
+.sidebar {
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
     align-items: center;
-    width: 300px;
+    width: 25%;
+    height: calc(100vh - 40px);
     padding: 20px;
     background: linear-gradient(180deg, #001f3f, #004080);
     color: #ffd700;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    width: 25%;
+    height: calc(100vh - 40px);
+    padding: 20px;
+    background: linear-gradient(180deg, #001f3f, #004080);
+    color: #ffd700;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 
 .section-title {
     font-family: papyrus;
 }
-.game-info {
-    border-left: 3px solid #ffa500;
-    flex-direction: column;
-}
 
 .main-content {
-    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    overflow: auto;
-}
-
-.page-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
+    width: 50%;
+    height: 50%;
 }
 
 .toolbar-section,
@@ -77,16 +84,19 @@ body, img, div {
 
 .info-title label {
     font-family: papyrus;
-    font-size: 1rem;
+    font-size: 1.3rem;
+    font-weight: bold;
     color: #ffd700;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
     margin-bottom: 5px;
 }
 
 .info-title input,
 .info-title textarea {
-    width: 90%; /* Adjusted input width */
-    max-width: 250px; /* Prevents it from being too wide */
+    width: 90%;
+    max-width: 250px;
     font-family: papyrus;
+    font-size: 1 rem;
     padding: 8px;
     border: 2px solid #ffd700;
     border-radius: 5px;
@@ -102,11 +112,23 @@ body, img, div {
     margin-top: 20px;
 }
 
+.game-info > h3 {
+    font-size: 40px;
+    font-family: papyrus;
+    margin-top: 50px;
+}
+.game-info > .info-title:first-of-type {
+    margin-top: 30px;
+}
+
 .button {
+    justify-content: center;
+    align-items: center;
     padding: 12px 24px;
     font-family: papyrus;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: bold;
+
     background: linear-gradient(135deg, #ffd700, #ffa500);
     color: black;
     border: none;
