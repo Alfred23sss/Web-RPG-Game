@@ -68,7 +68,7 @@ describe('PopUpComponent', () => {
         it('should show an error message if the size is invalid', () => {
             mockGameModeService.setGameSize.and.returnValue(false);
             component.setGameSize('invalid-size');
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.INVALID_GAME_SIZE);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.invalidGameSize);
         });
     });
 
@@ -81,7 +81,7 @@ describe('PopUpComponent', () => {
         it('should reset the mode and show an error if CTF is selected', () => {
             component.setGameType(GAME_MODES.ctf);
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.ctf);
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAME_MODE);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.unavailableGameMode);
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
         });
 
@@ -106,7 +106,7 @@ describe('PopUpComponent', () => {
             mockGameModeService.getGameSize.and.returnValue('');
             mockGameModeService.getGameMode.and.returnValue('');
             component.confirm();
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.MISSING_GAME_DETAILS);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.missingGameDetails);
             expect(mockGameService.createNewGame).not.toHaveBeenCalled();
         });
 
@@ -118,7 +118,7 @@ describe('PopUpComponent', () => {
 
         it('should navigate to edition view after confirming the game', () => {
             component.confirm();
-            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.EDITION_VIEW]);
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.editionView]);
         });
     });
 

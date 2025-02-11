@@ -79,30 +79,30 @@ export const GAME_MODES_LIST = [
 
 // global
 export const ERROR_MESSAGES = {
-    MISSING_CHARACTER_DETAILS: 'Please ensure you have assigned bonuses and dice, and entered a name and avatar.',
-    INVALID_GAME_SIZE: 'Invalid game size selected!',
-    UNAVAILABLE_GAME_MODE: 'CTF game mode is currently unavailable!',
-    MISSING_GAME_DETAILS: 'Please select both game size and game type!',
-    INVALID_GAME_MODE: 'Invalid game mode selected!',
-    UNAVAILABLE_GAME: "Le jeu n'est plus disponible.",
+    missingCharacterDetails: 'Please ensure you have assigned bonuses and dice, and entered a name and avatar.',
+    invalidGameSize: 'Invalid game size selected!',
+    unavailableGameMode: 'CTF game mode is currently unavailable!',
+    missingGameDetails: 'Please select both game size and game type!',
+    invalidGameMode: 'Invalid game mode selected!',
+    unavailableGame: "Le jeu n'est plus disponible.",
 };
 
 export const ROUTES = {
-    WAITING_VIEW: '/waiting-view',
-    EDITION_VIEW: '/edition',
+    waitingView: '/waiting-view',
+    editionView: '/edition',
     adminPage: '/admin',
     homePage: '/home',
     createPage: '/create',
-    CREATE_VIEW: '/create',
+    createView: '/create',
 };
 
 export const SNACKBAR_CONFIG = {
-    DURATION: 3000,
-    ACTION: 'Close',
+    duration: 3000,
+    action: 'Close',
 };
 
 export const HTTP_STATUS = {
-    INTERNAL_SERVER_ERROR: 500,
+    internalServerError: 500,
     forbidden: 403,
 };
 

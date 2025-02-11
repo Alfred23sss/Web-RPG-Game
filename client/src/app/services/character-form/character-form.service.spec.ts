@@ -122,7 +122,7 @@ describe('CharacterService', () => {
             expect(mockRouter.navigate).not.toHaveBeenCalled();
         });
 
-        it('should handle FORBIDDEN error and navigate to CREATE_VIEW', () => {
+        it('should handle FORBIDDEN error and navigate to createView', () => {
             const mockGame: Game = {
                 id: '1',
                 name: 'Test Game',
@@ -138,8 +138,8 @@ describe('CharacterService', () => {
             mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HTTP_STATUS.forbidden })));
             service['validateGameAvailability'](mockGame, closePopupSpy);
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAME);
-            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CREATE_VIEW]);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.unavailableGame);
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.createView]);
             expect(closePopupSpy).toHaveBeenCalled();
         });
     });
@@ -160,10 +160,10 @@ describe('CharacterService', () => {
     describe('proceedToWaitingView', () => {
         let closePopupSpy: jasmine.Spy;
 
-        it('should navigate to WAITING_VIEW', () => {
+        it('should navigate to waitingView', () => {
             closePopupSpy = jasmine.createSpy();
             service['proceedToWaitingView'](closePopupSpy);
-            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WAITING_VIEW]);
+            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.waitingView]);
             expect(closePopupSpy).toHaveBeenCalled();
         });
 
@@ -175,10 +175,10 @@ describe('CharacterService', () => {
     });
 
     describe('showMissingDetailsError', () => {
-        it('should call snackbarService.showMessage with MISSING_CHARACTER_DETAILS', () => {
+        it('should call snackbarService.showMessage with missingCharacterDetails', () => {
             service['showMissingDetailsError']();
 
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.missingCharacterDetails);
         });
     });
 

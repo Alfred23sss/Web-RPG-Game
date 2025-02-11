@@ -69,9 +69,9 @@ export class CharacterService {
     private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
-                if (error.status === HTTP_STATUS.INTERNAL_SERVER_ERROR || error.status === HTTP_STATUS.forbidden) {
-                    this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME);
-                    this.router.navigate([ROUTES.CREATE_VIEW]);
+                if (error.status === HTTP_STATUS.internalServerError || error.status === HTTP_STATUS.forbidden) {
+                    this.snackbarService.showMessage(ERROR_MESSAGES.unavailableGame);
+                    this.router.navigate([ROUTES.createView]);
                     closePopup();
                 }
             },
@@ -83,11 +83,11 @@ export class CharacterService {
     }
 
     private proceedToWaitingView(closePopup: () => void) {
-        this.router.navigate([ROUTES.WAITING_VIEW]);
+        this.router.navigate([ROUTES.waitingView]);
         closePopup();
     }
 
     private showMissingDetailsError() {
-        this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
+        this.snackbarService.showMessage(ERROR_MESSAGES.missingCharacterDetails);
     }
 }

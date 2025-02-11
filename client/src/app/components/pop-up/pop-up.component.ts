@@ -31,7 +31,7 @@ export class PopUpComponent {
 
     setGameSize(size: string) {
         if (!this.gameModeService.setGameSize(size)) {
-            this.snackbarService.showMessage(ERROR_MESSAGES.INVALID_GAME_SIZE);
+            this.snackbarService.showMessage(ERROR_MESSAGES.invalidGameSize);
         }
     }
 
@@ -39,7 +39,7 @@ export class PopUpComponent {
         if (Object.values(GAME_MODES).includes(mode)) {
             this.gameModeService.setGameMode(mode);
             if (mode === GAME_MODES.ctf) {
-                this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME_MODE);
+                this.snackbarService.showMessage(ERROR_MESSAGES.unavailableGameMode);
                 this.gameModeService.setGameMode('');
             }
         } else {
@@ -61,13 +61,13 @@ export class PopUpComponent {
         const gridSize = this.gridService.getGridSize(gameSize);
 
         if (!gameSize || !gameMode) {
-            this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_GAME_DETAILS);
+            this.snackbarService.showMessage(ERROR_MESSAGES.missingGameDetails);
             return;
         }
 
         const newGame: Game = this.gameService.createNewGame(gameMode, gridSize);
         this.gameService.updateCurrentGame(newGame);
-        this.router.navigate([ROUTES.EDITION_VIEW]);
+        this.router.navigate([ROUTES.editionView]);
         this.closePopup();
     }
 
