@@ -93,4 +93,15 @@ describe('ScreenshotService', () => {
 
         await expectAsync(service.generateScreenshot('invalid-id')).toBeRejectedWith("Element 'invalid-id' not found");
     });
+
+    it('should call html2canvas when Html2CanvasWrapper.captureElement is executed', async () => {
+        const element = document.createElement('div');
+        const options = { scale: 2 };
+
+        const captureElementSpy = spyOn(Html2CanvasWrapper, 'captureElement').and.callThrough();
+
+        await Html2CanvasWrapper.captureElement(element, options);
+
+        expect(captureElementSpy).toHaveBeenCalledWith(element, jasmine.objectContaining(options));
+    });
 });

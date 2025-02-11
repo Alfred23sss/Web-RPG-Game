@@ -19,8 +19,7 @@ export class ScreenshotService {
             imageFormat: 'image/jpeg',
         });
     }
-    // eslint-disable-next-line spaced-comment
-    //inspire de cette video youtube: https://www.youtube.com/watch?v=5TUvcep_bX8&ab_channel=BenNadel
+
     private async captureElement(
         elementId: string,
         options?: {
