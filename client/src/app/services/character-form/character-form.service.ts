@@ -65,7 +65,6 @@ export class CharacterService {
             this.snackbarService.showMessage(`The maximum name length is ${maxLength} characters.`);
         }
     }
-    
 
     private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({

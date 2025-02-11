@@ -60,16 +60,13 @@ export class CharacterFormComponent {
         });
     }
 
-    updateCharacterName(): void {
+    checkCharacterNameLength(): void {
         this.characterService.checkCharacterNameLength(this.characterName);
     }
-    
     closePopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
-    
-
     private isBonusAssigned(): boolean {
         return this.bonusAssigned.vitality || this.bonusAssigned.speed;
     }
