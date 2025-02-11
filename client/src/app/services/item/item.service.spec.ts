@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { ItemService } from './item.service';
-import { GameService } from '@app/services/game/game.service';
 import { Item } from '@app/classes/item';
-import { TileType, Tile } from '@app/interfaces/tile';
 import { GameSize } from '@app/interfaces/game';
+import { Tile, TileType } from '@app/interfaces/tile';
+import { GameService } from '@app/services/game/game.service';
+import { ItemService } from './item.service';
 
 const EXPECTED_ITEM_COUNT_MEDIUM = 4;
 const GAME_SIZE_10 = '10';
@@ -46,28 +46,6 @@ describe('ItemService', () => {
     it('should not increment counter if item does not exist', () => {
         service.setItems([]);
         service.incrementItemCounter('nonexistent');
-        expect(service.getItems()).toEqual([]);
-    });
-
-    it('should decrement item counter', () => {
-        const testItem = new Item({ id: '1', name: 'potion', itemCounter: 2 });
-        service.setItems([testItem]);
-
-        service.decrementItemCounter('potion');
-        expect(testItem.itemCounter).toBe(1);
-    });
-
-    it('should not decrement below zero', () => {
-        const testItem = new Item({ id: '1', name: 'potion', itemCounter: 0 });
-        service.setItems([testItem]);
-
-        service.decrementItemCounter('potion');
-        expect(testItem.itemCounter).toBe(0);
-    });
-
-    it('should not decrement counter if item does not exist', () => {
-        service.setItems([]);
-        service.decrementItemCounter('nonexistent');
         expect(service.getItems()).toEqual([]);
     });
 

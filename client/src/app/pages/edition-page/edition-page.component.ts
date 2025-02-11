@@ -1,3 +1,4 @@
+/* eslint-disable max-params */
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -37,35 +38,23 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         private itemService: ItemService,
     ) {}
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.gameService.fetchGames().subscribe();
         this.cloneInitialGame();
     }
 
-    ngAfterViewInit() {
-        setTimeout(() => {
-            if (this.itemBar && this.itemBar.items) {
-                this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
-                this.itemService.setItems(this.itemBar.items);
-            }
-        }, 0);
-    }
-
-    cloneInitialGame() {
-        const currentGame = this.gameService.getCurrentGame();
-        if (currentGame) {
-            this.game = this.makeDeepCopy(currentGame);
-            this.originalGame = this.makeDeepCopy(currentGame);
-            this.gridService.setGrid(this.game?.grid);
-            this.updateGameAndDescription();
+    ngAfterViewInit(): void {
+        if (this.itemBar && this.itemBar.items) {
+            this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
+            this.itemService.setItems(this.itemBar.items);
         }
     }
 
-    backToAdmin() {
+    backToAdmin(): void {
         this.router.navigate([Routes.AdminPage]);
     }
 
-    reset() {
+    reset(): void {
         this.game = this.makeDeepCopy(this.originalGame);
         this.updateGameAndDescription();
         this.gridService.setGrid(this.game.grid);
@@ -78,7 +67,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         this.cloneInitialGame();
     }
 
-    async save() {
+    async save(): Promise<void> {
         if (this.isSaving) return;
         this.isSaving = true;
         this.game.name = this.gameName;
@@ -98,7 +87,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         });
     }
 
-    private async savePreviewImage() {
+    private async savePreviewImage(): Promise<void> {
         try {
             const previewUrl = await this.gameService.savePreviewImage();
             this.game.previewImage = previewUrl;
@@ -107,17 +96,27 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private updateGameAndDescription() {
+    private updateGameAndDescription(): void {
         this.gameName = this.game.name;
         this.gameDescription = this.game.description;
     }
 
-    private updateGame() {
+    private updateGame(): void {
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
     }
 
     private makeDeepCopy(toCopy: string | Game | Item[]) {
         return JSON.parse(JSON.stringify(toCopy));
+    }
+
+    private cloneInitialGame(): void {
+        const currentGame = this.gameService.getCurrentGame();
+        if (currentGame) {
+            this.game = this.makeDeepCopy(currentGame);
+            this.originalGame = this.makeDeepCopy(currentGame);
+            this.gridService.setGrid(this.game?.grid);
+            this.updateGameAndDescription();
+        }
     }
 }

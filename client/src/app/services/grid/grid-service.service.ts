@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { GRID_DIMENSIONS } from '@app/constants/global.constants';
 import { GameSize } from '@app/interfaces/game';
-import { ImageType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType } from '@app/interfaces/images';
+import { Tile, TileType } from '@app/interfaces/tile';
 
 @Injectable({
     providedIn: 'root',
@@ -28,12 +29,8 @@ export class GridService {
         this.grid = grid;
     }
 
-    getGrid() {
+    getGrid(): Tile[][] | undefined {
         return this.grid;
-    }
-
-    getTile(row: number, col: number) {
-        return this.grid?.[row]?.[col];
     }
 
     getGridSize(gameSize: GameSize): number {

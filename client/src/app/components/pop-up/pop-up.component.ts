@@ -1,3 +1,4 @@
+/* eslint-disable max-params */
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
@@ -22,7 +23,6 @@ export class PopUpComponent {
     gameSizes = GAME_SIZES_LIST;
     gameModes = GAME_MODES_LIST;
 
-    // eslint-disable-next-line max-params
     constructor(
         private readonly dialogRef: MatDialog,
         private readonly gameModeService: GameModeService,
@@ -32,13 +32,13 @@ export class PopUpComponent {
         private readonly gridService: GridService,
     ) {}
 
-    setGameSize(size: GameSize) {
+    setGameSize(size: GameSize): void {
         if (!this.gameModeService.setGameSize(size)) {
             this.snackbarService.showMessage(ErrorMessages.InvalidGameSize);
         }
     }
 
-    setGameType(mode: GameMode) {
+    setGameType(mode: GameMode): void {
         if (Object.values(GameMode).includes(mode)) {
             this.gameModeService.setGameMode(mode);
             if (mode === GameMode.CTF) {
@@ -54,11 +54,11 @@ export class PopUpComponent {
         return this.gameModeService.getGameSize();
     }
 
-    getGameMode() {
+    getGameMode(): string {
         return this.gameModeService.getGameMode();
     }
 
-    confirm() {
+    confirm(): void {
         const gameSize = this.gameModeService.getGameSize();
         const gameMode = this.gameModeService.getGameMode();
         const gridSize = this.gridService.getGridSize(gameSize);
@@ -74,7 +74,7 @@ export class PopUpComponent {
         this.closePopup();
     }
 
-    closePopup() {
+    closePopup(): void {
         this.gameModeService.resetModeAndSize();
         this.dialogRef.closeAll();
     }

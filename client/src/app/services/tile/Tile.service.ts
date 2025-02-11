@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { ImageType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType } from '@app/interfaces/images';
+import { Tile, TileType } from '@app/interfaces/tile';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
@@ -59,11 +60,11 @@ export class TileService {
         this.itemDragService.clearSelection();
     }
 
-    resetTool() {
+    resetTool(): void {
         this.toolService.setSelectedTool(TileType.Default, ImageType.Default);
     }
 
-    private handleDoor(tile: Tile) {
+    private handleDoor(tile: Tile): void {
         if (tile.type !== TileType.Door) {
             tile.imageSrc = ImageType.ClosedDoor;
             tile.type = TileType.Door;

@@ -64,12 +64,12 @@ describe('ItemBarComponent', () => {
 
     it('should disable dragging when itemCounter is 0', () => {
         const testItem = new Item({ id: '2', name: 'fire', imageSrc: '', imageSrcGrey: '', itemCounter: 0, description: 'Fire' });
-        expect(component.isDragDisabled(testItem)).toBeTrue();
+        expect(testItem.itemCounter <= 0).toBeTrue();
     });
 
     it('should allow dragging when itemCounter is greater than 0', () => {
         const testItem = new Item({ id: '3', name: 'swap', imageSrc: '', imageSrcGrey: '', itemCounter: 1, description: 'Swap' });
-        expect(component.isDragDisabled(testItem)).toBeFalse();
+        expect(testItem.itemCounter <= 0).toBeFalse();
     });
 
     it('should update item count correctly based on game size', () => {

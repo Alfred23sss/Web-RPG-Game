@@ -2,7 +2,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/classes/item';
-import { ItemDescription, ItemType } from '@app/interfaces/tile';
+import { ItemType } from '@app/interfaces/images';
+import { ItemDescription } from '@app/interfaces/tile';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 
@@ -22,7 +23,7 @@ export class ItemBarComponent implements OnInit {
         private itemDragService: ItemDragService,
     ) {}
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.items = [
             {
                 id: '0',
@@ -103,25 +104,17 @@ export class ItemBarComponent implements OnInit {
         this.itemDragService.setSelectedItem(undefined, undefined);
     }
 
-    isDragDisabled(item: Item): boolean {
-        return item.itemCounter <= 0;
-    }
-
     onContainerDrop(event: DragEvent, item: Item): void {
         event.preventDefault();
 
         const draggedItem = this.itemDragService.getSelectedItem();
         const previousTile = this.itemDragService.getPreviousTile();
 
-        if (!draggedItem) {
-            return;
-        }
-        if (draggedItem.name !== item.name) {
-            return;
-        }
-        if (draggedItem.id === item.id) {
-            return;
-        }
+        if (!draggedItem) return;
+
+        if (draggedItem.name !== item.name) return;
+
+        if (draggedItem.id === item.id) return;
 
         item.itemCounter++;
 

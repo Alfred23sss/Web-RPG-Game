@@ -8,15 +8,13 @@ export class GameModeService {
     private gameSize: GameSize = GameSize.None;
     private gameMode: GameMode = GameMode.None;
 
-    setGameMode(mode: GameMode) {
+    setGameMode(mode: GameMode): void {
         this.gameMode = mode;
     }
     setGameSize(size: GameSize): boolean {
-        if (this.isValidSize(size)) {
-            this.gameSize = size;
-            return true;
-        }
-        return false;
+        if (!this.isValidSize(size)) return false;
+        this.gameSize = size;
+        return true;
     }
 
     getGameMode(): GameMode {
@@ -26,7 +24,7 @@ export class GameModeService {
         return this.gameSize;
     }
 
-    resetModeAndSize() {
+    resetModeAndSize(): void {
         this.gameMode = GameMode.None;
         this.gameSize = GameSize.None;
     }

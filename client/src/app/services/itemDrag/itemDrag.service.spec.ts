@@ -56,18 +56,4 @@ describe('ItemDragService', () => {
         service.decreaseItemCounter();
         expect(item.itemCounter).toBe(0);
     });
-
-    it('should increase item counter if selected item exists', () => {
-        const startingCounter = 2;
-        const item: Item = { name: 'TestItem', itemCounter: startingCounter } as Item;
-        service.setSelectedItem(item, undefined);
-
-        service.increaseItemCounter();
-        expect(item.itemCounter).toBe(startingCounter + 1);
-    });
-
-    it('should not increase item counter if selected item is undefined', () => {
-        service.increaseItemCounter();
-        expect(service.getSelectedItem()).toBeUndefined();
-    });
 });

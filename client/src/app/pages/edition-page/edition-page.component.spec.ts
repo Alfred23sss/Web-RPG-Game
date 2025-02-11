@@ -36,6 +36,7 @@ describe('EditionPageComponent', () => {
     let snackbarServiceMock: jasmine.SpyObj<SnackbarService>;
     let routerMock: jasmine.SpyObj<Router>;
 
+    const baseGridSize = 3;
     const mockDate = new Date('2025-02-11T16:48:33.205Z');
     const defaultMockGame: Game = {
         id: '1',
@@ -46,7 +47,7 @@ describe('EditionPageComponent', () => {
         isVisible: true,
         previewImage: '',
         description: 'Test Description',
-        grid: createBaseGrid(3),
+        grid: createBaseGrid(baseGridSize),
     };
 
     beforeEach(async () => {
@@ -100,10 +101,10 @@ describe('EditionPageComponent', () => {
             isVisible: true,
             previewImage: '',
             description: 'Another Test Description',
-            grid: createBaseGrid(3),
+            grid: createBaseGrid(baseGridSize),
         };
         gameServiceMock.getCurrentGame.and.returnValue(mockGame);
-        component.cloneInitialGame();
+        component.ngOnInit();
         expect(component.game.id).toEqual(mockGame.id);
         expect(component.game.name).toEqual(mockGame.name);
         expect(component.game.size).toEqual(mockGame.size);
@@ -134,7 +135,7 @@ describe('EditionPageComponent', () => {
             isVisible: true,
             previewImage: '',
             description: 'Test Description',
-            grid: createBaseGrid(3),
+            grid: createBaseGrid(baseGridSize),
         };
         component['originalGame'] = mockGame;
         component.originalItemBar = JSON.stringify([]);
@@ -160,7 +161,7 @@ describe('EditionPageComponent', () => {
             isVisible: true,
             previewImage: '',
             description: 'Save Test Description',
-            grid: createBaseGrid(3),
+            grid: createBaseGrid(baseGridSize),
         };
         component.gameName = 'Updated Game';
         component.gameDescription = 'Updated Description';

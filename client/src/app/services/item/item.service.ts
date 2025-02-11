@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { GameService } from '@app/services/game/game.service';
 import { Item } from '@app/classes/item';
 import { GameSize } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
+import { GameService } from '@app/services/game/game.service';
 
 const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.Small]: 2,
@@ -33,13 +33,6 @@ export class ItemService {
         const item = this.getItemByName(name);
         if (item) {
             item.itemCounter++;
-        }
-    }
-
-    decrementItemCounter(name: string): void {
-        const item = this.getItemByName(name);
-        if (item && item.itemCounter > 0) {
-            item.itemCounter--;
         }
     }
 

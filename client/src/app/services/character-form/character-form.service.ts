@@ -20,7 +20,7 @@ export class CharacterService {
         private readonly gameCommunicationService: GameCommunicationService,
     ) {}
 
-    assignBonus(attribute: AttributeType) {
+    assignBonus(attribute: AttributeType): void {
         if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
             if (!this.bonusAssigned[attribute]) {
                 this.attributes[attribute] += BONUS_VALUE;
@@ -49,7 +49,7 @@ export class CharacterService {
         isBonusAssigned: boolean;
         isDiceAssigned: boolean;
         closePopup: () => void;
-    }) {
+    }): void {
         this.validateGameAvailability(data.game, data.closePopup);
         if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
             this.proceedToWaitingView(data.closePopup);
@@ -58,20 +58,20 @@ export class CharacterService {
         }
     }
 
-    resetAttributes() {
+    resetAttributes(): void {
         this.attributes = { ...INITIAL_VALUES.attributes };
         this.bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
         this.diceAssigned = { ...INITIAL_VALUES.diceAssigned };
     }
 
-    checkCharacterNameLength(characterName: string) {
+    checkCharacterNameLength(characterName: string): void {
         const maxLength = 20;
         if (characterName.length >= maxLength) {
             this.snackbarService.showMessage(`The maximum name length is ${maxLength} characters.`);
         }
     }
 
-    private validateGameAvailability(game: Game, closePopup: () => void) {
+    private validateGameAvailability(game: Game, closePopup: () => void): void {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
                 if (error.status === HttpStatus.InternalServerError || error.status === HttpStatus.Forbidden) {
@@ -87,12 +87,12 @@ export class CharacterService {
         return !!characterName && !!selectedAvatar && isBonusAssigned && isDiceAssigned;
     }
 
-    private proceedToWaitingView(closePopup: () => void) {
+    private proceedToWaitingView(closePopup: () => void): void {
         this.router.navigate([Routes.WaitingView]);
         closePopup();
     }
 
-    private showMissingDetailsError() {
+    private showMissingDetailsError(): void {
         this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
     }
 }
