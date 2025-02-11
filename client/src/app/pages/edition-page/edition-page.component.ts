@@ -7,12 +7,12 @@ import { Item } from '@app/classes/item';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
+import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { ItemService } from '@app/services/item/item.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-edition-page',
@@ -35,7 +35,6 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         private gridService: GridService,
         private gameValidationService: GameValidationService,
         private router: Router,
-        private snackbarService: SnackbarService,
         private itemService: ItemService,
     ) {}
 
@@ -52,11 +51,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     }
 
     backToAdmin(): void {
-        this.snackbarService.showConfirmation('Are you sure ? Changes will not be saved!').subscribe((confirmed) => {
-            if (confirmed) {
-                this.router.navigate(['/admin']);
-            }
-        });
+        this.router.navigate([Routes.AdminPage]);
     }
 
     reset(): void {
@@ -86,7 +81,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         await this.savePreviewImage();
         this.updateGame();
         this.gameService.fetchGames().subscribe(() => {
-            this.router.navigate(['/admin']).then(() => {
+            this.router.navigate([Routes.AdminPage]).then(() => {
                 this.isSaving = false;
             });
         });

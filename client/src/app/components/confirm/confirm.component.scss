@@ -17,22 +17,6 @@
 }
 
 .confirm-button {
-    background-color: #ff4c4c;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    font-size: 1rem;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-
-    &:hover {
-        background-color: #d63232;
-    }
-}
-
-.cancel-button {
     background-color: #4caf50;
     color: white;
     border: none;
@@ -45,5 +29,21 @@
 
     &:hover {
         background-color: #388e3c;
+    }
+}
+
+.cancel-button {
+    background-color: #ff4c4c;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+
+    &:hover {
+        background-color: #d63232;
     }
 }

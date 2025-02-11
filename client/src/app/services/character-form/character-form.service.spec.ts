@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, HTTP_STATUS, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
+import { INITIAL_VALUES } from '@app/constants/global.constants';
+import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -41,21 +43,27 @@ describe('CharacterService', () => {
         expect(service.attributes).toEqual(INITIAL_VALUES.attributes);
     });
 
+    it('should return null for attack and defense when attribute is not Attack or Defense', () => {
+        const result = service.assignDice('SomeOtherAttribute' as AttributeType);
+
+        expect(result).toEqual({ attack: null, defense: null });
+    });
+
     describe('assignBonus', () => {
         it('should assign a bonus to the selected attribute', () => {
-            service.assignBonus(ATTRIBUTE_TYPES.VITALITY);
-            expect(service.bonusAssigned[ATTRIBUTE_TYPES.VITALITY]).toBeTrue();
-            expect(service.attributes[ATTRIBUTE_TYPES.VITALITY]).toBe(BONUS_ATTRIBUTE_VALUE);
+            service.assignBonus(AttributeType.Vitality);
+            expect(service.bonusAssigned[AttributeType.Vitality]).toBeTrue();
+            expect(service.attributes[AttributeType.Vitality]).toBe(BONUS_ATTRIBUTE_VALUE);
         });
 
         it('should reset other attributes when a bonus is assigned', () => {
-            service.assignBonus(ATTRIBUTE_TYPES.VITALITY);
-            expect(service.bonusAssigned[ATTRIBUTE_TYPES.SPEED]).toBeFalse();
-            expect(service.attributes[ATTRIBUTE_TYPES.SPEED]).toBe(DEFAULT_ATTRIBUTE_VALUE);
+            service.assignBonus(AttributeType.Vitality);
+            expect(service.bonusAssigned[AttributeType.Speed]).toBeFalse();
+            expect(service.attributes[AttributeType.Speed]).toBe(DEFAULT_ATTRIBUTE_VALUE);
 
-            service.assignBonus(ATTRIBUTE_TYPES.SPEED);
-            expect(service.bonusAssigned[ATTRIBUTE_TYPES.VITALITY]).toBeFalse();
-            expect(service.attributes[ATTRIBUTE_TYPES.VITALITY]).toBe(DEFAULT_ATTRIBUTE_VALUE);
+            service.assignBonus(AttributeType.Speed);
+            expect(service.bonusAssigned[AttributeType.Vitality]).toBeFalse();
+            expect(service.attributes[AttributeType.Vitality]).toBe(DEFAULT_ATTRIBUTE_VALUE);
         });
     });
 
@@ -65,31 +73,31 @@ describe('CharacterService', () => {
         });
 
         it('should assign attack to D6 and defense to D4 when attack is selected', () => {
-            const obj = service.assignDice(ATTRIBUTE_TYPES.ATTACK);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeTrue();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeFalse();
-            expect(obj.attack).toBe(DICE_TYPES.D6);
-            expect(obj.defense).toBe(DICE_TYPES.D4);
+            const obj = service.assignDice(AttributeType.Attack);
+            expect(service.diceAssigned[AttributeType.Attack]).toBeTrue();
+            expect(service.diceAssigned[AttributeType.Defense]).toBeFalse();
+            expect(obj.attack).toBe(DiceType.D6);
+            expect(obj.defense).toBe(DiceType.D4);
         });
 
         it('should assign defense to D6 and attack to D4 when defense is selected', () => {
-            const obj = service.assignDice(ATTRIBUTE_TYPES.DEFENSE);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeFalse();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeTrue();
-            expect(obj.attack).toBe(DICE_TYPES.D4);
-            expect(obj.defense).toBe(DICE_TYPES.D6);
+            const obj = service.assignDice(AttributeType.Defense);
+            expect(service.diceAssigned[AttributeType.Attack]).toBeFalse();
+            expect(service.diceAssigned[AttributeType.Defense]).toBeTrue();
+            expect(obj.attack).toBe(DiceType.D4);
+            expect(obj.defense).toBe(DiceType.D6);
         });
 
         it('should reassign dice when switching from attack to defense', () => {
-            service.assignDice(ATTRIBUTE_TYPES.ATTACK);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeTrue();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeFalse();
+            service.assignDice(AttributeType.Attack);
+            expect(service.diceAssigned[AttributeType.Attack]).toBeTrue();
+            expect(service.diceAssigned[AttributeType.Defense]).toBeFalse();
 
-            const obj = service.assignDice(ATTRIBUTE_TYPES.DEFENSE);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeFalse();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeTrue();
-            expect(obj.attack).toBe(DICE_TYPES.D4);
-            expect(obj.defense).toBe(DICE_TYPES.D6);
+            const obj = service.assignDice(AttributeType.Defense);
+            expect(service.diceAssigned[AttributeType.Attack]).toBeFalse();
+            expect(service.diceAssigned[AttributeType.Defense]).toBeTrue();
+            expect(obj.attack).toBe(DiceType.D4);
+            expect(obj.defense).toBe(DiceType.D6);
         });
     });
 
@@ -135,11 +143,11 @@ describe('CharacterService', () => {
                 grid: undefined,
             };
 
-            mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HTTP_STATUS.FORBIDDEN })));
+            mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HttpStatus.Forbidden })));
             service['validateGameAvailability'](mockGame, closePopupSpy);
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAME);
-            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.CREATE_VIEW]);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.UnavailableGame);
+            expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.CreateView]);
             expect(closePopupSpy).toHaveBeenCalled();
         });
     });
@@ -163,7 +171,7 @@ describe('CharacterService', () => {
         it('should navigate to WAITING_VIEW', () => {
             closePopupSpy = jasmine.createSpy();
             service['proceedToWaitingView'](closePopupSpy);
-            expect(mockRouter.navigate).toHaveBeenCalledWith([ROUTES.WAITING_VIEW]);
+            expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
             expect(closePopupSpy).toHaveBeenCalled();
         });
 
@@ -178,7 +186,7 @@ describe('CharacterService', () => {
         it('should call snackbarService.showMessage with MISSING_CHARACTER_DETAILS', () => {
             service['showMissingDetailsError']();
 
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MissingCharacterDetails);
         });
     });
 
@@ -189,11 +197,11 @@ describe('CharacterService', () => {
         beforeEach(() => {
             closePopupSpy = jasmine.createSpy('closePopup');
             mockGame = { id: '1', name: 'Test Game' } as Game;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
             spyOn(service as any, 'validateGameAvailability').and.callFake(() => null);
-            spyOn(service as unknown as { proceedToWaitingView: jasmine.Spy }, 'proceedToWaitingView');
-            spyOn(service as unknown as { showMissingDetailsError: jasmine.Spy }, 'showMissingDetailsError');
-            spyOn(service as unknown as { isCharacterValid: jasmine.Spy }, 'isCharacterValid').and.returnValue(true);
+            spyOn(service as any, 'proceedToWaitingView');
+            spyOn(service as any, 'showMissingDetailsError');
+            spyOn(service as any, 'isCharacterValid').and.returnValue(true);
         });
 
         it('should proceed to waiting view if character is valid', () => {
@@ -211,7 +219,7 @@ describe('CharacterService', () => {
         });
 
         it('should show missing details error if character is invalid', () => {
-            (service as unknown as { isCharacterValid: jasmine.Spy }).isCharacterValid.and.returnValue(false);
+            (service as any).isCharacterValid.and.returnValue(false);
 
             service.submitCharacter({
                 characterName: 'name',

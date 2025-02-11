@@ -1,36 +1,35 @@
 import { Injectable } from '@angular/core';
-import { GAME_SIZES } from '@app/constants/global.constants';
 import { GameMode, GameSize } from '@app/interfaces/game';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameModeService {
-    private gameSize: string = GameSize.None;
-    private gameMode: string = GameMode.None;
+    private gameSize: GameSize = GameSize.None;
+    private gameMode: GameMode = GameMode.None;
 
-    setGameMode(mode: string): void {
+    setGameMode(mode: GameMode): void {
         this.gameMode = mode;
     }
-    setGameSize(size: string): boolean {
+    setGameSize(size: GameSize): boolean {
         if (!this.isValidSize(size)) return false;
         this.gameSize = size;
         return true;
     }
 
-    getGameMode(): string {
+    getGameMode(): GameMode {
         return this.gameMode;
     }
-    getGameSize(): string {
+    getGameSize(): GameSize {
         return this.gameSize;
     }
 
     resetModeAndSize(): void {
-        this.gameMode = '';
-        this.gameSize = '';
+        this.gameMode = GameMode.None;
+        this.gameSize = GameSize.None;
     }
 
-    private isValidSize(size: string): boolean {
-        return Object.values(GAME_SIZES).includes(size);
+    private isValidSize(size: GameSize): boolean {
+        return Object.values(GameSize).includes(size);
     }
 }

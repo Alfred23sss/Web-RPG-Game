@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -64,7 +65,7 @@ describe('EditionPageComponent', () => {
         gameServiceMock.getCurrentGame.and.returnValue(defaultMockGame);
 
         await TestBed.configureTestingModule({
-            imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent],
+            imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent, RouterModule.forRoot([])],
             providers: [
                 { provide: GameService, useValue: gameServiceMock },
                 { provide: GridService, useValue: gridServiceMock },

@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { ROUTES } from '@app/constants/global.constants';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
@@ -35,11 +35,11 @@ export class AdminPageComponent implements OnInit {
     }
 
     deleteGame(id: string): void {
-        this.snackbarService.showConfirmation('Are you sure you want to delete this game?').subscribe((confirmed) => {
+        this.snackbarService.showConfirmation(ErrorMessages.ConfirmDeletion).subscribe((confirmed) => {
             if (confirmed) {
                 this.gameService.deleteGame(id).subscribe({
                     next: () => this.loadGames(),
-                    error: () => this.snackbarService.showMessage('Deletion failed'),
+                    error: () => this.snackbarService.showMessage(ErrorMessages.DeletionFailed),
                 });
             }
         });
@@ -57,14 +57,14 @@ export class AdminPageComponent implements OnInit {
         this.gameService.updateGameVisibility(id, isVisible);
     }
 
-    navigateToHome(): void {
-        this.router.navigate([ROUTES.homePage]);
+    navigateToHome() : void{
+        this.router.navigate([Routes.HomePage]);
     }
 
     private loadGames(): void {
         this.gameService.fetchGames().subscribe({
             next: (response) => (this.games = response),
-            error: () => this.snackbarService.showMessage('Failed to load games'),
+            error: () => this.snackbarService.showMessage(ErrorMessages.FailedLoad),
         });
     }
 }

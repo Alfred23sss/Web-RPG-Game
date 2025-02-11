@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { GAME_SIZES, GRID_DIMENSIONS } from '@app/constants/global.constants';
+import { GRID_DIMENSIONS } from '@app/constants/global.constants';
+import { GameSize } from '@app/interfaces/game';
 import { ImageType } from '@app/interfaces/images';
 import { Tile, TileType } from '@app/interfaces/tile';
 
@@ -32,7 +33,7 @@ export class GridService {
         return this.grid;
     }
 
-    getGridSize(gameSize: string): number {
-        return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.SMALL];
+    getGridSize(gameSize: GameSize): number {
+        return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GameSize.Small];
     }
 }
