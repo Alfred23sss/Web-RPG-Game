@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { ATTRIBUTE_TYPES, BONUS_VALUE, DICE_TYPES, ERROR_MESSAGES, HTTP_STATUS, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
+import { INITIAL_VALUES, BONUS_VALUE } from '@app/constants/global.constants';
+import { AttributeType, DiceType, ErrorMessages, HttpStatus, Route } from '@app/enums/global.enums'
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
