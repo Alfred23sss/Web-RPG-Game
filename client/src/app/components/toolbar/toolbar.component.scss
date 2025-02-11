@@ -32,7 +32,7 @@
     cursor: pointer;
     border: 2px solid transparent;
     border-radius: 10px;
-    background: transparent; /* No background */
+    background: transparent;
     transition:
         transform 0.3s ease,
         background 0.3s ease,
@@ -44,7 +44,7 @@
     font-family: papyrus;
 }
 .tool:hover {
-    background: rgba(0, 110, 255, 0.2); /* Light transparent blue */
+    background: rgba(0, 110, 255, 0.2);
     transform: scale(1.05);
     border-color: #ffd700;
 }

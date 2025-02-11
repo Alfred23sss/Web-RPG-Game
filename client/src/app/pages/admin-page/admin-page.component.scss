@@ -103,10 +103,10 @@
 
 .game-preview {
     position: relative;
-    width: 100%; /* Allow the preview to take up available space */
-    height: auto; /* Allow height to adjust based on content */
-    overflow: visible; /* Ensure nothing is clipped */
-    border: 1px solid #ccc; /* Optional: Add a border for clarity */
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    border: 1px solid #ccc;
     display: flex;
     justify-content: center;
     align-items: center;
