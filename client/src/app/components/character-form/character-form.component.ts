@@ -44,11 +44,18 @@ export class CharacterFormComponent {
         this.characterService.assignBonus(attribute);
     }
 
+    // assignDice(attribute: string, dice: string) {
+    //     const { attack, defense } = this.characterService.assignDice(attribute, dice, this.selectedAttackDice, this.selectedDefenseDice);
+    //     this.selectedAttackDice = attack;
+    //     this.selectedDefenseDice = defense;
+    // }
+
     assignDice(attribute: string, dice: string) {
         const { attack, defense } = this.characterService.assignDice(attribute);
         this.selectedAttackDice = attack;
         this.selectedDefenseDice = defense;
     }
+    
 
     submitCharacter(): void {
         this.characterService.submitCharacter(this.characterName, this.selectedAvatar, this.game, this.isBonusAssigned(), this.isDiceAssigned(), () =>
