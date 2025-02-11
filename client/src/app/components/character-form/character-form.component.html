@@ -10,7 +10,7 @@
         <h1 id="character-form_title">Create a Character</h1>
     </div>
 
-    <input type="text" placeholder="Character Name" [(ngModel)]="characterName" />
+    <input type="text" placeholder="Character Name" [(ngModel)]="characterName" (input)="checkCharacterNameLength()" maxlength="20" />
 
     <div class="character-form_body">
         <div class="character-form_avatars">
