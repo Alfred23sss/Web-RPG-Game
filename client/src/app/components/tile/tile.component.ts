@@ -1,6 +1,6 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { Tile } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/ItemDrag.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
 
 @Component({
@@ -16,7 +16,9 @@ export class TileComponent {
     constructor(
         private itemDragService: ItemDragService,
         private tileService: TileService,
-    ) {}
+    ) {
+        this.tileService.resetTool();
+    }
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {

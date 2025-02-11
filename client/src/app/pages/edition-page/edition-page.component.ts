@@ -8,8 +8,8 @@ import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
 import { Game } from '@app/interfaces/game';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
-import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-edition-page',
@@ -23,17 +23,22 @@ export class EditionPageComponent implements OnInit {
     gameDescription: string = '';
     game: Game;
     originalGame: Game;
+    isSaving: boolean = false;
 
     constructor(
         private gameService: GameService,
         private gridService: GridService,
-        private screenShotService: ScreenshotService,
         private gameValidationService: GameValidationService,
         private router: Router,
+        private snackbarService: SnackbarService,
     ) {}
 
     ngOnInit() {
         this.gameService.fetchGames().subscribe();
+        this.cloneInitialGame();
+    }
+
+    cloneInitialGame() {
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
             this.game = JSON.parse(JSON.stringify(currentGame));
@@ -43,8 +48,13 @@ export class EditionPageComponent implements OnInit {
             this.gameDescription = this.game.description;
         }
     }
+
     backToAdmin() {
-        this.router.navigate(['/admin']);
+        this.snackbarService.showConfirmation('Are you sure ? Changes will not be saved!').subscribe((confirmed) => {
+            if (confirmed) {
+                this.router.navigate(['/admin']);
+            }
+        });
     }
 
     reset() {
@@ -54,34 +64,38 @@ export class EditionPageComponent implements OnInit {
         this.gridService.setGrid(this.game.grid);
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
+        this.cloneInitialGame();
+        window.location.reload();
     }
 
     async save() {
+        if (this.isSaving) return;
+        this.isSaving = true;
         this.game.name = this.gameName;
         this.game.description = this.gameDescription;
 
         if (!this.gameValidationService.validateGame(this.game)) {
+            this.isSaving = false;
             return;
         }
 
-        if (this.game.grid?.[0]?.[0]?.item?.itemCounter !== undefined) {
-            console.log(this.game.grid[0][0].item.itemCounter);
-        }
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
 
         this.gameService.fetchGames().subscribe(() => {
-            this.backToAdmin();
+            this.router.navigate(['/admin']).then(() => {
+                this.isSaving = false;
+            });
         });
     }
 
     private async savePreviewImage() {
         try {
-            const previewUrl = await this.screenShotService.generatePreview('game-preview');
+            const previewUrl = await this.gameService.savePreviewImage();
             this.game.previewImage = previewUrl;
-        } catch (error) {
-            console.error('Error when saving:', error);
+        } catch {
+            this.isSaving = false;
         }
     }
 }

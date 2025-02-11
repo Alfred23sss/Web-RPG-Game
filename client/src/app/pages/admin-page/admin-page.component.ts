@@ -2,12 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
+import { ROUTES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
-import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
@@ -17,13 +17,13 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
     imports: [RouterLink, CommonModule, MatTooltipModule],
 })
 export class AdminPageComponent implements OnInit {
-    games: Game[]; // si ya une erreur de jeu qui affiche remmettre = games de gameservice
+    games: Game[];
     backgroundImage = GameDecorations.Background;
     constructor(
         private dialogRef: MatDialog,
-        public gameService: GameService,
-        public gridService: GridService,
+        private gameService: GameService,
         private snackbarService: SnackbarService,
+        private router: Router,
     ) {}
 
     ngOnInit() {
@@ -39,7 +39,7 @@ export class AdminPageComponent implements OnInit {
             if (confirmed) {
                 this.gameService.deleteGame(id).subscribe({
                     next: () => this.loadGames(),
-                    error: () => this.snackbarService.showMessage('Deletion failed'),
+                    error: () => this.snackbarService.showMessage('Deletion failed'), // 42
                 });
             }
         });
@@ -57,10 +57,14 @@ export class AdminPageComponent implements OnInit {
         this.gameService.updateGameVisibility(id, isVisible);
     }
 
+    navigateToHome() {
+        this.router.navigate([ROUTES.homePage]); // 61
+    }
+
     private loadGames() {
         this.gameService.fetchGames().subscribe({
             next: (response) => (this.games = response),
-            error: () => this.snackbarService.showMessage('Failed to load games'),
+            error: () => this.snackbarService.showMessage('Failed to load games'), // 67
         });
     }
 }

@@ -11,12 +11,7 @@
             </div>
             <div class="map-size-select">
                 @for (size of gameSizes; track size.key) {
-                <button
-                    class="map-button"
-                    [attr.data-info]="size.info"
-                    [class.active]="gameModeService.getGameSize() === size.key"
-                    (click)="setGameSize(size.key)"
-                >
+                <button class="map-button" [attr.data-info]="size.info" [class.active]="getGameSize() === size.key" (click)="setGameSize(size.key)">
                     {{ size.label }}
                 </button>
                 }
@@ -25,7 +20,7 @@
                 @for (mode of gameModes; track mode.key) {
                 <button
                     class="popup-button"
-                    [class.active]="gameModeService.getGameMode() === mode.key"
+                    [class.active]="getGameMode() === mode.key"
                     (click)="setGameType(mode.key)"
                     [style.backgroundImage]="mode.backgroundImage"
                 >

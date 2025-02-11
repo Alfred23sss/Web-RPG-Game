@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { ROUTES } from '@app/constants/global.constants';
 import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/global.constants';
 @Component({
     selector: 'app-waiting-view',
@@ -7,9 +9,14 @@ import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/global.constants'
 })
 export class WaitingViewComponent implements OnInit {
     accessCode: string;
+    constructor(private router: Router) {}
 
     ngOnInit(): void {
         this.generateAccessCode();
+    }
+
+    navigateToHome() {
+        this.router.navigate([ROUTES.createPage]);
     }
 
     private generateAccessCode(): void {

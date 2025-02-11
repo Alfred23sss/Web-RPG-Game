@@ -5,6 +5,12 @@ import { Item } from '@app/classes/item';
 import { TileType, Tile } from '@app/interfaces/tile';
 import { GameSize } from '@app/interfaces/game';
 
+const EXPECTED_ITEM_COUNT_MEDIUM = 4;
+const GAME_SIZE_10 = '10';
+const GAME_SIZE_15 = '15';
+const GAME_SIZE_20 = '20';
+const DEFAULT_GAME_SIZE = GameSize.Small;
+
 describe('ItemService', () => {
     let service: ItemService;
     let gameServiceMock: jasmine.SpyObj<GameService>;
@@ -85,8 +91,8 @@ describe('ItemService', () => {
         service.setItems(testItems);
         service.setItemCount();
 
-        expect(testItems[0].itemCounter).toBe(4);
-        expect(testItems[1].itemCounter).toBe(4);
+        expect(testItems[0].itemCounter).toBe(EXPECTED_ITEM_COUNT_MEDIUM);
+        expect(testItems[1].itemCounter).toBe(EXPECTED_ITEM_COUNT_MEDIUM);
     });
 
     it('should update item counters based on grid data', () => {
@@ -190,12 +196,13 @@ describe('ItemService', () => {
         service.setItemCount();
 
         const rawSize = mockGame.size as unknown as number;
-        const sizeMapping: Record<number, GameSize> = {
-            10: GameSize.Small,
-            15: GameSize.Medium,
-            20: GameSize.Large,
+        const sizeMapping: Record<string, GameSize> = {
+            [GAME_SIZE_10]: GameSize.Small,
+            [GAME_SIZE_15]: GameSize.Medium,
+            [GAME_SIZE_20]: GameSize.Large,
         };
-        const mappedSize = sizeMapping[rawSize] ?? GameSize.Small;
+
+        const mappedSize = sizeMapping[rawSize] ?? DEFAULT_GAME_SIZE;
 
         expect(mappedSize).toBe(GameSize.Small);
     });
@@ -218,12 +225,13 @@ describe('ItemService', () => {
         service.setItemCount();
 
         const rawSize = mockGame.size as unknown as number;
-        const sizeMapping: Record<number, GameSize> = {
-            10: GameSize.Small,
-            15: GameSize.Medium,
-            20: GameSize.Large,
+        const sizeMapping: Record<string, GameSize> = {
+            [GAME_SIZE_10]: GameSize.Small,
+            [GAME_SIZE_15]: GameSize.Medium,
+            [GAME_SIZE_20]: GameSize.Large,
         };
-        const mappedSize = sizeMapping[rawSize] ?? GameSize.Small;
+
+        const mappedSize = sizeMapping[rawSize] ?? DEFAULT_GAME_SIZE;
 
         expect(mappedSize).toBe(GameSize.Small);
     });

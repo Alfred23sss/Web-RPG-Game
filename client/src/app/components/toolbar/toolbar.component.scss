@@ -13,7 +13,6 @@
     font-size: 1.3rem;
     font-weight: bold;
     color: #ffd700;
-    margin-bottom: 15px;
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
     text-align: center;
 }
@@ -32,7 +31,7 @@
     cursor: pointer;
     border: 2px solid transparent;
     border-radius: 10px;
-    background: transparent; /* No background */
+    background: transparent;
     transition:
         transform 0.3s ease,
         background 0.3s ease,
@@ -44,7 +43,7 @@
     font-family: papyrus;
 }
 .tool:hover {
-    background: rgba(0, 110, 255, 0.2); /* Light transparent blue */
+    background: rgba(0, 110, 255, 0.2);
     transform: scale(1.05);
     border-color: #ffd700;
 }

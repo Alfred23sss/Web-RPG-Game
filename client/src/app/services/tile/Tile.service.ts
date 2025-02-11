@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/ItemDrag.service';
+import { ItemService } from '@app/services/item/item.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
-import { ItemService } from '../item/item.service';
 
 @Injectable({
     providedIn: 'root',
@@ -21,6 +21,7 @@ export class TileService {
 
         const selectedTool = this.toolService.getSelectedTool();
         if (!selectedTool) return;
+        if (selectedTool.tool === TileType.Default) return;
         if ((selectedTool.tool === TileType.Door || selectedTool.tool === TileType.Wall) && tile.item) return;
 
         if (selectedTool.tool === TileType.Door) {
@@ -59,6 +60,10 @@ export class TileService {
             previousTile.item = undefined;
         }
         this.itemDragService.clearSelection();
+    }
+
+    resetTool() {
+        this.toolService.setSelectedTool(TileType.Default, ImageType.Default);
     }
 
     private handleDoor(tile: Tile) {
