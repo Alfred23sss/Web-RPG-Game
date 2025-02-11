@@ -1,5 +1,5 @@
 export enum BonusValue {
-    DEFAULT = 2,
+    Default = 2,
 }
 
 export enum DiceType {
@@ -8,39 +8,39 @@ export enum DiceType {
 }
 
 export enum AttributeType {
-    VITALITY = 'vitality',
-    SPEED = 'speed',
-    ATTACK = 'attack',
-    DEFENSE = 'defense',
+    Vitality = 'Vitalité',
+    Speed = 'Vitesse',
+    Attack = 'Attaque',
+    Defense = 'Défense',
 }
 
 export enum Route {
-    WAITING_VIEW = '/waiting-view',
-    EDITION_VIEW = '/edition',
-    ADMIN_PAGE = '/admin',
-    HOME_PAGE = '/home',
-    CREATE_PAGE = '/create',
-    CREATE_VIEW = '/create',
+    WaitingView = '/waiting-view',
+    EditionView = '/edition',
+    AdminPage = '/admin',
+    HomePage = '/home',
+    CreatePage = '/create',
+    CreateView = '/create',
 }
 
 export enum HttpStatus {
-    INTERNAL_SERVER_ERROR = 500,
-    FORBIDDEN = 403,
+    InternalServerError = 500,
+    Forbidden = 403,
 }
 
 export enum TimeConstants {
-    SECOND_DIVIDER = 1000,
-    SECOND_MODULO = 60,
+    SecondDivider = 1000,
+    SecondModulo = 60,
 }
 
 export enum ErrorMessages {
-    MISSING_CHARACTER_DETAILS = 'Please ensure you have assigned bonuses and dice, and entered a name and avatar.',
-    INVALID_GAME_SIZE = 'Invalid game size selected!',
-    UNAVAILABLE_GAME_MODE = 'CTF game mode is currently unavailable!',
-    MISSING_GAME_DETAILS = 'Please select both game size and game type!',
-    INVALID_GAME_MODE = 'Invalid game mode selected!',
-    UNAVAILABLE_GAME = "Le jeu n'est plus disponible.",
-    DELETION_FAILED = 'Deletion failed',
-    CONFIRM_DELETION = 'Are you sure you want to delete this game?',
-    FAILED_LOAD="Failed to load games",
+    MissingCharacterDetails = 'Veuillez vous assurer d’avoir attribué des bonus et des dés, et d’avoir saisi un nom et un avatar.',
+    InvalidGameSize = 'Taille de jeu invalide sélectionnée !',
+    UnavailableGameMode = 'Le mode de jeu CTF n’est actuellement pas disponible !',
+    MissingGameDetails = 'Veuillez sélectionner à la fois la taille et le type de jeu !',
+    InvalidGameMode = 'Mode de jeu invalide sélectionné !',
+    UnavailableGame = "Le jeu n'est plus disponible.",
+    DeletionFailed = 'Échec de la suppression',
+    ConfirmDeletion = 'Êtes-vous sûr de vouloir supprimer ce jeu ?',
+    FailedLoad = 'Échec du chargement des jeux',
 }

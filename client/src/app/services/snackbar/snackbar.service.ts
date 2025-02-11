@@ -10,7 +10,7 @@ import { Observable, Subject } from 'rxjs';
 export class SnackbarService {
     constructor(private snackBar: MatSnackBar) {}
 
-    showMessage(message: string, action: string = SNACKBAR_CONFIG.ACTION, duration: number = SNACKBAR_CONFIG.DURATION): void {
+    showMessage(message: string, action: string = SNACKBAR_CONFIG.action, duration: number = SNACKBAR_CONFIG.duration): void {
         this.snackBar.open(message, action, { duration });
     }
 

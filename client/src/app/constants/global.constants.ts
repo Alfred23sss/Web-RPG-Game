@@ -1,23 +1,23 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType } from '@app/enums/global.enums';
 import { GameMode, GameSize } from '@app/interfaces/game';
 
 export const BONUS_VALUE = 2;
 
-
 export const INITIAL_VALUES = {
     attributes: {
-        [AttributeType.VITALITY]: 4,
-        [AttributeType.SPEED]: 4,
-        [AttributeType.ATTACK]: 4,
-        [AttributeType.DEFENSE]: 4,
+        [AttributeType.Vitality]: 4,
+        [AttributeType.Speed]: 4,
+        [AttributeType.Attack]: 4,
+        [AttributeType.Defense]: 4,
     },
     bonusAssigned: {
-        [AttributeType.VITALITY]: false,
-        [AttributeType.SPEED]: false,
+        [AttributeType.Vitality]: false,
+        [AttributeType.Speed]: false,
     },
     diceAssigned: {
-        [AttributeType.ATTACK]: false,
-        [AttributeType.DEFENSE]: false,
+        [AttributeType.Attack]: false,
+        [AttributeType.Defense]: false,
     },
 };
 
@@ -54,8 +54,8 @@ export const GAME_MODES_LIST = [
 ];
 
 export const SNACKBAR_CONFIG = {
-    DURATION: 3000,
-    ACTION: 'Close',
+    duration: 3000,
+    action: 'Close',
 };
 
 export const ACCESS_CODE_MIN_VALUE = 1000;
@@ -88,7 +88,6 @@ export const MOCK_GAMES = [
         grid: [],
     },
 ];
-
 
 // export const BONUS_VALUE = 2;
 
