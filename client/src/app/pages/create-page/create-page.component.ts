@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { Route } from '@app/enums/global.enums';
+import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
 
@@ -39,6 +39,6 @@ export class CreatePageComponent implements OnInit {
     }
 
     navigateToHome() {
-        this.router.navigate([Route.HomePage]);
+        this.router.navigate([Routes.HomePage]);
     }
 }

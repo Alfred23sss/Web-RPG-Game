@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { ROUTES, MOCK_GAMES } from '@app/constants/global.constants';
+import { MOCK_GAMES } from '@app/constants/global.constants';
+import { Routes } from '@app/enums/global.enums';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -173,7 +174,7 @@ describe('AdminPageComponent', () => {
 
         component.navigateToHome();
 
-        expect(navigateSpy).toHaveBeenCalledWith([ROUTES.homePage]);
+        expect(navigateSpy).toHaveBeenCalledWith([Routes.HomePage]);
     });
 
     it('should show an error message when loading games fails', () => {
