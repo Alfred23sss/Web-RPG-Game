@@ -1,31 +1,31 @@
 export const BONUS_VALUE = 2;
 
 export const DICE_TYPES = {
-    D4: 'D4',
-    D6: 'D6',
+    d4: 'D4',
+    d6: 'D6',
 } as const;
 
 export const ATTRIBUTE_TYPES = {
-    VITALITY: 'vitality',
-    SPEED: 'speed',
-    ATTACK: 'attack',
-    DEFENSE: 'defense',
+    vitality: 'vitality',
+    speed: 'speed',
+    attack: 'attack',
+    defense: 'defense',
 };
 
 export const INITIAL_VALUES = {
     attributes: {
-        [ATTRIBUTE_TYPES.VITALITY]: 4,
-        [ATTRIBUTE_TYPES.SPEED]: 4,
-        [ATTRIBUTE_TYPES.ATTACK]: 4,
-        [ATTRIBUTE_TYPES.DEFENSE]: 4,
+        [ATTRIBUTE_TYPES.vitality]: 4,
+        [ATTRIBUTE_TYPES.speed]: 4,
+        [ATTRIBUTE_TYPES.attack]: 4,
+        [ATTRIBUTE_TYPES.defense]: 4,
     },
     bonusAssigned: {
-        [ATTRIBUTE_TYPES.VITALITY]: false,
-        [ATTRIBUTE_TYPES.SPEED]: false,
+        [ATTRIBUTE_TYPES.vitality]: false,
+        [ATTRIBUTE_TYPES.speed]: false,
     },
     diceAssigned: {
-        [ATTRIBUTE_TYPES.ATTACK]: false,
-        [ATTRIBUTE_TYPES.DEFENSE]: false,
+        [ATTRIBUTE_TYPES.attack]: false,
+        [ATTRIBUTE_TYPES.defense]: false,
     },
 };
 
@@ -33,33 +33,33 @@ export const ATTRIBUTE_KEYS = Object.values(ATTRIBUTE_TYPES);
 
 // game creation pop-up
 export const GAME_SIZES = {
-    SMALL: 'small',
-    MEDIUM: 'medium',
-    LARGE: 'large',
+    small: 'small',
+    medium: 'medium',
+    large: 'large',
 };
 
 export const GRID_DIMENSIONS = {
-    [GAME_SIZES.SMALL]: 10,
-    [GAME_SIZES.MEDIUM]: 15,
-    [GAME_SIZES.LARGE]: 20,
+    [GAME_SIZES.small]: 10,
+    [GAME_SIZES.medium]: 15,
+    [GAME_SIZES.large]: 20,
 };
 
 export const DEFAULT_GAME_IMAGE = 'assets/images/example.png';
 
 export const TIME_CONSTANTS = {
-    SECOND_DIVIDER: 1000,
-    SECOND_MODULO: 60,
+    secondDivider: 1000,
+    secondModulo: 60,
 };
 
 export const GAME_MODES = {
-    CTF: 'CTF',
-    CLASSIC: 'CLASSIC',
+    ctf: 'CTF',
+    classic: 'CLASSIC',
 };
 
 export const GAME_SIZES_LIST = [
-    { key: GAME_SIZES.SMALL, label: 'Small', info: 'Grid: 10x10, Players: 2, Items: 2' },
-    { key: GAME_SIZES.MEDIUM, label: 'Medium', info: 'Grid: 15x15, Players: 4, Items: 4' },
-    { key: GAME_SIZES.LARGE, label: 'Large', info: 'Grid: 20x20, Players: 6, Items: 6' },
+    { key: GAME_SIZES.small, label: 'Small', info: 'Grid: 10x10, Players: 2, Items: 2' },
+    { key: GAME_SIZES.medium, label: 'Medium', info: 'Grid: 15x15, Players: 4, Items: 4' },
+    { key: GAME_SIZES.large, label: 'Large', info: 'Grid: 20x20, Players: 6, Items: 6' },
 ];
 
 export const GAME_MODES_LIST = [
@@ -70,7 +70,7 @@ export const GAME_MODES_LIST = [
         backgroundImage: "url('/assets/gamemodes/classic-game.png')",
     },
     {
-        key: GAME_MODES.CTF,
+        key: GAME_MODES.ctf,
         label: 'Capture The Flag',
         description: "Compete to secure your opponent's flag!",
         backgroundImage: "url('/assets/gamemodes/CTF-game.png')",
@@ -103,7 +103,7 @@ export const SNACKBAR_CONFIG = {
 
 export const HTTP_STATUS = {
     INTERNAL_SERVER_ERROR: 500,
-    FORBIDDEN: 403,
+    forbidden: 403,
 };
 
 export const ACCESS_CODE_MIN_VALUE = 1000;

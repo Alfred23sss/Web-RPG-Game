@@ -74,13 +74,13 @@ describe('PopUpComponent', () => {
 
     describe('setGameType', () => {
         it('should set the game mode if valid', () => {
-            component.setGameType(GAME_MODES.CLASSIC);
-            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.CLASSIC);
+            component.setGameType(GAME_MODES.classic);
+            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.classic);
         });
 
         it('should reset the mode and show an error if CTF is selected', () => {
-            component.setGameType(GAME_MODES.CTF);
-            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.CTF);
+            component.setGameType(GAME_MODES.ctf);
+            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GAME_MODES.ctf);
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAME_MODE);
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('');
         });
@@ -97,7 +97,7 @@ describe('PopUpComponent', () => {
         beforeEach(() => {
             mockGame = { id: 'game' } as Game;
             mockGameModeService.getGameSize.and.returnValue('medium');
-            mockGameModeService.getGameMode.and.returnValue(GAME_MODES.CLASSIC);
+            mockGameModeService.getGameMode.and.returnValue(GAME_MODES.classic);
             mockGridService.getGridSize.and.returnValue(GRID_SIZE_MEDIUM);
             mockGameService.createNewGame.and.returnValue(mockGame);
         });
@@ -112,7 +112,7 @@ describe('PopUpComponent', () => {
 
         it('should create a new game', () => {
             component.confirm();
-            expect(mockGameService.createNewGame).toHaveBeenCalledWith(GAME_MODES.CLASSIC, GRID_SIZE_MEDIUM);
+            expect(mockGameService.createNewGame).toHaveBeenCalledWith(GAME_MODES.classic, GRID_SIZE_MEDIUM);
             expect(mockGameService.updateCurrentGame).toHaveBeenCalledWith(mockGame);
         });
 

@@ -43,19 +43,19 @@ describe('CharacterService', () => {
 
     describe('assignBonus', () => {
         it('should assign a bonus to the selected attribute', () => {
-            service.assignBonus(ATTRIBUTE_TYPES.VITALITY);
-            expect(service.bonusAssigned[ATTRIBUTE_TYPES.VITALITY]).toBeTrue();
-            expect(service.attributes[ATTRIBUTE_TYPES.VITALITY]).toBe(BONUS_ATTRIBUTE_VALUE);
+            service.assignBonus(ATTRIBUTE_TYPES.vitality);
+            expect(service.bonusAssigned[ATTRIBUTE_TYPES.vitality]).toBeTrue();
+            expect(service.attributes[ATTRIBUTE_TYPES.vitality]).toBe(BONUS_ATTRIBUTE_VALUE);
         });
 
         it('should reset other attributes when a bonus is assigned', () => {
-            service.assignBonus(ATTRIBUTE_TYPES.VITALITY);
-            expect(service.bonusAssigned[ATTRIBUTE_TYPES.SPEED]).toBeFalse();
-            expect(service.attributes[ATTRIBUTE_TYPES.SPEED]).toBe(DEFAULT_ATTRIBUTE_VALUE);
+            service.assignBonus(ATTRIBUTE_TYPES.vitality);
+            expect(service.bonusAssigned[ATTRIBUTE_TYPES.speed]).toBeFalse();
+            expect(service.attributes[ATTRIBUTE_TYPES.speed]).toBe(DEFAULT_ATTRIBUTE_VALUE);
 
-            service.assignBonus(ATTRIBUTE_TYPES.SPEED);
-            expect(service.bonusAssigned[ATTRIBUTE_TYPES.VITALITY]).toBeFalse();
-            expect(service.attributes[ATTRIBUTE_TYPES.VITALITY]).toBe(DEFAULT_ATTRIBUTE_VALUE);
+            service.assignBonus(ATTRIBUTE_TYPES.speed);
+            expect(service.bonusAssigned[ATTRIBUTE_TYPES.vitality]).toBeFalse();
+            expect(service.attributes[ATTRIBUTE_TYPES.vitality]).toBe(DEFAULT_ATTRIBUTE_VALUE);
         });
     });
 
@@ -65,31 +65,31 @@ describe('CharacterService', () => {
         });
 
         it('should assign attack to D6 and defense to D4 when attack is selected', () => {
-            const obj = service.assignDice(ATTRIBUTE_TYPES.ATTACK);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeTrue();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeFalse();
-            expect(obj.attack).toBe(DICE_TYPES.D6);
-            expect(obj.defense).toBe(DICE_TYPES.D4);
+            const obj = service.assignDice(ATTRIBUTE_TYPES.attack);
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.attack]).toBeTrue();
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.defense]).toBeFalse();
+            expect(obj.attack).toBe(DICE_TYPES.d6);
+            expect(obj.defense).toBe(DICE_TYPES.d4);
         });
 
         it('should assign defense to D6 and attack to D4 when defense is selected', () => {
-            const obj = service.assignDice(ATTRIBUTE_TYPES.DEFENSE);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeFalse();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeTrue();
-            expect(obj.attack).toBe(DICE_TYPES.D4);
-            expect(obj.defense).toBe(DICE_TYPES.D6);
+            const obj = service.assignDice(ATTRIBUTE_TYPES.defense);
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.attack]).toBeFalse();
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.defense]).toBeTrue();
+            expect(obj.attack).toBe(DICE_TYPES.d4);
+            expect(obj.defense).toBe(DICE_TYPES.d6);
         });
 
         it('should reassign dice when switching from attack to defense', () => {
-            service.assignDice(ATTRIBUTE_TYPES.ATTACK);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeTrue();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeFalse();
+            service.assignDice(ATTRIBUTE_TYPES.attack);
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.attack]).toBeTrue();
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.defense]).toBeFalse();
 
-            const obj = service.assignDice(ATTRIBUTE_TYPES.DEFENSE);
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.ATTACK]).toBeFalse();
-            expect(service.diceAssigned[ATTRIBUTE_TYPES.DEFENSE]).toBeTrue();
-            expect(obj.attack).toBe(DICE_TYPES.D4);
-            expect(obj.defense).toBe(DICE_TYPES.D6);
+            const obj = service.assignDice(ATTRIBUTE_TYPES.defense);
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.attack]).toBeFalse();
+            expect(service.diceAssigned[ATTRIBUTE_TYPES.defense]).toBeTrue();
+            expect(obj.attack).toBe(DICE_TYPES.d4);
+            expect(obj.defense).toBe(DICE_TYPES.d6);
         });
     });
 
@@ -135,7 +135,7 @@ describe('CharacterService', () => {
                 grid: undefined,
             };
 
-            mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HTTP_STATUS.FORBIDDEN })));
+            mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HTTP_STATUS.forbidden })));
             service['validateGameAvailability'](mockGame, closePopupSpy);
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ERROR_MESSAGES.UNAVAILABLE_GAME);

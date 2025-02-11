@@ -23,7 +23,7 @@ export class CharacterService {
         if (!this.bonusAssigned[attribute]) {
             this.attributes[attribute] += BONUS_VALUE;
             this.bonusAssigned[attribute] = true;
-            const otherAttribute = attribute === ATTRIBUTE_TYPES.VITALITY ? ATTRIBUTE_TYPES.SPEED : ATTRIBUTE_TYPES.VITALITY;
+            const otherAttribute = attribute === ATTRIBUTE_TYPES.vitality ? ATTRIBUTE_TYPES.speed : ATTRIBUTE_TYPES.vitality;
             this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
             this.bonusAssigned[otherAttribute] = false;
         }
@@ -31,10 +31,10 @@ export class CharacterService {
 
     assignDice(attribute: string): { attack: string | null; defense: string | null } {
         this.diceAssigned[attribute] = true;
-        this.diceAssigned[attribute === ATTRIBUTE_TYPES.ATTACK ? ATTRIBUTE_TYPES.DEFENSE : ATTRIBUTE_TYPES.ATTACK] = false;
-        return attribute === ATTRIBUTE_TYPES.ATTACK
-            ? { attack: DICE_TYPES.D6, defense: DICE_TYPES.D4 }
-            : { attack: DICE_TYPES.D4, defense: DICE_TYPES.D6 };
+        this.diceAssigned[attribute === ATTRIBUTE_TYPES.attack ? ATTRIBUTE_TYPES.defense : ATTRIBUTE_TYPES.attack] = false;
+        return attribute === ATTRIBUTE_TYPES.attack
+            ? { attack: DICE_TYPES.d6, defense: DICE_TYPES.d4 }
+            : { attack: DICE_TYPES.d4, defense: DICE_TYPES.d6 };
     }
 
     submitCharacter(data: {
@@ -69,7 +69,7 @@ export class CharacterService {
     private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
-                if (error.status === HTTP_STATUS.INTERNAL_SERVER_ERROR || error.status === HTTP_STATUS.FORBIDDEN) {
+                if (error.status === HTTP_STATUS.INTERNAL_SERVER_ERROR || error.status === HTTP_STATUS.forbidden) {
                     this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME);
                     this.router.navigate([ROUTES.CREATE_VIEW]);
                     closePopup();

@@ -36,6 +36,6 @@ export class GridService {
     }
 
     getGridSize(gameSize: string): number {
-        return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.SMALL];
+        return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.small];
     }
 }

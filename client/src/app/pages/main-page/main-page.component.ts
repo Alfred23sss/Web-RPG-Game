@@ -14,7 +14,7 @@ import { map } from 'rxjs/operators';
     imports: [RouterLink],
 })
 export class MainPageComponent {
-    readonly title: string = "Willy's Wonderland";
+    readonly title: string = "William's Wonderland";
     message: BehaviorSubject<string> = new BehaviorSubject<string>('');
     gameDecorations = GameDecorations;
     constructor(private readonly communicationService: CommunicationService) {}

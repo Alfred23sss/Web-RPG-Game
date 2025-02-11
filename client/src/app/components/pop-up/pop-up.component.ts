@@ -38,7 +38,7 @@ export class PopUpComponent {
     setGameType(mode: string) {
         if (Object.values(GAME_MODES).includes(mode)) {
             this.gameModeService.setGameMode(mode);
-            if (mode === GAME_MODES.CTF) {
+            if (mode === GAME_MODES.ctf) {
                 this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME_MODE);
                 this.gameModeService.setGameMode('');
             }
