@@ -80,7 +80,7 @@ export class GameService {
         const game = this.getGameById(id);
         if (game) {
             game.isVisible = isVisible;
-            this.updateExistingGame(game);
+            this.saveGame(game);
         }
     }
 
