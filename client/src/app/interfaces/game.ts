@@ -1,17 +1,5 @@
 import { Tile } from './tile';
 
-export enum GameMode {
-    Classic = 'Classic',
-    CTF = 'CTF',
-    None = '',
-}
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
-}
-
 export interface Game {
     id: string;
     name: string;

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Game, GameMode } from '@app/interfaces/game';
+import { ErrorMessages, GameMode } from '@app/enums/global.enums';
+import { Game } from '@app/interfaces/game';
 import { TileType } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
-
 enum TitleLength {
     Min = 0,
     Max = 30,
@@ -56,7 +56,7 @@ export class GameValidationService {
     private validateDoorPosition(game: Game): string[] {
         const errors: string[] = [];
         if (!game.grid) {
-            errors.push('❌ Aucune grille trouvée');
+            errors.push(ErrorMessages.GridNotFound);
             return errors;
         }
         const numRows = game.grid.length;
@@ -78,7 +78,7 @@ export class GameValidationService {
             }
         }
         if (doorErrorFound) {
-            errors.push('❌ Une ou plusieurs portes ne sont pas correctement placées');
+            errors.push(ErrorMessages.InvalidDoorPlacement);
         }
         return errors;
     }
@@ -86,7 +86,7 @@ export class GameValidationService {
     private validateHalfTerrain(game: Game): string[] {
         const errors: string[] = [];
         if (!game.grid) {
-            errors.push('❌ Aucune grille trouvée');
+            errors.push(ErrorMessages.GridNotFound);
             return errors;
         }
         const terrainProportionMin = 0.5;
@@ -100,7 +100,7 @@ export class GameValidationService {
             }
         }
         if (terrainTileCount / gridSize <= terrainProportionMin) {
-            errors.push('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
+            errors.push('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
         }
         return errors;
     }

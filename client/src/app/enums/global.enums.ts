@@ -7,6 +7,18 @@ export enum DiceType {
     D6 = 'D6',
 }
 
+export enum GameMode {
+    Classic = 'Classic',
+    CTF = 'CTF',
+    None = '',
+}
+export enum GameSize {
+    Small = 'small',
+    Medium = 'medium',
+    Large = 'large',
+    None = '',
+}
+
 export enum AttributeType {
     Vitality = 'Vitality',
     Speed = 'Speed',
@@ -43,4 +55,7 @@ export enum ErrorMessages {
     DeletionFailed = 'Échec de la suppression',
     ConfirmDeletion = 'Êtes-vous sûr de vouloir supprimer ce jeu ?',
     FailedLoad = 'Échec du chargement des jeux',
+    GridNotFound = '❌ Aucune grille trouvée',
+    InvalidDoorPlacement = '❌ Une ou plusieurs portes ne sont pas correctement placées',
+    
 }
