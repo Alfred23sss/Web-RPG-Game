@@ -1,4 +1,4 @@
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from './game-communication.service';
@@ -10,7 +10,8 @@ describe('GameCommunicationService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            providers: [GameCommunicationService, provideHttpClientTesting()],
+            imports: [HttpClientTestingModule],
+            providers: [GameCommunicationService],
         });
 
         service = TestBed.inject(GameCommunicationService);
