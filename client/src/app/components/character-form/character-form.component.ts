@@ -30,8 +30,6 @@ export class CharacterFormComponent {
     diceAssigned = this.characterService.diceAssigned;
 
     protected attributeKeys = ATTRIBUTE_KEYS;
-    // protected attributeTypes = ATTRIBUTE_TYPES;
-    // protected diceTypes = DICE_TYPES;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
 
@@ -49,10 +47,8 @@ export class CharacterFormComponent {
 
     assignDice(attribute: AttributeType) {
         const { attack, defense } = this.characterService.assignDice(attribute);
-        // this.selectedAttackDice = attack;
         this.selectedAttackDice = attack as DiceType;
         this.selectedDefenseDice = defense as DiceType;
-        // this.selectedDefenseDice = defense;
     }
 
     submitCharacter(): void {
@@ -74,12 +70,10 @@ export class CharacterFormComponent {
         this.dialogRef.close();
     }
     private isBonusAssigned(): boolean {
-        // return this.bonusAssigned.vitality || this.bonusAssigned.speed;
-        return this.bonusAssigned[AttributeType.VITALITY] || this.bonusAssigned[AttributeType.SPEED];
+        return this.bonusAssigned[AttributeType.Vitality] || this.bonusAssigned[AttributeType.Speed];
     }
 
     private isDiceAssigned(): boolean {
-        // return this.diceAssigned.attack || this.diceAssigned.defense;
-        return this.diceAssigned[AttributeType.ATTACK] || this.diceAssigned[AttributeType.DEFENSE];
+        return this.diceAssigned[AttributeType.Attack] || this.diceAssigned[AttributeType.Defense];
     }
 }

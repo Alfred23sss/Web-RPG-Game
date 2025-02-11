@@ -39,6 +39,6 @@ export class CreatePageComponent implements OnInit {
     }
 
     navigateToHome() {
-        this.router.navigate([Route.HOME_PAGE]);
+        this.router.navigate([Route.HomePage]);
     }
 }

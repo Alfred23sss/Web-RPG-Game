@@ -35,11 +35,11 @@ export class AdminPageComponent implements OnInit {
     }
 
     deleteGame(id: string) {
-        this.snackbarService.showConfirmation(ErrorMessages.CONFIRM_DELETION).subscribe((confirmed) => {
+        this.snackbarService.showConfirmation(ErrorMessages.ConfirmDeletion).subscribe((confirmed) => {
             if (confirmed) {
                 this.gameService.deleteGame(id).subscribe({
                     next: () => this.loadGames(),
-                    error: () => this.snackbarService.showMessage(ErrorMessages.DELETION_FAILED), // 42
+                    error: () => this.snackbarService.showMessage(ErrorMessages.DeletionFailed),
                 });
             }
         });
@@ -58,13 +58,13 @@ export class AdminPageComponent implements OnInit {
     }
 
     navigateToHome() {
-        this.router.navigate([Route.HOME_PAGE]); // 61
+        this.router.navigate([Route.HomePage]);
     }
 
     private loadGames() {
         this.gameService.fetchGames().subscribe({
             next: (response) => (this.games = response),
-            error: () => this.snackbarService.showMessage(ErrorMessages.FAILED_LOAD), // 67
+            error: () => this.snackbarService.showMessage(ErrorMessages.FailedLoad),
         });
     }
 }

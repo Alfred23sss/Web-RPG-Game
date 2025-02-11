@@ -24,16 +24,16 @@
             <div>
                 <span>
                     {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} @if (attribute ===
-                    attributeTypes.ATTACK && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === attributeTypes.DEFENSE &&
+                    attributeTypes.Attack && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === attributeTypes.Defense &&
                     selectedDefenseDice) { + {{ selectedDefenseDice }}
                     }
                 </span>
 
-                @if (attribute === attributeTypes.VITALITY || attribute === attributeTypes.SPEED) {
+                @if (attribute === attributeTypes.Vitality || attribute === attributeTypes.Speed) {
                 <button (click)="assignBonus(attribute)" [disabled]="bonusAssigned[attribute]">
                     +2 {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
                 </button>
-                } @if (attribute === attributeTypes.ATTACK || attribute === attributeTypes.DEFENSE) {
+                } @if (attribute === attributeTypes.Attack || attribute === attributeTypes.Defense) {
                 <button (click)="assignDice(attribute)" [disabled]="diceAssigned[attribute]">
                     {{ diceTypes.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
                 </button>

@@ -8,13 +8,13 @@ export enum DiceType {
 }
 
 export enum AttributeType {
-    Vitality = 'Vitalité',
-    Speed = 'Vitesse',
-    Attack = 'Attaque',
-    Defense = 'Défense',
+    Vitality = 'Vitality',
+    Speed = 'Speed',
+    Attack = 'Attack',
+    Defense = 'Defense',
 }
 
-export enum Route {
+export enum Routes {
     WaitingView = '/waiting-view',
     EditionView = '/edition',
     AdminPage = '/admin',

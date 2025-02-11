@@ -3,10 +3,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 import { GAME_MODES_LIST, GAME_SIZES_LIST } from '@app/constants/global.constants';
-import { Route, ErrorMessages } from '@app/enums/global.enums';
-import { GameMode, GameSize } from '@app/interfaces/game';
+import { ErrorMessages, Route } from '@app/enums/global.enums';
+import { Game, GameMode, GameSize } from '@app/interfaces/game';
 
-import { Game } from '@app/interfaces/game';
 import { GameDecorations } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
@@ -35,7 +34,7 @@ export class PopUpComponent {
 
     setGameSize(size: GameSize) {
         if (!this.gameModeService.setGameSize(size)) {
-            this.snackbarService.showMessage(ErrorMessages.INVALID_GAME_SIZE);
+            this.snackbarService.showMessage(ErrorMessages.InvalidGameSize);
         }
     }
 
@@ -43,15 +42,15 @@ export class PopUpComponent {
         if (Object.values(GameMode).includes(mode)) {
             this.gameModeService.setGameMode(mode);
             if (mode === GameMode.CTF) {
-                this.snackbarService.showMessage(ErrorMessages.UNAVAILABLE_GAME_MODE);
-                this.gameModeService.setGameMode(GameMode.None); //voir si ca marche pcq je pense faur le changer a null
+                this.snackbarService.showMessage(ErrorMessages.UnavailableGameMode);
+                this.gameModeService.setGameMode(GameMode.None);
             }
         } else {
             this.gameModeService.setGameMode(mode);
         }
     }
 
-    getGameSize() : GameSize | null{
+    getGameSize(): GameSize | null {
         return this.gameModeService.getGameSize();
     }
 
@@ -65,13 +64,13 @@ export class PopUpComponent {
         const gridSize = this.gridService.getGridSize(gameSize);
 
         if (!gameSize || !gameMode) {
-            this.snackbarService.showMessage(ErrorMessages.MISSING_GAME_DETAILS);
+            this.snackbarService.showMessage(ErrorMessages.MissingGameDetails);
             return;
         }
 
         const newGame: Game = this.gameService.createNewGame(gameMode, gridSize);
         this.gameService.updateCurrentGame(newGame);
-        this.router.navigate([Route.EDITION_VIEW]);
+        this.router.navigate([Route.EditionView]);
         this.closePopup();
     }
 

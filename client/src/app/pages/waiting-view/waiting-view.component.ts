@@ -17,7 +17,7 @@ export class WaitingViewComponent implements OnInit {
     }
 
     navigateToHome() {
-        this.router.navigate([Route.CREATE_PAGE]);
+        this.router.navigate([Route.CreatePage]);
     }
 
     private generateAccessCode(): void {
