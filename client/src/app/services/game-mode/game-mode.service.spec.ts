@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { GameMode, GameSize } from '@app/interfaces/game';
 import { GameModeService } from './game-mode.service';
 
-fdescribe('GameModeService', () => {
+describe('GameModeService', () => {
     let service: GameModeService;
 
     beforeEach(() => {
