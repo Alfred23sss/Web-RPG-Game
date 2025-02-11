@@ -35,7 +35,7 @@ export class Tile {
     @Prop({ required: true, default: false })
     isOpen: boolean;
 
-    @ApiProperty({ type: () => Item })
+    @ApiProperty({ type: Item })
     @Prop({ type: Item, required: false })
     item?: Item;
 }
