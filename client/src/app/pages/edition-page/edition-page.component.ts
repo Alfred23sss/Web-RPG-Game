@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Item } from '@app/classes/item';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -45,7 +46,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     ngAfterViewInit() {
         setTimeout(() => {
             if (this.itemBar && this.itemBar.items) {
-                this.originalItemBar = JSON.stringify(this.itemBar.items);
+                this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
                 this.itemService.setItems(this.itemBar.items);
             }
         }, 0);
@@ -54,8 +55,8 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     cloneInitialGame() {
         const currentGame = this.gameService.getCurrentGame();
         if (currentGame) {
-            this.game = JSON.parse(JSON.stringify(currentGame));
-            this.originalGame = JSON.parse(JSON.stringify(currentGame));
+            this.game = this.makeDeepCopy(currentGame);
+            this.originalGame = this.makeDeepCopy(currentGame);
             this.gridService.setGrid(this.game?.grid);
             this.updateGameAndDescription();
         }
@@ -70,13 +71,12 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     }
 
     reset() {
-        this.game = JSON.parse(JSON.stringify(this.originalGame));
+        this.game = this.makeDeepCopy(this.originalGame);
         this.updateGameAndDescription();
         this.gridService.setGrid(this.game.grid);
-        this.gameService.updateCurrentGame(this.game);
-        this.gameService.saveGame(this.game);
+        this.updateGame();
         if (this.itemBar) {
-            const restoredItems = JSON.parse(this.originalItemBar);
+            const restoredItems = this.makeDeepCopy(this.originalItemBar);
             this.itemService.setItems(restoredItems);
             this.itemBar.items = this.itemService.getItems();
         }
@@ -95,8 +95,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         }
 
         await this.savePreviewImage();
-        this.gameService.updateCurrentGame(this.game);
-        this.gameService.saveGame(this.game);
+        this.updateGame();
         this.gameService.fetchGames().subscribe(() => {
             this.router.navigate(['/admin']).then(() => {
                 this.isSaving = false;
@@ -116,5 +115,14 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     private updateGameAndDescription() {
         this.gameName = this.game.name;
         this.gameDescription = this.game.description;
+    }
+
+    private updateGame() {
+        this.gameService.updateCurrentGame(this.game);
+        this.gameService.saveGame(this.game);
+    }
+
+    private makeDeepCopy(toCopy: string | Game | Item[]) {
+        return JSON.parse(JSON.stringify(toCopy));
     }
 }
