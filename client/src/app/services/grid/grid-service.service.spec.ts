@@ -2,9 +2,9 @@ import { TestBed } from '@angular/core/testing';
 import { ImageType, Tile, TileType } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
 
-const SMALL_GRID_SIZE = 3;
-const MEDIUM_GRID_SIZE = 5;
-const LARGE_GRID_SIZE = 7;
+const SMALL_GRID_SIZE = 10;
+const MEDIUM_GRID_SIZE = 15;
+const LARGE_GRID_SIZE = 20;
 
 describe('GridService', () => {
     let service: GridService;
