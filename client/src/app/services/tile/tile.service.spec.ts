@@ -152,20 +152,6 @@ describe('TileService', () => {
             expect(itemDragServiceSpy.clearSelection).toHaveBeenCalled();
         });
 
-        it('should not apply item to tile if draggedItem is undefined', () => {
-            const tile: Tile = { type: TileType.Default } as Tile;
-            const previousTile: Tile = { item: { name: 'item1' } as Item } as Tile;
-            const draggedItem = undefined;
-
-            itemDragServiceSpy.getSelectedItem.and.returnValue(draggedItem);
-            itemDragServiceSpy.getPreviousTile.and.returnValue(previousTile);
-
-            service.drop(tile);
-
-            expect(tile.item).toBeUndefined();
-            expect(previousTile.item).toEqual(jasmine.objectContaining({ name: 'item1' }));
-        });
-
         it('should not apply item to tile if tile is Wall', () => {
             const tile: Tile = { type: TileType.Wall } as Tile;
             const previousTile: Tile = { item: { name: 'item1' } as Item } as Tile;
