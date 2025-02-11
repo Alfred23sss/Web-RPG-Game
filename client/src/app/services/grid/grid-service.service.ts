@@ -28,7 +28,7 @@ export class GridService {
         this.grid = grid;
     }
 
-    getGrid() {
+    getGrid(): Tile[][] | undefined {
         return this.grid;
     }
 

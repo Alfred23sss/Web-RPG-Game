@@ -3,7 +3,7 @@ import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
 @Injectable({
@@ -21,7 +21,7 @@ export class GameService {
         this.loadCurrentGame();
     }
 
-    updateCurrentGame(game: Game) {
+    updateCurrentGame(game: Game): void {
         this.currentGame = game;
         sessionStorage.setItem('currentGame', JSON.stringify(game));
     }
@@ -40,7 +40,7 @@ export class GameService {
         };
     }
 
-    deleteGame(id: string) {
+    deleteGame(id: string): Observable<Game> {
         return this.gameCommunicationService.deleteGame(id).pipe(
             tap(() => {
                 this.removeGame(id);
@@ -56,7 +56,7 @@ export class GameService {
         return this.games.find((game) => game.id === id);
     }
 
-    fetchGames() {
+    fetchGames(): Observable<Game[]> {
         return this.gameCommunicationService.getAllGames().pipe(
             tap((response) => {
                 this.games = response;
@@ -64,7 +64,7 @@ export class GameService {
         );
     }
 
-    updateGameVisibility(id: string, isVisible: boolean) {
+    updateGameVisibility(id: string, isVisible: boolean): void {
         const game = this.getGameById(id);
         if (game) {
             game.isVisible = isVisible;
@@ -92,23 +92,23 @@ export class GameService {
         return this.games.some((game) => game.name === name && game.id !== this.currentGame?.id);
     }
 
-    async savePreviewImage() {
+    async savePreviewImage(): Promise<string> {
         return await this.screenShotService.generatePreview('game-preview');
     }
 
-    getGameIndexById(id: string) {
+    getGameIndexById(id: string): number {
         return this.games.findIndex((game) => game.id === id);
     }
 
-    removeGame(id: string) {
+    removeGame(id: string): void {
         this.games = this.games.filter((game) => game.id !== id);
     }
 
-    addGame(game: Game) {
+    addGame(game: Game): void {
         this.games.push(game);
     }
 
-    private loadCurrentGame() {
+    private loadCurrentGame(): void {
         const savedGame = sessionStorage.getItem('currentGame');
         if (savedGame) {
             const parsedGame: Game = JSON.parse(savedGame);

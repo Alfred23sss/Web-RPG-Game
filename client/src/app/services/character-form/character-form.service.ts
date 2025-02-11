@@ -19,7 +19,7 @@ export class CharacterService {
         private readonly gameCommunicationService: GameCommunicationService,
     ) {}
 
-    assignBonus(attribute: string) {
+    assignBonus(attribute: string): void {
         if (!this.bonusAssigned[attribute]) {
             this.attributes[attribute] += BONUS_VALUE;
             this.bonusAssigned[attribute] = true;
@@ -44,7 +44,7 @@ export class CharacterService {
         isBonusAssigned: boolean;
         isDiceAssigned: boolean;
         closePopup: () => void;
-    }) {
+    }): void {
         this.validateGameAvailability(data.game, data.closePopup);
         if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
             this.proceedToWaitingView(data.closePopup);
@@ -53,20 +53,20 @@ export class CharacterService {
         }
     }
 
-    resetAttributes() {
+    resetAttributes(): void {
         this.attributes = { ...INITIAL_VALUES.attributes };
         this.bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
         this.diceAssigned = { ...INITIAL_VALUES.diceAssigned };
     }
 
-    checkCharacterNameLength(characterName: string) {
+    checkCharacterNameLength(characterName: string): void {
         const maxLength = 20;
         if (characterName.length >= maxLength) {
             this.snackbarService.showMessage(`The maximum name length is ${maxLength} characters.`);
         }
     }
 
-    private validateGameAvailability(game: Game, closePopup: () => void) {
+    private validateGameAvailability(game: Game, closePopup: () => void): void {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
                 if (error.status === HTTP_STATUS.INTERNAL_SERVER_ERROR || error.status === HTTP_STATUS.FORBIDDEN) {
@@ -82,12 +82,12 @@ export class CharacterService {
         return !!characterName && !!selectedAvatar && isBonusAssigned && isDiceAssigned;
     }
 
-    private proceedToWaitingView(closePopup: () => void) {
+    private proceedToWaitingView(closePopup: () => void): void {
         this.router.navigate([ROUTES.WAITING_VIEW]);
         closePopup();
     }
 
-    private showMissingDetailsError() {
+    private showMissingDetailsError(): void {
         this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
     }
 }

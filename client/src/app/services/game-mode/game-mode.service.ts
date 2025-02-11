@@ -9,7 +9,7 @@ export class GameModeService {
     private gameSize: string = GameSize.None;
     private gameMode: string = GameMode.None;
 
-    setGameMode(mode: string) {
+    setGameMode(mode: string): void {
         this.gameMode = mode;
     }
     setGameSize(size: string): boolean {
@@ -25,7 +25,7 @@ export class GameModeService {
         return this.gameSize;
     }
 
-    resetModeAndSize() {
+    resetModeAndSize(): void {
         this.gameMode = '';
         this.gameSize = '';
     }
