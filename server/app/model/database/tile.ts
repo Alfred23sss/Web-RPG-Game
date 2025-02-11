@@ -35,8 +35,8 @@ export class Tile {
     @Prop({ required: true, default: false })
     isOpen: boolean;
 
-    @ApiProperty({ type: () => Item }) // Store the full Item object, not just the reference
-    @Prop({ type: Item, required: false }) // Change from ObjectId reference to embedded object
+    @ApiProperty({ type: Item })
+    @Prop({ type: Item, required: false })
     item?: Item;
 }
 
