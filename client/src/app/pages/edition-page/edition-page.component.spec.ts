@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
@@ -36,6 +35,7 @@ describe('EditionPageComponent', () => {
     let snackbarServiceMock: jasmine.SpyObj<SnackbarService>;
     let routerMock: jasmine.SpyObj<Router>;
 
+    const baseGridSize = 3;
     const mockDate = new Date('2025-02-11T16:48:33.205Z');
     const defaultMockGame: Game = {
         id: '1',
@@ -46,7 +46,7 @@ describe('EditionPageComponent', () => {
         isVisible: true,
         previewImage: '',
         description: 'Test Description',
-        grid: createBaseGrid(3),
+        grid: createBaseGrid(baseGridSize),
     };
 
     beforeEach(async () => {
@@ -64,7 +64,7 @@ describe('EditionPageComponent', () => {
         gameServiceMock.getCurrentGame.and.returnValue(defaultMockGame);
 
         await TestBed.configureTestingModule({
-            imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent, RouterTestingModule],
+            imports: [CommonModule, FormsModule, GridComponent, ToolbarComponent, ItemBarComponent],
             providers: [
                 { provide: GameService, useValue: gameServiceMock },
                 { provide: GridService, useValue: gridServiceMock },
@@ -100,7 +100,7 @@ describe('EditionPageComponent', () => {
             isVisible: true,
             previewImage: '',
             description: 'Another Test Description',
-            grid: createBaseGrid(3),
+            grid: createBaseGrid(baseGridSize),
         };
         gameServiceMock.getCurrentGame.and.returnValue(mockGame);
         component.ngOnInit();
@@ -134,7 +134,7 @@ describe('EditionPageComponent', () => {
             isVisible: true,
             previewImage: '',
             description: 'Test Description',
-            grid: createBaseGrid(3),
+            grid: createBaseGrid(baseGridSize),
         };
         component['originalGame'] = mockGame;
         component.originalItemBar = JSON.stringify([]);
@@ -160,7 +160,7 @@ describe('EditionPageComponent', () => {
             isVisible: true,
             previewImage: '',
             description: 'Save Test Description',
-            grid: createBaseGrid(3),
+            grid: createBaseGrid(baseGridSize),
         };
         component.gameName = 'Updated Game';
         component.gameDescription = 'Updated Description';
