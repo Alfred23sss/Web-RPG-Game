@@ -33,4 +33,17 @@ describe('GameModeService', () => {
 
         expect(service.getGameSize()).toBe(newGameSize);
     });
+
+    it('should return false if size is not valid', () => {
+        const newGameSize = '0';
+
+        expect(service.setGameSize(newGameSize)).toBeFalse;
+    });
+
+    it('should reset game mode and size', () => {
+        service.resetModeAndSize();
+
+        expect(service.getGameSize()).toBe(GameSize.None);
+        expect(service.getGameMode()).toBe(GameMode.None);
+    });
 });
