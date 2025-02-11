@@ -1,9 +1,5 @@
-import { DateController } from '@app/controllers/date/date.controller';
-import { ExampleController } from '@app/controllers/example/example.controller';
 import { ChatGateway } from '@app/gateways/chat/chat.gateway';
 import { Game, gameSchema } from '@app/model/database/game';
-import { DateService } from '@app/services/date/date.service';
-import { ExampleService } from '@app/services/example/example.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -25,7 +21,7 @@ import { GameService } from './services/game/game.service';
             { name: Item.name, schema: itemSchema },
         ]),
     ],
-    controllers: [DateController, ExampleController, GameController],
-    providers: [ChatGateway, DateService, ExampleService, Logger, GameService],
+    controllers: [GameController],
+    providers: [ChatGateway, Logger, GameService],
 })
 export class AppModule {}
