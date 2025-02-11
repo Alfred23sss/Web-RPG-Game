@@ -34,7 +34,7 @@
                     +2 {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
                 </button>
                 } @if (attribute === attributeTypes.ATTACK || attribute === attributeTypes.DEFENSE) {
-                <button (click)="assignDice(attribute, diceTypes.D6)" [disabled]="diceAssigned[attribute]">
+                <button (click)="assignDice(attribute)" [disabled]="diceAssigned[attribute]">
                     {{ diceTypes.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
                 </button>
                 }
