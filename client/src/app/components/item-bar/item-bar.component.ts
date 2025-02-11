@@ -1,20 +1,10 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { GameSize } from '@app/interfaces/game';
-import { Item } from '@app/interfaces/item';
-import { ItemDescription, ItemType, Tile } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/ItemDrag.service';
-import { GameService } from '@app/services/game/game.service';
-
-const ITEM_COUNTS: Record<GameSize, number> = {
-    [GameSize.Small]: 2,
-    [GameSize.Medium]: 4,
-    [GameSize.Large]: 6,
-    [GameSize.None]: 0,
-};
-
-const ITEMS_TO_UPDATE = new Set(['home', 'question']);
+import { Item } from '@app/classes/item';
+import { ItemDescription, ItemType } from '@app/interfaces/tile';
+import { ItemService } from '@app/services/item/item.service';
+import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 
 @Component({
     selector: 'app-item-bar',
@@ -28,8 +18,8 @@ export class ItemBarComponent implements OnInit {
     items: Item[] = [];
 
     constructor(
+        private itemService: ItemService,
         private itemDragService: ItemDragService,
-        private gameService: GameService,
     ) {}
 
     ngOnInit() {
@@ -58,10 +48,38 @@ export class ItemBarComponent implements OnInit {
                 itemCounter: 1,
                 description: ItemDescription.Rubik,
             },
-            { id: '3', name: 'stop', imageSrc: ItemType.Stop, imageSrcGrey: ItemType.StopGray, itemCounter: 1, description: ItemDescription.Stop },
-            { id: '4', name: 'fire', imageSrc: ItemType.Fire, imageSrcGrey: ItemType.FireGray, itemCounter: 1, description: ItemDescription.Fire },
-            { id: '5', name: 'swap', imageSrc: ItemType.Swap, imageSrcGrey: ItemType.SwapGray, itemCounter: 1, description: ItemDescription.Swap },
-            { id: '6', name: 'home', imageSrc: ItemType.Home, imageSrcGrey: ItemType.HomeGray, itemCounter: 2, description: ItemDescription.Home },
+            {
+                id: '3',
+                name: 'stop',
+                imageSrc: ItemType.Stop,
+                imageSrcGrey: ItemType.StopGray,
+                itemCounter: 1,
+                description: ItemDescription.Stop,
+            },
+            {
+                id: '4',
+                name: 'fire',
+                imageSrc: ItemType.Fire,
+                imageSrcGrey: ItemType.FireGray,
+                itemCounter: 1,
+                description: ItemDescription.Fire,
+            },
+            {
+                id: '5',
+                name: 'swap',
+                imageSrc: ItemType.Swap,
+                imageSrcGrey: ItemType.SwapGray,
+                itemCounter: 1,
+                description: ItemDescription.Swap,
+            },
+            {
+                id: '6',
+                name: 'home',
+                imageSrc: ItemType.Home,
+                imageSrcGrey: ItemType.HomeGray,
+                itemCounter: 2,
+                description: ItemDescription.Home,
+            },
             {
                 id: '7',
                 name: 'question',
@@ -72,7 +90,8 @@ export class ItemBarComponent implements OnInit {
             },
         ].map((data) => Object.assign(new Item(), data));
 
-        this.setItemCount();
+        this.itemService.setItems(this.items);
+        this.itemService.setItemCount();
     }
 
     selectObject(item: Item): void {
@@ -88,44 +107,7 @@ export class ItemBarComponent implements OnInit {
         return item.itemCounter <= 0;
     }
 
-    setItemCount() {
-        const currentGame = this.gameService.getCurrentGame();
-        if (!currentGame) {
-            console.warn('No game found.');
-            return;
-        }
-
-        const rawSize = currentGame.size as unknown as number;
-        const sizeMapping: Record<number, GameSize> = {
-            10: GameSize.Small,
-            15: GameSize.Medium,
-            20: GameSize.Large,
-        };
-        const mappedSize = sizeMapping[rawSize] ?? GameSize.Small;
-        const count = ITEM_COUNTS[mappedSize];
-
-        this.items.forEach((item) => {
-            if (ITEMS_TO_UPDATE.has(item.name)) {
-                item.itemCounter = count;
-            }
-        });
-
-        const grid = currentGame.grid as Tile[][] | undefined;
-        if (!grid) return;
-
-        grid.forEach((row) => {
-            row.forEach((tile) => {
-                if (tile.item) {
-                    const item = this.items.find((i) => i.name === tile.item!.name);
-                    if (item) {
-                        item.itemCounter = Math.max(0, item.itemCounter - 1);
-                    }
-                }
-            });
-        });
-    }
-
-    onDrop(event: DragEvent, item: Item): void {
+    onContainerDrop(event: DragEvent, item: Item): void {
         event.preventDefault();
 
         const draggedItem = this.itemDragService.getSelectedItem();

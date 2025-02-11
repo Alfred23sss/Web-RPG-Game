@@ -19,7 +19,7 @@ export class GameCommunicationService {
         return this.http.post<Game>(`${this.apiUrl}/create`, gameToAdd);
     }
 
-    updateGame(id: string, game: Partial<Game>) {
+    updateGame(id: string, game: Partial<Game>): Observable<Game> {
         return this.http.patch<Game>(`${this.apiUrl}/update/${id}`, game);
     }
 

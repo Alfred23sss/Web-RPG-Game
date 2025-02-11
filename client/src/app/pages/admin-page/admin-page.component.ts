@@ -2,12 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
+import { ROUTES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
-import { GridService } from '@app/services/grid/grid-service.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-admin-page',
@@ -16,18 +17,17 @@ import { GridService } from '@app/services/grid/grid-service.service';
     imports: [RouterLink, CommonModule, MatTooltipModule],
 })
 export class AdminPageComponent implements OnInit {
-    games: Game[] = this.gameService.games;
+    games: Game[];
     backgroundImage = GameDecorations.Background;
     constructor(
         private dialogRef: MatDialog,
-        public gameService: GameService,
-        public gridService: GridService,
+        private gameService: GameService,
+        private snackbarService: SnackbarService,
+        private router: Router,
     ) {}
 
     ngOnInit() {
-        this.gameService.fetchGames().subscribe((response) => {
-            this.games = response;
-        });
+        this.loadGames();
     }
 
     openDialog() {
@@ -35,16 +35,14 @@ export class AdminPageComponent implements OnInit {
     }
 
     deleteGame(id: string) {
-        if (confirm(`Are you sure you want to delete ${id}?`)) {
-            this.gameService.deleteGame(id).subscribe({
-                next: () => {
-                    this.removeGame(id);
-                },
-                error: () => {
-                    alert('Deletion failed.'); // CHANGE TO SNACKBAR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                },
-            });
-        }
+        this.snackbarService.showConfirmation('Are you sure you want to delete this game?').subscribe((confirmed) => {
+            if (confirmed) {
+                this.gameService.deleteGame(id).subscribe({
+                    next: () => this.loadGames(),
+                    error: () => this.snackbarService.showMessage('Deletion failed'), //42
+                });
+            }
+        });
     }
 
     updateCurrentGame(id: string) {
@@ -55,16 +53,18 @@ export class AdminPageComponent implements OnInit {
     }
 
     toggleVisibility(id: string, event: Event) {
-        const inputElement = event.target as HTMLInputElement;
-        const isVisible = inputElement.checked;
-        const game = this.gameService.getGameById(id);
-        if (game) {
-            game.isVisible = isVisible;
-            this.gameService.saveGame(game);
-        }
+        const isVisible = (event.target as HTMLInputElement).checked;
+        this.gameService.updateGameVisibility(id, isVisible);
     }
 
-    private removeGame(id: string) {
-        this.games = this.games.filter((game) => game.id !== id);
+    navigateToHome() {
+        this.router.navigate([ROUTES.homePage]); //61
+    }
+
+    private loadGames() {
+        this.gameService.fetchGames().subscribe({
+            next: (response) => (this.games = response),
+            error: () => this.snackbarService.showMessage('Failed to load games'), //67
+        });
     }
 }

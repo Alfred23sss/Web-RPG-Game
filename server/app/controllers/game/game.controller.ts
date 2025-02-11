@@ -24,7 +24,10 @@ export class GameController {
     async updateGame(@Param('id') id: string, @Body() game: Partial<UpdateGameDto>) {
         try {
             const updatedGame = await this.gameService.updateGame(id, game);
-            return { message: 'Game updated successfully', updatedGame };
+            if (!updatedGame) {
+                throw new HttpException(`Game with id ${id} not found`, HttpStatus.NOT_FOUND);
+            }
+            return updatedGame;
         } catch (error) {
             throw new HttpException({ message: 'Failed to update game', error: error.message }, HttpStatus.BAD_REQUEST);
         }
@@ -53,11 +56,32 @@ export class GameController {
         }
     }
 
-    @Get()
-    async getGame(@Body() id: string, @Res() response: Response) {
+    // @Get()
+    // async getGame(@Body() id: string, @Res() response: Response) {
+    //     try {
+    //         const game = await this.gameService.getGameById(id);
+    //         response.status(HttpStatus.OK).json(game);
+    //     } catch (error) {
+    //         response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+    //             message: 'Server Error',
+    //             error: error.message,
+    //         });
+    //     }
+    // }
+
+    @Get(':id')
+    async getGame(@Param('id') id: string, @Res() response: Response) {
         try {
             const game = await this.gameService.getGameById(id);
-            response.status(HttpStatus.OK).json(game);
+            if (!game ) {
+                response.status(HttpStatus.NOT_FOUND).json({ message: `Game with id ${id} not found` });
+            } 
+            if (!game.isVisible) {
+                return response.status(HttpStatus.FORBIDDEN).json({ message: `Game with id ${id} is no longer available` });
+            }
+            else {
+                response.status(HttpStatus.OK).json(game);
+            }
         } catch (error) {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Server Error', error: error.message });
         }

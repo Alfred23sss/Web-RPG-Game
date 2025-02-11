@@ -1,54 +1,62 @@
-.tool {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 5px 0;
-    padding: 5px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    border-radius: 10px; /* Rounded corners */
-    background: #003366; /* Slightly lighter blue */
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3); /* Subtle shadow for depth */
-}
-
-.tool:hover {
-    background: #006eff; /* Yellow-orange on hover */
-    color: #001f3f; /* Dark blue text color */
-    transform: scale(1.1); /* Slight zoom effect */
-    border-color: #ffd700; /* Bright yellow border */
-}
-
-.tool img {
-    height: 100px;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 5px #ffd700); /* Glow effect for icons */
-}
-
-.tool span {
-    font-size: 1rem;
-    font-weight: bold;
-    color: #ffd700; /* Yellow-orange text */
-}
-
-.tool.active {
-    border-color: #ffd700; /* Highlight the active tool */
-    background: #ffa500; /* Yellow-orange background */
-    color: #001f3f; /* Dark blue text color */
-}
-
-.header-item {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #ffa500; /* Yellow-orange for the header */
-    margin-bottom: 20px;
-    text-shadow: 1px 1px 2px #000; /* Subtle shadow for depth */
-}
-
 .tool-container {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header-item {
+    font-family: papyrus;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #ffd700;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
+.selected-header {
+    font-size: 1.5rem;
+}
+
+.tool {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 200px;
+    padding: 10px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: transparent; /* No background */
+    transition:
+        transform 0.3s ease,
+        background 0.3s ease,
+        border-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    margin: 8px 0;
+}
+.tool-name {
+    font-family: papyrus;
+}
+.tool:hover {
+    background: rgba(0, 110, 255, 0.2); /* Light transparent blue */
+    transform: scale(1.05);
+    border-color: #ffd700;
+}
+
+.tool img {
+    height: 80px;
+    margin-bottom: 5px;
+    filter: drop-shadow(0 0 5px #ffd700);
+}
+
+.tool span {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #ffd700;
 }

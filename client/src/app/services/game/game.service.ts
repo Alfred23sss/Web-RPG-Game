@@ -1,21 +1,43 @@
 import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
+import { GridService } from '@app/services/grid/grid-service.service';
 import { tap } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
+import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameService {
-    games: Game[];
+    games: Game[] = [];
     private currentGame: Game | undefined;
-    constructor(private gameCommunicationService: GameCommunicationService) {
+
+    constructor(
+        private gameCommunicationService: GameCommunicationService,
+        private gridService: GridService,
+        private screenShotService: ScreenshotService,
+    ) {
         this.loadCurrentGame();
     }
 
     updateCurrentGame(game: Game) {
         this.currentGame = game;
         sessionStorage.setItem('currentGame', JSON.stringify(game));
+    }
+
+    createNewGame(gameMode: string, gridSize: number): Game {
+        return {
+            id: uuidv4(),
+            name: '',
+            size: gridSize.toString(),
+            mode: gameMode,
+            lastModified: new Date(),
+            isVisible: false,
+            previewImage: '',
+            description: '',
+            grid: this.gridService.createGrid(gridSize, gridSize),
+        };
     }
 
     deleteGame(id: string) {
@@ -38,6 +60,10 @@ export class GameService {
         return this.games.find((game) => game.id === id);
     }
 
+    getGameIndexById(id: string) {
+        return this.games.findIndex((game) => game.id === id);
+    }
+
     removeGame(id: string) {
         this.games = this.games.filter((game) => game.id !== id);
     }
@@ -45,10 +71,17 @@ export class GameService {
     fetchGames() {
         return this.gameCommunicationService.getAllGames().pipe(
             tap((response) => {
-                console.log('Games fetched, updating games array in service:', response);
                 this.games = response;
             }),
         );
+    }
+
+    updateGameVisibility(id: string, isVisible: boolean) {
+        const game = this.getGameById(id);
+        if (game) {
+            game.isVisible = isVisible;
+            this.updateExistingGame(game);
+        }
     }
 
     saveGame(gameToAdd: Game): void {
@@ -76,38 +109,35 @@ export class GameService {
         return this.games.some((game) => game.name === name && game.id !== this.currentGame?.id);
     }
 
+    async savePreviewImage() {
+        return await this.screenShotService.generatePreview('game-preview');
+    }
+
     private loadCurrentGame() {
         const savedGame = sessionStorage.getItem('currentGame');
         if (savedGame) {
-            this.currentGame = JSON.parse(savedGame);
+            const parsedGame: Game = JSON.parse(savedGame);
+            parsedGame.lastModified = new Date(parsedGame.lastModified); // Convert back to Date
+            this.currentGame = parsedGame;
         }
     }
 
     private updateExistingGame(gameToUpdate: Game): void {
+        gameToUpdate.lastModified = new Date();
         this.gameCommunicationService.updateGame(gameToUpdate.id, gameToUpdate).subscribe({
             next: (updatedGame) => {
-                console.log('Game successfully updated:', updatedGame);
-
-                const index = this.games.findIndex((game) => game.id === gameToUpdate.id);
+                const index = this.getGameIndexById(gameToUpdate.id);
                 if (index !== -1) {
-                    this.games[index] = gameToUpdate;
+                    this.games[index] = updatedGame;
                 }
-            },
-            error: (err) => {
-                console.error('Error updating game:', err);
             },
         });
     }
 
     private saveNewGame(gameToAdd: Game): void {
         this.gameCommunicationService.saveGame(gameToAdd).subscribe({
-            next: (newGame) => {
-                console.log('Game successfully saved:', newGame);
-
-                this.addGame(gameToAdd);
-            },
-            error: (err) => {
-                console.error('Error saving game:', err);
+            next: (game) => {
+                this.addGame(game);
             },
         });
     }

@@ -127,7 +127,7 @@ describe('GameCommunicationService', () => {
         });
 
         const req = httpMock.expectOne(`${apiUrl}/update/1`);
-        expect(req.request.method).toBe('PUT');
+        expect(req.request.method).toBe('PATCH');
         expect(req.request.body).toEqual(updatedGame);
         req.flush(expectedGame);
     });

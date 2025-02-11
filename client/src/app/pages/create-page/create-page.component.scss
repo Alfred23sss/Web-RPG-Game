@@ -21,12 +21,7 @@
     padding: 0.75rem;
     flex-direction: column;
     background: linear-gradient(135deg, #3c70de98, #7b2eff9e);
-}
-
-.game-title {
-    text-align: center;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
+    cursor: pointer;
 }
 
 .game-preview img {
@@ -47,6 +42,11 @@
 
 .game-info > * {
     margin: 0.3rem;
+}
+
+.button-container {
+    display: flex;
+    gap: 40px;
 }
 
 .create-button {

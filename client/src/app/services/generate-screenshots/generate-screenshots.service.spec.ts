@@ -44,10 +44,12 @@ describe('ScreenshotService', () => {
     });
 
     it('should reject with a formatted error message when captureElement fails', async () => {
-        spyOn(Html2CanvasWrapper, 'captureElement').and.callFake(async () => {
-            return Promise.reject('Internal Error');
-        });
-        await expectAsync(service.generateScreenshot('test')).toBeRejectedWithError('Failed to capture: Internal Error');
+        const fakeElement = document.createElement('div');
+        spyOn(document, 'getElementById').and.returnValue(fakeElement);
+
+        spyOn(Html2CanvasWrapper, 'captureElement').and.returnValue(Promise.reject('Internal Error'));
+
+        await expectAsync(service.generateScreenshot('test')).toBeRejectedWith('Failed to capture: Internal Error');
     });
 
     it('should call Html2CanvasWrapper.captureElement with correct options', async () => {

@@ -4,29 +4,26 @@ import { Injectable } from '@angular/core';
     providedIn: 'root',
 })
 export class CharacterAttributesService {
-    assignBonus(attributeKey: string, attributes: unknown, bonusAssigned: unknown): void {
-        if (!bonusAssigned[attributeKey]) {
-            attributes[attributeKey] += 2;
-            bonusAssigned[attributeKey] = true;
-
-            const otherAttribute = attributeKey === 'vitality' ? 'speed' : 'vitality';
-            if (bonusAssigned[otherAttribute]) {
-                attributes[otherAttribute] = 4;
-                bonusAssigned[otherAttribute] = false;
-            }
-        }
-    }
-
-    assignDice(attributeKey: string, diceAssigned: unknown): void {
-        if (!diceAssigned[attributeKey]) {
-            diceAssigned[attributeKey] = true;
-
-            const otherAttribute = attributeKey === 'attack' ? 'defense' : 'attack';
-            if (diceAssigned[otherAttribute]) {
-                diceAssigned[otherAttribute] = false;
-            }
-        } else {
-            diceAssigned[attributeKey] = false;
-        }
-    }
+    // assignBonus(attributeKey: string, attributes: unknown, bonusAssigned: unknown): void {
+    //     if (!bonusAssigned[attributeKey]) {
+    //         attributes[attributeKey] += 2;
+    //         bonusAssigned[attributeKey] = true;
+    //         const otherAttribute = attributeKey === 'vitality' ? 'speed' : 'vitality';
+    //         if (bonusAssigned[otherAttribute]) {
+    //             attributes[otherAttribute] = 4;
+    //             bonusAssigned[otherAttribute] = false;
+    //         }
+    //     }
+    // }
+    // assignDice(attributeKey: string, diceAssigned: unknown): void {
+    //     if (!diceAssigned[attributeKey]) {
+    //         diceAssigned[attributeKey] = true;
+    //         const otherAttribute = attributeKey === 'attack' ? 'defense' : 'attack';
+    //         if (diceAssigned[otherAttribute]) {
+    //             diceAssigned[otherAttribute] = false;
+    //         }
+    //     } else {
+    //         diceAssigned[attributeKey] = false;
+    //     }
+    // }
 }
