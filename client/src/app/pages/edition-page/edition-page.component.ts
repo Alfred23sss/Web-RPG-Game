@@ -44,21 +44,9 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     }
 
     ngAfterViewInit() {
-        setTimeout(() => {
-            if (this.itemBar && this.itemBar.items) {
-                this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
-                this.itemService.setItems(this.itemBar.items);
-            }
-        }, 0);
-    }
-
-    cloneInitialGame() {
-        const currentGame = this.gameService.getCurrentGame();
-        if (currentGame) {
-            this.game = this.makeDeepCopy(currentGame);
-            this.originalGame = this.makeDeepCopy(currentGame);
-            this.gridService.setGrid(this.game?.grid);
-            this.updateGameAndDescription();
+        if (this.itemBar && this.itemBar.items) {
+            this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
+            this.itemService.setItems(this.itemBar.items);
         }
     }
 
@@ -124,5 +112,15 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
 
     private makeDeepCopy(toCopy: string | Game | Item[]) {
         return JSON.parse(JSON.stringify(toCopy));
+    }
+
+    private cloneInitialGame() {
+        const currentGame = this.gameService.getCurrentGame();
+        if (currentGame) {
+            this.game = this.makeDeepCopy(currentGame);
+            this.originalGame = this.makeDeepCopy(currentGame);
+            this.gridService.setGrid(this.game?.grid);
+            this.updateGameAndDescription();
+        }
     }
 }

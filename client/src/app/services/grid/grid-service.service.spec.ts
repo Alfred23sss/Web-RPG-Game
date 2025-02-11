@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { ImageType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType } from '@app/interfaces/images';
+import { Tile, TileType } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
 
 const SMALL_GRID_SIZE = 10;
