@@ -27,6 +27,7 @@ export class TileService {
         if (selectedTool.tool === TileType.Door) {
             this.handleDoor(tile);
         } else {
+            if (selectedTool.tool === tile.type) return;
             tile.imageSrc = selectedTool.image;
             tile.type = selectedTool.tool;
         }

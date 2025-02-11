@@ -115,6 +115,14 @@ describe('TileService', () => {
             expect(tile.type).toBe(TileType.Wall);
             expect(tile.imageSrc).toBe(ImageType.Wall);
         });
+
+        it('should not apply tool if tool type is the same as tile type', () => {
+            toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Wall, image: ImageType.Water });
+            tile.type = TileType.Wall;
+            tile.imageSrc = ImageType.Wall;
+            service.applyTool(tile);
+            expect(tile.imageSrc).toBe(ImageType.Wall);
+        });
     });
 
     describe('removeTileObject', () => {
