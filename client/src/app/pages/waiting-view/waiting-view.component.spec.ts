@@ -13,6 +13,7 @@ describe('WaitingViewComponent', () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         await TestBed.configureTestingModule({
             imports: [WaitingViewComponent],
+            providers: [{ provide: Router, useValue: mockRouter }],
         }).compileComponents();
 
         fixture = TestBed.createComponent(WaitingViewComponent);
