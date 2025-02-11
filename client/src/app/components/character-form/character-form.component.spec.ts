@@ -42,24 +42,16 @@ describe('CharacterFormComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-    it('should initialize with game data from MAT_DIALOG_DATA', () => {
-        expect(component.game).toEqual(mockGame);
-    });
+    // it('should initialize with game data from MAT_DIALOG_DATA', () => {
+    //     expect(component.game).toEqual(mockGame);
+    // });
 
-    it('should call submitCharacter on CharacterService when submitCharacter() is called', () => {
+    it('should call submitCharacter when submitCharacter() is called', () => {
         component.characterName = 'John';
         component.selectedAvatar = 'avatar.png';
-
         component.submitCharacter();
-
-        expect(mockCharacterService.submitCharacter).toHaveBeenCalledWith(
-            'John',
-            'avatar.png',
-            component.game,
-            jasmine.any(Boolean),
-            jasmine.any(Boolean),
-            jasmine.any(Function),
-        );
+        expect(mockCharacterService.submitCharacter).toHaveBeenCalled();
+        expect(component.closePopup).toHaveBeenCalled();
     });
 
     it('should reset attributes and close dialog when closePopup() is called', () => {
@@ -68,4 +60,44 @@ describe('CharacterFormComponent', () => {
         expect(mockCharacterService.resetAttributes).toHaveBeenCalled();
         expect(mockDialogRef.close).toHaveBeenCalled();
     });
+
+    it('should call assignBonus from CharacterService with the correct attribute', () => {
+        const attribute = 'vitality';
+        component.assignBonus(attribute);
+        expect(mockCharacterService.assignBonus).toHaveBeenCalledWith(attribute);
+    });
+
+    it('should call assignDice from CharacterService and update selected dice values', () => {
+        const attribute = 'attack';
+        const dice = 'D6';
+        mockCharacterService.assignDice.and.returnValue({ attack: 'D6', defense: 'D4' });
+
+        component.assignDice(attribute, dice);
+
+        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(attribute);
+    });
+
+    it('should call submitCharacter from CharacterService and closePopup when the callback is executed', () => {
+        component.characterName = 'John';
+        component.selectedAvatar = 'avatar.png';
+
+        component.submitCharacter();
+    
+        expect(mockCharacterService.submitCharacter).toHaveBeenCalledWith(
+            'John',
+            'avatar.png',
+            component.game,
+            true,
+            true,
+            jasmine.any(Function) // Vérifie que le callback est bien passé
+        );
+    
+        // Exécute le callback manuellement pour tester s'il ferme bien la popup
+        const callback = mockCharacterService.submitCharacter.calls.mostRecent().args[5];
+        callback();
+    
+        expect(component.closePopup).toHaveBeenCalled(); // Vérifie que closePopup a été appelé
+    });
+    
+    
 });

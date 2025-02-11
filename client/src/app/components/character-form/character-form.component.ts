@@ -59,7 +59,7 @@ export class CharacterFormComponent {
 
     submitCharacter(): void {
         this.characterService.submitCharacter(this.characterName, this.selectedAvatar, this.game, this.isBonusAssigned(), this.isDiceAssigned(), () =>
-            this.closePopup(),
+        this.closePopup(),
         );
     }
 
