@@ -37,7 +37,7 @@ describe('GameModeService', () => {
     it('should return false if size is not valid', () => {
         const newGameSize = '0';
 
-        expect(service.setGameSize(newGameSize)).toBeFalse;
+        expect(service.setGameSize(newGameSize)).toBeFalse();
     });
 
     it('should reset game mode and size', () => {
