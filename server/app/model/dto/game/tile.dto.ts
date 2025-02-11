@@ -1,6 +1,6 @@
 import { TileType } from '@app/model/database/tile';
 import { IsBoolean, IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { ItemDto } from './item.dto'; // Import the updated ItemDto
+import { ItemDto } from './item.dto';
 
 export class TileDto {
     @IsString()
@@ -19,6 +19,6 @@ export class TileDto {
     isOpen: boolean;
 
     @IsOptional()
-    @ValidateNested() // Still validate the embedded item
-    item?: ItemDto; // Directly store the full Item object
+    @ValidateNested()
+    item?: ItemDto;
 }
