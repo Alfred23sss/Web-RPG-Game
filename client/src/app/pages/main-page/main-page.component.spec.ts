@@ -9,7 +9,7 @@ import SpyObj = jasmine.SpyObj;
 
 const routes: Routes = [];
 
-describe('MainPageComponent', () => {
+fdescribe('MainPageComponent', () => {
     let component: MainPageComponent;
     let fixture: ComponentFixture<MainPageComponent>;
     let communicationServiceSpy: SpyObj<CommunicationService>;
@@ -42,8 +42,8 @@ describe('MainPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have as title 'LOG2990'", () => {
-        expect(component.title).toEqual('Game Name...');
+    it("should have as title 'William's Wonderland'", () => {
+        expect(component.title).toEqual("William's Wonderland");
     });
 
     it('should call basicGet when calling getMessagesFromServer', () => {

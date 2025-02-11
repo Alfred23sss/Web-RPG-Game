@@ -210,12 +210,18 @@ describe('GameService (MongoDB Integration)', () => {
             grid: [
                 [
                     {
-                        id: 'tile-1',
-                        item: { id: 'item-1' },
+                        id: 'tile',
+                        imageSrc: 'test.png',
+                        isOccupied: false,
+                        type: TileType.Default,
+                        isOpen: true,
+                        item: {
+                            ...MOCK_ITEM,
+                            id: 'item',
+                        },
                     },
                 ],
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                'invalidRow' as any,
+                'invalidRow' as unknown as (typeof MOCK_TILE)[],
             ],
         };
 
