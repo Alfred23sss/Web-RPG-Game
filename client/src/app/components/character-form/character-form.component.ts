@@ -32,9 +32,8 @@ export class CharacterFormComponent {
     protected diceTypes = DICE_TYPES;
 
     constructor(
-        // private router: Router,
-        private dialogRef: MatDialogRef<CharacterFormComponent>,
-        private characterService: CharacterService,
+        private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
+        private readonly characterService: CharacterService,
         @Inject(MAT_DIALOG_DATA) public data: { game: Game },
     ) {
         this.game = data.game;
@@ -44,23 +43,21 @@ export class CharacterFormComponent {
         this.characterService.assignBonus(attribute);
     }
 
-    // assignDice(attribute: string, dice: string) {
-    //     const { attack, defense } = this.characterService.assignDice(attribute, dice, this.selectedAttackDice, this.selectedDefenseDice);
-    //     this.selectedAttackDice = attack;
-    //     this.selectedDefenseDice = defense;
-    // }
-
-    assignDice(attribute: string, dice: string) {
+    assignDice(attribute: string) {
         const { attack, defense } = this.characterService.assignDice(attribute);
         this.selectedAttackDice = attack;
         this.selectedDefenseDice = defense;
     }
-    
 
     submitCharacter(): void {
-        this.characterService.submitCharacter(this.characterName, this.selectedAvatar, this.game, this.isBonusAssigned(), this.isDiceAssigned(), () =>
-        this.closePopup(),
-        );
+        this.characterService.submitCharacter({
+            characterName: this.characterName,
+            selectedAvatar: this.selectedAvatar,
+            game: this.game,
+            isBonusAssigned: this.isBonusAssigned(),
+            isDiceAssigned: this.isDiceAssigned(),
+            closePopup: () => this.closePopup(),
+        });
     }
 
     closePopup(): void {

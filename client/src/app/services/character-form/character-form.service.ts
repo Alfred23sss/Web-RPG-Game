@@ -14,9 +14,9 @@ export class CharacterService {
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
     constructor(
-        private router: Router,
-        private snackbarService: SnackbarService,
-        private gameCommunicationService: GameCommunicationService,
+        private readonly router: Router,
+        private readonly snackbarService: SnackbarService,
+        private readonly gameCommunicationService: GameCommunicationService,
     ) {}
 
     assignBonus(attribute: string) {
@@ -37,27 +37,36 @@ export class CharacterService {
             : { attack: DICE_TYPES.D4, defense: DICE_TYPES.D6 };
     }
 
-    submitCharacter(characterName: string,selectedAvatar: string,game: Game,isBonusAssigned: boolean,isDiceAssigned: boolean, closePopup: () => void,
-    ) {
-        this.validateGameAvailability(game, closePopup);
-
-        if (this.isCharacterValid(characterName, selectedAvatar, isBonusAssigned, isDiceAssigned)) {
-            this.proceedToWaitingView(closePopup);
+    submitCharacter(data: {
+        characterName: string;
+        selectedAvatar: string;
+        game: Game;
+        isBonusAssigned: boolean;
+        isDiceAssigned: boolean;
+        closePopup: () => void;
+    }) {
+        this.validateGameAvailability(data.game, data.closePopup);
+        if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
+            this.proceedToWaitingView(data.closePopup);
         } else {
             this.showMissingDetailsError();
         }
     }
 
+    resetAttributes() {
+        this.attributes = { ...INITIAL_VALUES.attributes };
+        this.bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
+        this.diceAssigned = { ...INITIAL_VALUES.diceAssigned };
+    }
+
     private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({
-            next: () => {},
             error: (error) => {
                 if (error.status === HTTP_STATUS.INTERNAL_SERVER_ERROR || error.status === HTTP_STATUS.FORBIDDEN) {
                     this.snackbarService.showMessage(ERROR_MESSAGES.UNAVAILABLE_GAME);
                     this.router.navigate([ROUTES.CREATE_VIEW]);
                     closePopup();
                 }
-                // console.error('Erreur:', error);
             },
         });
     }
@@ -73,11 +82,5 @@ export class CharacterService {
 
     private showMissingDetailsError() {
         this.snackbarService.showMessage(ERROR_MESSAGES.MISSING_CHARACTER_DETAILS);
-    }
-
-    resetAttributes() {
-        this.attributes = { ...INITIAL_VALUES.attributes };
-        this.bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
-        this.diceAssigned = { ...INITIAL_VALUES.diceAssigned };
     }
 }

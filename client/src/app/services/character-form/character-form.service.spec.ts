@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { ATTRIBUTE_TYPES, DICE_TYPES, ERROR_MESSAGES, HTTP_STATUS, INITIAL_VALUES, ROUTES } from '@app/constants/global.constants';
-import { Game } from '@app/interfaces/game'; // Import de l'interface Game
+import { Game } from '@app/interfaces/game';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
@@ -41,7 +41,6 @@ describe('CharacterService', () => {
         expect(service.attributes).toEqual(INITIAL_VALUES.attributes);
     });
 
-    // assignBonus method
     describe('assignBonus', () => {
         it('should assign a bonus to the selected attribute', () => {
             service.assignBonus(ATTRIBUTE_TYPES.VITALITY);
@@ -60,7 +59,6 @@ describe('CharacterService', () => {
         });
     });
 
-    // assignDice method
     describe('assignDice', () => {
         beforeEach(() => {
             service.resetAttributes();
@@ -95,12 +93,11 @@ describe('CharacterService', () => {
         });
     });
 
-    // validateGameAvailability method
     describe('validateGameAvailability', () => {
         let closePopupSpy: jasmine.Spy;
 
         beforeEach(() => {
-            closePopupSpy = jasmine.createSpy(); // Initialisation de `closePopupSpy`
+            closePopupSpy = jasmine.createSpy();
         });
 
         it('should do nothing when game is available', () => {
@@ -186,31 +183,48 @@ describe('CharacterService', () => {
     });
 
     describe('submitCharacter', () => {
-        
         let closePopupSpy: jasmine.Spy;
         let mockGame: Game;
 
         beforeEach(() => {
             closePopupSpy = jasmine.createSpy('closePopup');
             mockGame = { id: '1', name: 'Test Game' } as Game;
-
-            spyOn(service as any, 'validateGameAvailability').and.callFake(() => {});
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            spyOn(service as any, 'validateGameAvailability').and.callFake(() => null);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn(service as any, 'proceedToWaitingView');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn(service as any, 'showMissingDetailsError');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn(service as any, 'isCharacterValid').and.returnValue(true);
         });
 
         it('should proceed to waiting view if character is valid', () => {
-            service.submitCharacter('John', 'avatar.png', mockGame, true, true, closePopupSpy);
+            service.submitCharacter({
+                characterName: 'name',
+                selectedAvatar: 'avatar.png',
+                game: mockGame,
+                isBonusAssigned: true,
+                isDiceAssigned: true,
+                closePopup: closePopupSpy,
+            });
 
             expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
             expect(service['showMissingDetailsError']).not.toHaveBeenCalled();
         });
 
         it('should show missing details error if character is invalid', () => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (service as any).isCharacterValid.and.returnValue(false);
 
-            service.submitCharacter('John', 'avatar.png', mockGame, false, false, closePopupSpy);
+            service.submitCharacter({
+                characterName: 'name',
+                selectedAvatar: 'avatar.png',
+                game: mockGame,
+                isBonusAssigned: false,
+                isDiceAssigned: false,
+                closePopup: closePopupSpy,
+            });
 
             expect(service['showMissingDetailsError']).toHaveBeenCalled();
             expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
