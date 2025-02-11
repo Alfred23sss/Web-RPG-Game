@@ -13,11 +13,9 @@ export class GameModeService {
         this.gameMode = mode;
     }
     setGameSize(size: string): boolean {
-        if (this.isValidSize(size)) {
-            this.gameSize = size;
-            return true;
-        }
-        return false;
+        if (!this.isValidSize(size)) return false;
+        this.gameSize = size;
+        return true;
     }
 
     getGameMode(): string {

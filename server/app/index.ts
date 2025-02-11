@@ -6,8 +6,8 @@ import { json, urlencoded } from 'express';
 
 const bootstrap = async () => {
     const app = await NestFactory.create(AppModule);
-    app.use(json({ limit: '50mb' })); // potentiellement changer ici pour nest(jsp si on peut utiliser nest et express)
-    app.use(urlencoded({ limit: '50mb', extended: true })); // potentiellement changer ici pour nest(jsp si on peut utiliser nest et express)
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ limit: '50mb', extended: true }));
     app.setGlobalPrefix('api');
     app.useGlobalPipes(new ValidationPipe());
     app.enableCors();

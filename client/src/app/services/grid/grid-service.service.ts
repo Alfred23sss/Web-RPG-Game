@@ -32,10 +32,6 @@ export class GridService {
         return this.grid;
     }
 
-    getTile(row: number, col: number) {
-        return this.grid?.[row]?.[col];
-    }
-
     getGridSize(gameSize: string): number {
         return GRID_DIMENSIONS[gameSize as keyof typeof GRID_DIMENSIONS] || GRID_DIMENSIONS[GAME_SIZES.SMALL];
     }

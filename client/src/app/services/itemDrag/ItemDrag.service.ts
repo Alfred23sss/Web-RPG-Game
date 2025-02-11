@@ -32,10 +32,4 @@ export class ItemDragService {
             this.selectedItem.itemCounter--;
         }
     }
-
-    increaseItemCounter(): void {
-        if (this.selectedItem) {
-            this.selectedItem.itemCounter++;
-        }
-    }
 }

@@ -49,21 +49,6 @@ describe('GridService', () => {
         expect(grid).toBe(newGrid);
     });
 
-    it('should return a specific tile', () => {
-        const grid = service.createGrid(SMALL_GRID_SIZE, SMALL_GRID_SIZE);
-        service.setGrid(grid);
-
-        const tile = service.getTile(1, 1);
-
-        expect(tile).toBe(grid[1][1]);
-    });
-
-    it('should return undefined when grid is not set in getTile', () => {
-        const tile = service.getTile(1, 1);
-
-        expect(tile).toBeUndefined();
-    });
-
     it('should return the correct grid size for valid game sizes', () => {
         expect(service.getGridSize('small')).toBe(SMALL_GRID_SIZE);
         expect(service.getGridSize('medium')).toBe(MEDIUM_GRID_SIZE);

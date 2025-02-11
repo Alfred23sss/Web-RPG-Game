@@ -110,15 +110,11 @@ export class ItemBarComponent implements OnInit {
         const draggedItem = this.itemDragService.getSelectedItem();
         const previousTile = this.itemDragService.getPreviousTile();
 
-        if (!draggedItem) {
-            return;
-        }
-        if (draggedItem.name !== item.name) {
-            return;
-        }
-        if (draggedItem.id === item.id) {
-            return;
-        }
+        if (!draggedItem) return;
+
+        if (draggedItem.name !== item.name) return;
+
+        if (draggedItem.id === item.id) return;
 
         item.itemCounter++;
 
