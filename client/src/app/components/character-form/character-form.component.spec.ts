@@ -15,7 +15,7 @@ describe('CharacterFormComponent', () => {
     beforeEach(async () => {
         mockCharacterService = jasmine.createSpyObj<CharacterService>(
             'CharacterService',
-            ['submitCharacter', 'resetAttributes', 'assignBonus', 'assignDice'],
+            ['submitCharacter', 'resetAttributes', 'assignBonus', 'assignDice', 'checkCharacterNameLength'],
             {
                 attributes: { vitality: 5, speed: 5 },
                 bonusAssigned: { vitality: false, speed: false },
@@ -69,8 +69,13 @@ describe('CharacterFormComponent', () => {
 
     it('should reset attributes and close dialog when closePopup() is called', () => {
         component.closePopup();
-
         expect(mockCharacterService.resetAttributes).toHaveBeenCalled();
         expect(mockDialogRef.close).toHaveBeenCalled();
+    });
+
+    it('should call checkCharacterNameLength from CharacterService when updateCharacterName is called', () => {
+        component.characterName = 'ValidName';
+        component.checkCharacterNameLength();
+        expect(mockCharacterService.checkCharacterNameLength).toHaveBeenCalledWith('ValidName');
     });
 });

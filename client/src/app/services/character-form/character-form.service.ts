@@ -59,6 +59,13 @@ export class CharacterService {
         this.diceAssigned = { ...INITIAL_VALUES.diceAssigned };
     }
 
+    checkCharacterNameLength(characterName: string) {
+        const maxLength = 20;
+        if (characterName.length >= maxLength) {
+            this.snackbarService.showMessage(`The maximum name length is ${maxLength} characters.`);
+        }
+    }
+
     private validateGameAvailability(game: Game, closePopup: () => void) {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {

@@ -230,4 +230,16 @@ describe('CharacterService', () => {
             expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
         });
     });
+
+    describe('checkCharacterNameLength', () => {
+        it('should not show a snackbar message when character name is within the valid length', () => {
+            service.checkCharacterNameLength('ValidName');
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should show a snackbar message when character name exceeds the max length', () => {
+            service.checkCharacterNameLength('testWithaLongNameForCharacter');
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('The maximum name length is 20 characters.');
+        });
+    });
 });
