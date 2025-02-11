@@ -42,8 +42,8 @@ describe('MainPageComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it("should have as title 'LOG2990'", () => {
-        expect(component.title).toEqual('Game Name...');
+    it("should have as title 'William's Wonderland'", () => {
+        expect(component.title).toEqual("William's Wonderland");
     });
 
     it('should call basicGet when calling getMessagesFromServer', () => {
@@ -68,7 +68,7 @@ describe('MainPageComponent', () => {
         component.sendTimeToServer();
         component.message.subscribe({
             next: (res) => {
-                expect(res).toContain('Server not responding');
+                expect(res).toContain('The server is not responding');
             },
         });
     });
