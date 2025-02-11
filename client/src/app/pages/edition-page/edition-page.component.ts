@@ -25,8 +25,8 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     gameDescription: string = '';
     game: Game;
     isSaving: boolean = false;
-    private originalGame: Game;
-    private originalItemBar: string;
+    originalGame: Game;
+    originalItemBar: string;
 
     constructor(
         private gameService: GameService,
@@ -57,7 +57,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
             this.game = JSON.parse(JSON.stringify(currentGame));
             this.originalGame = JSON.parse(JSON.stringify(currentGame));
             this.gridService.setGrid(this.game?.grid);
-            this.updateNameAndDescription();
+            this.updateGameAndDescription();
         }
     }
 
@@ -71,7 +71,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
 
     reset() {
         this.game = JSON.parse(JSON.stringify(this.originalGame));
-        this.updateNameAndDescription();
+        this.updateGameAndDescription();
         this.gridService.setGrid(this.game.grid);
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
@@ -86,6 +86,8 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     async save() {
         if (this.isSaving) return;
         this.isSaving = true;
+        this.game.name = this.gameName;
+        this.game.description = this.gameDescription;
 
         if (!this.gameValidationService.validateGame(this.game)) {
             this.isSaving = false;
@@ -95,7 +97,6 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         await this.savePreviewImage();
         this.gameService.updateCurrentGame(this.game);
         this.gameService.saveGame(this.game);
-        this.updateNameAndDescription();
         this.gameService.fetchGames().subscribe(() => {
             this.router.navigate(['/admin']).then(() => {
                 this.isSaving = false;
@@ -112,8 +113,8 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         }
     }
 
-    private updateNameAndDescription() {
-        this.game.name = this.gameName;
-        this.game.description = this.gameDescription;
+    private updateGameAndDescription() {
+        this.gameName = this.game.name;
+        this.gameDescription = this.game.description;
     }
 }

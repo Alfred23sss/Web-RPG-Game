@@ -28,7 +28,7 @@ describe('GameModeService', () => {
     });
 
     it('should set and get gameSize correctly', () => {
-        const newGameSize = '15';
+        const newGameSize = 'medium';
         service.setGameSize(newGameSize);
 
         expect(service.getGameSize()).toBe(newGameSize);
