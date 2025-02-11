@@ -73,13 +73,12 @@ export class GameController {
     async getGame(@Param('id') id: string, @Res() response: Response) {
         try {
             const game = await this.gameService.getGameById(id);
-            if (!game ) {
+            if (!game) {
                 response.status(HttpStatus.NOT_FOUND).json({ message: `Game with id ${id} not found` });
-            } 
+            }
             if (!game.isVisible) {
                 return response.status(HttpStatus.FORBIDDEN).json({ message: `Game with id ${id} is no longer available` });
-            }
-            else {
+            } else {
                 response.status(HttpStatus.OK).json(game);
             }
         } catch (error) {

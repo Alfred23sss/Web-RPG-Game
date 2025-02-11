@@ -207,7 +207,16 @@ describe('GameService (MongoDB Integration)', () => {
         const game = await gameModel.create(MOCK_GAME_DATA);
         const invalidUpdate: UpdateGameDto = {
             id: game.id,
-            grid: [[{ id: 'tile', item: { id: 'item' } } as unknown as typeof MOCK_TILE], 'invalidRow'] as unknown as (typeof MOCK_TILE)[][],
+            grid: [
+                [
+                    {
+                        id: 'tile-1',
+                        item: { id: 'item-1' },
+                    },
+                ],
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                'invalidRow' as any,
+            ],
         };
 
         await expect(service.updateGame(game.id, invalidUpdate)).rejects.toThrow();
