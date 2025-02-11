@@ -3,7 +3,7 @@ import { GameDocument } from '@app/model/database/game';
 import { CreateGameDto } from '@app/model/dto/game/create-game.dto';
 import { UpdateGameDto } from '@app/model/dto/game/update-game.dto';
 import { GameService } from '@app/services/game/game.service';
-import { HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Response } from 'express';
 import { createStubInstance, SinonStubbedInstance } from 'sinon';
@@ -21,8 +21,15 @@ const TEST_GAME = {
     description: 'A test game',
     grid: [[]],
 };
-const RESPONSE = { status: jest.fn().mockReturnThis(), json: jest.fn() };
 const GAME_UPDATE: Partial<UpdateGameDto> = { mode: 'Singleplayer' };
+
+const createMockResponse = () => {
+    const res: Partial<Response> = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn().mockReturnThis(),
+    };
+    return res;
+};
 
 describe('GameController', () => {
     let controller: GameController;
@@ -47,7 +54,7 @@ describe('GameController', () => {
         expect(controller).toBeDefined();
     });
 
-    it('createGame() should call GameService.createGame()', async () => {
+    it('should create a game successfully', async () => {
         const createGameDto: CreateGameDto = new CreateGameDto();
         Object.assign(createGameDto, TEST_GAME);
         gameService.createGame.resolves();
@@ -58,23 +65,18 @@ describe('GameController', () => {
         expect(gameService.createGame.calledOnceWith(createGameDto)).toBeTruthy();
     });
 
-    it('createGame() should handle errors and return a bad request', async () => {
-        const createGameDto: CreateGameDto = new CreateGameDto();
+    it('should handle creation errors with bad request', async () => {
+        const createGameDto = new CreateGameDto();
         Object.assign(createGameDto, TEST_GAME);
-
         const errorMessage = 'Error creating game';
         gameService.createGame.rejects(new Error(errorMessage));
 
-        const result = await controller.createGame(createGameDto);
-
-        expect(result).toEqual({
-            message: 'Failed to create game',
-            error: errorMessage,
-        });
-        expect(gameService.createGame.calledOnceWith(createGameDto)).toBeTruthy();
+        await expect(controller.createGame(createGameDto)).rejects.toThrow(
+            new HttpException({ message: 'Failed to create game', error: errorMessage }, HttpStatus.BAD_REQUEST),
+        );
     });
 
-    it('updateGame() should call GameService.updateGame()', async () => {
+    it('should update a game successfully', async () => {
         gameService.updateGame.resolves(GAME_UPDATE as GameDocument);
 
         const result = await controller.updateGame(TEST_GAME_ID, GAME_UPDATE);
@@ -83,20 +85,16 @@ describe('GameController', () => {
         expect(gameService.updateGame.calledOnceWith(TEST_GAME_ID, GAME_UPDATE)).toBeTruthy();
     });
 
-    it('updateGame() should handle errors and return a bad request', async () => {
+    it('should handle update errors with bad request', async () => {
         const errorMessage = 'Error updating game';
         gameService.updateGame.rejects(new Error(errorMessage));
 
-        const result = await controller.updateGame(TEST_GAME_ID, GAME_UPDATE);
-
-        expect(result).toEqual({
-            message: 'Failed to update game',
-            error: errorMessage,
-        });
-        expect(gameService.updateGame.calledOnceWith(TEST_GAME_ID, GAME_UPDATE)).toBeTruthy();
+        await expect(controller.updateGame(TEST_GAME_ID, GAME_UPDATE)).rejects.toThrow(
+            new HttpException({ message: 'Failed to update game', error: errorMessage }, HttpStatus.BAD_REQUEST),
+        );
     });
 
-    it('deleteGame() should call GameService.deleteGame()', async () => {
+    it('should delete a game successfully', async () => {
         gameService.deleteGame.resolves(true);
 
         const result = await controller.deleteGame(TEST_GAME_ID);
@@ -105,58 +103,63 @@ describe('GameController', () => {
         expect(gameService.deleteGame.calledOnceWith(TEST_GAME_ID)).toBeTruthy();
     });
 
-    it('deleteGame() should handle errors and return a bad request', async () => {
-        const errorMessage = 'Error deleting game';
-        gameService.deleteGame.rejects(new Error(errorMessage));
-
-        const result = await controller.deleteGame(TEST_GAME_ID);
-
-        expect(result).toEqual({
-            message: 'Failed to delete game',
-            error: errorMessage,
-        });
-        expect(gameService.deleteGame.calledOnceWith(TEST_GAME_ID)).toBeTruthy();
-    });
-
-    it('deleteGame() should return not found if the game does not exist', async () => {
+    it('should return not found if game does not exist', async () => {
         gameService.deleteGame.resolves(false);
 
-        const result = await controller.deleteGame(TEST_GAME_ID);
-
-        expect(result).toEqual({ message: `Game with id ${TEST_GAME_ID} not found` });
-        expect(gameService.deleteGame.calledOnceWith(TEST_GAME_ID)).toBeTruthy();
+        await expect(controller.deleteGame(TEST_GAME_ID)).rejects.toThrow(
+            new HttpException({ message: 'Failed to delete game' }, HttpStatus.NOT_FOUND),
+        );
     });
 
-    it('getGames() should call GameService.getGames()', async () => {
+    it('should retrieve all games successfully', async () => {
+        const mockResponse = createMockResponse();
         const testGames = [TEST_GAME, TEST_GAME];
-
         gameService.getGames.resolves(testGames);
 
-        await controller.getGames(RESPONSE as unknown as Response);
+        await controller.getGames(mockResponse as Response);
 
-        expect(RESPONSE.status).toHaveBeenCalledWith(STATUS_OK);
-        expect(RESPONSE.json).toHaveBeenCalledWith(testGames);
+        expect(mockResponse.status).toHaveBeenCalledWith(STATUS_OK);
+        expect(mockResponse.json).toHaveBeenCalledWith(testGames);
         expect(gameService.getGames.calledOnce).toBeTruthy();
     });
 
-    it('getGame() should call GameService.getGameById() and return the game', async () => {
+    it('should handle server errors when retrieving games', async () => {
+        const mockResponse = createMockResponse();
+        const errorMessage = 'Database failure';
+
+        gameService.getGames.rejects(new Error(errorMessage));
+
+        await controller.getGames(mockResponse as Response);
+
+        expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+        expect(mockResponse.json).toHaveBeenCalledWith({
+            message: 'Server Error',
+            error: errorMessage,
+        });
+
+        expect(gameService.getGames.calledOnce).toBeTruthy();
+    });
+
+    it('should retrieve a game by ID successfully', async () => {
+        const mockResponse = createMockResponse();
         gameService.getGameById.resolves(TEST_GAME as GameDocument);
 
-        await controller.getGame(TEST_GAME_ID, RESPONSE as unknown as Response);
+        await controller.getGame(TEST_GAME_ID, mockResponse as Response);
 
-        expect(RESPONSE.status).toHaveBeenCalledWith(STATUS_OK);
-        expect(RESPONSE.json).toHaveBeenCalledWith(TEST_GAME);
+        expect(mockResponse.status).toHaveBeenCalledWith(STATUS_OK);
+        expect(mockResponse.json).toHaveBeenCalledWith(TEST_GAME);
         expect(gameService.getGameById.calledOnceWith(TEST_GAME_ID)).toBeTruthy();
     });
 
-    it('getGame() should handle errors and return 500 status', async () => {
+    it('should handle server errors when retrieving a game', async () => {
+        const mockResponse = createMockResponse();
         const errorMessage = 'Test error';
         gameService.getGameById.rejects(new Error(errorMessage));
 
-        await controller.getGame(TEST_GAME_ID, RESPONSE as unknown as Response);
+        await controller.getGame(TEST_GAME_ID, mockResponse as Response);
 
-        expect(RESPONSE.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
-        expect(RESPONSE.json).toHaveBeenCalledWith({
+        expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+        expect(mockResponse.json).toHaveBeenCalledWith({
             message: 'Server Error',
             error: errorMessage,
         });

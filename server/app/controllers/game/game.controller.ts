@@ -49,10 +49,7 @@ export class GameController {
             const games = await this.gameService.getGames();
             response.status(HttpStatus.OK).json(games);
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-                message: 'Server Error',
-                error: error.message,
-            });
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Server Error', error: error.message });
         }
     }
 
@@ -62,10 +59,7 @@ export class GameController {
             const game = await this.gameService.getGameById(id);
             response.status(HttpStatus.OK).json(game);
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-                message: 'Server Error',
-                error: error.message,
-            });
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Server Error', error: error.message });
         }
     }
 }
