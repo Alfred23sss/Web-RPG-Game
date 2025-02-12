@@ -143,11 +143,11 @@ export enum ErrorMessages {
 }
 
 export enum TileType {
-    Water = 'water',
-    Ice = 'ice',
-    Wall = 'wall',
-    Door = 'door',
-    Default = 'default',
+    Water = 'eau',
+    Ice = 'glace',
+    Wall = 'mur',
+    Door = 'porte',
+    Default = 'défaut',
 }
 
 export enum ItemDescription {
