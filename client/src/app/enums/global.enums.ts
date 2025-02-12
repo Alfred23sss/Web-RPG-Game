@@ -70,7 +70,7 @@ export enum DiceType {
 }
 
 export enum GameMode {
-    Classic = 'Classic',
+    Classic = 'Classique',
     CTF = 'CTF',
     None = '',
 }
