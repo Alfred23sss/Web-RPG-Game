@@ -23,6 +23,19 @@ export enum Routes {
     CreateView = '/create',
 }
 
+export enum ItemName {
+    Home = 'home',
+    Lightning = 'lightning',
+    Potion = 'potion',
+    Stop = 'stop',
+    QuestionMark = 'question',
+    Fire = 'fire',
+    Rubik = 'rubik',
+    Swap = 'swap',
+    Flag = 'flag',
+    Default = 'default',
+}
+
 export enum HttpStatus {
     InternalServerError = 500,
     Forbidden = 403,
