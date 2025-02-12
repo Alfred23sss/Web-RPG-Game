@@ -11,10 +11,10 @@ export class GameController {
     constructor(private readonly gameService: GameService) {}
 
     @Post('create')
-    async createGame(@Body() createGameDto: CreateGameDto): Promise<{ message: string }> {
+    async createGame(@Body() createGameDto: CreateGameDto): Promise<Partial<CreateGameDto>> {
         try {
-            await this.gameService.createGame(createGameDto);
-            return { message: 'Game created successfully' };
+            const game = await this.gameService.createGame(createGameDto);
+            return game;
         } catch (error) {
             throw new HttpException({ message: 'Failed to create game', error: error.message }, HttpStatus.BAD_REQUEST);
         }
