@@ -96,15 +96,15 @@ export class GameService {
         return await this.screenShotService.generatePreview('game-preview');
     }
 
-    getGameIndexById(id: string): number {
+    private getGameIndexById(id: string): number {
         return this.games.findIndex((game) => game.id === id);
     }
 
-    removeGame(id: string): void {
+    private removeGame(id: string): void {
         this.games = this.games.filter((game) => game.id !== id);
     }
 
-    addGame(game: Game): void {
+    private addGame(game: Game): void {
         this.games.push(game);
     }
 

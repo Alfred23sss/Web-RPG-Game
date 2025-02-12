@@ -4,8 +4,8 @@
     @if (visibleGames.length > 0) {
     <ul class="game-list">
         @for (game of visibleGames; let index = $index; track $index) {
-        <li class="game-item">
-            <div class="game-preview" (click)="openDialog(game)">
+        <li class="game-item" (click)="openDialog(game)">
+            <div class="game-preview">
                 <img [src]="game.previewImage" matTooltip="{{ game.description }}"  matTooltipPosition="above" />
             </div>
             <div class="game-info">
@@ -18,7 +18,9 @@
         }
     </ul>
     } @else {
-    <p>Aucun jeu disponible. Dsolé!</p>
+        <h2 class="game-missing">
+            <p>Aucun jeu disponible. Désolé!</p>
+        </h2>
     }
     <div class="button-container">
         <button class="create-button" (click)="navigateToHome()">Retour à l'acceuil</button>

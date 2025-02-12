@@ -8,6 +8,15 @@
     margin: 20px 0;
 }
 
+.game-missing {
+    justify-content: center;
+    text-align: center;
+    color: #ffd700;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 30px;
+    margin: 50px 0;
+}
+
 .container {
     display: flex;
     flex-direction: column;
