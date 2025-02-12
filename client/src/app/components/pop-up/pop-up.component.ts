@@ -3,8 +3,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 
 import { GAME_MODES_LIST, GAME_SIZES_LIST } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
-import { Game, GameMode, GameSize } from '@app/interfaces/game';
+import { ErrorMessages, GameMode, GameSize, Routes } from '@app/enums/global.enums';
+import { Game } from '@app/interfaces/game';
 
 import { GameDecorations } from '@app/interfaces/images';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';

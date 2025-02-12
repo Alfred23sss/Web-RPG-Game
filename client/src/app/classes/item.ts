@@ -1,8 +1,6 @@
-export class Item {
-    private static readonly randomId = 36;
-    private static readonly randomIdLength = 5;
-    private static readonly randomIdStart = 2;
+import { v4 as uuidv4 } from 'uuid';
 
+export class Item {
     id: string = '';
     imageSrc: string = '';
     imageSrcGrey: string = '';
@@ -26,6 +24,6 @@ export class Item {
     }
 
     private generateUniqueId(): string {
-        return `${this.id}-${Date.now()}-${Math.random().toString(Item.randomId).substr(Item.randomIdLength, Item.randomIdStart)}`;
+        return uuidv4();
     }
 }
