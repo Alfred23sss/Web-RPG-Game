@@ -79,3 +79,23 @@ export enum ErrorMessages {
     SomeTilesInnacessible = '❌ Il y a des tuiles inaccesseibles sur le terrain',
     MustPlaceHouseItems = 'items maisons doivent être placées',
 }
+
+export enum TileType {
+    Water = 'water',
+    Ice = 'ice',
+    Wall = 'wall',
+    Door = 'door',
+    Default = 'default',
+}
+
+export enum ItemDescription {
+    Home = 'Point de départ',
+    Lightning = 'paralyse',
+    Potion = 'soigne',
+    Stop = 'arrêt le jeu',
+    QuestionMark = 'objet aléatoire',
+    Fire = 'inflige des brûlure',
+    Rubik = 'bouge les colonnes ou les rangés',
+    Swap = 'échange les personnages',
+    Default = 'rien',
+}

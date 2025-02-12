@@ -2,7 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
-import { TileType } from '@app/interfaces/tile';
+import { TileType } from '@app/enums/global.enums';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ItemBarComponent } from './item-bar.component';

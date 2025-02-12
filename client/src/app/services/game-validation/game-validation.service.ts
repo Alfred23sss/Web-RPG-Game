@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ErrorMessages, GameMode } from '@app/enums/global.enums';
+import { ErrorMessages, GameMode, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { TileType } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 

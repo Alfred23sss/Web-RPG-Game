@@ -7,9 +7,9 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Item } from '@app/classes/item';
-import { GameMode } from '@app/enums/global.enums';
+import { GameMode, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { Tile, TileType } from '@app/interfaces/tile';
+import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { GameValidationService } from './game-validation.service';
 
