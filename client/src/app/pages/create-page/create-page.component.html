@@ -1,0 +1,26 @@
+<div class="container">
+    <h1 class="header-item">Création de jeu</h1>
+
+    @if (visibleGames.length > 0) {
+    <ul class="game-list">
+        @for (game of visibleGames; let index = $index; track $index) {
+        <li class="game-item">
+            <div class="game-preview" (click)="openDialog(game)">
+                <img [src]="game.previewImage" matTooltip="{{ game.description }}"  matTooltipPosition="above" />
+            </div>
+            <div class="game-info">
+                <h3>{{ game.name }}</h3>
+                <p>Taille: {{ game.size }}</p>
+                <p>Mode de jeu: {{ game.mode }}</p>
+                <p>Dernière modification: {{ game.lastModified | date: 'short' }}</p>
+            </div>
+        </li>
+        }
+    </ul>
+    } @else {
+    <p>Aucun jeu disponible. Dsolé!</p>
+    }
+    <div class="button-container">
+        <button class="create-button" (click)="navigateToHome()">Retour à l'acceuil</button>
+    </div>
+</div>

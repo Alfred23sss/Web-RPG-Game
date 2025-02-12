@@ -1,0 +1,6 @@
+<div class="image-container">
+    <img draggable="false" alt="{{ tile.type }}" [src]="tile.imageSrc" class="base-image" />
+    @if(tile.item) {
+    <img draggable="true" alt="Overlay" [src]="tile.item.imageSrc" class="overlay-image" [title]="tile.item.description" />
+    }
+</div>

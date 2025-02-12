@@ -1,0 +1,130 @@
+.header-item {
+    justify-content: center;
+    text-align: center;
+    color: #ffd700;
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 60px;
+    text-shadow: 2px 2px 4px #ff8c00;
+    margin: 20px 0;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.button-container {
+    display: flex;
+    gap: 40px;
+}
+
+.create-button {
+    margin-top: 10px;
+    flex-direction: row;
+    text-align: center;
+    padding: 12px 24px;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition:
+        transform 0.2s ease,
+        background-color 0.2s ease;
+}
+
+.create-button:hover {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, #ffdc5d, #ff8c00);
+}
+
+.game-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    flex-direction: column;
+    background: linear-gradient(135deg, #3c70de98, #7b2eff9e);
+}
+
+.game-title {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.game-preview img {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border: 2px solid;
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: #ffd700;
+    font-family: 'Comic Sans MS';
+    font-size: 14px;
+}
+
+.game-info > * {
+    margin: 0.3rem;
+}
+
+.button {
+    text-align: center;
+    background: linear-gradient(#6b73ff, #000dff);
+    color: #ffd700;
+    font-family: 'Comic Sans MS';
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.button:hover {
+    transform: scale(1.03);
+    background: linear-gradient(#6b73ff, #000dff);
+}
+
+.game-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    width: 75%;
+    padding: 0;
+    justify-content: center;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.game-preview {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.game-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.game-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #ffeb39, #ff8c00);
+    border-radius: 4px;
+}
+
+.game-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #ffc04c, #ff9a00);
+}

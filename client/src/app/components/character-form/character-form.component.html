@@ -1,0 +1,48 @@
+<div [class.gray-background]="showForm" class="character-form-container">
+    @if (showForm) {
+    <div class="character-form_header">
+        <div class="character-form_cancel">
+            <button class="character-form_cancel-button" (click)="closePopup()">
+                <img [src]="xSword" alt="xSword" class="cancel-swords" />
+            </button>
+        </div>
+
+        <h1 id="character-form_title">Créer un personnage</h1>
+    </div>
+
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="characterName" (input)="checkCharacterNameLength()" maxlength="20" />
+
+    <div class="character-form_body">
+        <div class="character-form_avatars">
+            @for (avatar of avatarTypes; track avatar) {
+            <img [src]="avatar" (click)="selectedAvatar = avatar" [class.selected]="selectedAvatar === avatar" alt="Avatar" />
+            }
+        </div>
+
+        <div class="character-form_attributes">
+            @for (attribute of attributeKeys; track attribute) {
+            <div>
+                <span>
+                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} @if (attribute ===
+                    attributeTypes.Attack && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === attributeTypes.Defense &&
+                    selectedDefenseDice) { + {{ selectedDefenseDice }}
+                    }
+                </span>
+
+                @if (attribute === attributeTypes.Vitality || attribute === attributeTypes.Speed) {
+                <button (click)="assignBonus(attribute)" [disabled]="bonusAssigned[attribute]">
+                    +2 {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
+                </button>
+                } @if (attribute === attributeTypes.Attack || attribute === attributeTypes.Defense) {
+                <button (click)="assignDice(attribute)" [disabled]="diceAssigned[attribute]">
+                    {{ diceTypes.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
+                </button>
+                }
+            </div>
+            }
+        </div>
+    </div>
+
+    <button (click)="submitCharacter()">Confirmer</button>
+    }
+</div>

@@ -1,0 +1,33 @@
+<div class="page" cdkDropListGroup>
+    <div class="sidebar">
+        <div class="toolbar-section">
+            <app-toolbar id="toolbar"></app-toolbar>
+        </div>
+        <div class="itembar-section">
+            <app-item-bar id="itembar"></app-item-bar>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div id="game-preview">
+            <app-grid [grid]="game.grid"></app-grid>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <h3>Éditeur de jeux</h3>
+        <div class="info-title">
+            <label for="game-name">Nom du jeu</label>
+            <input id="game-name" type="text" [(ngModel)]="gameName" placeholder="Entrer le nom du jeu" required />
+        </div>
+        <div class="info-title">
+            <label for="game-description">Description du jeu</label>
+            <textarea id="game-description" [(ngModel)]="gameDescription" placeholder="Entrer le nom de la description" required></textarea>
+        </div>
+        <div class="button-grid">
+            <button class="button" (click)="save()" [disabled]="isSaving">{{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}</button>
+            <button class="button" (click)="reset()">Réinitialiser</button>
+            <button class="button" (click)="backToAdmin()">Retour à l'acceuil</button>
+        </div>
+    </div>
+</div>

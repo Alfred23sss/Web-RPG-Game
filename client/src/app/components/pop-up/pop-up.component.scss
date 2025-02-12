@@ -1,0 +1,254 @@
+.popup {
+    padding: 20px;
+    width: 800px;
+    height: 500px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: none;
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 99;
+}
+
+.popup-grid {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.header h2 {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    margin: 0;
+}
+
+.map-size-select {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+}
+
+.map-button {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    background: none;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    position: relative;
+    padding: 5px 20px;
+    border: 2px solid transparent;
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease,
+        text-shadow 0.3s ease;
+}
+
+.map-button:hover {
+    transform: scale(1.1);
+    text-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
+    color: #ffd700;
+}
+
+.map-button::after {
+    content: attr(data-info);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
+
+.map-button:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.map-button.active {
+    transform: scale(1.1);
+    text-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
+    color: #ffd700;
+    border: 2px solid #ffd700;
+}
+
+.confirm-button.active {
+    transform: scale(1.1);
+    color: #ffd700;
+}
+
+.popup-button.active {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ffd700;
+}
+.popup-game-select {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: center;
+}
+
+.popup-cancel {
+    position: absolute;
+    top: 10px;
+    left: 50px;
+}
+
+.cancel-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 1px solid white;
+    background-color: rgb(255, 255, 255);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.cancel-swords {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 50%;
+}
+
+.popup-confirm {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.game-mode-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.confirm-button {
+    background: none;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition:
+        transform 0.3s ease,
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+.confirm-button:hover {
+    transform: scale(1.1);
+    color: #ffd700;
+}
+
+.confirm-button h3 {
+    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    margin: 0;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.popup-button {
+    width: 220px;
+    height: 300px;
+    margin: 30px 15px 0 15px;
+    font-size: 16px;
+    border: 2px solid black;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    border-radius: 8px;
+    cursor: pointer;
+
+    transition:
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease;
+}
+
+.cancel-button:hover {
+    background-color: rgb(255, 255, 255);
+    transform: none;
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.popup-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: #ffd700;
+}
+
+.game-mode-image {
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.8));
+    background-size: cover;
+    background-position: center;
+    background-color: transparent;
+}
+
+.popup-content {
+    width: 100%;
+    padding: 10px;
+    text-align: center;
+    position: absolute;
+    bottom: 0;
+}
+
+.popup-content h3 {
+    color: white;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+}
+.popup-content p {
+    color: #ddd;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
