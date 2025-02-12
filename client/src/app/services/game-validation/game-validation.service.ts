@@ -4,6 +4,7 @@ import { Game } from '@app/interfaces/game';
 import { TileType } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+
 enum TitleLength {
     Min = 0,
     Max = 30,
@@ -25,6 +26,7 @@ enum ItemCount {
     Medium = 10,
     Large = 12,
 }
+
 enum MaxDuration {
     MaxDuration = 10000,
 }
@@ -100,7 +102,7 @@ export class GameValidationService {
             }
         }
         if (terrainTileCount / gridSize <= terrainProportionMin) {
-            errors.push('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
+            errors.push(ErrorMessages.InvalidTerrainAmount);
         }
         return errors;
     }
@@ -108,10 +110,10 @@ export class GameValidationService {
     private validateTitleAndDescription(title: string, description: string): string[] {
         const errors: string[] = [];
         if (!this.isTitleValid(title)) {
-            errors.push('❌ Le nom doit être entre 1 et 30 caractères uniques');
+            errors.push(ErrorMessages.InvalidNameSize);
         }
         if (!this.isDescriptionValid(description)) {
-            errors.push('❌La description ne peut être vide et doit être de moins de 100 caractères');
+            errors.push(ErrorMessages.InvalidDescriptionSize);
         }
         return errors;
     }
@@ -128,7 +130,7 @@ export class GameValidationService {
     }
 
     private validateFlagPlaced(game: Game): string | null {
-        if (!game.grid) return '❌ Aucune grille trouvée';
+        if (!game.grid) return ErrorMessages.GridNotFound;
         if (game.mode !== GameMode.CTF) return null;
         for (const row of game.grid) {
             for (const tile of row) {
@@ -137,11 +139,11 @@ export class GameValidationService {
                 }
             }
         }
-        return '❌ Le drapeau doit être placé sur la grille';
+        return ErrorMessages.InvalidFlagPlacement;
     }
 
     private validateHomeItemsPlaced(game: Game): string | null {
-        if (!game.grid) return '❌ Aucune grille trouvée';
+        if (!game.grid) return ErrorMessages.GridNotFound;
         const requiredHomeItems =
             game.size === GameSize.Small
                 ? GameSize.SmallItemCount
@@ -156,11 +158,11 @@ export class GameValidationService {
                 }
             }
         }
-        return homeItemCount !== requiredHomeItems ? `❌ ${requiredHomeItems} items maisons doivent être placées` : null;
+        return homeItemCount !== requiredHomeItems ? `❌ ${requiredHomeItems} ${ErrorMessages.MustPlaceHouseItems}` : null;
     }
 
     private validateItemCount(game: Game): string | null {
-        if (!game.grid) return '❌ Aucune grille trouvée';
+        if (!game.grid) return ErrorMessages.GridNotFound;
         let itemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
@@ -170,17 +172,17 @@ export class GameValidationService {
             }
         }
         const requiredItemCount = game.size === GameSize.Small ? ItemCount.Small : game.size === GameSize.Medium ? ItemCount.Medium : ItemCount.Large;
-        return itemCount !== requiredItemCount ? '❌ Tous les items doivent être placées' : null;
+        return itemCount !== requiredItemCount ? ErrorMessages.ItemsNotPlaced : null;
     }
 
-    private validateAllTerrainAccessible(game: Game): string[] {
+    private validateAllTerrainAccessible(game: Game): ErrorMessages[] | string[] {
         if (!game.grid || game.grid.length === 0) {
-            return ['❌ Aucune grille trouvée'];
+            return [ErrorMessages.GridNotFound];
         }
 
         const start = this.findAccessibleStart(game);
         if (!start) {
-            return ['❌ Aucune tuile de terrain accessible trouvée'];
+            return [ErrorMessages.InnacessibleTerrain];
         }
 
         const visited = this.performBFS(game, start.row, start.col);
@@ -250,7 +252,7 @@ export class GameValidationService {
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < numCols; j++) {
                 if (game.grid[i]?.[j]?.type !== TileType.Wall && !visited[i][j]) {
-                    return ['❌ Il y a des tuiles inaccesseibles sur le terrain'];
+                    return [ErrorMessages.SomeTilesInnacessible];
                 }
             }
         }

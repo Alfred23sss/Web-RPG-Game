@@ -57,5 +57,12 @@ export enum ErrorMessages {
     FailedLoad = 'Échec du chargement des jeux',
     GridNotFound = '❌ Aucune grille trouvée',
     InvalidDoorPlacement = '❌ Une ou plusieurs portes ne sont pas correctement placées',
-    
+    InvalidTerrainAmount = '❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)',
+    InvalidNameSize = '❌ Le nom doit être entre 1 et 30 caractères uniques',
+    InvalidDescriptionSize = '❌La description ne peut être vide et doit être de moins de 100 caractères',
+    InvalidFlagPlacement = '❌ Le drapeau doit être placé sur la grille',
+    ItemsNotPlaced = '❌ Tous les items doivent être placées',
+    InnacessibleTerrain = '❌ Aucune tuile de terrain accessible trouvée',
+    SomeTilesInnacessible = '❌ Il y a des tuiles inaccesseibles sur le terrain',
+    MustPlaceHouseItems = 'items maisons doivent être placées',
 }

@@ -97,7 +97,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', {
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', {
             duration: 10000,
         });
     });
@@ -347,7 +347,7 @@ describe('GameValidationService', () => {
         const grid = Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => ({ type: TileType.Wall })));
         const game = { grid, size: '10' } as Game;
         const result = service['validateHalfTerrain'](game);
-        expect(result).toContain('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
+        expect(result).toContain('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
     });
 
     it('performBFS should return an empty tab if game.grid is undefined', () => {
