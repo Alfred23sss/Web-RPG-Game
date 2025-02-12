@@ -5,7 +5,7 @@ import { ImageType, ItemDescription, ItemType, TileType } from '@app/enums/globa
 import { Tile } from '@app/interfaces/tile';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
-import { TileService } from '@app/services/tile/tile.service';
+import { TileService } from '@app/services/tile/Tile.service';
 import { ToolService } from '@app/services/tool/tool.service';
 
 describe('TileService', () => {
