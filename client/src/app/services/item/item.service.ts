@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
-import { GameSize } from '@app/interfaces/game';
+import { GameSize } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 

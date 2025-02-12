@@ -2,8 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/classes/item';
-import { ItemType } from '@app/interfaces/images';
-import { ItemDescription } from '@app/interfaces/tile';
+import { ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 
@@ -27,7 +26,7 @@ export class ItemBarComponent implements OnInit {
         this.items = [
             {
                 id: '0',
-                name: 'lightning',
+                name: ItemName.Lightning,
                 imageSrc: ItemType.Lightning,
                 imageSrcGrey: ItemType.LightningGray,
                 itemCounter: 1,
@@ -35,7 +34,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '1',
-                name: 'potion',
+                name: ItemName.Potion,
                 imageSrc: ItemType.Potion,
                 imageSrcGrey: ItemType.PotionGray,
                 itemCounter: 1,
@@ -43,7 +42,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '2',
-                name: 'rubik',
+                name: ItemName.Rubik,
                 imageSrc: ItemType.Rubik,
                 imageSrcGrey: ItemType.RubikGray,
                 itemCounter: 1,
@@ -51,7 +50,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '3',
-                name: 'stop',
+                name: ItemName.Stop,
                 imageSrc: ItemType.Stop,
                 imageSrcGrey: ItemType.StopGray,
                 itemCounter: 1,
@@ -59,7 +58,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '4',
-                name: 'fire',
+                name: ItemName.Fire,
                 imageSrc: ItemType.Fire,
                 imageSrcGrey: ItemType.FireGray,
                 itemCounter: 1,
@@ -67,7 +66,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '5',
-                name: 'swap',
+                name: ItemName.Swap,
                 imageSrc: ItemType.Swap,
                 imageSrcGrey: ItemType.SwapGray,
                 itemCounter: 1,
@@ -75,7 +74,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '6',
-                name: 'home',
+                name: ItemName.Home,
                 imageSrc: ItemType.Home,
                 imageSrcGrey: ItemType.HomeGray,
                 itemCounter: 2,
@@ -83,7 +82,7 @@ export class ItemBarComponent implements OnInit {
             },
             {
                 id: '7',
-                name: 'question',
+                name: ItemName.QuestionMark,
                 imageSrc: ItemType.QuestionMark,
                 imageSrcGrey: ItemType.QuestionMarkGray,
                 itemCounter: 2,

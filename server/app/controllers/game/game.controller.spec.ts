@@ -44,9 +44,9 @@ describe('GameController', () => {
 
     it('should create a game successfully', async () => {
         const createGameDto = Object.assign(new CreateGameDto(), MOCK_GAME);
-        gameService.createGame.resolves();
-
-        await expect(controller.createGame(createGameDto)).resolves.toEqual({ message: 'Game created successfully' });
+        const gameDocumentMock = { ...MOCK_GAME, _id: MOCK_GAME_ID } as GameDocument;
+        gameService.createGame.resolves(gameDocumentMock);
+        await expect(controller.createGame(createGameDto)).resolves.toEqual(gameDocumentMock);
     });
 
     it('should handle game creation failure', async () => {

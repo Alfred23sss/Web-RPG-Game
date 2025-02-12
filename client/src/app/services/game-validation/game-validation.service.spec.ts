@@ -7,8 +7,9 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Item } from '@app/classes/item';
-import { Game, GameMode } from '@app/interfaces/game';
-import { Tile, TileType } from '@app/interfaces/tile';
+import { GameMode, TileType } from '@app/enums/global.enums';
+import { Game } from '@app/interfaces/game';
+import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { GameValidationService } from './game-validation.service';
 
@@ -97,7 +98,7 @@ describe('GameValidationService', () => {
         };
 
         expect(service.validateGame(game)).toBeFalse();
-        expect(snackBarMock.open).toHaveBeenCalledWith('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', {
+        expect(snackBarMock.open).toHaveBeenCalledWith('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)', 'Close', {
             duration: 10000,
         });
     });
@@ -347,7 +348,7 @@ describe('GameValidationService', () => {
         const grid = Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => ({ type: TileType.Wall })));
         const game = { grid, size: '10' } as Game;
         const result = service['validateHalfTerrain'](game);
-        expect(result).toContain('❌ LA grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
+        expect(result).toContain('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
     });
 
     it('performBFS should return an empty tab if game.grid is undefined', () => {

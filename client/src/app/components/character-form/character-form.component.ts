@@ -2,10 +2,9 @@ import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType, DiceType } from '@app/enums/global.enums';
+import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
 
 import { Game } from '@app/interfaces/game';
-import { AvatarType, GameDecorations } from '@app/interfaces/images';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 
 @Component({
