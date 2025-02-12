@@ -1,18 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, GameMode, GameSize } from '@app/enums/global.enums';
-
+import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 export const BONUS_VALUE = 2;
-
-// doit sortir de const mettre dans interface
-interface BonusAssigned {
-    [AttributeType.Vitality]: boolean;
-    [AttributeType.Speed]: boolean;
-}
-
-interface DiceAssigned {
-    [AttributeType.Attack]: boolean;
-    [AttributeType.Defense]: boolean;
-}
 
 export const INITIAL_VALUES = {
     attributes: {
