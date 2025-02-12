@@ -1,5 +1,5 @@
 <div class="container">
-    <h1 class="header-item">Game Manager</h1>
+    <h1 class="header-item">Gestionnaire De Jeu</h1>
     @if(games && games.length > 0) {
     <ul class="game-list">
         @for(game of games; let index = $index; track $index) {
@@ -9,22 +9,22 @@
             </div>
             <div class="game-info">
                 <h3>{{ game.name }}</h3>
-                <p>Size: {{ game.size }}x{{ game.size }}</p>
-                <p>Game Mode: {{ game.mode }}</p>
-                <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
+                <p>Taille: {{ game.size }}x{{ game.size }}</p>
+                <p>Mode de jeu: {{ game.mode }}</p>
+                <p>Dernière modification: {{ game.lastModified | date: 'short' }}</p>
 
-                <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">Modify Game</button>
-                <button class="button" (click)="deleteGame(game.id)">Delete</button>
-                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Show Game </label>
+                <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">Modifier le jeu</button>
+                <button class="button" (click)="deleteGame(game.id)">Supprimer</button>
+                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu </label>
             </div>
         </li>
         }
     </ul>
     } @else {
-    <p>No games available. Please add a game.</p>
+    <p>Aucun jeu disponible. S'il vous plaît, créez-en un.</p>
     }
     <div class="button-container">
-        <button class="create-button" (click)="navigateToHome()">Back to Home</button>
-        <button class="create-button" (click)="openDialog()">Create Game</button>
+        <button class="create-button" (click)="navigateToHome()">Retour Acceuil</button>
+        <button class="create-button" (click)="openDialog()">Créer Un Jeu</button>
     </div>
 </div>

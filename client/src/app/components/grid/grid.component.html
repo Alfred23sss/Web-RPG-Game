@@ -5,8 +5,8 @@
         <app-tile
             [tile]="tile"
             [ngClass]="{
-                'invalid-drop': tile.type === 'wall' || tile.isOccupied,
-                'valid-drop': tile.type !== 'wall' && !tile.isOccupied
+                'invalid-drop': tile.type === tileType.Wall || tile.isOccupied,
+                'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied
             }"
         >
         </app-tile>
