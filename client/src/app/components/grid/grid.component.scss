@@ -1,10 +1,12 @@
-
 .grid-container {
     width: 100%;
     height: 100%;
     display: grid;
     background-color: #ddd;
-    border: 2px solid #000;
+    border: 4px solid #ffd700;
+    background: #333;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    box-sizing: border-box;
 }
 
 .grid-row {
@@ -27,5 +29,5 @@ app-tile {
 }
 
 app-tile:hover {
-    border-color: #00f;
+    border-color: #ffd700;
 }
