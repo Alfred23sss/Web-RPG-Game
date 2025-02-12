@@ -12,6 +12,7 @@ div {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    overflow: hidden;
 }
 
 .cdk-drag-preview {
@@ -24,6 +25,7 @@ div {
     align-items: center;
     height: 100vh;
     width: 100%;
+    overflow: hidden;
 }
 
 .sidebar {
@@ -52,6 +54,7 @@ div {
     color: #ffd700;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     overflow: hidden;
+    padding-bottom: 20px;
 }
 
 .section-title {
@@ -62,8 +65,9 @@ div {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-grow: 1;
     width: 50%;
-    height: 50%;
+    height: 100%;
 }
 
 .toolbar-section,
@@ -72,6 +76,7 @@ div {
     flex-direction: column;
     align-items: center;
     width: 100%;
+    margin-bottom: 40px;
 }
 
 .info-title {
