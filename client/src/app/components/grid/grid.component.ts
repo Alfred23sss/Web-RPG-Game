@@ -2,7 +2,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { Tile } from '@app/interfaces/tile';
+import { Tile, TileType } from '@app/interfaces/tile';
 
 @Component({
     selector: 'app-grid',
@@ -13,4 +13,5 @@ import { Tile } from '@app/interfaces/tile';
 })
 export class GridComponent {
     @Input() grid: Tile[][] | undefined = [];
+    tileType = TileType;
 }

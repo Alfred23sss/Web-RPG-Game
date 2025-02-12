@@ -82,10 +82,10 @@ export enum GameSize {
 }
 
 export enum AttributeType {
-    Vitality = 'Vitality',
-    Speed = 'Speed',
-    Attack = 'Attack',
-    Defense = 'Defense',
+    Vitality = 'Vitalité',
+    Speed = 'Vitesse',
+    Attack = 'Attaque',
+    Defense = 'Défense',
 }
 
 export enum Routes {

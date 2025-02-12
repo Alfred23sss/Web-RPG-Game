@@ -1,5 +1,5 @@
 <div class="container">
-    <h1 class="header-item">Create Game</h1>
+    <h1 class="header-item">Création de jeu</h1>
 
     @if (visibleGames.length > 0) {
     <ul class="game-list">
@@ -10,17 +10,17 @@
             </div>
             <div class="game-info">
                 <h3>{{ game.name }}</h3>
-                <p>Size: {{ game.size }}</p>
-                <p>Game Mode: {{ game.mode }}</p>
-                <p>Last Modified: {{ game.lastModified | date: 'short' }}</p>
+                <p>Taille: {{ game.size }}</p>
+                <p>Mode de jeu: {{ game.mode }}</p>
+                <p>Dernière modification: {{ game.lastModified | date: 'short' }}</p>
             </div>
         </li>
         }
     </ul>
     } @else {
-    <p>No games available. Sorry!</p>
+    <p>Aucun jeu disponible. Dsolé!</p>
     }
     <div class="button-container">
-        <button class="create-button" (click)="navigateToHome()">Back to Home</button>
+        <button class="create-button" (click)="navigateToHome()">Retour à l'acceuil</button>
     </div>
 </div>
