@@ -49,28 +49,6 @@ describe('ItemService', () => {
         expect(service.getItems()).toEqual([]);
     });
 
-    it('should decrement item counter', () => {
-        const testItem = new Item({ id: '1', name: 'potion', itemCounter: 2 });
-        service.setItems([testItem]);
-
-        service.decrementItemCounter('potion');
-        expect(testItem.itemCounter).toBe(1);
-    });
-
-    it('should not decrement below zero', () => {
-        const testItem = new Item({ id: '1', name: 'potion', itemCounter: 0 });
-        service.setItems([testItem]);
-
-        service.decrementItemCounter('potion');
-        expect(testItem.itemCounter).toBe(0);
-    });
-
-    it('should not decrement counter if item does not exist', () => {
-        service.setItems([]);
-        service.decrementItemCounter('nonexistent');
-        expect(service.getItems()).toEqual([]);
-    });
-
     it('should update item count based on game size', () => {
         const mockGame = {
             id: 'test-game',

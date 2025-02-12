@@ -26,15 +26,15 @@ export class AdminPageComponent implements OnInit {
         private router: Router,
     ) {}
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.loadGames();
     }
 
-    openDialog() {
+    openDialog(): void {
         this.dialogRef.open(PopUpComponent);
     }
 
-    deleteGame(id: string) {
+    deleteGame(id: string): void {
         this.snackbarService.showConfirmation(ErrorMessages.ConfirmDeletion).subscribe((confirmed) => {
             if (confirmed) {
                 this.gameService.deleteGame(id).subscribe({
@@ -45,23 +45,23 @@ export class AdminPageComponent implements OnInit {
         });
     }
 
-    updateCurrentGame(id: string) {
+    updateCurrentGame(id: string): void {
         const game = this.gameService.getGameById(id);
         if (game) {
             this.gameService.updateCurrentGame(game);
         }
     }
 
-    toggleVisibility(id: string, event: Event) {
+    toggleVisibility(id: string, event: Event): void {
         const isVisible = (event.target as HTMLInputElement).checked;
         this.gameService.updateGameVisibility(id, isVisible);
     }
 
-    navigateToHome() {
+    navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
     }
 
-    private loadGames() {
+    private loadGames(): void {
         this.gameService.fetchGames().subscribe({
             next: (response) => (this.games = response),
             error: () => this.snackbarService.showMessage(ErrorMessages.FailedLoad),

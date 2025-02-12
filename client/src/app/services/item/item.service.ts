@@ -36,13 +36,6 @@ export class ItemService {
         }
     }
 
-    decrementItemCounter(name: string): void {
-        const item = this.getItemByName(name);
-        if (item && item.itemCounter > 0) {
-            item.itemCounter--;
-        }
-    }
-
     setItemCount(): void {
         const currentGame = this.gameService.getCurrentGame();
         if (!currentGame) {

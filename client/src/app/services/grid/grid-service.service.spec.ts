@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { GameSize } from '@app/enums/global.enums';
-import { ImageType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType } from '@app/interfaces/images';
+import { Tile, TileType } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
 
 const SMALL_GRID_SIZE = 10;
@@ -47,21 +48,6 @@ describe('GridService', () => {
         const grid = service.getGrid();
 
         expect(grid).toBe(newGrid);
-    });
-
-    it('should return a specific tile', () => {
-        const grid = service.createGrid(SMALL_GRID_SIZE, SMALL_GRID_SIZE);
-        service.setGrid(grid);
-
-        const tile = service.getTile(1, 1);
-
-        expect(tile).toBe(grid[1][1]);
-    });
-
-    it('should return undefined when grid is not set in getTile', () => {
-        const tile = service.getTile(1, 1);
-
-        expect(tile).toBeUndefined();
     });
 
     it('should return the correct grid size for valid game sizes', () => {

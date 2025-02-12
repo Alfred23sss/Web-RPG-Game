@@ -295,7 +295,7 @@ export class GameValidationService {
         return isNotEmpty && isWithinLimit;
     }
 
-    private showError(message: string) {
+    private showError(message: string): void {
         this.snackBar.showMessage(message, 'Close', MaxDuration.MaxDuration);
     }
 }

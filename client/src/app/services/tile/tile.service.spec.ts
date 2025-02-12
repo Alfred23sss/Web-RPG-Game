@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { ImageType, ItemDescription, ItemType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType, ItemType } from '@app/interfaces/images';
+import { ItemDescription, Tile, TileType } from '@app/interfaces/tile';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';

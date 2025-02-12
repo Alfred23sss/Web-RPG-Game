@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ImageType, ItemDescription, ItemType, Tile, TileType } from '@app/interfaces/tile';
+import { ImageType, ItemType } from '@app/interfaces/images';
+import { ItemDescription, Tile, TileType } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/Tile.service';
 import { TileComponent } from './tile.component';
@@ -140,5 +141,14 @@ describe('TileComponent', () => {
         component.onDrop(event);
 
         expect(TileComponent.activeButton).toBeNull();
+    });
+
+    it('should return if active button is not null', () => {
+        TileComponent.activeButton = 1;
+
+        const event = new MouseEvent('mousedown', { button: 0, bubbles: true });
+        component.onMouseDown(event);
+
+        expect(TileComponent.activeButton).toBe(1);
     });
 });

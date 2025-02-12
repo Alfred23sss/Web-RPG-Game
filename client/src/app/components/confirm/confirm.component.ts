@@ -12,11 +12,11 @@ export class ConfirmComponent {
         @Inject(MAT_SNACK_BAR_DATA) public data: { message: string },
     ) {}
 
-    onYesClick() {
+    onYesClick(): void {
         this.snackBarRef.dismissWithAction();
     }
 
-    onNoClick() {
+    onNoClick(): void {
         this.snackBarRef.dismiss();
     }
 }
