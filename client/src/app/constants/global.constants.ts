@@ -45,22 +45,22 @@ export const GRID_DIMENSIONS: Record<GameSize, number> = {
 export const DEFAULT_GAME_IMAGE = 'assets/images/example.png';
 
 export const GAME_SIZES_LIST = [
-    { key: GameSize.Small, label: 'Small', info: 'Grid: 10x10, Players: 2, Items: 2' },
-    { key: GameSize.Medium, label: 'Medium', info: 'Grid: 15x15, Players: 4, Items: 4' },
-    { key: GameSize.Large, label: 'Large', info: 'Grid: 20x20, Players: 6, Items: 6' },
+    { key: GameSize.Small, label: 'Petit', info: 'Grille: 10x10, Joeurs: 2, Items: 2' },
+    { key: GameSize.Medium, label: 'Moyen', info: 'Grille: 15x15, Joeurs: 4, Items: 4' },
+    { key: GameSize.Large, label: 'Large', info: 'Grille: 20x20, Joueurs: 6, Items: 6' },
 ];
 
 export const GAME_MODES_LIST = [
     {
         key: GameMode.Classic,
-        label: 'Classic',
-        description: 'A traditional game mode where strategy is key.',
+        label: 'Classique',
+        description: 'Un mode de jeu traditionnel où la stratégie est la clé.',
         backgroundImage: "url('/assets/gamemodes/classic-game.png')",
     },
     {
         key: GameMode.CTF,
-        label: 'Capture The Flag',
-        description: "Compete to secure your opponent's flag!",
+        label: 'Capture Le Drapeau',
+        description: 'Rivalisez pour sécuriser le drapeau de votre adversaire !',
         backgroundImage: "url('/assets/gamemodes/CTF-game.png')",
     },
 ];

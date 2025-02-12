@@ -1,13 +1,13 @@
 import { Tile } from './tile';
 
 export enum GameMode {
-    Classic = 'Classic',
+    Classic = 'Classique',
     CTF = 'CTF',
     None = '',
 }
 export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
+    Small = 'petit',
+    Medium = 'moyen',
     Large = 'large',
     None = '',
 }
