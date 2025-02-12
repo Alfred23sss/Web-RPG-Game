@@ -1,5 +1,5 @@
 import { Item } from '@app/classes/item';
-import { TileType} from '@app/enums/global.enums';
+import { TileType } from '@app/enums/global.enums';
 
 export interface Tile {
     id: string;

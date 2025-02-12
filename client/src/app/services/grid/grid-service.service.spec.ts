@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { GameSize, TileType } from '@app/enums/global.enums';
-import { ImageType } from '@app/interfaces/images';
+import { GameSize, ImageType, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
 

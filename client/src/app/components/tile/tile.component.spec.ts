@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { ItemDescription, TileType } from '@app/enums/global.enums';
-import { ImageType, ItemType } from '@app/interfaces/images';
+import { ImageType, ItemDescription, ItemType, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { TileService } from '@app/services/tile/tile.service';

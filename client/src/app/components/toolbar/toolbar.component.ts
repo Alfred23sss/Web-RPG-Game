@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TileType } from '@app/enums/global.enums';
-import { ImageType } from '@app/interfaces/images';
+import { ImageType, TileType } from '@app/enums/global.enums';
 import { ToolService } from '@app/services/tool/tool.service';
 
 @Component({

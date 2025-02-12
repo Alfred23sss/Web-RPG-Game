@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ImageType } from '@app/interfaces/images';
-import { TileType } from '@app/enums/global.enums';
+import { ImageType, TileType } from '@app/enums/global.enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({

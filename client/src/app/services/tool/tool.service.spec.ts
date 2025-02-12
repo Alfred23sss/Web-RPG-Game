@@ -1,6 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { TileType } from '@app/enums/global.enums';
-import { ImageType } from '@app/interfaces/images';
+import { ImageType, TileType } from '@app/enums/global.enums';
 import { ToolService } from './tool.service';
 
 describe('TimeService', () => {
