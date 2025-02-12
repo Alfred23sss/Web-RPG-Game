@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { ImageType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { ImageType } from '@app/interfaces/images';
-import { Tile, TileType } from '@app/interfaces/tile';
+import { Tile } from '@app/interfaces/tile';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { ScreenshotService } from '@app/services/generate-screenshots/generate-screenshots.service';
 import { GridService } from '@app/services/grid/grid-service.service';

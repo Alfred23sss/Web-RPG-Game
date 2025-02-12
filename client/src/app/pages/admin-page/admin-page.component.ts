@@ -4,9 +4,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages, GameDecorations, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { GameDecorations } from '@app/interfaces/images';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
