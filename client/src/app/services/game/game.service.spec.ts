@@ -115,31 +115,31 @@ describe('GameService', () => {
 
     it('should call delete game from gamecommunication service and with correct id', () => {
         gameCommunicationServiceSpy.deleteGame.and.returnValue(of(testGame1));
-
-        spyOn(service, 'removeGame');
+        service.games = [testGame1];
 
         service.deleteGame(testGame1.id).subscribe();
 
         expect(gameCommunicationServiceSpy.deleteGame).toHaveBeenCalledWith(testGame1.id);
+        expect(service.getGames()).not.toContain(testGame1);
     });
 
-    it('should add game', () => {
-        service.addGame(testGame1);
+    it('should add game when saveGame is called with a new game', () => {
+        gameCommunicationServiceSpy.saveGame.and.returnValue(of(testGame1));
 
-        expect(service['games']).toContain(testGame1);
+        service.saveGame(testGame1);
+
+        expect(service.getGames()).toContain(testGame1);
     });
 
     it('should get all games', () => {
-        service.addGame(testGame1);
-        service.addGame(testGame2);
+        service.games = [testGame1, testGame2];
 
         const games = service.getGames();
         expect(games).toEqual([testGame1, testGame2]);
     });
 
     it('should get a game by ID', () => {
-        service.addGame(testGame1);
-        service.addGame(testGame2);
+        service.games = [testGame1, testGame2];
 
         const fetchedGame = service.getGameById(testGame1.id);
         expect(fetchedGame).toEqual(testGame1);
@@ -148,13 +148,11 @@ describe('GameService', () => {
         expect(nonExistentGame).toBeUndefined();
     });
 
-    it('should remove the game by id', () => {
-        service.addGame(testGame1);
-        service.addGame(testGame2);
+    it('should remove the game by id when deleteGame is called', () => {
+        service.games = [testGame1, testGame2];
+        gameCommunicationServiceSpy.deleteGame.and.returnValue(of(testGame1));
 
-        expect(service.getGames().length).toBe(2);
-
-        service.removeGame(testGame1.id);
+        service.deleteGame(testGame1.id).subscribe();
 
         expect(service.getGames().length).toBe(1);
         expect(service.getGameById(testGame1.id)).toBeUndefined();
@@ -166,49 +164,38 @@ describe('GameService', () => {
 
         service.fetchGames().subscribe(() => {
             expect(gameCommunicationServiceSpy.getAllGames).toHaveBeenCalled();
-
             expect(service.getGames()).toEqual([testGame1]);
         });
     });
 
     it('should update game visibility and save the game', () => {
-        spyOn(service, 'getGameById').and.returnValue(testGame1);
-
-        spyOn(service, 'saveGame');
+        service.games = [testGame1];
+        gameCommunicationServiceSpy.updateGame.and.returnValue(of(testGame1));
 
         const newVisibility = false;
         service.updateGameVisibility(testGame1.id, newVisibility);
 
-        expect(service.getGameById).toHaveBeenCalledWith(testGame1.id);
-
-        expect(testGame1.isVisible).toBe(newVisibility);
-
-        expect(service.saveGame).toHaveBeenCalledWith(testGame1);
-    });
-
-    it('should update existing game if it exists', () => {
-        spyOn(service, 'getGameById').and.returnValue(testGame1);
-
-        gameCommunicationServiceSpy.updateGame.and.returnValue(of(testGame1));
-
-        service.saveGame(testGame1);
-
-        expect(service.getGameById).toHaveBeenCalledWith(testGame1.id);
+        expect(service.getGameById(testGame1.id)?.isVisible).toBe(newVisibility);
         expect(gameCommunicationServiceSpy.updateGame).toHaveBeenCalledWith(testGame1.id, testGame1);
     });
 
+    it('should update existing game if it exists', () => {
+        service.games = [testGame1];
+        const updatedGame = { ...testGame1, name: 'Updated Name' };
+        gameCommunicationServiceSpy.updateGame.and.returnValue(of(updatedGame));
+
+        service.saveGame(testGame1);
+
+        expect(gameCommunicationServiceSpy.updateGame).toHaveBeenCalledWith(testGame1.id, testGame1);
+        expect(service.getGames()[0]).toEqual(updatedGame);
+    });
+
     it('should save new game if it does not exist', () => {
-        spyOn(service, 'getGameById').and.returnValue(undefined);
-
-        spyOn(service, 'saveGame').and.callThrough();
-
-        const spy = spyOn(service as unknown as { saveNewGame: (gameToAdd: Game) => void }, 'saveNewGame');
+        gameCommunicationServiceSpy.saveGame.and.returnValue(of(testGame2));
 
         service.saveGame(testGame2);
 
-        expect(service.getGameById).toHaveBeenCalledWith(testGame2.id);
-
-        expect(spy).toHaveBeenCalledWith(testGame2);
+        expect(service.getGames()).toContain(testGame2);
     });
 
     it('should return the current game if it exists', () => {
@@ -231,7 +218,7 @@ describe('GameService', () => {
     });
 
     it('should return true if the game name is already used by another game', () => {
-        service['games'] = [testGame1, testGame2];
+        service.games = [testGame1, testGame2];
 
         expect(service.isGameNameUsed(testGame1.name)).toBe(true);
     });
@@ -240,24 +227,12 @@ describe('GameService', () => {
         const updatedGame = { ...testGame1, name: 'Updated Name' };
         service.games = [testGame1];
 
-        gameCommunicationServiceSpy.updateGame.and.returnValue(of(updatedGame)); // Change juste le return
+        gameCommunicationServiceSpy.updateGame.and.returnValue(of(updatedGame));
 
         service['updateExistingGame'](testGame1);
 
         expect(gameCommunicationServiceSpy.updateGame).toHaveBeenCalledWith(testGame1.id, testGame1);
         expect(service.games[0]).toEqual(updatedGame);
-    });
-
-    it('should save a new game and add it to the games array', () => {
-        gameCommunicationServiceSpy.saveGame.calls.reset();
-
-        const saveGameSpy = gameCommunicationServiceSpy.saveGame.and.returnValue(of(testGame1));
-        const addGameSpy = spyOn(service, 'addGame');
-
-        service['saveNewGame'](testGame1);
-
-        expect(saveGameSpy).toHaveBeenCalledWith(testGame1);
-        expect(addGameSpy).toHaveBeenCalledWith(testGame1);
     });
 
     it('should call generatePreview and return the preview image', async () => {
