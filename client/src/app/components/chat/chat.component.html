@@ -1,0 +1,10 @@
+<div>
+    <h1>Chat</h1>
+    <input [(ngModel)]="message" placeholder="Entrez un message" />
+    <button (click)="sendMessage()">Envoyer</button>
+    <ul>
+        @for(message of messages; track $index){
+        <li>{{ message }}</li>
+        }
+    </ul>
+</div>
