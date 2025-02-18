@@ -217,7 +217,7 @@ Si par la suite vous désirez quitter la connexion `SSH` et revenir à votre ter
 exit
 ```
 
-![Connection à la VM avec un Client SSH](static/connexion_ssh.png)
+![Connection à la VM avec un Client SSH](static/connexion_sshsh.png)
 
 **Attention : L'adresse DNS publique sur la capture d'écran sera complètement différente de la votre. Ne la recopiez pas. Utilisez celle qui a été assignée à votre machine virtuelle disponible dans les détails de l'instance.**
 
@@ -266,7 +266,7 @@ Vous pouvez vérifier si votre serveur est bien en ligne en accédant à l'adres
 
 Pour vérifier la communication du site-web au serveur, vous pouvez changer le fichier d'environnement local (`environment.ts`) pour qu'il pointe vers votre serveur distant, lancer le serveur statique local et vérifier que les requêtes de votre page web sont bien envoyées au serveur distant.
 
-Finalement, vous pouvez modifier le fichier d'environnement de production (`environment.prod.ts`) pour qu'il pointe vers votre serveur distant et déployer votre site web sur GitLab Pages. Vous devriez être en mesure de voir votre site web communiquer avec votre serveur distant, le tout, en mode _production_.
+Finalement, vous pouvez modifier le fichier d'environnement de  production (`environment.prod.ts`) pour qu'il pointe vers votre serveur distant et déployer votre site web sur GitLab Pages. Vous devriez être en mesure de voir votre site web communiquer avec votre serveur distant, le tout, en mode _production_.
 
 # Déploiement automatique du server
 
