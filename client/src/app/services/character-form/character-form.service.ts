@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { PlayerInfo } from '@app/interfaces/player-info';
+import { PlayerInfo } from '@app/interfaces/player';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { PlayerInfoService } from '@app/services/player-info/player-info.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';

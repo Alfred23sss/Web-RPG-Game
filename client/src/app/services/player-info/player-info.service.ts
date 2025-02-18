@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
-import { PlayerInfo } from '@app/interfaces/player-info';
+import { PlayerInfo } from '@app/interfaces/player';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({

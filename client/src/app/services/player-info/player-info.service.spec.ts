@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { PlayerInfoService } from './player-info.service';
-import { PlayerInfo } from '@app/interfaces/player-info';
+import { PlayerInfo } from '@app/interfaces/player';
 import { Item } from '@app/classes/item';
 import { BehaviorSubject } from 'rxjs';
 import { DiceType } from '@app/enums/global.enums';

@@ -9,7 +9,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
 import { PlayerInfoService } from '@app/services/player-info/player-info.service';
-import { PlayerInfo } from '@app/interfaces/player-info';
+import { PlayerInfo } from '@app/interfaces/player';
 
 const DEFAULT_ATTRIBUTE_VALUE = 4;
 const BONUS_ATTRIBUTE_VALUE = 6;
