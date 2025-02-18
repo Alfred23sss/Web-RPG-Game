@@ -1,12 +1,13 @@
 import { Item } from '@app/classes/item';
+import { DiceType } from '@app/enums/global.enums';
 
 export interface PlayerInfo {
     name: string;
     avatar: string;
     hp: { current: number; max: number };
     speed: number;
-    attack: { value: number; bonusDie: 'D4' | 'D6' };
-    defense: { value: number; bonusDie: 'D4' | 'D6' };
+    attack: { value: number; bonusDice: DiceType };
+    defense: { value: number; bonusDice: DiceType };
     movementPoints: number;
     actionPoints: number;
     inventory: [Item | null, Item | null];

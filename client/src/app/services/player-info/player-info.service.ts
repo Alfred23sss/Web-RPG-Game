@@ -32,4 +32,9 @@ export class PlayerInfoService {
         }
         return false;
     }
+
+    removeItemFromInventory(item: Item): boolean {
+        
+        return false;
+    }
 }

@@ -229,11 +229,11 @@ describe('CharacterService', () => {
                 speed: service.attributes[AttributeType.Speed],
                 attack: {
                     value: service.attributes[AttributeType.Attack],
-                    bonusDie: service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
+                    bonusDice: service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
                 },
                 defense: {
                     value: service.attributes[AttributeType.Defense],
-                    bonusDie: service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
+                    bonusDice: service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
                 },
                 movementPoints: 10,
                 actionPoints: 10,
@@ -315,8 +315,8 @@ describe('CharacterService', () => {
             });
 
             const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
-            expectedPlayerInfo.attack.bonusDie = DiceType.D6;
-            expectedPlayerInfo.defense.bonusDie = DiceType.D6;
+            expectedPlayerInfo.attack.bonusDice = DiceType.D6;
+            expectedPlayerInfo.defense.bonusDice = DiceType.D6;
 
             expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
         });
