@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { RoomValidationService } from '@app/services/room-validation.service';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
 
 @Component({
     selector: 'app-access-code',

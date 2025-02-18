@@ -18,9 +18,6 @@ export class RoomValidationService {
     }
 
     private isAccessCodeValid(code: string): boolean {
-        if (code) {
-            return true;
-        }
         return true;
     }
 }
