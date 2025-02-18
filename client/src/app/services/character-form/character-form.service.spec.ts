@@ -255,11 +255,11 @@ describe('CharacterService', () => {
             speed: INITIAL_VALUES.attributes[AttributeType.Speed],
             attack: {
                 value: INITIAL_VALUES.attributes[AttributeType.Attack],
-                bonusDie: DiceType.D4,
+                bonusDice: DiceType.D4,
             },
             defense: {
                 value: INITIAL_VALUES.attributes[AttributeType.Defense],
-                bonusDie: DiceType.D4,
+                bonusDice: DiceType.D4,
             },
             movementPoints: 10,
             actionPoints: 10,
@@ -277,8 +277,8 @@ describe('CharacterService', () => {
             });
 
             const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
-            expectedPlayerInfo.attack.bonusDie = service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
-            expectedPlayerInfo.defense.bonusDie = service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
+            expectedPlayerInfo.attack.bonusDice = service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
+            expectedPlayerInfo.defense.bonusDice = service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
 
             expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
             expect((service as any).proceedToWaitingView).toHaveBeenCalledWith(closePopupSpy);
@@ -296,8 +296,8 @@ describe('CharacterService', () => {
             });
 
             const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
-            expectedPlayerInfo.attack.bonusDie = DiceType.D4;
-            expectedPlayerInfo.defense.bonusDie = DiceType.D4;
+            expectedPlayerInfo.attack.bonusDice = DiceType.D4;
+            expectedPlayerInfo.defense.bonusDice = DiceType.D4;
 
             expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
         });

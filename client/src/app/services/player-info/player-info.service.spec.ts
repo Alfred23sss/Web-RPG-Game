@@ -11,10 +11,10 @@ describe('PlayerInfoService', () => {
     const MOCK_PLAYER: PlayerInfo = {
         name: 'TestPlayer',
         avatar: 'avatar.png',
-        hp: { current: 100, max: 100 },
-        speed: 5,
-        attack: { value: 10, bonusDie: DiceType.D6 },
-        defense: { value: 8, bonusDie: DiceType.D4 },
+        hp: { current: 6, max: 6 },
+        speed: 4,
+        attack: { value: 4, bonusDice: DiceType.D6 },
+        defense: { value: 4, bonusDice: DiceType.D4 },
         movementPoints: 10,
         actionPoints: 10,
         inventory: [null, null],
@@ -34,10 +34,10 @@ describe('PlayerInfoService', () => {
         const initialPlayer: PlayerInfo = {
             name: 'TestPlayer',
             avatar: 'avatar.png',
-            hp: { current: 100, max: 100 },
-            speed: 5,
-            attack: { value: 10, bonusDie: DiceType.D6 },
-            defense: { value: 8, bonusDie: DiceType.D4 },
+            hp: { current: 4, max: 6 },
+            speed: 4,
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 4, bonusDice: DiceType.D4 },
             movementPoints: 10,
             actionPoints: 10,
             inventory: [null, null],
@@ -45,7 +45,6 @@ describe('PlayerInfoService', () => {
 
         service.initializePlayer(initialPlayer);
 
-        // Access the private playerState using a type assertion.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const playerState = (service as any).playerState as BehaviorSubject<PlayerInfo | null>;
         const player = playerState.value;
@@ -83,9 +82,7 @@ describe('PlayerInfoService', () => {
     it('should add item to second slot if first is occupied', () => {
         service.initializePlayer(MOCK_PLAYER);
 
-        // Fill first slot.
         service.addItemToInventory(mockItem);
-        // Add second item.
         const success = service.addItemToInventory(mockItem);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -104,7 +101,6 @@ describe('PlayerInfoService', () => {
     });
 
     it('should return false if player is not initialized', () => {
-        // Set the player state to null.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (service as any).playerState.next(null);
         const success = service.addItemToInventory(mockItem);

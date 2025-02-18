@@ -66,7 +66,7 @@ export class CharacterService {
                 },
                 defense: {
                     value: this.attributes[AttributeType.Defense],
-                    bonusDice: this.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
+                    bonusDice: this.diceAssigned[AttributeType.Defense] ? DiceType.D6 : DiceType.D4,
                 },
                 movementPoints: 10, // Adjust with an actual value when known.
                 actionPoints: 10,
