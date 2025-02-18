@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { AttributeType, DiceType } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item';
 import { PlayerInfo } from '@app/interfaces/player-info';
-import { CharacterService } from '@app/services/character-form/character-form.service';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
@@ -11,29 +10,26 @@ export class PlayerInfoService {
     playerInfo$!: Observable<PlayerInfo | null>;
     private playerState = new BehaviorSubject<PlayerInfo | null>(null);
 
-    constructor(private characterService: CharacterService) {
+    constructor() {
         this.playerInfo$ = this.playerState.asObservable();
     }
 
-    initializePlayer(name: string, avatar: string) {
-        const vitality = this.characterService.attributes[AttributeType.Vitality];
-        const speed = this.characterService.attributes[AttributeType.Speed];
-        const attack = this.characterService.attributes[AttributeType.Attack];
-        const defense = this.characterService.attributes[AttributeType.Defense];
-
-        const attackDice = this.characterService.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
-        const defenseDice = this.characterService.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
-
-        const playerInfo: PlayerInfo = {
-            name,
-            avatar,
-            hp: { current: vitality, max: vitality },
-            speed,
-            attack: { value: attack, bonusDie: attackDice },
-            defense: { value: defense, bonusDie: defenseDice },
-            movementPoints: 10, // Eventually change to an actual value
-            actionPoints: 10, // Eventually change to an actual value
-        };
+    initializePlayer(playerInfo: PlayerInfo): void {
         this.playerState.next(playerInfo);
+    }
+
+    addItemToInventory(item: Item): boolean {
+        const currentPlayer = this.playerState.value;
+        if (!currentPlayer) return false;
+
+        const inventory = currentPlayer.inventory;
+        const emptySlotIndex = inventory.findIndex((slot) => slot === null);
+
+        if (emptySlotIndex !== -1) {
+            inventory[emptySlotIndex] = item;
+            this.playerState.next({ ...currentPlayer, inventory });
+            return true;
+        }
+        return false;
     }
 }

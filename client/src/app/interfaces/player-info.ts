@@ -1,3 +1,5 @@
+import { Item } from '@app/classes/item';
+
 export interface PlayerInfo {
     name: string;
     avatar: string;
@@ -7,4 +9,5 @@ export interface PlayerInfo {
     defense: { value: number; bonusDie: 'D4' | 'D6' };
     movementPoints: number;
     actionPoints: number;
+    inventory: [Item | null, Item | null];
 }

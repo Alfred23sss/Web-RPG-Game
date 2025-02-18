@@ -8,6 +8,8 @@ import { GameCommunicationService } from '@app/services/game-communication/game-
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
+import { PlayerInfoService } from '@app/services/player-info/player-info.service';
+import { PlayerInfo } from '@app/interfaces/player-info';
 
 const DEFAULT_ATTRIBUTE_VALUE = 4;
 const BONUS_ATTRIBUTE_VALUE = 6;
@@ -17,11 +19,13 @@ describe('CharacterService', () => {
     let mockRouter: jasmine.SpyObj<Router>;
     let mockCommunicationService: jasmine.SpyObj<GameCommunicationService>;
     let mockSnackbarService: jasmine.SpyObj<SnackbarService>;
+    let mockPlayerInfoService: jasmine.SpyObj<PlayerInfoService>;
 
     beforeEach(() => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockCommunicationService = jasmine.createSpyObj('GameCommunicationService', ['getGameById']);
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+        mockPlayerInfoService = jasmine.createSpyObj('PlayerInfoService', ['initializePlayer']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -29,6 +33,7 @@ describe('CharacterService', () => {
                 { provide: Router, useValue: mockRouter },
                 { provide: GameCommunicationService, useValue: mockCommunicationService },
                 { provide: SnackbarService, useValue: mockSnackbarService },
+                { provide: PlayerInfoService, useValue: mockPlayerInfoService },
             ],
         });
 
@@ -204,7 +209,7 @@ describe('CharacterService', () => {
             spyOn(service as any, 'isCharacterValid').and.returnValue(true);
         });
 
-        it('should proceed to waiting view if character is valid', () => {
+        it('should proceed to waiting view if character is valid and initialize player with correct data', () => {
             service.submitCharacter({
                 characterName: 'name',
                 selectedAvatar: 'avatar.png',
@@ -214,8 +219,122 @@ describe('CharacterService', () => {
                 closePopup: closePopupSpy,
             });
 
-            expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
-            expect(service['showMissingDetailsError']).not.toHaveBeenCalled();
+            const expectedPlayerInfo = {
+                name: 'name',
+                avatar: 'avatar.png',
+                hp: {
+                    current: service.attributes[AttributeType.Vitality],
+                    max: service.attributes[AttributeType.Vitality],
+                },
+                speed: service.attributes[AttributeType.Speed],
+                attack: {
+                    value: service.attributes[AttributeType.Attack],
+                    bonusDie: service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
+                },
+                defense: {
+                    value: service.attributes[AttributeType.Defense],
+                    bonusDie: service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
+                },
+                movementPoints: 10,
+                actionPoints: 10,
+                inventory: [null, null],
+            } as PlayerInfo;
+
+            expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
+            expect((service as any).proceedToWaitingView).toHaveBeenCalledWith(closePopupSpy);
+            expect((service as any).showMissingDetailsError).not.toHaveBeenCalled();
+        });
+
+        const DEFAULT_PLAYER_INFO: PlayerInfo = {
+            name: 'name',
+            avatar: 'avatar.png',
+            hp: {
+                current: INITIAL_VALUES.attributes[AttributeType.Vitality],
+                max: INITIAL_VALUES.attributes[AttributeType.Vitality],
+            },
+            speed: INITIAL_VALUES.attributes[AttributeType.Speed],
+            attack: {
+                value: INITIAL_VALUES.attributes[AttributeType.Attack],
+                bonusDie: DiceType.D4,
+            },
+            defense: {
+                value: INITIAL_VALUES.attributes[AttributeType.Defense],
+                bonusDie: DiceType.D4,
+            },
+            movementPoints: 10,
+            actionPoints: 10,
+            inventory: [null, null],
+        };
+
+        it('should proceed to waiting view if character is valid and initialize player with correct data', () => {
+            service.submitCharacter({
+                characterName: 'name',
+                selectedAvatar: 'avatar.png',
+                game: mockGame,
+                isBonusAssigned: true,
+                isDiceAssigned: true,
+                closePopup: closePopupSpy,
+            });
+
+            const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
+            expectedPlayerInfo.attack.bonusDie = service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
+            expectedPlayerInfo.defense.bonusDie = service.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4;
+
+            expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
+            expect((service as any).proceedToWaitingView).toHaveBeenCalledWith(closePopupSpy);
+            expect((service as any).showMissingDetailsError).not.toHaveBeenCalled();
+        });
+
+        it('should set bonusDie to D4 for attack and defense when diceAssigned[Attack] is false', () => {
+            service.submitCharacter({
+                characterName: 'name',
+                selectedAvatar: 'avatar.png',
+                game: mockGame,
+                isBonusAssigned: true,
+                isDiceAssigned: true,
+                closePopup: closePopupSpy,
+            });
+
+            const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
+            expectedPlayerInfo.attack.bonusDie = DiceType.D4;
+            expectedPlayerInfo.defense.bonusDie = DiceType.D4;
+
+            expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
+        });
+
+        it('should set bonusDie to D6 for attack and defense when diceAssigned[Attack] is true', () => {
+            service.assignDice(AttributeType.Attack);
+
+            service.submitCharacter({
+                characterName: 'name',
+                selectedAvatar: 'avatar.png',
+                game: mockGame,
+                isBonusAssigned: true,
+                isDiceAssigned: true,
+                closePopup: closePopupSpy,
+            });
+
+            const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
+            expectedPlayerInfo.attack.bonusDie = DiceType.D6;
+            expectedPlayerInfo.defense.bonusDie = DiceType.D6;
+
+            expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
+        });
+
+        it('should show missing details error if character is invalid', () => {
+            (service as any).isCharacterValid.and.returnValue(false);
+
+            service.submitCharacter({
+                characterName: 'name',
+                selectedAvatar: 'avatar.png',
+                game: mockGame,
+                isBonusAssigned: false,
+                isDiceAssigned: false,
+                closePopup: closePopupSpy,
+            });
+
+            expect(service['showMissingDetailsError']).toHaveBeenCalled();
+            expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
         });
 
         it('should show missing details error if character is invalid', () => {
