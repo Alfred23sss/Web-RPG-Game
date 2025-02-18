@@ -8,6 +8,7 @@ import { RoomValidationService } from '@app/services/room-validation.service';
     selector: 'app-access-code',
     templateUrl: './access-code.component.html',
     styleUrls: ['./access-code.component.scss'],
+    standalone: true,
     imports: [FormsModule],
 })
 export class AccessCodeComponent {
@@ -23,11 +24,10 @@ export class AccessCodeComponent {
     }
 
     submitCode(): void {
-        console.log('alfred le magnifique');
         this.roomValidation.validateCode(this.accessCode);
-        console.log('alfred le magnifique');
         this.closeDialog();
-        console.log('alfred le magnifique');
-        this.dialog.open(CharacterFormComponent, undefined);
+        this.dialog.open(CharacterFormComponent, {
+            data: {},
+        });
     }
 }

@@ -1,15 +1,16 @@
 import { Injectable } from '@angular/core';
-import { SocketClientService } from './socket/socket-client-service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RoomValidationService {
-    constructor(private readonly socketClientService: SocketClientService) {}
+    // constructor(private readonly socketClientService: SocketClientService) {}
+    currentAcessCode: string = '';
 
     validateCode(code: string) {
         this.isAccessCodeValid(code);
         this.isGameUnlock();
+        this.currentAcessCode = code;
     }
 
     private isGameUnlock(): boolean {

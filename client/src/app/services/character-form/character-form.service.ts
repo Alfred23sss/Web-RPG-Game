@@ -50,7 +50,9 @@ export class CharacterService {
         isDiceAssigned: boolean;
         closePopup: () => void;
     }): void {
-        this.validateGameAvailability(data.game, data.closePopup);
+        if (data.game !== undefined) {
+            this.validateGameAvailability(data.game, data.closePopup);
+        }
         if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
             this.proceedToWaitingView(data.closePopup);
         } else {
