@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { SocketClientService } from './socket/socket-client-service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Injectable({
     providedIn: 'root',
@@ -17,9 +17,6 @@ export class RoomValidationService {
     }
 
     private isAccessCodeValid(code: string): boolean {
-        if (code) {
-            return true;
-        }
         return true;
     }
 }
