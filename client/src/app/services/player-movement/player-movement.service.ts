@@ -7,55 +7,54 @@ import { GridService } from '@app/services/grid/grid-service.service';
     providedIn: 'root',
 })
 export class PlayerMovementService {
-    constructor(private gridService: GridService) {}
-
-    private movementCosts = new Map<string, number>([
-        ['ice', 0],
-        ['base', 1],
-        ['door-open', 1],
-        ['water', 2],
-        ['wall', Infinity],
-        ['door-closed', Infinity],
+    private movementCosts = new Map<TileType, number>([
+        [TileType.Ice, 0],
+        [TileType.Default, 1],
+        [TileType.Water, 2],
+        [TileType.Wall, Infinity],
+        [TileType.Door, 1],
     ]);
+
+    constructor(private gridService: GridService) {}
 
     availablePath(startTile: Tile | undefined, maxMovement: number): Tile[] | undefined {
         const grid = this.gridService.getGrid();
 
-        if (!startTile || !grid) {
-            return undefined;
-        }
+        if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return undefined;
+
         const reachableTiles: Set<Tile> = new Set();
         const queue: { tile: Tile; remainingPoints: number }[] = [{ tile: startTile, remainingPoints: maxMovement }];
         const visited = new Map<Tile, number>();
 
         reachableTiles.add(startTile);
 
-        while (queue.length > 0) {
-            const { tile, remainingPoints } = queue.shift()!;
+        while (true) {
+            const next = queue.shift();
+            if (!next) break;
+            const { tile, remainingPoints } = next;
 
             for (const neighbor of this.getNeighbors(tile, grid)) {
-                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity;
-                if (moveCost === Infinity) continue; 
+                if (neighbor.type === TileType.Wall && neighbor) continue;
                 if (neighbor.type === TileType.Door && !neighbor.isOpen) continue;
+                const moveCost = this.movementCosts.get(neighbor.type);
+                if (moveCost === undefined) {
+                    throw new Error(`Unknown tile type: ${neighbor.type}`);
+                }
+                // if (moveCost === Infinity) continue;
 
                 const newRemainingPoints = remainingPoints - moveCost;
-                if (newRemainingPoints >= 0 && (!visited.has(neighbor) || newRemainingPoints > visited.get(neighbor)!)) {
+                if (newRemainingPoints >= 0 && !visited.has(neighbor)) {
                     visited.set(neighbor, newRemainingPoints);
                     reachableTiles.add(neighbor);
                     queue.push({ tile: neighbor, remainingPoints: newRemainingPoints });
                 }
             }
         }
-
         return Array.from(reachableTiles);
     }
-
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined): Tile[] | undefined {
         const grid = this.gridService.getGrid();
-
-        if (!startTile || !targetTile || this.movementCosts.get(targetTile.type) === Infinity || !grid) {
-            return undefined;
-        }
+        if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
 
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: 0 }];
         const costs = new Map<Tile, number>();
@@ -64,20 +63,22 @@ export class PlayerMovementService {
         costs.set(startTile, 0);
         previous.set(startTile, null);
 
-        while (queue.length > 0) {
+        while (true) {
             queue.sort((a, b) => a.cost - b.cost);
-            const { tile: currentTile, cost: currentCost } = queue.shift()!;
+            const next = queue.shift();
+            if (!next) break;
+            const { tile: currentTile, cost: currentCost } = next;
 
-            if (currentTile === targetTile) {
-                return this.reconstructPath(previous, targetTile);
-            }
+            if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);
 
             for (const neighbor of this.getNeighbors(currentTile, grid)) {
-                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity;
+                if (!this.isValidNeighbor(neighbor)) continue;
+
+                const moveCost = this.getMoveCost(neighbor);
                 if (moveCost === Infinity) continue;
 
                 const newCost = currentCost + moveCost;
-                if (!costs.has(neighbor) || newCost < costs.get(neighbor)!) {
+                if (!costs.has(neighbor) || newCost < (costs.get(neighbor) ?? Infinity)) {
                     costs.set(neighbor, newCost);
                     previous.set(neighbor, currentTile);
                     queue.push({ tile: neighbor, cost: newCost });
@@ -88,9 +89,23 @@ export class PlayerMovementService {
         return undefined;
     }
 
+    private getMoveCost(neighbor: Tile): number {
+        return this.movementCosts.get(neighbor.type) ?? Infinity;
+    }
+
+    private isValidNeighbor(neighbor: Tile): boolean {
+        if (neighbor.type === TileType.Door && !neighbor.isOpen) return false;
+        return this.movementCosts.has(neighbor.type);
+    }
+
     private getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
         const neighbors: Tile[] = [];
-        const [x, y] = [0, 0]; // Changer Ceci pour avoir le bon x et y en le sortant du string voir si on créer un nouveau attribut ou sort du string
+
+        const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
+        if (!match) return neighbors;
+
+        const x = parseInt(match[1], 10);
+        const y = parseInt(match[2], 10);
 
         const directions = [
             [0, 1],
@@ -102,7 +117,8 @@ export class PlayerMovementService {
         for (const [dx, dy] of directions) {
             const nx = x + dx;
             const ny = y + dy;
-            if (grid[nx] && grid[nx][ny]) {
+
+            if (nx >= 0 && ny >= 0 && nx < grid.length && ny < grid[0].length && grid[nx][ny]) {
                 neighbors.push(grid[nx][ny]);
             }
         }
@@ -110,7 +126,7 @@ export class PlayerMovementService {
         return neighbors;
     }
 
-    private reconstructPath(previous: Map<Tile, Tile | null>, target: Tile): Tile[] {
+    private reconstructPath(previous: Map<Tile, Tile | null>, target: Tile | null): Tile[] {
         const path: Tile[] = [];
         let current: Tile | null = target;
         while (current) {
