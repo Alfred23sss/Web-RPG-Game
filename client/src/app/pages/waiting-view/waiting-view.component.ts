@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
 import { Routes } from '@app/enums/global.enums';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Component({
     selector: 'app-waiting-view',
@@ -12,10 +13,14 @@ import { Routes } from '@app/enums/global.enums';
 })
 export class WaitingViewComponent implements OnInit {
     accessCode: string;
-    constructor(private router: Router) {}
+    constructor(
+        private router: Router,
+        private readonly socketClientService: SocketClientService,
+    ) {}
 
     ngOnInit(): void {
         this.generateAccessCode();
+        this.socketClientService.createRoom(this.accessCode);
     }
 
     navigateToHome(): void {

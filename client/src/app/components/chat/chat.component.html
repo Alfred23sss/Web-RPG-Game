@@ -1,10 +1,20 @@
-<div>
-    <h1>Chat</h1>
-    <input [(ngModel)]="message" placeholder="Entrez un message" />
-    <button (click)="sendMessage()">Envoyer</button>
-    <ul>
-        @for(message of messages; track $index){
-        <li>{{ message }}</li>
-        }
-    </ul>
+<div class="chat-wrapper">
+    <div class="chat-container">
+        <div class="messages-container">
+            @for(message of messages; track $index){
+            <div class="message other-message">
+                {{ message }}
+            </div>
+            } @for(msg of messagesSent; track $index){
+            <div class="message my-message">
+                {{ msg }}
+            </div>
+            }
+        </div>
+
+        <div class="input-container">
+            <input type="text" [(ngModel)]="message" placeholder="Type a message..." />
+            <button (click)="sendMessageToOthers()">Send</button>
+        </div>
+    </div>
 </div>
