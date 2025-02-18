@@ -13,7 +13,6 @@ export class SocketClientService {
 
     connect() {
         this.socket = io('ws://localhost:3000', {
-            // Ajoutez le namespace ici
             transports: ['websocket'],
             upgrade: false,
         });
@@ -31,7 +30,23 @@ export class SocketClientService {
         this.socket.emit('broadcastAll', message);
     }
 
+    createRoom(room: string) {
+        this.socket.emit('create', room);
+    }
+
+    joinRoom(room: string) {
+        this.socket.emit('joinRoom', room);
+    }
+
+    sendMessageToOthers(message: string) {
+        this.socket.emit('broadcast', message);
+    }
+
     onMessage(callback: (message: string) => void) {
         this.socket.on('massMessage', callback);
+    }
+
+    getSocketId() {
+        return this.socket.id;
     }
 }

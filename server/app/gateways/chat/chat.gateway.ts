@@ -23,14 +23,26 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         return { isValid: word?.length > WORD_MIN_LENGTH };
     }
 
+    @SubscribeMessage(ChatEvents.Create)
+    createRoom(socket: Socket, room: string) {
+        socket.join(room);
+        this.logger.log(`Room created : ${room}`);
+        this.server.to(room).emit('roomCreated', `Room ${room} created and joined by ${socket.id}`);
+    }
+
     @SubscribeMessage(ChatEvents.BroadcastAll)
     broadcastAll(socket: Socket, message: string) {
         this.server.emit(ChatEvents.MassMessage, `${socket.id} : ${message}`);
     }
 
+    @SubscribeMessage(ChatEvents.Broadcast)
+    broadcast(socket: Socket, message: string) {
+        socket.broadcast.emit(ChatEvents.MassMessage, `${socket.id} : ${message}`);
+    }
+
     @SubscribeMessage(ChatEvents.JoinRoom)
-    joinRoom(socket: Socket) {
-        socket.join(this.room);
+    joinRoom(socket: Socket, room: string) {
+        socket.join(room);
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)

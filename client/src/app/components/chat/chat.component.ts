@@ -12,8 +12,12 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 export class ChatComponent implements OnInit, OnDestroy {
     message: string = '';
     messages: string[] = [];
+    messagesSent: string[] = [];
+    id: string | undefined;
 
-    constructor(private socketService: SocketClientService) {}
+    constructor(private socketService: SocketClientService) {
+        this.id = socketService.getSocketId();
+    }
 
     ngOnInit(): void {
         this.socketService.onMessage((message: string) => {
@@ -22,8 +26,15 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     sendMessage(): void {
-        this.socketService.sendMessage(this.message); // Envoyer le message
-        this.message = ''; // Réinitialiser le champ de saisie
+        this.socketService.sendMessage(this.message);
+        this.messagesSent.push(this.message);
+        this.message = '';
+    }
+
+    sendMessageToOthers(): void {
+        this.socketService.sendMessageToOthers(this.message);
+        this.messagesSent.push(this.message);
+        this.message = '';
     }
 
     ngOnDestroy(): void {
