@@ -10,12 +10,12 @@
         <h1 id="character-form_title">Créer un personnage</h1>
     </div>
 
-    <input type="text" placeholder="Nom du personnage" [(ngModel)]="characterName" (input)="checkCharacterNameLength()" maxlength="20" />
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="20" />
 
     <div class="character-form_body">
         <div class="character-form_avatars">
             @for (avatar of avatarTypes; track avatar) {
-            <img [src]="avatar" (click)="selectedAvatar = avatar" [class.selected]="selectedAvatar === avatar" alt="Avatar" />
+            <img [src]="avatar" (click)="createdPlayer.avatar = avatar" [class.selected]="createdPlayer.avatar === avatar" alt="Avatar" />
             }
         </div>
 

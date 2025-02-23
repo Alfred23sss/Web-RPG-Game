@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { PlayerInfo } from '@app/interfaces/player';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
@@ -42,17 +43,12 @@ export class CharacterService {
         return { attack: null, defense: null };
     }
 
-    submitCharacter(data: {
-        characterName: string;
-        selectedAvatar: string;
-        game: Game;
-        isBonusAssigned: boolean;
-        isDiceAssigned: boolean;
-        closePopup: () => void;
-    }): void {
-        this.validateGameAvailability(data.game, data.closePopup);
-        if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
-            this.proceedToWaitingView(data.closePopup);
+    submitCharacter(player: PlayerInfo, game: Game, closePopup: () => void): void {
+        console.log('✅ Personnage soumis :', player);
+        this.validateGameAvailability(game, closePopup);
+
+        if (this.isCharacterValid(player)) {
+            this.proceedToWaitingView(closePopup);
         } else {
             this.showMissingDetailsError();
         }
@@ -67,7 +63,7 @@ export class CharacterService {
     checkCharacterNameLength(characterName: string): void {
         const maxLength = 20;
         if (characterName.length >= maxLength) {
-            this.snackbarService.showMessage(`The maximum name length is ${maxLength} characters.`);
+            this.snackbarService.showMessage(`La longueur maximale du nom est de ${maxLength} caractères`);
         }
     }
 
@@ -83,8 +79,17 @@ export class CharacterService {
         });
     }
 
-    private isCharacterValid(characterName: string, selectedAvatar: string, isBonusAssigned: boolean, isDiceAssigned: boolean): boolean {
-        return !!characterName && !!selectedAvatar && isBonusAssigned && isDiceAssigned;
+    private hasBonusAssigned(player: PlayerInfo): boolean {
+        return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
+    }
+
+    private hasDiceAssigned(player: PlayerInfo): boolean {
+        return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
+    }
+
+    isCharacterValid(player: PlayerInfo): boolean {
+        console.log('🛠 Vérification du personnage :', player);
+        return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
     }
 
     private proceedToWaitingView(closePopup: () => void): void {
@@ -92,7 +97,7 @@ export class CharacterService {
         closePopup();
     }
 
-    private showMissingDetailsError(): void {
+    showMissingDetailsError(): void {
         this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
     }
 }

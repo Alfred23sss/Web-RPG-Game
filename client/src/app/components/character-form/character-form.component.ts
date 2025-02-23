@@ -3,8 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
-
 import { Game } from '@app/interfaces/game';
+import { PlayerInfo } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 
 @Component({
@@ -14,15 +14,14 @@ import { CharacterService } from '@app/services/character-form/character-form.se
     imports: [FormsModule],
 })
 export class CharacterFormComponent {
-    characterName: string = '';
-    selectedAvatar: string = '';
     showForm: boolean = true;
+    xSword: string = GameDecorations.XSwords;
+
+    game: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
+    createdPlayer: PlayerInfo;
     selectedAttackDice: DiceType | null = null;
     selectedDefenseDice: DiceType | null = null;
-    xSword: string = GameDecorations.XSwords;
-    game: Game;
-
-    avatarTypes: string[] = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
+    avatarTypes: string[] = Object.values(AvatarType);
 
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
@@ -35,9 +34,21 @@ export class CharacterFormComponent {
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game },
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game; createdPlayer: PlayerInfo }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game;
+        this.createdPlayer = data.createdPlayer ?? {
+            //voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
+            name: '',
+            avatar: '',
+            hp: { current: 10, max: 10 },
+            speed: 4,
+            attack: { value: 4, bonusDice: DiceType.Uninitialized },
+            defense: { value: 4, bonusDice: DiceType.Uninitialized },
+            movementPoints: 3,
+            actionPoints: 3,
+            inventory: [null, null],
+        };
     }
 
     assignBonus(attribute: AttributeType) {
@@ -46,35 +57,34 @@ export class CharacterFormComponent {
 
     assignDice(attribute: AttributeType): void {
         const { attack, defense } = this.characterService.assignDice(attribute);
-        this.selectedAttackDice = attack as DiceType;
-        this.selectedDefenseDice = defense as DiceType;
+        if (attack) {
+            this.createdPlayer.attack.bonusDice = attack as DiceType;
+        }
+        if (defense) {
+            this.createdPlayer.defense.bonusDice = defense as DiceType;
+        }
+        this.selectedAttackDice = attack ? (attack as DiceType) : null;
+        this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
 
     submitCharacter(): void {
-        this.characterService.submitCharacter({
-            characterName: this.characterName,
-            selectedAvatar: this.selectedAvatar,
-            game: this.game,
-            isBonusAssigned: this.isBonusAssigned(),
-            isDiceAssigned: this.isDiceAssigned(),
-            closePopup: () => this.closePopup(),
-        });
+        console.log('🔍 Vérification avant soumission :', this.createdPlayer);
+
+        if (this.createdPlayer && this.characterService.isCharacterValid(this.createdPlayer)) {
+            this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
+        } else {
+            this.characterService.showMissingDetailsError();
+        }
     }
 
     checkCharacterNameLength(): void {
-        this.characterService.checkCharacterNameLength(this.characterName);
+        if (this.createdPlayer) {
+            this.characterService.checkCharacterNameLength(this.createdPlayer.name);
+        }
     }
 
     closePopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
-    }
-
-    private isBonusAssigned(): boolean {
-        return this.bonusAssigned[AttributeType.Vitality] || this.bonusAssigned[AttributeType.Speed];
-    }
-
-    private isDiceAssigned(): boolean {
-        return this.diceAssigned[AttributeType.Attack] || this.diceAssigned[AttributeType.Defense];
     }
 }
