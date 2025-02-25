@@ -8,27 +8,27 @@ import { environment } from 'src/environments/environment';
     providedIn: 'root',
 })
 export class GameCommunicationService {
-    private apiUrl = environment.serverUrl;
+    private apiUrl = `${environment.serverUrl}/games`;
 
     constructor(private readonly http: HttpClient) {}
 
     getAllGames(): Observable<Game[]> {
-        return this.http.get<Game[]>(`${this.apiUrl}/games`);
+        return this.http.get<Game[]>(`${this.apiUrl}`);
     }
 
     saveGame(gameToAdd: Game): Observable<Game> {
-        return this.http.post<Game>(`${this.apiUrl}/games/create`, gameToAdd);
+        return this.http.post<Game>(`${this.apiUrl}/create`, gameToAdd);
     }
 
     updateGame(id: string, game: Partial<Game>): Observable<Game> {
-        return this.http.patch<Game>(`${this.apiUrl}/games/update/${id}`, game);
+        return this.http.patch<Game>(`${this.apiUrl}/update/${id}`, game);
     }
 
     deleteGame(id: string): Observable<Game> {
-        return this.http.delete<Game>(`${this.apiUrl}/games/delete/${id}`);
+        return this.http.delete<Game>(`${this.apiUrl}/delete/${id}`);
     }
 
     getGameById(id: string): Observable<Game> {
-        return this.http.get<Game>(`${this.apiUrl}/games/${id}`);
+        return this.http.get<Game>(`${this.apiUrl}/${id}`);
     }
 }
