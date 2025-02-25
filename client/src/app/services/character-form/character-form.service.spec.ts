@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { PlayerInfo } from '@app/interfaces/player'; //changer le import a autre chose que @app
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
@@ -153,15 +154,32 @@ describe('CharacterService', () => {
     });
 
     describe('isCharacterValid', () => {
-        it('should return true when all parameters are valid', () => {
-            expect(service['isCharacterValid']('name', 'avatar.png', true, true)).toBeTrue();
+        let validPlayer: PlayerInfo;
+
+        beforeEach(() => {
+            validPlayer = {
+                name: 'TestPlayer',
+                avatar: 'avatar.png',
+                speed: 5,
+                vitality: 6,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 3, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+            };
         });
-        it('should return false when at least one parameter is missing', () => {
-            expect(service['isCharacterValid']('', 'avatar.png', true, true)).toBeFalse();
-            expect(service['isCharacterValid']('name', '', true, true)).toBeFalse();
-            expect(service['isCharacterValid']('name', 'avatar.png', false, true)).toBeFalse();
-            expect(service['isCharacterValid']('name', 'avatar.png', true, false)).toBeFalse();
-            expect(service['isCharacterValid']('', '', false, false)).toBeFalse();
+
+        it('should return true when all parameters are valid', () => {
+            expect(service.isCharacterValid(validPlayer)).toBeTrue();
+        });
+
+        it('should return false when at least one required parameter is missing', () => {
+            expect(service.isCharacterValid({ ...validPlayer, name: '' })).toBeFalse();
+            expect(service.isCharacterValid({ ...validPlayer, avatar: '' })).toBeFalse();
+            expect(service.isCharacterValid({ ...validPlayer, attack: { value: 4, bonusDice: DiceType.Uninitialized } })).toBeFalse();
+            expect(service.isCharacterValid({ ...validPlayer, defense: { value: 4, bonusDice: DiceType.Uninitialized } })).toBeFalse();
         });
     });
 
@@ -205,30 +223,42 @@ describe('CharacterService', () => {
         });
 
         it('should proceed to waiting view if character is valid', () => {
-            service.submitCharacter({
-                characterName: 'name',
-                selectedAvatar: 'avatar.png',
-                game: mockGame,
-                isBonusAssigned: true,
-                isDiceAssigned: true,
-                closePopup: closePopupSpy,
-            });
+            const validPlayer: PlayerInfo = {
+                name: 'TestPlayer',
+                avatar: 'avatar.png',
+                speed: 5,
+                vitality: 6,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 3, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+            };
+
+            service.submitCharacter(validPlayer, mockGame, closePopupSpy);
 
             expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
             expect(service['showMissingDetailsError']).not.toHaveBeenCalled();
         });
 
         it('should show missing details error if character is invalid', () => {
-            (service as any).isCharacterValid.and.returnValue(false);
+            spyOn(service, 'isCharacterValid').and.returnValue(false);
 
-            service.submitCharacter({
-                characterName: 'name',
-                selectedAvatar: 'avatar.png',
-                game: mockGame,
-                isBonusAssigned: false,
-                isDiceAssigned: false,
-                closePopup: closePopupSpy,
-            });
+            const invalidPlayer: PlayerInfo = {
+                name: '',
+                avatar: 'avatar.png',
+                speed: 5,
+                vitality: 6,
+                attack: { value: 4, bonusDice: DiceType.Uninitialized },
+                defense: { value: 3, bonusDice: DiceType.Uninitialized },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+            };
+
+            service.submitCharacter(invalidPlayer, mockGame, closePopupSpy); // ✅ Correction ici
 
             expect(service['showMissingDetailsError']).toHaveBeenCalled();
             expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
