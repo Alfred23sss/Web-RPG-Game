@@ -3,7 +3,6 @@ import { DiceType } from '@app/enums/global.enums';
 
 export interface Player {
     playerInfo: PlayerInfo;
-    //on va ajouter les atteibuts de poaitions ici --> L-F
 }
 
 export interface PlayerInfo {

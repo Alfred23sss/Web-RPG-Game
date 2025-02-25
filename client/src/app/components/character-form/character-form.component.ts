@@ -82,8 +82,6 @@ export class CharacterFormComponent {
     // }
 
     submitCharacter(): void {
-        console.log('🔍 Vérification avant soumission :', this.createdPlayer);
-
         if (!this.game) {
             this.proceedToWaitingView(); // ✅ Redirige vers la Waiting View sans soumettre
             return;
@@ -96,13 +94,6 @@ export class CharacterFormComponent {
             this.characterService.showMissingDetailsError();
         }
     }
-
-    private proceedToWaitingView(): void {
-        this.characterService.resetAttributes();
-        this.dialogRef.close();
-        this.characterService.goToWaitingView();
-    }
-
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
@@ -112,5 +103,11 @@ export class CharacterFormComponent {
     closePopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
+    }
+
+    private proceedToWaitingView(): void {
+        this.characterService.resetAttributes();
+        this.dialogRef.close();
+        this.characterService.goToWaitingView();
     }
 }

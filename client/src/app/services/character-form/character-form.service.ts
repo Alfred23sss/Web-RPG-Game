@@ -44,7 +44,6 @@ export class CharacterService {
     }
 
     submitCharacter(player: PlayerInfo, game: Game, closePopup: () => void): void {
-        console.log('✅ Personnage soumis :', player);
         this.validateGameAvailability(game, closePopup);
 
         if (this.isCharacterValid(player)) {
@@ -67,6 +66,18 @@ export class CharacterService {
         }
     }
 
+    goToWaitingView(): void {
+        this.router.navigate(['/waiting-view']);
+    }
+
+    isCharacterValid(player: PlayerInfo): boolean {
+        return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
+    }
+
+    showMissingDetailsError(): void {
+        this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
+    }
+
     private validateGameAvailability(game: Game, closePopup: () => void): void {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
@@ -79,12 +90,6 @@ export class CharacterService {
         });
     }
 
-    
-    goToWaitingView(): void {
-        this.router.navigate(['/waiting-view']); 
-    }
-    
-
     private hasBonusAssigned(player: PlayerInfo): boolean {
         return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
     }
@@ -93,17 +98,8 @@ export class CharacterService {
         return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
-    isCharacterValid(player: PlayerInfo): boolean {
-        console.log('🛠 Vérification du personnage :', player);
-        return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
-    }
-
     private proceedToWaitingView(closePopup: () => void): void {
         this.router.navigate([Routes.WaitingView]);
         closePopup();
-    }
-
-    showMissingDetailsError(): void {
-        this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
     }
 }

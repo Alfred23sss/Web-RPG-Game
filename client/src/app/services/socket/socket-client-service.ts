@@ -16,14 +16,6 @@ export class SocketClientService {
             transports: ['websocket'],
             upgrade: false,
         });
-
-        this.socket.on('connect', () => {
-            console.log('Connecté au serveur WebSocket');
-        });
-
-        this.socket.on('connect_error', (error) => {
-            console.error('Erreur de connexion WebSocket:', error);
-        });
     }
 
     sendMessage(message: string) {
@@ -36,10 +28,6 @@ export class SocketClientService {
 
     joinRoom(room: string) {
         this.socket.emit('joinRoom', room);
-
-        this.socket.on('joinedRoom', (message) => {
-            console.log(message); // Should log: "You have joined room XYZ"
-        });
     }
 
     sendMessageToOthers(message: string, room: string) {

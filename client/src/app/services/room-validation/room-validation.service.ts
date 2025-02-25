@@ -67,18 +67,13 @@ export class RoomValidationService {
     private loadAccessCodes(): void {
         this.accessCodeCommunication.getAccessCodes().subscribe({
             next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
-            error: (err) => console.error('Error fetching access codes:', err),
         });
     }
 
     private postAccessCode(code: string): void {
         this.accessCodeCommunication.createAccessCode(code).subscribe({
-            next: (response) => {
-                console.log('Access code created:', response.code);
+            next: () => {
                 this.socketClientService.createRoom(code);
-            },
-            error: (err) => {
-                console.error('Error creating access code:', err);
             },
         });
     }
