@@ -43,10 +43,9 @@ export class CharacterFormComponent {
             name: '',
             avatar: '',
             speed: 4,
-            vitality: 4,
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
-            hp: { current: 10, max: 10 },
+            hp: { current: 4, max: 4 },
             movementPoints: 3,
             actionPoints: 3,
             inventory: [null, null],
@@ -55,15 +54,13 @@ export class CharacterFormComponent {
 
     assignBonus(attribute: AttributeType) {
         this.characterService.assignBonus(attribute);
-    
+
         if (attribute === AttributeType.Vitality) {
-            this.createdPlayer.vitality = this.characterService.attributes[AttributeType.Vitality];
+            this.createdPlayer.hp.max = this.createdPlayer.hp.current = this.characterService.attributes[AttributeType.Vitality];
         } else if (attribute === AttributeType.Speed) {
             this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed];
         }
     }
-    
-    
 
     assignDice(attribute: AttributeType): void {
         const { attack, defense } = this.characterService.assignDice(attribute);
@@ -76,16 +73,6 @@ export class CharacterFormComponent {
         this.selectedAttackDice = attack ? (attack as DiceType) : null;
         this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
-
-    // submitCharacter(): void {
-    //     console.log('🔍 Vérification avant soumission :', this.createdPlayer);
-
-    //     if (this.createdPlayer && this.characterService.isCharacterValid(this.createdPlayer)) {
-    //         this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
-    //     } else {
-    //         this.characterService.showMissingDetailsError();
-    //     }
-    // }
 
     submitCharacter(): void {
         console.log('🔍 Vérification avant soumission :', this.createdPlayer);
