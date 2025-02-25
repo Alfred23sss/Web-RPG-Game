@@ -1,0 +1,39 @@
+[draggable='true'] {
+    -webkit-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    cursor: grab;
+}
+
+body,
+img,
+div {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    overflow: hidden;
+}
+
+.cdk-drag-preview {
+    opacity: 1 !important;
+}
+
+.page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    max-width: 100vh;
+}
