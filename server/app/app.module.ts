@@ -6,6 +6,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { GameController } from './controllers/game/game.controller';
 import { Item, itemSchema } from './model/database/item';
 import { GameService } from './services/game/game.service';
+import { AccessCodesController } from './controllers/access-code/access-code.controller';
+import { AccessCodes, accessCodesSchema } from './model/database/access-codes';
+import { AccessCodesService } from './services/access-codes/access-codes.service';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
@@ -19,9 +22,10 @@ import { GameService } from './services/game/game.service';
         MongooseModule.forFeature([
             { name: Game.name, schema: gameSchema },
             { name: Item.name, schema: itemSchema },
+            { name: AccessCodes.name, schema: accessCodesSchema },
         ]),
     ],
-    controllers: [GameController],
-    providers: [ChatGateway, Logger, GameService],
+    controllers: [GameController, AccessCodesController], // ✅ Register AccessCodeController
+    providers: [ChatGateway, Logger, GameService, AccessCodesService],
 })
 export class AppModule {}
