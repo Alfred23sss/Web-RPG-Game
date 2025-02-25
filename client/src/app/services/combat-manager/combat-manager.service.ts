@@ -55,9 +55,7 @@ export class CombatManagerService {
 
     handleEvasion(): void {
         const currentAttributes = this.getCurrentAttributes();
-        if (currentAttributes.escapeAttempts <= 0) {
-            return; // Tell player he has no escape attempts
-        }
+        if (currentAttributes.escapeAttempts <= 0) return; // Tell player he has no more escape attempts
 
         if (Math.random() < ESCAPE_CHANCE) {
             this.combatState.player1.playerInfoService.restoreHealth();
@@ -73,7 +71,7 @@ export class CombatManagerService {
     }
 
     private rollDice(bonusDice: DiceType): number {
-        return Math.ceil(Math.random() * parseInt(bonusDice.slice(1), 2));
+        return Math.ceil(Math.random() * parseInt(bonusDice.slice(1), 10));
     }
 
     private switchTurn(): void {
