@@ -16,4 +16,6 @@ export interface PlayerInfo {
     movementPoints: number;
     actionPoints: number;
     inventory: [Item | null, Item | null];
+    turnTime?: number;
+    escapeAttempts?: number;
 }

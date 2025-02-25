@@ -7,28 +7,16 @@ import { BehaviorSubject, Observable } from 'rxjs';
     providedIn: 'root',
 })
 export class PlayerInfoService {
-    playerInfo$!: Observable<PlayerInfo | null>;
-    private playerState = new BehaviorSubject<PlayerInfo | null>(null);
-
-    constructor() {
-        this.playerInfo$ = this.playerState.asObservable();
-    }
+    playerInfo$!: Observable<PlayerInfo>;
+    private playerState!: BehaviorSubject<PlayerInfo>;
 
     initializePlayer(playerInfo: PlayerInfo): void {
-        this.playerState.next(playerInfo);
-        // console.log(`attack : ${playerInfo.attack.value} with bonus ${playerInfo.attack.bonusDice}`);
-        // console.log(`defense : ${playerInfo.defense.value} with bonus ${playerInfo.defense.bonusDice}`);
-        // console.log(`speed : ${playerInfo.speed}`);
-        // console.log(`hp : ${playerInfo.hp.current}`);
-        // console.log(`name : ${playerInfo.name}`);
-        // console.log(`inventory[0] : ${playerInfo.inventory[0]}`);
-        // console.log(`inventory[1] : ${playerInfo.inventory[1]}`);
-        // console.log(`hp : ${playerInfo.avatar}`);
+        this.playerState = new BehaviorSubject<PlayerInfo>(playerInfo);
+        this.playerInfo$ = this.playerState.asObservable();
     }
 
     addItemToInventory(item: Item): boolean {
         const currentPlayer = this.playerState.value;
-        if (!currentPlayer) return false;
 
         const inventory = currentPlayer.inventory;
         const emptySlotIndex = inventory.findIndex((slot) => slot === null);
@@ -43,7 +31,7 @@ export class PlayerInfoService {
 
     removeItemFromInventory(index: number): boolean {
         const currentPlayer = this.playerState.value;
-        if (!currentPlayer || index < 0 || index >= currentPlayer.inventory.length) return false;
+        if (index < 0 || index >= currentPlayer.inventory.length) return false;
 
         const inventory = currentPlayer.inventory;
         inventory[index] = null;
@@ -62,7 +50,6 @@ export class PlayerInfoService {
 
     updateHealth(healthVariation: number): void {
         const currentPlayer = this.playerState.value;
-        if (!currentPlayer) return;
 
         const clampedHealth = Math.max(0, Math.min(currentPlayer.hp.current - healthVariation, currentPlayer.hp.max));
 
@@ -77,5 +64,9 @@ export class PlayerInfoService {
                 current: clampedHealth,
             },
         });
+    }
+
+    restoreHealth(): void {
+        this.updateHealth(this.playerState.value.hp.max);
     }
 }
