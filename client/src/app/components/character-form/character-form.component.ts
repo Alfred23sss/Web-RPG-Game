@@ -11,6 +11,7 @@ import { CharacterService } from '@app/services/character-form/character-form.se
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
     styleUrls: ['./character-form.component.scss'],
+    standalone: true,
     imports: [FormsModule],
 })
 export class CharacterFormComponent {
