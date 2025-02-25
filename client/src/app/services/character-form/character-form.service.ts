@@ -79,6 +79,12 @@ export class CharacterService {
         });
     }
 
+    
+    goToWaitingView(): void {
+        this.router.navigate(['/waiting-view']); 
+    }
+    
+
     private hasBonusAssigned(player: PlayerInfo): boolean {
         return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
     }
