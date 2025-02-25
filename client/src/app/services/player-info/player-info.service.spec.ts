@@ -99,4 +99,25 @@ describe('PlayerInfoService', () => {
 
         expect(service.addItemToInventory(mockItem)).toBeFalse();
     });
+
+    it('should restore health to max when restoreHealth is called', () => {
+        const injuredPlayer: PlayerInfo = {
+            name: 'TestPlayer',
+            avatar: 'avatar.png',
+            hp: { current: 20, max: MAX_HP },
+            speed: 4,
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 4, bonusDice: DiceType.D4 },
+            movementPoints: 10,
+            actionPoints: 10,
+            inventory: [null, null],
+        };
+
+        service.initializePlayer(injuredPlayer);
+        service.restoreHealth();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const player = (service as any).playerState.value as PlayerInfo;
+        expect(player.hp.current).toEqual(MAX_HP);
+    });
 });

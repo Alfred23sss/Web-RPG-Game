@@ -51,7 +51,7 @@ export class PlayerInfoService {
     updateHealth(healthVariation: number): void {
         const currentPlayer = this.playerState.value;
 
-        const clampedHealth = Math.max(0, Math.min(currentPlayer.hp.current - healthVariation, currentPlayer.hp.max));
+        const clampedHealth = Math.max(0, Math.min(currentPlayer.hp.current + healthVariation, currentPlayer.hp.max));
 
         if (clampedHealth === 0) {
             return;
