@@ -2,12 +2,13 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game';
+import { environment } from 'src/environments/environment';
 import { GameCommunicationService } from './game-communication.service';
 
 describe('GameCommunicationService', () => {
     let service: GameCommunicationService;
     let httpMock: HttpTestingController;
-    const apiUrl = 'http://localhost:3000/api/games';
+    const apiUrl = environment.serverUrl;
 
     beforeEach(() => {
         TestBed.configureTestingModule({
