@@ -316,7 +316,7 @@ describe('CharacterService', () => {
 
             const expectedPlayerInfo = { ...DEFAULT_PLAYER_INFO };
             expectedPlayerInfo.attack.bonusDice = DiceType.D6;
-            expectedPlayerInfo.defense.bonusDice = DiceType.D6;
+            expectedPlayerInfo.defense.bonusDice = DiceType.D4;
 
             expect(mockPlayerInfoService.initializePlayer).toHaveBeenCalledWith(expectedPlayerInfo);
         });

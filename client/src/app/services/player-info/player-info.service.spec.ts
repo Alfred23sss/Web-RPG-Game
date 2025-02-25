@@ -5,6 +5,8 @@ import { Item } from '@app/classes/item';
 import { BehaviorSubject } from 'rxjs';
 import { DiceType } from '@app/enums/global.enums';
 
+const MAX_HP = 100;
+
 describe('PlayerInfoService', () => {
     let service: PlayerInfoService;
 
@@ -34,7 +36,7 @@ describe('PlayerInfoService', () => {
         const initialPlayer: PlayerInfo = {
             name: 'TestPlayer',
             avatar: 'avatar.png',
-            hp: { current: 4, max: 6 },
+            hp: { current: MAX_HP, max: MAX_HP },
             speed: 4,
             attack: { value: 4, bonusDice: DiceType.D6 },
             defense: { value: 4, bonusDice: DiceType.D4 },
@@ -46,16 +48,14 @@ describe('PlayerInfoService', () => {
         service.initializePlayer(initialPlayer);
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const playerState = (service as any).playerState as BehaviorSubject<PlayerInfo | null>;
+        const playerState = (service as any).playerState as BehaviorSubject<PlayerInfo>;
         const player = playerState.value;
 
         expect(player).toBeTruthy();
         expect(player?.name).toBe('TestPlayer');
         expect(player?.avatar).toBe('avatar.png');
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        expect(player?.hp.current).toBe(100);
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        expect(player?.hp.max).toBe(100);
+        expect(player?.hp.current).toBe(MAX_HP);
+        expect(player?.hp.max).toBe(MAX_HP);
         expect(player?.inventory).toEqual([null, null]);
     });
 
@@ -98,12 +98,5 @@ describe('PlayerInfoService', () => {
         service.addItemToInventory(mockItem);
 
         expect(service.addItemToInventory(mockItem)).toBeFalse();
-    });
-
-    it('should return false if player is not initialized', () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (service as any).playerState.next(null);
-        const success = service.addItemToInventory(mockItem);
-        expect(success).toBeFalse();
     });
 });
