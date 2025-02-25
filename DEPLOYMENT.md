@@ -196,7 +196,7 @@ Cliquez sur le bouton `Lancer l'instance` pour finaliser la procédure.
 
 **Attention :** l'adresse DNS publique de votre instance n'est pas persistante. Elle changera à chaque fois que vous redémarrerez ou fermez/ouvrez votre instance. Prenez ceci en compte lors de la connexion à votre machine. 
 
-Retournez au [Tableau de bord EC2](https://ca-central-1.console.aws.amazon.com/ec2/v2/home?region=ca-central-1#Instances:) (`Services -> EC2 -> Instances`). Aussitôt que l'état de votre machine passera à `En cours d'exécution`, cela signifiera que votre machine est prête à être utilisée.
+Retournez au [Tableau de bord EC2](https://ca-central-1.console.aws.amazon.com/ec2/v2/home?region=ca-central-1#Instances:) (`Services -> EC2 -> Instances`). Aussitôt que l'état de votre machine passera à `En cours d'exécution`, cela signifiera que votre machine est prête à être utilisée. 
 Pour y avoir accès, nous allons utiliser une connexion `SSH`.
 
 1. Pour les utilisateurs Linux, exécutez, si nécessaire, cette commande pour vous assurer que votre clé n’est pas visible publiquement par les autres utilisateurs.
@@ -349,7 +349,7 @@ Le problème est souvent dû à un problème de cache. Réessayer de vider la ca
 
 ## Comment faire pour qu'on puisse accéder à mon site sans être connecté à GitLab
 
-Il faut modifier les accès au site web.
+Il faut modifier les accès au site web.p
 Pour le faire, sur GitLab, allez dans `Settings` → `General` → `Visibility, project features, permissions` → `Pages`. Modifiez la valeur `Only Project Members` pour `Everyone`.
 ⚠️ Attention : en modifiant cette configuration, le site de votre projet sera accessible par **n'importe quelle personne** ayant une connexion Internet.
 
