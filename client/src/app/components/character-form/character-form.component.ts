@@ -85,7 +85,6 @@ export class CharacterFormComponent {
         console.log('🔍 Vérification avant soumission :', this.createdPlayer);
 
         if (!this.game) {
-            console.warn('⚠ Aucun jeu trouvé. Redirection vers la Waiting View...');
             this.proceedToWaitingView(); // ✅ Redirige vers la Waiting View sans soumettre
             return;
         }

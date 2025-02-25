@@ -42,8 +42,8 @@ export class SocketClientService {
         });
     }
 
-    sendMessageToOthers(message: string) {
-        this.socket.emit('broadcast', message);
+    sendMessageToOthers(room: string, message: string) {
+        this.socket.emit('roomMessage', { room, message });
     }
 
     onMessage(callback: (message: string) => void) {

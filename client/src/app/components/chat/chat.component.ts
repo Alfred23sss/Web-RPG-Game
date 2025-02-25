@@ -1,8 +1,8 @@
 /* eslint-disable @angular-eslint/no-empty-lifecycle-method */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-
 @Component({
     selector: 'app-chat',
     templateUrl: './chat.component.html',
@@ -14,9 +14,14 @@ export class ChatComponent implements OnInit, OnDestroy {
     messages: string[] = [];
     messagesSent: string[] = [];
     id: string | undefined;
+    room: string = 'default-room';
 
-    constructor(private socketService: SocketClientService) {
+    constructor(
+        private socketService: SocketClientService,
+        private roomValidationService: RoomValidationService,
+    ) {
         this.id = socketService.getSocketId();
+        this.room = this.roomValidationService.currentAccessCode;
     }
 
     ngOnInit(): void {
@@ -32,7 +37,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     sendMessageToOthers(): void {
-        this.socketService.sendMessageToOthers(this.message);
+        this.socketService.sendMessageToOthers(this.message, this.room);
         this.messagesSent.push(this.message);
         this.message = '';
     }
