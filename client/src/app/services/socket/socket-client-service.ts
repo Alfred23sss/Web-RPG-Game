@@ -42,12 +42,12 @@ export class SocketClientService {
         });
     }
 
-    sendMessageToOthers(room: string, message: string) {
+    sendMessageToOthers(message: string, room: string) {
         this.socket.emit('roomMessage', { room, message });
     }
 
     onMessage(callback: (message: string) => void) {
-        this.socket.on('massMessage', callback);
+        this.socket.on('roomMessage', callback);
     }
 
     getSocketId() {

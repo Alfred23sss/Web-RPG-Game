@@ -12,7 +12,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
     imports: [ChatComponent],
 })
 export class WaitingViewComponent implements OnInit {
-    accessCode: string = '1111';
+    accessCode: string;
     constructor(
         private router: Router,
         private readonly socketClientService: SocketClientService,
@@ -20,9 +20,8 @@ export class WaitingViewComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.socketClientService.createRoom(this.accessCode);
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         this.accessCode = this.roomValidationService.currentAccessCode;
+        this.socketClientService.createRoom(this.accessCode);
     }
 
     navigateToHome(): void {
