@@ -17,33 +17,29 @@ export class PlayerMovementService {
 
     constructor(private gridService: GridService) {}
 
-    availablePath(startTile: Tile | undefined, maxMovement: number): Tile[] | undefined {
+    availablePath(startTile: Tile | undefined, maxMovement: number): Tile[] {
         const grid = this.gridService.getGrid();
+        if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return [];
 
-        if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return undefined;
-
-        const reachableTiles: Set<Tile> = new Set();
+        const reachableTiles = new Set<Tile>();
         const queue: { tile: Tile; remainingPoints: number }[] = [{ tile: startTile, remainingPoints: maxMovement }];
         const visited = new Map<Tile, number>();
 
         reachableTiles.add(startTile);
+        visited.set(startTile, maxMovement);
 
-        while (true) {
-            const next = queue.shift();
-            if (!next) break;
-            const { tile, remainingPoints } = next;
+        while (queue.length) {
+            const dequeued = queue.shift();
+            if (!dequeued) continue;
+            const { tile, remainingPoints } = dequeued;
 
             for (const neighbor of this.getNeighbors(tile, grid)) {
-                if (neighbor.type === TileType.Wall && neighbor) continue;
-                if (neighbor.type === TileType.Door && !neighbor.isOpen) continue;
-                const moveCost = this.movementCosts.get(neighbor.type);
-                if (moveCost === undefined) {
-                    throw new Error(`Unknown tile type: ${neighbor.type}`);
-                }
-                // if (moveCost === Infinity) continue;
+                if (neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen)) continue;
 
+                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity;
                 const newRemainingPoints = remainingPoints - moveCost;
-                if (newRemainingPoints >= 0 && !visited.has(neighbor)) {
+                const neighborRemainingPoints = visited.get(neighbor) ?? -Infinity;
+                if (newRemainingPoints >= 0 && newRemainingPoints > neighborRemainingPoints) {
                     visited.set(neighbor, newRemainingPoints);
                     reachableTiles.add(neighbor);
                     queue.push({ tile: neighbor, remainingPoints: newRemainingPoints });
@@ -52,6 +48,7 @@ export class PlayerMovementService {
         }
         return Array.from(reachableTiles);
     }
+
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined): Tile[] | undefined {
         const grid = this.gridService.getGrid();
         if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
@@ -63,7 +60,7 @@ export class PlayerMovementService {
         costs.set(startTile, 0);
         previous.set(startTile, null);
 
-        while (true) {
+        while (queue.length > 0) {
             queue.sort((a, b) => a.cost - b.cost);
             const next = queue.shift();
             if (!next) break;

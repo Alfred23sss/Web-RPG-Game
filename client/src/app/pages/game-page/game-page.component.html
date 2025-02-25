@@ -1,7 +1,14 @@
 <div class="page" cdkDropListGroup>
     <div class="main-content">
         <div id="game-preview">
-            <app-grid [grid]="game?.grid"></app-grid>
+            <app-grid [grid]="game?.grid" [availablePath]="availablePath" [quickestPath]="quickestPath" (tileHovered)="updateQuickestPath($event)">
+            </app-grid>
+        </div>
+    </div>
+
+    <div class="game-info">
+        <div class="button-grid">
+            <button class="button" (click)="backToHome()">Abandonner</button>
         </div>
     </div>
 </div>
