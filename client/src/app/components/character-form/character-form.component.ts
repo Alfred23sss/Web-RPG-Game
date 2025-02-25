@@ -18,7 +18,7 @@ export class CharacterFormComponent {
     showForm: boolean = true;
     xSword: string = GameDecorations.XSwords;
 
-    game: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
+    game?: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
     createdPlayer: PlayerInfo;
     selectedAttackDice: DiceType | null = null;
     selectedDefenseDice: DiceType | null = null;
@@ -42,10 +42,11 @@ export class CharacterFormComponent {
             //voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
             name: '',
             avatar: '',
-            hp: { current: 10, max: 10 },
             speed: 4,
+            vitality: 4,
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
+            hp: { current: 10, max: 10 },
             movementPoints: 3,
             actionPoints: 3,
             inventory: [null, null],
@@ -68,15 +69,42 @@ export class CharacterFormComponent {
         this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
 
+    // submitCharacter(): void {
+    //     console.log('🔍 Vérification avant soumission :', this.createdPlayer);
+
+    //     if (this.createdPlayer && this.characterService.isCharacterValid(this.createdPlayer)) {
+    //         this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
+    //     } else {
+    //         this.characterService.showMissingDetailsError();
+    //     }
+    // }
+
     submitCharacter(): void {
         console.log('🔍 Vérification avant soumission :', this.createdPlayer);
-
-        if (this.createdPlayer && this.characterService.isCharacterValid(this.createdPlayer)) {
+    
+        if (!this.game) {
+            console.warn("⚠ Aucun jeu trouvé. Redirection vers la Waiting View...");
+            this.proceedToWaitingView(); // ✅ Redirige vers la Waiting View sans soumettre
+            return;
+        }
+    
+        if (this.characterService.isCharacterValid(this.createdPlayer)) {
             this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
         } else {
             this.characterService.showMissingDetailsError();
         }
     }
+    
+    private proceedToWaitingView(): void {
+        this.characterService.resetAttributes();
+        this.dialogRef.close(); 
+        this.characterService.goToWaitingView(); 
+    }
+
+    
+    
+    
+    
 
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
