@@ -60,8 +60,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
         // Vérifier si le socket est bien dans la salle avant d'envoyer le message
         if (socket.rooms.has(room)) {
-            this.server.to(room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
-            console.log(`Message envoyé dans la salle ${room}: ${message}`);
+            socket.broadcast.to(room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
+            console.log(`Message envoyé dans la salle ${room} sauf à ${socket.id}: ${message}`);
         } else {
             console.warn(`Socket ${socket.id} a tenté d'envoyer un message dans ${room} sans y être.`);
         }

@@ -11,6 +11,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 })
 export class ChatComponent implements OnInit, OnDestroy {
     message: string = '';
+    lastMessage: string;
     messages: string[] = [];
     messagesSent: string[] = [];
     id: string | undefined;
