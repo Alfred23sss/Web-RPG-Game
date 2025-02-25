@@ -21,9 +21,9 @@ enum GameSize {
     LargeItemCount = 6,
 }
 enum ItemCount {
-    Small = 8,
-    Medium = 10,
-    Large = 12,
+    Small = 2,
+    Medium = 4,
+    Large = 6,
 }
 
 enum MaxDuration {
@@ -285,7 +285,8 @@ export class GameValidationService {
     private isTitleValid(title: string): boolean {
         const isLengthValid = title?.length > TitleLength.Min && title.length <= TitleLength.Max;
         const isUniqueTitle = !this.gameService.isGameNameUsed(title);
-        return isLengthValid && isUniqueTitle;
+        const regex = /^(?!\s)[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*$/;
+        return isLengthValid && isUniqueTitle && regex.test(title);
     }
 
     private isDescriptionValid(description: string): boolean {

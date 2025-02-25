@@ -18,11 +18,11 @@
         <h3>Éditeur de jeux</h3>
         <div class="info-title">
             <label for="game-name">Nom du jeu</label>
-            <input id="game-name" type="text" [(ngModel)]="gameName" placeholder="Entrer le nom du jeu" required />
+            <input id="game-name" type="text" [(ngModel)]="gameName" maxlength="30" placeholder="Entrer le nom du jeu" required />
         </div>
         <div class="info-title">
             <label for="game-description">Description du jeu</label>
-            <textarea id="game-description" [(ngModel)]="gameDescription" placeholder="Entrer le nom de la description" required></textarea>
+            <textarea id="game-description" [(ngModel)]="gameDescription" maxlength="100" placeholder="Entrer le nom de la description" required></textarea>
         </div>
         <div class="button-grid">
             <button class="button" (click)="save()" [disabled]="isSaving">{{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}</button>
