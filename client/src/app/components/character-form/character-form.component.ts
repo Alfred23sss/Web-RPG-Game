@@ -55,7 +55,15 @@ export class CharacterFormComponent {
 
     assignBonus(attribute: AttributeType) {
         this.characterService.assignBonus(attribute);
+    
+        if (attribute === AttributeType.Vitality) {
+            this.createdPlayer.vitality = this.characterService.attributes[AttributeType.Vitality];
+        } else if (attribute === AttributeType.Speed) {
+            this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed];
+        }
     }
+    
+    
 
     assignDice(attribute: AttributeType): void {
         const { attack, defense } = this.characterService.assignDice(attribute);
@@ -81,30 +89,26 @@ export class CharacterFormComponent {
 
     submitCharacter(): void {
         console.log('🔍 Vérification avant soumission :', this.createdPlayer);
-    
+
         if (!this.game) {
-            console.warn("⚠ Aucun jeu trouvé. Redirection vers la Waiting View...");
+            //mettre la logique de verification de code 4 chiffres a la place de ca
+            console.warn('⚠ Aucun jeu trouvé. Redirection vers la Waiting View...');
             this.proceedToWaitingView(); // ✅ Redirige vers la Waiting View sans soumettre
             return;
         }
-    
+
         if (this.characterService.isCharacterValid(this.createdPlayer)) {
             this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
         } else {
             this.characterService.showMissingDetailsError();
         }
     }
-    
+
     private proceedToWaitingView(): void {
         this.characterService.resetAttributes();
-        this.dialogRef.close(); 
-        this.characterService.goToWaitingView(); 
+        this.dialogRef.close();
+        this.characterService.goToWaitingView();
     }
-
-    
-    
-    
-    
 
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
