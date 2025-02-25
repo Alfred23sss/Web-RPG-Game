@@ -36,6 +36,10 @@ export class SocketClientService {
 
     joinRoom(room: string) {
         this.socket.emit('joinRoom', room);
+
+        this.socket.on('joinedRoom', (message) => {
+            console.log(message); // Should log: "You have joined room XYZ"
+        });
     }
 
     sendMessageToOthers(message: string) {

@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
 import { Routes } from '@app/enums/global.enums';
-import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Component({
@@ -17,33 +16,16 @@ export class WaitingViewComponent implements OnInit {
     constructor(
         private router: Router,
         private readonly socketClientService: SocketClientService,
-        private accessCodeservice: AccessCodesCommunicationService,
+        private readonly roomValidationService: RoomValidationService,
     ) {}
 
     ngOnInit(): void {
-        this.generateAccessCode();
         this.socketClientService.createRoom(this.accessCode);
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        this.createAccessCode();
+        this.accessCode = this.roomValidationService.currentAccessCode;
     }
 
     navigateToHome(): void {
         this.router.navigate([Routes.CreatePage]);
-    }
-
-    private createAccessCode(): void {
-        this.accessCodeservice.createAccessCode(this.accessCode).subscribe({
-            next: (response) => {
-                console.log('Access code created:', response.code);
-                this.socketClientService.createRoom(this.accessCode); // Join room after creation
-            },
-            error: (err) => {
-                console.error('Error creating access code:', err);
-            },
-        });
-    }
-
-    private generateAccessCode(): void {
-        this.accessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
     }
 }

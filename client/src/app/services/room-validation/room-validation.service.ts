@@ -1,12 +1,22 @@
 import { Injectable } from '@angular/core';
-// import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
+import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
+import { Game } from '@app/interfaces/game';
+import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RoomValidationService {
     currentAccessCode: string = '';
-    private codes: string[] = [];
+    private accessCodes: string[] = [];
+
+    constructor(
+        private readonly accessCodeCommunication: AccessCodesCommunicationService,
+        private readonly socketClientService: SocketClientService,
+    ) {
+        this.loadAccessCodes();
+    }
 
     validateCode(code: string): boolean {
         if (!this.containsCode(code)) {
@@ -17,22 +27,59 @@ export class RoomValidationService {
         return true;
     }
 
+    createCode(code: string) {
+        this.postAccessCode(code);
+    }
+
+    generateAccessCode(): void {
+        this.currentAccessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
+
+        if (this.containsCode(this.currentAccessCode)) {
+            this.generateAccessCode();
+        } else {
+            this.accessCodes.push(this.currentAccessCode);
+        }
+    }
+
+    joinGame(game: Game): void {
+        if (this.isCreating(game)) {
+            this.generateAccessCode();
+            this.postAccessCode(this.currentAccessCode);
+        }
+        this.socketClientService.joinRoom(this.currentAccessCode);
+        // this.validateCode(this.currentAccessCode); //on aura surement besoin de le mettre assurer pas trop de joeur qui rentre
+        this.loadAccessCodes();
+    }
+
+    isCreating(game: Game): boolean {
+        return game !== undefined;
+    }
+
     private isGameUnlock(): boolean {
         // Add logic if needed
         return true;
     }
 
     private containsCode(code: string): boolean {
-        return this.codes.includes(code);
+        return this.accessCodes.includes(code);
     }
 
-    // private generateAccessCode(): void {
-    //     this.currentAccessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
+    private loadAccessCodes(): void {
+        this.accessCodeCommunication.getAccessCodes().subscribe({
+            next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
+            error: (err) => console.error('Error fetching access codes:', err),
+        });
+    }
 
-    //     if (this.containsCode(this.currentAccessCode)) {
-    //         this.generateAccessCode();
-    //     } else {
-    //         this.codes.push(this.currentAccessCode);
-    //     }
-    // }
+    private postAccessCode(code: string): void {
+        this.accessCodeCommunication.createAccessCode(code).subscribe({
+            next: (response) => {
+                console.log('Access code created:', response.code);
+                this.socketClientService.createRoom(code);
+            },
+            error: (err) => {
+                console.error('Error creating access code:', err);
+            },
+        });
+    }
 }
