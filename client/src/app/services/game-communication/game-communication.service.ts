@@ -13,22 +13,22 @@ export class GameCommunicationService {
     constructor(private readonly http: HttpClient) {}
 
     getAllGames(): Observable<Game[]> {
-        return this.http.get<Game[]>(this.apiUrl);
+        return this.http.get<Game[]>(`${this.apiUrl}/games`);
     }
 
     saveGame(gameToAdd: Game): Observable<Game> {
-        return this.http.post<Game>(`${this.apiUrl}/create`, gameToAdd);
+        return this.http.post<Game>(`${this.apiUrl}/games/create`, gameToAdd);
     }
 
     updateGame(id: string, game: Partial<Game>): Observable<Game> {
-        return this.http.patch<Game>(`${this.apiUrl}/update/${id}`, game);
+        return this.http.patch<Game>(`${this.apiUrl}/games/update/${id}`, game);
     }
 
     deleteGame(id: string): Observable<Game> {
-        return this.http.delete<Game>(`${this.apiUrl}/delete/${id}`);
+        return this.http.delete<Game>(`${this.apiUrl}/games/delete/${id}`);
     }
 
     getGameById(id: string): Observable<Game> {
-        return this.http.get<Game>(`${this.apiUrl}/${id}`);
+        return this.http.get<Game>(`${this.apiUrl}/games/${id}`);
     }
 }
