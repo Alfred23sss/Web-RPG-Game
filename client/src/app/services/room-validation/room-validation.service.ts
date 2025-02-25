@@ -5,8 +5,8 @@ import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.
     providedIn: 'root',
 })
 export class RoomValidationService {
+    currentAccessCode: string = '';
     private codes: string[] = [];
-    private currentAccessCode: string = '';
 
     validateCode(code: string): boolean {
         if (!this.containsCode(code)) {

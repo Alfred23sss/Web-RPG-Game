@@ -6,6 +6,8 @@ import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums
 import { Game } from '@app/interfaces/game';
 import { PlayerInfo } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Component({
     selector: 'app-character-form',
@@ -35,6 +37,8 @@ export class CharacterFormComponent {
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
+        private readonly socketClientService: SocketClientService,
+        private readonly roomValidationService: RoomValidationService,
         @Inject(MAT_DIALOG_DATA) public data: { game: Game; createdPlayer: PlayerInfo }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game;
@@ -72,6 +76,7 @@ export class CharacterFormComponent {
         console.log('🔍 Vérification avant soumission :', this.createdPlayer);
 
         if (this.createdPlayer && this.characterService.isCharacterValid(this.createdPlayer)) {
+            this.socketClientService.joinRoom(this.roomValidationService.currentAccessCode);
             this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
         } else {
             this.characterService.showMissingDetailsError();
