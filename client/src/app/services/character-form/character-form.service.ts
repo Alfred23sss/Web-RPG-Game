@@ -3,7 +3,9 @@ import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { PlayerInfo } from '@app/interfaces/player';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
+import { PlayerInfoService } from '@app/services/player-info/player-info.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Injectable({
@@ -18,6 +20,7 @@ export class CharacterService {
         private readonly router: Router,
         private readonly snackbarService: SnackbarService,
         private readonly gameCommunicationService: GameCommunicationService,
+        private readonly playerInfoService: PlayerInfoService,
     ) {}
 
     assignBonus(attribute: AttributeType): void {
@@ -52,6 +55,24 @@ export class CharacterService {
     }): void {
         this.validateGameAvailability(data.game, data.closePopup);
         if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
+            const playerInfo: PlayerInfo = {
+                name: data.characterName,
+                avatar: data.selectedAvatar,
+                hp: { current: this.attributes[AttributeType.Vitality], max: this.attributes[AttributeType.Vitality] },
+                speed: this.attributes[AttributeType.Speed],
+                attack: {
+                    value: this.attributes[AttributeType.Attack],
+                    bonusDice: this.diceAssigned[AttributeType.Attack] ? DiceType.D6 : DiceType.D4,
+                },
+                defense: {
+                    value: this.attributes[AttributeType.Defense],
+                    bonusDice: this.diceAssigned[AttributeType.Defense] ? DiceType.D6 : DiceType.D4,
+                },
+                movementPoints: 10, // Adjust with an actual value when known.
+                actionPoints: 10,
+                inventory: [null, null],
+            };
+            this.playerInfoService.initializePlayer(playerInfo);
             this.proceedToWaitingView(data.closePopup);
         } else {
             this.showMissingDetailsError();
