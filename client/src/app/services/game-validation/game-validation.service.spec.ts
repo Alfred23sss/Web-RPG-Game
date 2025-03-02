@@ -279,8 +279,8 @@ describe('GameValidationService', () => {
     it('should validate a valid large grid', () => {
         const game: Game = {
             id: '12',
-            name: 'Jeu Grand Valide',
-            description: 'Cas de test pour une grille grande valide',
+            name: 'Jeu Grand',
+            description: 'Cas de test pou',
             size: '20',
             mode: GameMode.Classic,
             lastModified: new Date(),
@@ -299,8 +299,8 @@ describe('GameValidationService', () => {
 
         const game: Game = {
             id: '13',
-            name: 'Jeu Moyen - Maison manquante',
-            description: 'Il manque un item "maison" dans la grille moyenne',
+            name: 'Jeu Moyen',
+            description: 'Il manque un item',
             size: '15',
             mode: GameMode.Classic,
             lastModified: new Date(),
@@ -319,8 +319,8 @@ describe('GameValidationService', () => {
 
         const game: Game = {
             id: '14',
-            name: 'Jeu Grand - Maison manquante',
-            description: 'Il manque un item "maison" dans la grille grande',
+            name: 'Jeu Grand',
+            description: 'Il manque un ',
             size: '20',
             mode: GameMode.Classic,
             lastModified: new Date(),
@@ -468,13 +468,7 @@ describe('GameValidationService', () => {
         const grid = createBaseGrid(10);
         grid[3][3].item = createDummyItem('home');
         grid[3][4].item = createDummyItem('home');
-        grid[3][5].item = createDummyItem('question');
-        grid[3][6].item = createDummyItem('question');
-        grid[3][7].item = createDummyItem('swap');
-        grid[3][8].item = createDummyItem('lightning');
-        grid[3][9].item = createDummyItem('potion');
-        grid[3][0].item = createDummyItem('fire');
-        grid[3][1].item = createDummyItem('rubik');
+        grid[3][9].item = createDummyItem('question');
         grid[3][2].item = createDummyItem('stop');
         return grid;
     }
@@ -485,12 +479,6 @@ describe('GameValidationService', () => {
         grid[3][4].item = createDummyItem('home');
         grid[1][8].item = createDummyItem('home');
         grid[1][9].item = createDummyItem('home');
-        grid[3][5].item = createDummyItem('question');
-        grid[3][6].item = createDummyItem('question');
-        grid[1][6].item = createDummyItem('question');
-        grid[1][7].item = createDummyItem('question');
-        grid[3][7].item = createDummyItem('swap');
-        grid[3][8].item = createDummyItem('lightning');
         grid[3][9].item = createDummyItem('potion');
         grid[3][0].item = createDummyItem('fire');
         grid[3][1].item = createDummyItem('rubik');
@@ -507,12 +495,6 @@ describe('GameValidationService', () => {
         grid[1][2].item = createDummyItem('home');
         grid[1][3].item = createDummyItem('home');
         grid[3][5].item = createDummyItem('question');
-        grid[3][6].item = createDummyItem('question');
-        grid[1][6].item = createDummyItem('question');
-        grid[1][7].item = createDummyItem('question');
-        grid[1][4].item = createDummyItem('question');
-        grid[1][5].item = createDummyItem('question');
-        grid[3][7].item = createDummyItem('swap');
         grid[3][8].item = createDummyItem('lightning');
         grid[3][9].item = createDummyItem('potion');
         grid[3][0].item = createDummyItem('fire');

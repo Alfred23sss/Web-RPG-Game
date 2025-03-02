@@ -1,4 +1,4 @@
-import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { ImageType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
@@ -248,6 +248,3 @@ describe('GameService', () => {
         expect(result).toBe(mockPreviewImage);
     });
 });
-function done() {
-    throw new Error('Function not implemented.');
-}
