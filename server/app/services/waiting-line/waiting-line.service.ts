@@ -3,26 +3,42 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class WaitingLineService {
-    private waitingLine: Player[] = [];
+    private waitingLines: Map<string, Player[]> = new Map();
 
-    addPlayer(player: Player): void {
-        this.waitingLine.push(player);
+    addPlayer(roomId: string, player: Player): void {
+        if (!this.waitingLines.has(roomId)) {
+            this.waitingLines.set(roomId, []);
+        }
+        this.waitingLines.get(roomId).push(player);
     }
 
-    removePlayer(playerId: string): void {
-        this.waitingLine = this.waitingLine.filter((p) => p.playerInfo.name !== playerId);
+    removePlayer(roomId: string, playerId: string): void {
+        if (this.waitingLines.has(roomId)) {
+            const waitingLine = this.waitingLines.get(roomId);
+            this.waitingLines.set(
+                roomId,
+                waitingLine.filter((p) => p.playerInfo.name !== playerId),
+            );
+        }
     }
 
-    getWaitingLine(): Player[] {
-        return this.waitingLine;
+    getWaitingLine(roomId: string): Player[] {
+        return this.waitingLines.get(roomId) || [];
     }
 
-    clearWaitingLine(): void {
-        this.waitingLine = [];
+    clearWaitingLine(roomId: string): void {
+        this.waitingLines.delete(roomId);
     }
 
-    isAdmin(playerId: string): boolean {
-        const player = this.waitingLine.find((p) => p.playerInfo.name === playerId);
+    isAdmin(roomId: string, playerId: string): boolean {
+        const waitingLine = this.waitingLines.get(roomId);
+        if (!waitingLine) return false;
+
+        const player = waitingLine.find((p) => p.playerInfo.name === playerId);
         return player ? player.playerInfo.isAdmin : false;
+    }
+
+    getAllWaitingLines(): Map<string, Player[]> {
+        return this.waitingLines;
     }
 }
