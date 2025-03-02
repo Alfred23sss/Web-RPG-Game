@@ -34,6 +34,7 @@ describe('CharacterService', () => {
         });
 
         service = TestBed.inject(CharacterService);
+        mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     });
 
     it('should be created', () => {
@@ -271,6 +272,46 @@ describe('CharacterService', () => {
         it('should show a snackbar message when character name exceeds the max length', () => {
             service.checkCharacterNameLength('testWithaLongNameForCharacter');
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('La longueur maximale du nom est de 20 caractères');
+        });
+    });
+
+    describe('goToWaitingView', () => {
+        it('should proceed to waiting view', () => {
+            service.goToWaitingView();
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/waiting-view']);
+        });
+    });
+
+    describe('hasBonusAssigned', () => {
+        it('should return false if bonus is not assigned to speed or vitality', () => {
+            const playerWithoutBonus: PlayerInfo = {
+                name: 'Name',
+                avatar: 'avatar.png',
+                speed: INITIAL_VALUES.attributes[AttributeType.Speed],
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 4, max: INITIAL_VALUES.attributes[AttributeType.Vitality] },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+            };
+            const hasBonusAssigned = (service as any).hasBonusAssigned(playerWithoutBonus);
+            expect(hasBonusAssigned).toBeFalse();
+        });
+        it('should return true if bonus is assigned to speed or vitality', () => {
+            const playerWithBonus: PlayerInfo = {
+                name: 'Name',
+                avatar: 'avatar.png',
+                speed: 6,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 4, max: INITIAL_VALUES.attributes[AttributeType.Vitality] },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+            };
+            const hasBonusAssigned = (service as any).hasBonusAssigned(playerWithBonus);
+            expect(hasBonusAssigned).toBeTrue();
         });
     });
 });
