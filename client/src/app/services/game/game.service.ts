@@ -74,13 +74,14 @@ export class GameService {
     }
 
     saveGame(gameToAdd: Game): void {
-        // this.fetchGames().subscribe();
-        const existingGame = this.getGameById(gameToAdd.id);
-        if (existingGame) {
-            this.updateExistingGame(gameToAdd);
-        } else {
-            this.saveNewGame(gameToAdd);
-        }
+        this.fetchGames().subscribe(() => {
+            const existingGame = this.getGameById(gameToAdd.id);
+            if (existingGame) {
+                this.updateExistingGame(gameToAdd);
+            } else {
+                this.saveNewGame(gameToAdd);
+            }
+        });
     }
 
     getCurrentGame(): Game | undefined {

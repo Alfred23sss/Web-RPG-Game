@@ -4,9 +4,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { Routes } from '@app/enums/global.enums';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-create-page',
@@ -15,11 +16,12 @@ import { GameService } from '@app/services/game/game.service';
     imports: [MatTooltipModule, CommonModule],
 })
 export class CreatePageComponent implements OnInit {
-    games: Game[] = this.gameService.games;
+    games: Game[] = [];
     constructor(
         private readonly dialog: MatDialog,
         private readonly gameService: GameService,
         private readonly router: Router,
+        private readonly snackBarService: SnackbarService,
     ) {}
 
     get visibleGames(): Game[] {
@@ -33,8 +35,15 @@ export class CreatePageComponent implements OnInit {
     }
 
     openDialog(game: Game): void {
-        this.dialog.open(CharacterFormComponent, {
-            data: { game },
+        this.gameService.fetchGames().subscribe(() => {
+            const currentGame = this.gameService.getGameById(game.id);
+            if (!currentGame?.isVisible) {
+                this.snackBarService.showMessage(ErrorMessages.UnavailableGame);
+                return;
+            }
+            this.dialog.open(CharacterFormComponent, {
+                data: { game },
+            });
         });
     }
 

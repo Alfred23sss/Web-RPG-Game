@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { GameService } from '@app/services/game/game.service';
-import { CreatePageComponent } from './create-page.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
+import { GameService } from '@app/services/game/game.service';
+import { of } from 'rxjs';
+import { CreatePageComponent } from './create-page.component';
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
@@ -58,16 +58,20 @@ describe('CreatePageComponent', () => {
         expect(mockGameService.fetchGames).toHaveBeenCalled();
     });
 
-    it('should open character form dialog with correct data', () => {
+    it('should open character form dialog with correct data', fakeAsync(() => {
         const dialogSpy = spyOn(dialog, 'open');
-        const testGame = MOCK_GAMES[0];
+        const testGame = { ...MOCK_GAMES[0], isVisible: true };
+
+        mockGameService.fetchGames.and.returnValue(of([])); // Use mockGameService
+        mockGameService.getGameById = jasmine.createSpy().and.returnValue(testGame); // Mock getGameById
 
         component.openDialog(testGame);
+        tick(); // Simulate the async call
 
         expect(dialogSpy).toHaveBeenCalledWith(CharacterFormComponent, {
             data: { game: testGame },
         });
-    });
+    }));
 
     it('should navigate to home page', () => {
         component.navigateToHome();

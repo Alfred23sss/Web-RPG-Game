@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
 import { ImageType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
@@ -48,6 +48,7 @@ describe('GameService', () => {
         });
 
         service = TestBed.inject(GameService);
+        spyOn(service, 'fetchGames').and.returnValue(of([]));
 
         testGame1 = {
             id: 'game-1',
@@ -190,13 +191,15 @@ describe('GameService', () => {
         expect(service.getGames()[0]).toEqual(updatedGame);
     });
 
-    it('should save new game if it does not exist', () => {
-        gameCommunicationServiceSpy.saveGame.and.returnValue(of(testGame2));
+    it('should save new game if it does not exist', fakeAsync(() => {
+        spyOn(service, 'getGameById').and.returnValue(undefined);
+        spyOn(gameCommunicationServiceSpy, 'saveGame').and.returnValue(of(testGame2));
 
         service.saveGame(testGame2);
+        tick();
 
         expect(service.getGames()).toContain(testGame2);
-    });
+    }));
 
     it('should return the current game if it exists', () => {
         service['currentGame'] = testGame1;
@@ -245,3 +248,6 @@ describe('GameService', () => {
         expect(result).toBe(mockPreviewImage);
     });
 });
+function done() {
+    throw new Error('Function not implemented.');
+}
