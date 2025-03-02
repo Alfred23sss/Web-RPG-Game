@@ -8,7 +8,7 @@ import { GameCommunicationService } from './game-communication.service';
 describe('GameCommunicationService', () => {
     let service: GameCommunicationService;
     let httpMock: HttpTestingController;
-    const apiUrl = environment.serverUrl;
+    const apiUrl = environment.serverUrl + '/games';
 
     beforeEach(() => {
         TestBed.configureTestingModule({
