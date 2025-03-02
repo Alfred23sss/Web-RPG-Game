@@ -16,14 +16,6 @@ export class SocketClientService {
             transports: ['websocket'],
             upgrade: false,
         });
-
-        this.socket.on('connect', () => {
-            console.log('Connecté au serveur WebSocket');
-        });
-
-        this.socket.on('connect_error', (error) => {
-            console.error('Erreur de connexion WebSocket:', error);
-        });
     }
 
     sendMessage(message: string) {
@@ -38,12 +30,12 @@ export class SocketClientService {
         this.socket.emit('joinRoom', room);
     }
 
-    sendMessageToOthers(message: string) {
-        this.socket.emit('broadcast', message);
+    sendMessageToOthers(message: string, room: string) {
+        this.socket.emit('roomMessage', { room, message });
     }
 
     onMessage(callback: (message: string) => void) {
-        this.socket.on('massMessage', callback);
+        this.socket.on('roomMessage', callback);
     }
 
     getSocketId() {

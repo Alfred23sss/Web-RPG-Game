@@ -1,9 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+    ConnectedSocket,
+    MessageBody,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    OnGatewayInit,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID, WORD_MIN_LENGTH } from './chat.gateway.constants';
 import { ChatEvents } from './chat.gateway.events';
-
 @WebSocketGateway({ cors: true })
 @Injectable()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -43,13 +51,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @SubscribeMessage(ChatEvents.JoinRoom)
     joinRoom(socket: Socket, room: string) {
         socket.join(room);
+        socket.emit('joinedRoom', `You have joined room ${room}`);
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(socket: Socket, message: string) {
-        // Seulement un membre de la salle peut envoyer un message aux autres
-        if (socket.rooms.has(this.room)) {
-            this.server.to(this.room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
+    roomMessage(@ConnectedSocket() socket: Socket, @MessageBody() data: { room: string; message: string }) {
+        const { room, message } = data;
+
+        // Vérifier si le socket est bien dans la salle avant d'envoyer le message
+        if (socket.rooms.has(room)) {
+            socket.broadcast.to(room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
+            console.log(`Message envoyé dans la salle ${room} sauf à ${socket.id}: ${message}`);
+        } else {
+            console.warn(`Socket ${socket.id} a tenté d'envoyer un message dans ${room} sans y être.`);
         }
     }
 

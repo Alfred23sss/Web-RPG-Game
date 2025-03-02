@@ -6,6 +6,7 @@ import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums
 import { Game } from '@app/interfaces/game';
 import { PlayerInfo } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
 
 @Component({
     selector: 'app-character-form',
@@ -35,11 +36,12 @@ export class CharacterFormComponent {
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
+        private readonly roomValidationService: RoomValidationService,
         @Inject(MAT_DIALOG_DATA) public data: { game: Game; createdPlayer: PlayerInfo }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game;
         this.createdPlayer = data.createdPlayer ?? {
-            //voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
+            // voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
             name: '',
             avatar: '',
             speed: 4,
@@ -75,27 +77,29 @@ export class CharacterFormComponent {
     }
 
     submitCharacter(): void {
-        console.log('🔍 Vérification avant soumission :', this.createdPlayer);
-
         if (!this.game) {
-            //mettre la logique de verification de code 4 chiffres a la place de ca
-            console.warn('⚠ Aucun jeu trouvé. Redirection vers la Waiting View...');
-            this.proceedToWaitingView(); // ✅ Redirige vers la Waiting View sans soumettre
+            this.proceedToWaitingView();
             return;
         }
 
         if (this.characterService.isCharacterValid(this.createdPlayer)) {
+            this.roomValidationService.joinGame(this.game);
             this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
         } else {
             this.characterService.showMissingDetailsError();
         }
     }
-
+    
     private proceedToWaitingView(): void {
         this.characterService.resetAttributes();
-        this.dialogRef.close();
-        this.characterService.goToWaitingView();
+        this.dialogRef.close(); 
+        this.characterService.goToWaitingView(); 
     }
+
+    
+    
+    
+    
 
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
@@ -107,4 +111,6 @@ export class CharacterFormComponent {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
+
+
 }

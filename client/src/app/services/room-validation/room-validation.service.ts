@@ -1,23 +1,80 @@
 import { Injectable } from '@angular/core';
+import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
+import { Game } from '@app/interfaces/game';
+import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Injectable({
     providedIn: 'root',
 })
 export class RoomValidationService {
-    // constructor(private readonly socketClientService: SocketClientService) {}
-    currentAcessCode: string = '';
+    currentAccessCode: string = '';
+    private accessCodes: string[] = [];
 
-    validateCode(code: string) {
-        this.isAccessCodeValid(code);
+    constructor(
+        private readonly accessCodeCommunication: AccessCodesCommunicationService,
+        private readonly socketClientService: SocketClientService,
+    ) {
+        this.loadAccessCodes();
+    }
+
+    validateCode(code: string): boolean {
+        if (!this.containsCode(code)) {
+            return false;
+        }
         this.isGameUnlock();
-        this.currentAcessCode = code;
+        this.currentAccessCode = code;
+        return true;
+    }
+
+    createCode(code: string) {
+        this.postAccessCode(code);
+    }
+
+    generateAccessCode(): void {
+        this.currentAccessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
+
+        if (this.containsCode(this.currentAccessCode)) {
+            this.generateAccessCode();
+        } else {
+            this.accessCodes.push(this.currentAccessCode);
+        }
+    }
+
+    joinGame(game: Game): void {
+        if (this.isCreating(game)) {
+            this.generateAccessCode();
+            this.postAccessCode(this.currentAccessCode);
+        }
+        this.socketClientService.joinRoom(this.currentAccessCode);
+        // this.validateCode(this.currentAccessCode); //on aura surement besoin de le mettre assurer pas trop de joeur qui rentre
+        this.loadAccessCodes();
+    }
+
+    isCreating(game: Game): boolean {
+        return game !== undefined;
     }
 
     private isGameUnlock(): boolean {
+        // Add logic if needed
         return true;
     }
 
-    private isAccessCodeValid(code: string): boolean {
-        return true;
+    private containsCode(code: string): boolean {
+        return this.accessCodes.includes(code);
+    }
+
+    private loadAccessCodes(): void {
+        this.accessCodeCommunication.getAccessCodes().subscribe({
+            next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
+        });
+    }
+
+    private postAccessCode(code: string): void {
+        this.accessCodeCommunication.createAccessCode(code).subscribe({
+            next: () => {
+                this.socketClientService.createRoom(code);
+            },
+        });
     }
 }

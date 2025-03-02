@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
 import { Routes } from '@app/enums/global.enums';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Component({
@@ -16,18 +16,15 @@ export class WaitingViewComponent implements OnInit {
     constructor(
         private router: Router,
         private readonly socketClientService: SocketClientService,
+        private readonly roomValidationService: RoomValidationService,
     ) {}
 
     ngOnInit(): void {
-        this.generateAccessCode();
+        this.accessCode = this.roomValidationService.currentAccessCode;
         this.socketClientService.createRoom(this.accessCode);
     }
 
     navigateToHome(): void {
         this.router.navigate([Routes.CreatePage]);
-    }
-
-    private generateAccessCode(): void {
-        this.accessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
     }
 }

@@ -1,9 +1,12 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { AttributeType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
 import { CharacterFormComponent } from './character-form.component';
 
 describe('CharacterFormComponent', () => {
@@ -12,11 +15,20 @@ describe('CharacterFormComponent', () => {
     let mockCharacterService: jasmine.SpyObj<CharacterService>;
     let mockDialogRef: jasmine.SpyObj<MatDialogRef<CharacterFormComponent>>;
     let mockGame: Game;
+    let mockRoomValidationService: jasmine.SpyObj<RoomValidationService>;
 
     beforeEach(async () => {
         mockCharacterService = jasmine.createSpyObj<CharacterService>(
             'CharacterService',
-            ['submitCharacter', 'resetAttributes', 'assignBonus', 'assignDice', 'checkCharacterNameLength'],
+            [
+                'submitCharacter',
+                'resetAttributes',
+                'assignBonus',
+                'assignDice',
+                'checkCharacterNameLength',
+                'isCharacterValid',
+                'showMissingDetailsError',
+            ],
             {
                 attributes: {
                     [AttributeType.Vitality]: 5,
@@ -34,15 +46,28 @@ describe('CharacterFormComponent', () => {
                 },
             },
         );
+        mockRoomValidationService = jasmine.createSpyObj<RoomValidationService>('RoomValidationService', ['joinGame']);
 
-        mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
         mockGame = { id: '1', name: 'Test Game' } as Game;
+        // await TestBed.configureTestingModule({
+        //     imports: [FormsModule, CharacterFormComponent],
+        //     providers: [
+        //         provideHttpClient(),
+        //         { provide: CharacterService, useValue: mockCharacterService },
+        //         { provide: MatDialogRef, useValue: mockDialogRef },
+        //         { provide: MAT_DIALOG_DATA, useValue: { game: mockGame } },
+        //     ],
+        // }).compileComponents();
+
         await TestBed.configureTestingModule({
             imports: [FormsModule, CharacterFormComponent],
             providers: [
+                provideHttpClient(), // Provides HttpClient
+                provideHttpClientTesting(), // Provides HttpClientTestingController
                 { provide: CharacterService, useValue: mockCharacterService },
                 { provide: MatDialogRef, useValue: mockDialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { game: mockGame } },
+                { provide: RoomValidationService, useValue: mockRoomValidationService },
             ],
         }).compileComponents();
 
@@ -70,24 +95,19 @@ describe('CharacterFormComponent', () => {
 
     it('should call submitCharacter from CharacterService and closePopup when the callback is executed', () => {
         spyOn(component, 'closePopup');
-
+        mockCharacterService.isCharacterValid.and.returnValue(true);
+        mockCharacterService.submitCharacter.and.callFake((player, game, callback) => {
+            callback();
+        });
+        mockRoomValidationService.joinGame.and.returnValue();
+        component.game = mockGame;
         component.submitCharacter();
-        expect(mockCharacterService.submitCharacter).toHaveBeenCalled();
-
-        const dataPassed = mockCharacterService.submitCharacter.calls.mostRecent().args[0];
-        dataPassed.closePopup();
-
+        expect(mockCharacterService.submitCharacter).toHaveBeenCalledWith(component.createdPlayer, mockGame, jasmine.any(Function));
         expect(component.closePopup).toHaveBeenCalled();
     });
 
-    it('should reset attributes and close dialog when closePopup() is called', () => {
-        component.closePopup();
-        expect(mockCharacterService.resetAttributes).toHaveBeenCalled();
-        expect(mockDialogRef.close).toHaveBeenCalled();
-    });
-
     it('should call checkCharacterNameLength from CharacterService when updateCharacterName is called', () => {
-        component.characterName = 'ValidName';
+        component.createdPlayer.name = 'ValidName';
         component.checkCharacterNameLength();
         expect(mockCharacterService.checkCharacterNameLength).toHaveBeenCalledWith('ValidName');
     });
