@@ -3,6 +3,21 @@
     <p>
         Votre code d'accès: <strong>{{ accessCode }}</strong>
     </p>
+
+    <div class="waiting-line">
+        <h2>Liste des joueurs en attente</h2>
+        <ul>
+            @for(player of waitingLine; track $index){ }
+            <li>
+                <span class="player-name">{{ player.playerInfo.name }}</span>
+                @if(player.playerInfo.isAdmin){
+                <span class="admin-badge">Admin</span>
+                }
+            </li>
+        </ul>
+    </div>
+
     <button class="button" (click)="navigateToHome()">Quitter</button>
+
     <app-chat></app-chat>
 </div>

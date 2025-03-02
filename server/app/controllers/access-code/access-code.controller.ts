@@ -1,6 +1,6 @@
 import { AccessCodesDto } from '@app/model/dto/game/access-codes.dto';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Body, Controller, Get, HttpException, HttpStatus, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
@@ -26,6 +26,16 @@ export class AccessCodesController {
             response.status(HttpStatus.OK).json(games);
         } catch (error) {
             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Server Error', error: error.message });
+        }
+    }
+
+    @Delete(':code')
+    async deleteCode(@Param('code') code: string, @Res() response: Response) {
+        try {
+            await this.accessCodesService.deleteCode(code);
+            response.status(HttpStatus.OK).json({ message: `Access code ${code} deleted successfully` });
+        } catch (error) {
+            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to delete access code', error: error.message });
         }
     }
 }

@@ -21,4 +21,8 @@ export class AccessCodesCommunicationService {
     createAccessCode(code: string): Observable<AccessCode> {
         return this.http.post<AccessCode>(`${this.apiUrl}/create`, { code });
     }
+
+    deleteAccessCode(code: string): Observable<AccessCode> {
+        return this.http.delete<AccessCode>(`${this.apiUrl}/${code}`);
+    }
 }

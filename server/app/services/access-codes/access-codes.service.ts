@@ -16,4 +16,12 @@ export class AccessCodesService {
     async getCodes(): Promise<AccessCodes[]> {
         return this.accessCodesModel.find().exec();
     }
+
+    async deleteCode(code: string): Promise<AccessCodes> {
+        const deletedAccessCode = await this.accessCodesModel.findOneAndDelete({ code }).exec();
+        if (!deletedAccessCode) {
+            throw new Error(`Access code ${code} not found`);
+        }
+        return deletedAccessCode;
+    }
 }

@@ -19,7 +19,9 @@ export class AccessCodeComponent {
         private dialog: MatDialog,
         private readonly roomValidation: RoomValidationService,
         private readonly snackbarService: SnackbarService,
-    ) {}
+    ) {
+        this.roomValidation.loadAccessCodes();
+    }
 
     closeDialog() {
         this.dialogRef.close();

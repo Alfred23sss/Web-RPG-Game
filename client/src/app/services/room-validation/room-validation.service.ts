@@ -55,6 +55,12 @@ export class RoomValidationService {
         return game !== undefined;
     }
 
+    loadAccessCodes(): void {
+        this.accessCodeCommunication.getAccessCodes().subscribe({
+            next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
+        });
+    }
+
     private isGameUnlock(): boolean {
         // Add logic if needed
         return true;
@@ -62,12 +68,6 @@ export class RoomValidationService {
 
     private containsCode(code: string): boolean {
         return this.accessCodes.includes(code);
-    }
-
-    private loadAccessCodes(): void {
-        this.accessCodeCommunication.getAccessCodes().subscribe({
-            next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
-        });
     }
 
     private postAccessCode(code: string): void {

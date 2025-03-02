@@ -1,3 +1,5 @@
+import { Player } from '@app/interfaces/Player';
+import { WaitingLineService } from '@app/services/waiting-line/waiting-line.service';
 import { Injectable, Logger } from '@nestjs/common';
 import {
     ConnectedSocket,
@@ -19,7 +21,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
     private readonly room = PRIVATE_ROOM_ID;
 
-    constructor(private readonly logger: Logger) {}
+    constructor(
+        private readonly logger: Logger,
+        private readonly waitingLineService: WaitingLineService,
+    ) {}
 
     @SubscribeMessage(ChatEvents.Validate)
     validate(socket: Socket, word: string) {
@@ -64,6 +69,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
             console.log(`Message envoyé dans la salle ${room} sauf à ${socket.id}: ${message}`);
         } else {
             console.warn(`Socket ${socket.id} a tenté d'envoyer un message dans ${room} sans y être.`);
+        }
+    }
+
+    @SubscribeMessage(ChatEvents.AddToWaitingLine)
+    addToWaitingLine(socket: Socket, player: Player) {
+        this.waitingLineService.addPlayer(player);
+        this.server.emit('waitingLineUpdated', this.waitingLineService.getWaitingLine());
+    }
+
+    @SubscribeMessage(ChatEvents.RemoveFromWaitingLine)
+    removeFromWaitingLine(socket: Socket, playerId: string) {
+        this.waitingLineService.removePlayer(playerId);
+        this.server.emit('waitingLineUpdated', this.waitingLineService.getWaitingLine());
+    }
+
+    @SubscribeMessage(ChatEvents.LeaveRoom)
+    leaveRoom(socket: Socket, room: string) {
+        socket.leave(room);
+        this.logger.log(`Socket ${socket.id} left room: ${room}`);
+        socket.emit('leftRoom', `You have left room ${room}`);
+    }
+
+    @SubscribeMessage(ChatEvents.DeleteRoom)
+    deleteRoom(socket: Socket, room: string) {
+        const roomSockets = this.server.sockets.adapter.rooms.get(room);
+        if (roomSockets) {
+            this.server.to(room).emit('roomDeleted', `Room ${room} has been deleted.`);
+
+            roomSockets.forEach((socketId) => {
+                const clientSocket = this.server.sockets.sockets.get(socketId);
+                if (clientSocket) {
+                    clientSocket.leave(room);
+                    clientSocket.emit('leftRoom', `You have been removed from room ${room}.`);
+                }
+            });
+
+            this.logger.log(`Room ${room} has been deleted.`);
+        } else {
+            this.logger.warn(`Attempted to delete non-existent room: ${room}`);
+            socket.emit('error', `Room ${room} does not exist.`);
         }
     }
 
