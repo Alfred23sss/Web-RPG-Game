@@ -219,7 +219,7 @@ describe('CharacterService', () => {
             spyOn(service as any, 'validateGameAvailability').and.callFake(() => null);
             spyOn(service as any, 'proceedToWaitingView');
             spyOn(service as any, 'showMissingDetailsError');
-            spyOn(service as any, 'isCharacterValid').and.returnValue(true);
+            spyOn(service, 'isCharacterValid').and.returnValue(true);
         });
 
         it('should proceed to waiting view if character is valid', () => {
@@ -243,7 +243,7 @@ describe('CharacterService', () => {
         });
 
         it('should show missing details error if character is invalid', () => {
-            spyOn(service, 'isCharacterValid').and.returnValue(false);
+            (service.isCharacterValid as jasmine.Spy).and.returnValue(false);
 
             const invalidPlayer: PlayerInfo = {
                 name: '',
@@ -258,7 +258,7 @@ describe('CharacterService', () => {
                 inventory: [null, null],
             };
 
-            service.submitCharacter(invalidPlayer, mockGame, closePopupSpy); // ✅ Correction ici
+            service.submitCharacter(invalidPlayer, mockGame, closePopupSpy);
 
             expect(service['showMissingDetailsError']).toHaveBeenCalled();
             expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
@@ -273,7 +273,7 @@ describe('CharacterService', () => {
 
         it('should show a snackbar message when character name exceeds the max length', () => {
             service.checkCharacterNameLength('testWithaLongNameForCharacter');
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('The maximum name length is 20 characters.');
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('La longueur maximale du nom est de 20 caractères');
         });
     });
 });

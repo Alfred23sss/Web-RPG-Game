@@ -71,19 +71,9 @@ export class CharacterFormComponent {
         this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
 
-    // submitCharacter(): void {
-    //     console.log('🔍 Vérification avant soumission :', this.createdPlayer);
-
-    //     if (this.createdPlayer && this.characterService.isCharacterValid(this.createdPlayer)) {
-    //         this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
-    //     } else {
-    //         this.characterService.showMissingDetailsError();
-    //     }
-    // }
-
     submitCharacter(): void {
         if (!this.game) {
-            this.proceedToWaitingView(); // ✅ Redirige vers la Waiting View sans soumettre
+            this.proceedToWaitingView();
             return;
         }
 
