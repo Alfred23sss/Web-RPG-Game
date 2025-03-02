@@ -17,11 +17,12 @@ export class AccessCodesService {
         return this.accessCodesModel.find().exec();
     }
 
-    async deleteCode(code: string): Promise<AccessCodes> {
-        const deletedAccessCode = await this.accessCodesModel.findOneAndDelete({ code }).exec();
-        if (!deletedAccessCode) {
-            throw new Error(`Access code ${code} not found`);
+    async deleteCode(code: string): Promise<boolean> {
+        try {
+            const result = await this.accessCodesModel.deleteOne({ code }).exec();
+            return result.deletedCount > 0;
+        } catch (error) {
+            throw new Error(`Failed to delete game: ${error.message}`);
         }
-        return deletedAccessCode;
     }
 }

@@ -23,6 +23,6 @@ export class AccessCodesCommunicationService {
     }
 
     deleteAccessCode(code: string): Observable<AccessCode> {
-        return this.http.delete<AccessCode>(`${this.apiUrl}/${code}`);
+        return this.http.delete<AccessCode>(`${this.apiUrl}/delete/${code}`);
     }
 }

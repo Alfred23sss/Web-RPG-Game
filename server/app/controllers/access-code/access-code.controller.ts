@@ -29,13 +29,16 @@ export class AccessCodesController {
         }
     }
 
-    @Delete(':code')
-    async deleteCode(@Param('code') code: string, @Res() response: Response) {
+    @Delete('delete/:code')
+    async deleteGame(@Param('code') code: string) {
         try {
-            await this.accessCodesService.deleteCode(code);
-            response.status(HttpStatus.OK).json({ message: `Access code ${code} deleted successfully` });
+            const result = await this.accessCodesService.deleteCode(code);
+            if (!result) {
+                throw new HttpException(`Game with code ${code} not found`, HttpStatus.NOT_FOUND);
+            }
+            return { message: `Game with code ${code} deleted successfully` };
         } catch (error) {
-            response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Failed to delete access code', error: error.message });
+            throw new HttpException({ message: 'Failed to delete code', error: error.message }, HttpStatus.BAD_REQUEST);
         }
     }
 }
