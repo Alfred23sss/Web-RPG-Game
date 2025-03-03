@@ -30,16 +30,17 @@ export class PlayerMovementService {
 
         while (queue.length) {
             const dequeued = queue.shift();
-            if (!dequeued) continue;
+            if (!dequeued) continue; //33
             const { tile, remainingPoints } = dequeued;
 
             for (const neighbor of this.getNeighbors(tile, grid)) {
-                if (neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen)) continue;
+                if (this.isNeighborBlocked(neighbor)) continue;
 
-                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity;
+                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity; //39
                 const newRemainingPoints = remainingPoints - moveCost;
                 const neighborRemainingPoints = visited.get(neighbor) ?? -Infinity;
-                if (newRemainingPoints >= 0 && newRemainingPoints > neighborRemainingPoints) {
+
+                if (this.canMoveToTile(newRemainingPoints, neighborRemainingPoints)) {
                     visited.set(neighbor, newRemainingPoints);
                     reachableTiles.add(neighbor);
                     queue.push({ tile: neighbor, remainingPoints: newRemainingPoints });
@@ -63,7 +64,7 @@ export class PlayerMovementService {
         while (queue.length > 0) {
             queue.sort((a, b) => a.cost - b.cost);
             const next = queue.shift();
-            if (!next) break;
+            if (!next) break; //67
             const { tile: currentTile, cost: currentCost } = next;
 
             if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);
@@ -76,6 +77,7 @@ export class PlayerMovementService {
 
                 const newCost = currentCost + moveCost;
                 if (!costs.has(neighbor) || newCost < (costs.get(neighbor) ?? Infinity)) {
+                    // 79
                     costs.set(neighbor, newCost);
                     previous.set(neighbor, currentTile);
                     queue.push({ tile: neighbor, cost: newCost });
@@ -86,8 +88,16 @@ export class PlayerMovementService {
         return undefined;
     }
 
+    private isNeighborBlocked(neighbor: Tile): boolean {
+        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen);
+    }
+
+    private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
+        return newRemaining >= 0 && newRemaining > neighborRemaining;
+    }
+
     private getMoveCost(neighbor: Tile): number {
-        return this.movementCosts.get(neighbor.type) ?? Infinity;
+        return this.movementCosts.get(neighbor.type) ?? Infinity; // 99
     }
 
     private isValidNeighbor(neighbor: Tile): boolean {
@@ -99,7 +109,7 @@ export class PlayerMovementService {
         const neighbors: Tile[] = [];
 
         const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
-        if (!match) return neighbors;
+        if (!match) return neighbors; // 111
 
         const x = parseInt(match[1], 10);
         const y = parseInt(match[2], 10);
