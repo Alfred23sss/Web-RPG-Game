@@ -161,3 +161,10 @@ export enum ItemDescription {
     Swap = 'échange les personnages',
     Default = 'rien',
 }
+
+export enum AttributeValueModifiers {
+    BigPenalty = -2,
+    SmallPenalty = -1,
+    SmallBonus = 1,
+    BigBonus = 2,
+}
