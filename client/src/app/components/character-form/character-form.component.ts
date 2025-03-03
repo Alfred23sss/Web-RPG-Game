@@ -4,10 +4,9 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { PlayerInfo } from '@app/interfaces/player';
+import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
-
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
@@ -20,7 +19,7 @@ export class CharacterFormComponent {
     xSword: string = GameDecorations.XSwords;
 
     game?: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
-    createdPlayer: PlayerInfo;
+    createdPlayer: Player;
     selectedAttackDice: DiceType | null = null;
     selectedDefenseDice: DiceType | null = null;
     avatarTypes: string[] = Object.values(AvatarType);
@@ -37,7 +36,7 @@ export class CharacterFormComponent {
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
         private readonly roomValidationService: RoomValidationService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; createdPlayer: PlayerInfo }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game; createdPlayer: Player }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game;
         this.createdPlayer = data.createdPlayer ?? {
@@ -78,7 +77,7 @@ export class CharacterFormComponent {
         }
 
         if (this.characterService.isCharacterValid(this.createdPlayer)) {
-            this.roomValidationService.joinGame(this.game);
+            this.roomValidationService.joinGame(this.game, this.createdPlayer);
             this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
         } else {
             this.characterService.showMissingDetailsError();

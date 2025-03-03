@@ -16,7 +16,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 export class WaitingViewComponent implements OnInit, OnDestroy {
     accessCode: string;
     player: Player;
-    waitingLine: Player[] = [];
+    lobby: Player[] = [];
 
     constructor(
         private router: Router,
@@ -27,29 +27,27 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.accessCode = this.roomValidationService.currentAccessCode;
-        this.socketClientService.createRoom(this.accessCode);
+        this.socketClientService.createLobby(this.accessCode);
 
         this.player = {
-            playerInfo: {
-                name: 'default',
-                avatar: 'default-avatar.png',
-                speed: 5,
-                vitality: 10,
-                attack: { value: 3, bonusDice: DiceType.D6 },
-                defense: { value: 2, bonusDice: DiceType.D6 },
-                hp: { current: 10, max: 10 },
-                movementPoints: 3,
-                actionPoints: 2,
-                inventory: [null, null],
-                isAdmin: true,
-            },
+            name: 'default',
+            avatar: 'default-avatar.png',
+            speed: 5,
+            vitality: 10,
+            attack: { value: 3, bonusDice: DiceType.D6 },
+            defense: { value: 2, bonusDice: DiceType.D6 },
+            hp: { current: 10, max: 10 },
+            movementPoints: 3,
+            actionPoints: 2,
+            inventory: [null, null],
+            isAdmin: true,
         };
 
-        this.socketClientService.addToWaitingLine(this.player);
+        this.socketClientService.addToLobby(this.player);
 
-        this.socketClientService.onWaitingLineUpdated((waitingLine: Player[]) => {
-            this.waitingLine = waitingLine;
-            console.log('Waiting line updated:', this.waitingLine);
+        this.socketClientService.onLobbyUpdate((lobby: Player[]) => {
+            this.lobby = lobby;
+            console.log('Waiting line updated:', this.lobby);
         });
 
         this.socketClientService.onGameDeleted((message: string) => {
@@ -59,8 +57,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if (this.player.playerInfo.isAdmin) {
-            this.socketClientService.deleteRoom(this.accessCode);
+        if (this.player.isAdmin) {
+            this.socketClientService.deleteLobby(this.accessCode);
 
             this.accessCodeCommunicationService.deleteAccessCode(this.accessCode).subscribe({
                 next: () => {
@@ -72,8 +70,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             });
         }
 
-        this.socketClientService.removeFromWaitingLine(this.player.playerInfo.name);
-        this.socketClientService.leaveRoom(this.accessCode);
+        this.socketClientService.removeFromLobby(this.player.name);
+        this.socketClientService.leaveLobby(this.accessCode, this.player.name);
     }
     navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);

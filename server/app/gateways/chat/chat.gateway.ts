@@ -72,17 +72,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         }
     }
 
-    @SubscribeMessage(ChatEvents.AddToWaitingLine)
-    addToWaitingLine(socket: Socket, player: Player) {
-        this.waitingLineService.addPlayer(player);
-        this.server.emit('waitingLineUpdated', this.waitingLineService.getWaitingLine());
-    }
+    // @SubscribeMessage(ChatEvents.AddToWaitingLine)
+    // addToWaitingLine(socket: Socket, player: Player) {
+    //     this.waitingLineService.addPlayer(player);
+    //     this.server.emit('waitingLineUpdated', this.waitingLineService.getWaitingLine());
+    // }
 
-    @SubscribeMessage(ChatEvents.RemoveFromWaitingLine)
-    removeFromWaitingLine(socket: Socket, playerId: string) {
-        this.waitingLineService.removePlayer(playerId);
-        this.server.emit('waitingLineUpdated', this.waitingLineService.getWaitingLine());
-    }
+    // @SubscribeMessage(ChatEvents.RemoveFromWaitingLine)
+    // removeFromWaitingLine(socket: Socket, playerId: string) {
+    //     this.waitingLineService.removePlayer(playerId);
+    //     this.server.emit('waitingLineUpdated', this.waitingLineService.getWaitingLine());
+    // }
 
     @SubscribeMessage(ChatEvents.LeaveRoom)
     leaveRoom(socket: Socket, room: string) {

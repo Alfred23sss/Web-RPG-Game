@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
+import { Player } from '@app/interfaces/player';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 
@@ -41,12 +42,12 @@ export class RoomValidationService {
         }
     }
 
-    joinGame(game: Game): void {
+    joinGame(game: Game, player: Player): void {
         if (this.isCreating(game)) {
             this.generateAccessCode();
             this.postAccessCode(this.currentAccessCode);
         }
-        this.socketClientService.joinRoom(this.currentAccessCode);
+        this.socketClientService.joinLobby(this.currentAccessCode, player);
         // this.validateCode(this.currentAccessCode); //on aura surement besoin de le mettre assurer pas trop de joeur qui rentre
         this.loadAccessCodes();
     }
@@ -73,7 +74,7 @@ export class RoomValidationService {
     private postAccessCode(code: string): void {
         this.accessCodeCommunication.createAccessCode(code).subscribe({
             next: () => {
-                this.socketClientService.createRoom(code);
+                this.socketClientService.createLobby(code);
             },
         });
     }

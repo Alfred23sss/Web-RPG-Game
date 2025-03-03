@@ -18,38 +18,68 @@ export class SocketClientService {
             upgrade: false,
         });
     }
+    // new
+
+    createLobby(lobbyId: string) {
+        this.socket.emit('createLobby', lobbyId);
+    }
+
+    joinLobby(lobbyId: string, player: Player) {
+        this.socket.emit('joinLobby', { lobbyId, player });
+    }
+
+    leaveLobby(lobbyId: string, playerName: string) {
+        this.socket.emit('leaveLobby', { lobbyId, playerName });
+    }
+
+    deleteLobby(lobbyId: string) {
+        this.socket.emit('deleteLobby', lobbyId);
+    }
+
+    onLobbyUpdate(callback: (players: Player[]) => void) {
+        this.socket.on('lobbyUpdated', callback);
+    }
+
+    onLobbyDeleted(callback: (message: string) => void) {
+        this.socket.on('lobbyDeleted', callback);
+    }
+
+    getSocketId() {
+        return this.socket.id;
+    }
+    // rest
 
     sendMessage(message: string) {
         this.socket.emit('broadcastAll', message);
     }
 
     createRoom(room: string) {
-        this.socket.emit('create', room);
+        this.socket.emit('createLobby', room);
     }
 
     joinRoom(room: string) {
-        this.socket.emit('joinRoom', room);
+        this.socket.emit('joinLobby', room);
     }
 
     deleteRoom(room: string) {
-        this.socket.emit('deleteRoom', room);
+        this.socket.emit('deleteLobby', room);
     }
 
     leaveRoom(room: string) {
-        this.socket.emit('leaveRoom', room);
+        this.socket.emit('leaveLobby', room);
     }
 
-    addToWaitingLine(player: Player) {
-        this.socket.emit('addToWaitingLine', player);
+    addToLobby(player: Player) {
+        this.socket.emit('joinLobby', player);
     }
 
-    removeFromWaitingLine(playerId: string) {
-        this.socket.emit('removeFromWaitingLine', playerId);
+    removeFromLobby(playerId: string) {
+        this.socket.emit('leaveLobby', playerId);
     }
 
-    onWaitingLineUpdated(callback: (waitingLine: Player[]) => void) {
-        this.socket.on('waitingLineUpdated', callback);
-    }
+    // onLobbyUpdate(callback: (waitingLine: Player[]) => void) {
+    //     this.socket.on('waitingLineUpdated', callback);
+    // }
 
     onGameDeleted(callback: (message: string) => void) {
         this.socket.on('gameDeleted', callback);
@@ -63,7 +93,7 @@ export class SocketClientService {
         this.socket.on('roomMessage', callback);
     }
 
-    getSocketId() {
-        return this.socket.id;
-    }
+    // getSocketId() {
+    //     return this.socket.id;
+    // }
 }
