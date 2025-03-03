@@ -70,9 +70,13 @@ export class CharacterService {
         this.router.navigate(['/waiting-view']);
     }
 
+    // isCharacterValid(player: PlayerInfo): boolean {
+    //     return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
+    // }
     isCharacterValid(player: PlayerInfo): boolean {
         return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
     }
+    
 
     showMissingDetailsError(): void {
         this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
