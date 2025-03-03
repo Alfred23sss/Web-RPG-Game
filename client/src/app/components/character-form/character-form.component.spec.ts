@@ -31,10 +31,10 @@ describe('CharacterFormComponent', () => {
             ],
             {
                 attributes: {
-                    [AttributeType.Vitality]: 5,
-                    [AttributeType.Speed]: 5,
-                    [AttributeType.Attack]: 5,
-                    [AttributeType.Defense]: 5,
+                    [AttributeType.Vitality]: 4,
+                    [AttributeType.Speed]: 4,
+                    [AttributeType.Attack]: 4,
+                    [AttributeType.Defense]: 4,
                 },
                 bonusAssigned: {
                     [AttributeType.Vitality]: false,
@@ -49,21 +49,12 @@ describe('CharacterFormComponent', () => {
         mockRoomValidationService = jasmine.createSpyObj<RoomValidationService>('RoomValidationService', ['joinGame']);
 
         mockGame = { id: '1', name: 'Test Game' } as Game;
-        // await TestBed.configureTestingModule({
-        //     imports: [FormsModule, CharacterFormComponent],
-        //     providers: [
-        //         provideHttpClient(),
-        //         { provide: CharacterService, useValue: mockCharacterService },
-        //         { provide: MatDialogRef, useValue: mockDialogRef },
-        //         { provide: MAT_DIALOG_DATA, useValue: { game: mockGame } },
-        //     ],
-        // }).compileComponents();
 
         await TestBed.configureTestingModule({
             imports: [FormsModule, CharacterFormComponent],
             providers: [
-                provideHttpClient(), // Provides HttpClient
-                provideHttpClientTesting(), // Provides HttpClientTestingController
+                provideHttpClient(),
+                provideHttpClientTesting(),
                 { provide: CharacterService, useValue: mockCharacterService },
                 { provide: MatDialogRef, useValue: mockDialogRef },
                 { provide: MAT_DIALOG_DATA, useValue: { game: mockGame } },
@@ -86,6 +77,21 @@ describe('CharacterFormComponent', () => {
         expect(mockCharacterService.assignBonus).toHaveBeenCalledWith(attribute);
     });
 
+    it('should call update createdPlayer.hp when assigning bonus to Vitality', () => {
+        const attribute: AttributeType = AttributeType.Vitality;
+        const initialVitality = mockCharacterService.attributes[AttributeType.Vitality];
+        component.assignBonus(attribute);
+        expect(component.createdPlayer.hp.max).toBe(initialVitality + 2);
+        expect(component.createdPlayer.hp.current).toBe(initialVitality + 2);
+    });
+
+    it('should update createdPlayer.speed when assigning bonus to Speed', () => {
+        const attribute: AttributeType = AttributeType.Speed;
+        const initialSpeed = mockCharacterService.attributes[AttributeType.Speed];
+        component.assignBonus(attribute);
+        expect(component.createdPlayer.speed).toBe(initialSpeed + 2);
+    });
+
     it('should call assignDice from CharacterService and update selected dice values', () => {
         const attribute: AttributeType = AttributeType.Attack;
         mockCharacterService.assignDice.and.returnValue({ attack: 'D6', defense: 'D4' });
@@ -105,6 +111,10 @@ describe('CharacterFormComponent', () => {
         expect(mockCharacterService.submitCharacter).toHaveBeenCalledWith(component.createdPlayer, mockGame, jasmine.any(Function));
         expect(component.closePopup).toHaveBeenCalled();
     });
+
+    // it('should proceed to waiting view if there is no games', ()=>{
+
+    // })
 
     it('should call checkCharacterNameLength from CharacterService when updateCharacterName is called', () => {
         component.createdPlayer.name = 'ValidName';
