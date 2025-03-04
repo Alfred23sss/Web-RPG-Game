@@ -32,7 +32,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const accessCode = this.lobbyService.createLobby(game);
         client.join(accessCode);
         this.logger.log(`Lobby created with game: ${game.name} and accessCode: ${accessCode}`);
-        // this.server.to(accessCode).emit('lobbyCreated', this.lobbyService.getLobbyPlayers(accessCode));
         client.emit('lobbyCreated', { accessCode });
     }
 

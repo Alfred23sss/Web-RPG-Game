@@ -16,8 +16,6 @@ export class LobbyService {
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
         this.lobbies.set(accessCode, { accessCode, game, players: [] });
-        this.logger.log(`Created lobby ${accessCode} for game: ${game.name}`);
-        this.logger.log(`All lobbies: ${JSON.stringify([...this.lobbies.keys()])}`);
         return accessCode;
     }
 
