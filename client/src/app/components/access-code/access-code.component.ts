@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
+import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
@@ -14,25 +14,23 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 })
 export class AccessCodeComponent {
     accessCode: string = '';
+    isLobbyCreated: boolean = true;
     constructor(
         public dialogRef: MatDialogRef<AccessCodeComponent>,
         private dialog: MatDialog,
-        private readonly roomValidation: RoomValidationService,
+        private readonly accessCodeService: AccessCodesCommunicationService,
         private readonly snackbarService: SnackbarService,
-    ) {
-        this.roomValidation.loadAccessCodes();
-    }
+    ) {}
 
     closeDialog() {
         this.dialogRef.close();
     }
 
     submitCode(): void {
-        if (this.roomValidation.validateCode(this.accessCode)) {
-            this.roomValidation.currentAccessCode = this.accessCode;
+        if (this.accessCodeService.validateAccessCode(this.accessCode)) {
             this.closeDialog();
             this.dialog.open(CharacterFormComponent, {
-                data: {},
+                data: { accessCode: this.accessCode, isLobbyCreated: this.isLobbyCreated },
             });
         } else {
             this.snackbarService.showMessage("La partie que vous souhaitez rejoindre n'existe pas!");

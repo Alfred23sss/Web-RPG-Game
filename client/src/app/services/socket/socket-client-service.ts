@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
+import { Game } from '@app/interfaces/game';
+import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
+import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 
 @Injectable({
@@ -8,90 +12,189 @@ import { io, Socket } from 'socket.io-client';
 export class SocketClientService {
     socket: Socket;
 
-    constructor() {
+    constructor(private readonly accessCodeService: AccessCodesCommunicationService) {
         this.connect();
     }
 
     connect() {
         this.socket = io('ws://localhost:3000', {
+            // was 3000 changed to 4200 ??
             transports: ['websocket'],
             upgrade: false,
         });
     }
-    // new
 
-    createLobby(lobbyId: string) {
-        this.socket.emit('createLobby', lobbyId);
+    createLobby(game: Game, player: Player): void {
+        this.socket.emit('createLobby', { game });
+
+        this.socket.on('lobbyCreated', (data) => {
+            const { accessCode } = data;
+            console.log(`Lobby created with access code: ${accessCode}`);
+
+            this.joinLobby(accessCode, player);
+        });
     }
 
-    joinLobby(lobbyId: string, player: Player) {
-        this.socket.emit('joinLobby', { lobbyId, player });
+    joinLobby(accessCode: string, player: Player) {
+        console.log('joiiniiing');
+        this.accessCodeService.validateAccessCode(accessCode).subscribe({
+            next: (isValid) => {
+                if (isValid) {
+                    this.socket.emit('joinLobby', { accessCode, player });
+                } else {
+                    console.error('Invalid access code');
+                }
+            },
+            error: (err) => console.error('Error validating access code:', err),
+        });
     }
 
-    leaveLobby(lobbyId: string, playerName: string) {
-        this.socket.emit('leaveLobby', { lobbyId, playerName });
+    removeAccessCode(code: string) {
+        this.accessCodeService.removeAccessCode(code).subscribe({
+            next: () => {
+                console.log(`Access code ${code} removed successfully`);
+            },
+            error: (err) => console.error('Error removing access code:', err),
+        });
     }
 
-    deleteLobby(lobbyId: string) {
-        this.socket.emit('deleteLobby', lobbyId);
+    getLobbyPlayers(accessCode: string) {
+        return new Observable<Player[]>((observer) => {
+            this.socket.emit('getLobbyPlayers', accessCode);
+            this.socket.on('updatePlayers', (players: Player[]) => {
+                observer.next(players);
+            });
+            this.socket.on('error', (errorMessage: string) => {
+                observer.error(errorMessage);
+            });
+        });
     }
 
-    onLobbyUpdate(callback: (players: Player[]) => void) {
-        this.socket.on('lobbyUpdated', callback);
+    getLobby(accessCode: string) {
+        return new Observable<Lobby>((observer) => {
+            this.socket.emit('getLobby', accessCode);
+            this.socket.on('updateLobby', (lobby: Lobby) => {
+                observer.next(lobby);
+            });
+            this.socket.on('error', (errorMessage: string) => {
+                observer.error(errorMessage);
+            });
+        });
     }
 
-    onLobbyDeleted(callback: (message: string) => void) {
+    addPlayerToLobby(accessCode: string, player: unknown) {
+        this.socket.emit('joinLobby', { accessCode, player });
+    }
+
+    removePlayerFromLobby(accessCode: string, playerName: string) {
+        this.socket.emit('leaveLobby', { accessCode, playerName });
+    }
+
+    deleteLobby(accessCode: string) {
+        this.socket.emit('deleteLobby', accessCode);
+    }
+
+    onLobbyUpdate(callback: (players: unknown[]) => void) {
+        this.socket.on('updatePlayers', callback);
+    }
+
+    onLobbyError(callback: (error: string) => void) {
+        this.socket.on('error', callback);
+    }
+
+    onLobbyCreated(callback: (players: unknown[]) => void) {
+        this.socket.on('lobbyCreated', callback);
+    }
+
+    onLobbyDeleted(callback: () => void) {
         this.socket.on('lobbyDeleted', callback);
+    }
+
+    onLeaveLobby(callback: () => void) {
+        this.socket.on('leftLobby', callback);
+    }
+
+    onJoinLobby(callback: () => void) {
+        this.socket.on('joinedLobby', callback);
     }
 
     getSocketId() {
         return this.socket.id;
     }
-    // rest
+    // new
 
-    sendMessage(message: string) {
-        this.socket.emit('broadcastAll', message);
-    }
-
-    createRoom(room: string) {
-        this.socket.emit('createLobby', room);
-    }
-
-    joinRoom(room: string) {
-        this.socket.emit('joinLobby', room);
-    }
-
-    deleteRoom(room: string) {
-        this.socket.emit('deleteLobby', room);
-    }
-
-    leaveRoom(room: string) {
-        this.socket.emit('leaveLobby', room);
-    }
-
-    addToLobby(player: Player) {
-        this.socket.emit('joinLobby', player);
-    }
-
-    removeFromLobby(playerId: string) {
-        this.socket.emit('leaveLobby', playerId);
-    }
-
-    // onLobbyUpdate(callback: (waitingLine: Player[]) => void) {
-    //     this.socket.on('waitingLineUpdated', callback);
+    // createLobby(lobbyId: string) {
+    //     this.socket.emit('createLobby', lobbyId);
     // }
 
-    onGameDeleted(callback: (message: string) => void) {
-        this.socket.on('gameDeleted', callback);
-    }
+    // joinLobby(lobbyId: string, player: Player) {
+    //     this.socket.emit('joinLobby', { lobbyId, player });
+    // }
 
-    sendMessageToOthers(message: string, room: string) {
-        this.socket.emit('roomMessage', { room, message });
-    }
+    // leaveLobby(lobbyId: string, playerName: string) {
+    //     this.socket.emit('leaveLobby', { lobbyId, playerName });
+    // }
 
-    onMessage(callback: (message: string) => void) {
-        this.socket.on('roomMessage', callback);
-    }
+    // deleteLobby(lobbyId: string) {
+    //     this.socket.emit('deleteLobby', lobbyId);
+    // }
+
+    // onLobbyUpdate(callback: (players: Player[]) => void) {
+    //     this.socket.on('lobbyUpdated', callback);
+    // }
+
+    // onLobbyDeleted(callback: (message: string) => void) {
+    //     this.socket.on('lobbyDeleted', callback);
+    // }
+
+    // getSocketId() {
+    //     return this.socket.id;
+    // }
+    // // rest
+
+    // sendMessage(message: string) {
+    //     this.socket.emit('broadcastAll', message);
+    // }
+
+    // createRoom(room: string) {
+    //     this.socket.emit('createLobby', room);
+    // }
+
+    // joinRoom(room: string) {
+    //     this.socket.emit('joinLobby', room);
+    // }
+
+    // deleteRoom(room: string) {
+    //     this.socket.emit('deleteLobby', room);
+    // }
+
+    // leaveRoom(room: string) {
+    //     this.socket.emit('leaveLobby', room);
+    // }
+
+    // addToLobby(player: Player) {
+    //     this.socket.emit('joinLobby', player);
+    // }
+
+    // removeFromLobby(playerId: string) {
+    //     this.socket.emit('leaveLobby', playerId);
+    // }
+
+    // // onLobbyUpdate(callback: (waitingLine: Player[]) => void) {
+    // //     this.socket.on('waitingLineUpdated', callback);
+    // // }
+
+    // onGameDeleted(callback: (message: string) => void) {
+    //     this.socket.on('gameDeleted', callback);
+    // }
+
+    // sendMessageToOthers(message: string, room: string) {
+    //     this.socket.emit('roomMessage', { room, message });
+    // }
+
+    // onMessage(callback: (message: string) => void) {
+    //     this.socket.on('roomMessage', callback);
+    // }
 
     // getSocketId() {
     //     return this.socket.id;

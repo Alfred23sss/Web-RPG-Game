@@ -1,59 +1,58 @@
-import { Player } from '@app/model/player/player.model';
+import { Lobby } from '@app/interfaces/Lobby';
+import { Player } from '@app/interfaces/Player';
+import { Game } from '@app/model/database/game';
+import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
-    private lobbies: Map<string, Player[]> = new Map<string, Player[]>();
+    private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
 
-    createLobby(lobbyId: string): void {
-        if (!this.lobbies.has(lobbyId)) {
-            this.lobbies.set(lobbyId, []);
-        }
+    constructor(private readonly accessCodeService: AccessCodesService) {}
+
+    createLobby(game: Game): string {
+        const accessCode = this.accessCodeService.generateAccessCode();
+        this.lobbies.set(accessCode, { accessCode, game, players: [] });
+        return accessCode;
     }
 
-    joinLobby(lobbyId: string, player: Player): boolean {
-        if (!this.lobbies.has(lobbyId)) return false;
+    getLobby(accessCode: string): Lobby | undefined {
+        return this.lobbies.get(accessCode);
+    }
 
-        const players = this.lobbies.get(lobbyId);
-
-        if (players.some((p) => p.name === player.name)) return false;
-
-        players.push(player);
+    joinLobby(accessCode: string, player: Player): boolean {
+        const lobby = this.lobbies.get(accessCode);
+        if (!lobby) return false;
+        // make sure player isnt already in lobby possibly?
+        lobby.players.push(player);
         return true;
     }
 
-    leaveLobby(lobbyId: string, playerName: string): void {
-        const players = this.lobbies.get(lobbyId);
-
-        if (!players) return;
-
-        this.lobbies.set(
-            lobbyId,
-            players.filter((player) => player.name !== playerName),
-        );
-        if (this.lobbies.get(lobbyId)?.length === 0) {
-            this.lobbies.delete(lobbyId);
+    leaveLobby(accessCode: string, playerName: string) {
+        const lobby = this.lobbies.get(accessCode);
+        if (lobby) {
+            lobby.players = lobby.players.filter((p) => p.name !== playerName);
+            if (lobby.players.length === 0) {
+                this.lobbies.delete(accessCode);
+                this.accessCodeService.removeAccessCode(accessCode);
+            }
         }
     }
 
-    getLobbyPlayers(lobbyId: string): Player[] {
-        return this.lobbies.get(lobbyId) || [];
+    getLobbyPlayers(accessCode: string): Player[] {
+        return this.lobbies.get(accessCode)?.players || [];
     }
 
     clearLobby(lobbyId: string): void {
         this.lobbies.delete(lobbyId);
     }
 
-    getLobbies(): Map<string, Player[]> {
-        return this.lobbies;
-    }
-
-    getLobbyIdByPlayer(playerName: string): string | null {
-        for (const [lobbyId, players] of this.lobbies.entries()) {
-            if (players.some((player) => player.name === playerName)) {
-                return lobbyId;
+    getLobbyIdByPlayer(playerName: string): string | undefined {
+        for (const [accessCode, lobby] of this.lobbies) {
+            if (lobby.players.some((player) => player.name === playerName)) {
+                return accessCode;
             }
         }
-        return null;
+        return undefined;
     }
 }

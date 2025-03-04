@@ -2,10 +2,6 @@ import { DiceType } from '@app/interfaces/Dice';
 import { Item } from '@app/interfaces/Item';
 
 export interface Player {
-    playerInfo: PlayerInfo;
-}
-
-export interface PlayerInfo {
     name: string;
     avatar: string;
     speed: number;

@@ -5,8 +5,9 @@ import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
+import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { CharacterService } from '@app/services/character-form/character-form.service';
-import { RoomValidationService } from '@app/services/room-validation/room-validation.service';
+
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
@@ -17,7 +18,8 @@ import { RoomValidationService } from '@app/services/room-validation/room-valida
 export class CharacterFormComponent {
     showForm: boolean = true;
     xSword: string = GameDecorations.XSwords;
-
+    isLobbyCreated: boolean;
+    currentAccessCode: string;
     game?: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
     createdPlayer: Player;
     selectedAttackDice: DiceType | null = null;
@@ -35,10 +37,12 @@ export class CharacterFormComponent {
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
-        private readonly roomValidationService: RoomValidationService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; createdPlayer: Player }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        private readonly accessCodeService: AccessCodeService,
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean; createdPlayer: Player }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
-        this.game = data.game;
+        this.game = data.game; // undef for multiple clients except original
+        this.isLobbyCreated = data.isLobbyCreated;
+        this.currentAccessCode = data.accessCode;
         this.createdPlayer = data.createdPlayer ?? {
             // voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
             name: '',
@@ -51,7 +55,7 @@ export class CharacterFormComponent {
             movementPoints: 3,
             actionPoints: 3,
             inventory: [null, null],
-        };
+        }; // needs to be default player ??
     }
 
     assignBonus(attribute: AttributeType) {
@@ -72,17 +76,33 @@ export class CharacterFormComponent {
 
     submitCharacter(): void {
         if (!this.game) {
-            this.proceedToWaitingView();
+            console.log('game failed in charceter form');
+            this.returnHome();
             return;
         }
 
         if (this.characterService.isCharacterValid(this.createdPlayer)) {
-            this.roomValidationService.joinGame(this.game, this.createdPlayer);
-            this.characterService.submitCharacter(this.createdPlayer, this.game, () => this.closePopup());
+            this.accessCodeService.setAccessCode(this.currentAccessCode);
+            if (this.isLobbyCreated) {
+                console.log('joining Lobby in c form');
+                this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+                console.log('joined Lobby in c form');
+            } else {
+                this.createdPlayer.isAdmin = true;
+                this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+            }
+            this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+                console.log('created Player');
+                console.log(this.createdPlayer);
+                sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+                this.closePopup();
+            });
         } else {
             this.characterService.showMissingDetailsError();
         }
     }
+
+    // remove and chek in html rather chek for valid characters
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
@@ -93,10 +113,10 @@ export class CharacterFormComponent {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
-
-    private proceedToWaitingView(): void {
+    // make its pertinent to keep ??
+    private returnHome(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
-        this.characterService.goToWaitingView();
+        this.characterService.returnHome();
     }
 }
