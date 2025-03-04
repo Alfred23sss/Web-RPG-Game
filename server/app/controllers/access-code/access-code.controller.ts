@@ -1,44 +1,48 @@
-// import { AccessCodesDto } from '@app/model/dto/game/access-codes.dto';
-// import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-// import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
-// import { ApiTags } from '@nestjs/swagger';
-// import { Response } from 'express';
+import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
+import { Controller, Delete, Get, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
-// @ApiTags('AccessCodes')
-// @Controller('accessCodes')
-// export class AccessCodesController {
-//     constructor(private readonly accessCodesService: AccessCodesService) {}
+@ApiTags('AccessCodes')
+@Controller('accessCodes')
+export class AccessCodesController {
+    constructor(private readonly accessCodesService: AccessCodesService) {}
 
-//     @Post('create')
-//     async createGame(@Body() createCodeDto: AccessCodesDto): Promise<Partial<AccessCodesDto>> {
-//         try {
-//             const game = await this.accessCodesService.createAccessCode(createCodeDto);
-//             return { code: game.code };
-//         } catch (error) {
-//             throw new HttpException({ message: 'Failed to create accessCode', error: error.message }, HttpStatus.BAD_REQUEST);
-//         }
-//     }
+    @Post()
+    generateAccessCode(): { code: string } {
+        try {
+            const code = this.accessCodesService.generateAccessCode();
+            return { code };
+        } catch (error) {
+            throw new HttpException({ message: 'Failed to generate access code', error: error.message }, HttpStatus.BAD_REQUEST);
+        }
+    }
 
-//     @Get()
-//     async getGames(@Res() response: Response) {
-//         try {
-//             const games = await this.accessCodesService.getCodes();
-//             response.status(HttpStatus.OK).json(games);
-//         } catch (error) {
-//             response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ message: 'Server Error', error: error.message });
-//         }
-//     }
+    @Get(':code/validate')
+    validateAccessCode(@Param('code') code: string): { isValid: boolean } {
+        try {
+            const isValid = this.accessCodesService.validateAccessCode(code);
+            return { isValid };
+        } catch (error) {
+            throw new HttpException({ message: 'Failed to validate access code', error: error.message }, HttpStatus.BAD_REQUEST);
+        }
+    }
 
-//     @Delete('delete/:code')
-//     async deleteGame(@Param('code') code: string) {
-//         try {
-//             const result = await this.accessCodesService.deleteCode(code);
-//             if (!result) {
-//                 throw new HttpException(`Game with code ${code} not found`, HttpStatus.NOT_FOUND);
-//             }
-//             return { message: `Game with code ${code} deleted successfully` };
-//         } catch (error) {
-//             throw new HttpException({ message: 'Failed to delete code', error: error.message }, HttpStatus.BAD_REQUEST);
-//         }
-//     }
-// }
+    @Get()
+    getAllAccessCodes(): string[] {
+        try {
+            return this.accessCodesService.getAllAccessCodes();
+        } catch (error) {
+            throw new HttpException({ message: 'Failed to fetch access codes', error: error.message }, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Delete(':code')
+    removeAccessCode(@Param('code') code: string): { message: string } {
+        try {
+            this.accessCodesService.removeAccessCode(code);
+            return { message: `Access code ${code} removed successfully` };
+        } catch (error) {
+            throw new HttpException({ message: 'Failed to remove access code', error: error.message }, HttpStatus.BAD_REQUEST);
+        }
+    }
+}

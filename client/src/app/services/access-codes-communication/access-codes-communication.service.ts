@@ -11,18 +11,18 @@ export class AccessCodesCommunicationService {
     constructor(private readonly http: HttpClient) {}
 
     generateAccessCode(): Observable<string> {
-        return this.http.post<string>(`${this.apiUrl}/generate`, {});
+        return this.http.post<string>(`${this.apiUrl}`, {});
     }
 
-    validateAccessCode(code: string): Observable<boolean> {
-        return this.http.post<boolean>(`${this.apiUrl}/validate`, { code });
+    validateAccessCode(code: string): Observable<{ isValid: boolean }> {
+        return this.http.get<{ isValid: boolean }>(`${this.apiUrl}/${code}/validate`);
     }
 
     getAllAccessCodes(): Observable<string[]> {
-        return this.http.get<string[]>(`${this.apiUrl}/all`);
+        return this.http.get<string[]>(`${this.apiUrl}`);
     }
 
     removeAccessCode(code: string): Observable<void> {
-        return this.http.post<void>(`${this.apiUrl}/remove`, { code });
+        return this.http.delete<void>(`${this.apiUrl}/${code}`);
     }
 }

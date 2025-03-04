@@ -3,10 +3,13 @@ import { Game, gameSchema } from '@app/model/database/game';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { AccessCodesController } from './controllers/access-code/access-code.controller';
 import { GameController } from './controllers/game/game.controller';
+import { LobbyGateway } from './gateways/lobby/lobby.gateway';
 import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
 import { GameService } from './services/game/game.service';
+import { LobbyService } from './services/lobby/lobby.service';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
@@ -22,8 +25,8 @@ import { GameService } from './services/game/game.service';
             { name: Item.name, schema: itemSchema },
         ]),
     ],
-    controllers: [GameController],
-    providers: [Logger, GameService, AccessCodesService], // removed chat
+    controllers: [GameController, AccessCodesController],
+    providers: [Logger, GameService, AccessCodesService, LobbyGateway, LobbyService], // removed chat
     exports: [],
 })
 export class AppModule {}

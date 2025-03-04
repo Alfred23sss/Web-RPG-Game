@@ -15,25 +15,44 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 export class AccessCodeComponent {
     accessCode: string = '';
     isLobbyCreated: boolean = true;
+    accessCodes: string[];
     constructor(
         public dialogRef: MatDialogRef<AccessCodeComponent>,
         private dialog: MatDialog,
         private readonly accessCodeService: AccessCodesCommunicationService,
         private readonly snackbarService: SnackbarService,
-    ) {}
+    ) {
+        this.accessCodeService.getAllAccessCodes().subscribe({
+            next: (response: string[]) => {
+                console.log('Access codes received:', response);
+                this.accessCodes = response;
+            },
+            error: (err) => {
+                console.error('Error fetching access codes:', err);
+            },
+        });
+    }
 
     closeDialog() {
         this.dialogRef.close();
     }
 
     submitCode(): void {
-        if (this.accessCodeService.validateAccessCode(this.accessCode)) {
-            this.closeDialog();
-            this.dialog.open(CharacterFormComponent, {
-                data: { accessCode: this.accessCode, isLobbyCreated: this.isLobbyCreated },
-            });
-        } else {
-            this.snackbarService.showMessage("La partie que vous souhaitez rejoindre n'existe pas!");
-        }
+        this.accessCodeService.validateAccessCode(this.accessCode).subscribe({
+            next: (response: { isValid: boolean }) => {
+                if (response.isValid) {
+                    this.closeDialog();
+                    this.dialog.open(CharacterFormComponent, {
+                        data: { accessCode: this.accessCode, isLobbyCreated: this.isLobbyCreated },
+                    });
+                } else {
+                    this.snackbarService.showMessage("La partie que vous souhaitez rejoindre n'existe pas!");
+                }
+            },
+            error: (err) => {
+                console.error('Error validating access code:', err);
+                this.snackbarService.showMessage("Une erreur s'est produite lors de la validation du code d'accès.");
+            },
+        });
     }
 }

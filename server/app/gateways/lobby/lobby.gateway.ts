@@ -1,5 +1,6 @@
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
+import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import {
@@ -22,6 +23,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     constructor(
         private readonly lobbyService: LobbyService,
         private readonly logger: Logger,
+        private readonly accessCodesService: AccessCodesService,
     ) {}
 
     @SubscribeMessage('createLobby')
@@ -85,6 +87,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const { accessCode, playerName } = data;
         client.leave(accessCode);
         this.lobbyService.leaveLobby(accessCode, playerName);
+        this.accessCodesService.removeAccessCode(accessCode);
         this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         this.logger.log(`Player ${playerName} left lobby ${accessCode}`);
     }
