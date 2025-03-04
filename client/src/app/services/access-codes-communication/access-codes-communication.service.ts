@@ -2,10 +2,6 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-interface AccessCode {
-    code: string;
-}
-
 @Injectable({
     providedIn: 'root',
 })
@@ -14,11 +10,19 @@ export class AccessCodesCommunicationService {
 
     constructor(private readonly http: HttpClient) {}
 
-    getAccessCodes(): Observable<AccessCode[]> {
-        return this.http.get<AccessCode[]>(this.apiUrl);
+    generateAccessCode(): Observable<string> {
+        return this.http.post<string>(`${this.apiUrl}`, {});
     }
 
-    createAccessCode(code: string): Observable<AccessCode> {
-        return this.http.post<AccessCode>(`${this.apiUrl}/create`, { code });
+    validateAccessCode(code: string): Observable<{ isValid: boolean }> {
+        return this.http.get<{ isValid: boolean }>(`${this.apiUrl}/${code}/validate`);
+    }
+
+    getAllAccessCodes(): Observable<string[]> {
+        return this.http.get<string[]>(`${this.apiUrl}`);
+    }
+
+    removeAccessCode(code: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${code}`);
     }
 }

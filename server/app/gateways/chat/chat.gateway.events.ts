@@ -10,4 +10,8 @@ export enum ChatEvents {
     Hello = 'hello',
     Clock = 'clock',
     Create = 'create',
+    LeaveRoom = 'leaveRoom',
+    DeleteRoom = 'deleteRoom',
+    AddToWaitingLine = 'addToWaitingLine',
+    RemoveFromWaitingLine = 'removeFromWaitingLine',
 }

@@ -1,80 +1,86 @@
-import { Injectable } from '@angular/core';
-import { ACCESS_CODE_MIN_VALUE, ACCESS_CODE_RANGE } from '@app/constants/global.constants';
-import { Game } from '@app/interfaces/game';
-import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
-import { SocketClientService } from '@app/services/socket/socket-client-service';
+// import { Injectable } from '@angular/core';
+// import { Game } from '@app/interfaces/game';
+// import { Player } from '@app/interfaces/player';
+// import { SocketClientService } from '@app/services/socket/socket-client-service';
 
-@Injectable({
-    providedIn: 'root',
-})
-export class RoomValidationService {
-    currentAccessCode: string = '';
-    private accessCodes: string[] = [];
+// @Injectable({
+//     providedIn: 'root',
+// })
+// // change to another service
+// export class RoomValidationService {
+//     // private currentAccessCode: string = '';
 
-    constructor(
-        private readonly accessCodeCommunication: AccessCodesCommunicationService,
-        private readonly socketClientService: SocketClientService,
-    ) {
-        this.loadAccessCodes();
-    }
+//     constructor(private readonly socketClientService: SocketClientService) {}
 
-    validateCode(code: string): boolean {
-        if (!this.containsCode(code)) {
-            return false;
-        }
-        this.isGameUnlock();
-        this.currentAccessCode = code;
-        return true;
-    }
+//     joinExistingGame(accessCode: string, player: Player): void {
+//         this.socketClientService.joinLobby(accessCode, player);
+//     }
 
-    createCode(code: string) {
-        this.postAccessCode(code);
-    }
+//     createAndJoinGame(game: Game, player: Player): void {
+//         this.socketClientService.createLobby(game);
+//         this.socketClientService.joinLobby(game.accessCode, player);
+//     }
+//     // // changer nom de certaine fonction et des if qui sont mal fait selon nom de fonction est valeur de retour
+//     // validateAccessCode(code: string): boolean {
+//     //     if (!this.activeAccessCodes.has(code)) {
+//     //         return false;
+//     //     }
+//     //     this.currentAccessCode = code;
+//     //     return true;
+//     // }
 
-    generateAccessCode(): void {
-        this.currentAccessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
+//     // createCode(code: string) {
+//     //     this.postAccessCode(code);
+//     // }
 
-        if (this.containsCode(this.currentAccessCode)) {
-            this.generateAccessCode();
-        } else {
-            this.accessCodes.push(this.currentAccessCode);
-        }
-    }
+//     // generateAccessCode(): void {
+//     //     this.currentAccessCode = Math.floor(ACCESS_CODE_MIN_VALUE + Math.random() * ACCESS_CODE_RANGE).toString();
 
-    joinGame(game: Game): void {
-        if (this.isCreating(game)) {
-            this.generateAccessCode();
-            this.postAccessCode(this.currentAccessCode);
-        }
-        this.socketClientService.joinRoom(this.currentAccessCode);
-        // this.validateCode(this.currentAccessCode); //on aura surement besoin de le mettre assurer pas trop de joeur qui rentre
-        this.loadAccessCodes();
-    }
+//     //     if (this.containsCode(this.currentAccessCode)) {
+//     //         this.generateAccessCode();
+//     //     } else {
+//     //         this.accessCodes.push(this.currentAccessCode);
+//     //     }
+//     // }
 
-    isCreating(game: Game): boolean {
-        return game !== undefined;
-    }
+//     // joinGame(game: Game, player: Player): void {
+//     //     if (this.isCreating(game)) {
+//     //         console.log('creating game');
+//     //         this.generateAccessCode();
+//     //         player.isAdmin = true;
+//     //         this.postAccessCode(this.currentAccessCode);
+//     //     }
+//     //     console.log('joining game');
+//     //     this.socketClientService.joinLobby(this.currentAccessCode, player);
+//     //     console.log('joined game');
+//     //     // this.validateCode(this.currentAccessCode); //on aura surement besoin de le mettre assurer pas trop de joeur qui rentre
+//     //     this.loadAccessCodes();
+//     // }
 
-    private isGameUnlock(): boolean {
-        // Add logic if needed
-        return true;
-    }
+//     // isCreating(game: Game): boolean {
+//     //     return game !== undefined;
+//     // }
 
-    private containsCode(code: string): boolean {
-        return this.accessCodes.includes(code);
-    }
+//     // loadAccessCodes(): void {
+//     //     this.accessCodeCommunication.getAccessCodes().subscribe({
+//     //         next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
+//     //     });
+//     // }
 
-    private loadAccessCodes(): void {
-        this.accessCodeCommunication.getAccessCodes().subscribe({
-            next: (codes) => (this.accessCodes = codes.map((c) => c.code)),
-        });
-    }
+//     // private isGameUnlock(): boolean {
+//     //     // Add logic if needed
+//     //     return true;
+//     // }
 
-    private postAccessCode(code: string): void {
-        this.accessCodeCommunication.createAccessCode(code).subscribe({
-            next: () => {
-                this.socketClientService.createRoom(code);
-            },
-        });
-    }
-}
+//     // private containsCode(code: string): boolean {
+//     //     return this.accessCodes.includes(code);
+//     // }
+
+//     // private postAccessCode(code: string): void {
+//     //     this.accessCodeCommunication.createAccessCode(code).subscribe({
+//     //         next: () => {
+//     //             this.socketClientService.createLobby(code);
+//     //         },
+//     //     });
+//     // }
+// }

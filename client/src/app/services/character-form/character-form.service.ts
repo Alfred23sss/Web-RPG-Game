@@ -3,9 +3,11 @@ import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { PlayerInfo } from '@app/interfaces/player';
+import { Player, Player } from '@app/interfaces/player';
+import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Injectable({
     providedIn: 'root',
@@ -19,6 +21,8 @@ export class CharacterService {
         private readonly router: Router,
         private readonly snackbarService: SnackbarService,
         private readonly gameCommunicationService: GameCommunicationService,
+        private readonly socketClientService: SocketClientService,
+        private readonly accessCodeService: AccessCodeService,
     ) {}
 
     assignBonus(attribute: AttributeType): void {
@@ -43,13 +47,26 @@ export class CharacterService {
         return { attack: null, defense: null };
     }
 
-    submitCharacter(player: PlayerInfo, game: Game, closePopup: () => void): void {
+    submitCharacter(player: Player, game: Game, closePopup: () => void): void {
         this.validateGameAvailability(game, closePopup);
 
         if (this.isCharacterValid(player)) {
             this.proceedToWaitingView(closePopup);
         } else {
             this.showMissingDetailsError();
+        }
+    }
+
+    joinExistingLobby(accessCode: string, player: Player): void {
+        this.socketClientService.joinLobby(accessCode, player);
+    }
+
+    async createAndJoinLobby(game: Game, player: Player): Promise<void> {
+        try {
+            const accessCode = await this.socketClientService.createLobby(game, player);
+            this.accessCodeService.setAccessCode(accessCode);
+        } catch (error) {
+            console.error('Error creating or joining lobby:', error);
         }
     }
 
@@ -66,14 +83,11 @@ export class CharacterService {
         }
     }
 
-    goToWaitingView(): void {
-        this.router.navigate(['/waiting-view']);
+    returnHome(): void {
+        this.router.navigate(['/home']);
     }
 
-    // isCharacterValid(player: PlayerInfo): boolean {
-    //     return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
-    // }
-    isCharacterValid(player: PlayerInfo): boolean {
+    isCharacterValid(player: Player): boolean {
         return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
     }
     
@@ -97,11 +111,11 @@ export class CharacterService {
     
     
 
-    private hasBonusAssigned(player: PlayerInfo): boolean {
+    private hasBonusAssigned(player: Player): boolean {
         return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
     }
 
-    private hasDiceAssigned(player: PlayerInfo): boolean {
+    private hasDiceAssigned(player: Player): boolean {
         return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 

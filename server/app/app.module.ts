@@ -1,14 +1,15 @@
-import { ChatGateway } from '@app/gateways/chat/chat.gateway';
+// import { ChatGateway } from '@app/gateways/chat/chat.gateway';
 import { Game, gameSchema } from '@app/model/database/game';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { GameController } from './controllers/game/game.controller';
-import { Item, itemSchema } from './model/database/item';
-import { GameService } from './services/game/game.service';
 import { AccessCodesController } from './controllers/access-code/access-code.controller';
-import { AccessCodes, accessCodesSchema } from './model/database/access-codes';
+import { GameController } from './controllers/game/game.controller';
+import { LobbyGateway } from './gateways/lobby/lobby.gateway';
+import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
+import { GameService } from './services/game/game.service';
+import { LobbyService } from './services/lobby/lobby.service';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
@@ -22,10 +23,10 @@ import { AccessCodesService } from './services/access-codes/access-codes.service
         MongooseModule.forFeature([
             { name: Game.name, schema: gameSchema },
             { name: Item.name, schema: itemSchema },
-            { name: AccessCodes.name, schema: accessCodesSchema },
         ]),
     ],
-    controllers: [GameController, AccessCodesController], // ✅ Register AccessCodeController
-    providers: [ChatGateway, Logger, GameService, AccessCodesService],
+    controllers: [GameController, AccessCodesController],
+    providers: [LobbyGateway, LobbyService, Logger, GameService, AccessCodesService], // removed chat
+    exports: [AccessCodesService],
 })
 export class AppModule {}

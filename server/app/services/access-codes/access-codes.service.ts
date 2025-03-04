@@ -1,19 +1,31 @@
-import { AccessCodes, AccessCodesDocument } from '@app/model/database/access-codes';
-import { AccessCodesDto } from '@app/model/dto/game/access-codes.dto';
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 @Injectable()
 export class AccessCodesService {
-    constructor(@InjectModel(AccessCodes.name) private accessCodesModel: Model<AccessCodesDocument>) {}
+    private accessCodes: Set<string> = new Set();
+    private minValue = 1000;
+    private maxValue = 9000;
+    // constructor(@InjectModel(AccessCodes.name) private accessCodesModel: Model<AccessCodesDocument>) {}
 
-    async createAccessCode(createCodeDto: AccessCodesDto): Promise<AccessCodes> {
-        const newAccessCode = new this.accessCodesModel(createCodeDto);
-        return newAccessCode.save();
+    generateAccessCode(): string {
+        let code: string;
+        do {
+            code = Math.floor(this.minValue + Math.random() * this.maxValue).toString();
+        } while (this.validateAccessCode(code));
+
+        this.accessCodes.add(code);
+        return code;
     }
 
-    async getCodes(): Promise<AccessCodes[]> {
-        return this.accessCodesModel.find().exec();
+    validateAccessCode(code: string): boolean {
+        return this.accessCodes.has(code);
+    }
+
+    removeAccessCode(code: string): void {
+        this.accessCodes.delete(code);
+    }
+
+    getAllAccessCodes(): string[] {
+        return Array.from(this.accessCodes);
     }
 }
