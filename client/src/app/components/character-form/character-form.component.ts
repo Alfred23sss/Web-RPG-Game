@@ -7,6 +7,8 @@ import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
+
 
 @Component({
     selector: 'app-character-form',
@@ -34,10 +36,17 @@ export class CharacterFormComponent {
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
 
+    unavailableNames: string[] = []; //AJOUT2!!!!!
+    unavailableAvatars: string[] = [];//AJOUT2!!!!!!!
+    errorMessage: string = '';//AJOUT2!!!!!!!!!
+    
+
+
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
         private readonly accessCodeService: AccessCodeService,
+        private readonly socketClientService: SocketClientService,
         @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean; createdPlayer: Player }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game; // undef for multiple clients except original
@@ -57,6 +66,20 @@ export class CharacterFormComponent {
             inventory: [null, null],
         }; // needs to be default player ??
     }
+
+    ngOnInit(): void {
+        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[], avatars: string[] }) => {
+            console.log('🔴 Réception des noms et avatars indisponibles:', data);
+            this.unavailableNames = data.names;
+            this.unavailableAvatars = data.avatars;
+        });
+    
+        this.socketClientService.onSelectionError((message: string) => {
+            console.log('❌ Erreur de sélection:', message);
+            this.errorMessage = message;
+        });
+    }
+    
 
     assignBonus(attribute: AttributeType) {
         this.characterService.assignBonus(attribute);
@@ -116,4 +139,17 @@ export class CharacterFormComponent {
         this.dialogRef.close();
         this.characterService.returnHome();
     }
+
+    updateSelection(): void {
+        if (!this.createdPlayer.name || !this.createdPlayer.avatar) return;
+    
+        console.log('🟡 Envoi de la mise à jour de sélection au serveur:', this.createdPlayer);
+    
+        this.socketClientService.emit('updatePlayerSelection', {
+            accessCode: this.currentAccessCode,
+            player: this.createdPlayer,
+        });
+    }
+    
+    
 }

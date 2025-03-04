@@ -62,4 +62,38 @@ export class LobbyService {
         }
         return undefined;
     }
+
+    getUnavailableNamesAndAvatars(accessCode: string): { names: string[]; avatars: string[] } {//AJOUT2!!!!!!!!!
+        const lobby = this.lobbies.get(accessCode);
+        if (!lobby) return { names: [], avatars: [] };
+    
+        return {
+            names: lobby.players.map(player => player.name),
+            avatars: lobby.players.map(player => player.avatar),
+        };
+    }
+    
+
+    updatePlayerSelection(accessCode: string, player: Player): boolean {//AJOUT2!!!!!!!!!
+        const lobby = this.lobbies.get(accessCode);
+        if (!lobby) return false;
+    
+        // Vérifier si le nom ou l'avatar est déjà pris
+        if (lobby.players.some(p => p.name === player.name && p.name !== player.name)) return false;
+        if (lobby.players.some(p => p.avatar === player.avatar && p.name !== player.name)) return false;
+    
+        // Mettre à jour le joueur
+        const existingPlayer = lobby.players.find(p => p.name === player.name);
+        if (existingPlayer) {
+            existingPlayer.avatar = player.avatar;
+        } else {
+            lobby.players.push(player);
+        }
+    
+        return true;
+    }
+    
+
+    
+    
 }
