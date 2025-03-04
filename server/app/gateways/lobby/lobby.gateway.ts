@@ -102,12 +102,13 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
     @SubscribeMessage('getLobby')
     handleGetLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        this.logger.log(`Received getLobby request for accessCode: ${accessCode}`);
         const lobby = this.lobbyService.getLobby(accessCode);
-        this.logger.log(lobby);
         if (lobby) {
-            this.logger.log('lobby was defined at some point');
+            this.logger.log(`Lobby found: ${JSON.stringify(lobby)}`);
             client.emit('updateLobby', lobby);
         } else {
+            this.logger.log(`Lobby not found for accessCode: ${accessCode}`);
             client.emit('error', 'Lobby not found');
         }
     }

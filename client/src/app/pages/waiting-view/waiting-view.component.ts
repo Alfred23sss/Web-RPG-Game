@@ -24,6 +24,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.accessCode = this.accessCodeService.getAccessCode();
+
         this.lobby = {
             accessCode: this.accessCode,
             players: [],
@@ -33,8 +34,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (storedPlayer) {
             this.player = JSON.parse(storedPlayer);
         }
-        console.log('Player:', this.player);
-
+        console.log('access code :', this.accessCode);
         this.socketClientService.getLobby(this.accessCode).subscribe({
             next: (lobby) => {
                 this.lobby = lobby;

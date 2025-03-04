@@ -23,33 +23,58 @@ export class SocketClientService {
         });
     }
 
-    createLobby(game: Game, player: Player): void {
-        this.socket.emit('createLobby', { game });
+    async createLobby(game: Game, player: Player): Promise<string> {
+        return new Promise((resolve, reject) => {
+            this.socket.emit('createLobby', { game });
 
-        this.socket.on('lobbyCreated', (data) => {
-            const { accessCode } = data;
-            if (accessCode) {
-                console.log(`Lobby created with access code: ${accessCode}`);
-                this.joinLobby(accessCode, player);
-            } else {
-                console.log('no code');
-            }
+            this.socket.once('lobbyCreated', async (data) => {
+                if (data?.accessCode) {
+                    console.log(`Lobby created with access code: ${data.accessCode}`);
+
+                    try {
+                        await this.joinLobby(data.accessCode, player);
+                        resolve(data.accessCode);
+                    } catch (error) {
+                        console.error(error);
+                    }
+                } else {
+                    reject(new Error('Failed to create lobby: No access code received'));
+                }
+            });
+
+            this.socket.once('error', (errorMessage) => {
+                reject(new Error(`Lobby creation failed: ${errorMessage}`));
+            });
         });
     }
 
-    joinLobby(accessCode: string, player: Player) {
-        console.log('joiinniin');
+    async joinLobby(accessCode: string, player: Player): Promise<void> {
+        return new Promise((resolve, reject) => {
+            console.log('Joining lobby...');
 
-        this.accessCodeService.validateAccessCode(accessCode).subscribe({
-            next: (isValid) => {
-                if (isValid) {
-                    this.socket.emit('joinLobby', { accessCode, player });
-                    console.log('joined');
-                } else {
-                    console.error('Invalid access code');
-                }
-            },
-            error: (err) => console.error('Error validating access code:', err),
+            this.accessCodeService.validateAccessCode(accessCode).subscribe({
+                next: (isValid) => {
+                    if (isValid) {
+                        this.socket.emit('joinLobby', { accessCode, player });
+
+                        this.socket.once('joinedLobby', () => {
+                            console.log('Successfully joined lobby');
+                            resolve();
+                        });
+
+                        this.socket.once('joinError', (errorMessage) => {
+                            console.error('Join error:', errorMessage);
+                            reject(new Error(`Join failed: ${errorMessage}`));
+                        });
+                    } else {
+                        reject(new Error('Invalid access code'));
+                    }
+                },
+                error: (err) => {
+                    console.error('Error validating access code:', err);
+                    reject(new Error('Access code validation failed'));
+                },
+            });
         });
     }
 
@@ -74,13 +99,18 @@ export class SocketClientService {
         });
     }
 
-    getLobby(accessCode: string) {
+    getLobby(accessCode: string): Observable<Lobby> {
         return new Observable<Lobby>((observer) => {
             this.socket.emit('getLobby', accessCode);
-            this.socket.on('updateLobby', (lobby: Lobby) => {
+
+            this.socket.once('updateLobby', (lobby: Lobby) => {
+                console.log('Received lobby update:', lobby);
                 observer.next(lobby);
+                observer.complete();
             });
-            this.socket.on('error', (errorMessage: string) => {
+
+            this.socket.once('error', (errorMessage: string) => {
+                console.error('Socket error:', errorMessage);
                 observer.error(errorMessage);
             });
         });

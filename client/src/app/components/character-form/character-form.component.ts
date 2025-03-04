@@ -74,7 +74,7 @@ export class CharacterFormComponent {
         this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
 
-    submitCharacter(): void {
+    async submitCharacter(): Promise<void> {
         if (!this.game) {
             console.log('game failed in charceter form');
             this.returnHome();
@@ -83,17 +83,16 @@ export class CharacterFormComponent {
 
         if (this.characterService.isCharacterValid(this.createdPlayer)) {
             this.accessCodeService.setAccessCode(this.currentAccessCode);
+
             if (this.isLobbyCreated) {
                 console.log('joining Lobby in c form');
                 this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
                 console.log('joined Lobby in c form');
             } else {
                 this.createdPlayer.isAdmin = true;
-                this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+                await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
             }
             this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
-                console.log('created Player');
-                console.log(this.createdPlayer);
                 sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
                 this.closePopup();
             });
@@ -102,7 +101,6 @@ export class CharacterFormComponent {
         }
     }
 
-    // remove and chek in html rather chek for valid characters
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
@@ -113,7 +111,6 @@ export class CharacterFormComponent {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
-    // make its pertinent to keep ??
     private returnHome(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();

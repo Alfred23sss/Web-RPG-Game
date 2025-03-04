@@ -4,6 +4,7 @@ import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
+import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
@@ -21,6 +22,7 @@ export class CharacterService {
         private readonly snackbarService: SnackbarService,
         private readonly gameCommunicationService: GameCommunicationService,
         private readonly socketClientService: SocketClientService,
+        private readonly accessCodeService: AccessCodeService,
     ) {}
 
     assignBonus(attribute: AttributeType): void {
@@ -59,8 +61,13 @@ export class CharacterService {
         this.socketClientService.joinLobby(accessCode, player);
     }
 
-    createAndJoinLobby(game: Game, player: Player): void {
-        this.socketClientService.createLobby(game, player);
+    async createAndJoinLobby(game: Game, player: Player): Promise<void> {
+        try {
+            const accessCode = await this.socketClientService.createLobby(game, player);
+            this.accessCodeService.setAccessCode(accessCode);
+        } catch (error) {
+            console.error('Error creating or joining lobby:', error);
+        }
     }
 
     resetAttributes(): void {
