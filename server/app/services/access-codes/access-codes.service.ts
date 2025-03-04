@@ -10,7 +10,7 @@ export class AccessCodesService {
     generateAccessCode(): string {
         let code: string;
         do {
-            code = Math.floor(this.minValue + Math.random() * this.maxValue).toString(); // Generates a 4-digit access code
+            code = Math.floor(this.minValue + Math.random() * this.maxValue).toString();
         } while (this.validateAccessCode(code));
 
         this.accessCodes.add(code);

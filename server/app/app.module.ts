@@ -26,7 +26,7 @@ import { LobbyService } from './services/lobby/lobby.service';
         ]),
     ],
     controllers: [GameController, AccessCodesController],
-    providers: [Logger, GameService, AccessCodesService, LobbyGateway, LobbyService], // removed chat
-    exports: [],
+    providers: [LobbyGateway, LobbyService, Logger, GameService, AccessCodesService], // removed chat
+    exports: [AccessCodesService],
 })
 export class AppModule {}

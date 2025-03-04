@@ -3,6 +3,6 @@ import { Player } from '@app/interfaces/player';
 
 export interface Lobby {
     accessCode: string;
-    game: Game;
+    game: Game | null;
     players: Player[];
 }
