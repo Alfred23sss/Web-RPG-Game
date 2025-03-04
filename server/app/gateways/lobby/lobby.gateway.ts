@@ -108,7 +108,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.logger.log(`Received getLobby request for accessCode: ${accessCode}`);
         const lobby = this.lobbyService.getLobby(accessCode);
         if (lobby) {
-            this.logger.log(`Lobby found: ${JSON.stringify(lobby)}`);
+            this.logger.log(`Lobby found with code: ${JSON.stringify(lobby.accessCode)}`);
             client.emit('updateLobby', lobby);
         } else {
             this.logger.log(`Lobby not found for accessCode: ${accessCode}`);
