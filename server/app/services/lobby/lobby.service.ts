@@ -2,13 +2,16 @@ import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
     private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
 
-    constructor(private readonly accessCodeService: AccessCodesService) {}
+    constructor(
+        private readonly accessCodeService: AccessCodesService,
+        private readonly logger: Logger,
+    ) {}
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
@@ -17,6 +20,8 @@ export class LobbyService {
     }
 
     getLobby(accessCode: string): Lobby | undefined {
+        this.logger.log(`Fetching lobby for accessCode: ${accessCode}`);
+        this.logger.log(`Current lobbies: ${JSON.stringify([...this.lobbies.keys()])}`);
         return this.lobbies.get(accessCode);
     }
 

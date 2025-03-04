@@ -30,7 +30,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const accessCode = this.lobbyService.createLobby(game);
         client.join(accessCode);
         this.logger.log(`Lobby created with game: ${game.name} and accessCode: ${accessCode}`);
-        this.server.to(accessCode).emit('lobbyCreated', this.lobbyService.getLobbyPlayers(accessCode));
+        // this.server.to(accessCode).emit('lobbyCreated', this.lobbyService.getLobbyPlayers(accessCode));
         client.emit('lobbyCreated', { accessCode });
     }
 
@@ -49,6 +49,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
+            client.emit('joinedLobby');
         } else {
             client.emit('joinError', 'Unable to join lobby');
         }
@@ -102,8 +103,9 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     @SubscribeMessage('getLobby')
     handleGetLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);
-
+        this.logger.log(lobby);
         if (lobby) {
+            this.logger.log('lobby was defined at some point');
             client.emit('updateLobby', lobby);
         } else {
             client.emit('error', 'Lobby not found');
@@ -114,7 +116,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.logger.log('LobbyGateway initialized.');
     }
 
-    handleConnection(socket: Socket) {
+    handleConnection(@ConnectedSocket() socket: Socket) {
         this.logger.log(`User connected: ${socket.id}`);
         const accessCode = this.lobbyService.getLobbyIdByPlayer(socket.id);
 
@@ -127,7 +129,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
-    handleDisconnect(client: Socket) {
+    handleDisconnect(@ConnectedSocket() client: Socket) {
         const accessCode = this.lobbyService.getLobbyIdByPlayer(client.id);
         if (accessCode) {
             this.lobbyService.leaveLobby(accessCode, client.id);

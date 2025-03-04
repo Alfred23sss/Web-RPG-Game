@@ -15,7 +15,7 @@ export class AccessCodesCommunicationService {
     }
 
     validateAccessCode(code: string): Observable<boolean> {
-        return this.http.post<boolean>(`${this.apiUrl}/validate`, { code });
+        return this.http.get<boolean>(`${this.apiUrl}/validate/${code}`);
     }
 
     getAllAccessCodes(): Observable<string[]> {

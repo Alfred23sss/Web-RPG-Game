@@ -1,4 +1,7 @@
 <div class="waiting-view">
+    @if (isLoading) {
+    <p>Chargement en cours...</p>
+    } @else {
     <p>En attente de participants...</p>
     <p>
         Votre code d'accès: <strong>{{ accessCode }}</strong>
@@ -7,17 +10,17 @@
     <div class="waiting-line">
         <h2>Liste des joueurs en attente</h2>
         <ul>
-            @for(player of players; track $index){ }
+            @for (player of lobby.players; track $index) {
             <li>
                 <span class="player-name">{{ player.name }}</span>
-                @if(player.isAdmin){
+                @if (player.isAdmin) {
                 <span class="admin-badge">Admin</span>
                 }
             </li>
+            }
         </ul>
     </div>
 
     <button class="button" (click)="navigateToHome()">Quitter</button>
-
-    <!-- <app-chat></app-chat> -->
+    }
 </div>

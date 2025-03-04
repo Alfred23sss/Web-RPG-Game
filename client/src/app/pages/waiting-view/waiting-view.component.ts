@@ -14,7 +14,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     accessCode: string;
     player: Player;
     lobby: Lobby;
-    players: Player[];
+    isLoading: boolean = true;
 
     constructor(
         private router: Router,
@@ -24,28 +24,48 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.accessCode = this.accessCodeService.getAccessCode();
-
+        this.lobby = {
+            accessCode: this.accessCode,
+            players: [],
+            game: null,
+        };
         const storedPlayer = sessionStorage.getItem('player');
         if (storedPlayer) {
             this.player = JSON.parse(storedPlayer);
         }
-        console.log('player:');
-        console.log(this.player);
+        console.log('Player:', this.player);
 
-        this.socketClientService.getLobby(this.accessCode).subscribe((lobby) => {
-            this.lobby = lobby;
-            // this.players = lobby.players;
+        this.socketClientService.getLobby(this.accessCode).subscribe({
+            next: (lobby) => {
+                this.lobby = lobby;
+                this.isLoading = false;
+            },
+            error: (err) => {
+                console.error('Error fetching lobby:', err);
+                this.isLoading = false;
+                this.navigateToHome();
+            },
         });
 
         this.socketClientService.onJoinLobby(() => {
-            this.socketClientService.getLobbyPlayers(this.accessCode).subscribe((players) => {
-                this.lobby.players = players;
+            this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
+                next: (players) => {
+                    this.lobby.players = players;
+                },
+                error: (err) => {
+                    console.error('Error fetching players:', err);
+                },
             });
         });
 
         this.socketClientService.onLeaveLobby(() => {
-            this.socketClientService.getLobbyPlayers(this.accessCode).subscribe((players) => {
-                this.lobby.players = players;
+            this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
+                next: (players) => {
+                    this.lobby.players = players;
+                },
+                error: (err) => {
+                    console.error('Error fetching players:', err);
+                },
             });
         });
 
@@ -82,9 +102,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
-        if (this.player.isAdmin) {
-            this.socketClientService.deleteLobby(this.accessCode);
+        if (this.accessCode && this.player) {
+            this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
+            if (this.player.isAdmin) {
+                this.socketClientService.deleteLobby(this.accessCode);
+            }
         }
     }
 

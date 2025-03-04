@@ -10,7 +10,7 @@ export class AccessCodesService {
     generateAccessCode(): string {
         let code: string;
         do {
-            code = Math.floor(this.minValue + Math.random() * this.maxValue).toString(); // Generates a 4-digit access code
+            code = Math.floor(this.minValue + Math.random() * this.maxValue).toString();
         } while (this.validateAccessCode(code));
 
         this.accessCodes.add(code);
@@ -28,22 +28,4 @@ export class AccessCodesService {
     getAllAccessCodes(): string[] {
         return Array.from(this.accessCodes);
     }
-
-    // async createAccessCode(createCodeDto: AccessCodesDto): Promise<AccessCodes> {
-    //     const newAccessCode = new this.accessCodesModel(createCodeDto);
-    //     return newAccessCode.save();
-    // }
-
-    // async getCodes(): Promise<AccessCodes[]> {
-    //     return this.accessCodesModel.find().exec();
-    // }
-
-    // async deleteCode(code: string): Promise<boolean> {
-    //     try {
-    //         const result = await this.accessCodesModel.deleteOne({ code }).exec();
-    //         return result.deletedCount > 0;
-    //     } catch (error) {
-    //         throw new Error(`Failed to delete game: ${error.message}`);
-    //     }
-    // }
 }

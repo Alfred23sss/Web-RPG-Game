@@ -18,7 +18,6 @@ export class SocketClientService {
 
     connect() {
         this.socket = io('ws://localhost:3000', {
-            // was 3000 changed to 4200 ??
             transports: ['websocket'],
             upgrade: false,
         });
@@ -29,18 +28,23 @@ export class SocketClientService {
 
         this.socket.on('lobbyCreated', (data) => {
             const { accessCode } = data;
-            console.log(`Lobby created with access code: ${accessCode}`);
-
-            this.joinLobby(accessCode, player);
+            if (accessCode) {
+                console.log(`Lobby created with access code: ${accessCode}`);
+                this.joinLobby(accessCode, player);
+            } else {
+                console.log('no code');
+            }
         });
     }
 
     joinLobby(accessCode: string, player: Player) {
-        console.log('joiiniiing');
+        console.log('joiinniin');
+
         this.accessCodeService.validateAccessCode(accessCode).subscribe({
             next: (isValid) => {
                 if (isValid) {
                     this.socket.emit('joinLobby', { accessCode, player });
+                    console.log('joined');
                 } else {
                     console.error('Invalid access code');
                 }
