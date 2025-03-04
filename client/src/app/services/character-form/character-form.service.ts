@@ -3,7 +3,7 @@ import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { Player, Player } from '@app/interfaces/player';
+import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -90,7 +90,6 @@ export class CharacterService {
     isCharacterValid(player: Player): boolean {
         return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
     }
-    
 
     showMissingDetailsError(): void {
         this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
@@ -107,9 +106,6 @@ export class CharacterService {
             },
         });
     }
-
-    
-    
 
     private hasBonusAssigned(player: Player): boolean {
         return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];

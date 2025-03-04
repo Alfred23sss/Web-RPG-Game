@@ -1,7 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ATTRIBUTE_KEYS, BONUS_VALUE } from '@app/constants/global.constants';
+import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
@@ -47,10 +47,11 @@ export class CharacterFormComponent {
             // voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
             name: '',
             avatar: '',
-            speed: this.characterService.attributes[AttributeType.Speed],
+            speed: 4,
+            vitality: 4,
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
-            hp: { current: this.characterService.attributes[AttributeType.Vitality], max: this.characterService.attributes[AttributeType.Vitality] },
+            hp: { current: 10, max: 10 },
             movementPoints: 3,
             actionPoints: 3,
             inventory: [null, null],
@@ -59,12 +60,6 @@ export class CharacterFormComponent {
 
     assignBonus(attribute: AttributeType) {
         this.characterService.assignBonus(attribute);
-
-        if (attribute === AttributeType.Vitality) {
-            this.createdPlayer.hp.max = this.createdPlayer.hp.current = this.characterService.attributes[AttributeType.Vitality] + BONUS_VALUE;
-        } else if (attribute === AttributeType.Speed) {
-            this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed] + BONUS_VALUE;
-        }
     }
 
     assignDice(attribute: AttributeType): void {
@@ -105,13 +100,6 @@ export class CharacterFormComponent {
             this.characterService.showMissingDetailsError();
         }
     }
-
-    private proceedToWaitingView(): void {
-        this.characterService.resetAttributes();
-        this.dialogRef.close();
-        this.characterService.goToWaitingView();
-    }
-
 
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
