@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
+import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -57,7 +57,7 @@ export class CharacterService {
         }
     }
 
-    async joinExistingLobby(accessCode: string, player: Player): Promise<boolean> {
+    async joinExistingLobby(accessCode: string, player: Player): Promise<string> {
         return new Promise((resolve) => {
             this.socketClientService.getLobby(accessCode).subscribe({
                 next: (lobby) => {
@@ -67,15 +67,15 @@ export class CharacterService {
                             .subscribe({
                                 next: (result) => {
                                     if (result) {
-                                        resolve(true);
+                                        resolve(JoinLobbyResult.RedirectToHome);
                                     } else {
-                                        resolve(true);
+                                        resolve(JoinLobbyResult.StayInLobby);
                                     }
                                 },
                             });
                     } else {
                         this.socketClientService.joinLobby(accessCode, player);
-                        resolve(false);
+                        resolve(JoinLobbyResult.JoinedLobby);
                     }
                 },
             });

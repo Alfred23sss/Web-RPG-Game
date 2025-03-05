@@ -2,7 +2,7 @@ import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
+import { AttributeType, AvatarType, DiceType, GameDecorations, JoinLobbyResult } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -84,9 +84,16 @@ export class CharacterFormComponent {
             this.accessCodeService.setAccessCode(this.currentAccessCode);
 
             if (this.isLobbyCreated) {
-                const stayInForm = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
-                if (!stayInForm) {
-                    this.submitCharacterForm();
+                const joinResult = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+                switch (joinResult) {
+                    case JoinLobbyResult.JoinedLobby:
+                        this.submitCharacterForm();
+                        break;
+                    case JoinLobbyResult.StayInLobby:
+                        break;
+                    case JoinLobbyResult.RedirectToHome:
+                        this.returnHome();
+                        break;
                 }
             } else {
                 this.createdPlayer.isAdmin = true;
