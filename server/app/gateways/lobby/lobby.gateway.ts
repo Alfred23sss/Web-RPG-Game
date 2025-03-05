@@ -26,6 +26,13 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         private readonly accessCodesService: AccessCodesService,
     ) {}
 
+    @SubscribeMessage('requestUnavailableOptions')
+    handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+
+        client.emit('updateUnavailableOptions', updatedUnavailableOptions);
+    }
+
     @SubscribeMessage('createLobby')
     handleCreateLobby(@MessageBody() data: { game: Game }, @ConnectedSocket() client: Socket) {
         const { game } = data;
@@ -196,12 +203,5 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         }
         this.logger.log(`User disconnected: ${client.id}`);
-    }
-
-    @SubscribeMessage('requestUnavailableOptions')
-    handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
-        const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-
-        client.emit('updateUnavailableOptions', updatedUnavailableOptions);
     }
 }

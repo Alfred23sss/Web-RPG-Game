@@ -167,3 +167,8 @@ export enum ItemDescription {
     Swap = 'échange les personnages',
     Default = 'rien',
 }
+
+export enum AccessCodeGenerator {
+    Minimum = 1000,
+    Maximum = 9000,
+}

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { PlayerInfo } from '@app/interfaces/player'; //changer le import a autre chose que @app
+import { PlayerInfo } from '@app/interfaces/player'; // changer le import a autre chose que @app
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';

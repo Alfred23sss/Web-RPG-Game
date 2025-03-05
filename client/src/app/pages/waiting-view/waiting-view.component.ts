@@ -40,34 +40,29 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.player = JSON.parse(storedPlayer);
         }
 
-        console.log('access code :', this.accessCode);
-
         this.socketClientService.getLobby(this.accessCode).subscribe({
             next: (lobby) => {
                 this.lobby = lobby;
                 this.isLoading = false;
             },
-            error: (err) => {
-                console.error('Error fetching lobby:', err);
+            error: () => {
                 this.isLoading = false;
                 this.navigateToHome();
             },
         });
 
         this.socketClientService.onJoinLobby(() => {
-            console.log('USER JOINED');
             this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
                 next: (players) => {
                     this.lobby.players = players;
                 },
-                error: (err) => {
-                    console.error('Error fetching players:', err);
+                error: () => {
+                    throw new Error('Error fetching players');
                 },
             });
         });
 
         this.socketClientService.onLobbyUpdate((players: Player[]) => {
-            console.log('Received updated player list:', players);
             this.lobby.players = players;
         });
 
@@ -76,8 +71,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                 next: (players) => {
                     this.lobby.players = players;
                 },
-                error: (err) => {
-                    console.error('Error fetching players:', err);
+                error: () => {
+                    throw new Error('Error fetching players');
                 },
             });
         });
