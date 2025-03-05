@@ -27,11 +27,10 @@ export class AccessCodeComponent {
     ) {
         this.accessCodeCommunicationService.getAllAccessCodes().subscribe({
             next: (response: string[]) => {
-                console.log('Access codes received:', response);
                 this.accessCodes = response;
             },
-            error: (err) => {
-                console.error('Error fetching access codes:', err);
+            error: () => {
+                throw new Error('Error fetching access codes');
             },
         });
     }

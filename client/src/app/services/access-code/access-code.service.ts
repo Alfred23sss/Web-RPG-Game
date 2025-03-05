@@ -24,7 +24,6 @@ export class AccessCodeService {
                     resolve(lobby);
                 },
                 error: (err) => {
-                    console.error('Error fetching lobby:', err);
                     reject(err);
                 },
             });

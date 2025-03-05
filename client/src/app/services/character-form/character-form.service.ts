@@ -83,12 +83,8 @@ export class CharacterService {
     }
 
     async createAndJoinLobby(game: Game, player: Player): Promise<void> {
-        try {
-            const accessCode = await this.socketClientService.createLobby(game, player);
-            this.accessCodeService.setAccessCode(accessCode);
-        } catch (error) {
-            console.error('Error creating or joining lobby:', error);
-        }
+        const accessCode = await this.socketClientService.createLobby(game, player);
+        this.accessCodeService.setAccessCode(accessCode);
     }
 
     resetAttributes(): void {

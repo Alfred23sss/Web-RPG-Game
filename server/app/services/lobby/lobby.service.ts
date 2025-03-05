@@ -50,7 +50,6 @@ export class LobbyService {
 
         return true;
     }
-
     leaveLobby(accessCode: string, playerName: string): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
@@ -91,12 +90,10 @@ export class LobbyService {
         if (!lobby) {
             return { names: [], avatars: [] };
         }
-
         const unavailableData = {
             names: lobby.players.map((player) => player.name),
             avatars: lobby.players.map((player) => player.avatar),
         };
-
         return unavailableData;
     }
 }

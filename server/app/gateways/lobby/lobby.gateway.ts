@@ -27,6 +27,13 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         private readonly accessCodesService: AccessCodesService,
     ) {}
 
+    @SubscribeMessage('requestUnavailableOptions')
+    handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+
+        client.emit('updateUnavailableOptions', updatedUnavailableOptions);
+    }
+
     @SubscribeMessage(LobbyEvents.CreateLobby)
     handleCreateLobby(@MessageBody() data: { game: Game }, @ConnectedSocket() client: Socket) {
         const { game } = data;

@@ -29,14 +29,8 @@ export class SocketClientService {
 
             this.socket.once('lobbyCreated', async (data) => {
                 if (data?.accessCode) {
-                    console.log(`Lobby created with access code: ${data.accessCode}`);
-
-                    try {
-                        await this.joinLobby(data.accessCode, player);
-                        resolve(data.accessCode);
-                    } catch (error) {
-                        console.error(error);
-                    }
+                    await this.joinLobby(data.accessCode, player);
+                    resolve(data.accessCode);
                 } else {
                     reject(new Error('Failed to create lobby: No access code received'));
                 }
@@ -50,28 +44,23 @@ export class SocketClientService {
 
     async joinLobby(accessCode: string, player: Player): Promise<void> {
         return new Promise((resolve, reject) => {
-            console.log('Joining lobby...');
-
             this.accessCodeService.validateAccessCode(accessCode).subscribe({
                 next: (isValid) => {
                     if (isValid) {
                         this.socket.emit('joinLobby', { accessCode, player });
 
                         this.socket.once('joinedLobby', () => {
-                            console.log('Successfully joined lobby');
                             resolve();
                         });
 
                         this.socket.once('joinError', (errorMessage) => {
-                            console.error('Join error:', errorMessage);
                             reject(new Error(`Join failed: ${errorMessage}`));
                         });
                     } else {
                         reject(new Error('Invalid access code'));
                     }
                 },
-                error: (err) => {
-                    console.error('Error validating access code:', err);
+                error: () => {
                     reject(new Error('Access code validation failed'));
                 },
             });
@@ -79,12 +68,7 @@ export class SocketClientService {
     }
 
     removeAccessCode(code: string) {
-        this.accessCodeService.removeAccessCode(code).subscribe({
-            next: () => {
-                console.log(`Access code ${code} removed successfully`);
-            },
-            error: (err) => console.error('Error removing access code:', err),
-        });
+        this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
     getLobbyPlayers(accessCode: string) {
@@ -170,27 +154,22 @@ export class SocketClientService {
         return this.socket.id;
     }
 
-    on(event: string, callback: (data: any) => void): void { //AJOUT!!!!!!!!
+    on(event: string, callback: (data: unknown) => void): void {
+        // AJOUT!!!!!!!!
         this.socket.on(event, callback);
     }
 
-    emit(event: string, data: any): void {//AJOUT2!!!!!
+    emit(event: string, data: unknown): void {
+        // AJOUT2!!!!!
         this.socket.emit(event, data);
     }
 
-    onUpdateUnavailableOptions(callback: (data: { names: string[], avatars: string[] }) => void): void {//AJOUT2!!!!!
+    onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
+        // AJOUT2!!!!!
         this.socket.on('updateUnavailableOptions', callback);
     }
 
     onJoinError(callback: (message: string) => void): void {
         this.socket.on('joinError', callback);
     }
-    
-
-    
-    
-    
-    
-    
-
 }
