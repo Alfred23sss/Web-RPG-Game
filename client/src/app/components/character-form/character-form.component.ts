@@ -47,13 +47,12 @@ export class CharacterFormComponent implements OnInit {
         private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
         private readonly snackbarService: SnackbarService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean; createdPlayer: Player }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
-        this.game = data.game; // undef for multiple clients except original
+        this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
         this.currentAccessCode = data.accessCode;
-        this.createdPlayer = data.createdPlayer ?? {
-            // voir si je ne peux pas directement les initialiser dans l'interface comme ca chawue joureru que j ecris aura les attribus par defaut
+        this.createdPlayer = {
             name: '',
             avatar: '',
             speed: 4,
@@ -64,7 +63,8 @@ export class CharacterFormComponent implements OnInit {
             movementPoints: 3,
             actionPoints: 3,
             inventory: [null, null],
-        }; // needs to be default player ??
+            isAdmin: false,
+        };
     }
 
     ngOnInit(): void {
