@@ -57,13 +57,19 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     //     }
     // }
     @SubscribeMessage('joinLobby')
-    @SubscribeMessage('joinLobby')
     handleJoinLobby(@MessageBody() data: { accessCode: string; player: Player }, @ConnectedSocket() client: Socket) {
         const { accessCode, player } = data;
         const lobby = this.lobbyService.getLobby(accessCode);
     
         if (!lobby) {
-            client.emit('error', 'Invalid access code');
+            client.emit('joinError', 'Invalid access code');
+            return;
+        }
+    
+        // Vérifie si le nom est déjà pris
+        const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+        if (unavailableOptions.names.includes(player.name)) {
+            client.emit('joinError', '⚠️ Ce nom est déjà pris. Choisissez un autre.');
             return;
         }
     
@@ -71,11 +77,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
-    
-            // 🛠️ Vérification : Ajout de logs
-            const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-            console.log(`Unavailable names: ${unavailableOptions.names}`);
-            console.log(`Unavailable avatars: ${unavailableOptions.avatars}`);
     
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
             this.server.to(accessCode).emit('updateUnavailableOptions', unavailableOptions);
@@ -85,6 +86,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             client.emit('joinError', 'Unable to join lobby');
         }
     }
+    
+    
     
     
 
@@ -186,8 +189,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     
         // 🛠️ Vérification : Ajout de logs
         const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-        console.log(`Updated Unavailable names: ${unavailableOptions.names}`);
-        console.log(`Updated Unavailable avatars: ${unavailableOptions.avatars}`);
     
         this.server.to(accessCode).emit('updateUnavailableOptions', unavailableOptions);
     }

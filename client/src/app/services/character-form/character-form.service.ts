@@ -47,15 +47,25 @@ export class CharacterService {
         return { attack: null, defense: null };
     }
 
-    submitCharacter(player: Player, game: Game, closePopup: () => void): void {
-        this.validateGameAvailability(game, closePopup);
+    // submitCharacter(player: Player, game: Game, closePopup: () => void): void {
+    //     this.validateGameAvailability(game, closePopup);
 
+    //     if (this.isCharacterValid(player)) {
+    //         this.proceedToWaitingView(closePopup);
+    //     } else {
+    //         this.showMissingDetailsError();
+    //     }
+    // }
+    submitCharacter(player: Player, game: Game, closePopup: () => void, unavailableNames: string[]): void {
+        this.validateGameAvailability(game, closePopup);
+    
         if (this.isCharacterValid(player)) {
-            this.proceedToWaitingView(closePopup);
+            this.proceedToWaitingView(closePopup, unavailableNames, player.name); // ✅ Passe les bons arguments
         } else {
             this.showMissingDetailsError();
         }
     }
+    
 
     joinExistingLobby(accessCode: string, player: Player): void {
         this.socketClientService.joinLobby(accessCode, player);
@@ -115,8 +125,20 @@ export class CharacterService {
         return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
-    private proceedToWaitingView(closePopup: () => void): void {
+    // private proceedToWaitingView(closePopup: () => void): void {
+    //     this.router.navigate([Routes.WaitingView]);
+    //     closePopup();
+    // }
+    private proceedToWaitingView(closePopup: () => void, unavailableNames: string[], playerName: string): void {
+        console.log('✅ Redirection vers waiting-view en cours');
+    
+        if (unavailableNames.includes(playerName)) {
+            console.log('❌ Annulation de la redirection : Nom déjà pris');
+            return; // ⛔ STOP ici !
+        }
+    
         this.router.navigate([Routes.WaitingView]);
         closePopup();
     }
+    
 }
