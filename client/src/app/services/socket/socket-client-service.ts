@@ -128,7 +128,7 @@ export class SocketClientService {
         this.socket.emit('deleteLobby', accessCode);
     }
 
-    onLobbyUpdate(callback: (players: unknown[]) => void) {
+    onLobbyUpdate(callback: (players: Player[]) => void) {
         this.socket.on('updatePlayers', callback);
     }
 

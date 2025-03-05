@@ -20,8 +20,6 @@ export class LobbyService {
     }
 
     getLobby(accessCode: string): Lobby | undefined {
-        this.logger.log(`Fetching lobby for accessCode: ${accessCode}`);
-        this.logger.log(`Current lobbies: ${JSON.stringify([...this.lobbies.keys()])}`);
         return this.lobbies.get(accessCode);
     }
 
@@ -33,15 +31,18 @@ export class LobbyService {
         return true;
     }
 
-    leaveLobby(accessCode: string, playerName: string) {
+    leaveLobby(accessCode: string, playerName: string): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (lobby) {
+            const player = lobby.players.find((p) => p.name === playerName);
             lobby.players = lobby.players.filter((p) => p.name !== playerName);
-            if (lobby.players.length === 0) {
+            if (player.isAdmin) {
                 this.lobbies.delete(accessCode);
                 this.accessCodeService.removeAccessCode(accessCode);
+                return true;
             }
         }
+        return false;
     }
 
     getLobbyPlayers(accessCode: string): Player[] {
