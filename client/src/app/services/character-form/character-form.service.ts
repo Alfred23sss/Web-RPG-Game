@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
+import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -57,8 +57,29 @@ export class CharacterService {
         }
     }
 
-    joinExistingLobby(accessCode: string, player: Player): void {
-        this.socketClientService.joinLobby(accessCode, player);
+    async joinExistingLobby(accessCode: string, player: Player): Promise<string> {
+        return new Promise((resolve) => {
+            this.socketClientService.getLobby(accessCode).subscribe({
+                next: (lobby) => {
+                    if (lobby.isLocked) {
+                        this.snackbarService
+                            .showConfirmation("La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil")
+                            .subscribe({
+                                next: (result) => {
+                                    if (result) {
+                                        resolve(JoinLobbyResult.RedirectToHome);
+                                    } else {
+                                        resolve(JoinLobbyResult.StayInLobby);
+                                    }
+                                },
+                            });
+                    } else {
+                        this.socketClientService.joinLobby(accessCode, player);
+                        resolve(JoinLobbyResult.JoinedLobby);
+                    }
+                },
+            });
+        });
     }
 
     async createAndJoinLobby(game: Game, player: Player): Promise<void> {
@@ -84,7 +105,7 @@ export class CharacterService {
     }
 
     returnHome(): void {
-        this.router.navigate(['/home']);
+        this.router.navigate([Routes.HomePage]);
     }
 
     isCharacterValid(player: Player): boolean {

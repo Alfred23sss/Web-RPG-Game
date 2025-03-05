@@ -3,7 +3,7 @@ import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
+import { AttributeType, AvatarType, DiceType, GameDecorations, JoinLobbyResult } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -138,16 +138,33 @@ export class CharacterFormComponent {
                 resolve(true);
             });
             if (this.isLobbyCreated) {
-                this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+                const joinResult = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+                switch (joinResult) {
+                    case JoinLobbyResult.JoinedLobby:
+                        this.submitCharacterForm();
+                        break;
+                    case JoinLobbyResult.StayInLobby:
+                        break;
+                    case JoinLobbyResult.RedirectToHome:
+                        this.returnHome();
+                        break;
+                }
             } else {
                 if (!this.game) {
                     resolve(false);
                     return;
                 }
                 this.createdPlayer.isAdmin = true;
-                this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+                await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+                this.submitCharacterForm();
             }
-        });
+            this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+                sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+                this.closePopup();
+            });
+        } else {
+            this.characterService.showMissingDetailsError();
+        }
     }
 
     checkCharacterNameLength(): void {
@@ -159,6 +176,17 @@ export class CharacterFormComponent {
     closePopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
+    }
+
+    private submitCharacterForm(): void {
+        if (!this.game) {
+            return;
+        }
+
+        this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+            sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+            this.closePopup();
+        });
     }
 
     private returnHome(): void {

@@ -69,6 +69,12 @@ export enum DiceType {
     Uninitialized = '',
 }
 
+export enum JoinLobbyResult {
+    RedirectToHome = 'redirectToHome',
+    StayInLobby = 'stayInLobby',
+    JoinedLobby = 'joinedLobby',
+}
+
 export enum GameMode {
     Classic = 'Classique',
     CTF = 'CTF',

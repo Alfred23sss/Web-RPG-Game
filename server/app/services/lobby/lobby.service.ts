@@ -15,15 +15,12 @@ export class LobbyService {
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
-        this.lobbies.set(accessCode, { accessCode, game, players: [] });
-        this.logger.log(`Created lobby ${accessCode} for game: ${game.name}`);
-        this.logger.log(`All lobbies: ${JSON.stringify([...this.lobbies.keys()])}`);
+        const maxPlayers = game.size === '10' ? 2 : game.size === '15' ? 4 : 6;
+        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers });
         return accessCode;
     }
 
     getLobby(accessCode: string): Lobby | undefined {
-        this.logger.log(`Fetching lobby for accessCode: ${accessCode}`);
-        this.logger.log(`Current lobbies: ${JSON.stringify([...this.lobbies.keys()])}`);
         return this.lobbies.get(accessCode);
     }
 
@@ -41,22 +38,39 @@ export class LobbyService {
         if (lobby.players.some(p => p.name === player.name || p.avatar === player.avatar)) {
             return false; // Refuse l'ajout si le nom ou l'avatar est déjà pris
         }
+
+        if (lobby.players.length >= lobby.maxPlayers) {
+            lobby.isLocked = true;
+            return false;
+        }
+
         lobby.players.push(player);
+
+        if (lobby.players.length >= lobby.maxPlayers) {
+            lobby.isLocked = true;
+        }
+
         return true;
     }
     
-
-    leaveLobby(accessCode: string, playerName: string) {
+    leaveLobby(accessCode: string, playerName: string): boolean {
         const lobby = this.lobbies.get(accessCode);
-        if (lobby) {
-            lobby.players = lobby.players.filter((p) => p.name !== playerName);
-            if (lobby.players.length === 0) {
-                this.lobbies.delete(accessCode);
-                this.accessCodeService.removeAccessCode(accessCode);
-            }
-        }
-    }
+        if (!lobby) return false;
 
+        lobby.players = lobby.players.filter((p) => p.name !== playerName);
+
+        if (lobby.players.length === 0 || lobby.players.some((p) => p.name === playerName && p.isAdmin)) {
+            this.lobbies.delete(accessCode);
+            this.accessCodeService.removeAccessCode(accessCode);
+            return true;
+        }
+
+        if (lobby.isLocked && lobby.players.length < lobby.maxPlayers) {
+            lobby.isLocked = false;
+        }
+
+        return false;
+    }
     getLobbyPlayers(accessCode: string): Player[] {
         return this.lobbies.get(accessCode)?.players || [];
     }
