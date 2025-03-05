@@ -1,7 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
 import { DiceType } from '@app/enums/global.enums';
-import { DiceModifier } from '@app/interfaces/item-attributes';
 import { Player } from '@app/interfaces/player';
 
 const ESCAPE_ATTEMPTS = 2;
@@ -46,8 +44,8 @@ export class CombatManagerService {
         const defender = attacker === this.combatState.player1 ? this.combatState.player2 : this.combatState.player1;
         const defenderInfo = defender.playerInfoService.getPlayerInfo();
 
-        const attackValue = attackerInfo.attack.value + this.rollDice(attackerInfo.attack.bonusDice, attacker);
-        const defenseValue = defenderInfo.defense.value + this.rollDice(defenderInfo.defense.bonusDice, defender);
+        const attackValue = attackerInfo.attack.value + this.rollDice(attackerInfo.attack.bonusDice);
+        const defenseValue = defenderInfo.defense.value + this.rollDice(defenderInfo.defense.bonusDice);
         const damage = Math.max(0, attackValue - defenseValue);
 
         defender.playerInfoService.updateHealth(-damage);
@@ -72,24 +70,8 @@ export class CombatManagerService {
         this.switchTurn();
     }
 
-    private rollDice(diceType: DiceType, player: Player): number {
-        const diceValue = parseInt(diceType.slice(1), 10);
-
-        const modifiers = player.playerInfoService
-            .getPlayerInfo()
-            .inventory.filter((item): item is Item => !!item?.diceModifiers)
-            .flatMap((item) => item.diceModifiers)
-            .filter((mod): mod is DiceModifier => !!mod && mod.diceType === diceType);
-
-        let min = 1;
-        let max = diceValue;
-
-        modifiers.forEach((mod) => {
-            min = Math.max(min, mod.min);
-            max = Math.min(max, mod.max);
-        });
-
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+    private rollDice(bonusDice: DiceType): number {
+        return Math.ceil(Math.random() * parseInt(bonusDice.slice(1), 10));
     }
 
     private switchTurn(): void {
