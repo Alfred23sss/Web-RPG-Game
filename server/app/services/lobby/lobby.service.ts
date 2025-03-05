@@ -1,3 +1,4 @@
+import { GameSize, GameSizePlayerCount } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
@@ -15,7 +16,12 @@ export class LobbyService {
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
-        const maxPlayers = game.size === '10' ? 2 : game.size === '15' ? 4 : 6;
+        const maxPlayers =
+            game.size === GameSize.Small
+                ? GameSizePlayerCount.Small
+                : game.size === GameSize.Medium
+                ? GameSizePlayerCount.Medium
+                : GameSizePlayerCount.Large;
         this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers });
         return accessCode;
     }
@@ -24,19 +30,11 @@ export class LobbyService {
         return this.lobbies.get(accessCode);
     }
 
-    // joinLobby(accessCode: string, player: Player): boolean {
-    //     const lobby = this.lobbies.get(accessCode);
-    //     if (!lobby) return false;
-    //     // make sure player isnt already in lobby possibly?
-    //     lobby.players.push(player);
-    //     return true;
-    // }
-
     joinLobby(accessCode: string, player: Player): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
-        if (lobby.players.some(p => p.name === player.name || p.avatar === player.avatar)) {
-            return false; // Refuse l'ajout si le nom ou l'avatar est déjà pris
+        if (lobby.players.some((p) => p.name === player.name || p.avatar === player.avatar)) {
+            return false;
         }
 
         if (lobby.players.length >= lobby.maxPlayers) {
@@ -52,7 +50,7 @@ export class LobbyService {
 
         return true;
     }
-    
+
     leaveLobby(accessCode: string, playerName: string): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
@@ -93,13 +91,12 @@ export class LobbyService {
         if (!lobby) {
             return { names: [], avatars: [] };
         }
-    
+
         const unavailableData = {
             names: lobby.players.map((player) => player.name),
             avatars: lobby.players.map((player) => player.avatar),
         };
-    
+
         return unavailableData;
     }
-    
 }

@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
+import { AccessCodes } from './access-codes.service.constant';
 
 @Injectable()
 export class AccessCodesService {
     private accessCodes: Set<string> = new Set();
-    private minValue = 1000;
-    private maxValue = 9000;
-    // constructor(@InjectModel(AccessCodes.name) private accessCodesModel: Model<AccessCodesDocument>) {}
+    private minValue = AccessCodes.MinValue;
+    private maxValue = AccessCodes.MaxValue;
 
     generateAccessCode(): string {
         let code: string;

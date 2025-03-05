@@ -14,6 +14,7 @@ import {
     WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { LobbyEvents } from './lobby.gateway.events';
 
 @WebSocketGateway({ cors: true })
 export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
@@ -26,7 +27,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         private readonly accessCodesService: AccessCodesService,
     ) {}
 
-    @SubscribeMessage('createLobby')
+    @SubscribeMessage(LobbyEvents.CreateLobby)
     handleCreateLobby(@MessageBody() data: { game: Game }, @ConnectedSocket() client: Socket) {
         const { game } = data;
         const accessCode = this.lobbyService.createLobby(game);
@@ -35,23 +36,13 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         client.emit('lobbyCreated', { accessCode });
     }
 
-    @SubscribeMessage('joinLobby')
+    @SubscribeMessage(LobbyEvents.JoinLobby)
     handleJoinLobby(@MessageBody() data: { accessCode: string; player: Player }, @ConnectedSocket() client: Socket) {
         const { accessCode, player } = data;
-        const lobby = this.lobbyService.getLobby(accessCode);
 
+        const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) {
             client.emit('error', 'Invalid access code');
-            return;
-        }
-
-        const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-        if (unavailableOptions.names.includes(player.name)) {
-            client.emit('joinError', '⚠️ Ce nom est déjà pris.');
-            return;
-        }
-        if (unavailableOptions.avatars.includes(player.avatar)) {
-            client.emit('joinError', '⚠️ Cet avatar est déjà pris.');
             return;
         }
 
@@ -63,10 +54,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const success = this.lobbyService.joinLobby(accessCode, player);
         if (success) {
             client.join(accessCode);
-            const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-            this.server.to(accessCode).emit('updateUnavailableOptions', updatedUnavailableOptions);
+            this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-
             client.emit('joinedLobby'); // prq ca?
 
             if (lobby.players.length >= lobby.maxPlayers) {
@@ -77,7 +66,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
-    @SubscribeMessage('deleteLobby')
+    @SubscribeMessage(LobbyEvents.DeleteLobby)
     handleDeleteLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) {
@@ -103,7 +92,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
-    @SubscribeMessage('leaveLobby')
+    @SubscribeMessage(LobbyEvents.LeaveLobby)
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, playerName } = data;
         client.leave(accessCode);
@@ -121,7 +110,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
-    @SubscribeMessage('getLobbyPlayers')
+    @SubscribeMessage(LobbyEvents.GetLobbyPlayers)
     handleGetLobbyPlayers(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const players = this.lobbyService.getLobbyPlayers(accessCode);
         if (players) {
@@ -131,7 +120,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
-    @SubscribeMessage('getLobby')
+    @SubscribeMessage(LobbyEvents.GetLobby)
     handleGetLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         this.logger.log(`Received getLobby request for accessCode: ${accessCode}`);
         const lobby = this.lobbyService.getLobby(accessCode);
@@ -144,7 +133,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
-    @SubscribeMessage('lockLobby')
+    @SubscribeMessage(LobbyEvents.LockLobby)
     handleLockLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) {
@@ -157,7 +146,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
     }
 
-    @SubscribeMessage('unlockLobby')
+    @SubscribeMessage(LobbyEvents.UnlockLobby)
     handleUnlockLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) {
@@ -196,12 +185,5 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         }
         this.logger.log(`User disconnected: ${client.id}`);
-    }
-
-    @SubscribeMessage('requestUnavailableOptions')
-    handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
-        const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-
-        client.emit('updateUnavailableOptions', updatedUnavailableOptions);
     }
 }
