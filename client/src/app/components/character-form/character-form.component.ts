@@ -37,9 +37,9 @@ export class CharacterFormComponent {
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
 
-    unavailableNames: string[] = []; //AJOUT2!!!!!
-    unavailableAvatars: string[] = []; //AJOUT2!!!!!!!
-    errorMessage: string = ''; //AJOUT2!!!!!!!!!
+    unavailableNames: string[] = []; 
+    unavailableAvatars: string[] = []; 
+    errorMessage: string = ''; 
 
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
@@ -68,26 +68,17 @@ export class CharacterFormComponent {
     }
 
     ngOnInit(): void {
-        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[], avatars: string[] }) => {
-            console.log('🔴 Réception des noms indisponibles:', data);
+        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
             this.unavailableNames = data.names;
             this.unavailableAvatars = data.avatars;
         });
-    
-        // this.socketClientService.onSelectionError((message: string) => {
-        //     console.log('❌ Erreur de sélection:', message);
-        //     this.errorMessage = message;
-        //     this.snackbarService.showMessage(message);
-        // });
-    
+
         this.socketClientService.onJoinError((message: string) => {
-            console.log('❌ Erreur en rejoignant la partie:', message);
             this.errorMessage = message;
             this.snackbarService.showMessage(message);
             // NE PAS REDIRIGER VERS WAITING-VIEW
         });
     }
-    
 
     assignBonus(attribute: AttributeType) {
         this.characterService.assignBonus(attribute);
@@ -107,93 +98,54 @@ export class CharacterFormComponent {
 
     async submitCharacter(): Promise<void> {
         if (!this.game) {
-            console.log('❌ Game is missing, returning');
+            this.returnHome();
             return;
         }
-    
-        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            console.log('❌ Nom déjà pris côté client, on arrête ici et on NE REDIRIGE PAS');
-            this.snackbarService.showMessage('⚠️ Ce nom est déjà utilisé !');
-            return; // 🚨 STOP ici !
-        }
-    
         if (!this.characterService.isCharacterValid(this.createdPlayer)) {
-            console.log('❌ Caractère invalide, affichage erreur');
             this.characterService.showMissingDetailsError();
             return;
         }
-    
-        console.log('✅ Nom valide, on continue la soumission');
-    
         this.accessCodeService.setAccessCode(this.currentAccessCode);
-    
-        // 🔹 Attendre la réponse du serveur avant d'autoriser la redirection
-        try {
-            const joinSuccess = await this.tryJoinLobby();
-    
-            if (!joinSuccess) {
-                console.log('❌ Une erreur a été détectée, ANNULATION de la fermeture du popup et de la redirection');
-                return; // 🚨 NE PAS continuer si une erreur a été reçue
-            }
-    
-            console.log('✅ Aucun problème détecté, on continue');
-    
-            this.characterService.submitCharacter(
-                this.createdPlayer,
-                this.game,
-                () => {
-                    console.log('✅ Validation réussie, on ferme le popup');
-                    sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-    
-                    if (this.unavailableNames.includes(this.createdPlayer.name)) {
-                        console.log('❌ Nom encore pris après validation, on ANNULE la fermeture du popup');
-                        return; // 🚨 STOP ici !
-                    }
-    
-                    this.closePopup();
-                },
-                this.unavailableNames
-            );
-        } catch (error) {
-            console.log('❌ Exception capturée lors de la tentative de connexion au lobby:', error);
+
+        const joinSuccess = await this.tryJoinLobby();
+
+        if (!joinSuccess) {
             return;
         }
+
+        this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+            sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+
+            if (this.unavailableNames.includes(this.createdPlayer.name)) {
+                return;
+            }
+
+            this.closePopup();
+        });
     }
     async tryJoinLobby(): Promise<boolean> {
         return new Promise((resolve) => {
             this.socketClientService.onJoinError((message: string) => {
-                console.log('❌ Erreur détectée en rejoignant (serveur) :', message);
                 this.snackbarService.showMessage(message);
-                resolve(false); // 🚨 On empêche `submitCharacter()` de continuer
+                resolve(false);
             });
-    
+
             this.socketClientService.onJoinLobby(() => {
-                console.log('✅ Connexion réussie au lobby');
-                resolve(true); // ✅ Permet à `submitCharacter()` de continuer
+                resolve(true);
             });
-    
+
             if (this.isLobbyCreated) {
-                console.log('✅ Envoi de la demande pour rejoindre un lobby existant');
                 this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
             } else {
                 if (!this.game) {
-                    console.log('❌ Impossible de créer un lobby : game est undefined');
-                    this.snackbarService.showMessage("❌ Erreur : Impossible de créer le lobby (données invalides).");
                     resolve(false);
                     return;
                 }
-    
-                console.log('✅ Envoi de la demande pour créer un nouveau lobby');
                 this.createdPlayer.isAdmin = true;
                 this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
             }
         });
     }
-    
-        
-    
-    
-    
 
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
@@ -202,36 +154,14 @@ export class CharacterFormComponent {
     }
 
     closePopup(): void {
-        console.log('🔴 Fermeture du popup demandée');
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
-    
-    // private returnHome(): void {
-    //     this.characterService.resetAttributes();
-    //     this.dialogRef.close();
-    //     this.characterService.returnHome();
-    // }
 
-    updateSelection(): void {
-        if (!this.createdPlayer.name || !this.createdPlayer.avatar) return;
-
-        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            this.snackbarService.showMessage('⚠️ Ce nom est déjà pris !');
-            return;
-        }
-
-        if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
-            this.snackbarService.showMessage('⚠️ Cet avatar est déjà pris !');
-            return;
-        }
-
-        console.log('🟡 Envoi de la mise à jour de sélection au serveur:', this.createdPlayer);
-
-        this.socketClientService.emit('updatePlayerSelection', {
-            accessCode: this.currentAccessCode,
-            player: this.createdPlayer,
-        });
+    private returnHome(): void {
+        this.characterService.resetAttributes();
+        this.dialogRef.close();
+        this.characterService.returnHome();
     }
 
     checkNameAvailability(): void {
