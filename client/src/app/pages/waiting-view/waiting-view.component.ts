@@ -26,15 +26,19 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.accessCode = this.accessCodeService.getAccessCode();
 
         this.lobby = {
+            isLocked: false,
             accessCode: this.accessCode,
             players: [],
             game: null,
         };
+
         const storedPlayer = sessionStorage.getItem('player');
         if (storedPlayer) {
             this.player = JSON.parse(storedPlayer);
         }
+
         console.log('access code :', this.accessCode);
+
         this.socketClientService.getLobby(this.accessCode).subscribe({
             next: (lobby) => {
                 this.lobby = lobby;
@@ -69,36 +73,21 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             });
         });
 
+        this.socketClientService.onLobbyLocked((data) => {
+            if (data.accessCode === this.accessCode) {
+                this.lobby.isLocked = true;
+            }
+        });
+
+        this.socketClientService.onLobbyUnlocked((data) => {
+            if (data.accessCode === this.accessCode) {
+                this.lobby.isLocked = false;
+            }
+        });
+
         this.socketClientService.onLobbyDeleted(() => {
             this.navigateToHome();
         });
-        // this.socketClientService.createLobby(this.accessCode);
-
-        // this.player = {
-        //     name: 'default',
-        //     avatar: 'default-avatar.png',
-        //     speed: 5,
-        //     vitality: 10,
-        //     attack: { value: 3, bonusDice: DiceType.D6 },
-        //     defense: { value: 2, bonusDice: DiceType.D6 },
-        //     hp: { current: 10, max: 10 },
-        //     movementPoints: 3,
-        //     actionPoints: 2,
-        //     inventory: [null, null],
-        //     isAdmin: true,
-        // };
-
-        // this.socketClientService.addToLobby(this.player);
-
-        // this.socketClientService.onLobbyUpdate((lobby: Player[]) => {
-        //     this.lobby = lobby;
-        //     console.log('Waiting line updated:', this.lobby);
-        // });
-
-        // this.socketClientService.onGameDeleted((message: string) => {
-        //     console.log(message);
-        //     this.router.navigate([Routes.HomePage]);
-        // });
     }
 
     ngOnDestroy(): void {
@@ -110,6 +99,15 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
     }
 
+    changeLobbyLockStatus(): void {
+        if (!this.player.isAdmin) return;
+
+        if (this.lobby.isLocked) {
+            this.socketClientService.unlockLobby(this.accessCode);
+        } else {
+            this.socketClientService.lockLobby(this.accessCode);
+        }
+    }
     navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
     }

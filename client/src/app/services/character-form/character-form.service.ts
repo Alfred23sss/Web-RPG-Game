@@ -57,8 +57,29 @@ export class CharacterService {
         }
     }
 
-    joinExistingLobby(accessCode: string, player: Player): void {
-        this.socketClientService.joinLobby(accessCode, player);
+    async joinExistingLobby(accessCode: string, player: Player): Promise<boolean> {
+        return new Promise((resolve) => {
+            this.socketClientService.getLobby(accessCode).subscribe({
+                next: (lobby) => {
+                    if (lobby.isLocked) {
+                        this.snackbarService
+                            .showConfirmation("La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil")
+                            .subscribe({
+                                next: (result) => {
+                                    if (result) {
+                                        resolve(true);
+                                    } else {
+                                        resolve(true);
+                                    }
+                                },
+                            });
+                    } else {
+                        this.socketClientService.joinLobby(accessCode, player);
+                        resolve(false);
+                    }
+                },
+            });
+        });
     }
 
     async createAndJoinLobby(game: Game, player: Player): Promise<void> {
@@ -84,7 +105,7 @@ export class CharacterService {
     }
 
     returnHome(): void {
-        this.router.navigate(['/home']);
+        this.router.navigate([Routes.HomePage]);
     }
 
     isCharacterValid(player: Player): boolean {

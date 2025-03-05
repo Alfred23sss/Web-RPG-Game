@@ -15,7 +15,7 @@ export class LobbyService {
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
-        this.lobbies.set(accessCode, { accessCode, game, players: [] });
+        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false });
         return accessCode;
     }
 

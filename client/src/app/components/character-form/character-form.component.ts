@@ -76,7 +76,6 @@ export class CharacterFormComponent {
 
     async submitCharacter(): Promise<void> {
         if (!this.game) {
-            console.log('game failed in charceter form');
             this.returnHome();
             return;
         }
@@ -85,17 +84,15 @@ export class CharacterFormComponent {
             this.accessCodeService.setAccessCode(this.currentAccessCode);
 
             if (this.isLobbyCreated) {
-                console.log('joining Lobby in c form');
-                this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
-                console.log('joined Lobby in c form');
+                const stayInForm = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+                if (!stayInForm) {
+                    this.submitCharacterForm();
+                }
             } else {
                 this.createdPlayer.isAdmin = true;
                 await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+                this.submitCharacterForm();
             }
-            this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
-                sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-                this.closePopup();
-            });
         } else {
             this.characterService.showMissingDetailsError();
         }
@@ -111,6 +108,18 @@ export class CharacterFormComponent {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
+
+    private submitCharacterForm(): void {
+        if (!this.game) {
+            return;
+        }
+
+        this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+            sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+            this.closePopup();
+        });
+    }
+
     private returnHome(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();

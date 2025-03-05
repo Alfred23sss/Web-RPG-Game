@@ -43,7 +43,13 @@ export class AccessCodeComponent {
     submitCode(): void {
         this.validateAccessCode()
             .then(async () => this.fetchLobbyData())
-            .then((lobby) => this.openCharacterForm(lobby))
+            .then((lobby) => {
+                if (this.isLobbyLocked(lobby)) {
+                    this.snackbarService.showMessage('Le lobby est verrouillé et ne peut pas être rejoint.');
+                } else {
+                    this.openCharacterForm(lobby);
+                }
+            })
             .catch((err) => {
                 this.snackbarService.showMessage(err.message || "Une erreur s'est produite.");
             });
@@ -70,6 +76,10 @@ export class AccessCodeComponent {
             }
             return lobby;
         });
+    }
+
+    private isLobbyLocked(lobby: Lobby): boolean {
+        return lobby.isLocked;
     }
 
     private openCharacterForm(lobby: Lobby): void {
