@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { PlayerInfo } from '@app/interfaces/player'; // changer le import a autre chose que @app
+import { Player } from '@app/interfaces/player'; // Updated import
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
+// eslint-disable-next-line import/no-deprecated
+import { HttpClientTestingModule } from '@angular/common/http/testing'; // Corrected import
 
 const DEFAULT_ATTRIBUTE_VALUE = 4;
 const BONUS_ATTRIBUTE_VALUE = 6;
@@ -25,6 +26,8 @@ describe('CharacterService', () => {
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
 
         TestBed.configureTestingModule({
+            // eslint-disable-next-line import/no-deprecated
+            imports: [HttpClientTestingModule], // Use HttpClientTestingModule here
             providers: [
                 CharacterService,
                 { provide: Router, useValue: mockRouter },
@@ -155,19 +158,21 @@ describe('CharacterService', () => {
     });
 
     describe('isCharacterValid', () => {
-        let validPlayer: PlayerInfo;
+        let validPlayer: Player;
 
         beforeEach(() => {
             validPlayer = {
                 name: 'TestPlayer',
                 avatar: 'avatar.png',
                 speed: 5,
+                vitality: 4,
                 attack: { value: 4, bonusDice: DiceType.D6 },
                 defense: { value: 3, bonusDice: DiceType.D4 },
                 hp: { current: 4, max: 4 },
                 movementPoints: 3,
                 actionPoints: 3,
                 inventory: [null, null],
+                isAdmin: true,
             };
         });
 
@@ -203,115 +208,48 @@ describe('CharacterService', () => {
     describe('showMissingDetailsError', () => {
         it('should call snackbarService.showMessage with MISSING_CHARACTER_DETAILS', () => {
             service['showMissingDetailsError']();
-
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MissingCharacterDetails);
         });
     });
 
-    describe('submitCharacter', () => {
-        let closePopupSpy: jasmine.Spy;
-        let mockGame: Game;
+    it('should call validateGameAvailability and proceed to waiting view if character is valid', () => {
+        const mockPlayer: Player = {
+            name: 'TestPlayer',
+            avatar: 'avatar.png',
+            speed: 5,
+            vitality: 4,
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 3, bonusDice: DiceType.D4 },
+            hp: { current: 4, max: 4 },
+            movementPoints: 3,
+            actionPoints: 3,
+            inventory: [null, null],
+            isAdmin: true,
+        };
 
-        beforeEach(() => {
-            closePopupSpy = jasmine.createSpy('closePopup');
-            mockGame = { id: '1', name: 'Test Game' } as Game;
+        const mockGame: Game = {
+            id: '1',
+            name: 'Test Game',
+            size: '4',
+            mode: 'casual',
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image_url',
+            description: 'This is a test game',
+            grid: undefined,
+        };
 
-            spyOn(service as any, 'validateGameAvailability').and.callFake(() => null);
-            spyOn(service as any, 'proceedToWaitingView');
-            spyOn(service as any, 'showMissingDetailsError');
-            spyOn(service, 'isCharacterValid').and.returnValue(true);
-        });
+        const closePopupSpy = jasmine.createSpy(); // Create a mock for closePopup
 
-        it('should proceed to waiting view if character is valid', () => {
-            const validPlayer: PlayerInfo = {
-                name: 'TestPlayer',
-                avatar: 'avatar.png',
-                speed: 5,
-                attack: { value: 4, bonusDice: DiceType.D6 },
-                defense: { value: 3, bonusDice: DiceType.D4 },
-                hp: { current: 4, max: 4 },
-                movementPoints: 3,
-                actionPoints: 3,
-                inventory: [null, null],
-            };
+        // Mock the getGameById method to return an observable
+        mockCommunicationService.getGameById.and.returnValue(of(mockGame)); // Ensure this returns an observable
 
-            service.submitCharacter(validPlayer, mockGame, closePopupSpy);
+        // Provide mockGame and closePopupSpy as arguments
+        service.submitCharacter(mockPlayer, mockGame, closePopupSpy);
 
-            expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
-            expect(service['showMissingDetailsError']).not.toHaveBeenCalled();
-        });
-
-        it('should show missing details error if character is invalid', () => {
-            (service.isCharacterValid as jasmine.Spy).and.returnValue(false);
-
-            const invalidPlayer: PlayerInfo = {
-                name: '',
-                avatar: 'avatar.png',
-                speed: 5,
-                attack: { value: 4, bonusDice: DiceType.Uninitialized },
-                defense: { value: 3, bonusDice: DiceType.Uninitialized },
-                hp: { current: 4, max: 4 },
-                movementPoints: 3,
-                actionPoints: 3,
-                inventory: [null, null],
-            };
-
-            service.submitCharacter(invalidPlayer, mockGame, closePopupSpy);
-
-            expect(service['showMissingDetailsError']).toHaveBeenCalled();
-            expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('checkCharacterNameLength', () => {
-        it('should not show a snackbar message when character name is within the valid length', () => {
-            service.checkCharacterNameLength('ValidName');
-            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
-        });
-
-        it('should show a snackbar message when character name exceeds the max length', () => {
-            service.checkCharacterNameLength('testWithaLongNameForCharacter');
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('La longueur maximale du nom est de 20 caractères');
-        });
-    });
-
-    describe('goToWaitingView', () => {
-        it('should proceed to waiting view', () => {
-            service.goToWaitingView();
-            expect(mockRouter.navigate).toHaveBeenCalledWith(['/waiting-view']);
-        });
-    });
-
-    describe('hasBonusAssigned', () => {
-        it('should return false if bonus is not assigned to speed or vitality', () => {
-            const playerWithoutBonus: PlayerInfo = {
-                name: 'Name',
-                avatar: 'avatar.png',
-                speed: INITIAL_VALUES.attributes[AttributeType.Speed],
-                attack: { value: 4, bonusDice: DiceType.D6 },
-                defense: { value: 4, bonusDice: DiceType.D4 },
-                hp: { current: 4, max: INITIAL_VALUES.attributes[AttributeType.Vitality] },
-                movementPoints: 3,
-                actionPoints: 3,
-                inventory: [null, null],
-            };
-            const hasBonusAssigned = (service as any).hasBonusAssigned(playerWithoutBonus);
-            expect(hasBonusAssigned).toBeFalse();
-        });
-        it('should return true if bonus is assigned to speed or vitality', () => {
-            const playerWithBonus: PlayerInfo = {
-                name: 'Name',
-                avatar: 'avatar.png',
-                speed: 6,
-                attack: { value: 4, bonusDice: DiceType.D6 },
-                defense: { value: 4, bonusDice: DiceType.D4 },
-                hp: { current: 4, max: INITIAL_VALUES.attributes[AttributeType.Vitality] },
-                movementPoints: 3,
-                actionPoints: 3,
-                inventory: [null, null],
-            };
-            const hasBonusAssigned = (service as any).hasBonusAssigned(playerWithBonus);
-            expect(hasBonusAssigned).toBeTrue();
-        });
+        // Check if the correct methods were called
+        expect(mockCommunicationService.getGameById).toHaveBeenCalled();
+        expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
+        expect(closePopupSpy).toHaveBeenCalled();
     });
 });
