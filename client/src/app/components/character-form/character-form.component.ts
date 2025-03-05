@@ -74,11 +74,11 @@ export class CharacterFormComponent {
             this.unavailableAvatars = data.avatars;
         });
     
-        this.socketClientService.onSelectionError((message: string) => {
-            console.log('❌ Erreur de sélection:', message);
-            this.errorMessage = message;
-            this.snackbarService.showMessage(message);
-        });
+        // this.socketClientService.onSelectionError((message: string) => {
+        //     console.log('❌ Erreur de sélection:', message);
+        //     this.errorMessage = message;
+        //     this.snackbarService.showMessage(message);
+        // });
     
         this.socketClientService.onJoinError((message: string) => {
             console.log('❌ Erreur en rejoignant la partie:', message);
@@ -105,75 +105,92 @@ export class CharacterFormComponent {
         this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
 
-    async submitCharacter(): Promise<void>{
+    async submitCharacter(): Promise<void> {
         if (!this.game) {
             console.log('❌ Game is missing, returning');
             return;
         }
     
         if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            console.log('❌ Nom déjà pris, on arrête ici et on NE REDIRIGE PAS');
+            console.log('❌ Nom déjà pris côté client, on arrête ici et on NE REDIRIGE PAS');
             this.snackbarService.showMessage('⚠️ Ce nom est déjà utilisé !');
             return; // 🚨 STOP ici !
-            
-        }else{
-            if (!this.characterService.isCharacterValid(this.createdPlayer)) {
-                console.log('❌ Caractère invalide, affichage erreur');
-                this.characterService.showMissingDetailsError();
-                return;
-            }
-        
-            console.log('✅ Nom valide, on continue la soumission');
-        
-            this.accessCodeService.setAccessCode(this.currentAccessCode);
-        
-            let joinErrorOccurred = false; // 🔥 Vérifier si une erreur arrive
-        
-            // 🔹 Écouter les erreurs du serveur avant d'exécuter la suite
-            this.socketClientService.onJoinError((message: string) => {
-                console.log('❌ Erreur détectée en rejoignant :', message);
-                this.snackbarService.showMessage(message);
-                joinErrorOccurred = true;
-            });
-        
-            if (this.isLobbyCreated) {
-                console.log('✅ Rejoindre un lobby existant');
-                await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
-            } 
-            else {
-                console.log('✅ Créer un nouveau lobby');
-                this.createdPlayer.isAdmin = true;
-                await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
-            }
-        
-            // 🔹 Vérifier après tentative de connexion si une erreur a été reçue
-            if (joinErrorOccurred) {
+        }
+    
+        if (!this.characterService.isCharacterValid(this.createdPlayer)) {
+            console.log('❌ Caractère invalide, affichage erreur');
+            this.characterService.showMissingDetailsError();
+            return;
+        }
+    
+        console.log('✅ Nom valide, on continue la soumission');
+    
+        this.accessCodeService.setAccessCode(this.currentAccessCode);
+    
+        // 🔹 Attendre la réponse du serveur avant d'autoriser la redirection
+        try {
+            const joinSuccess = await this.tryJoinLobby();
+    
+            if (!joinSuccess) {
                 console.log('❌ Une erreur a été détectée, ANNULATION de la fermeture du popup et de la redirection');
                 return; // 🚨 NE PAS continuer si une erreur a été reçue
-            } 
-            else {
-                console.log('✅ Aucun problème détecté, on continue');
-        
-                this.characterService.submitCharacter(
-                    this.createdPlayer,
-                    this.game,
-                    () => {
-                        console.log('✅ Validation réussie, on ferme le popup');
-                        sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-        
-                        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-                            console.log('❌ Nom encore pris après validation, on ANNULE la fermeture du popup');
-                            return; // 🚨 STOP ici !
-                        }
-        
-                        this.closePopup();
-                    },
-                    this.unavailableNames
-                );
             }
+    
+            console.log('✅ Aucun problème détecté, on continue');
+    
+            this.characterService.submitCharacter(
+                this.createdPlayer,
+                this.game,
+                () => {
+                    console.log('✅ Validation réussie, on ferme le popup');
+                    sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+    
+                    if (this.unavailableNames.includes(this.createdPlayer.name)) {
+                        console.log('❌ Nom encore pris après validation, on ANNULE la fermeture du popup');
+                        return; // 🚨 STOP ici !
+                    }
+    
+                    this.closePopup();
+                },
+                this.unavailableNames
+            );
+        } catch (error) {
+            console.log('❌ Exception capturée lors de la tentative de connexion au lobby:', error);
+            return;
         }
-        
     }
+    async tryJoinLobby(): Promise<boolean> {
+        return new Promise((resolve) => {
+            this.socketClientService.onJoinError((message: string) => {
+                console.log('❌ Erreur détectée en rejoignant (serveur) :', message);
+                this.snackbarService.showMessage(message);
+                resolve(false); // 🚨 On empêche `submitCharacter()` de continuer
+            });
+    
+            this.socketClientService.onJoinLobby(() => {
+                console.log('✅ Connexion réussie au lobby');
+                resolve(true); // ✅ Permet à `submitCharacter()` de continuer
+            });
+    
+            if (this.isLobbyCreated) {
+                console.log('✅ Envoi de la demande pour rejoindre un lobby existant');
+                this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+            } else {
+                if (!this.game) {
+                    console.log('❌ Impossible de créer un lobby : game est undefined');
+                    this.snackbarService.showMessage("❌ Erreur : Impossible de créer le lobby (données invalides).");
+                    resolve(false);
+                    return;
+                }
+    
+                console.log('✅ Envoi de la demande pour créer un nouveau lobby');
+                this.createdPlayer.isAdmin = true;
+                this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+            }
+        });
+    }
+    
+        
     
     
     
@@ -219,7 +236,7 @@ export class CharacterFormComponent {
 
     checkNameAvailability(): void {
         if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            this.snackbarService.showMessage('Ce nom est déjà pris ! Choisissez un autre.');
+            this.snackbarService.showMessage('Ce ');
         }
     }
 }

@@ -167,10 +167,6 @@ export class SocketClientService {
     onUpdateUnavailableOptions(callback: (data: { names: string[], avatars: string[] }) => void): void {//AJOUT2!!!!!
         this.socket.on('updateUnavailableOptions', callback);
     }
-    
-    onSelectionError(callback: (message: string) => void): void {//AJOUT2!!!!!
-        this.socket.on('selectionError', callback);
-    }
 
     onJoinError(callback: (message: string) => void): void {
         this.socket.on('joinError', callback);

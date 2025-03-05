@@ -36,61 +36,35 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         client.emit('lobbyCreated', { accessCode });
     }
 
-    // @SubscribeMessage('joinLobby')
-    // handleJoinLobby(@MessageBody() data: { accessCode: string; player: Player }, @ConnectedSocket() client: Socket) {
-    //     const { accessCode, player } = data;
-
-    //     const lobby = this.lobbyService.getLobby(accessCode);
-    //     if (!lobby) {
-    //         client.emit('error', 'Invalid access code');
-    //         return;
-    //     }
-
-    //     const success = this.lobbyService.joinLobby(accessCode, player);
-    //     if (success) {
-    //         client.join(accessCode);
-    //         this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
-    //         this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-    //         client.emit('joinedLobby');
-    //     } else {
-    //         client.emit('joinError', 'Unable to join lobby');
-    //     }
-    // }
     @SubscribeMessage('joinLobby')
     handleJoinLobby(@MessageBody() data: { accessCode: string; player: Player }, @ConnectedSocket() client: Socket) {
         const { accessCode, player } = data;
         const lobby = this.lobbyService.getLobby(accessCode);
-    
+
         if (!lobby) {
-            client.emit('joinError', 'Invalid access code');
+            client.emit('error', 'Invalid access code'); //le .on(error est ou dans le cote client??)
             return;
         }
-    
-        // Vérifie si le nom est déjà pris
+
         const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
         if (unavailableOptions.names.includes(player.name)) {
-            client.emit('joinError', '⚠️ Ce nom est déjà pris. Choisissez un autre.');
+            client.emit('joinError', 'Ce nom est déjà pris. Choisissez un autre.'); //+
             return;
         }
-    
+
         const success = this.lobbyService.joinLobby(accessCode, player);
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
-    
+
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-            this.server.to(accessCode).emit('updateUnavailableOptions', unavailableOptions);
-    
+            this.server.to(accessCode).emit('updateUnavailableOptions', unavailableOptions); //+
+
             client.emit('joinedLobby');
         } else {
             client.emit('joinError', 'Unable to join lobby');
         }
     }
-    
-    
-    
-    
-
 
     @SubscribeMessage('deleteLobby')
     handleDeleteLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
@@ -176,23 +150,4 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
         this.logger.log(`User disconnected: ${client.id}`);
     }
-
-    @SubscribeMessage('updatePlayerSelection')
-    handleUpdatePlayerSelection(@MessageBody() data: { accessCode: string; player: Player }, @ConnectedSocket() client: Socket) {
-        const { accessCode, player } = data;
-    
-        const success = this.lobbyService.updatePlayerSelection(accessCode, player);
-        if (!success) {
-            client.emit('selectionError', 'Name or avatar already taken');
-            return;
-        }
-    
-        // 🛠️ Vérification : Ajout de logs
-        const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
-    
-        this.server.to(accessCode).emit('updateUnavailableOptions', unavailableOptions);
-    }
-    
-    
-
 }
