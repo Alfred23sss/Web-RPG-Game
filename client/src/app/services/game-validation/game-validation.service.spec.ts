@@ -419,7 +419,7 @@ describe('GameValidationService', () => {
         return Array.from({ length: size }, (_, rowIndex) =>
             Array.from({ length: size }, (_, colIndex) => ({
                 id: `${rowIndex}-${colIndex}`,
-                imageSrc: 'assets/tile-items/default.png',
+                imageSrc: './assets/tile-items/default.png',
                 isOccupied: false,
                 type: TileType.Default,
                 isOpen: true,
@@ -457,8 +457,8 @@ describe('GameValidationService', () => {
         return new Item({
             id: `dummy-${itemName}`,
             name: itemName,
-            imageSrc: `assets/item/${itemName}.png`,
-            imageSrcGrey: `assets/item/${itemName}-grey.png`,
+            imageSrc: `./assets/item/${itemName}.png`,
+            imageSrcGrey: `./assets/item/${itemName}-grey.png`,
             itemCounter: 1,
             description: `Dummy ${itemName} item`,
         });

@@ -27,3 +27,5 @@ export interface PlayerInfo {
     inventory: [Item | null, Item | null];
     isAdmin: boolean;
 }
+
+// snip

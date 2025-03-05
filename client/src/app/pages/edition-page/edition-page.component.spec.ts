@@ -20,7 +20,7 @@ function createBaseGrid(size: number): Tile[][] {
     return Array.from({ length: size }, (_, rowIndex) =>
         Array.from({ length: size }, (i, colIndex) => ({
             id: `${rowIndex}-${colIndex}`,
-            imageSrc: 'assets/tile-items/default.png',
+            imageSrc: './assets/tile-items/default.png',
             isOccupied: false,
             type: TileType.Default,
             isOpen: true,

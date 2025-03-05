@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AttributeType, GameMode, GameSize } from '@app/enums/global.enums';
+import { AttributeType, GameMode, GameModeType, GameSize } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 export const BONUS_VALUE = 2;
 
@@ -30,7 +30,7 @@ export const GRID_DIMENSIONS: Record<GameSize, number> = {
     [GameSize.None]: 0,
 };
 
-export const DEFAULT_GAME_IMAGE = 'assets/images/example.png';
+export const DEFAULT_GAME_IMAGE = GameModeType.Default;
 
 export const GAME_SIZES_LIST = [
     { key: GameSize.Small, label: 'Petit', info: 'Grille: 10x10, Joeurs: 2, Items: 2' },
@@ -43,13 +43,13 @@ export const GAME_MODES_LIST = [
         key: GameMode.Classic,
         label: 'Classique',
         description: 'Un mode de jeu traditionnel où la stratégie est la clé.',
-        backgroundImage: "url('/assets/gamemodes/classic-game.png')",
+        backgroundImage: `url('${GameModeType.Classic}')`,
     },
     {
         key: GameMode.CTF,
         label: 'Capture Le Drapeau',
         description: 'Rivalisez pour sécuriser le drapeau de votre adversaire !',
-        backgroundImage: "url('/assets/gamemodes/CTF-game.png')",
+        backgroundImage: `url('${GameModeType.CTF}')`,
     },
 ];
 
