@@ -15,7 +15,8 @@ export class LobbyService {
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
-        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false });
+        const maxPlayers = game.size === '10' ? 2 : game.size === '15' ? 4 : 6;
+        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers });
         return accessCode;
     }
 
@@ -26,25 +27,38 @@ export class LobbyService {
     joinLobby(accessCode: string, player: Player): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
-        // make sure player isnt already in lobby possibly?
+
+        if (lobby.players.length >= lobby.maxPlayers) {
+            lobby.isLocked = true;
+            return false;
+        }
+
         lobby.players.push(player);
+
+        if (lobby.players.length >= lobby.maxPlayers) {
+            lobby.isLocked = true;
+        }
+
         return true;
     }
-
     leaveLobby(accessCode: string, playerName: string): boolean {
         const lobby = this.lobbies.get(accessCode);
-        if (lobby) {
-            const player = lobby.players.find((p) => p.name === playerName);
-            lobby.players = lobby.players.filter((p) => p.name !== playerName);
-            if (player.isAdmin) {
-                this.lobbies.delete(accessCode);
-                this.accessCodeService.removeAccessCode(accessCode);
-                return true;
-            }
+        if (!lobby) return false;
+
+        lobby.players = lobby.players.filter((p) => p.name !== playerName);
+
+        if (lobby.players.length === 0 || lobby.players.some((p) => p.name === playerName && p.isAdmin)) {
+            this.lobbies.delete(accessCode);
+            this.accessCodeService.removeAccessCode(accessCode);
+            return true;
         }
+
+        if (lobby.isLocked && lobby.players.length < lobby.maxPlayers) {
+            lobby.isLocked = false;
+        }
+
         return false;
     }
-
     getLobbyPlayers(accessCode: string): Player[] {
         return this.lobbies.get(accessCode)?.players || [];
     }

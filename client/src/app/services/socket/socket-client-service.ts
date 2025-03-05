@@ -104,13 +104,11 @@ export class SocketClientService {
             this.socket.emit('getLobby', accessCode);
 
             this.socket.once('updateLobby', (lobby: Lobby) => {
-                console.log('Received lobby update:', lobby);
                 observer.next(lobby);
                 observer.complete();
             });
 
             this.socket.once('error', (errorMessage: string) => {
-                console.error('Socket error:', errorMessage);
                 observer.error(errorMessage);
             });
         });

@@ -54,10 +54,12 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
-            const updatedPlayer = this.lobbyService.getLobbyPlayers(accessCode);
-            this.logger.log('Updated player list:', updatedPlayer);
-            this.server.to(accessCode).emit('updatePlayers', updatedPlayer);
-            client.emit('joinedLobby'); //prq ca?
+            this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
+            client.emit('joinedLobby'); // prq ca?
+
+            if (lobby.players.length >= lobby.maxPlayers) {
+                this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
+            }
         } else {
             client.emit('joinError', 'Unable to join lobby');
         }
@@ -94,10 +96,16 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const { accessCode, playerName } = data;
         client.leave(accessCode);
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
-        this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-        this.logger.log(`Player ${playerName} left lobby ${accessCode}`);
+
         if (isLobbyDeleted) {
-            this.server.to(accessCode).emit('lobbyDeleted', this.lobbyService.getLobbyPlayers(accessCode));
+            this.server.to(accessCode).emit('lobbyDeleted');
+        } else {
+            this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
+
+            const lobby = this.lobbyService.getLobby(accessCode);
+            if (lobby && lobby.players.length < lobby.maxPlayers) {
+                this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
+            }
         }
     }
 
@@ -145,6 +153,11 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             return;
         }
 
+        if (lobby.players.length >= lobby.maxPlayers) {
+            client.emit('error', 'Lobby is full and cannot be unlocked');
+            return;
+        }
+
         lobby.isLocked = false;
         this.logger.log(`Lobby ${accessCode} has been unlocked`);
         this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
@@ -160,10 +173,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         if (accessCode) {
             socket.join(accessCode);
-            this.logger.log(`Player ${socket.id} rejoined lobby ${accessCode}`);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-        } else {
-            this.logger.log(`Player ${socket.id} has no lobby associated`);
         }
     }
 

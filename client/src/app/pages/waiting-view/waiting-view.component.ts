@@ -4,6 +4,7 @@ import { Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 @Component({
     selector: 'app-waiting-view',
@@ -20,6 +21,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private router: Router,
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
+        private readonly snackbarService: SnackbarService,
     ) {}
 
     ngOnInit(): void {
@@ -30,6 +32,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             accessCode: this.accessCode,
             players: [],
             game: null,
+            maxPlayers: 0,
         };
 
         const storedPlayer = sessionStorage.getItem('player');
@@ -79,15 +82,15 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             });
         });
 
-        this.socketClientService.onLobbyLocked((data) => {
-            if (data.accessCode === this.accessCode) {
-                this.lobby.isLocked = true;
+        this.socketClientService.onLobbyLocked(({ accessCode, isLocked }) => {
+            if (this.accessCode === accessCode) {
+                this.lobby.isLocked = isLocked;
             }
         });
 
-        this.socketClientService.onLobbyUnlocked((data) => {
-            if (data.accessCode === this.accessCode) {
-                this.lobby.isLocked = false;
+        this.socketClientService.onLobbyUnlocked(({ accessCode, isLocked }) => {
+            if (this.accessCode === accessCode) {
+                this.lobby.isLocked = isLocked;
             }
         });
 
@@ -106,10 +109,12 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     changeLobbyLockStatus(): void {
-        if (!this.player.isAdmin) return;
-
         if (this.lobby.isLocked) {
-            this.socketClientService.unlockLobby(this.accessCode);
+            if (this.lobby.players.length < this.lobby.maxPlayers) {
+                this.socketClientService.unlockLobby(this.accessCode);
+            } else {
+                this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
+            }
         } else {
             this.socketClientService.lockLobby(this.accessCode);
         }

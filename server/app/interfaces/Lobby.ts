@@ -6,4 +6,5 @@ export interface Lobby {
     accessCode: string;
     game: Game | null;
     players: Player[];
+    maxPlayers: number;
 }
