@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common'; // ✅ Ajoute ceci
+import { CommonModule } from '@angular/common'; 
 import { Component, Inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -10,6 +10,7 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+
 
 @Component({
     selector: 'app-character-form',
@@ -37,9 +38,9 @@ export class CharacterFormComponent {
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
 
-    unavailableNames: string[] = []; 
-    unavailableAvatars: string[] = []; 
-    errorMessage: string = ''; 
+    unavailableNames: string[] = [];
+    unavailableAvatars: string[] = [];
+    errorMessage: string = '';
 
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
@@ -67,16 +68,13 @@ export class CharacterFormComponent {
         }; // needs to be default player ??
     }
 
-    ngOnInit(): void {
-        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            this.unavailableNames = data.names;
-            this.unavailableAvatars = data.avatars;
-        });
 
-        this.socketClientService.onJoinError((message: string) => {
-            this.errorMessage = message;
-            this.snackbarService.showMessage(message);
-            // NE PAS REDIRIGER VERS WAITING-VIEW
+    ngOnInit(): void {
+        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
+    
+        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
+            this.unavailableNames = [...data.names];  
+            this.unavailableAvatars = [...data.avatars]; 
         });
     }
 
@@ -101,39 +99,44 @@ export class CharacterFormComponent {
             this.returnHome();
             return;
         }
+
         if (!this.characterService.isCharacterValid(this.createdPlayer)) {
             this.characterService.showMissingDetailsError();
             return;
         }
-        this.accessCodeService.setAccessCode(this.currentAccessCode);
 
-        const joinSuccess = await this.tryJoinLobby();
-
-        if (!joinSuccess) {
+        if (this.unavailableNames.includes(this.createdPlayer.name)) {
+            this.snackbarService.showMessage('Ce nom est déjà utilisé !');
+            return;
+        }
+        if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
+            this.snackbarService.showMessage('Cet avatar est déjà pris !');
             return;
         }
 
-        this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+        this.accessCodeService.setAccessCode(this.currentAccessCode);
+        const joinSuccess = await this.tryJoinLobby();
+        if (joinSuccess) {
+            this.submitCharacterForm();
+        }
+    }
+    
+    private submitCharacterForm(): void {
+        this.characterService.submitCharacter(this.createdPlayer, this.game!, () => {
             sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-
-            if (this.unavailableNames.includes(this.createdPlayer.name)) {
-                return;
-            }
-
             this.closePopup();
         });
     }
+
     async tryJoinLobby(): Promise<boolean> {
         return new Promise((resolve) => {
             this.socketClientService.onJoinError((message: string) => {
                 this.snackbarService.showMessage(message);
                 resolve(false);
             });
-
             this.socketClientService.onJoinLobby(() => {
                 resolve(true);
             });
-
             if (this.isLobbyCreated) {
                 this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
             } else {
@@ -162,11 +165,5 @@ export class CharacterFormComponent {
         this.characterService.resetAttributes();
         this.dialogRef.close();
         this.characterService.returnHome();
-    }
-
-    checkNameAvailability(): void {
-        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            this.snackbarService.showMessage('Ce ');
-        }
     }
 }

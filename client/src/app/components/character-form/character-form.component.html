@@ -6,36 +6,23 @@
                 <img [src]="xSword" alt="xSword" class="cancel-swords" />
             </button>
         </div>
-
         <h1 id="character-form_title">Créer un personnage</h1>
     </div>
 
-    <!-- <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="20" /> -->
-    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name"
-    (input)="checkNameAvailability()" maxlength="20" />
-
-
-
-
-
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" maxlength="20" />
 
     <div class="character-form_body">
-        <!-- <div class="character-form_avatars">
-            @for (avatar of avatarTypes; track avatar) {
-            <img [src]="avatar" (click)="createdPlayer.avatar = avatar" [class.selected]="createdPlayer.avatar === avatar" alt="Avatar" />
-            }
-        </div> -->
         <div class="character-form_avatars">
             @for (avatar of avatarTypes; track avatar) {
-                <img [src]="avatar" 
-                     (click)="!unavailableAvatars.includes(avatar) ? createdPlayer.avatar = avatar : null"
-                     [class.selected]="createdPlayer.avatar === avatar"
-                     [class.disabled]="unavailableAvatars.includes(avatar)"
-                     alt="Avatar" />
+            <img
+                [src]="avatar"
+                (click)="!unavailableAvatars.includes(avatar) ? (createdPlayer.avatar = avatar) : null"
+                [class.selected]="createdPlayer.avatar === avatar"
+                [class.disabled]="unavailableAvatars.includes(avatar)"
+                alt="Avatar"
+            />
             }
         </div>
-        
-        
 
         <div class="character-form_attributes">
             @for (attribute of attributeKeys; track attribute) {

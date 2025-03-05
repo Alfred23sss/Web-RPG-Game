@@ -27,13 +27,24 @@ export class LobbyService {
         return this.lobbies.get(accessCode);
     }
 
+    // joinLobby(accessCode: string, player: Player): boolean {
+    //     const lobby = this.lobbies.get(accessCode);
+    //     if (!lobby) return false;
+    //     // make sure player isnt already in lobby possibly?
+    //     lobby.players.push(player);
+    //     return true;
+    // }
+
     joinLobby(accessCode: string, player: Player): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
-        // make sure player isnt already in lobby possibly?
+        if (lobby.players.some(p => p.name === player.name || p.avatar === player.avatar)) {
+            return false; // Refuse l'ajout si le nom ou l'avatar est déjà pris
+        }
         lobby.players.push(player);
         return true;
     }
+    
 
     leaveLobby(accessCode: string, playerName: string) {
         const lobby = this.lobbies.get(accessCode);
@@ -68,6 +79,13 @@ export class LobbyService {
         if (!lobby) {
             return { names: [], avatars: [] };
         }
-        return { names: lobby.players.map((player) => player.name), avatars: lobby.players.map((player) => player.avatar) };
+    
+        const unavailableData = {
+            names: lobby.players.map((player) => player.name),
+            avatars: lobby.players.map((player) => player.avatar),
+        };
+    
+        return unavailableData;
     }
+    
 }

@@ -42,23 +42,26 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const lobby = this.lobbyService.getLobby(accessCode);
 
         if (!lobby) {
-            client.emit('error', 'Invalid access code'); //le .on(error est ou dans le cote client??)
+            client.emit('joinError', 'Invalid access code');
             return;
         }
 
         const unavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
         if (unavailableOptions.names.includes(player.name)) {
-            client.emit('joinError', 'Ce nom est déjà pris. Choisissez un autre.'); //+
+            client.emit('joinError', '⚠️ Ce nom est déjà pris.');
+            return;
+        }
+        if (unavailableOptions.avatars.includes(player.avatar)) {
+            client.emit('joinError', '⚠️ Cet avatar est déjà pris.');
             return;
         }
 
         const success = this.lobbyService.joinLobby(accessCode, player);
         if (success) {
             client.join(accessCode);
-            this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
-
+            const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+            this.server.to(accessCode).emit('updateUnavailableOptions', updatedUnavailableOptions);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-            this.server.to(accessCode).emit('updateUnavailableOptions', unavailableOptions); //+
 
             client.emit('joinedLobby');
         } else {
@@ -149,5 +152,12 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         }
         this.logger.log(`User disconnected: ${client.id}`);
+    }
+
+    @SubscribeMessage('requestUnavailableOptions')
+    handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+
+        client.emit('updateUnavailableOptions', updatedUnavailableOptions);
     }
 }
