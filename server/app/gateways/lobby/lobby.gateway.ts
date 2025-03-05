@@ -49,8 +49,10 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
-            this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-            client.emit('joinedLobby');
+            const updatedPlayer = this.lobbyService.getLobbyPlayers(accessCode);
+            this.logger.log('Updated player list:', updatedPlayer);
+            this.server.to(accessCode).emit('updatePlayers', updatedPlayer);
+            client.emit('joinedLobby'); //prq ca?
         } else {
             client.emit('joinError', 'Unable to join lobby');
         }
@@ -86,10 +88,12 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, playerName } = data;
         client.leave(accessCode);
-        this.lobbyService.leaveLobby(accessCode, playerName);
-        this.accessCodesService.removeAccessCode(accessCode);
+        const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
         this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         this.logger.log(`Player ${playerName} left lobby ${accessCode}`);
+        if (isLobbyDeleted) {
+            this.server.to(accessCode).emit('lobbyDeleted', this.lobbyService.getLobbyPlayers(accessCode));
+        }
     }
 
     @SubscribeMessage('getLobbyPlayers')

@@ -48,6 +48,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
 
         this.socketClientService.onJoinLobby(() => {
+            console.log('USER JOINED');
             this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
                 next: (players) => {
                     this.lobby.players = players;
@@ -56,6 +57,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                     console.error('Error fetching players:', err);
                 },
             });
+        });
+
+        this.socketClientService.onLobbyUpdate((players: Player[]) => {
+            console.log('Received updated player list:', players);
+            this.lobby.players = players;
         });
 
         this.socketClientService.onLeaveLobby(() => {
