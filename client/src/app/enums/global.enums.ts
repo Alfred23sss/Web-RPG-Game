@@ -102,6 +102,7 @@ export enum Routes {
     HomePage = '/home',
     CreatePage = '/create',
     CreateView = '/create',
+    Game = '/game',
 }
 
 export enum ItemName {

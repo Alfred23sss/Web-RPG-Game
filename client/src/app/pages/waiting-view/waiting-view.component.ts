@@ -16,6 +16,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     player: Player;
     lobby: Lobby;
     isLoading: boolean = true;
+    isGameStarting: boolean = false;
+    isGameStartedEmitted: boolean = false;
 
     constructor(
         private router: Router,
@@ -92,10 +94,15 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.socketClientService.onLobbyDeleted(() => {
             this.navigateToHome();
         });
+
+        this.socketClientService.onAlertGameStarted(() => {
+            console.log('Game is starting');
+            this.navigateToGame();
+        });
     }
 
     ngOnDestroy(): void {
-        if (this.accessCode && this.player) {
+        if (this.accessCode && this.player && !this.isGameStarting) {
             this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
             if (this.player.isAdmin) {
                 this.socketClientService.deleteLobby(this.accessCode);
@@ -116,5 +123,16 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
+    }
+
+    navigateToGame() {
+        if (this.player.isAdmin && !this.isGameStartedEmitted) {
+            console.log('Alerting game started');
+            this.isGameStartedEmitted = true;
+            this.socketClientService.alertGameStarted(this.accessCode);
+        }
+        this.isGameStarting = true;
+        sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
+        this.router.navigate([Routes.Game]);
     }
 }

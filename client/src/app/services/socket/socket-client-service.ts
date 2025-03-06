@@ -98,6 +98,14 @@ export class SocketClientService {
         });
     }
 
+    alertGameStarted(accessCode: string) {
+        this.socket.emit('alertGameStarted', accessCode);
+    }
+
+    onAlertGameStarted(callback: () => void) {
+        this.socket.on('gameStarted', callback);
+    }
+
     addPlayerToLobby(accessCode: string, player: unknown) {
         this.socket.emit('joinLobby', { accessCode, player });
     }

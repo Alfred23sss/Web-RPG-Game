@@ -15,7 +15,11 @@
         <div class="game-details">
             <h3>Informations de partie</h3>
             <p>Taille de la carte: {{ game?.size }}</p>
-            <p>Joueurs actuels:</p>
+            <p>
+                Joueurs actuels: @for(player of lobby.players; track $index){
+                <span>{{ player.name }}</span>
+                }
+            </p>
             <p>Joueur actif:</p>
         </div>
 

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { Lobby } from '@app/interfaces/lobby';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
@@ -25,6 +26,14 @@ export class GamePageComponent implements OnInit {
     availablePath: Tile[] | undefined;
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
+    lobby: Lobby;
+    defaultLobby: Lobby = {
+        isLocked: false,
+        accessCode: '',
+        players: [],
+        game: null,
+        maxPlayers: 0,
+    }; // moche
 
     constructor(
         private gameService: GameService,
@@ -34,8 +43,9 @@ export class GamePageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.gameService.fetchGames().subscribe();
-        this.game = this.gameService.getCurrentGame();
+        const storedLobby = sessionStorage.getItem('lobby');
+        this.lobby = storedLobby ? (JSON.parse(storedLobby) as Lobby) : this.defaultLobby; // moche
+        this.game = this.gameService.getCurrentGame(); // moche
         this.gridService.setGrid(this.game?.grid);
         if (this.game && this.game.grid) {
             this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement);
