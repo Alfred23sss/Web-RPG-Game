@@ -1,178 +1,162 @@
-// /* eslint-disable @typescript-eslint/no-magic-numbers */
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { TestBed } from '@angular/core/testing';
-// import { CombatManagerService } from './combat-manager.service';
-// import { Player } from '@app/interfaces/player';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TestBed } from '@angular/core/testing';
+import { Item } from '@app/classes/item';
+import { DiceType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
+import { PlayerInfoService } from '@app/services/player-info/player-info.service';
+import { BehaviorSubject } from 'rxjs';
 
-// const MOCK_PLAYER_1 = {
-//     playerInfoService: {
-//         getPlayerInfo: jasmine.createSpy('getPlayerInfo').and.returnValue({
-//             speed: 10,
-//             attack: { value: 4, bonusDice: 'D6' },
-//             defense: { value: 4, bonusDice: 'D4' },
-//             name: 'Player1',
-//             hp: { current: 100, max: 100 },
-//         }),
-//         updateHealth: jasmine.createSpy('updateHealth'),
-//         restoreHealth: jasmine.createSpy('restoreHealth'),
-//     },
-// } as unknown as Player;
+const MAX_HP = 100;
 
-// const MOCK_PLAYER_2 = {
-//     playerInfoService: {
-//         getPlayerInfo: jasmine.createSpy('getPlayerInfo').and.returnValue({
-//             speed: 5,
-//             attack: { value: 4, bonusDice: 'D4' },
-//             defense: { value: 4, bonusDice: 'D6' },
-//             name: 'Player2',
-//             hp: { current: 100, max: 100 },
-//         }),
-//         updateHealth: jasmine.createSpy('updateHealth'),
-//         restoreHealth: jasmine.createSpy('restoreHealth'),
-//     },
-// } as unknown as Player;
+describe('PlayerInfoService', () => {
+    let service: PlayerInfoService;
+    const mockItem = new Item({
+        id: '0',
+        name: 'Lightning',
+        imageSrc: 'lightning.png',
+        imageSrcGrey: 'lightning-gray.png',
+        itemCounter: 1,
+        description: 'Test item',
+    });
 
-// const MOCK_PLAYER_3 = {
-//     playerInfoService: {
-//         getPlayerInfo: jasmine.createSpy('getPlayerInfo').and.returnValue({
-//             speed: 15,
-//             attack: { value: 4, bonusDice: 'D6' },
-//             defense: { value: 4, bonusDice: 'D4' },
-//             name: 'Player3',
-//             hp: { current: 100, max: 100 },
-//         }),
-//         updateHealth: jasmine.createSpy('updateHealth'),
-//         restoreHealth: jasmine.createSpy('restoreHealth'),
-//     },
-// } as unknown as Player;
+    const MOCK_PLAYER: Player = {
+        name: 'TestPlayer',
+        avatar: 'avatar.png',
+        vitality: 4,
+        hp: { current: 50, max: MAX_HP },
+        speed: 4,
+        attack: { value: 4, bonusDice: DiceType.D6 },
+        defense: { value: 4, bonusDice: DiceType.D4 },
+        movementPoints: 10,
+        actionPoints: 10,
+        inventory: [null, null],
+        isAdmin: false,
+    };
 
-// describe('CombatManagerService', () => {
-//     let service: CombatManagerService;
+    beforeEach(() => {
+        TestBed.configureTestingModule({});
+        service = TestBed.inject(PlayerInfoService);
+        service.initializePlayer({ ...MOCK_PLAYER });
+    });
 
-//     beforeEach(() => {
-//         TestBed.configureTestingModule({});
-//         service = TestBed.inject(CombatManagerService);
-//     });
+    it('should be created', () => {
+        expect(service).toBeTruthy();
+    });
 
-//     it('should be created', () => {
-//         expect(service).toBeTruthy();
-//     });
+    it('should initialize player state with correct values', () => {
+        const initialPlayer: Player = {
+            ...MOCK_PLAYER,
+            hp: { current: MAX_HP, max: MAX_HP },
+        };
 
-//     it('should start combat with the correct initial state when MOCK_PLAYER_1 has higher speed', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         const cs = (service as any).combatState; // any because combatState is private
+        service.initializePlayer(initialPlayer);
+        const playerState = (service as any).playerState as BehaviorSubject<Player>;
+        expect(playerState.value).toEqual(initialPlayer);
+    });
 
-//         expect(cs.player1).toBe(MOCK_PLAYER_1);
-//         expect(cs.player2).toBe(MOCK_PLAYER_2);
-//         expect(cs.currentPlayer).toBe(MOCK_PLAYER_1);
-//         expect(cs.isCombatActive).toBeTrue();
-//         expect(cs.player1Attributes.turnTime).toEqual(5);
-//         expect(cs.player1Attributes.escapeAttempts).toEqual(2);
-//         expect(cs.player2Attributes.turnTime).toEqual(5);
-//         expect(cs.player2Attributes.escapeAttempts).toEqual(2);
-//     });
+    it('should add item to first empty slot', () => {
+        const success = service.addItemToInventory(mockItem);
+        const player = (service as any).playerState.value as Player;
+        expect(success).toBeTrue();
+        expect(player.inventory).toEqual([mockItem, null]);
+    });
 
-//     it('should set currentPlayer to player2 when player2 has higher speed than player1 (line 36 branch)', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_3);
-//         const cs = (service as any).combatState; // any because combatState is private
-//         expect(cs.currentPlayer).toBe(MOCK_PLAYER_3);
-//     });
+    it('should add item to second slot when first is occupied', () => {
+        service.addItemToInventory(mockItem);
 
-//     it('should handle attack correctly when currentPlayer is MOCK_PLAYER_1 (line 44 branch option 1)', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         spyOn(service as any, 'rollDice').and.returnValue(2); // any because rollDice is private
-//         service.handleAttack();
-//         expect(MOCK_PLAYER_1.playerInfoService.updateHealth).toHaveBeenCalledWith(-0);
-//         const cs = (service as any).combatState; // any because combatState is private
-//         expect(cs.currentPlayer).toBe(MOCK_PLAYER_2);
-//     });
+        const success = service.addItemToInventory(mockItem);
+        const player = (service as any).playerState.value;
 
-//     it('should handle attack correctly when currentPlayer is MOCK_PLAYER_2', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         (service as any).combatState.currentPlayer = MOCK_PLAYER_2; // any because combatState is private
-//         spyOn(service as any, 'rollDice').and.returnValue(1); // any because rollDice is private
-//         service.handleAttack();
-//         expect(MOCK_PLAYER_2.playerInfoService.updateHealth).toHaveBeenCalledWith(-0);
-//         const cs = (service as any).combatState; // any because combatState is private
-//         expect(cs.currentPlayer).toBe(MOCK_PLAYER_1);
-//     });
+        expect(success).toBeTrue();
+        expect(player.inventory).toEqual([mockItem, mockItem]);
+    });
 
-//     it('should switch turn correctly when currentPlayer is MOCK_PLAYER_1', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         (service as any).combatState.currentPlayer = MOCK_PLAYER_1; // any because combatState is private
-//         (service as any).switchTurn(); // any because switchTurn is private
-//         expect((service as any).combatState.currentPlayer).toBe(MOCK_PLAYER_2); // any because combatState is private
-//     });
+    it('should not add item when inventory is full', () => {
+        service.addItemToInventory(mockItem);
+        service.addItemToInventory(mockItem);
 
-//     it('should switch turn correctly when currentPlayer is MOCK_PLAYER_2 (line 81 branch option 2)', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         (service as any).combatState.currentPlayer = MOCK_PLAYER_2; // any because combatState is private
-//         (service as any).switchTurn(); // any because switchTurn is private
-//         expect((service as any).combatState.currentPlayer).toBe(MOCK_PLAYER_1); // any because combatState is private
-//     });
+        const success = service.addItemToInventory(mockItem);
+        expect(success).toBeFalse();
+    });
 
-//     // --- Tests for line 85 (ternary in getCurrentAttributes) ---
-//     it('should return player1Attributes when currentPlayer is MOCK_PLAYER_1 (line 85 branch option 1)', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         (service as any).combatState.currentPlayer = MOCK_PLAYER_1;
-//         const attributes = (service as any).getCurrentAttributes(); // any because getCurrentAttributes is private
-//         expect(attributes).toBe((service as any).combatState.player1Attributes); // any because combatState is private
-//     });
+    it('should handle negative health updates correctly', () => {
+        service.updateHealth(-60);
+        const player = (service as any).playerState.value;
+        expect(player.hp.current).toBe(0);
+    });
 
-//     it('should return player2Attributes when currentPlayer is MOCK_PLAYER_2 (line 85 branch option 2)', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         (service as any).combatState.currentPlayer = MOCK_PLAYER_2;
-//         const attributes = (service as any).getCurrentAttributes(); // any because getCurrentAttributes is private
-//         expect(attributes).toBe((service as any).combatState.player2Attributes); // any because combatState is private
-//     });
+    it('should clamp health to 0 when taking fatal damage', () => {
+        service.updateHealth(-200);
+        const player = (service as any).playerState.value;
+        expect(player.hp.current).toBe(0);
+    });
 
-//     it('should handle successful evasion correctly', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         spyOn(Math, 'random').and.returnValue(0.2);
-//         service.handleEvasion();
-//         expect(MOCK_PLAYER_1.playerInfoService.restoreHealth).toHaveBeenCalled();
-//         expect(MOCK_PLAYER_2.playerInfoService.restoreHealth).toHaveBeenCalled();
-//         const cs = (service as any).combatState; // any because combatState is private
-//         expect(cs.isCombatActive).toBeFalse();
-//     });
+    it('should not exceed max health when healing', () => {
+        service.updateHealth(100);
+        const player = (service as any).playerState.value;
+        expect(player.hp.current).toBe(MAX_HP);
+    });
 
-//     it('should handle failed evasion correctly and switch turn', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         spyOn(Math, 'random').and.returnValue(0.5);
-//         const cs = (service as any).combatState; // any because combatState is private
-//         const initialEscapes = cs.player1Attributes.escapeAttempts;
-//         service.handleEvasion();
-//         expect(cs.player1Attributes.escapeAttempts).toEqual(initialEscapes - 1);
-//         expect(cs.currentPlayer).toBe(MOCK_PLAYER_2);
-//     });
+    it('should restore health to max when restoreHealth is called', () => {
+        const injuredPlayer: Player = {
+            ...MOCK_PLAYER,
+            hp: { current: 20, max: MAX_HP },
+        };
+        service.initializePlayer(injuredPlayer);
 
-//     it('should set turnTime to NO_ESCAPES_TIMER when escapeAttempts reach 0 after evasion', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         const cs = (service as any).combatState; // any because combatState is private
-//         spyOn(Math, 'random').and.returnValue(0.5);
-//         cs.player1Attributes.escapeAttempts = 1;
-//         service.handleEvasion();
-//         expect(cs.player1Attributes.escapeAttempts).toEqual(0);
-//         expect(cs.player1Attributes.turnTime).toEqual(3);
-//     });
+        service.restoreHealth();
+        const player = (service as any).playerState.value;
+        expect(player.hp.current).toEqual(MAX_HP);
+    });
 
-//     it('should roll dice correctly for bonusDice "D6"', () => {
-//         spyOn(Math, 'random').and.returnValue(0.5);
-//         const result = (service as any).rollDice('D6'); // any because rollDice is private
-//         expect(result).toEqual(3);
-//     });
+    it('should properly update observable when making changes', (done) => {
+        const testPlayer = { ...MOCK_PLAYER, name: 'ObservableTest' };
+        service.initializePlayer(testPlayer);
 
-//     it('should return early in handleEvasion when escapeAttempts are 0', () => {
-//         service.startCombat(MOCK_PLAYER_1, MOCK_PLAYER_2);
-//         const cs = (service as any).combatState; // any because combatState is private
+        service.player$.subscribe((player) => {
+            expect(player.name).toBe('ObservableTest');
+            done();
+        });
+    });
 
-//         cs.player1Attributes.escapeAttempts = 0;
-//         spyOn(service as any, 'switchTurn'); // any because switchTurn is private
+    it('should handle partial healing correctly', () => {
+        const injuredPlayer = { ...MOCK_PLAYER, hp: { current: 20, max: MAX_HP } };
+        service.initializePlayer(injuredPlayer);
 
-//         service.handleEvasion();
+        service.updateHealth(30);
+        const player = (service as any).playerState.value;
+        expect(player.hp.current).toBe(50);
+    });
 
-//         expect((service as any).switchTurn).not.toHaveBeenCalled();
-//         expect(cs.currentPlayer).toBe(MOCK_PLAYER_1);
-//         expect(cs.isCombatActive).toBeTrue();
-//     });
-// });
+    it('should return correct player snapshot', () => {
+        const snapshot = service.getPlayerSnapshot();
+        expect(snapshot).toEqual(jasmine.any(Object));
+        expect(snapshot).toEqual(MOCK_PLAYER);
+        expect(snapshot).not.toBe((service as any).playerState.value);
+    });
+
+    it('should handle multiple sequential updates correctly', () => {
+        expect(service.getPlayerSnapshot().hp.current).toBe(50);
+
+        service.updateHealth(-30);
+        expect(service.getPlayerSnapshot().hp.current).toBe(20);
+
+        service.updateHealth(25);
+        expect(service.getPlayerSnapshot().hp.current).toBe(45);
+
+        service.updateHealth(100);
+        expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP);
+    });
+
+    it('should maintain inventory integrity after multiple operations', () => {
+        service.addItemToInventory(mockItem);
+        expect(service.getPlayerSnapshot().inventory).toEqual([mockItem, null]);
+
+        service.addItemToInventory(mockItem);
+        expect(service.getPlayerSnapshot().inventory).toEqual([mockItem, mockItem]);
+
+        const success = service.addItemToInventory(mockItem);
+        expect(success).toBeFalse();
+        expect(service.getPlayerSnapshot().inventory).toEqual([mockItem, mockItem]);
+    });
+});
