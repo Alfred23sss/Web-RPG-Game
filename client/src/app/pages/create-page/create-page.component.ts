@@ -16,6 +16,7 @@ import { GameService } from '@app/services/game/game.service';
 })
 export class CreatePageComponent implements OnInit {
     games: Game[] = this.gameService.games;
+    private isLobbyCreated: boolean = false;
     constructor(
         private readonly dialog: MatDialog,
         private readonly gameService: GameService,
@@ -34,7 +35,7 @@ export class CreatePageComponent implements OnInit {
 
     openDialog(game: Game): void {
         this.dialog.open(CharacterFormComponent, {
-            data: { game },
+            data: { game, isLobbyCreated: this.isLobbyCreated },
         });
     }
 
