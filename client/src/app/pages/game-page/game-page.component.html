@@ -1,14 +1,78 @@
-<div class="page" cdkDropListGroup>
-    <div class="main-content">
-        <div id="game-preview">
-            <app-grid [grid]="game?.grid" [availablePath]="availablePath" [quickestPath]="quickestPath" (tileHovered)="updateQuickestPath($event)">
-            </app-grid>
+<div class="game-container">
+    <!-- Carte du jeu -->
+    <div class="game-map">
+        <app-grid
+            [grid]="game?.grid"
+            [availablePath]="availablePath"
+            [quickestPath]="quickestPath"
+            (tileHovered)="updateQuickestPath($event)"
+        ></app-grid>
+    </div>
+
+    <!-- Panneau d'informations -->
+    <div class="game-info">
+        <div class="game-details">
+            <h3>Informations de partie</h3>
+            <p>Taille de la carte: {{ game?.size }}</p>
+            <p>Joueurs actuels:</p>
+            <p>Joueur actif:</p>
+        </div>
+
+        <!-- 
+        
+        <div class="player-info">
+            <h3>Informations du joueur</h3>
+            <p>Nom: {{ player?.name }}</p>
+            <img [src]="player?.avatar" alt="Avatar">
+            <p>Points de vie: {{ player?.hp }} / {{ player?.maxHp }}</p>
+            <p>Attributs: Rapidité {{ player?.speed }}, Attaque {{ player?.attack }}, Défense {{ player?.defense }}</p>
+            <p>Dés assignés: {{ player?.diceType }}</p>
+            <p>Mouvements restants: {{ player?.remainingMoves }}</p>
+            <p>Actions restantes: {{ player?.remainingActions }}</p>
+        </div>
+
+        -->
+
+        <div class="inventory">
+            <h3>Inventaire</h3>
+            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
         </div>
     </div>
 
-    <div class="game-info">
-        <div class="button-grid">
-            <button class="button" (click)="backToHome()">Abandonner</button>
-        </div>
+    <!-- Liste des joueurs 
+    <div class="player-list">
+        <h3>Joueurs</h3>
+        <ul>
+            <li *ngFor="let p of game?.players" [class.active]="p === game?.activePlayer" [class.organizer]="p.isOrganizer" [class.abandoned]="p.hasAbandoned">
+                {{ p.name }} - Combats gagnés: {{ p.wins }}
+            </li>
+        </ul>
+    </div>-->
+
+    <!-- Zone des messages -->
+    <div class="game-messages">
+        <h3>Messages</h3>
+        <div class="messages-content">(Clavardage et journal de jeu)</div>
     </div>
+
+    <!-- Compte à rebours 
+    <div class="countdown" *ngIf="game?.inCombat && player?.isInCombat">
+        <p>Temps restant: {{ game?.countdown }}</p>
+    </div>-->
+
+    <!-- Boutons d'action 
+    <div class="action-buttons">
+        <button (click)="endTurn()">Terminer tour</button>
+        <button (click)="executeNextAction()">Exécuter action</button>
+        <button (click)="backToHome()">Abandonner</button>
+    </div>-->
+
+    <!-- Interface de combat 
+    <div class="combat-interface" *ngIf="player?.isInCombat">
+        <h3>Combat</h3>
+        <p>Résultats des dés: {{ game?.combatDiceResults }}</p>
+        <p>Tentatives d'évasion restantes: {{ player?.escapeAttempts }}</p>
+        <button (click)="attack()" *ngIf="game?.playerTurn === player">Attaquer</button>
+        <button (click)="evade()" *ngIf="player?.escapeAttempts > 0">Évasion</button>
+    </div>-->
 </div>
