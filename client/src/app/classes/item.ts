@@ -1,4 +1,3 @@
-import { DiceModifier, ItemCondition, ItemModifier } from '@app/interfaces/item-attributes';
 import { v4 as uuidv4 } from 'uuid';
 
 export class Item {
@@ -8,9 +7,7 @@ export class Item {
     name: string = '';
     itemCounter: number = 0;
     description: string = '';
-    modifiers?: ItemModifier[];
-    condition?: ItemCondition;
-    diceModifiers?: DiceModifier[];
+    originalReference?: Item;
 
     constructor(init?: Partial<Item>) {
         if (init) {
