@@ -25,7 +25,7 @@ export class GameService {
                     item: tile.item ? new this.itemModel(tile.item) : undefined,
                 })),
             );
-            i;
+
             return await this.gameModel.create(game);
         } catch (error) {
             throw new Error(`Failed to create game: ${error.message}`);

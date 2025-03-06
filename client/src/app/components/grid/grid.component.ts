@@ -16,6 +16,7 @@ export class GridComponent {
     @Input() grid: Tile[][] | undefined = [];
     @Input() availablePath: Tile[] | undefined = [];
     @Input() quickestPath: Tile[] | undefined = [];
+    @Input() isEditionMode: boolean = false;
     @Output() tileHovered = new EventEmitter<Tile>();
     tileType = TileType;
 

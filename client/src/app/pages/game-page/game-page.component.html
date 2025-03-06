@@ -5,6 +5,7 @@
             [grid]="game?.grid"
             [availablePath]="availablePath"
             [quickestPath]="quickestPath"
+            [isEditionMode]="false"
             (tileHovered)="updateQuickestPath($event)"
         ></app-grid>
     </div>
@@ -56,8 +57,16 @@
     </div>
 
     <!-- Compte à rebours 
-    <div class="countdown" *ngIf="game?.inCombat && player?.isInCombat">
-        <p>Temps restant: {{ game?.countdown }}</p>
+    <div class="countdown">
+        @if(Player.isInCombat)
+        {
+            <p>Temps restant: {{ game?.countdown }}</p>
+        }
+        @else
+        {
+            <p>Pas en combat</p>
+        }
+
     </div>-->
 
     <!-- Boutons d'action 
