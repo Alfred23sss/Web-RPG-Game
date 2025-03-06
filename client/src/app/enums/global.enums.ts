@@ -67,6 +67,13 @@ export enum BonusValue {
 export enum DiceType {
     D4 = 'D4',
     D6 = 'D6',
+    Uninitialized = '',
+}
+
+export enum JoinLobbyResult {
+    RedirectToHome = 'redirectToHome',
+    StayInLobby = 'stayInLobby',
+    JoinedLobby = 'joinedLobby',
 }
 
 export enum GameMode {
@@ -160,4 +167,9 @@ export enum ItemDescription {
     Rubik = 'bouge les colonnes ou les rangés',
     Swap = 'échange les personnages',
     Default = 'rien',
+}
+
+export enum AccessCodeGenerator {
+    Minimum = 1000,
+    Maximum = 9000,
 }

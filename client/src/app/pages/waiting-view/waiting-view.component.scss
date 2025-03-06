@@ -1,25 +1,78 @@
 .waiting-view {
     text-align: center;
     margin-top: 20px;
+    padding: 20px;
+    background-color: #2c3e50;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ecf0f1;
+    font-family: 'Arial', sans-serif;
+}
 
-    p {
-        font-size: 20px;
-        font-family: papyrus;
-        color: #ffd700;
-        font-style: bold;
-    }
+.waiting-view p {
+    font-size: 20px;
+    color: #ffd700;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
 
-    strong {
-        font-size: 24px;
-        color: #ffa500;
-        font-style: bold;
-    }
+.waiting-view strong {
+    font-size: 24px;
+    color: #ffa500;
+}
+
+.waiting-line {
+    margin-top: 20px;
+    background-color: #34495e;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.waiting-line h2 {
+    font-size: 22px;
+    color: #ffd700;
+    margin-bottom: 10px;
+}
+
+.waiting-line ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.waiting-line li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #3b4a5c;
+    border-radius: 5px;
+    font-size: 18px;
+    color: #ecf0f1;
+    transition: background-color 0.2s ease;
+}
+
+.waiting-line li:hover {
+    background-color: #4a5c6e;
+}
+
+.player-name {
+    font-weight: bold;
+}
+
+.admin-badge {
+    background-color: #e67e22;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .button {
-    margin-top: 10px;
-    flex-direction: row;
-    text-align: center;
+    margin-top: 20px;
     padding: 12px 24px;
     font-size: 1.2rem;
     background: linear-gradient(135deg, #ffd700, #ffa500);
