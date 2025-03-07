@@ -24,7 +24,7 @@ export class GamePageComponent implements OnInit {
     gameName: string = '';
     gameDescription: string = '';
     game: Game | null;
-    currentPLayer: Player;
+    currentPlayer: Player;
     availablePath: Tile[] | undefined;
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
@@ -45,8 +45,11 @@ export class GamePageComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        const storedLobby = sessionStorage.getItem('lobby');
-        this.lobby = storedLobby ? (JSON.parse(storedLobby) as Lobby) : this.defaultLobby; // moche
+        const lobby = sessionStorage.getItem('lobby');
+        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby;
+        const currentPlayer = sessionStorage.getItem('player');
+        this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
+        // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         this.game = this.lobby.game; // moche
         this.gridService.setGrid(this.game?.grid);
         if (this.game && this.game.grid) {

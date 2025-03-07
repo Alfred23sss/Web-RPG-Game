@@ -25,42 +25,42 @@
         <div class="player-info">
             <h3>Informations du joueur</h3>
             <div class="player-header">
-                <p class="player-name">{{ lobby.players[0].name }}</p>
-                <img [src]="lobby.players[0].avatar" alt="Avatar du joueur" class="player-avatar" />
+                <p class="player-name">{{ currentPlayer.name }}</p>
+                <img [src]="currentPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
             </div>
             <div class="player-stats">
                 <div class="health-bar">
-                    <div class="health-label">Points de vie: {{ lobby.players[0].hp.current }} / {{ lobby.players[0].hp.max }}</div>
+                    <div class="health-label">Points de vie: {{ currentPlayer.hp.current }} / {{ currentPlayer.hp.max }}</div>
                     <div class="health-bar-outer">
-                        <div class="health-bar-inner" [style.width.%]="(lobby.players[0].hp.current / lobby.players[0].hp.max) * 100"></div>
+                        <div class="health-bar-inner" [style.width.%]="(currentPlayer.hp.current / currentPlayer.hp.max) * 100"></div>
                     </div>
                 </div>
                 <div class="attributes-grid">
                     <div class="attribute">
                         <span class="attribute-label">Rapidité</span>
-                        <span class="attribute-value">{{ lobby.players[0].speed }}</span>
+                        <span class="attribute-value">{{ currentPlayer.speed }}</span>
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Attaque</span>
-                        <span class="attribute-value">{{ lobby.players[0].attack }}</span>
+                        <span class="attribute-value">{{ currentPlayer.attack }}</span>
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Défense</span>
-                        <span class="attribute-value">{{ lobby.players[0].defense }}</span>
+                        <span class="attribute-value">{{ currentPlayer.defense }}</span>
                     </div>
                 </div>
                 <div class="dice-type">
                     <span class="dice-label">Dés assignés:</span>
-                    <span class="dice-value">{{ lobby.players[0].attack.bonusDice }}</span>
+                    <span class="dice-value">{{ currentPlayer.attack.bonusDice }}</span>
                 </div>
                 <div class="resources">
                     <div class="resource">
                         <span class="resource-label">Mouvements restants:</span>
-                        <span class="resource-value">{{ lobby.players[0].movementPoints }}</span>
+                        <span class="resource-value">{{ currentPlayer.movementPoints }}</span>
                     </div>
                     <div class="resource">
                         <span class="resource-label">Actions restantes:</span>
-                        <span class="resource-value">{{ lobby.players[0] }}</span>
+                        <span class="resource-value">{{ currentPlayer }}</span>
                     </div>
                 </div>
             </div>
