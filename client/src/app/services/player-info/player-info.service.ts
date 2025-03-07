@@ -1,72 +1,68 @@
-// import { Injectable } from '@angular/core';
-// import { Item } from '@app/classes/item';
-// import { PlayerInfo } from '@app/interfaces/player';
-// import { BehaviorSubject, Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { Item } from '@app/classes/item';
+import { Player } from '@app/interfaces/player';
+import { BehaviorSubject, Observable } from 'rxjs';
 
-// @Injectable({
-//     providedIn: 'root',
-// })
-// export class PlayerInfoService {
-//     playerInfo$!: Observable<PlayerInfo>;
-//     private playerState!: BehaviorSubject<PlayerInfo>;
+@Injectable({
+    providedIn: 'root',
+})
+export class PlayerInfoService {
+    player$!: Observable<Player>;
+    private playerState!: BehaviorSubject<Player>;
 
-//     initializePlayer(playerInfo: PlayerInfo): void {
-//         this.playerState = new BehaviorSubject<PlayerInfo>(playerInfo);
-//         this.playerInfo$ = this.playerState.asObservable();
-//     }
+    initializePlayer(player: Player): void {
+        this.playerState = new BehaviorSubject<Player>({ ...player });
+        this.player$ = this.playerState.asObservable();
+    }
 
-//     addItemToInventory(item: Item): boolean {
-//         const currentPlayer = this.playerState.value;
+    addItemToInventory(item: Item): boolean {
+        const currentPlayer = this.playerState.value;
+        const emptySlotIndex = currentPlayer.inventory.findIndex((slot) => slot === null);
 
-//         const inventory = currentPlayer.inventory;
-//         const emptySlotIndex = inventory.findIndex((slot) => slot === null);
+        if (emptySlotIndex !== -1) {
+            const newInventory: [Item | null, Item | null] = [...currentPlayer.inventory];
+            newInventory[emptySlotIndex] = item;
 
-//         if (emptySlotIndex !== -1) {
-//             inventory[emptySlotIndex] = item;
-//             this.playerState.next({ ...currentPlayer, inventory });
-//             return true;
-//         }
-//         return false;
-//     }
+            const updatedPlayer = {
+                ...currentPlayer,
+                inventory: newInventory,
+            };
 
-//     removeItemFromInventory(index: number): boolean {
-//         const currentPlayer = this.playerState.value;
-//         if (index < 0 || index >= currentPlayer.inventory.length) return false;
+            this.playerState.next(updatedPlayer);
+            return true;
+        }
+        return false;
+    }
 
-//         const inventory = currentPlayer.inventory;
-//         inventory[index] = null;
-//         this.playerState.next({ ...currentPlayer, inventory });
-//         return true;
-//     }
+    updateHealth(healthVariation: number): void {
+        const currentPlayer = this.playerState.value;
+        const newHp = Math.max(0, Math.min(currentPlayer.hp.current + healthVariation, currentPlayer.hp.max));
 
-//     getPlayerInfo(): PlayerInfo {
-//         return JSON.parse(JSON.stringify(this.playerState.value)) as PlayerInfo;
-//     }
+        const updatedPlayer = {
+            ...currentPlayer,
+            hp: {
+                ...currentPlayer.hp,
+                current: newHp,
+            },
+        };
 
-//     getInventory(): [Item | null, Item | null] {
-//         const playerInventory = this.playerState.value?.inventory;
-//         return playerInventory ? playerInventory : [null, null];
-//     }
+        this.playerState.next(updatedPlayer);
+    }
 
-//     updateHealth(healthVariation: number): void {
-//         const currentPlayer = this.playerState.value;
+    restoreHealth(): void {
+        const currentPlayer = this.playerState.value;
+        const updatedPlayer = {
+            ...currentPlayer,
+            hp: {
+                ...currentPlayer.hp,
+                current: currentPlayer.hp.max,
+            },
+        };
 
-//         const clampedHealth = Math.max(0, Math.min(currentPlayer.hp.current + healthVariation, currentPlayer.hp.max));
+        this.playerState.next(updatedPlayer);
+    }
 
-//         if (clampedHealth === 0) {
-//             return;
-//         }
-
-//         this.playerState.next({
-//             ...currentPlayer,
-//             hp: {
-//                 ...currentPlayer.hp,
-//                 current: clampedHealth,
-//             },
-//         });
-//     }
-
-//     restoreHealth(): void {
-//         this.updateHealth(this.playerState.value.hp.max);
-//     }
-// }
+    getPlayerSnapshot(): Player {
+        return { ...this.playerState.value };
+    }
+}
