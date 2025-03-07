@@ -93,7 +93,7 @@ export class GamePageComponent implements OnInit {
     }
     abandonGame(): void {
         this.currentPlayer.hasAbandoned = true;
-        this.socketClientService.abandonGame(this.currentPlayer.name);
+        this.socketClientService.abandonGame(this.currentPlayer.name, this.lobby.accessCode);
         this.backToHome();
     }
 
