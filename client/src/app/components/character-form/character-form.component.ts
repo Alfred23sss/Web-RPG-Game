@@ -64,6 +64,7 @@ export class CharacterFormComponent implements OnInit {
             actionPoints: 3,
             inventory: [null, null],
             isAdmin: false,
+            hasAbandoned: false,
         };
     }
 

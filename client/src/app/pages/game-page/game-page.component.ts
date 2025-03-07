@@ -10,6 +10,7 @@ import { Tile } from '@app/interfaces/tile';
 // import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 const playerMovement = 3;
 
@@ -42,6 +43,7 @@ export class GamePageComponent implements OnInit {
         private gridService: GridService,
         private playerMovementService: PlayerMovementService,
         private router: Router,
+        private socketClientService: SocketClientService,
     ) {}
 
     ngOnInit(): void {
@@ -49,12 +51,24 @@ export class GamePageComponent implements OnInit {
         this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby;
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
+
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         this.game = this.lobby.game; // moche
         this.gridService.setGrid(this.game?.grid);
         if (this.game && this.game.grid) {
             this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement);
         }
+
+        this.socketClientService.onAbandonGame((data) => {
+            console.log('Received abandoned game event for:', data.playerName);
+
+            const abandonedPlayer = this.lobby.players.find((player) => player.name === data.playerName);
+
+            if (abandonedPlayer) {
+                abandonedPlayer.hasAbandoned = true;
+                console.log(`${data.playerName} has abandoned the game`);
+            }
+        });
     }
 
     updateQuickestPath(targetTile: Tile): void {
@@ -68,6 +82,19 @@ export class GamePageComponent implements OnInit {
 
     backToHome(): void {
         this.router.navigate([Routes.HomePage]);
+    }
+
+    endTurn(): void {
+        console.log('Tour terminé !');
+    }
+
+    executeNextAction(): void {
+        console.log('Action exécutée !');
+    }
+    abandonGame(): void {
+        this.currentPlayer.hasAbandoned = true;
+        this.socketClientService.abandonGame(this.currentPlayer.name);
+        this.backToHome();
     }
 
     private isAvailablePath(tile: Tile): boolean {

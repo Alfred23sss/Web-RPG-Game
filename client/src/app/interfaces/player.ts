@@ -13,4 +13,5 @@ export interface Player {
     actionPoints: number;
     inventory: [Item | null, Item | null];
     isAdmin: boolean;
+    hasAbandoned: boolean;
 }

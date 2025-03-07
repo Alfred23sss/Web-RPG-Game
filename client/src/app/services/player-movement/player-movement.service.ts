@@ -30,13 +30,13 @@ export class PlayerMovementService {
 
         while (queue.length) {
             const dequeued = queue.shift();
-            if (!dequeued) continue; //33
+            if (!dequeued) continue; // 33
             const { tile, remainingPoints } = dequeued;
 
             for (const neighbor of this.getNeighbors(tile, grid)) {
                 if (this.isNeighborBlocked(neighbor)) continue;
 
-                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity; //39
+                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity; // 39
                 const newRemainingPoints = remainingPoints - moveCost;
                 const neighborRemainingPoints = visited.get(neighbor) ?? -Infinity;
 
@@ -64,7 +64,7 @@ export class PlayerMovementService {
         while (queue.length > 0) {
             queue.sort((a, b) => a.cost - b.cost);
             const next = queue.shift();
-            if (!next) break; //67
+            if (!next) break; // 67
             const { tile: currentTile, cost: currentCost } = next;
 
             if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);

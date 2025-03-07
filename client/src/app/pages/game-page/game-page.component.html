@@ -6,9 +6,12 @@
         <div class="game-details">
             <h3>Informations de partie</h3>
             <p>Taille de la carte: {{ game?.size }}</p>
-            <p>
-                Joueurs actuels: @for(player of lobby.players; track $index){
-                <span class="player-name" [class.player-admin]="player.isAdmin" [class.player-regular]="!player.isAdmin">
+            <p>Joueurs actuels: @for(player of lobby.players; track $index){
+                    <span 
+                    class="player-name" 
+                    [class.player-admin]="player.isAdmin" 
+                    [class.player-regular]="!player.isAdmin"
+                    [class.abandoned]="player.hasAbandoned">
                     {{ player.name }}
                 </span>
                 }
@@ -37,29 +40,29 @@
                 </div>
                 <div class="attributes-grid">
                     <div class="attribute">
-                        <span class="attribute-label">Rapidité</span>
+                        <span class="attribute-label">Rapidité: </span>
                         <span class="attribute-value">{{ currentPlayer.speed }}</span>
                     </div>
                     <div class="attribute">
-                        <span class="attribute-label">Attaque</span>
+                        <span class="attribute-label">Attaque: </span>
                         <span class="attribute-value">{{ currentPlayer.attack }}</span>
                     </div>
                     <div class="attribute">
-                        <span class="attribute-label">Défense</span>
+                        <span class="attribute-label">Défense: </span>
                         <span class="attribute-value">{{ currentPlayer.defense }}</span>
                     </div>
                 </div>
                 <div class="dice-type">
-                    <span class="dice-label">Dés assignés:</span>
+                    <span class="dice-label">Dés assignés: </span>
                     <span class="dice-value">{{ currentPlayer.attack.bonusDice }}</span>
                 </div>
                 <div class="resources">
                     <div class="resource">
-                        <span class="resource-label">Mouvements restants:</span>
+                        <span class="resource-label">Mouvements restants: </span>
                         <span class="resource-value">{{ currentPlayer.movementPoints }}</span>
                     </div>
                     <div class="resource">
-                        <span class="resource-label">Actions restantes:</span>
+                        <span class="resource-label">Actions restantes: </span>
                         <span class="resource-value">{{ currentPlayer }}</span>
                     </div>
                 </div>
@@ -101,6 +104,12 @@
             </li>
         </ul>
     </div>-->
+
+    <div class="action-buttons">
+        <div><button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button></div>
+        <div><button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button></div>
+        <div><button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button></div>
+    </div>
 
     <!-- Zone des messages -->
     <div class="game-messages">
