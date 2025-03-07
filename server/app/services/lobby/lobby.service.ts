@@ -30,32 +30,43 @@ export class LobbyService {
         return this.lobbies.get(accessCode);
     }
 
-    joinLobby(accessCode: string, player: Player): boolean {
+    // joinLobby(accessCode: string, player: Player): boolean {
+    //     const lobby = this.lobbies.get(accessCode);
+    //     if (!lobby) return false;
+    //     if (lobby.players.length >= lobby.maxPlayers) {
+    //         lobby.isLocked = true;
+    //         return false;
+    //     }
+    //     lobby.players.push(player);
+    //     if (lobby.players.length >= lobby.maxPlayers) {
+    //         lobby.isLocked = true;
+    //     }
+    //     return true;
+    // }
+    joinLobby(accessCode: string, player: Player): { success: boolean; reason?: string, assignedName?: string } {
         const lobby = this.lobbies.get(accessCode);
-        if (!lobby) return false;
-        if (lobby.players.some((p) => p.name === player.name || p.avatar === player.avatar)) {
-            return false;
-        }
-
-        if (lobby.players.length >= lobby.maxPlayers) {
-            lobby.isLocked = true;
-            return false;
-        }
-
+        if (!lobby) return { success: false, reason: 'Lobby not found' };
+    
+        player.name = this.generateUniqueName(lobby, player.name);
+    
         lobby.players.push(player);
-
+    
         if (lobby.players.length >= lobby.maxPlayers) {
             lobby.isLocked = true;
         }
-
-        return true;
+    
+        return { success: true, assignedName: player.name };
     }
+    
+
+    isNameTaken(lobby: Lobby, player: Player): boolean {
+        return lobby.players.some((p) => p.name === player.name);
+    }
+    
     leaveLobby(accessCode: string, playerName: string): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
-
         lobby.players = lobby.players.filter((p) => p.name !== playerName);
-
         if (lobby.players.length === 0 || lobby.players.some((p) => p.name === playerName && p.isAdmin)) {
             this.lobbies.delete(accessCode);
             this.accessCodeService.removeAccessCode(accessCode);
@@ -96,4 +107,23 @@ export class LobbyService {
         };
         return unavailableData;
     }
+
+    private generateUniqueName(lobby: Lobby, duplicatedName: string): string {
+        const existingNames = lobby.players.map(player => player.name.toLowerCase());
+    
+        if (!existingNames.includes(duplicatedName.toLowerCase())) {
+            return duplicatedName;
+        }
+
+        let counter = 2;
+        let uniqueName;
+    
+        do {
+            uniqueName = `${duplicatedName}-${counter}`;
+            counter++;
+        } while (existingNames.includes(uniqueName.toLowerCase()));
+    
+        return uniqueName;
+    }
+    
 }

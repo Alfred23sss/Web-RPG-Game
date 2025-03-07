@@ -60,6 +60,9 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         const success = this.lobbyService.joinLobby(accessCode, player);
         if (success) {
+            // if(this.lobbyService.isNameTaken){
+            //     player.name = this.generateUniqueName(lobby, player.name);
+            // }
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));

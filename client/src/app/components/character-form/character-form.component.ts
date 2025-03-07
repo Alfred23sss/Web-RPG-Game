@@ -33,7 +33,7 @@ export class CharacterFormComponent implements OnInit {
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
 
-    unavailableNames: string[] = [];
+
     unavailableAvatars: string[] = [];
     errorMessage: string = '';
 
@@ -71,7 +71,6 @@ export class CharacterFormComponent implements OnInit {
         this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
 
         this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            this.unavailableNames = [...data.names];
             this.unavailableAvatars = [...data.avatars];
         });
     }
@@ -138,11 +137,6 @@ export class CharacterFormComponent implements OnInit {
     private isCharacterValid(): boolean {
         if (!this.characterService.isCharacterValid(this.createdPlayer)) {
             this.characterService.showMissingDetailsError();
-            return false;
-        }
-
-        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            this.snackbarService.showMessage('Ce nom est déjà utilisé !');
             return false;
         }
         if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {

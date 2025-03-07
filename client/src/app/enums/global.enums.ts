@@ -28,7 +28,6 @@ export enum AvatarType {
     Valkyrie = './assets/avatars/avatar_valkyrie.png',
     Vampire = './assets/avatars/avatar_vampire.png',
     Wizard = './assets/avatars/avatar_wizard.png',
-    Default = './assets/avatar/avatar_archer.png',
 }
 
 export enum ImageType {
