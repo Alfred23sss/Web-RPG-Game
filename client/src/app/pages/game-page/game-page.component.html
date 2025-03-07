@@ -1,14 +1,5 @@
 <div class="game-container">
     <!-- Carte du jeu -->
-    <div class="game-map">
-        <app-grid
-            [grid]="game?.grid"
-            [availablePath]="availablePath"
-            [quickestPath]="quickestPath"
-            [isEditionMode]="false"
-            (tileHovered)="updateQuickestPath($event)"
-        ></app-grid>
-    </div>
 
     <!-- Panneau d'informations -->
     <div class="game-info">
@@ -23,6 +14,10 @@
             <p>Joueur actif:</p>
         </div>
 
+        <div class="inventory">
+            <h3>Inventaire</h3>
+            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
+        </div>
         <!-- 
         
         <div class="player-info">
@@ -37,11 +32,16 @@
         </div>
 
         -->
+    </div>
 
-        <div class="inventory">
-            <h3>Inventaire</h3>
-            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
-        </div>
+    <div class="game-map">
+        <app-grid
+            [grid]="game?.grid"
+            [availablePath]="availablePath"
+            [quickestPath]="quickestPath"
+            [isEditionMode]="false"
+            (tileHovered)="updateQuickestPath($event)"
+        ></app-grid>
     </div>
 
     <!-- Liste des joueurs 
