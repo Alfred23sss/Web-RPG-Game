@@ -5,6 +5,7 @@ import { GridComponent } from '@app/components/grid/grid.component';
 import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 // import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
@@ -23,6 +24,7 @@ export class GamePageComponent implements OnInit {
     gameName: string = '';
     gameDescription: string = '';
     game: Game | null;
+    currentPLayer: Player;
     availablePath: Tile[] | undefined;
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
