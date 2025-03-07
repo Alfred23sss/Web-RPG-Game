@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { Routes } from '@app/enums/global.enums';
@@ -7,10 +7,12 @@ import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { LogBookService } from '@app/services/logbook/logbook.service';
 // import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Subscription } from 'rxjs';
 
 const playerMovement = 3;
 
@@ -21,7 +23,7 @@ const playerMovement = 3;
     styleUrls: ['./game-page.component.scss'],
     imports: [CommonModule, GridComponent],
 })
-export class GamePageComponent implements OnInit {
+export class GamePageComponent implements OnInit, OnDestroy {
     gameName: string = '';
     gameDescription: string = '';
     game: Game | null;
@@ -30,6 +32,9 @@ export class GamePageComponent implements OnInit {
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
     lobby: Lobby;
+
+    logEntries: string[] = [];
+    activeTab: 'chat' | 'log' = 'chat';
     defaultLobby: Lobby = {
         isLocked: false,
         accessCode: '',
@@ -37,6 +42,7 @@ export class GamePageComponent implements OnInit {
         game: null,
         maxPlayers: 0,
     }; // moche
+    logBookSubscription: Subscription;
 
     constructor(
         // private gameService: GameService,
@@ -44,7 +50,13 @@ export class GamePageComponent implements OnInit {
         private playerMovementService: PlayerMovementService,
         private router: Router,
         private socketClientService: SocketClientService,
-    ) {}
+        private logbookService: LogBookService,
+    ) {
+        this.logEntries = this.logbookService.logBook;
+        this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
+            this.logEntries = logBook;
+        });
+    }
 
     ngOnInit(): void {
         const lobby = sessionStorage.getItem('lobby');
@@ -60,14 +72,16 @@ export class GamePageComponent implements OnInit {
         }
 
         this.socketClientService.onAbandonGame((data) => {
-            console.log('Received abandoned game event for:', data.playerName);
+            console.log('Received abandoned game event for:', data.player);
 
-            const abandonedPlayer = this.lobby.players.find((player) => player.name === data.playerName);
-
-            if (abandonedPlayer) {
-                abandonedPlayer.hasAbandoned = true;
-                console.log(`${data.playerName} has abandoned the game`);
+            const abandonedPlayer = this.lobby.players.find((player) => player.name === data.player.name);
+            if (!abandonedPlayer) {
+                return;
             }
+            this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
+
+            abandonedPlayer.hasAbandoned = true;
+            console.log(`${data.player.name} has abandoned the game`);
         });
     }
 
@@ -93,8 +107,12 @@ export class GamePageComponent implements OnInit {
     }
     abandonGame(): void {
         this.currentPlayer.hasAbandoned = true;
-        this.socketClientService.abandonGame(this.currentPlayer.name, this.lobby.accessCode);
+        this.socketClientService.abandonGame(this.currentPlayer, this.lobby.accessCode);
         this.backToHome();
+    }
+
+    ngOnDestroy(): void {
+        this.logBookSubscription.unsubscribe();
     }
 
     private isAvailablePath(tile: Tile): boolean {

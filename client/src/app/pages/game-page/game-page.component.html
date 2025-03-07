@@ -6,12 +6,14 @@
         <div class="game-details">
             <h3>Informations de partie</h3>
             <p>Taille de la carte: {{ game?.size }}</p>
-            <p>Joueurs actuels: @for(player of lobby.players; track $index){
-                    <span 
-                    class="player-name" 
-                    [class.player-admin]="player.isAdmin" 
+            <p>
+                Joueurs actuels: @for(player of lobby.players; track $index){
+                <span
+                    class="player-name"
+                    [class.player-admin]="player.isAdmin"
                     [class.player-regular]="!player.isAdmin"
-                    [class.abandoned]="player.hasAbandoned">
+                    [class.abandoned]="player.hasAbandoned"
+                >
                     {{ player.name }}
                 </span>
                 }
@@ -24,7 +26,6 @@
             <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
         </div>
 
-        <!-- //fait pour avoir une idee mais on utilise pas le actual player ici mais plutot le premier player du lobby et certains infos sont a changer -->
         <div class="player-info">
             <h3>Informations du joueur</h3>
             <div class="player-header">
@@ -68,55 +69,49 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 
-        
-        <div class="player-info">
-            <h3>Informations du joueur</h3>
-            <p>Nom: {{ player?.name }}</p>
-            <img [src]="player?.avatar" alt="Avatar">
-            <p>Points de vie: {{ player?.hp }} / {{ player?.maxHp }}</p>
-            <p>Attributs: Rapidité {{ player?.speed }}, Attaque {{ player?.attack }}, Défense {{ player?.defense }}</p>
-            <p>Dés assignés: {{ player?.diceType }}</p>
-            <p>Mouvements restants: {{ player?.remainingMoves }}</p>
-            <p>Actions restantes: {{ player?.remainingActions }}</p>
+    <div class="game-map-container">
+        <div class="game-map">
+            <app-grid
+                [grid]="game?.grid"
+                [availablePath]="availablePath"
+                [quickestPath]="quickestPath"
+                [isEditionMode]="false"
+                (tileHovered)="updateQuickestPath($event)"
+            ></app-grid>
         </div>
 
-        -->
+        <div class="action-buttons">
+            <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
+            <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
+            <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
+        </div>
     </div>
 
-    <div class="game-map">
-        <app-grid
-            [grid]="game?.grid"
-            [availablePath]="availablePath"
-            [quickestPath]="quickestPath"
-            [isEditionMode]="false"
-            (tileHovered)="updateQuickestPath($event)"
-        ></app-grid>
-    </div>
-
-    <!-- Liste des joueurs 
-    <div class="player-list">
-        <h3>Joueurs</h3>
-        <ul>
-            <li *ngFor="let p of game?.players" [class.active]="p === game?.activePlayer" [class.organizer]="p.isOrganizer" [class.abandoned]="p.hasAbandoned">
-                {{ p.name }} - Combats gagnés: {{ p.wins }}
-            </li>
-        </ul>
-    </div>-->
-
-    <div class="action-buttons">
-        <div><button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button></div>
-        <div><button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button></div>
-        <div><button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button></div>
-    </div>
-
-    <!-- Zone des messages -->
     <div class="game-messages">
         <h3>Messages</h3>
-        <div class="messages-content">(Clavardage et journal de jeu)</div>
-    </div>
 
+        <!-- Boutons pour basculer entre les panneaux -->
+        <div class="message-toggle">
+            <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
+            <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
+        </div>
+
+        <!-- Panneau des messages -->
+        <div class="messages-content" *ngIf="activeTab === 'chat'">
+            <p>Panneau des messages (clavardage).</p>
+        </div>
+
+        <!-- Panneau du journal de bord -->
+        <div class="log-content" *ngIf="activeTab === 'log'">
+            @for(entry of logEntries; track $index) {
+            <p class="log-entry">
+                {{ entry }}
+            </p>
+            }
+        </div>
+    </div>
     <!-- Compte à rebours 
     <div class="countdown">
         @if(Player.isInCombat)
@@ -128,13 +123,6 @@
             <p>Pas en combat</p>
         }
 
-    </div>-->
-
-    <!-- Boutons d'action 
-    <div class="action-buttons">
-        <button (click)="endTurn()">Terminer tour</button>
-        <button (click)="executeNextAction()">Exécuter action</button>
-        <button (click)="backToHome()">Abandonner</button>
     </div>-->
 
     <!-- Interface de combat 

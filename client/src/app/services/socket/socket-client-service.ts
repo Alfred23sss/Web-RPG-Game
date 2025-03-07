@@ -181,12 +181,12 @@ export class SocketClientService {
         this.socket.on('joinError', callback);
     }
 
-    abandonGame(playerName: string, accessCode: string) {
-        this.socket.emit('abandonedGame', { playerName, accessCode });
+    abandonGame(player: Player, accessCode: string) {
+        this.socket.emit('abandonedGame', { player, accessCode });
         console.log('abandonedGame emitted');
     }
 
-    onAbandonGame(callback: (data: { playerName: string }) => void) {
+    onAbandonGame(callback: (data: { player: Player }) => void) {
         this.socket.on('game-abandoned', callback);
         console.log('onAbandonGame received');
     }
