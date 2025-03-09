@@ -65,6 +65,8 @@ export class CharacterFormComponent implements OnInit {
             inventory: [null, null],
             isAdmin: false,
             hasAbandoned: false,
+            isActive: false,
+            combatWon: 0,
         };
     }
 

@@ -11,6 +11,7 @@ import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
 import { GameService } from './services/game/game.service';
 import { LobbyService } from './services/lobby/lobby.service';
+import { TurnService } from './services/turn/turn.service';
 @Module({
     imports: [
         ConfigModule.forRoot({ isGlobal: true }),
@@ -27,7 +28,7 @@ import { LobbyService } from './services/lobby/lobby.service';
         ]),
     ],
     controllers: [GameController, AccessCodesController],
-    providers: [LobbyGateway, LobbyService, GameGateway, Logger, GameService, AccessCodesService], // removed chat
+    providers: [LobbyGateway, LobbyService, GameGateway, Logger, GameService, AccessCodesService, TurnService], // removed chat
     exports: [AccessCodesService],
 })
 export class AppModule {}

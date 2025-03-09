@@ -14,4 +14,6 @@ export interface Player {
     inventory: [Item | null, Item | null];
     isAdmin: boolean;
     hasAbandoned: boolean;
+    isActive: boolean;
+    combatWon: number;
 }
