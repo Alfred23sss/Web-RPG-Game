@@ -111,6 +111,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                 this.socketClientService.deleteLobby(this.accessCode);
             }
         }
+        this.removeSocketListeners();
         // pas oublier de off des sockets ensuite
     }
 
@@ -139,5 +140,15 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.isGameStarting = true;
         sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
+    }
+
+    private removeSocketListeners(): void {
+        this.socketClientService.socket.off('joinLobby');
+        this.socketClientService.socket.off('lobbyUpdate');
+        this.socketClientService.socket.off('leaveLobby');
+        this.socketClientService.socket.off('lobbyLocked');
+        this.socketClientService.socket.off('lobbyUnlocked');
+        this.socketClientService.socket.off('lobbyDeleted');
+        this.socketClientService.socket.off('alertGameStarted');
     }
 }
