@@ -75,11 +75,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement);
         }
 
-        if (sessionStorage.getItem('refreshed') === 'true') {
-            this.abandonGame();
-        } else {
-            sessionStorage.setItem('refreshed', 'true');
-        }
+        this.handlePageRefresh();
 
         this.socketClientService.onAbandonGame((data) => {
             console.log('Received abandoned game event for:', data.player);
@@ -135,5 +131,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     private isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+    }
+
+    private handlePageRefresh(): void {
+        if (sessionStorage.getItem('refreshed') === 'true') {
+            this.abandonGame();
+        } else {
+            sessionStorage.setItem('refreshed', 'true');
+        }
     }
 }
