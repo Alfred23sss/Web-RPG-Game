@@ -35,7 +35,7 @@ export class GameSessionService {
             if (a.speed === b.speed) {
                 return Math.random() - randomizer;
             }
-            return a.speed - b.speed;
+            return b.speed - a.speed;
         });
         playerList[0].isActive = true;
         return playerList;

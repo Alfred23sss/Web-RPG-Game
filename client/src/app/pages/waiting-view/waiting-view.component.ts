@@ -111,6 +111,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                 this.socketClientService.deleteLobby(this.accessCode);
             }
         }
+        // pas oublier de off des sockets ensuite
     }
 
     changeLobbyLockStatus(): void {
@@ -132,6 +133,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             console.log('Alerting game started');
             this.isGameStartedEmitted = true;
+            console.log(this.accessCode);
             this.socketClientService.alertGameStarted(this.accessCode);
         }
         this.isGameStarting = true;

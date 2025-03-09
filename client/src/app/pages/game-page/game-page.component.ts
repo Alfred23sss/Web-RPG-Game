@@ -69,6 +69,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
         this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
+        console.log(`this is the player list ${this.playerList}`);
 
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         this.game = this.lobby.game; // moche
@@ -97,6 +98,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
             setTimeout(() => {
                 this.backToHome();
             }, delayBeforeHome);
+        });
+
+        this.socketClientService.onAlertGameStarted((data) => {
+            this.playerList = data.orderedPlayers;
         });
     }
 

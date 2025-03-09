@@ -20,6 +20,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.CreateGame)
     handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+        this.logger.log(payload.accessCode);
         const lobby = this.lobbyService.getLobby(payload.accessCode);
         const gameSession = this.gameSessionService.createGameSession(payload.accessCode, lobby.game);
         this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers });
