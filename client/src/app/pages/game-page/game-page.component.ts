@@ -29,6 +29,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     gameName: string = '';
     gameDescription: string = '';
     game: Game | null;
+    wasRefreshed: boolean = false;
     currentPlayer: Player;
     availablePath: Tile[] | undefined;
     quickestPath: Tile[] | undefined;
@@ -72,6 +73,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.gridService.setGrid(this.game?.grid);
         if (this.game && this.game.grid) {
             this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement);
+        }
+
+        if (sessionStorage.getItem('refreshed') === 'true') {
+            this.abandonGame();
+        } else {
+            sessionStorage.setItem('refreshed', 'true');
         }
 
         this.socketClientService.onAbandonGame((data) => {
@@ -123,6 +130,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.logBookSubscription.unsubscribe();
+        sessionStorage.setItem('refreshed', 'false');
     }
 
     private isAvailablePath(tile: Tile): boolean {
