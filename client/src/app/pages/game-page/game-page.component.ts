@@ -11,10 +11,12 @@ import { LogBookService } from '@app/services/logbook/logbook.service';
 // import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Subscription } from 'rxjs';
 
 const playerMovement = 3;
+const delayBeforeHome = 2000;
 
 @Component({
     selector: 'app-game-page',
@@ -51,6 +53,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private router: Router,
         private socketClientService: SocketClientService,
         private logbookService: LogBookService,
+        private snackbarService: SnackbarService,
     ) {
         this.logEntries = this.logbookService.logBook;
         this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
@@ -82,6 +85,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
             abandonedPlayer.hasAbandoned = true;
             console.log(`${data.player.name} has abandoned the game`);
+        });
+
+        this.socketClientService.onGameDeleted(() => {
+            this.snackbarService.showMessage("Trop de joueurs ont abandonnés la partie, vous allez être redirigé vers la page d'accueil");
+            setTimeout(() => {
+                this.backToHome();
+            }, delayBeforeHome);
         });
     }
 

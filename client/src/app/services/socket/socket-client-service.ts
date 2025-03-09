@@ -190,4 +190,8 @@ export class SocketClientService {
         this.socket.on('game-abandoned', callback);
         console.log('onAbandonGame received');
     }
+
+    onGameDeleted(callback: () => void) {
+        this.socket.on('gameDeleted', callback);
+    }
 }
