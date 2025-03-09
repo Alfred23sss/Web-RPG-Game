@@ -95,8 +95,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.navigateToHome();
         });
 
-        this.socketClientService.onAlertGameStarted(() => {
+        this.socketClientService.onAlertGameStarted((data) => {
             console.log('Game is starting');
+
+            sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
+
             this.navigateToGame();
         });
     }

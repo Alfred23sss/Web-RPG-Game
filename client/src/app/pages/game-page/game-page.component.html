@@ -7,12 +7,13 @@
             <h3>Informations de partie</h3>
             <p>Taille de la carte: {{ game?.size }}</p>
             <p>
-                Joueurs actuels: @for(player of lobby.players; track $index){
+                Joueurs actuels: @for(player of playerList; track $index){
                 <span
                     class="player-name"
                     [class.player-admin]="player.isAdmin"
                     [class.player-regular]="!player.isAdmin"
                     [class.abandoned]="player.hasAbandoned"
+                    [class.active]="player.isActive"
                 >
                     {{ player.name }} Combat gagné: {{ player.combatWon }}
                 </span>

@@ -35,6 +35,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
     lobby: Lobby;
+    playerList: Player[];
 
     logEntries: string[] = [];
     activeTab: 'chat' | 'log' = 'chat';
@@ -67,6 +68,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby;
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
+        this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
 
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         this.game = this.lobby.game; // moche

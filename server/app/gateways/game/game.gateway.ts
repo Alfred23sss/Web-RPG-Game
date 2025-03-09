@@ -1,7 +1,7 @@
-import { Game } from '@app/interfaces/game';
+import { Game } from '@app/interfaces/Game';
 import { Player } from '@app/interfaces/Player';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { TurnService } from '@app/services/turn/turn.service';
 import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -15,8 +15,16 @@ export class GameGateway {
     constructor(
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
-        private readonly turnService: TurnService,
+        private readonly gameSessionService: GameSessionService,
     ) {}
+
+    @SubscribeMessage(GameEvents.CreateGame)
+    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+        const lobby = this.lobbyService.getLobby(payload.accessCode);
+        const gameSession = this.gameSessionService.createGameSession(payload.accessCode, lobby.game);
+        this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers });
+        this.logger.log('game created emitted');
+    }
 
     @SubscribeMessage(GameEvents.AbandonedGame)
     handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
@@ -33,8 +41,5 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.EndTurn)
-    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { game: Game }) {
-        this.logger.log(`Player ${payload.game.turn.currentPlayer.name} has ended his turn`);
-        this.turnService.handleTurnEnd(payload.game);
-    }
+    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { game: Game }) {}
 }

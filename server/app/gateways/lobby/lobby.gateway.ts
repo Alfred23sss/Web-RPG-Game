@@ -153,11 +153,11 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
     }
 
-    @SubscribeMessage(LobbyEvents.AlertGameStarted)
-    handleAlertGameStarted(@MessageBody() accessCode: string) {
-        this.server.to(accessCode).emit('gameStarted');
-        this.logger.log(`Game started for lobby ${accessCode}`);
-    }
+    // @SubscribeMessage(LobbyEvents.AlertGameStarted)
+    // handleAlertGameStarted(@MessageBody() accessCode: string) {
+    //     this.server.to(accessCode).emit('gameStarted');
+    //     this.logger.log(`Game started for lobby ${accessCode}`);
+    // }
 
     @SubscribeMessage(LobbyEvents.UnlockLobby)
     handleUnlockLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
