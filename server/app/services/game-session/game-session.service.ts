@@ -3,7 +3,7 @@ import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
 import { Game } from '@app/model/database/game';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 const randomizer = 0.5;
 
@@ -33,11 +33,17 @@ export class GameSessionService {
     private orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = players.sort((a, b) => {
             if (a.speed === b.speed) {
-                return Math.random() - randomizer;
+                return Math.random() < randomizer ? -1 : 1;
             }
             return b.speed - a.speed;
         });
-        playerList[0].isActive = true;
+
+        if (playerList.length > 0) {
+            playerList[0].isActive = true;
+        }
+
+        Logger.log(`Ordered Players: ${JSON.stringify(playerList.map((p) => ({ name: p.name, speed: p.speed, isActive: p.isActive })))}`);
+
         return playerList;
     }
     // startTurnTimer(game: Game, duration: number, accessCode: string): void {
