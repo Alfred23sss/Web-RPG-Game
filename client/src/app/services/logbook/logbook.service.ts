@@ -17,7 +17,7 @@ export class LogBookService {
         }
         const formattedEntry = `[${formattedTime}] - ${entry}${playerNames}`;
 
-        this.logBook.push(formattedEntry);
+        this.logBook.unshift(formattedEntry);
 
         this.logBookUpdated.next(this.logBook);
     }
