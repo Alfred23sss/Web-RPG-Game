@@ -21,6 +21,28 @@ export class GameSessionService {
         return gameSession;
     }
 
+    handlePlayerAbandoned(accessCode: string, playerName: string): Player {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return;
+
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        if (player) {
+            this.updatePlayer(player, { hasAbandoned: true });
+        }
+        return player;
+    }
+
+    getPlayers(accessCode: string): Player[] {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return [];
+        return gameSession.turn.orderedPlayers;
+    }
+
+    private updatePlayer(player: Player, updates: Partial<Player>): void {
+        if (!player) return;
+        Object.assign(player, updates);
+    }
+
     private initializeTurn(accessCode: string): Turn {
         return {
             orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),
@@ -46,6 +68,7 @@ export class GameSessionService {
 
         return playerList;
     }
+
     // startTurnTimer(game: Game, duration: number, accessCode: string): void {
 
     // }

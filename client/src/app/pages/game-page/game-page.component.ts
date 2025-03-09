@@ -26,8 +26,6 @@ const delayBeforeHome = 2000;
     imports: [CommonModule, GridComponent],
 })
 export class GamePageComponent implements OnInit, OnDestroy {
-    gameName: string = '';
-    gameDescription: string = '';
     game: Game | null;
     wasRefreshed: boolean = false;
     currentPlayer: Player;
@@ -36,16 +34,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     playerTile: Tile | undefined;
     lobby: Lobby;
     playerList: Player[];
-
     logEntries: string[] = [];
     activeTab: 'chat' | 'log' = 'chat';
-    defaultLobby: Lobby = {
-        isLocked: false,
-        accessCode: '',
-        players: [],
-        game: null,
-        maxPlayers: 0,
-    }; // moche
     logBookSubscription: Subscription;
 
     constructor(
@@ -82,14 +72,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.socketClientService.onAbandonGame((data) => {
             console.log('Received abandoned game event for:', data.player);
-
-            const abandonedPlayer = this.lobby.players.find((player) => player.name === data.player.name);
-            if (!abandonedPlayer) {
-                return;
-            }
+            const abandonedPlayer = this.playerList.find((p) => p.name === data.player.name);
+            if (!abandonedPlayer) return;
+            abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
 
-            abandonedPlayer.hasAbandoned = true;
             console.log(`${data.player.name} has abandoned the game`);
         });
 

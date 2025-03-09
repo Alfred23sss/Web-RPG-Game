@@ -110,6 +110,7 @@ export class CharacterFormComponent implements OnInit {
         } else {
             this.createdPlayer.isAdmin = true;
             await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+            console.log(this.createdPlayer);
             this.submitCharacterForm();
         }
     }
