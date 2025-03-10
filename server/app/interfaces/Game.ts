@@ -1,5 +1,4 @@
 import { Tile } from '@app/model/database/tile';
-import { Turn } from './Turn';
 
 export enum GameMode {
     Classic = 'Classique',
@@ -23,5 +22,5 @@ export interface Game {
     previewImage: string;
     description: string;
     grid: Tile[][] | undefined;
-    turn: Turn | undefined;
+    // turn: Turn | undefined;
 }

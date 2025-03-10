@@ -87,6 +87,12 @@ app-grid {
     width: 600px;
 }
 
+.player-name.active {
+    color: green !important;
+    font-weight: bold;
+}
+
+
 .game-messages {
     flex: 0 0 300px;
     padding: 15px;

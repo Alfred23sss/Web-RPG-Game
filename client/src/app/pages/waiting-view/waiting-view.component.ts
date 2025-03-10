@@ -95,8 +95,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.navigateToHome();
         });
 
-        this.socketClientService.onAlertGameStarted(() => {
+        this.socketClientService.onAlertGameStarted((data) => {
             console.log('Game is starting');
+
+            sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
+
             this.navigateToGame();
         });
     }
@@ -108,6 +111,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                 this.socketClientService.deleteLobby(this.accessCode);
             }
         }
+        this.removeSocketListeners();
+        // pas oublier de off des sockets ensuite
     }
 
     changeLobbyLockStatus(): void {
@@ -129,10 +134,21 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             console.log('Alerting game started');
             this.isGameStartedEmitted = true;
+            console.log(this.accessCode);
             this.socketClientService.alertGameStarted(this.accessCode);
         }
         this.isGameStarting = true;
         sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
+    }
+
+    private removeSocketListeners(): void {
+        this.socketClientService.socket.off('joinLobby');
+        this.socketClientService.socket.off('lobbyUpdate');
+        this.socketClientService.socket.off('leaveLobby');
+        this.socketClientService.socket.off('lobbyLocked');
+        this.socketClientService.socket.off('lobbyUnlocked');
+        this.socketClientService.socket.off('lobbyDeleted');
+        this.socketClientService.socket.off('alertGameStarted');
     }
 }

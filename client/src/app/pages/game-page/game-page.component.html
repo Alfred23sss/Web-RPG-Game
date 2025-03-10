@@ -7,14 +7,15 @@
             <h3>Informations de partie</h3>
             <p>Taille de la carte: {{ game?.size }}</p>
             <p>
-                Joueurs actuels: @for(player of lobby.players; track $index){
+                Joueurs actuels: @for(player of playerList; track $index){
                 <span
                     class="player-name"
                     [class.player-admin]="player.isAdmin"
                     [class.player-regular]="!player.isAdmin"
                     [class.abandoned]="player.hasAbandoned"
+                    [class.active]="player.isActive"
                 >
-                    {{ player.name }}
+                    {{ player.name }} Combat gagné: {{ player.combatWon }}
                 </span>
                 }
             </p>
@@ -46,12 +47,16 @@
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Attaque: </span>
-                        <span class="attribute-value">{{ currentPlayer.attack }}</span>
+                        <span class="attribute-value">
+                            {{ currentPlayer.attack.value }} (Bonus: {{ currentPlayer.attack.bonusDice }})
+                        </span>
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Défense: </span>
-                        <span class="attribute-value">{{ currentPlayer.defense }}</span>
-                    </div>
+                        <span class="attribute-value">
+                            {{ currentPlayer.defense.value }} (Bonus: {{ currentPlayer.defense.bonusDice }})
+                        </span>
+                    </div>                    
                 </div>
                 <div class="dice-type">
                     <span class="dice-label">Dés assignés: </span>
@@ -64,7 +69,7 @@
                     </div>
                     <div class="resource">
                         <span class="resource-label">Actions restantes: </span>
-                        <span class="resource-value">{{ currentPlayer }}</span>
+                        <span class="resource-value">{{ currentPlayer.actionPoints }}</span>
                     </div>
                 </div>
             </div>

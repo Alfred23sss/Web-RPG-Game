@@ -99,11 +99,14 @@ export class SocketClientService {
     }
 
     alertGameStarted(accessCode: string) {
-        this.socket.emit('alertGameStarted', accessCode);
+        this.socket.emit('createGame', { accessCode });
     }
 
-    onAlertGameStarted(callback: () => void) {
-        this.socket.on('gameStarted', callback);
+    onAlertGameStarted(callback: (data: { orderedPlayers: Player[] }) => void) {
+        this.socket.on('gameStarted', (data) => {
+            console.log('Game started event received', data);
+            callback(data);
+        });
     }
 
     addPlayerToLobby(accessCode: string, player: unknown) {

@@ -26,8 +26,6 @@ const delayBeforeHome = 2000;
     imports: [CommonModule, GridComponent],
 })
 export class GamePageComponent implements OnInit, OnDestroy {
-    gameName: string = '';
-    gameDescription: string = '';
     game: Game | null;
     wasRefreshed: boolean = false;
     currentPlayer: Player;
@@ -35,16 +33,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
     lobby: Lobby;
-
+    playerList: Player[];
     logEntries: string[] = [];
     activeTab: 'chat' | 'log' = 'chat';
-    defaultLobby: Lobby = {
-        isLocked: false,
-        accessCode: '',
-        players: [],
-        game: null,
-        maxPlayers: 0,
-    }; // moche
     logBookSubscription: Subscription;
 
     constructor(
@@ -67,6 +58,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby;
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
+        this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
+        console.log(`this is the player list ${this.playerList}`);
 
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         this.game = this.lobby.game; // moche
@@ -79,14 +72,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.socketClientService.onAbandonGame((data) => {
             console.log('Received abandoned game event for:', data.player);
-
-            const abandonedPlayer = this.lobby.players.find((player) => player.name === data.player.name);
-            if (!abandonedPlayer) {
-                return;
-            }
+            const abandonedPlayer = this.playerList.find((p) => p.name === data.player.name);
+            if (!abandonedPlayer) return;
+            abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
 
-            abandonedPlayer.hasAbandoned = true;
             console.log(`${data.player.name} has abandoned the game`);
         });
 
@@ -95,6 +85,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
             setTimeout(() => {
                 this.backToHome();
             }, delayBeforeHome);
+        });
+
+        this.socketClientService.onAlertGameStarted((data) => {
+            this.playerList = data.orderedPlayers;
         });
     }
 
