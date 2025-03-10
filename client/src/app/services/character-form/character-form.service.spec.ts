@@ -165,7 +165,6 @@ describe('CharacterService', () => {
                 name: 'TestPlayer',
                 avatar: 'avatar.png',
                 speed: 5,
-                vitality: 4,
                 attack: { value: 4, bonusDice: DiceType.D6 },
                 defense: { value: 3, bonusDice: DiceType.D4 },
                 hp: { current: 4, max: 4 },
@@ -174,6 +173,8 @@ describe('CharacterService', () => {
                 inventory: [null, null],
                 isAdmin: true,
                 hasAbandoned: false,
+                isActive: true,
+                combatWon: 0,
             };
         });
 
@@ -218,7 +219,6 @@ describe('CharacterService', () => {
             name: 'TestPlayer',
             avatar: 'avatar.png',
             speed: 5,
-            vitality: 4,
             attack: { value: 4, bonusDice: DiceType.D6 },
             defense: { value: 3, bonusDice: DiceType.D4 },
             hp: { current: 4, max: 4 },
@@ -227,6 +227,8 @@ describe('CharacterService', () => {
             inventory: [null, null],
             isAdmin: true,
             hasAbandoned: false,
+            combatWon: 0,
+            isActive: false,
         };
 
         const mockGame: Game = {

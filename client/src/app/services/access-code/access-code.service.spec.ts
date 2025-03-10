@@ -22,7 +22,6 @@ describe('AccessCodeService', () => {
     const MOCK_PLAYER: Player = {
         name: 'Test Player',
         avatar: 'avatar.png',
-        vitality: 4,
         hp: { current: 100, max: 100 },
         speed: 5,
         attack: { value: 4, bonusDice: DiceType.D6 },
@@ -32,6 +31,8 @@ describe('AccessCodeService', () => {
         inventory: [null, null],
         isAdmin: false,
         hasAbandoned: false,
+        isActive: false,
+        combatWon: 0,
     };
 
     beforeEach(() => {

@@ -14,7 +14,6 @@ describe('PlayerInfoService', () => {
     const MOCK_PLAYER: Player = {
         name: 'TestPlayer',
         avatar: 'avatar.png',
-        vitality: 4,
         hp: { current: 6, max: 6 },
         speed: 4,
         attack: { value: 4, bonusDice: DiceType.D6 },
@@ -24,6 +23,8 @@ describe('PlayerInfoService', () => {
         inventory: [null, null],
         isAdmin: false,
         hasAbandoned: false,
+        isActive: false,
+        combatWon: 0,
     };
 
     beforeEach(() => {

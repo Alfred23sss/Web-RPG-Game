@@ -15,7 +15,6 @@ describe('LogBookService', () => {
             name: '',
             avatar: '',
             speed: 4,
-            vitality: 4,
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
             hp: { current: 10, max: 10 },
@@ -24,6 +23,8 @@ describe('LogBookService', () => {
             inventory: [null, null],
             isAdmin: false,
             hasAbandoned: false,
+            combatWon: 0,
+            isActive: true,
         };
     });
 
