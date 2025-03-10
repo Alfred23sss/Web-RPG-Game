@@ -38,6 +38,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     activeTab: 'chat' | 'log' = 'chat';
     logBookSubscription: Subscription;
 
+    // eslint-disable-next-line max-params
     constructor(
         // private gameService: GameService,
         private gridService: GridService,
@@ -59,7 +60,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
         this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
-        console.log(`this is the player list ${this.playerList}`);
 
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         this.game = this.lobby.game; // moche
@@ -71,13 +71,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.handlePageRefresh();
 
         this.socketClientService.onAbandonGame((data) => {
-            console.log('Received abandoned game event for:', data.player);
             const abandonedPlayer = this.playerList.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
-
-            console.log(`${data.player.name} has abandoned the game`);
         });
 
         this.socketClientService.onGameDeleted(() => {
@@ -106,11 +103,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     endTurn(): void {
-        console.log('Tour terminé !');
+        return;
     }
 
     executeNextAction(): void {
-        console.log('Action exécutée !');
+        return;
     }
     abandonGame(): void {
         this.currentPlayer.hasAbandoned = true;

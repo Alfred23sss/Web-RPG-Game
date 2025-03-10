@@ -96,8 +96,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         });
 
         this.socketClientService.onAlertGameStarted((data) => {
-            console.log('Game is starting');
-
             sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
 
             this.navigateToGame();
@@ -132,9 +130,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     navigateToGame() {
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
-            console.log('Alerting game started');
             this.isGameStartedEmitted = true;
-            console.log(this.accessCode);
             this.socketClientService.alertGameStarted(this.accessCode);
         }
         this.isGameStarting = true;

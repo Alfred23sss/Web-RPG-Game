@@ -104,7 +104,6 @@ export class SocketClientService {
 
     onAlertGameStarted(callback: (data: { orderedPlayers: Player[] }) => void) {
         this.socket.on('gameStarted', (data) => {
-            console.log('Game started event received', data);
             callback(data);
         });
     }
@@ -186,12 +185,10 @@ export class SocketClientService {
 
     abandonGame(player: Player, accessCode: string) {
         this.socket.emit('abandonedGame', { player, accessCode });
-        console.log('abandonedGame emitted');
     }
 
     onAbandonGame(callback: (data: { player: Player }) => void) {
         this.socket.on('game-abandoned', callback);
-        console.log('onAbandonGame received');
     }
 
     onGameDeleted(callback: () => void) {
