@@ -173,6 +173,7 @@ describe('CharacterService', () => {
                 actionPoints: 3,
                 inventory: [null, null],
                 isAdmin: true,
+                hasAbandoned: false,
             };
         });
 
@@ -225,6 +226,7 @@ describe('CharacterService', () => {
             actionPoints: 3,
             inventory: [null, null],
             isAdmin: true,
+            hasAbandoned: false,
         };
 
         const mockGame: Game = {

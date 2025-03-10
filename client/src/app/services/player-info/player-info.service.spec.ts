@@ -23,6 +23,7 @@ describe('PlayerInfoService', () => {
         actionPoints: 10,
         inventory: [null, null],
         isAdmin: false,
+        hasAbandoned: false,
     };
 
     beforeEach(() => {
