@@ -47,16 +47,12 @@
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Attaque: </span>
-                        <span class="attribute-value">
-                            {{ currentPlayer.attack.value }} (Bonus: {{ currentPlayer.attack.bonusDice }})
-                        </span>
+                        <span class="attribute-value"> {{ currentPlayer.attack.value }} (Bonus: {{ currentPlayer.attack.bonusDice }}) </span>
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Défense: </span>
-                        <span class="attribute-value">
-                            {{ currentPlayer.defense.value }} (Bonus: {{ currentPlayer.defense.bonusDice }})
-                        </span>
-                    </div>                    
+                        <span class="attribute-value"> {{ currentPlayer.defense.value }} (Bonus: {{ currentPlayer.defense.bonusDice }}) </span>
+                    </div>
                 </div>
                 <div class="dice-type">
                     <span class="dice-label">Dés assignés: </span>
@@ -85,6 +81,14 @@
                 [isEditionMode]="false"
                 (tileHovered)="updateQuickestPath($event)"
             ></app-grid>
+        </div>
+        <div class="timer">
+            @if (currentPlayer === clientPlayer) {
+            <p>C'est votre tour</p>
+            } @else {
+            <p>C'est le tour à {{ currentPlayer.name }}</p>
+            }
+            <p>Temps restant: {{ turnTimer }} secondes</p>
         </div>
 
         <div class="action-buttons">

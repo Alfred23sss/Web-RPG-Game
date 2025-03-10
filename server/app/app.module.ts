@@ -2,6 +2,7 @@
 import { Game, gameSchema } from '@app/model/database/game';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AccessCodesController } from './controllers/access-code/access-code.controller';
 import { GameController } from './controllers/game/game.controller';
@@ -14,6 +15,7 @@ import { GameService } from './services/game/game.service';
 import { LobbyService } from './services/lobby/lobby.service';
 @Module({
     imports: [
+        EventEmitterModule.forRoot(),
         ConfigModule.forRoot({ isGlobal: true }),
         MongooseModule.forRootAsync({
             imports: [ConfigModule],

@@ -191,6 +191,33 @@ export class SocketClientService {
         this.socket.on('game-abandoned', callback);
     }
 
+    onTransitionStarted(callback: (data: { nextPlayer: Player; transitionDuration: number }) => void) {
+        this.socket.on('transitionStarted', callback);
+    }
+
+    onTurnStarted(callback: (data: { player: Player; turnDuration: number }) => void) {
+        this.socket.on('turnStarted', callback);
+    }
+
+    onTimerUpdate(callback: (data: { timeLeft: number }) => void) {
+        this.socket.on('timerUpdate', callback);
+    }
+
+    endTurn(accessCode: string) {
+        this.socket.emit('endTurn', { accessCode });
+    }
+
+    // socket.on('turnStarted', (data) => {
+    //     console.log('Turn started', data);
+    //     // Update UI to show it's this player's turn
+    //     updateUI(`${data.player.name}'s turn (${data.turnDuration} seconds)`);
+
+    //     // If it's the current user's turn, enable controls
+    //     if (data.player.name === currentPlayerName) {
+    //       enableTurnControls();
+    //     }
+    //   });
+
     onGameDeleted(callback: () => void) {
         this.socket.on('gameDeleted', callback);
     }

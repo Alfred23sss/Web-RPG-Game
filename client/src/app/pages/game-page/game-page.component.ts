@@ -28,6 +28,7 @@ const delayBeforeHome = 2000;
 export class GamePageComponent implements OnInit, OnDestroy {
     game: Game | null;
     wasRefreshed: boolean = false;
+    clientPlayer: Player;
     currentPlayer: Player;
     availablePath: Tile[] | undefined;
     quickestPath: Tile[] | undefined;
@@ -37,6 +38,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     logEntries: string[] = [];
     activeTab: 'chat' | 'log' = 'chat';
     logBookSubscription: Subscription;
+    turnTimer: number;
 
     // eslint-disable-next-line max-params
     constructor(
@@ -57,8 +59,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         const lobby = sessionStorage.getItem('lobby');
         this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby;
-        const currentPlayer = sessionStorage.getItem('player');
-        this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
+        const clientPlayer = sessionStorage.getItem('player');
+        this.clientPlayer = clientPlayer ? (JSON.parse(clientPlayer) as Player) : this.clientPlayer;
         this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
 
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
@@ -84,6 +86,21 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }, delayBeforeHome);
         });
 
+        this.socketClientService.onTransitionStarted((data) => {
+            this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+        });
+
+        this.socketClientService.onTurnStarted((data) => {
+            this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
+            this.currentPlayer = data.player;
+            this.turnTimer = data.turnDuration;
+            // empecher joueur quu nest pas le current player de endTurn()
+        });
+
+        this.socketClientService.onTimerUpdate((data) => {
+            this.turnTimer = data.timeLeft;
+        });
+
         this.socketClientService.onAlertGameStarted((data) => {
             this.playerList = data.orderedPlayers;
         });
@@ -103,15 +120,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     endTurn(): void {
-        return;
+        this.turnTimer = 0;
+        this.socketClientService.endTurn(this.lobby.accessCode);
     }
 
     executeNextAction(): void {
         return;
     }
     abandonGame(): void {
-        this.currentPlayer.hasAbandoned = true;
-        this.socketClientService.abandonGame(this.currentPlayer, this.lobby.accessCode);
+        this.clientPlayer.hasAbandoned = true;
+        this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
         this.backToHome();
     }
 
