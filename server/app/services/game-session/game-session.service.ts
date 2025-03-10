@@ -29,6 +29,19 @@ export class GameSessionService {
         return gameSession;
     }
 
+    deleteGameSession(accessCode: string): void {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (gameSession) {
+            if (gameSession.turn.turnTimers) {
+                clearTimeout(gameSession.turn.turnTimers);
+            }
+            if (gameSession.turn.countdownInterval) {
+                clearInterval(gameSession.turn.countdownInterval);
+            }
+            this.gameSessions.delete(accessCode);
+        }
+    }
+
     handlePlayerAbandoned(accessCode: string, playerName: string): Player {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
@@ -50,10 +63,14 @@ export class GameSessionService {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
 
-        // Clear any existing timers
+        // Clear existing timers
         if (gameSession.turn.turnTimers) {
             clearTimeout(gameSession.turn.turnTimers);
             gameSession.turn.turnTimers = null;
+        }
+        if (gameSession.turn.countdownInterval) {
+            clearInterval(gameSession.turn.countdownInterval);
+            gameSession.turn.countdownInterval = null;
         }
 
         // Set current player as inactive
@@ -77,6 +94,7 @@ export class GameSessionService {
             currentTurnCountdown: 0,
             turnTimers: null,
             isTransitionPhase: false,
+            countdownInterval: null,
         };
     }
 
@@ -101,6 +119,16 @@ export class GameSessionService {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
 
+        // Clear existing timers
+        if (gameSession.turn.turnTimers) {
+            clearTimeout(gameSession.turn.turnTimers);
+            gameSession.turn.turnTimers = null;
+        }
+        if (gameSession.turn.countdownInterval) {
+            clearInterval(gameSession.turn.countdownInterval);
+            gameSession.turn.countdownInterval = null;
+        }
+
         // Set transition phase
         gameSession.turn.isTransitionPhase = true;
         gameSession.turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
@@ -108,12 +136,12 @@ export class GameSessionService {
         // Find next active player
         const nextPlayer = this.getNextPlayer(accessCode);
 
-        // Emit transition started event through gateway
+        // Emit transition started event
         this.emitTransitionStarted(accessCode, nextPlayer);
 
         // Start transition timer
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
-        const transitionTimer = setInterval(() => {
+        gameSession.turn.countdownInterval = setInterval(() => {
             transitionTimeLeft--;
             gameSession.turn.transitionTimeRemaining = transitionTimeLeft;
 
@@ -121,7 +149,10 @@ export class GameSessionService {
             this.emitTransitionCountdown(accessCode, transitionTimeLeft);
 
             if (transitionTimeLeft <= 0) {
-                clearInterval(transitionTimer);
+                if (gameSession.turn.countdownInterval) {
+                    clearInterval(gameSession.turn.countdownInterval);
+                }
+                gameSession.turn.countdownInterval = null;
             }
         }, SECOND);
 
@@ -167,9 +198,15 @@ export class GameSessionService {
         // Emit turn started event
         this.emitTurnStarted(accessCode, player);
 
+        // Clear any existing interval timer
+        if (gameSession.turn.countdownInterval) {
+            clearInterval(gameSession.turn.countdownInterval);
+            gameSession.turn.countdownInterval = null;
+        }
+
         // Start turn timer
         let timeLeft = TURN_DURATION / SECOND;
-        const turnTimer = setInterval(() => {
+        gameSession.turn.countdownInterval = setInterval(() => {
             timeLeft--;
             gameSession.turn.currentTurnCountdown = timeLeft;
 
@@ -177,7 +214,10 @@ export class GameSessionService {
             this.emitTimerUpdate(accessCode, timeLeft);
 
             if (timeLeft <= 0) {
-                clearInterval(turnTimer);
+                if (gameSession.turn.countdownInterval) {
+                    clearInterval(gameSession.turn.countdownInterval);
+                }
+                gameSession.turn.countdownInterval = null;
             }
         }, SECOND);
 

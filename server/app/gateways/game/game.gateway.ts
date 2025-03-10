@@ -38,7 +38,9 @@ export class GameGateway {
         this.logger.log(`Lobby ${lobby} has left lobby`);
 
         if (lobby.players.length <= 1) {
-            // stop game session here
+            // stop game session here'
+            this.lobbyService.clearLobby(payload.accessCode);
+            this.gameSessionService.deleteGameSession(payload.accessCode);
             this.server.to(payload.accessCode).emit('gameDeleted');
         }
         this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });

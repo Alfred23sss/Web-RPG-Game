@@ -94,7 +94,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             this.currentPlayer = data.player;
             this.turnTimer = data.turnDuration;
-            // empecher joueur quu nest pas le current player de endTurn()
         });
 
         this.socketClientService.onTimerUpdate((data) => {
@@ -128,6 +127,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         return;
     }
     abandonGame(): void {
+        // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?
         this.clientPlayer.hasAbandoned = true;
         this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
         this.backToHome();
