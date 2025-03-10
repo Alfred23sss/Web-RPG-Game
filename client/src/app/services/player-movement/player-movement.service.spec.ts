@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';

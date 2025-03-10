@@ -45,6 +45,7 @@ describe('TileComponent', () => {
             },
         } as Tile;
         component.tile = mockTile;
+        component.isEditionMode = true;
         fixture.detectChanges();
     });
 

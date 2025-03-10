@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { MOCK_GAMES } from '@app/constants/global.constants';
 import { DiceType } from '@app/enums/global.enums';

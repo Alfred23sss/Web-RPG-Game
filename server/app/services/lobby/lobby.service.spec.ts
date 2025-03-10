@@ -9,7 +9,6 @@ import { LobbyService } from './lobby.service';
 describe('LobbyService', () => {
     let lobbyService: LobbyService;
     let accessCodesService: AccessCodesService;
-    let logger: Logger;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -33,7 +32,6 @@ describe('LobbyService', () => {
 
         lobbyService = module.get<LobbyService>(LobbyService);
         accessCodesService = module.get<AccessCodesService>(AccessCodesService);
-        logger = module.get<Logger>(Logger);
     });
 
     afterEach(() => {
