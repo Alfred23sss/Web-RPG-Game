@@ -23,6 +23,7 @@
 
     <button class="button" (click)="navigateToHome()">Quitter</button>
     @if (player.isAdmin) {
+    <button class="button" (click)="navigateToGame()">Commencer la partie</button>
     <button class="button" (click)="changeLobbyLockStatus()">
         {{ lobby.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
     </button>

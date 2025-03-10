@@ -4,12 +4,15 @@
         @for (tile of row; track $index) {
         <app-tile
             [tile]="tile"
+            (mouseenter)="tileHovered.emit(tile)"
             [ngClass]="{
                 'invalid-drop': tile.type === tileType.Wall || tile.isOccupied,
-                'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied
+                'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied,
+                'available-path': isAvailablePath(tile),
+                'quickest-path': isInQuickestPath(tile) && isAvailablePath(tile)
             }"
-        >
-        </app-tile>
+            [isEditionMode]="isEditionMode"
+        ></app-tile>
         }
     </div>
     }

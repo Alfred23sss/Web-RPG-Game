@@ -22,4 +22,5 @@ export interface Game {
     previewImage: string;
     description: string;
     grid: Tile[][] | undefined;
+    // turn: Turn | undefined;
 }

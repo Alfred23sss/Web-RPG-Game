@@ -5,9 +5,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AccessCodesController } from './controllers/access-code/access-code.controller';
 import { GameController } from './controllers/game/game.controller';
+import { GameGateway } from './gateways/game/game.gateway';
 import { LobbyGateway } from './gateways/lobby/lobby.gateway';
 import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
+import { GameSessionService } from './services/game-session/game-session.service';
 import { GameService } from './services/game/game.service';
 import { LobbyService } from './services/lobby/lobby.service';
 @Module({
@@ -26,7 +28,7 @@ import { LobbyService } from './services/lobby/lobby.service';
         ]),
     ],
     controllers: [GameController, AccessCodesController],
-    providers: [LobbyGateway, LobbyService, Logger, GameService, AccessCodesService], // removed chat
+    providers: [LobbyGateway, LobbyService, GameGateway, Logger, GameService, AccessCodesService, GameSessionService], // removed chat
     exports: [AccessCodesService],
 })
 export class AppModule {}

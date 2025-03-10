@@ -16,6 +16,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     player: Player;
     lobby: Lobby;
     isLoading: boolean = true;
+    isGameStarting: boolean = false;
+    isGameStartedEmitted: boolean = false;
 
     constructor(
         private router: Router,
@@ -92,15 +94,23 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.socketClientService.onLobbyDeleted(() => {
             this.navigateToHome();
         });
+
+        this.socketClientService.onAlertGameStarted((data) => {
+            sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
+
+            this.navigateToGame();
+        });
     }
 
     ngOnDestroy(): void {
-        if (this.accessCode && this.player) {
+        if (this.accessCode && this.player && !this.isGameStarting) {
             this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
             if (this.player.isAdmin) {
                 this.socketClientService.deleteLobby(this.accessCode);
             }
         }
+        this.removeSocketListeners();
+        // pas oublier de off des sockets ensuite
     }
 
     changeLobbyLockStatus(): void {
@@ -116,5 +126,25 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
     navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
+    }
+
+    navigateToGame() {
+        if (this.player.isAdmin && !this.isGameStartedEmitted) {
+            this.isGameStartedEmitted = true;
+            this.socketClientService.alertGameStarted(this.accessCode);
+        }
+        this.isGameStarting = true;
+        sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
+        this.router.navigate([Routes.Game]);
+    }
+
+    private removeSocketListeners(): void {
+        this.socketClientService.socket.off('joinLobby');
+        this.socketClientService.socket.off('lobbyUpdate');
+        this.socketClientService.socket.off('leaveLobby');
+        this.socketClientService.socket.off('lobbyLocked');
+        this.socketClientService.socket.off('lobbyUnlocked');
+        this.socketClientService.socket.off('lobbyDeleted');
+        this.socketClientService.socket.off('alertGameStarted');
     }
 }

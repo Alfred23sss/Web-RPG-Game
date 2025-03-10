@@ -7,4 +7,5 @@ export enum LobbyEvents {
     GetLobby = 'getLobby',
     LockLobby = 'lockLobby',
     UnlockLobby = 'unlockLobby',
+    AlertGameStarted = 'alertGameStarted',
 }

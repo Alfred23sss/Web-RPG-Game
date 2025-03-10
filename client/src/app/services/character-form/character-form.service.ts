@@ -51,6 +51,7 @@ export class CharacterService {
         this.validateGameAvailability(game, closePopup);
 
         if (this.isCharacterValid(player)) {
+            sessionStorage.setItem('player', JSON.stringify(player));
             this.proceedToWaitingView(closePopup);
         } else {
             this.showMissingDetailsError();

@@ -56,14 +56,16 @@ export class CharacterFormComponent implements OnInit {
             name: '',
             avatar: '',
             speed: 4,
-            vitality: 4,
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
-            hp: { current: 10, max: 10 },
+            hp: { current: 4, max: 4 },
             movementPoints: 3,
             actionPoints: 3,
             inventory: [null, null],
             isAdmin: false,
+            hasAbandoned: false,
+            isActive: false,
+            combatWon: 0,
         };
     }
 
@@ -78,6 +80,11 @@ export class CharacterFormComponent implements OnInit {
 
     assignBonus(attribute: AttributeType): void {
         this.characterService.assignBonus(attribute);
+        if (attribute === AttributeType.Vitality) {
+            this.createdPlayer.hp.current = this.createdPlayer.hp.max = this.characterService.attributes[AttributeType.Vitality];
+        } else if (attribute === AttributeType.Speed) {
+            this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed];
+        }
     }
 
     assignDice(attribute: AttributeType): void {

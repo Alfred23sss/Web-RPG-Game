@@ -13,6 +13,7 @@ export class TileComponent {
     static activeButton: number | null = null;
     static isDraggedTest = false;
     @Input() tile!: Tile;
+    @Input() isEditionMode: boolean = false; // a voir
     constructor(
         private itemDragService: ItemDragService,
         private tileService: TileService,
@@ -22,6 +23,7 @@ export class TileComponent {
 
     @HostListener('mousedown', ['$event'])
     onMouseDown(event: MouseEvent): void {
+        if (!this.isEditionMode) return;
         this.itemDragService.setSelectedItem(this.tile.item, this.tile);
 
         if (TileComponent.activeButton !== null) return;
@@ -42,6 +44,7 @@ export class TileComponent {
 
     @HostListener('mouseenter')
     onMouseEnter(): void {
+        if (!this.isEditionMode) return;
         if (TileComponent.activeButton === 0) {
             this.tileService.applyTool(this.tile);
         }
@@ -52,6 +55,7 @@ export class TileComponent {
 
     @HostListener('contextmenu', ['$event'])
     onRightClick(event: MouseEvent): void {
+        if (!this.isEditionMode) return;
         event.preventDefault();
         event.stopPropagation();
         if (this.tile.item) {
@@ -62,6 +66,7 @@ export class TileComponent {
 
     @HostListener('document:mouseup', ['$event'])
     onMouseUp(event: MouseEvent): void {
+        if (!this.isEditionMode) return;
         if (TileComponent.activeButton === event.button) {
             TileComponent.activeButton = null;
         }
@@ -70,12 +75,14 @@ export class TileComponent {
 
     @HostListener('dragover', ['$event'])
     onDragOver(event: DragEvent): void {
+        if (!this.isEditionMode) return;
         event.preventDefault();
         TileComponent.isDraggedTest = true;
     }
 
     @HostListener('drop', ['$event'])
     onDrop(event: DragEvent): void {
+        if (!this.isEditionMode) return;
         event.preventDefault();
         this.tileService.drop(this.tile);
         if (TileComponent.activeButton === event.button) {

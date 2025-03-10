@@ -98,6 +98,16 @@ export class SocketClientService {
         });
     }
 
+    alertGameStarted(accessCode: string) {
+        this.socket.emit('createGame', { accessCode });
+    }
+
+    onAlertGameStarted(callback: (data: { orderedPlayers: Player[] }) => void) {
+        this.socket.on('gameStarted', (data) => {
+            callback(data);
+        });
+    }
+
     addPlayerToLobby(accessCode: string, player: unknown) {
         this.socket.emit('joinLobby', { accessCode, player });
     }
@@ -171,5 +181,17 @@ export class SocketClientService {
 
     onJoinError(callback: (message: string) => void): void {
         this.socket.on('joinError', callback);
+    }
+
+    abandonGame(player: Player, accessCode: string) {
+        this.socket.emit('abandonedGame', { player, accessCode });
+    }
+
+    onAbandonGame(callback: (data: { player: Player }) => void) {
+        this.socket.on('game-abandoned', callback);
+    }
+
+    onGameDeleted(callback: () => void) {
+        this.socket.on('gameDeleted', callback);
     }
 }
