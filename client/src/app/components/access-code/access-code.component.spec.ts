@@ -1,146 +1,195 @@
-// import { HttpClientTestingModule } from '@angular/common/http/testing';
-// import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
-// import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-// import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-// import { Game } from '@app/interfaces/game';
-// import { Lobby } from '@app/interfaces/lobby';
-// import { AccessCodeService } from '@app/services/access-code/access-code.service';
-// import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
-// import { SnackbarService } from '@app/services/snackbar/snackbar.service';
-// import { of, throwError } from 'rxjs';
-// import { AccessCodeComponent } from './access-code.component';
+import { ErrorHandler } from '@angular/core';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
+import { Lobby } from '@app/interfaces/lobby';
+import { AccessCodeService } from '@app/services/access-code/access-code.service';
+import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { of } from 'rxjs';
+import { AccessCodeComponent } from './access-code.component';
 
-// describe('AccessCodeComponent', () => {
-//     let component: AccessCodeComponent;
-//     let fixture: ComponentFixture<AccessCodeComponent>;
-//     let mockDialogRef: jasmine.SpyObj<MatDialogRef<AccessCodeComponent>>;
-//     let mockDialog: jasmine.SpyObj<MatDialog>;
-//     let mockAccessCodesService: jasmine.SpyObj<AccessCodesCommunicationService>;
-//     let mockSnackbar: jasmine.SpyObj<SnackbarService>;
-//     let mockAccessCodeService: jasmine.SpyObj<AccessCodeService>;
+class TestErrorHandler implements ErrorHandler {
+    public capturedError: any = null;
+    handleError(error: any): void {
+        this.capturedError = error;
+    }
+}
 
-//     const mockLobby: Lobby = {
-//         isLocked: false,
-//         accessCode: 'TEST123',
-//         game: {} as Game,
-//         players: [],
-//         maxPlayers: 4,
-//     };
+describe('AccessCodeComponent', () => {
+    let component: AccessCodeComponent;
+    let fixture: ComponentFixture<AccessCodeComponent>;
+    let dialogRefSpy: jasmine.SpyObj<MatDialogRef<AccessCodeComponent>>;
+    let dialogSpy: jasmine.SpyObj<MatDialog>;
+    let accessCodesCommunicationServiceSpy: jasmine.SpyObj<AccessCodesCommunicationService>;
+    let snackbarServiceSpy: jasmine.SpyObj<SnackbarService>;
+    let accessCodeServiceSpy: jasmine.SpyObj<AccessCodeService>;
+    let testErrorHandler: TestErrorHandler;
 
-//     beforeEach(async () => {
-//         mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
-//         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-//         mockAccessCodesService = jasmine.createSpyObj('AccessCodesCommunicationService', ['validateAccessCode', 'getAllAccessCodes']);
-//         mockSnackbar = jasmine.createSpyObj('SnackbarService', ['showMessage']);
-//         mockAccessCodeService = jasmine.createSpyObj('AccessCodeService', ['getLobbyData']);
+    beforeEach(async () => {
+        dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
+        dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+        accessCodesCommunicationServiceSpy = jasmine.createSpyObj('AccessCodesCommunicationService', ['getAllAccessCodes', 'validateAccessCode']);
+        snackbarServiceSpy = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+        accessCodeServiceSpy = jasmine.createSpyObj('AccessCodeService', ['getLobbyData']);
 
-//         await TestBed.configureTestingModule({
-//             imports: [AccessCodeComponent, HttpClientTestingModule],
-//             providers: [
-//                 { provide: MatDialogRef, useValue: mockDialogRef },
-//                 { provide: MatDialog, useValue: mockDialog },
-//                 { provide: AccessCodesCommunicationService, useValue: mockAccessCodesService },
-//                 { provide: SnackbarService, useValue: mockSnackbar },
-//                 { provide: AccessCodeService, useValue: mockAccessCodeService },
-//             ],
-//         }).compileComponents();
+        // Par défaut, le service renvoie des codes d'accès
+        accessCodesCommunicationServiceSpy.getAllAccessCodes.and.returnValue(of(['code1', 'code2']));
+        testErrorHandler = new TestErrorHandler();
 
-//         fixture = TestBed.createComponent(AccessCodeComponent);
-//         component = fixture.componentInstance;
+        await TestBed.configureTestingModule({
+            // Comme le composant est standalone et importe FormsModule, on peut l'importer directement
+            imports: [AccessCodeComponent],
+            providers: [
+                { provide: MatDialogRef, useValue: dialogRefSpy },
+                { provide: MatDialog, useValue: dialogSpy },
+                { provide: AccessCodesCommunicationService, useValue: accessCodesCommunicationServiceSpy },
+                { provide: SnackbarService, useValue: snackbarServiceSpy },
+                { provide: AccessCodeService, useValue: accessCodeServiceSpy },
+                { provide: ErrorHandler, useValue: testErrorHandler },
+            ],
+        }).compileComponents();
+    });
 
-//         mockAccessCodesService.getAllAccessCodes.and.returnValue(of(['TEST123', 'OTHER456']));
-//         fixture.detectChanges();
-//     });
+    beforeEach(() => {
+        fixture = TestBed.createComponent(AccessCodeComponent);
+        component = fixture.componentInstance;
+        fixture.detectChanges();
+    });
 
-//     it('should create component and initialize access codes', () => {
-//         expect(component).toBeTruthy();
-//         expect(mockAccessCodesService.getAllAccessCodes).toHaveBeenCalled();
-//         expect(component.accessCodes).toEqual(['TEST123', 'OTHER456']);
-//     });
+    it('devrait créer le composant', () => {
+        expect(component).toBeTruthy();
+    });
 
-//     it('should close dialog when closeDialog() is called', () => {
-//         component.closeDialog();
-//         expect(mockDialogRef.close).toHaveBeenCalled();
-//     });
+    it('doit s’abonner à getAllAccessCodes dans le constructeur et assigner accessCodes', () => {
+        expect(component.accessCodes).toEqual(['code1', 'code2']);
+    });
 
-//     it('should handle valid access code submission successfully', fakeAsync(() => {
-//         mockAccessCodesService.validateAccessCode.and.returnValue(of({ isValid: true }));
-//         mockAccessCodeService.getLobbyData.and.returnValue(Promise.resolve(mockLobby));
+    it('closeDialog doit appeler dialogRef.close', () => {
+        component.closeDialog();
+        expect(dialogRefSpy.close).toHaveBeenCalled();
+    });
 
-//         component.accessCode = 'TEST123';
-//         component.submitCode();
-//         tick();
+    // it('devrait capturer une erreur dans le constructeur si getAllAccessCodes échoue', fakeAsync(() => {
+    //     // Simuler une erreur lors de l'appel à getAllAccessCodes
+    //     accessCodesCommunicationServiceSpy.getAllAccessCodes.and.returnValue(throwError(() => new Error('Error fetching access codes')));
 
-//         expect(mockDialog.open).toHaveBeenCalledWith(CharacterFormComponent, {
-//             data: {
-//                 accessCode: 'TEST123',
-//                 isLobbyCreated: true,
-//                 game: mockLobby.game,
-//             },
-//         });
-//         expect(mockSnackbar.showMessage).not.toHaveBeenCalled();
-//     }));
+    //     try {
+    //         TestBed.createComponent(AccessCodeComponent);
+    //         tick();
+    //         fail('Le constructeur aurait dû lever une erreur');
+    //     } catch (error: any) {
+    //         expect(error).toBeTruthy();
+    //         expect(error.message).toEqual('Error fetching access codes');
+    //     }
+    // }));
 
-//     it('should show error for locked lobby', fakeAsync(() => {
-//         const lockedLobby = { ...mockLobby, isLocked: true };
-//         mockAccessCodesService.validateAccessCode.and.returnValue(of({ isValid: true }));
-//         mockAccessCodeService.getLobbyData.and.returnValue(Promise.resolve(lockedLobby));
+    describe('validateAccessCode', () => {
+        it('doit résoudre si le code d’accès est valide', async () => {
+            accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
+            component.accessCode = 'VALID';
+            await expectAsync((component as any).validateAccessCode()).toBeResolved();
+        });
 
-//         component.accessCode = 'LOCKED';
-//         component.submitCode();
-//         tick();
+        it('doit rejeter si le code d’accès est invalide', async () => {
+            accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: false }));
+            component.accessCode = 'INVALID';
+            await expectAsync((component as any).validateAccessCode()).toBeRejectedWithError("La partie que vous souhaitez rejoindre n'existe pas!");
+        });
+    });
 
-//         expect(mockSnackbar.showMessage).toHaveBeenCalledWith('Le lobby est verrouillé et ne peut pas être rejoint.');
-//     }));
+    describe('fetchLobbyData', () => {
+        it('doit renvoyer les données du lobby si le lobby est valide', async () => {
+            const lobby = { isLocked: false, game: 'gameData' } as any;
+            accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(lobby));
+            component.accessCode = 'SOME_CODE';
+            const result = await (component as any).fetchLobbyData();
+            expect(result).toEqual(lobby);
+        });
 
-//     it('should handle invalid access code validation', fakeAsync(() => {
-//         mockAccessCodesService.validateAccessCode.and.returnValue(of({ isValid: false }));
+        it('doit lancer une erreur si le lobby est nul ou si la propriété game est absente', async () => {
+            // Cas où lobby est null
+            accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(null as unknown as Lobby));
+            component.accessCode = 'SOME_CODE';
+            await expectAsync((component as any).fetchLobbyData()).toBeRejectedWithError('Impossible de récupérer la partie.');
 
-//         component.accessCode = 'INVALID';
-//         component.submitCode();
-//         tick();
+            // Cas où lobby ne possède pas la propriété game
+            accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve({ isLocked: false } as unknown as Lobby));
+            await expectAsync((component as any).fetchLobbyData()).toBeRejectedWithError('Impossible de récupérer la partie.');
+        });
+    });
 
-//         expect(mockSnackbar.showMessage).toHaveBeenCalledWith("La partie que vous souhaitez rejoindre n'existe pas!");
-//     }));
+    describe('isLobbyLocked', () => {
+        it('doit retourner true si le lobby est verrouillé', () => {
+            const lobby = { isLocked: true } as any;
+            expect((component as any).isLobbyLocked(lobby)).toBeTrue();
+        });
 
-//     it('should handle validation errors', fakeAsync(() => {
-//         mockAccessCodesService.validateAccessCode.and.returnValue(throwError(() => new Error('Validation error')));
+        it('doit retourner false si le lobby n’est pas verrouillé', () => {
+            const lobby = { isLocked: false } as any;
+            expect((component as any).isLobbyLocked(lobby)).toBeFalse();
+        });
+    });
 
-//         component.accessCode = 'ERROR';
-//         component.submitCode();
-//         tick();
+    describe('openCharacterForm', () => {
+        it('doit fermer le dialogue et ouvrir le formulaire de personnage avec les données correctes', () => {
+            const lobby = { isLocked: false, game: 'gameData' } as any;
+            component.accessCode = 'ACCESS';
+            component.isLobbyCreated = true;
+            (component as any).openCharacterForm(lobby);
+            expect(dialogRefSpy.close).toHaveBeenCalled();
+            expect(dialogSpy.open).toHaveBeenCalledWith(CharacterFormComponent, {
+                data: {
+                    accessCode: 'ACCESS',
+                    isLobbyCreated: true,
+                    game: 'gameData',
+                },
+            });
+        });
+    });
 
-//         expect(mockSnackbar.showMessage).toHaveBeenCalledWith('Validation error');
-//     }));
+    describe('submitCode', () => {
+        it('doit afficher un message si le lobby est verrouillé', fakeAsync(() => {
+            component.accessCode = 'CODE';
+            accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
+            const lobby = { isLocked: true, game: 'gameData' } as any;
+            accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(lobby));
 
-//     it('should handle missing game in lobby data', fakeAsync(() => {
-//         const invalidLobby = { ...mockLobby, game: null };
-//         mockAccessCodesService.validateAccessCode.and.returnValue(of({ isValid: true }));
-//         mockAccessCodeService.getLobbyData.and.returnValue(Promise.resolve(invalidLobby));
+            component.submitCode();
+            tick(); // Simule l’attente des promesses
+            expect(snackbarServiceSpy.showMessage).toHaveBeenCalledWith('Le lobby est verrouillé et ne peut pas être rejoint.');
+        }));
 
-//         component.accessCode = 'NOGAME';
-//         component.submitCode();
-//         tick();
+        it('doit ouvrir le formulaire de personnage si le lobby n’est pas verrouillé', fakeAsync(() => {
+            component.accessCode = 'CODE';
+            accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
+            const lobby = { isLocked: false, game: 'gameData' } as any;
+            accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(lobby));
 
-//         expect(mockSnackbar.showMessage).toHaveBeenCalledWith('Impossible de récupérer la partie.');
-//     }));
+            spyOn(component as any, 'openCharacterForm').and.callThrough();
 
-//     it('should handle lobby fetch errors', fakeAsync(() => {
-//         mockAccessCodesService.validateAccessCode.and.returnValue(of({ isValid: true }));
-//         mockAccessCodeService.getLobbyData.and.returnValue(Promise.reject(new Error('Fetch error')));
+            component.submitCode();
+            tick();
+            expect((component as any).openCharacterForm).toHaveBeenCalledWith(lobby);
+        }));
 
-//         component.accessCode = 'FETCHERR';
-//         component.submitCode();
-//         tick();
+        it('doit afficher un message d’erreur lorsque validateAccessCode échoue', fakeAsync(() => {
+            component.accessCode = 'CODE';
+            accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: false }));
 
-//         expect(mockSnackbar.showMessage).toHaveBeenCalledWith('Fetch error');
-//     }));
+            component.submitCode();
+            tick();
+            expect(snackbarServiceSpy.showMessage).toHaveBeenCalledWith("La partie que vous souhaitez rejoindre n'existe pas!");
+        }));
 
-//     it('should handle empty access code submission', fakeAsync(() => {
-//         component.accessCode = '';
-//         component.submitCode();
-//         tick();
+        it('doit afficher un message d’erreur lorsque fetchLobbyData lance une erreur', fakeAsync(() => {
+            component.accessCode = 'CODE';
+            accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
+            accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(null as unknown as Lobby));
 
-//         expect(mockSnackbar.showMessage).toHaveBeenCalledWith("La partie que vous souhaitez rejoindre n'existe pas!");
-//     }));
-// });
+            component.submitCode();
+            tick();
+            expect(snackbarServiceSpy.showMessage).toHaveBeenCalledWith('Impossible de récupérer la partie.');
+        }));
+    });
+});
