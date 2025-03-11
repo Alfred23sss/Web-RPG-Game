@@ -97,6 +97,7 @@ export class SocketClientService {
             });
         });
     }
+    
 
     addPlayerToLobby(accessCode: string, player: unknown) {
         this.socket.emit('joinLobby', { accessCode, player });
@@ -154,10 +155,9 @@ export class SocketClientService {
         return this.socket.id;
     }
 
-    on(event: string, callback: (data: unknown) => void): void {
-        // AJOUT!!!!!!!!
-        this.socket.on(event, callback);
-    }
+    // on(event: string, callback: (data: unknown) => void): void {
+    //     this.socket.on(event, callback);
+    // }
 
     emit(event: string, data: unknown): void {
         // AJOUT2!!!!!
@@ -171,5 +171,24 @@ export class SocketClientService {
 
     onJoinError(callback: (message: string) => void): void {
         this.socket.on('joinError', callback);
+    }
+
+    selectAvatar(accessCode: string, avatar: string): void {
+        this.socket.emit('selectAvatar', { accessCode, avatar });
+    }
+    
+    deselectAvatar(accessCode: string): void {
+        this.socket.emit('deselectAvatar', { accessCode });
+    }
+    
+    onAvatarSelected(callback: (data: { avatar: string }) => void): void {
+        this.socket.on('avatarSelected', callback);
+    }
+    
+    onAvatarDeselected(callback: () => void): void {
+        this.socket.on('avatarDeselected', callback);
+    }
+    on<T>(event: string, callback: (data: T) => void): void {
+        this.socket.on(event, callback);
     }
 }

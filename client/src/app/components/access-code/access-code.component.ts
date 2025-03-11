@@ -83,6 +83,9 @@ export class AccessCodeComponent {
 
     private openCharacterForm(lobby: Lobby): void {
         this.closeDialog();
+
+
+        //this.socketClientService.send(LobbyEvents.JoinWaitingRoom, code); -->
         this.dialog.open(CharacterFormComponent, {
             data: {
                 accessCode: this.accessCode,

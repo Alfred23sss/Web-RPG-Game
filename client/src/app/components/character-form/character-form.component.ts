@@ -67,11 +67,31 @@ export class CharacterFormComponent implements OnInit {
         };
     }
 
+    // ngOnInit(): void {
+    //     this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
+
+    //     this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
+    //         this.unavailableAvatars = [...data.avatars];
+    //     });
+    // }
     ngOnInit(): void {
         this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
-
+    
         this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
             this.unavailableAvatars = [...data.avatars];
+        });
+        
+    
+        this.socketClientService.onAvatarSelected((data: { avatar: string }) => {
+            if (data.avatar === this.createdPlayer.avatar) {
+                this.snackbarService.showMessage('Avatar sélectionné avec succès !');
+            }
+        });
+    
+        this.socketClientService.onAvatarDeselected(() => {
+            if (this.createdPlayer.avatar) {
+                this.snackbarService.showMessage('Avatar désélectionné.');
+            }
         });
     }
 
@@ -107,6 +127,22 @@ export class CharacterFormComponent implements OnInit {
             this.createdPlayer.isAdmin = true;
             await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
             this.submitCharacterForm();
+        }
+    }
+
+    selectAvatar(avatar: string): void {
+        if (!this.unavailableAvatars.includes(avatar)) {
+            this.createdPlayer.avatar = avatar;
+            this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
+        } else {
+            this.snackbarService.showMessage('Cet avatar est déjà pris !');
+        }
+    }
+    
+    deselectAvatar(): void {
+        if (this.createdPlayer.avatar) {
+            this.socketClientService.deselectAvatar(this.currentAccessCode);
+            this.createdPlayer.avatar = '';
         }
     }
 

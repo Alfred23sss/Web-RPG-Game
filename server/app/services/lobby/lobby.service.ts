@@ -1,9 +1,10 @@
 import { GameSize, GameSizePlayerCount } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/Lobby';
+import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { Injectable, Logger } from '@nestjs/common';
+
 
 @Injectable()
 export class LobbyService {
@@ -22,7 +23,7 @@ export class LobbyService {
                 : game.size === GameSize.Medium
                 ? GameSizePlayerCount.Medium
                 : GameSizePlayerCount.Large;
-        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers });
+        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers, waitingPlayers:[] }); //verrifier ona fait la emme chose qie ds
         return accessCode;
     }
 
@@ -124,6 +125,10 @@ export class LobbyService {
         } while (existingNames.includes(uniqueName.toLowerCase()));
     
         return uniqueName;
+    }
+
+    getWaitingAvatars(accessCode: string): WaintingPlayers[]{
+        return this.getLobby(accessCode).waitingPlayers;
     }
     
 }
