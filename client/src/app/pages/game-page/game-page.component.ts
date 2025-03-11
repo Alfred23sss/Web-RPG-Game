@@ -38,6 +38,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     activeTab: 'chat' | 'log' = 'chat';
     logBookSubscription: Subscription;
 
+    //nous avons besoin de ces 6 services pour que tout fonctionne.
+    // eslint-disable-next-line max-params
     constructor(
         // private gameService: GameService,
         private gridService: GridService,
