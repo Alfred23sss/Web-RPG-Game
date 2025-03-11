@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -202,7 +203,7 @@ describe('LobbyGateway', () => {
 
             gateway.handleDeleteLobby('TEST123', mockSocket as Socket);
 
-            expect(mockSocket.emit).toHaveBeenCalledWith('error', `Lobby TEST123 does not exist.`);
+            expect(mockSocket.emit).toHaveBeenCalledWith('error', 'Lobby TEST123 does not exist.');
         });
     });
 
