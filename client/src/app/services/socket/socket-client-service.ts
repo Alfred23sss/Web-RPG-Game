@@ -170,7 +170,7 @@ export class SocketClientService {
     // }
     onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
         this.socket.on('updateUnavailableOptions', (data) => {
-            console.log("Updated unavailable options:", data);
+            console.log("🔄 Événement reçu du serveur :", data);
             callback(data);
         });
     }
