@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -75,6 +76,7 @@ export class CharacterFormComponent implements OnInit {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
         console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
 
+
         this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
 
         this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
@@ -83,11 +85,13 @@ export class CharacterFormComponent implements OnInit {
             this.cdr.detectChanges();
         });
 
+
         this.socketClientService.onAvatarSelected((data: { avatar: string }) => {
             if (data.avatar === this.createdPlayer.avatar) {
                 this.snackbarService.showMessage('Avatar sélectionné avec succès !');
             }
         });
+
 
         this.socketClientService.onAvatarDeselected(() => {
             if (this.createdPlayer.avatar) {
