@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -10,16 +10,17 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { ChangeDetectorRef } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/core';
+
+
 
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
     styleUrls: ['./character-form.component.scss'],
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush, 
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, CommonModule],
+
 })
 export class CharacterFormComponent implements OnInit {
     showForm: boolean = true;
@@ -36,7 +37,6 @@ export class CharacterFormComponent implements OnInit {
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
 
-
     unavailableAvatars: string[] = [];
     errorMessage: string = '';
 
@@ -50,9 +50,7 @@ export class CharacterFormComponent implements OnInit {
         private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
         private readonly snackbarService: SnackbarService,
-
-        private readonly cdr: ChangeDetectorRef, // Ajout du ChangeDetectorRef
-
+        private readonly cdr: ChangeDetectorRef,
         @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game;
@@ -73,38 +71,32 @@ export class CharacterFormComponent implements OnInit {
         };
     }
 
-    // ngOnInit(): void {
-    //     this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
-
-    //     this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-    //         this.unavailableAvatars = [...data.avatars];
-    //     });
-    // }
     ngOnInit(): void {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
         console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
-        
+
         this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
 
         this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            console.log("⚡ Mise à jour des avatars indisponibles reçue :", data.avatars);
-            this.unavailableAvatars = [...data.avatars]; 
-            this.cdr.markForCheck();
+            console.log('⚡ Mise à jour des avatars indisponibles reçue :', data.avatars);
+            this.unavailableAvatars = [...data.avatars];
             this.cdr.detectChanges();
         });
-        
-    
+
         this.socketClientService.onAvatarSelected((data: { avatar: string }) => {
             if (data.avatar === this.createdPlayer.avatar) {
                 this.snackbarService.showMessage('Avatar sélectionné avec succès !');
             }
         });
-    
+
         this.socketClientService.onAvatarDeselected(() => {
             if (this.createdPlayer.avatar) {
                 this.snackbarService.showMessage('Avatar désélectionné.');
             }
         });
+        this.cdr.markForCheck();
+        this.cdr.detectChanges();
+
     }
 
     assignBonus(attribute: AttributeType): void {
@@ -142,23 +134,54 @@ export class CharacterFormComponent implements OnInit {
         }
     }
 
+    // selectAvatar(avatar: string): void {
+    //     if (!this.unavailableAvatars.includes(avatar)) {
+    //         this.createdPlayer.avatar = avatar;
+    //         this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
+            
+    //     } else {
+    //         this.snackbarService.showMessage('Cet avatar est déjà pris !');
+    //     }
+    //     console.log('les avatars pas dispo sont ', this.unavailableAvatars);
+    // }
     selectAvatar(avatar: string): void {
+        if (this.createdPlayer.avatar) {
+            // ✅ Si un avatar est déjà sélectionné, on doit le retirer avant d'en choisir un autre
+            this.deselectAvatar();
+        }
+    
         if (!this.unavailableAvatars.includes(avatar)) {
             this.createdPlayer.avatar = avatar;
             this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
+    
+            // ✅ Mise à jour immédiate de unavailableAvatars pour éviter le délai
+            this.unavailableAvatars = [...this.unavailableAvatars, avatar];
+    
+            console.log('🚀 Avatar sélectionné :', avatar);
+            console.log('🚀 Mise à jour immédiate des avatars indisponibles :', this.unavailableAvatars);
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
         } else {
             this.snackbarService.showMessage('Cet avatar est déjà pris !');
         }
-        console.log('les avatars pas dispo sont ', this.unavailableAvatars)
     }
     
+    
+
     deselectAvatar(): void {
         if (this.createdPlayer.avatar) {
+            console.log(`❌ Désélection de l'avatar : ${this.createdPlayer.avatar}`);
             this.socketClientService.deselectAvatar(this.currentAccessCode);
+    
+            // ✅ Supprimer l'avatar du joueur
+            this.unavailableAvatars = this.unavailableAvatars.filter(av => av !== this.createdPlayer.avatar);
             this.createdPlayer.avatar = '';
+    
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
         }
     }
-
+    
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
