@@ -164,9 +164,15 @@ export class SocketClientService {
         this.socket.emit(event, data);
     }
 
+    // onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
+    //     // AJOUT2!!!!!
+    //     this.socket.on('updateUnavailableOptions',  callback);
+    // }
     onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
-        // AJOUT2!!!!!
-        this.socket.on('updateUnavailableOptions', callback);
+        this.socket.on('updateUnavailableOptions', (data) => {
+            console.log("Updated unavailable options:", data);
+            callback(data);
+        });
     }
 
     onJoinError(callback: (message: string) => void): void {
@@ -174,19 +180,35 @@ export class SocketClientService {
     }
 
     selectAvatar(accessCode: string, avatar: string): void {
+        console.log(`Selecting avatar: ${avatar} for lobby: ${accessCode}`);
         this.socket.emit('selectAvatar', { accessCode, avatar });
     }
     
     deselectAvatar(accessCode: string): void {
+        console.log(`Deselecting avatar for lobby: ${accessCode}`);
         this.socket.emit('deselectAvatar', { accessCode });
     }
     
+    // onAvatarSelected(callback: (data: { avatar: string }) => void): void {
+    //     this.socket.on('avatarSelected', callback);
+    // }
     onAvatarSelected(callback: (data: { avatar: string }) => void): void {
-        this.socket.on('avatarSelected', callback);
+        this.socket.on('avatarSelected', (data) => {
+            console.log("Avatar selected:", data);
+            callback(data);
+        });
     }
     
+    
+    // onAvatarDeselected(callback: () => void): void {
+    //     this.socket.on('avatarDeselected', callback);
+    // }
+
     onAvatarDeselected(callback: () => void): void {
-        this.socket.on('avatarDeselected', callback);
+        this.socket.on('avatarDeselected', () => {
+            console.log("Avatar deselected");
+            callback();
+        });
     }
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);

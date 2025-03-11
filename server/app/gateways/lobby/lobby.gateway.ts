@@ -174,50 +174,99 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
     }
 
+    // @SubscribeMessage('selectAvatar')
+    // handleSelectAvatar(
+    //     @MessageBody() data: { accessCode: string; avatar: string },
+    //     @ConnectedSocket() client: Socket,
+    // ) {
+    //     const { accessCode, avatar } = data;
+    //     const lobby = this.lobbyService.getLobby(accessCode);
+    
+    //     if (!lobby) {
+    //         client.emit('error', 'Lobby not found');
+    //         return;
+    //     }
+    //     const isAvatarTaken = lobby.waitingPlayers.some((wp) => wp.avatar === avatar);
+    //     if (isAvatarTaken) {
+    //         client.emit('error', 'Cet avatar est déjà pris !');
+    //         return;
+    //     }
+    
+    //     lobby.waitingPlayers.push({ socketId: client.id, avatar });
+    //     this.server.to(accessCode).emit('updateUnavailableOptions', {
+    //         names: lobby.players.map((p) => p.name),
+    //         avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
+    //     });
+    //     client.emit('avatarSelected', { avatar });
+    // }
     @SubscribeMessage('selectAvatar')
-    handleSelectAvatar(
-        @MessageBody() data: { accessCode: string; avatar: string },
-        @ConnectedSocket() client: Socket,
-    ) {
-        const { accessCode, avatar } = data;
-        const lobby = this.lobbyService.getLobby(accessCode);
-    
-        if (!lobby) {
-            client.emit('error', 'Lobby not found');
-            return;
-        }
-        const isAvatarTaken = lobby.waitingPlayers.some((wp) => wp.avatar === avatar);
-        if (isAvatarTaken) {
-            client.emit('error', 'Cet avatar est déjà pris !');
-            return;
-        }
-    
-        lobby.waitingPlayers.push({ socketId: client.id, avatar });
-        this.server.to(accessCode).emit('updateUnavailableOptions', {
-            names: lobby.players.map((p) => p.name),
-            avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
-        });
-        client.emit('avatarSelected', { avatar });
+handleSelectAvatar(
+    @MessageBody() data: { accessCode: string; avatar: string },
+    @ConnectedSocket() client: Socket,
+) {
+    const { accessCode, avatar } = data;
+    const lobby = this.lobbyService.getLobby(accessCode);
+
+    if (!lobby) {
+        client.emit('error', 'Lobby not found');
+        return;
     }
     
+    const isAvatarTaken = lobby.waitingPlayers.some((wp) => wp.avatar === avatar);
+    if (isAvatarTaken) {
+        client.emit('error', 'Cet avatar est déjà pris !');
+        return;
+    }
+    
+    lobby.waitingPlayers.push({ socketId: client.id, avatar });
+    console.log(`Waiting players updated after selecting:`, lobby.waitingPlayers);
+    
+    this.server.to(accessCode).emit('updateUnavailableOptions', {
+        names: lobby.players.map((p) => p.name),
+        avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
+    });
+    client.emit('avatarSelected', { avatar });
+}
+    
+    // @SubscribeMessage('deselectAvatar')
+    // handleDeselectAvatar(
+    //     @MessageBody() accessCode: string,
+    //     @ConnectedSocket() client: Socket,
+    // ) {
+    //     const lobby = this.lobbyService.getLobby(accessCode);
+    
+    //     if (!lobby) {
+    //         client.emit('error', 'Lobby not found');
+    //         return;
+    //     }
+    //     lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
+    //     this.server.to(accessCode).emit('updateUnavailableOptions', {
+    //         names: lobby.players.map((p) => p.name),
+    //         avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
+    //     });
+    //     client.emit('avatarDeselected');
+    // }
     @SubscribeMessage('deselectAvatar')
-    handleDeselectAvatar(
-        @MessageBody() accessCode: string,
-        @ConnectedSocket() client: Socket,
-    ) {
-        const lobby = this.lobbyService.getLobby(accessCode);
-    
-        if (!lobby) {
-            client.emit('error', 'Lobby not found');
-            return;
-        }
-        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
-        this.server.to(accessCode).emit('updateUnavailableOptions', {
-            names: lobby.players.map((p) => p.name),
-            avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
-        });
-        client.emit('avatarDeselected');
+handleDeselectAvatar(
+    @MessageBody() accessCode: string,
+    @ConnectedSocket() client: Socket,
+) {
+    const lobby = this.lobbyService.getLobby(accessCode);
+    if (!lobby) {
+        client.emit('error', 'Lobby not found');
+        return;
     }
+
+    lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
+    console.log(`Waiting players updated after deselecting:`, lobby.waitingPlayers);
+    
+    this.server.to(accessCode).emit('updateUnavailableOptions', {
+        names: lobby.players.map((p) => p.name),
+        avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
+    });
+    client.emit('avatarDeselected');
+}
+
 
     afterInit() {
         this.logger.log('LobbyGateway initialized.');
