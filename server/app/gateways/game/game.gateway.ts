@@ -1,5 +1,6 @@
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
+import { GameManagerService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
@@ -17,6 +18,7 @@ export class GameGateway {
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly gameSessionService: GameSessionService,
+        private readonly gameCombatService: GameManagerService,
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)
@@ -55,6 +57,24 @@ export class GameGateway {
         this.gameSessionService.endTurn(payload.accessCode);
     }
 
+    @SubscribeMessage(GameEvents.StartCombat)
+    handleStartCombat(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; attackerId: string; defenderId: string }) {
+        this.logger.log(`Starting combat for game ${payload.accessCode}`);
+        this.gameCombatService.startCombat(payload.accessCode, payload.attackerId, payload.defenderId);
+    }
+
+    @SubscribeMessage(GameEvents.PerformAttack)
+    handlePerformAttack(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; attackerName: string }) {
+        this.logger.log(`Player ${payload.attackerName} is attacking in game ${payload.accessCode}`);
+        this.gameCombatService.performAttack(payload.accessCode, payload.attackerName);
+    }
+
+    @SubscribeMessage(GameEvents.AttemptEscape)
+    handleAttemptEscape(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; playerName: string }) {
+        this.logger.log(`Player ${payload.playerName} is attempting to escape in game ${payload.accessCode}`);
+        this.gameCombatService.attemptEscape(payload.accessCode, payload.playerName);
+    }
+
     @OnEvent('game.transition.started')
     handleTransitionStarted(payload: { accessCode: string; nextPlayer: Player }) {
         this.logger.log(`Received transition started event for game ${payload.accessCode}`);
@@ -85,6 +105,41 @@ export class GameGateway {
     handleTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
         this.server.to(payload.accessCode).emit('timerUpdate', {
             timeLeft: payload.timeLeft,
+        });
+    }
+
+    @OnEvent('game.combat.started')
+    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; firstFighter: Player }) {
+        this.logger.log(`Combat started in game ${payload.accessCode}`);
+        this.server.to(payload.accessCode).emit('combatStarted', {
+            attacker: payload.attacker,
+            defender: payload.defender,
+            firstFighter: payload.firstFighter,
+        });
+    }
+
+    @OnEvent('game.combat.timer')
+    handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
+        this.server.to(payload.accessCode).emit('combatTimerUpdate', {
+            timeLeft: payload.timeLeft,
+        });
+    }
+
+    @OnEvent('game.combat.timeout')
+    handleCombatTimeout(payload: { accessCode: string; fighter: Player }) {
+        this.logger.log(`Combat timeout for ${payload.fighter.name} in game ${payload.accessCode}`);
+        this.server.to(payload.accessCode).emit('combatTimeout', {
+            fighter: payload.fighter,
+        });
+    }
+
+    @OnEvent('game.combat.turn.started')
+    handleCombatTurnStarted(payload: { accessCode: string; fighter: Player; duration: number; escapeAttemptsLeft: number }) {
+        this.logger.log(`Combat turn started for ${payload.fighter.name} in game ${payload.accessCode}`);
+        this.server.to(payload.accessCode).emit('combatTurnStarted', {
+            fighter: payload.fighter,
+            duration: payload.duration,
+            escapeAttemptsLeft: payload.escapeAttemptsLeft,
         });
     }
 }
