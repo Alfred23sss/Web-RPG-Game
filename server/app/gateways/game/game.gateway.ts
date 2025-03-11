@@ -1,4 +1,5 @@
 import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/model/database/tile';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
@@ -18,11 +19,12 @@ export class GameGateway {
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)
-    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; grid: Tile[][] }) {
         this.logger.log(payload.accessCode);
-        const lobby = this.lobbyService.getLobby(payload.accessCode);
-        const gameSession = this.gameSessionService.createGameSession(payload.accessCode, lobby.game);
-        this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers });
+        // const lobby = this.lobbyService.getLobby(payload.accessCode);
+        const gameSession = this.gameSessionService.createGameSession(payload.accessCode);
+        this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers, updatedGame: gameSession.game });
+        Logger.log('emitting gameStarted');
         this.logger.log('game created emitted');
     }
 
