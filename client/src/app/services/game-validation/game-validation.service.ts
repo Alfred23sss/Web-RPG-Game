@@ -171,7 +171,7 @@ export class GameValidationService {
             }
         }
         const requiredItemCount = game.size === GameSize.Small ? ItemCount.Small : game.size === GameSize.Medium ? ItemCount.Medium : ItemCount.Large;
-        return itemCount !== requiredItemCount ? ErrorMessages.ItemsNotPlaced : null;
+        return itemCount < requiredItemCount ? ErrorMessages.ItemsNotPlaced : itemCount > requiredItemCount ? ErrorMessages.TooManyItemsPlaced : null;
     }
 
     private validateAllTerrainAccessible(game: Game): ErrorMessages[] | string[] {
