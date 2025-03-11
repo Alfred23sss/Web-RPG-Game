@@ -38,7 +38,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     activeTab: 'chat' | 'log' = 'chat';
     logBookSubscription: Subscription;
 
-    // eslint-disable-next-line max-params
     constructor(
         // private gameService: GameService,
         private gridService: GridService,
@@ -56,13 +55,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         const lobby = sessionStorage.getItem('lobby');
-        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby;
+        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; //lobby peut etre inutile, car on a accesscode
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
         this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
+        const game = sessionStorage.getItem('game');
+        this.game = game ? (JSON.parse(game) as Game) : this.game;
 
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
-        this.game = this.lobby.game; // moche
         this.gridService.setGrid(this.game?.grid);
         if (this.game && this.game.grid) {
             this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement);
@@ -86,6 +86,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.socketClientService.onAlertGameStarted((data) => {
             this.playerList = data.orderedPlayers;
+            this.game = data.updatedGame;
         });
     }
 
