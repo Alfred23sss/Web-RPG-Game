@@ -69,9 +69,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         const success = this.lobbyService.joinLobby(accessCode, player);
         if (success) {
-            // if(this.lobbyService.isNameTaken){
-            //     player.name = this.generateUniqueName(lobby, player.name);
-            // }
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
@@ -183,32 +180,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
     }
 
-    // @SubscribeMessage('selectAvatar') ??VERSION SANS CONSOLE LOG
-    // handleSelectAvatar(
-    //     @MessageBody() data: { accessCode: string; avatar: string },
-    //     @ConnectedSocket() client: Socket,
-    // ) {
-    //     const { accessCode, avatar } = data;
-    //     const lobby = this.lobbyService.getLobby(accessCode);
-
-    //     if (!lobby) {
-    //         client.emit('error', 'Lobby not found');
-    //         return;
-    //     }
-    //     const isAvatarTaken = lobby.waitingPlayers.some((wp) => wp.avatar === avatar);
-    //     if (isAvatarTaken) {
-    //         client.emit('error', 'Cet avatar est déjà pris !');
-    //         return;
-    //     }
-
-    //     lobby.waitingPlayers.push({ socketId: client.id, avatar });
-    //     this.server.to(accessCode).emit('updateUnavailableOptions', {
-    //         names: lobby.players.map((p) => p.name),
-    //         avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
-    //     });
-    //     client.emit('avatarSelected', { avatar });
-    // }
-
     @SubscribeMessage('selectAvatar')
     handleSelectAvatar(@MessageBody() data: { accessCode: string; avatar: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, avatar } = data;
@@ -238,25 +209,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         client.emit('avatarSelected', { avatar });
     }
 
-    // @SubscribeMessage('deselectAvatar')
-    // handleDeselectAvatar(
-    //     @MessageBody() accessCode: string,
-    //     @ConnectedSocket() client: Socket,
-    // ) {
-    //     const lobby = this.lobbyService.getLobby(accessCode);
-
-    //     if (!lobby) {
-    //         client.emit('error', 'Lobby not found');
-    //         return;
-    //     }
-    //     lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
-    //     this.server.to(accessCode).emit('updateUnavailableOptions', {
-    //         names: lobby.players.map((p) => p.name),
-    //         avatars: lobby.waitingPlayers.map((wp) => wp.avatar),
-    //     });
-    //     client.emit('avatarDeselected');
-    // }
-
     @SubscribeMessage('deselectAvatar')
     handleDeselectAvatar(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);
@@ -268,11 +220,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         // Supprime l'avatar du joueur de `waitingPlayers`
         lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
 
-        // console.log(`❌ Mise à jour waitingPlayers après désélection :`, lobby.waitingPlayers);
-
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
-
-        // console.log(`🔄 Envoi de updateUnavailableOptions avec avatars :`, unavailableAvatars);
 
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
         client.emit('avatarDeselected');
@@ -309,15 +257,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
 
         client.join(accessCode);
-        // console.log(`✅ Client ${client.id} a rejoint la room ${accessCode}`);
-
-        // 🔥 Vérifions quels avatars sont indisponibles
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
 
-        // console.log(`🟡 Liste des avatars indisponibles pour ${client.id} après joinRoom:`, unavailableAvatars);
-
-        // ✅ Envoi immédiat au joueur qui rejoint
         this.server.to(client.id).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-        // console.log(`🔄 `, unavailableAvatars);
     }
 }

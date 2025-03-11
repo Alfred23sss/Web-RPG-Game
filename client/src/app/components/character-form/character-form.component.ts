@@ -75,14 +75,10 @@ export class CharacterFormComponent implements OnInit {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
         console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
     
-        // ✅ Vérifier si `updateUnavailableOptions` est bien reçu
         this.socketClientService.onUpdateUnavailableOptions((data: { avatars: string[] }) => {
             console.log("⚡ Client a reçu updateUnavailableOptions :", data.avatars);
             this.unavailableAvatars = [...data.avatars];
     
-            console.log("🟢 Après mise à jour, unavailableAvatars =", this.unavailableAvatars);
-            
-            // ✅ Forcer la mise à jour de l'UI immédiatement
             this.cdr.detectChanges();
         });
     
