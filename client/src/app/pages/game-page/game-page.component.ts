@@ -8,14 +8,11 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { LogBookService } from '@app/services/logbook/logbook.service';
-// import { GameService } from '@app/services/game/game.service';
-import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Subscription } from 'rxjs';
 
-const playerMovement = 3;
 const delayBeforeHome = 2000;
 
 @Component({
@@ -38,11 +35,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     activeTab: 'chat' | 'log' = 'chat';
     logBookSubscription: Subscription;
 
-    // nous avons besoin de ces 6 services pour que tout fonctionne.
-    // eslint-disable-next-line max-params
     constructor(
-        // private gameService: GameService,
-        private gridService: GridService,
         private playerMovementService: PlayerMovementService,
         private router: Router,
         private socketClientService: SocketClientService,
@@ -64,11 +57,19 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const game = sessionStorage.getItem('game');
         this.game = game ? (JSON.parse(game) as Game) : this.game;
 
-        // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
-        this.gridService.setGrid(this.game?.grid);
         if (this.game && this.game.grid) {
-            this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement);
+            this.availablePath = this.playerMovementService.availablePath(
+                this.getCurrentPlayerPosition(),
+                this.currentPlayer.movementPoints,
+                this.game.grid,
+            );
         }
+
+        // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
+        // this.gridService.setGrid(this.game?.grid);
+        // if (this.game && this.game.grid) {
+        //     this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement, this.game.grid);
+        // }
 
         this.handlePageRefresh();
 
@@ -96,8 +97,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
             this.quickestPath = undefined;
         } else {
-            this.playerTile = this.game.grid[1][7];
-            this.quickestPath = this.playerMovementService.quickestPath(this.playerTile, targetTile) || [];
+            this.quickestPath = this.playerMovementService.quickestPath(this.getCurrentPlayerPosition(), targetTile, this.game.grid) || [];
         }
     }
 
@@ -133,5 +133,19 @@ export class GamePageComponent implements OnInit, OnDestroy {
         } else {
             sessionStorage.setItem('refreshed', 'true');
         }
+    }
+
+    private getCurrentPlayerPosition(): Tile | undefined {
+        if (!this.game || !this.game.grid || !this.currentPlayer) {
+            return undefined;
+        }
+        for (const row of this.game.grid) {
+            for (const tile of row) {
+                if (tile.player && tile.player.name === this.currentPlayer.name) {
+                    return tile;
+                }
+            }
+        }
+        return undefined;
     }
 }

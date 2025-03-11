@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
-import { GridService } from '@app/services/grid/grid-service.service';
 
 @Injectable({
     providedIn: 'root',
@@ -15,10 +14,7 @@ export class PlayerMovementService {
         [TileType.Door, 1],
     ]);
 
-    constructor(private gridService: GridService) {}
-
-    availablePath(startTile: Tile | undefined, maxMovement: number): Tile[] {
-        const grid = this.gridService.getGrid();
+    availablePath(startTile: Tile | undefined, maxMovement: number, grid: Tile[][]): Tile[] {
         if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return [];
 
         const reachableTiles = new Set<Tile>();
@@ -50,8 +46,7 @@ export class PlayerMovementService {
         return Array.from(reachableTiles);
     }
 
-    quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined): Tile[] | undefined {
-        const grid = this.gridService.getGrid();
+    quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
         if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
 
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: 0 }];

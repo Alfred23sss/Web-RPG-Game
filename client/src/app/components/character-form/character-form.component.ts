@@ -59,7 +59,7 @@ export class CharacterFormComponent implements OnInit {
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
             hp: { current: 4, max: 4 },
-            movementPoints: 3,
+            movementPoints: 4,
             actionPoints: 3,
             inventory: [null, null],
             isAdmin: false,
@@ -84,6 +84,7 @@ export class CharacterFormComponent implements OnInit {
             this.createdPlayer.hp.current = this.createdPlayer.hp.max = this.characterService.attributes[AttributeType.Vitality];
         } else if (attribute === AttributeType.Speed) {
             this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed];
+            this.createdPlayer.movementPoints = this.createdPlayer.speed;
         }
     }
 
