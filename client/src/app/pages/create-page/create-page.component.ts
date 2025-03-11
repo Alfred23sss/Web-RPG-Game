@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -16,7 +16,8 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
     imports: [MatTooltipModule, CommonModule],
 })
 export class CreatePageComponent implements OnInit {
-    games: Game[] = [];
+    games: Game[] = this.gameService.games;
+    private isLobbyCreated: boolean = false;
     constructor(
         private readonly dialog: MatDialog,
         private readonly gameService: GameService,
@@ -35,15 +36,8 @@ export class CreatePageComponent implements OnInit {
     }
 
     openDialog(game: Game): void {
-        this.gameService.fetchGames().subscribe(() => {
-            const currentGame = this.gameService.getGameById(game.id);
-            if (!currentGame?.isVisible) {
-                this.snackBarService.showMessage(ErrorMessages.UnavailableGame);
-                return;
-            }
-            this.dialog.open(CharacterFormComponent, {
-                data: { game },
-            });
+        this.dialog.open(CharacterFormComponent, {
+            data: { game, isLobbyCreated: this.isLobbyCreated },
         });
     }
 

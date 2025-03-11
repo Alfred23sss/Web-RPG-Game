@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
+import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { Player } from '@app/interfaces/player';
+import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Injectable({
     providedIn: 'root',
@@ -18,6 +21,8 @@ export class CharacterService {
         private readonly router: Router,
         private readonly snackbarService: SnackbarService,
         private readonly gameCommunicationService: GameCommunicationService,
+        private readonly socketClientService: SocketClientService,
+        private readonly accessCodeService: AccessCodeService,
     ) {}
 
     assignBonus(attribute: AttributeType): void {
@@ -42,20 +47,45 @@ export class CharacterService {
         return { attack: null, defense: null };
     }
 
-    submitCharacter(data: {
-        characterName: string;
-        selectedAvatar: string;
-        game: Game;
-        isBonusAssigned: boolean;
-        isDiceAssigned: boolean;
-        closePopup: () => void;
-    }): void {
-        this.validateGameAvailability(data.game, data.closePopup);
-        if (this.isCharacterValid(data.characterName, data.selectedAvatar, data.isBonusAssigned, data.isDiceAssigned)) {
-            this.proceedToWaitingView(data.closePopup);
+    submitCharacter(player: Player, game: Game, closePopup: () => void): void {
+        this.validateGameAvailability(game, closePopup);
+
+        if (this.isCharacterValid(player)) {
+            sessionStorage.setItem('player', JSON.stringify(player));
+            this.proceedToWaitingView(closePopup);
         } else {
             this.showMissingDetailsError();
         }
+    }
+
+    async joinExistingLobby(accessCode: string, player: Player): Promise<string> {
+        return new Promise((resolve) => {
+            this.socketClientService.getLobby(accessCode).subscribe({
+                next: (lobby) => {
+                    if (lobby.isLocked) {
+                        this.snackbarService
+                            .showConfirmation("La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil")
+                            .subscribe({
+                                next: (result) => {
+                                    if (result) {
+                                        resolve(JoinLobbyResult.RedirectToHome);
+                                    } else {
+                                        resolve(JoinLobbyResult.StayInLobby);
+                                    }
+                                },
+                            });
+                    } else {
+                        this.socketClientService.joinLobby(accessCode, player);
+                        resolve(JoinLobbyResult.JoinedLobby);
+                    }
+                },
+            });
+        });
+    }
+
+    async createAndJoinLobby(game: Game, player: Player): Promise<void> {
+        const accessCode = await this.socketClientService.createLobby(game, player);
+        this.accessCodeService.setAccessCode(accessCode);
     }
 
     resetAttributes(): void {
@@ -67,8 +97,20 @@ export class CharacterService {
     checkCharacterNameLength(characterName: string): void {
         const maxLength = 20;
         if (characterName.length >= maxLength) {
-            this.snackbarService.showMessage(`The maximum name length is ${maxLength} characters.`);
+            this.snackbarService.showMessage(`La longueur maximale du nom est de ${maxLength} caractères`);
         }
+    }
+
+    returnHome(): void {
+        this.router.navigate([Routes.HomePage]);
+    }
+
+    isCharacterValid(player: Player): boolean {
+        return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
+    }
+
+    showMissingDetailsError(): void {
+        this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
     }
 
     private validateGameAvailability(game: Game, closePopup: () => void): void {
@@ -83,16 +125,16 @@ export class CharacterService {
         });
     }
 
-    private isCharacterValid(characterName: string, selectedAvatar: string, isBonusAssigned: boolean, isDiceAssigned: boolean): boolean {
-        return !!characterName && !!selectedAvatar && isBonusAssigned && isDiceAssigned;
+    private hasBonusAssigned(player: Player): boolean {
+        return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
+    }
+
+    private hasDiceAssigned(player: Player): boolean {
+        return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
     private proceedToWaitingView(closePopup: () => void): void {
         this.router.navigate([Routes.WaitingView]);
         closePopup();
-    }
-
-    private showMissingDetailsError(): void {
-        this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
     }
 }

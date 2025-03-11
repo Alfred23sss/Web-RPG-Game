@@ -1,7 +1,31 @@
 <div class="waiting-view">
+    @if (isLoading) {
+    <p>Chargement en cours...</p>
+    } @else {
     <p>En attente de participants...</p>
     <p>
         Votre code d'accès: <strong>{{ accessCode }}</strong>
     </p>
+
+    <div class="waiting-line">
+        <h2>Liste des joueurs en attente</h2>
+        <ul>
+            @for (player of lobby.players; track $index) {
+            <li>
+                <span class="player-name">{{ player.name }}</span>
+                @if (player.isAdmin) {
+                <span class="admin-badge">Admin</span>
+                }
+            </li>
+            }
+        </ul>
+    </div>
+
     <button class="button" (click)="navigateToHome()">Quitter</button>
+    @if (player.isAdmin) {
+    <button class="button" (click)="navigateToGame()">Commencer la partie</button>
+    <button class="button" (click)="changeLobbyLockStatus()">
+        {{ lobby.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
+    </button>
+    } }
 </div>

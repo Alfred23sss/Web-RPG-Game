@@ -54,7 +54,7 @@ export class ItemBarComponent implements OnInit {
                 imageSrc: ItemType.Stop,
                 imageSrcGrey: ItemType.StopGray,
                 itemCounter: 1,
-                description: ItemDescription.Stop,
+                description: ItemDescription.Stop, // consider changing this item
             },
             {
                 id: '4',

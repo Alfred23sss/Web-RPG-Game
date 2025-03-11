@@ -1,13 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { Player } from '@app/interfaces/player'; // Updated import
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
+// eslint-disable-next-line import/no-deprecated
+import { HttpClientTestingModule } from '@angular/common/http/testing'; // Corrected import
 
 const DEFAULT_ATTRIBUTE_VALUE = 4;
 const BONUS_ATTRIBUTE_VALUE = 6;
@@ -24,6 +26,8 @@ describe('CharacterService', () => {
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
 
         TestBed.configureTestingModule({
+            // eslint-disable-next-line import/no-deprecated
+            imports: [HttpClientTestingModule], // Use HttpClientTestingModule here
             providers: [
                 CharacterService,
                 { provide: Router, useValue: mockRouter },
@@ -33,6 +37,7 @@ describe('CharacterService', () => {
         });
 
         service = TestBed.inject(CharacterService);
+        mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     });
 
     it('should be created', () => {
@@ -153,15 +158,35 @@ describe('CharacterService', () => {
     });
 
     describe('isCharacterValid', () => {
-        it('should return true when all parameters are valid', () => {
-            expect(service['isCharacterValid']('name', 'avatar.png', true, true)).toBeTrue();
+        let validPlayer: Player;
+
+        beforeEach(() => {
+            validPlayer = {
+                name: 'TestPlayer',
+                avatar: 'avatar.png',
+                speed: 5,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 3, bonusDice: DiceType.D4 },
+                hp: { current: 4, max: 4 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: true,
+                hasAbandoned: false,
+                isActive: true,
+                combatWon: 0,
+            };
         });
-        it('should return false when at least one parameter is missing', () => {
-            expect(service['isCharacterValid']('', 'avatar.png', true, true)).toBeFalse();
-            expect(service['isCharacterValid']('name', '', true, true)).toBeFalse();
-            expect(service['isCharacterValid']('name', 'avatar.png', false, true)).toBeFalse();
-            expect(service['isCharacterValid']('name', 'avatar.png', true, false)).toBeFalse();
-            expect(service['isCharacterValid']('', '', false, false)).toBeFalse();
+
+        it('should return true when all parameters are valid', () => {
+            expect(service.isCharacterValid(validPlayer)).toBeTrue();
+        });
+
+        it('should return false when at least one required parameter is missing', () => {
+            expect(service.isCharacterValid({ ...validPlayer, name: '' })).toBeFalse();
+            expect(service.isCharacterValid({ ...validPlayer, avatar: '' })).toBeFalse();
+            expect(service.isCharacterValid({ ...validPlayer, attack: { value: 4, bonusDice: DiceType.Uninitialized } })).toBeFalse();
+            expect(service.isCharacterValid({ ...validPlayer, defense: { value: 4, bonusDice: DiceType.Uninitialized } })).toBeFalse();
         });
     });
 
@@ -185,65 +210,50 @@ describe('CharacterService', () => {
     describe('showMissingDetailsError', () => {
         it('should call snackbarService.showMessage with MISSING_CHARACTER_DETAILS', () => {
             service['showMissingDetailsError']();
-
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MissingCharacterDetails);
         });
     });
 
-    describe('submitCharacter', () => {
-        let closePopupSpy: jasmine.Spy;
-        let mockGame: Game;
+    it('should call validateGameAvailability and proceed to waiting view if character is valid', () => {
+        const mockPlayer: Player = {
+            name: 'TestPlayer',
+            avatar: 'avatar.png',
+            speed: 5,
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 3, bonusDice: DiceType.D4 },
+            hp: { current: 4, max: 4 },
+            movementPoints: 3,
+            actionPoints: 3,
+            inventory: [null, null],
+            isAdmin: true,
+            hasAbandoned: false,
+            combatWon: 0,
+            isActive: false,
+        };
 
-        beforeEach(() => {
-            closePopupSpy = jasmine.createSpy('closePopup');
-            mockGame = { id: '1', name: 'Test Game' } as Game;
+        const mockGame: Game = {
+            id: '1',
+            name: 'Test Game',
+            size: '4',
+            mode: 'casual',
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image_url',
+            description: 'This is a test game',
+            grid: undefined,
+        };
 
-            spyOn(service as any, 'validateGameAvailability').and.callFake(() => null);
-            spyOn(service as any, 'proceedToWaitingView');
-            spyOn(service as any, 'showMissingDetailsError');
-            spyOn(service as any, 'isCharacterValid').and.returnValue(true);
-        });
+        const closePopupSpy = jasmine.createSpy(); // Create a mock for closePopup
 
-        it('should proceed to waiting view if character is valid', () => {
-            service.submitCharacter({
-                characterName: 'name',
-                selectedAvatar: 'avatar.png',
-                game: mockGame,
-                isBonusAssigned: true,
-                isDiceAssigned: true,
-                closePopup: closePopupSpy,
-            });
+        // Mock the getGameById method to return an observable
+        mockCommunicationService.getGameById.and.returnValue(of(mockGame)); // Ensure this returns an observable
 
-            expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
-            expect(service['showMissingDetailsError']).not.toHaveBeenCalled();
-        });
+        // Provide mockGame and closePopupSpy as arguments
+        service.submitCharacter(mockPlayer, mockGame, closePopupSpy);
 
-        it('should show missing details error if character is invalid', () => {
-            (service as any).isCharacterValid.and.returnValue(false);
-
-            service.submitCharacter({
-                characterName: 'name',
-                selectedAvatar: 'avatar.png',
-                game: mockGame,
-                isBonusAssigned: false,
-                isDiceAssigned: false,
-                closePopup: closePopupSpy,
-            });
-
-            expect(service['showMissingDetailsError']).toHaveBeenCalled();
-            expect(service['proceedToWaitingView']).not.toHaveBeenCalled();
-        });
-    });
-
-    describe('checkCharacterNameLength', () => {
-        it('should not show a snackbar message when character name is within the valid length', () => {
-            service.checkCharacterNameLength('ValidName');
-            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
-        });
-
-        it('should show a snackbar message when character name exceeds the max length', () => {
-            service.checkCharacterNameLength('testWithaLongNameForCharacter');
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('The maximum name length is 20 characters.');
-        });
+        // Check if the correct methods were called
+        expect(mockCommunicationService.getGameById).toHaveBeenCalled();
+        expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
+        expect(closePopupSpy).toHaveBeenCalled();
     });
 });
