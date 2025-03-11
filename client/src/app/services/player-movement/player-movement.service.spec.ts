@@ -36,11 +36,12 @@ describe('PlayerMovementService', () => {
 
     describe('availablePath', () => {
         it('should return empty array for invalid start tile', () => {
-            mockGridService.getGrid.and.returnValue(mockTiles());
+            const grid = mockTiles();
+            mockGridService.getGrid.and.returnValue(grid);
             const invalidTiles = [undefined, createTile('tile-0-0', TileType.Wall), createTile('tile-0-0', TileType.Door, false)];
 
             invalidTiles.forEach((tile) => {
-                expect(service.availablePath(tile as Tile, 5)).toEqual([]);
+                expect(service.availablePath(tile as Tile, 5, grid)).toEqual([]);
             });
         });
 
@@ -51,7 +52,7 @@ describe('PlayerMovementService', () => {
             ];
             mockGridService.getGrid.and.returnValue(grid);
 
-            const result = service.availablePath(grid[0][0], 2);
+            const result = service.availablePath(grid[0][0], 2, grid);
             expect(result).toEqual([grid[0][0]]);
         });
 
@@ -62,7 +63,7 @@ describe('PlayerMovementService', () => {
             ];
             mockGridService.getGrid.and.returnValue(grid);
 
-            const result = service.availablePath(grid[0][0], 3);
+            const result = service.availablePath(grid[0][0], 3, grid);
             expect(result.map((t) => t.id)).toEqual(jasmine.arrayWithExactContents(['tile-0-0', 'tile-0-1', 'tile-1-0', 'tile-1-1']));
         });
 
@@ -70,7 +71,7 @@ describe('PlayerMovementService', () => {
             const grid = [[createTile('invalid_id', TileType.Default), createTile('tile-0-1', TileType.Default)]];
             mockGridService.getGrid.and.returnValue(grid);
 
-            const result = service.availablePath(grid[0][0], 2);
+            const result = service.availablePath(grid[0][0], 2, grid);
             expect(result).toEqual([grid[0][0]]);
         });
 
@@ -78,22 +79,23 @@ describe('PlayerMovementService', () => {
             const grid = [[createTile('tile-0-0', TileType.Default), createTile('tile-0-1', 'Unknown' as TileType)]];
             mockGridService.getGrid.and.returnValue(grid);
 
-            const result = service.availablePath(grid[0][0], 1);
+            const result = service.availablePath(grid[0][0], 1, grid);
             expect(result).toEqual([grid[0][0]]);
         });
     });
 
     describe('quickestPath', () => {
         it('should return undefined for invalid inputs', () => {
-            mockGridService.getGrid.and.returnValue(mockTiles());
+            const grid = mockTiles();
+            mockGridService.getGrid.and.returnValue(grid);
             const tests = [
-                { start: undefined, target: mockTiles()[0][0] },
-                { start: mockTiles()[0][0], target: undefined },
-                { start: mockTiles()[0][0], target: createTile('tile-1-1', TileType.Wall) },
+                { start: undefined, target: grid[0][0] },
+                { start: grid[0][0], target: undefined },
+                { start: grid[0][0], target: createTile('tile-1-1', TileType.Wall) },
             ];
 
             tests.forEach(({ start, target }) => {
-                expect(service.quickestPath(start as Tile, target as Tile)).toBeUndefined();
+                expect(service.quickestPath(start as Tile, target as Tile, grid)).toBeUndefined();
             });
         });
 
@@ -104,7 +106,7 @@ describe('PlayerMovementService', () => {
             ];
             mockGridService.getGrid.and.returnValue(grid);
 
-            const path = service.quickestPath(grid[0][0], grid[1][1]);
+            const path = service.quickestPath(grid[0][0], grid[1][1], grid);
             expect(path?.map((t) => t.id)).toEqual(['tile-0-0', 'tile-1-0', 'tile-1-1']);
         });
 
@@ -112,7 +114,7 @@ describe('PlayerMovementService', () => {
             const grid = [[createTile('tile-0-0', TileType.Default)], [createTile('tile-1-0', TileType.Wall)]];
             mockGridService.getGrid.and.returnValue(grid);
 
-            expect(service.quickestPath(grid[0][0], grid[1][0])).toBeUndefined();
+            expect(service.quickestPath(grid[0][0], grid[1][0], grid)).toBeUndefined();
         });
 
         it('should return undefined when path is completely blocked', () => {
@@ -124,7 +126,7 @@ describe('PlayerMovementService', () => {
 
             const start = grid[0][0];
             const target = grid[1][1];
-            expect(service.quickestPath(start, target)).toBeUndefined();
+            expect(service.quickestPath(start, target, grid)).toBeUndefined();
         });
     });
 

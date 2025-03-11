@@ -59,14 +59,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const game = sessionStorage.getItem('game');
         this.game = game ? (JSON.parse(game) as Game) : this.game;
 
-        if (this.game && this.game.grid) {
-            this.availablePath = this.playerMovementService.availablePath(
-                this.getCurrentPlayerPosition(),
-                this.currentPlayer.movementPoints,
-                this.game.grid,
-            );
-        }
-
         // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
         // this.gridService.setGrid(this.game?.grid);
         // if (this.game && this.game.grid) {
@@ -97,6 +89,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             this.currentPlayer = data.player;
             this.turnTimer = data.turnDuration;
+            if (this.game && this.game.grid) {
+                this.availablePath = this.playerMovementService.availablePath(
+                    this.getClientPlayerPosition(),
+                    this.clientPlayer.movementPoints,
+                    this.game.grid,
+                );
+            }
         });
 
         this.socketClientService.onTimerUpdate((data) => {
@@ -113,7 +112,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
             this.quickestPath = undefined;
         } else {
-            this.quickestPath = this.playerMovementService.quickestPath(this.getCurrentPlayerPosition(), targetTile, this.game.grid) || [];
+            this.quickestPath = this.playerMovementService.quickestPath(this.getClientPlayerPosition(), targetTile, this.game.grid) || [];
         }
     }
 
@@ -153,13 +152,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
-    private getCurrentPlayerPosition(): Tile | undefined {
-        if (!this.game || !this.game.grid || !this.currentPlayer) {
+    private getClientPlayerPosition(): Tile | undefined {
+        if (!this.game || !this.game.grid || !this.clientPlayer) {
             return undefined;
         }
         for (const row of this.game.grid) {
             for (const tile of row) {
-                if (tile.player && tile.player.name === this.currentPlayer.name) {
+                if (tile.player && tile.player.name === this.clientPlayer.name) {
                     return tile;
                 }
             }
