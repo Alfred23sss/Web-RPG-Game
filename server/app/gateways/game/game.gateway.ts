@@ -31,14 +31,14 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.AbandonedGame)
     handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
         this.logger.log(`Player ${payload.player.name} has abandoned game`);
-        this.lobbyService.leaveLobby(payload.accessCode, payload.player.name);
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
         const lobby = this.lobbyService.getLobby(payload.accessCode);
-        client.leave(payload.accessCode);
         this.logger.log(`Lobby ${lobby} has left lobby`);
 
-        if (lobby.players.length <= 1) {
+        if (lobby.players.length <= 2) {
             // stop game session here'
+            this.lobbyService.leaveLobby(payload.accessCode, payload.player.name);
+            client.leave(payload.accessCode);
             this.lobbyService.clearLobby(payload.accessCode);
             this.gameSessionService.deleteGameSession(payload.accessCode);
             this.server.to(payload.accessCode).emit('gameDeleted');
