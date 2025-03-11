@@ -188,10 +188,10 @@ export class CharacterFormComponent implements OnInit {
             this.characterService.showMissingDetailsError();
             return false;
         }
-        if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
-            this.snackbarService.showMessage('Cet avatar est déjà pris !');
-            return false;
-        }
+        // if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
+        //     this.snackbarService.showMessage('Cet avatar est déjà pris !');
+        //     return false;
+        // }
 
         return true;
     }

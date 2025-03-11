@@ -314,4 +314,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     this.server.to(client.id).emit('updateUnavailableOptions', updatedUnavailableOptions);
 }
 
+
+
 }
