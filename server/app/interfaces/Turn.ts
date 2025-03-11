@@ -1,9 +1,11 @@
 import { Player } from './Player';
 
 export interface Turn {
-    currentPlayer: Player | undefined;
-    orderedPlayers: Player[] | undefined;
-    turnTimers?: NodeJS.Timeout | null;
+    orderedPlayers: Player[];
+    currentPlayer: Player | null;
     currentTurnCountdown: number;
-    isTransitionPhase?: boolean;
+    turnTimers: NodeJS.Timeout | null; // For setTimeout
+    countdownInterval: NodeJS.Timeout | null; // For setInterval
+    isTransitionPhase: boolean;
+    transitionTimeRemaining?: number;
 }

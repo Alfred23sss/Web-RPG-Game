@@ -92,7 +92,6 @@ app-grid {
     font-weight: bold;
 }
 
-
 .game-messages {
     flex: 0 0 300px;
     padding: 15px;
@@ -145,6 +144,14 @@ player-name {
     color: #2c3b56;
     border: 1px solid #b38a00;
     font-weight: 700;
+}
+
+.timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff5722;
+    text-align: center;
+    margin: 10px 0;
 }
 
 .player-regular {
