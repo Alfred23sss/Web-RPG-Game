@@ -55,7 +55,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         const lobby = sessionStorage.getItem('lobby');
-        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; //lobby peut etre inutile, car on a accesscode
+        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; // lobby peut etre inutile, car on a accesscode
         const currentPlayer = sessionStorage.getItem('player');
         this.currentPlayer = currentPlayer ? (JSON.parse(currentPlayer) as Player) : this.currentPlayer;
         this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
