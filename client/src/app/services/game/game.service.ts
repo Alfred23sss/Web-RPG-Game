@@ -44,6 +44,7 @@ export class GameService {
         return this.gameCommunicationService.deleteGame(id).pipe(
             tap(() => {
                 this.removeGame(id);
+                this.fetchGames().subscribe();
             }),
         );
     }
@@ -73,12 +74,14 @@ export class GameService {
     }
 
     saveGame(gameToAdd: Game): void {
-        const existingGame = this.getGameById(gameToAdd.id);
-        if (existingGame) {
-            this.updateExistingGame(gameToAdd);
-        } else {
-            this.saveNewGame(gameToAdd);
-        }
+        this.fetchGames().subscribe(() => {
+            const existingGame = this.getGameById(gameToAdd.id);
+            if (existingGame) {
+                this.updateExistingGame(gameToAdd);
+            } else {
+                this.saveNewGame(gameToAdd);
+            }
+        });
     }
 
     getCurrentGame(): Game | undefined {

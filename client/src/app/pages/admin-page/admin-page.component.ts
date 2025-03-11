@@ -47,6 +47,7 @@ export class AdminPageComponent implements OnInit {
     updateCurrentGame(id: string): void {
         const game = this.gameService.getGameById(id);
         if (game) {
+            game.isVisible = false;
             this.gameService.updateCurrentGame(game);
         }
     }
