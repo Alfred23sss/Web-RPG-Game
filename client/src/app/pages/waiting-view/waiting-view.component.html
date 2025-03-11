@@ -6,7 +6,6 @@
     <p>
         Votre code d'accès: <strong>{{ accessCode }}</strong>
     </p>
-
     <div class="waiting-line">
         <h2>Liste des joueurs en attente</h2>
         <ul>
@@ -15,6 +14,8 @@
                 <span class="player-name">{{ player.name }}</span>
                 @if (player.isAdmin) {
                 <span class="admin-badge">Admin</span>
+                } @if (this.player.isAdmin && !player.isAdmin) {
+                <button (click)="kickPlayer(player)">Expulser</button>
                 }
             </li>
             }

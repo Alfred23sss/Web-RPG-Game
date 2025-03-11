@@ -97,7 +97,6 @@ export class SocketClientService {
             });
         });
     }
-    
 
     addPlayerToLobby(accessCode: string, player: unknown) {
         this.socket.emit('joinLobby', { accessCode, player });

@@ -64,6 +64,10 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
         this.socketClientService.onLobbyUpdate((players: Player[]) => {
             this.lobby.players = players;
+            if (!players.some((p) => p.name === this.player.name)) {
+                this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
+                this.navigateToHome();
+            }
         });
 
         this.socketClientService.onLeaveLobby(() => {
@@ -95,7 +99,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if (this.accessCode && this.player) {
+        const isPlayerInLobby = this.lobby.players.some((p) => p.name === this.player.name);
+        if (this.accessCode && isPlayerInLobby) {
             this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
             if (this.player.isAdmin) {
                 this.socketClientService.deleteLobby(this.accessCode);
@@ -114,6 +119,14 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.socketClientService.lockLobby(this.accessCode);
         }
     }
+
+    kickPlayer(player: Player): void {
+        if (this.accessCode) {
+            this.socketClientService.removePlayerFromLobby(this.accessCode, player.name);
+            this.lobby.players = this.lobby.players.filter((p) => p.name !== player.name);
+        }
+    }
+
     navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
     }
