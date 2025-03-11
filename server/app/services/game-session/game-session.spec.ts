@@ -1,13 +1,15 @@
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { GameSessionService } from './game-session.service';
 import { Logger } from '@nestjs/common/services/logger.service';
+import { EventEmitter2 } from 'eventemitter2';
+import { GameSessionService } from './game-session.service';
 
 describe('GameSessionService', () => {
     let gameSessionService: GameSessionService;
     let lobbyService: LobbyService;
     let accessCodesService: AccessCodesService;
     let logger: Logger;
+    let eventEmitter: EventEmitter2;
 
     const mockLobby = {
         accessCode: 'test-access-code',
@@ -33,8 +35,9 @@ describe('GameSessionService', () => {
         accessCodesService = new AccessCodesService();
         logger = new Logger();
         lobbyService = new LobbyService(accessCodesService, logger);
+        eventEmitter = new EventEmitter2();
 
-        gameSessionService = new GameSessionService(lobbyService);
+        gameSessionService = new GameSessionService(lobbyService, eventEmitter);
     });
 
     it('should be defined', () => {

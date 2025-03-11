@@ -30,46 +30,42 @@
         <div class="player-info">
             <h3>Informations du joueur</h3>
             <div class="player-header">
-                <p class="player-name">{{ currentPlayer.name }}</p>
-                <img [src]="currentPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
+                <p class="player-name">{{ clientPlayer.name }}</p>
+                <img [src]="clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
             </div>
             <div class="player-stats">
                 <div class="health-bar">
-                    <div class="health-label">Points de vie: {{ currentPlayer.hp.current }} / {{ currentPlayer.hp.max }}</div>
+                    <div class="health-label">Points de vie: {{ clientPlayer.hp.current }} / {{ clientPlayer.hp.max }}</div>
                     <div class="health-bar-outer">
-                        <div class="health-bar-inner" [style.width.%]="(currentPlayer.hp.current / currentPlayer.hp.max) * 100"></div>
+                        <div class="health-bar-inner" [style.width.%]="(clientPlayer.hp.current / clientPlayer.hp.max) * 100"></div>
                     </div>
                 </div>
                 <div class="attributes-grid">
                     <div class="attribute">
                         <span class="attribute-label">Rapidité: </span>
-                        <span class="attribute-value">{{ currentPlayer.speed }}</span>
+                        <span class="attribute-value">{{ clientPlayer.speed }}</span>
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Attaque: </span>
-                        <span class="attribute-value">
-                            {{ currentPlayer.attack.value }} (Bonus: {{ currentPlayer.attack.bonusDice }})
-                        </span>
+                        <span class="attribute-value"> {{ clientPlayer.attack.value }} (Bonus: {{ clientPlayer.attack.bonusDice }}) </span>
                     </div>
                     <div class="attribute">
                         <span class="attribute-label">Défense: </span>
-                        <span class="attribute-value">
-                            {{ currentPlayer.defense.value }} (Bonus: {{ currentPlayer.defense.bonusDice }})
-                        </span>
-                    </div>                    
+                        <span class="attribute-value"> {{ clientPlayer.defense.value }} (Bonus: {{ clientPlayer.defense.bonusDice }}) </span>
+                    </div>
                 </div>
                 <div class="dice-type">
                     <span class="dice-label">Dés assignés: </span>
-                    <span class="dice-value">{{ currentPlayer.attack.bonusDice }}</span>
+                    <span class="dice-value">{{ clientPlayer.attack.bonusDice }}</span>
                 </div>
                 <div class="resources">
                     <div class="resource">
                         <span class="resource-label">Mouvements restants: </span>
-                        <span class="resource-value">{{ currentPlayer.movementPoints }}</span>
+                        <span class="resource-value">{{ clientPlayer.movementPoints }}</span>
                     </div>
                     <div class="resource">
                         <span class="resource-label">Actions restantes: </span>
-                        <span class="resource-value">{{ currentPlayer.actionPoints }}</span>
+                        <span class="resource-value">{{ clientPlayer.actionPoints }}</span>
                     </div>
                 </div>
             </div>
@@ -86,9 +82,19 @@
                 (tileHovered)="updateQuickestPath($event)"
             ></app-grid>
         </div>
+        <div class="timer">
+            @if (currentPlayer.name === clientPlayer.name) {
+            <p>C'est votre tour</p>
+            } @else {
+            <p>C'est le tour à {{ currentPlayer.name }}</p>
+            }
+            <p>Temps restant: {{ turnTimer }} secondes</p>
+        </div>
 
         <div class="action-buttons">
+            @if(currentPlayer.name === clientPlayer.name){
             <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
+            }
             <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
         </div>
