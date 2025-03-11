@@ -11,8 +11,6 @@ import { CharacterService } from '@app/services/character-form/character-form.se
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 
-
-
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
@@ -20,7 +18,6 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
     standalone: true,
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, CommonModule],
-
 })
 export class CharacterFormComponent implements OnInit {
     showForm: boolean = true;
@@ -74,18 +71,16 @@ export class CharacterFormComponent implements OnInit {
     ngOnInit(): void {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
         console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
-    
+
         this.socketClientService.onUpdateUnavailableOptions((data: { avatars: string[] }) => {
-            console.log("⚡ Client a reçu updateUnavailableOptions :", data.avatars);
+            console.log('⚡ Client a reçu updateUnavailableOptions :', data.avatars);
             this.unavailableAvatars = [...data.avatars];
-    
+
             this.cdr.detectChanges();
         });
-    
+
         this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
     }
-    
-    
 
     assignBonus(attribute: AttributeType): void {
         this.characterService.assignBonus(attribute);
@@ -126,7 +121,7 @@ export class CharacterFormComponent implements OnInit {
     //     if (!this.unavailableAvatars.includes(avatar)) {
     //         this.createdPlayer.avatar = avatar;
     //         this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
-            
+
     //     } else {
     //         this.snackbarService.showMessage('Cet avatar est déjà pris !');
     //     }
@@ -136,37 +131,33 @@ export class CharacterFormComponent implements OnInit {
         if (this.createdPlayer.avatar) {
             this.deselectAvatar();
         }
-    
+
         if (!this.unavailableAvatars.includes(avatar)) {
             this.createdPlayer.avatar = avatar;
             this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
-    
+
             this.unavailableAvatars = [...this.unavailableAvatars, avatar];
-    
+
             this.cdr.markForCheck();
             this.cdr.detectChanges();
         } else {
             this.snackbarService.showMessage('Cet avatar est déjà pris !');
         }
     }
-    
-    
-    
 
     deselectAvatar(): void {
         if (this.createdPlayer.avatar) {
             console.log(`❌ Désélection de l'avatar : ${this.createdPlayer.avatar}`);
             this.socketClientService.deselectAvatar(this.currentAccessCode);
-    
-            this.unavailableAvatars = this.unavailableAvatars.filter(av => av !== this.createdPlayer.avatar);
+
+            this.unavailableAvatars = this.unavailableAvatars.filter((av) => av !== this.createdPlayer.avatar);
             this.createdPlayer.avatar = '';
-    
+
             this.cdr.markForCheck();
             this.cdr.detectChanges();
         }
     }
-    
-    
+
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
