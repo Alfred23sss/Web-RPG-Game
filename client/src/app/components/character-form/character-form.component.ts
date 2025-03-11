@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -171,6 +170,7 @@ export class CharacterFormComponent implements OnInit {
     }
     
     
+    
 
     deselectAvatar(): void {
         if (this.createdPlayer.avatar) {
@@ -185,6 +185,7 @@ export class CharacterFormComponent implements OnInit {
             this.cdr.detectChanges();
         }
     }
+    
     
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {

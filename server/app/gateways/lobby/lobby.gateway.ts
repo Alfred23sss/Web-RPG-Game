@@ -239,6 +239,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     }
     
     
+    
 
 
     
@@ -314,4 +315,20 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
         this.logger.log(`User disconnected: ${client.id}`);
     }
+    @SubscribeMessage('joinRoom')
+handleJoinRoom(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+    const lobby = this.lobbyService.getLobby(accessCode);
+    if (!lobby) {
+        client.emit('error', 'Lobby not found');
+        return;
+    }
+
+    client.join(accessCode);
+    console.log(`✅ Client ${client.id} a rejoint la room ${accessCode} immédiatement après validation du code.`);
+
+    const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+    console.log(`🔄 Envoi de updateUnavailableOptions après joinRoom:`, updatedUnavailableOptions);
+    this.server.to(client.id).emit('updateUnavailableOptions', updatedUnavailableOptions);
+}
+
 }
