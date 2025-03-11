@@ -39,6 +39,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (storedPlayer) {
             this.player = JSON.parse(storedPlayer);
         }
+        console.log(this.player);
 
         this.socketClientService.getLobby(this.accessCode).subscribe({
             next: (lobby) => {
@@ -62,14 +63,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             });
         });
 
-        this.socketClientService.onLobbyUpdate((players: Player[]) => {
-            this.lobby.players = players;
-            if (!players.some((p) => p.name === this.player.name)) {
-                this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
-                this.navigateToHome();
-            }
-        });
-
         this.socketClientService.onLeaveLobby(() => {
             this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
                 next: (players) => {
@@ -79,6 +72,17 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                     throw new Error('Error fetching players');
                 },
             });
+        });
+
+        this.socketClientService.onLobbyUpdate((players: Player[]) => {
+            this.lobby.players = players;
+        });
+
+        this.socketClientService.onKicked(({ accessCode, playerName }) => {
+            if (accessCode === this.accessCode && playerName === this.player.name) {
+                this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
+                this.navigateToHome();
+            }
         });
 
         this.socketClientService.onLobbyLocked(({ accessCode, isLocked }) => {
@@ -107,7 +111,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             }
         }
     }
-
     changeLobbyLockStatus(): void {
         if (this.lobby.isLocked) {
             if (this.lobby.players.length < this.lobby.maxPlayers) {
@@ -122,7 +125,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     kickPlayer(player: Player): void {
         if (this.accessCode) {
-            this.socketClientService.removePlayerFromLobby(this.accessCode, player.name);
+            this.socketClientService.emit('kickPlayer', {
+                accessCode: this.accessCode,
+                playerName: player.name,
+            });
+
             this.lobby.players = this.lobby.players.filter((p) => p.name !== player.name);
         }
     }

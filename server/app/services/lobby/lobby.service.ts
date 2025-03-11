@@ -1,4 +1,4 @@
-import { GameSize, GameSizePlayerCount } from '@app/enums/enums';
+import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
 import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
@@ -17,12 +17,14 @@ export class LobbyService {
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
         const maxPlayers =
-            game.size === GameSize.Small
+            game.size === GameSizeTileCount.Small
                 ? GameSizePlayerCount.Small
-                : game.size === GameSize.Medium
+                : game.size === GameSizeTileCount.Medium
                 ? GameSizePlayerCount.Medium
                 : GameSizePlayerCount.Large;
-        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers, waitingPlayers: [] }); // verrifier ona fait la emme chose qie ds
+
+        const lobby = { accessCode, game, players: [], isLocked: false, maxPlayers, waitingPlayers: [] };
+        this.lobbies.set(accessCode, lobby);
         return accessCode;
     }
 

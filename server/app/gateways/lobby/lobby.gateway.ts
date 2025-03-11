@@ -120,6 +120,17 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
     }
 
+    @SubscribeMessage('kickPlayer')
+    handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
+        this.logger.log(`Admin requested to kick player ${data.playerName} from lobby ${data.accessCode}`);
+
+        this.handleLeaveLobby(data, client);
+
+        this.server.to(client.id).emit('kicked', { accessCode: data.accessCode, playerName: data.playerName });
+
+        this.logger.log(`Player ${data.playerName} was kicked from lobby ${data.accessCode}`);
+    }
+
     @SubscribeMessage(LobbyEvents.GetLobbyPlayers)
     handleGetLobbyPlayers(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const players = this.lobbyService.getLobbyPlayers(accessCode);

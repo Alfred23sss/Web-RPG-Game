@@ -71,6 +71,10 @@ export class SocketClientService {
         this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
+    kickPlayer(accessCode: string, playerName: string): void {
+        this.socket.emit('kickPlayer', { accessCode, playerName });
+    }
+
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
             this.socket.emit('getLobbyPlayers', accessCode);
@@ -116,6 +120,10 @@ export class SocketClientService {
 
     onLobbyError(callback: (error: string) => void) {
         this.socket.on('error', callback);
+    }
+
+    onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
+        this.socket.on('kicked', callback);
     }
 
     onLobbyCreated(callback: (players: unknown[]) => void) {
@@ -169,7 +177,7 @@ export class SocketClientService {
     // }
     onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
         this.socket.on('updateUnavailableOptions', (data) => {
-            console.log("🔄 Événement reçu du serveur :", data);
+            console.log('🔄 Événement reçu du serveur :', data);
             callback(data);
         });
     }
@@ -182,30 +190,29 @@ export class SocketClientService {
         console.log(`Selecting avatar: ${avatar} for lobby: ${accessCode}`);
         this.socket.emit('selectAvatar', { accessCode, avatar });
     }
-    
+
     deselectAvatar(accessCode: string): void {
         console.log(`Deselecting avatar for lobby: ${accessCode}`);
         this.socket.emit('deselectAvatar', { accessCode });
     }
-    
+
     // onAvatarSelected(callback: (data: { avatar: string }) => void): void {
     //     this.socket.on('avatarSelected', callback);
     // }
     onAvatarSelected(callback: (data: { avatar: string }) => void): void {
         this.socket.on('avatarSelected', (data) => {
-            console.log("Avatar selected:", data);
+            console.log('Avatar selected:', data);
             callback(data);
         });
     }
-    
-    
+
     // onAvatarDeselected(callback: () => void): void {
     //     this.socket.on('avatarDeselected', callback);
     // }
 
     onAvatarDeselected(callback: () => void): void {
         this.socket.on('avatarDeselected', () => {
-            console.log("Avatar deselected");
+            console.log('Avatar deselected');
             callback();
         });
     }
