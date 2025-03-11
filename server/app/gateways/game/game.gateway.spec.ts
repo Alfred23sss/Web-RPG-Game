@@ -1,9 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { GameGateway } from './game.gateway';
+import { GameManagerService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
+import { GameGateway } from './game.gateway';
 
 describe('GameGateway', () => {
     let gateway: GameGateway;
@@ -29,6 +30,7 @@ describe('GameGateway', () => {
                         }),
                     },
                 },
+                { provide: GameManagerService, useValue: {} },
             ],
         }).compile();
 

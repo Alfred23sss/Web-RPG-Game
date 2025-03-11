@@ -39,6 +39,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     activeTab: 'chat' | 'log' = 'chat';
     logBookSubscription: Subscription;
     turnTimer: number;
+    isInCombatMode: boolean = false;
 
     // nous avons besoin de ces 6 services pour que tout fonctionne.
     // eslint-disable-next-line max-params
@@ -127,7 +128,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     executeNextAction(): void {
-        return;
+        this.isInCombatMode = true;
+        this.snackbarService.showMessage('Mode combat activé');
     }
     abandonGame(): void {
         // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?

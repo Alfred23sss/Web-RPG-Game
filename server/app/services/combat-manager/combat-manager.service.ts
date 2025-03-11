@@ -9,6 +9,8 @@ const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
+const DICE_RANDOMIZER = 6;
+const ESCAPE_TRESHOLD = 0.5;
 
 @Injectable()
 export class GameManagerService {
@@ -55,9 +57,9 @@ export class GameManagerService {
             return;
         }
 
-        const attackerScore = currentFighter.attack.value + Math.floor(Math.random() * 6) + 1;
+        const attackerScore = currentFighter.attack.value + Math.floor(Math.random() * DICE_RANDOMIZER) + 1;
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
-        const defenseScore = defenderPlayer.defense.value + Math.floor(Math.random() * 6) + 1;
+        const defenseScore = defenderPlayer.defense.value + Math.floor(Math.random() * DICE_RANDOMIZER) + 1;
         const attackSuccessful = attackerScore > defenseScore;
 
         this.emitCombatAttackResult(accessCode, currentFighter, attackSuccessful, attackerScore, defenseScore);
@@ -89,7 +91,7 @@ export class GameManagerService {
 
         remainingEscapeAttempts.set(playerName, attemptsLeft - 1);
 
-        const escapeSuccessful = Math.random() > 0.5;
+        const escapeSuccessful = Math.random() > ESCAPE_TRESHOLD;
 
         this.emitCombatEscapeAttemptResult(accessCode, currentFighter, escapeSuccessful, attemptsLeft - 1);
 
