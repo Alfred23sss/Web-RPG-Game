@@ -74,33 +74,22 @@ export class CharacterFormComponent implements OnInit {
     ngOnInit(): void {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
         console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
-
-
-        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
-
-        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            console.log('⚡ Mise à jour des avatars indisponibles reçue :', data.avatars);
+    
+        // ✅ Vérifier si `updateUnavailableOptions` est bien reçu
+        this.socketClientService.onUpdateUnavailableOptions((data: { avatars: string[] }) => {
+            console.log("⚡ Client a reçu updateUnavailableOptions :", data.avatars);
             this.unavailableAvatars = [...data.avatars];
+    
+            console.log("🟢 Après mise à jour, unavailableAvatars =", this.unavailableAvatars);
+            
+            // ✅ Forcer la mise à jour de l'UI immédiatement
             this.cdr.detectChanges();
         });
-
-
-        this.socketClientService.onAvatarSelected((data: { avatar: string }) => {
-            if (data.avatar === this.createdPlayer.avatar) {
-                this.snackbarService.showMessage('Avatar sélectionné avec succès !');
-            }
-        });
-
-
-        this.socketClientService.onAvatarDeselected(() => {
-            if (this.createdPlayer.avatar) {
-                this.snackbarService.showMessage('Avatar désélectionné.');
-            }
-        });
-        this.cdr.markForCheck();
-        this.cdr.detectChanges();
-
+    
+        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
     }
+    
+    
 
     assignBonus(attribute: AttributeType): void {
         this.characterService.assignBonus(attribute);
@@ -149,7 +138,6 @@ export class CharacterFormComponent implements OnInit {
     // }
     selectAvatar(avatar: string): void {
         if (this.createdPlayer.avatar) {
-            // ✅ Si un avatar est déjà sélectionné, on doit le retirer avant d'en choisir un autre
             this.deselectAvatar();
         }
     
@@ -157,11 +145,8 @@ export class CharacterFormComponent implements OnInit {
             this.createdPlayer.avatar = avatar;
             this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
     
-            // ✅ Mise à jour immédiate de unavailableAvatars pour éviter le délai
             this.unavailableAvatars = [...this.unavailableAvatars, avatar];
     
-            console.log('🚀 Avatar sélectionné :', avatar);
-            console.log('🚀 Mise à jour immédiate des avatars indisponibles :', this.unavailableAvatars);
             this.cdr.markForCheck();
             this.cdr.detectChanges();
         } else {
@@ -177,7 +162,6 @@ export class CharacterFormComponent implements OnInit {
             console.log(`❌ Désélection de l'avatar : ${this.createdPlayer.avatar}`);
             this.socketClientService.deselectAvatar(this.currentAccessCode);
     
-            // ✅ Supprimer l'avatar du joueur
             this.unavailableAvatars = this.unavailableAvatars.filter(av => av !== this.createdPlayer.avatar);
             this.createdPlayer.avatar = '';
     
