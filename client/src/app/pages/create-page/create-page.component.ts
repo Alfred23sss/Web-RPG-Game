@@ -7,7 +7,6 @@ import { CharacterFormComponent } from '@app/components/character-form/character
 import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
 @Component({
     selector: 'app-create-page',
@@ -22,7 +21,6 @@ export class CreatePageComponent implements OnInit {
         private readonly dialog: MatDialog,
         private readonly gameService: GameService,
         private readonly router: Router,
-        private readonly snackBarService: SnackbarService,
     ) {}
 
     get visibleGames(): Game[] {
