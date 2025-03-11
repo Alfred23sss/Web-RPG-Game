@@ -148,6 +148,7 @@ export enum ErrorMessages {
     InnacessibleTerrain = '❌ Aucune tuile de terrain accessible trouvée',
     SomeTilesInnacessible = '❌ Il y a des tuiles inaccesseibles sur le terrain',
     MustPlaceHouseItems = 'items maisons doivent être placées',
+    TooManyItemsPlaced = '❌ Trop d’items ont été placés',
 }
 
 export enum TileType {
