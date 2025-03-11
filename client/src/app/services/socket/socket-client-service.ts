@@ -221,4 +221,20 @@ export class SocketClientService {
     onGameDeleted(callback: () => void) {
         this.socket.on('gameDeleted', callback);
     }
+
+    onGameCombatStarted(callback: (data: { attacker: Player; defender: Player; firstFighter: Player }) => void) {
+        this.socket.on('combatStarted', callback);
+    }
+
+    onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
+        this.socket.on('combatTimerUpdate', callback);
+    }
+
+    onGameCombatTimeout(callback: (data: { fighter: Player }) => void) {
+        this.socket.on('combatTimeout', callback);
+    }
+
+    onGameCombatTurnStarted(callback: (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => void) {
+        this.socket.on('combatTurnStarted', callback);
+    }
 }
