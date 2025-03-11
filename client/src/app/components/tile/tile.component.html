@@ -3,4 +3,7 @@
     @if(tile.item) {
     <img draggable="true" alt="Overlay" [src]="tile.item.imageSrc" class="overlay-image" [title]="tile.item.description" />
     }
+    @if(tile.player) {
+        <img draggable="true" alt="Overlay" [src]="tile.player.avatar" class="overlay-image" [title]="tile.player.name" />
+        }
 </div>
