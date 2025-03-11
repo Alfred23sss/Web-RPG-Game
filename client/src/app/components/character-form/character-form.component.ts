@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -10,15 +10,13 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { ChangeDetectorRef } from '@angular/core';
-import { ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
     styleUrls: ['./character-form.component.scss'],
     standalone: true,
-    changeDetection: ChangeDetectionStrategy.OnPush, 
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, CommonModule],
 })
 export class CharacterFormComponent implements OnInit {
@@ -35,7 +33,6 @@ export class CharacterFormComponent implements OnInit {
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
-
 
     unavailableAvatars: string[] = [];
     errorMessage: string = '';
@@ -83,23 +80,22 @@ export class CharacterFormComponent implements OnInit {
     ngOnInit(): void {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
         console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
-        
+
         this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
 
         this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            console.log("⚡ Mise à jour des avatars indisponibles reçue :", data.avatars);
-            this.unavailableAvatars = [...data.avatars]; 
+            console.log('⚡ Mise à jour des avatars indisponibles reçue :', data.avatars);
+            this.unavailableAvatars = [...data.avatars];
             this.cdr.markForCheck();
             this.cdr.detectChanges();
         });
-        
-    
+
         this.socketClientService.onAvatarSelected((data: { avatar: string }) => {
             if (data.avatar === this.createdPlayer.avatar) {
                 this.snackbarService.showMessage('Avatar sélectionné avec succès !');
             }
         });
-    
+
         this.socketClientService.onAvatarDeselected(() => {
             if (this.createdPlayer.avatar) {
                 this.snackbarService.showMessage('Avatar désélectionné.');
@@ -149,9 +145,9 @@ export class CharacterFormComponent implements OnInit {
         } else {
             this.snackbarService.showMessage('Cet avatar est déjà pris !');
         }
-        console.log('les avatars pas dispo sont ', this.unavailableAvatars)
+        console.log('les avatars pas dispo sont ', this.unavailableAvatars);
     }
-    
+
     deselectAvatar(): void {
         if (this.createdPlayer.avatar) {
             this.socketClientService.deselectAvatar(this.currentAccessCode);
