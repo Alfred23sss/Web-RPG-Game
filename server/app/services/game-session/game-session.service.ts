@@ -1,7 +1,7 @@
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
-import { Game } from '@app/model/database/game';
+import { Tile } from '@app/model/database/tile';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -19,10 +19,20 @@ export class GameSessionService {
         private readonly eventEmitter: EventEmitter2,
     ) {}
 
-    createGameSession(accessCode: string, game: Game): GameSession {
+    createGameSession(accessCode: string): GameSession {
+        const lobby = this.lobbyService.getLobby(accessCode);
+        const game = lobby.game;
+        const grid = game.grid;
+        const spawnPoints = this.findSpawnPoints(grid);
+
+        const turn = this.initializeTurn(accessCode);
+
+        const updatedGrid = this.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
+
+        game.grid = updatedGrid;
         const gameSession: GameSession = {
             game,
-            turn: this.initializeTurn(accessCode),
+            turn,
         };
         this.gameSessions.set(accessCode, gameSession);
         this.startTransitionPhase(accessCode);
@@ -41,24 +51,25 @@ export class GameSessionService {
             this.gameSessions.delete(accessCode);
         }
     }
-
-    handlePlayerAbandoned(accessCode: string, playerName: string): Player {
+    handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return;
+        if (!gameSession) return null;
 
         const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
         if (player) {
             this.updatePlayer(player, { hasAbandoned: true });
+            // faudra ajouter la logiue d'enlever le spawnpoint
+            // if (tile) {
+            //     tile.player = null;
+            // }
         }
         return player;
     }
 
     getPlayers(accessCode: string): Player[] {
         const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return [];
-        return gameSession.turn.orderedPlayers;
+        return gameSession ? gameSession.turn.orderedPlayers : [];
     }
-
     endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
@@ -83,8 +94,9 @@ export class GameSessionService {
     }
 
     private updatePlayer(player: Player, updates: Partial<Player>): void {
-        if (!player) return;
-        Object.assign(player, updates);
+        if (player) {
+            Object.assign(player, updates);
+        }
     }
 
     private initializeTurn(accessCode: string): Turn {
@@ -99,7 +111,7 @@ export class GameSessionService {
     }
 
     private orderPlayersBySpeed(players: Player[]): Player[] {
-        const playerList = players.sort((a, b) => {
+        const playerList = [...players].sort((a, b) => {
             if (a.speed === b.speed) {
                 return Math.random() < randomizer ? -1 : 1;
             }
@@ -115,6 +127,24 @@ export class GameSessionService {
         return playerList;
     }
 
+    private findSpawnPoints(grid: Tile[][]): Tile[] {
+        return grid.flat().filter((tile) => tile.item?.name === 'home');
+    }
+
+    private assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): Tile[][] {
+        const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - randomizer);
+
+        players.forEach((player, index) => {
+            if (index < shuffledSpawns.length) {
+                shuffledSpawns[index].player = player;
+            }
+        });
+
+        shuffledSpawns.slice(players.length).forEach((spawnPoint) => {
+            spawnPoint.item = null;
+        });
+        return grid;
+    }
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;

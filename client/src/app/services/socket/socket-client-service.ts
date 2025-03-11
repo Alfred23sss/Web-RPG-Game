@@ -102,7 +102,7 @@ export class SocketClientService {
         this.socket.emit('createGame', { accessCode });
     }
 
-    onAlertGameStarted(callback: (data: { orderedPlayers: Player[] }) => void) {
+    onAlertGameStarted(callback: (data: { orderedPlayers: Player[]; updatedGame: Game }) => void) {
         this.socket.on('gameStarted', (data) => {
             callback(data);
         });

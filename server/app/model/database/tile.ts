@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { ApiProperty } from '@nestjs/swagger';
 import { Document } from 'mongoose';
 import { Item } from './item';
+import { Player } from './player';
 
 export type GameDocument = Tile & Document;
 
@@ -38,6 +39,10 @@ export class Tile {
     @ApiProperty({ type: Item })
     @Prop({ type: Item, required: false })
     item?: Item;
+
+    @ApiProperty({ type: Player })
+    @Prop({ type: Player, required: false })
+    player?: Player;
 }
 
 export const tileSchema = SchemaFactory.createForClass(Tile);
