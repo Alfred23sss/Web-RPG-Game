@@ -1,15 +1,27 @@
+import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import { CombatManagerService } from './combat-manager.service';
+import { GameManagerService } from './combat-manager.service';
 
-describe('CombatManagerService', () => {
-    let service: CombatManagerService;
+describe('GameManagerService', () => {
+    let service: GameManagerService;
+
+    const mockGameSessionService = {};
+    const mockEventEmitter = {};
+    const mockLogger = {};
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [CombatManagerService],
+            providers: [
+                GameManagerService,
+                { provide: GameSessionService, useValue: mockGameSessionService },
+                { provide: EventEmitter2, useValue: mockEventEmitter },
+                { provide: Logger, useValue: mockLogger },
+            ],
         }).compile();
 
-        service = module.get<CombatManagerService>(CombatManagerService);
+        service = module.get<GameManagerService>(GameManagerService);
     });
 
     it('should be defined', () => {

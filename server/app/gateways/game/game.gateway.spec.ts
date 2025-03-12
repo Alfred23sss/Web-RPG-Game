@@ -1,5 +1,6 @@
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
+import { GameManagerService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
@@ -60,6 +61,18 @@ describe('GameGateway', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GameGateway,
+                { provide: Logger, useValue: { log: jest.fn() } },
+                { provide: LobbyService, useValue: { getLobby: jest.fn() } },
+                {
+                    provide: GameSessionService,
+                    useValue: {
+                        createGameSession: jest.fn().mockReturnValue({
+                            turn: { orderedPlayers: [] },
+                            game: {},
+                        }),
+                    },
+                },
+                { provide: GameManagerService, useValue: {} },
                 { provide: Logger, useValue: loggerMock },
                 { provide: LobbyService, useValue: lobbyServiceMock },
                 { provide: GameSessionService, useValue: gameSessionServiceMock },
