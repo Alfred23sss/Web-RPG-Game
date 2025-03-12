@@ -288,4 +288,71 @@ fdescribe('GameSessionService', () => {
     //     expect(session.turn.turnTimers).toBeNull();
     //     expect(session.turn.countdownInterval).toBeNull();
     // });
+
+    it('should emit turn resumed event when resuming game', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+
+        gameSessionService.endTurn(MOCK_LOBBY.accessCode);
+        jest.advanceTimersByTime(DEFAULT_TIME);
+
+        const remainingTime = 15;
+        const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+        gameSessionService.resumeGameTurn(MOCK_LOBBY.accessCode, remainingTime);
+
+        expect(emitSpy).toHaveBeenCalledWith(
+            'game.turn.resumed',
+            expect.objectContaining({
+                accessCode: MOCK_LOBBY.accessCode,
+                player: session.turn.currentPlayer,
+                remainingTime,
+            }),
+        );
+    });
+
+    it('should handle resume attempt for non-existent session', () => {
+        const emitSpy = jest.spyOn(eventEmitter, 'emit');
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        gameSessionService.resumeGameTurn('invalid-code', 10);
+        expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should maintain correct timer sequence after resume', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+
+        gameSessionService.endTurn(MOCK_LOBBY.accessCode);
+        jest.advanceTimersByTime(DEFAULT_TIME);
+
+        const initialRemaining = gameSessionService.pauseGameTurn(MOCK_LOBBY.accessCode);
+        const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+        gameSessionService.resumeGameTurn(MOCK_LOBBY.accessCode, initialRemaining);
+
+        jest.advanceTimersByTime(SHORT_TIME);
+        expect(emitSpy).toHaveBeenCalledWith(
+            'game.turn.timer',
+            expect.objectContaining({
+                timeLeft: initialRemaining - 1,
+            }),
+        );
+
+        const endTurnSpy = jest.spyOn(gameSessionService, 'endTurn');
+        jest.advanceTimersByTime(initialRemaining * SHORT_TIME);
+        expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
+    });
+
+    it('should automatically call endTurn after TURN_DURATION when the player turn starts', () => {
+        const endTurnSpy = jest.spyOn(gameSessionService, 'endTurn');
+
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+
+        jest.advanceTimersByTime(DEFAULT_TIME);
+
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        jest.advanceTimersByTime(30000);
+
+        expect(endTurnSpy).toHaveBeenCalledTimes(1);
+        expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
+    });
 });

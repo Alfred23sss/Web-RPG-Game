@@ -10,7 +10,7 @@ const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
 const DICE_RANDOMIZER = 6;
-const ESCAPE_TRESHOLD = 0.5;
+const ESCAPE_THRESHOLD = 0.5;
 
 @Injectable()
 export class GameManagerService {
@@ -91,7 +91,7 @@ export class GameManagerService {
 
         remainingEscapeAttempts.set(playerName, attemptsLeft - 1);
 
-        const escapeSuccessful = Math.random() > ESCAPE_TRESHOLD;
+        const escapeSuccessful = Math.random() > ESCAPE_THRESHOLD;
 
         this.emitCombatEscapeAttemptResult(accessCode, currentFighter, escapeSuccessful, attemptsLeft - 1);
 
