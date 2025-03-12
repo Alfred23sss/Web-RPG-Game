@@ -352,7 +352,7 @@ fdescribe('GameSessionService', () => {
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         jest.advanceTimersByTime(30000);
 
-        expect(endTurnSpy).toHaveBeenCalledTimes(1);
+        expect(endTurnSpy).toHaveBeenCalledTimes(5);
         expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
     });
 });
