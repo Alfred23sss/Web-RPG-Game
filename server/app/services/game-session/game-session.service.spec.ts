@@ -9,6 +9,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
 
 const DEFAULT_TIME = 3000;
+const SHORT_TIME = 1000;
 const FAST_SPEED = 6;
 const SLOW_SPEED = 4;
 
@@ -142,6 +143,7 @@ fdescribe('GameSessionService', () => {
     it('should randomize order when speeds are equal', () => {
         const players = [createValidPlayer('Player1', SLOW_SPEED), createValidPlayer('Player2', SLOW_SPEED)];
 
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         jest.spyOn(Math, 'random').mockReturnValue(0.2);
         const ordered = gameSessionService['orderPlayersBySpeed'](players);
 
@@ -195,7 +197,7 @@ fdescribe('GameSessionService', () => {
         gameSessionService.endTurn(MOCK_LOBBY.accessCode);
 
         jest.advanceTimersByTime(DEFAULT_TIME);
-        jest.advanceTimersByTime(100);
+        jest.advanceTimersByTime(SHORT_TIME);
 
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
         expect(session?.turn.currentPlayer?.name).toBe('Player2');
@@ -230,7 +232,7 @@ fdescribe('GameSessionService', () => {
         gameSessionService.endTurn(MOCK_LOBBY.accessCode);
 
         jest.advanceTimersByTime(DEFAULT_TIME);
-        jest.advanceTimersByTime(1000);
+        jest.advanceTimersByTime(SHORT_TIME);
 
         expect(emitSpy).toHaveBeenCalledWith(
             'game.turn.timer',
@@ -240,10 +242,11 @@ fdescribe('GameSessionService', () => {
             }),
         );
 
-        jest.advanceTimersByTime(2000);
+        jest.advanceTimersByTime(DEFAULT_TIME);
 
         const timerUpdates = emitSpy.mock.calls.filter((call) => call[0] === 'game.turn.timer').map((call) => call[1].timeLeft);
 
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         expect(timerUpdates).toEqual(expect.arrayContaining([29, 28, 27]));
     });
 
@@ -259,7 +262,7 @@ fdescribe('GameSessionService', () => {
 
         expect(initialTimer).toBeDefined();
 
-        jest.advanceTimersByTime(30000);
+        jest.advanceTimersByTime(DEFAULT_TIME);
 
         expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
     });
