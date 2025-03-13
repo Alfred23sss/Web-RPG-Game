@@ -13,7 +13,7 @@ const SHORT_TIME = 1000;
 const FAST_SPEED = 6;
 const SLOW_SPEED = 4;
 
-fdescribe('GameSessionService', () => {
+describe('GameSessionService', () => {
     let gameSessionService: GameSessionService;
     let lobbyService: LobbyService;
     let accessCodesService: AccessCodesService;
@@ -246,7 +246,7 @@ fdescribe('GameSessionService', () => {
 
         const timerUpdates = emitSpy.mock.calls.filter((call) => call[0] === 'game.turn.timer').map((call) => call[1].timeLeft);
 
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */ // just 1 sec timer numbers interval
         expect(timerUpdates).toEqual(expect.arrayContaining([29, 28, 27]));
     });
 
@@ -349,9 +349,10 @@ fdescribe('GameSessionService', () => {
 
         jest.advanceTimersByTime(DEFAULT_TIME);
 
-        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
+        /* eslint-disable-next-line @typescript-eslint/no-magic-numbers*/ // just a longer arbitrary timer
         jest.advanceTimersByTime(30000);
 
+        /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */ // amount of times the spy should be called
         expect(endTurnSpy).toHaveBeenCalledTimes(5);
         expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
     });
