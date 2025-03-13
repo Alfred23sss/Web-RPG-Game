@@ -60,12 +60,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const game = sessionStorage.getItem('game');
         this.game = game ? (JSON.parse(game) as Game) : this.game;
 
-        // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
-        // this.gridService.setGrid(this.game?.grid);
-        // if (this.game && this.game.grid) {
-        //     this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement, this.game.grid);
-        // }
-
         this.handlePageRefresh();
 
         this.socketClientService.onAbandonGame((data) => {
@@ -90,12 +84,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             this.currentPlayer = data.player;
             this.turnTimer = data.turnDuration;
-            if (this.game && this.game.grid) {
+            if (this.currentPlayer.name === this.clientPlayer.name && this.game && this.game.grid) {
                 this.availablePath = this.playerMovementService.availablePath(
                     this.getClientPlayerPosition(),
                     this.clientPlayer.movementPoints,
                     this.game.grid,
                 );
+            } else {
+                this.availablePath = [];
             }
         });
 
