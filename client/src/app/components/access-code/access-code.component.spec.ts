@@ -10,8 +10,8 @@ import { of } from 'rxjs';
 import { AccessCodeComponent } from './access-code.component';
 
 class TestErrorHandler implements ErrorHandler {
-    public capturedError: any = null;
-    handleError(error: any): void {
+    capturedError: unknown = null;
+    handleError(error: unknown): void {
         this.capturedError = error;
     }
 }
@@ -33,7 +33,6 @@ describe('AccessCodeComponent', () => {
         snackbarServiceSpy = jasmine.createSpyObj('SnackbarService', ['showMessage']);
         accessCodeServiceSpy = jasmine.createSpyObj('AccessCodeService', ['getLobbyData']);
 
-        // Par défaut, le service renvoie des codes d'accès
         accessCodesCommunicationServiceSpy.getAllAccessCodes.and.returnValue(of(['code1', 'code2']));
         testErrorHandler = new TestErrorHandler();
 
@@ -88,21 +87,26 @@ describe('AccessCodeComponent', () => {
         it('doit résoudre si le code d’accès est valide', async () => {
             accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
             component.accessCode = 'VALID';
+
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             await expectAsync((component as any).validateAccessCode()).toBeResolved();
         });
 
         it('doit rejeter si le code d’accès est invalide', async () => {
             accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: false }));
             component.accessCode = 'INVALID';
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             await expectAsync((component as any).validateAccessCode()).toBeRejectedWithError("La partie que vous souhaitez rejoindre n'existe pas!");
         });
     });
 
     describe('fetchLobbyData', () => {
         it('doit renvoyer les données du lobby si le lobby est valide', async () => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // for partial object mocking
             const lobby = { isLocked: false, game: 'gameData' } as any;
             accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(lobby));
             component.accessCode = 'SOME_CODE';
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             const result = await (component as any).fetchLobbyData();
             expect(result).toEqual(lobby);
         });
@@ -111,31 +115,38 @@ describe('AccessCodeComponent', () => {
             // Cas où lobby est null
             accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(null as unknown as Lobby));
             component.accessCode = 'SOME_CODE';
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             await expectAsync((component as any).fetchLobbyData()).toBeRejectedWithError('Impossible de récupérer la partie.');
 
             // Cas où lobby ne possède pas la propriété game
             accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve({ isLocked: false } as unknown as Lobby));
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             await expectAsync((component as any).fetchLobbyData()).toBeRejectedWithError('Impossible de récupérer la partie.');
         });
     });
 
     describe('isLobbyLocked', () => {
         it('doit retourner true si le lobby est verrouillé', () => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // for partial object mocking
             const lobby = { isLocked: true } as any;
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             expect((component as any).isLobbyLocked(lobby)).toBeTrue();
         });
 
         it('doit retourner false si le lobby n’est pas verrouillé', () => {
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // for partial object mocking
             const lobby = { isLocked: false } as any;
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             expect((component as any).isLobbyLocked(lobby)).toBeFalse();
         });
     });
 
     describe('openCharacterForm', () => {
         it('doit fermer le dialogue et ouvrir le formulaire de personnage avec les données correctes', () => {
-            const lobby = { isLocked: false, game: 'gameData' } as any;
+            const lobby = { isLocked: false, game: 'gameData' } as unknown;
             component.accessCode = 'ACCESS';
             component.isLobbyCreated = true;
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             (component as any).openCharacterForm(lobby);
             expect(dialogRefSpy.close).toHaveBeenCalled();
             expect(dialogSpy.open).toHaveBeenCalledWith(CharacterFormComponent, {
@@ -152,6 +163,7 @@ describe('AccessCodeComponent', () => {
         it('doit afficher un message si le lobby est verrouillé', fakeAsync(() => {
             component.accessCode = 'CODE';
             accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // for partial object mocking
             const lobby = { isLocked: true, game: 'gameData' } as any;
             accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(lobby));
 
@@ -163,13 +175,15 @@ describe('AccessCodeComponent', () => {
         it('doit ouvrir le formulaire de personnage si le lobby n’est pas verrouillé', fakeAsync(() => {
             component.accessCode = 'CODE';
             accessCodesCommunicationServiceSpy.validateAccessCode.and.returnValue(of({ isValid: true }));
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // for partial object mocking
             const lobby = { isLocked: false, game: 'gameData' } as any;
             accessCodeServiceSpy.getLobbyData.and.returnValue(Promise.resolve(lobby));
-
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             spyOn(component as any, 'openCharacterForm').and.callThrough();
 
             component.submitCode();
             tick();
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // to access private component
             expect((component as any).openCharacterForm).toHaveBeenCalledWith(lobby);
         }));
 
