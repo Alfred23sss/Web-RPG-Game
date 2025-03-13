@@ -1,5 +1,6 @@
-/* eslint-disable max-lines */
-/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-empty-function */ // necessary to access the real timer interval function
+/* eslint-disable max-lines */ // tested file respects this rule
+/* eslint-disable @typescript-eslint/no-magic-numbers */ // ok for test file
 /* eslint-disable @typescript-eslint/no-explicit-any */ // all any uses are to allow the testing of a private service.
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
@@ -32,9 +33,8 @@ describe('GameManagerService', () => {
         vitality: 0,
     });
 
-    // eslint-disable-next-line no-unused-vars
+    /* eslint-disable-next-line no-unused-vars */ // variable unused here but necessary for certain tests
     const mockCombatState = (accessCode: string) => ({
-        // variable unused here but necessary for certain tests
         attacker: mockPlayer('attacker', 6),
         defender: mockPlayer('defender', 4),
         currentFighter: mockPlayer('attacker', 4),
