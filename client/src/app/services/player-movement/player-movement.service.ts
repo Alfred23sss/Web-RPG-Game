@@ -84,7 +84,7 @@ export class PlayerMovementService {
     }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
-        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || !neighbor.player;
+        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
     }
 
     private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
@@ -96,7 +96,7 @@ export class PlayerMovementService {
     }
 
     private isValidNeighbor(neighbor: Tile): boolean {
-        if ((neighbor.type === TileType.Door && !neighbor.isOpen) || !neighbor.player) return false;
+        if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
         return this.movementCosts.has(neighbor.type);
     }
 
