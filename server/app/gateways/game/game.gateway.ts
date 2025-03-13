@@ -75,6 +75,28 @@ export class GameGateway {
         this.gameCombatService.attemptEscape(payload.accessCode, payload.playerName);
     }
 
+    @SubscribeMessage(GameEvents.PlayerMovementUpdate)
+    async handlePlayerMovementUpdate(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() payload: { accessCode: string; previousTile: Tile; newTile: Tile; movement: Tile[] },
+    ): Promise<void> {
+        const player: Player = payload.previousTile.player;
+
+        try {
+            await this.gameSessionService.updatePlayerPosition(payload.accessCode, payload.movement, player);
+        } catch (err) {
+            this.logger.error('Error updating player position', err);
+        }
+    }
+
+    @OnEvent('game.player.movement')
+    handlePlayerMovement(payload: { accessCode: string; grid: Tile[][]; player: Player }) {
+        this.server.to(payload.accessCode).emit('playerMovement', {
+            grid: payload.grid,
+            player: payload.player,
+        });
+    }
+
     @OnEvent('game.transition.started')
     handleTransitionStarted(payload: { accessCode: string; nextPlayer: Player }) {
         this.logger.log(`Received transition started event for game ${payload.accessCode}`);

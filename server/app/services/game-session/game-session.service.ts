@@ -10,6 +10,7 @@ const randomizer = 0.5;
 const TRANSITION_PHASE_DURATION = 3000;
 const TURN_DURATION = 30000;
 const SECOND = 1000;
+const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
 export class GameSessionService {
@@ -18,17 +19,13 @@ export class GameSessionService {
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
-
     createGameSession(accessCode: string): GameSession {
         const lobby = this.lobbyService.getLobby(accessCode);
         const game = lobby.game;
         const grid = game.grid;
         const spawnPoints = this.findSpawnPoints(grid);
-
         const turn = this.initializeTurn(accessCode);
-
         const updatedGrid = this.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
-
         game.grid = updatedGrid;
         const gameSession: GameSession = {
             game,
@@ -38,7 +35,6 @@ export class GameSessionService {
         this.startTransitionPhase(accessCode);
         return gameSession;
     }
-
     deleteGameSession(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (gameSession) {
@@ -65,7 +61,6 @@ export class GameSessionService {
         }
         return player;
     }
-
     getPlayers(accessCode: string): Player[] {
         const gameSession = this.gameSessions.get(accessCode);
         return gameSession ? gameSession.turn.orderedPlayers : [];
@@ -73,7 +68,6 @@ export class GameSessionService {
     endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-
         if (gameSession.turn.turnTimers) {
             clearTimeout(gameSession.turn.turnTimers);
             gameSession.turn.turnTimers = null;
@@ -85,44 +79,32 @@ export class GameSessionService {
         if (gameSession.turn.currentPlayer) {
             this.updatePlayer(gameSession.turn.currentPlayer, { isActive: false });
         }
-
         this.startTransitionPhase(accessCode);
     }
-
     pauseGameTurn(accessCode: string): number {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return 0;
-
         const remainingTime = gameSession.turn.currentTurnCountdown;
-
         if (gameSession.turn.turnTimers) {
             clearTimeout(gameSession.turn.turnTimers);
             gameSession.turn.turnTimers = null;
         }
-
         if (gameSession.turn.countdownInterval) {
             clearInterval(gameSession.turn.countdownInterval);
             gameSession.turn.countdownInterval = null;
         }
-
         return remainingTime;
     }
-
     resumeGameTurn(accessCode: string, remainingTime: number): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-
         gameSession.turn.currentTurnCountdown = remainingTime;
-
         this.emitTurnResumed(accessCode, gameSession.turn.currentPlayer, remainingTime);
-
         let timeLeft = remainingTime;
         gameSession.turn.countdownInterval = setInterval(() => {
             timeLeft--;
             gameSession.turn.currentTurnCountdown = timeLeft;
-
             this.emitTimerUpdate(accessCode, timeLeft);
-
             if (timeLeft <= 0) {
                 if (gameSession.turn.countdownInterval) {
                     clearInterval(gameSession.turn.countdownInterval);
@@ -130,33 +112,63 @@ export class GameSessionService {
                 gameSession.turn.countdownInterval = null;
             }
         }, SECOND);
-
-        // Schedule end of turn
         gameSession.turn.turnTimers = setTimeout(() => {
             this.endTurn(accessCode);
         }, remainingTime * SECOND);
     }
-
     setCombatState(accessCode: string, isInCombat: boolean): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (gameSession) {
             gameSession.turn.isInCombat = isInCombat;
         }
     }
-
     isCurrentPlayer(accessCode: string, playerName: string): boolean {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession || !gameSession.turn.currentPlayer) return false;
-
         return gameSession.turn.currentPlayer.name === playerName;
     }
 
+    async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
+        const gameSession = this.gameSessions.get(accessCode);
+
+        for (let i = 1; i < movement.length; i++) {
+            await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
+            this.clearPlayerFromGrid(gameSession.game.grid, player);
+            this.setPlayerOnTile(gameSession.game.grid, movement[i], player);
+
+            this.eventEmitter.emit('game.player.movement', {
+                accessCode,
+                grid: gameSession.game.grid,
+                player,
+            });
+        }
+    }
+
+    private clearPlayerFromGrid(grid: Tile[][], player: Player): void {
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.player && tile.player.name === player.name) {
+                    tile.player = null;
+                }
+            }
+        }
+    }
+
+    private setPlayerOnTile(grid: Tile[][], targetTile: Tile, player: Player): void {
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.id === targetTile.id) {
+                    tile.player = player;
+                    return;
+                }
+            }
+        }
+    }
     private updatePlayer(player: Player, updates: Partial<Player>): void {
         if (player) {
             Object.assign(player, updates);
         }
     }
-
     private initializeTurn(accessCode: string): Turn {
         return {
             orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),
@@ -168,7 +180,6 @@ export class GameSessionService {
             isInCombat: false,
         };
     }
-
     private orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = [...players].sort((a, b) => {
             if (a.speed === b.speed) {
@@ -176,29 +187,22 @@ export class GameSessionService {
             }
             return b.speed - a.speed;
         });
-
         if (playerList.length > 0) {
             playerList[0].isActive = true;
         }
-
         Logger.log(`Ordered Players: ${JSON.stringify(playerList.map((p) => ({ name: p.name, speed: p.speed, isActive: p.isActive })))}`);
-
         return playerList;
     }
-
     private findSpawnPoints(grid: Tile[][]): Tile[] {
         return grid.flat().filter((tile) => tile.item?.name === 'home');
     }
-
     private assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): Tile[][] {
         const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - randomizer);
-
         players.forEach((player, index) => {
             if (index < shuffledSpawns.length) {
                 shuffledSpawns[index].player = player;
             }
         });
-
         shuffledSpawns.slice(players.length).forEach((spawnPoint) => {
             spawnPoint.item = null;
         });
@@ -207,7 +211,6 @@ export class GameSessionService {
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-
         if (gameSession.turn.turnTimers) {
             clearTimeout(gameSession.turn.turnTimers);
             gameSession.turn.turnTimers = null;
@@ -216,21 +219,15 @@ export class GameSessionService {
             clearInterval(gameSession.turn.countdownInterval);
             gameSession.turn.countdownInterval = null;
         }
-
         gameSession.turn.isTransitionPhase = true;
         gameSession.turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
-
         const nextPlayer = this.getNextPlayer(accessCode);
-
         this.emitTransitionStarted(accessCode, nextPlayer);
-
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         gameSession.turn.countdownInterval = setInterval(() => {
             transitionTimeLeft--;
             gameSession.turn.transitionTimeRemaining = transitionTimeLeft;
-
             this.emitTransitionCountdown(accessCode, transitionTimeLeft);
-
             if (transitionTimeLeft <= 0) {
                 if (gameSession.turn.countdownInterval) {
                     clearInterval(gameSession.turn.countdownInterval);
@@ -238,7 +235,6 @@ export class GameSessionService {
                 gameSession.turn.countdownInterval = null;
             }
         }, SECOND);
-
         gameSession.turn.turnTimers = setTimeout(() => {
             this.startPlayerTurn(accessCode, nextPlayer);
         }, TRANSITION_PHASE_DURATION);

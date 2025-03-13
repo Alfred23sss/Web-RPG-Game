@@ -80,6 +80,7 @@
                 [quickestPath]="quickestPath"
                 [isEditionMode]="false"
                 (tileHovered)="updateQuickestPath($event)"
+                (tileClicked)="handleTileClick($event)"
                 [ngClass]="{ 'red-border': isInCombatMode }"
             ></app-grid>
         </div>
