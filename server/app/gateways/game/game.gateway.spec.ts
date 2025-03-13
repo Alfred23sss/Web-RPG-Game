@@ -14,6 +14,7 @@ describe('GameGateway', () => {
     let gameSessionServiceMock: Partial<GameSessionService>;
     let lobbyServiceMock: Partial<LobbyService>;
     let loggerMock: Partial<Logger>;
+    let combatServiceMock: Partial<GameManagerService>;
 
     const mockPlayer: Player = {
         name: 'test-player',
@@ -58,6 +59,12 @@ describe('GameGateway', () => {
             log: jest.fn(),
         };
 
+        combatServiceMock = {
+            startCombat: jest.fn(),
+            performAttack: jest.fn(),
+            attemptEscape: jest.fn(),
+        };
+
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GameGateway,
@@ -72,7 +79,7 @@ describe('GameGateway', () => {
                         }),
                     },
                 },
-                { provide: GameManagerService, useValue: {} },
+                { provide: GameManagerService, useValue: combatServiceMock },
                 { provide: Logger, useValue: loggerMock },
                 { provide: LobbyService, useValue: lobbyServiceMock },
                 { provide: GameSessionService, useValue: gameSessionServiceMock },
@@ -197,6 +204,104 @@ describe('GameGateway', () => {
             expect(serverMock.emit).toHaveBeenCalledWith('timerUpdate', {
                 timeLeft: 15,
             });
+        });
+
+        it('should log and emit combat timeout event', () => {
+            const payload = {
+                accessCode: 'test123',
+                fighter: mockPlayer,
+            };
+
+            gateway.handleCombatTimeout(payload);
+
+            expect(loggerMock.log).toHaveBeenCalledWith(`Combat timeout for ${mockPlayer.name} in game test123`);
+
+            expect(serverMock.to).toHaveBeenCalledWith('test123');
+            expect(serverMock.emit).toHaveBeenCalledWith('combatTimeout', {
+                fighter: mockPlayer,
+            });
+        });
+
+        it('should log and emit combat turn started event', () => {
+            const payload = {
+                accessCode: 'test123',
+                fighter: mockPlayer,
+                duration: 30,
+                escapeAttemptsLeft: 2,
+            };
+
+            gateway.handleCombatTurnStarted(payload);
+
+            expect(loggerMock.log).toHaveBeenCalledWith(`Combat turn started for ${mockPlayer.name} in game test123`);
+
+            expect(serverMock.to).toHaveBeenCalledWith('test123');
+            expect(serverMock.emit).toHaveBeenCalledWith('combatTurnStarted', {
+                fighter: mockPlayer,
+                duration: 30,
+                escapeAttemptsLeft: 2,
+            });
+        });
+
+        it('should emit combat timer update event', () => {
+            const payload = {
+                accessCode: 'test123',
+                timeLeft: 15,
+            };
+
+            gateway.handleCombatTimerUpdate(payload);
+
+            expect(serverMock.to).toHaveBeenCalledWith('test123');
+            expect(serverMock.emit).toHaveBeenCalledWith('combatTimerUpdate', {
+                timeLeft: 15,
+            });
+        });
+
+        it('should log and emit combat start event', () => {
+            const payload = {
+                accessCode: 'test123',
+                attacker: mockPlayer,
+                defender: mockPlayer,
+                firstFighter: mockPlayer,
+            };
+
+            gateway.handleCombatStarted(payload);
+
+            expect(loggerMock.log).toHaveBeenCalledWith('Combat started in game test123');
+
+            expect(serverMock.to).toHaveBeenCalledWith('test123');
+            expect(serverMock.emit).toHaveBeenCalledWith('combatStarted', {
+                attacker: mockPlayer,
+                defender: mockPlayer,
+                firstFighter: mockPlayer,
+            });
+        });
+    });
+
+    describe('Message Handlers', () => {
+        const mockClient = {} as Socket;
+
+        it('should handle StartCombat message', () => {
+            const payload = { accessCode: 'test123', attackerId: 'attacker1', defenderId: 'defender1' };
+            gateway.handleStartCombat(mockClient, payload);
+
+            expect(loggerMock.log).toHaveBeenCalledWith('Starting combat for game test123');
+            expect(combatServiceMock.startCombat).toHaveBeenCalledWith('test123', 'attacker1', 'defender1');
+        });
+
+        it('should handle PerformAttack message', () => {
+            const payload = { accessCode: 'test123', attackerName: 'test-player' };
+            gateway.handlePerformAttack(mockClient, payload);
+
+            expect(loggerMock.log).toHaveBeenCalledWith('Player test-player is attacking in game test123');
+            expect(combatServiceMock.performAttack).toHaveBeenCalledWith('test123', 'test-player');
+        });
+
+        it('should handle AttemptEscape message', () => {
+            const payload = { accessCode: 'test123', playerName: 'test-player' };
+            gateway.handleAttemptEscape(mockClient, payload);
+
+            expect(loggerMock.log).toHaveBeenCalledWith('Player test-player is attempting to escape in game test123');
+            expect(combatServiceMock.attemptEscape).toHaveBeenCalledWith('test123', 'test-player');
         });
     });
 });
