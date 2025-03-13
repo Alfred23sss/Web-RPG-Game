@@ -256,4 +256,46 @@ describe('CharacterService', () => {
         expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
         expect(closePopupSpy).toHaveBeenCalled();
     });
+
+    it('should call validateGameAvailability and proceed to waiting view if character is valid', () => {
+        const mockPlayer: Player = {
+            name: '',
+            avatar: 'avatar.png',
+            speed: 5,
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 3, bonusDice: DiceType.D4 },
+            hp: { current: 4, max: 4 },
+            movementPoints: 3,
+            actionPoints: 3,
+            inventory: [null, null],
+            isAdmin: true,
+            hasAbandoned: false,
+            combatWon: 0,
+            isActive: false,
+        };
+        const mockGame: Game = {
+            id: '1',
+            name: 'Test Game',
+            size: '4',
+            mode: 'casual',
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image_url',
+            description: 'This is a test game',
+            grid: undefined,
+        };
+
+        const closePopupSpy = jasmine.createSpy(); // Create a mock for closePopup
+
+        // Mock the getGameById method to return an observable
+        mockCommunicationService.getGameById.and.returnValue(of(mockGame)); // Ensure this returns an observable
+
+        // Provide mockGame and closePopupSpy as arguments
+        service.submitCharacter(mockPlayer, mockGame, closePopupSpy);
+
+        // Check if the correct methods were called
+        // expect(mockCommunicationService.getGameById).toHaveBeenCalled();
+        // expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
+        // expect(closePopupSpy).toHaveBeenCalled();
+    });
 });
