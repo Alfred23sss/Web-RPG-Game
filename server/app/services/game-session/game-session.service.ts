@@ -148,7 +148,7 @@ export class GameSessionService {
         for (const row of grid) {
             for (const tile of row) {
                 if (tile.player && tile.player.name === player.name) {
-                    tile.player = null;
+                    tile.player = undefined;
                 }
             }
         }
