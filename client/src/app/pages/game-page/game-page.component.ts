@@ -102,7 +102,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.game.grid = data.grid;
             }
             if (this.clientPlayer.name === data.player.name) {
-                this.clientPlayer.movementPoints--;
+                this.clientPlayer.movementPoints =
+                    this.clientPlayer.movementPoints -
+                    this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
+
                 this.updateAvailablePath();
             }
         });

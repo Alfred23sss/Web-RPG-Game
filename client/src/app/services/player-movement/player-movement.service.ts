@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { TileType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 
 @Injectable({
@@ -81,6 +82,13 @@ export class PlayerMovementService {
         }
 
         return undefined;
+    }
+
+    calculateRemainingMovementPoints(tile: Tile | undefined, player: Player): number {
+        if (tile) {
+            return this.getMoveCost(tile);
+        }
+        return player.movementPoints;
     }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
