@@ -102,6 +102,16 @@ export class SocketClientService {
         });
     }
 
+    alertGameStarted(accessCode: string) {
+        this.socket.emit('createGame', { accessCode });
+    }
+
+    onAlertGameStarted(callback: (data: { orderedPlayers: Player[]; updatedGame: Game }) => void) {
+        this.socket.on('gameStarted', (data) => {
+            callback(data);
+        });
+    }
+
     addPlayerToLobby(accessCode: string, player: unknown) {
         this.socket.emit('joinLobby', { accessCode, player });
     }
@@ -173,6 +183,61 @@ export class SocketClientService {
 
     onJoinError(callback: (message: string) => void): void {
         this.socket.on('joinError', callback);
+    }
+
+    abandonGame(player: Player, accessCode: string) {
+        this.socket.emit('abandonedGame', { player, accessCode });
+    }
+
+    onAbandonGame(callback: (data: { player: Player }) => void) {
+        this.socket.on('game-abandoned', callback);
+    }
+
+    onTransitionStarted(callback: (data: { nextPlayer: Player; transitionDuration: number }) => void) {
+        this.socket.on('transitionStarted', callback);
+    }
+
+    onTurnStarted(callback: (data: { player: Player; turnDuration: number }) => void) {
+        this.socket.on('turnStarted', callback);
+    }
+
+    onTimerUpdate(callback: (data: { timeLeft: number }) => void) {
+        this.socket.on('timerUpdate', callback);
+    }
+
+    endTurn(accessCode: string) {
+        this.socket.emit('endTurn', { accessCode });
+    }
+
+    // socket.on('turnStarted', (data) => {
+    //     console.log('Turn started', data);
+    //     // Update UI to show it's this player's turn
+    //     updateUI(`${data.player.name}'s turn (${data.turnDuration} seconds)`);
+
+    //     // If it's the current user's turn, enable controls
+    //     if (data.player.name === currentPlayerName) {
+    //       enableTurnControls();
+    //     }
+    //   });
+
+    onGameDeleted(callback: () => void) {
+        this.socket.on('gameDeleted', callback);
+    }
+
+    onGameCombatStarted(callback: (data: { attacker: Player; defender: Player; firstFighter: Player }) => void) {
+        this.socket.on('combatStarted', callback);
+    }
+
+    onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
+        this.socket.on('combatTimerUpdate', callback);
+    }
+
+    onGameCombatTimeout(callback: (data: { fighter: Player }) => void) {
+        this.socket.on('combatTimeout', callback);
+    }
+
+    onGameCombatTurnStarted(callback: (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => void) {
+        this.socket.on('combatTurnStarted', callback);
     }
 
     selectAvatar(accessCode: string, avatar: string): void {

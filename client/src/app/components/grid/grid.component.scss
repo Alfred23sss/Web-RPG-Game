@@ -31,3 +31,24 @@ app-tile {
 app-tile:hover {
     border-color: #ffd700;
 }
+
+.available-path {
+    background-color: rgba(0, 255, 0, 0.3);
+    border: 2px dashed green;
+}
+
+.quickest-path {
+    position: relative; // Assure que le point est positionné par rapport à la tuile
+
+    &::after {
+        content: '';
+        width: 10px; // Taille du point
+        height: 10px;
+        background-color: blue;
+        border-radius: 50%; // Rend le point circulaire
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%); // Centre le point dans la tuile
+    }
+}

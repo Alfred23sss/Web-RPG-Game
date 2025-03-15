@@ -1,0 +1,243 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+.red-border {
+    border: 5px solid red;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.game-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    font-family: 'Arial', sans-serif;
+    color: #f8f0a1;
+    background-color: #1f2a44;
+}
+
+.game-map-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-height: 1080px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+.game-info {
+    flex: 0 0 250px;
+    padding: 15px;
+    background-color: #2c3b56;
+    border-right: 1px solid #4e5a73;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.game-details,
+.inventory {
+    background-color: #3e4a65;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.game-details h3,
+.inventory h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #f8f0a1;
+    border-bottom: 1px solid #5c6a85;
+    padding-bottom: 5px;
+}
+
+.inventory-slot {
+    background-color: #1f2a44;
+    border: 1px dashed #f8f0a1;
+    padding: 10px;
+    margin: 5px 0;
+    text-align: center;
+    border-radius: 4px;
+    color: #f8f0a1;
+}
+
+.game-map {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-color: #2c3b56;
+    overflow: auto;
+}
+
+app-grid {
+    width: 600px;
+}
+
+.player-name.active {
+    color: green !important;
+    font-weight: bold;
+}
+
+.game-messages {
+    flex: 0 0 300px;
+    padding: 15px;
+    background-color: #2c3b56;
+    border-left: 1px solid #4e5a73;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-messages h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #f8f0a1;
+    border-bottom: 1px solid #5c6a85;
+    padding-bottom: 5px;
+}
+
+.messages-content {
+    flex: 1;
+    background-color: #1f2a44;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    min-height: 200px;
+}
+
+.player-info,
+.player-list,
+.countdown,
+.action-buttons,
+.combat-interface {
+    margin-top: 15px;
+    background-color: #3e4a65;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+player-name {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.player-admin {
+    background-color: #d1af00;
+    color: #2c3b56;
+    border: 1px solid #b38a00;
+    font-weight: 700;
+}
+
+.timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff5722;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.player-regular {
+    background-color: #f8f0a1;
+    color: #2c3b56;
+    border: 1px solid #b38a00;
+}
+
+.player-admin::before {
+    content: '👑 ';
+}
+
+.player-name:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+.player-avatar {
+    width: 40px;
+}
+
+.action-buttons {
+    padding-top: 350px;
+}
+
+button {
+    justify-content: center;
+    align-items: center;
+    padding: 12px 24px;
+    margin: 5px;
+    width: 200px;
+    font-family: papyrus;
+    font-size: 1.1rem;
+    font-weight: bold;
+
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+
+    &:hover {
+        background: #bbb;
+    }
+}
+
+.abandoned {
+    text-decoration: line-through;
+    color: #b0b0b0;
+}
+
+.game-messages {
+    border: 1px solid #ffc400;
+    padding: 10px;
+    margin: 10px;
+    background-color: #3e4a65;
+}
+
+.message-toggle {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.message-toggle button {
+    height: 100px;
+    flex: 1;
+    border: none;
+    background-color: #0044f1;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.message-toggle button.active {
+    background-color: #0044f1;
+}
+
+.messages-content,
+.log-content {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
+    background-color: #3e4a65;
+}

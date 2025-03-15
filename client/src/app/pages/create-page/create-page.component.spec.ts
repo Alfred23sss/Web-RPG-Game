@@ -5,10 +5,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 // import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { GameService } from '@app/services/game/game.service';
-import { CreatePageComponent } from './create-page.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
+import { GameService } from '@app/services/game/game.service';
+import { CreatePageComponent } from './create-page.component';
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;

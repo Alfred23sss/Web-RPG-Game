@@ -90,6 +90,9 @@ export const MOCK_GAMES = [
     },
 ];
 
+export const ESCAPE_CHANCE = 0.3;
+export const NO_ESCAPES_TIMER = 3;
+
 export const DEFAULT_LOBBY: Lobby = {
     isLocked: false,
     accessCode: '',
