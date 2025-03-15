@@ -285,17 +285,13 @@ describe('CharacterService', () => {
             grid: undefined,
         };
 
-        const closePopupSpy = jasmine.createSpy(); // Create a mock for closePopup
+        const closePopupSpy = jasmine.createSpy();
 
-        // Mock the getGameById method to return an observable
-        mockCommunicationService.getGameById.and.returnValue(of(mockGame)); // Ensure this returns an observable
+        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
+        service['showMissingDetailsError']();
 
-        // Provide mockGame and closePopupSpy as arguments
         service.submitCharacter(mockPlayer, mockGame, closePopupSpy);
 
-        // Check if the correct methods were called
-        // expect(mockCommunicationService.getGameById).toHaveBeenCalled();
-        // expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
-        // expect(closePopupSpy).toHaveBeenCalled();
+        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MissingCharacterDetails);
     });
 });
