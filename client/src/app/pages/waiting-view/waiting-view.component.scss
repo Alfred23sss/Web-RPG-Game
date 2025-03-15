@@ -45,6 +45,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    height: 50px;
     padding: 10px;
     margin: 5px 0;
     background-color: #3b4a5c;
@@ -58,8 +59,27 @@
     background-color: #4a5c6e;
 }
 
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .player-name {
     font-weight: bold;
+}
+
+.player-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.player-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .admin-badge {
@@ -69,6 +89,22 @@
     border-radius: 12px;
     font-size: 14px;
     font-weight: bold;
+}
+
+.kick-button {
+    background-color: #c0392b;
+    color: white;
+    padding: 6px 10px;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.kick-button:hover {
+    background-color: #e74c3c;
 }
 
 .button {

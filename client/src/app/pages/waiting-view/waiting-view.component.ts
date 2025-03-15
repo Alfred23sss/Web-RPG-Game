@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
@@ -21,8 +21,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private router: Router,
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
-        private readonly snackbarService: SnackbarService,
-        private readonly cdr: ChangeDetectorRef,
+        private readonly snackbarService: SnackbarService, // private readonly cdr: ChangeDetectorRef,
     ) {}
 
     ngOnInit(): void {
@@ -77,7 +76,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
         this.socketClientService.onLobbyUpdate((players: Player[]) => {
             this.lobby.players = players;
-            this.cdr.detectChanges();
+            const updatedPlayer = players.find((p) => p.avatar === this.player.avatar);
+            if (updatedPlayer) {
+                this.player.name = updatedPlayer.name;
+                sessionStorage.setItem('player', JSON.stringify(this.player));
+            }
         });
 
         this.socketClientService.onKicked(({ accessCode, playerName }) => {

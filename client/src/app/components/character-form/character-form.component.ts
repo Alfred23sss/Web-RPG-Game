@@ -117,16 +117,6 @@ export class CharacterFormComponent implements OnInit {
         }
     }
 
-    // selectAvatar(avatar: string): void {
-    //     if (!this.unavailableAvatars.includes(avatar)) {
-    //         this.createdPlayer.avatar = avatar;
-    //         this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
-
-    //     } else {
-    //         this.snackbarService.showMessage('Cet avatar est déjà pris !');
-    //     }
-    //     console.log('les avatars pas dispo sont ', this.unavailableAvatars);
-    // }
     selectAvatar(avatar: string): void {
         if (this.createdPlayer.avatar) {
             this.deselectAvatar();
@@ -165,6 +155,12 @@ export class CharacterFormComponent implements OnInit {
     }
 
     closePopup(): void {
+        this.deselectAvatar();
+        this.characterService.resetAttributes();
+        this.dialogRef.close();
+    }
+
+    resetPopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
@@ -202,13 +198,12 @@ export class CharacterFormComponent implements OnInit {
 
         this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
             sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-            this.closePopup();
+            this.resetPopup();
         });
     }
 
     private returnHome(): void {
-        this.characterService.resetAttributes();
-        this.dialogRef.close();
+        this.closePopup();
         this.characterService.returnHome();
     }
 }

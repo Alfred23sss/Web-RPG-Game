@@ -11,12 +11,17 @@
         <ul>
             @for (player of lobby.players; track $index) {
             <li>
-                <span class="player-name">{{ player.name }}</span>
-                @if (player.isAdmin) {
-                <span class="admin-badge">Admin</span>
-                } @if (this.player.isAdmin && !player.isAdmin) {
-                <button (click)="kickPlayer(player)">Expulser</button>
-                }
+                <div class="player-info">
+                    <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
+                    <span class="player-name">{{ player.name }}</span>
+                </div>
+                <div class="player-actions">
+                    @if (player.isAdmin) {
+                    <span class="admin-badge">Admin</span>
+                    } @if (this.player.isAdmin && !player.isAdmin) {
+                    <button class="kick-button" (click)="kickPlayer(player)">Expulser</button>
+                    }
+                </div>
             </li>
             }
         </ul>
