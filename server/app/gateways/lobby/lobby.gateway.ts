@@ -1,6 +1,5 @@
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
-import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import {
@@ -24,7 +23,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     constructor(
         private readonly lobbyService: LobbyService,
         private readonly logger: Logger,
-        private readonly accessCodesService: AccessCodesService,
     ) {}
 
     @SubscribeMessage('requestUnavailableOptions')
@@ -39,7 +37,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
 
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-        console.log(unavailableAvatars);
         client.emit('updateUnavailableOptions', unavailableAvatars);
     }
 
@@ -75,7 +72,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.lobbyService.setPlayerSocket(player.name, client.id);
 
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-            client.emit('joinedLobby'); // prq ca?
+            client.emit('joinedLobby');
 
             if (lobby.players.length >= lobby.maxPlayers) {
                 this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
@@ -144,16 +141,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     }
 
     @SubscribeMessage('kickPlayer')
-    handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
+    handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }) {
         this.logger.log(`Admin requested to kick player ${data.playerName} from lobby ${data.accessCode}`);
-
-        // const lobby = this.lobbyService.getLobby(data.accessCode);
-        // const admin = lobby?.players.find((p) => p.isAdmin);
-
-        // if (!admin || admin.name !== client.id) {
-        //     client.emit('error', 'You are not authorized to kick players');
-        //     return;
-        // }
 
         const kickedPlayerSocketId = this.lobbyService.getPlayerSocket(data.playerName);
         if (kickedPlayerSocketId) {
@@ -243,8 +232,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         lobby.waitingPlayers.push({ socketId: client.id, avatar });
 
-        // console.log(`🚀 Mise à jour waitingPlayers après sélection :`, lobby.waitingPlayers);
-
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
 
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
@@ -259,7 +246,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             return;
         }
 
-        // Supprime l'avatar du joueur de `waitingPlayers`
         lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
 
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];

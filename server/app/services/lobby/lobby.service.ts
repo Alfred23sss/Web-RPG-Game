@@ -3,17 +3,14 @@ import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
     private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
     private playerSockets: Map<string, string> = new Map<string, string>();
 
-    constructor(
-        private readonly accessCodeService: AccessCodesService,
-        private readonly logger: Logger,
-    ) {}
+    constructor(private readonly accessCodeService: AccessCodesService) {}
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
@@ -33,19 +30,6 @@ export class LobbyService {
         return this.lobbies.get(accessCode);
     }
 
-    // joinLobby(accessCode: string, player: Player): boolean {
-    //     const lobby = this.lobbies.get(accessCode);
-    //     if (!lobby) return false;
-    //     if (lobby.players.length >= lobby.maxPlayers) {
-    //         lobby.isLocked = true;
-    //         return false;
-    //     }
-    //     lobby.players.push(player);
-    //     if (lobby.players.length >= lobby.maxPlayers) {
-    //         lobby.isLocked = true;
-    //     }
-    //     return true;
-    // }
     joinLobby(accessCode: string, player: Player): { success: boolean; reason?: string; assignedName?: string } {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return { success: false, reason: 'Lobby not found' };
@@ -122,6 +106,10 @@ export class LobbyService {
         this.playerSockets.delete(playerName);
     }
 
+    getWaitingAvatars(accessCode: string): WaintingPlayers[] {
+        return this.getLobby(accessCode).waitingPlayers;
+    }
+
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {
         const existingNames = lobby.players.map((player) => player.name.toLowerCase());
 
@@ -138,9 +126,5 @@ export class LobbyService {
         } while (existingNames.includes(uniqueName.toLowerCase()));
 
         return uniqueName;
-    }
-
-    getWaitingAvatars(accessCode: string): WaintingPlayers[] {
-        return this.getLobby(accessCode).waitingPlayers;
     }
 }

@@ -24,7 +24,7 @@ export class CharacterFormComponent implements OnInit {
     xSword: string = GameDecorations.XSwords;
     isLobbyCreated: boolean;
     currentAccessCode: string;
-    game?: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
+    game?: Game;
     createdPlayer: Player;
     selectedAttackDice: DiceType | null = null;
     selectedDefenseDice: DiceType | null = null;
@@ -48,7 +48,7 @@ export class CharacterFormComponent implements OnInit {
         private readonly socketClientService: SocketClientService,
         private readonly snackbarService: SnackbarService,
         private readonly cdr: ChangeDetectorRef,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean },
     ) {
         this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
@@ -70,10 +70,8 @@ export class CharacterFormComponent implements OnInit {
 
     ngOnInit(): void {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
-        console.log(`🚀 Demande de join immédiat pour la room ${this.currentAccessCode}`);
 
         this.socketClientService.onUpdateUnavailableOptions((data: { avatars: string[] }) => {
-            console.log('⚡ Client a reçu updateUnavailableOptions :', data.avatars);
             this.unavailableAvatars = [...data.avatars];
 
             this.cdr.detectChanges();
@@ -137,7 +135,6 @@ export class CharacterFormComponent implements OnInit {
 
     deselectAvatar(): void {
         if (this.createdPlayer.avatar) {
-            console.log(`❌ Désélection de l'avatar : ${this.createdPlayer.avatar}`);
             this.socketClientService.deselectAvatar(this.currentAccessCode);
 
             this.unavailableAvatars = this.unavailableAvatars.filter((av) => av !== this.createdPlayer.avatar);
@@ -183,10 +180,6 @@ export class CharacterFormComponent implements OnInit {
             this.characterService.showMissingDetailsError();
             return false;
         }
-        // if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
-        //     this.snackbarService.showMessage('Cet avatar est déjà pris !');
-        //     return false;
-        // }
 
         return true;
     }
