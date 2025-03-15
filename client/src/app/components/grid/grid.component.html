@@ -2,9 +2,10 @@
     @for (row of grid; track $index) {
     <div class="grid-row">
         @for (tile of row; track $index) {
-        <app-tile
+            <app-tile
             [tile]="tile"
             (mouseenter)="tileHovered.emit(tile)"
+            (click)="onTileClick(tile)"
             [ngClass]="{
                 'invalid-drop': tile.type === tileType.Wall || tile.isOccupied,
                 'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied,

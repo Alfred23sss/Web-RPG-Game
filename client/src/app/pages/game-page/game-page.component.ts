@@ -60,12 +60,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const game = sessionStorage.getItem('game');
         this.game = game ? (JSON.parse(game) as Game) : this.game;
 
-        // tres moche ^^^ si quelquun trouve meilleur syntaxe hesiter pas a changer ^^^
-        // this.gridService.setGrid(this.game?.grid);
-        // if (this.game && this.game.grid) {
-        //     this.availablePath = this.playerMovementService.availablePath(this.game.grid[1][7], playerMovement, this.game.grid);
-        // }
-
         this.handlePageRefresh();
 
         this.socketClientService.onAbandonGame((data) => {
@@ -89,14 +83,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.onTurnStarted((data) => {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             this.currentPlayer = data.player;
+            this.clientPlayer.movementPoints = this.clientPlayer.speed;
             this.turnTimer = data.turnDuration;
-            if (this.game && this.game.grid) {
-                this.availablePath = this.playerMovementService.availablePath(
-                    this.getClientPlayerPosition(),
-                    this.clientPlayer.movementPoints,
-                    this.game.grid,
-                );
-            }
+            this.updateAvailablePath();
         });
 
         this.socketClientService.onTimerUpdate((data) => {
@@ -107,8 +96,27 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.playerList = data.orderedPlayers;
             this.game = data.updatedGame;
         });
+
+        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player }) => {
+            if (this.game && this.game.grid) {
+                this.game.grid = data.grid;
+            }
+            if (this.clientPlayer.name === data.player.name) {
+                this.clientPlayer.movementPoints =
+                    this.clientPlayer.movementPoints -
+                    this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
+                this.updateAvailablePath();
+            }
+        });
     }
 
+    handleTileClick(targetTile: Tile): void {
+        const currentTile = this.getClientPlayerPosition();
+        if (!currentTile || !this.game || !this.game.grid) {
+            return;
+        }
+        this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
+    }
     updateQuickestPath(targetTile: Tile): void {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
             this.quickestPath = undefined;
@@ -166,5 +174,17 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
         }
         return undefined;
+    }
+
+    private updateAvailablePath(): void {
+        if (this.currentPlayer.name === this.clientPlayer.name && this.game && this.game.grid) {
+            this.availablePath = this.playerMovementService.availablePath(
+                this.getClientPlayerPosition(),
+                this.clientPlayer.movementPoints,
+                this.game.grid,
+            );
+        } else {
+            this.availablePath = [];
+        }
     }
 }
