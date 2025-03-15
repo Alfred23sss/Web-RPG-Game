@@ -58,9 +58,9 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.StartCombat)
-    handleStartCombat(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; attackerId: string; defenderId: string }) {
+    handleStartCombat(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; attackerName: string; defenderName: string }) {
         this.logger.log(`Starting combat for game ${payload.accessCode}`);
-        this.gameCombatService.startCombat(payload.accessCode, payload.attackerId, payload.defenderId);
+        this.gameCombatService.startCombat(payload.accessCode, payload.attackerName, payload.defenderName);
     }
 
     @SubscribeMessage(GameEvents.PerformAttack)

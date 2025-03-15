@@ -4,9 +4,9 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 
 @Injectable({
     providedIn: 'root',
@@ -255,6 +255,10 @@ export class SocketClientService {
             accessCode,
         };
         this.emit('playerMovementUpdate', payload);
+    }
+
+    startCombat(attackerName: string, defenderName: string, accessCode: string) {
+        this.socket.emit('startCombat', { attackerName, defenderName, accessCode });
     }
 
     onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player }) => void): void {

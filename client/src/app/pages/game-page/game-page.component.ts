@@ -108,10 +108,20 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.updateAvailablePath();
             }
         });
+
+        this.socketClientService.onGameCombatStarted((data) => {
+            this.snackbarService.showMessage(
+                `Combat commencé entre ${data.attacker.name} et ${data.defender.name}, c'est à ${data.firstFighter.name} de jouer`,
+            );
+            this.isInCombatMode = true;
+        });
     }
 
     handleTileClick(targetTile: Tile): void {
         const currentTile = this.getClientPlayerPosition();
+        if (targetTile.player) {
+            this.socketClientService.startCombat(this.clientPlayer.name, targetTile.player.name, this.lobby.accessCode);
+        }
         if (!currentTile || !this.game || !this.game.grid) {
             return;
         }
