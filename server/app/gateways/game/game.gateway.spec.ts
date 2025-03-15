@@ -1,6 +1,6 @@
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
-import { GameManagerService } from '@app/services/combat-manager/combat-manager.service';
+import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
@@ -14,7 +14,7 @@ describe('GameGateway', () => {
     let gameSessionServiceMock: Partial<GameSessionService>;
     let lobbyServiceMock: Partial<LobbyService>;
     let loggerMock: Partial<Logger>;
-    let combatServiceMock: Partial<GameManagerService>;
+    let combatServiceMock: Partial<GameCombatService>;
 
     const mockPlayer: Player = {
         name: 'test-player',
@@ -79,7 +79,7 @@ describe('GameGateway', () => {
                         }),
                     },
                 },
-                { provide: GameManagerService, useValue: combatServiceMock },
+                { provide: GameCombatService, useValue: combatServiceMock },
                 { provide: Logger, useValue: loggerMock },
                 { provide: LobbyService, useValue: lobbyServiceMock },
                 { provide: GameSessionService, useValue: gameSessionServiceMock },

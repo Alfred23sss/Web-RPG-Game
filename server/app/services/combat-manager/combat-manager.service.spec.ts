@@ -8,10 +8,10 @@ import { GameSessionService } from '@app/services/game-session/game-session.serv
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GameManagerService } from './combat-manager.service';
+import { GameCombatService } from './combat-manager.service';
 
-describe('GameManagerService', () => {
-    let service: GameManagerService;
+describe('GameCombatService', () => {
+    let service: GameCombatService;
     let gameSessionService: jest.Mocked<GameSessionService>;
     let eventEmitter: jest.Mocked<EventEmitter2>;
     let logger: jest.Mocked<Logger>;
@@ -69,14 +69,14 @@ describe('GameManagerService', () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                GameManagerService,
+                GameCombatService,
                 { provide: GameSessionService, useValue: mockGameSessionService },
                 { provide: EventEmitter2, useValue: mockEventEmitter },
                 { provide: Logger, useValue: mockLogger },
             ],
         }).compile();
 
-        service = module.get<GameManagerService>(GameManagerService);
+        service = module.get<GameCombatService>(GameCombatService);
         gameSessionService = module.get(GameSessionService);
         eventEmitter = module.get(EventEmitter2);
         logger = module.get(Logger);
