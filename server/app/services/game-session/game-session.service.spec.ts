@@ -1,3 +1,6 @@
+/* eslint-disable max-lines */ // the original file respects this condition
+/* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
+/* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
 import { Player } from '@app/interfaces/Player';
@@ -267,28 +270,6 @@ describe('GameSessionService', () => {
         expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
     });
 
-    // it('should clear timers in endTurn if timers exist', () => { ** should be testing 4 of the 6 missing lines but doesn't work for some reason. No clue. **
-    //     const session = gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
-
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     session.turn.turnTimers = 100 as any;
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     session.turn.countdownInterval = 200 as any;
-
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     jest.spyOn(gameSessionService as any, 'startTransitionPhase').mockImplementation(jest.fn());
-
-    //     const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
-    //     const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
-
-    //     gameSessionService.endTurn(MOCK_LOBBY.accessCode);
-
-    //     expect(clearTimeoutSpy).toHaveBeenCalledWith(100);
-    //     expect(clearIntervalSpy).toHaveBeenCalledWith(200);
-    //     expect(session.turn.turnTimers).toBeNull();
-    //     expect(session.turn.countdownInterval).toBeNull();
-    // });
-
     it('should emit turn resumed event when resuming game', () => {
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
@@ -355,5 +336,180 @@ describe('GameSessionService', () => {
         /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */ // amount of times the spy should be called
         expect(endTurnSpy).toHaveBeenCalledTimes(5);
         expect(endTurnSpy).toHaveBeenCalledWith(MOCK_LOBBY.accessCode);
+    });
+
+    it('should clear existing countdown interval in startPlayerTurn if it exists', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+        const originalIntervalId = setInterval(() => {}, DEFAULT_TIME);
+        session.turn.countdownInterval = originalIntervalId;
+
+        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+        const testPlayer = createValidPlayer('Test Player', FAST_SPEED);
+
+        gameSessionService['startPlayerTurn'](MOCK_LOBBY.accessCode, testPlayer);
+
+        expect(clearIntervalSpy).toHaveBeenCalledWith(originalIntervalId);
+        expect(session.turn.countdownInterval).not.toEqual(originalIntervalId);
+    });
+
+    it('should clear existing timers in startTransitionPhase if timers exist', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+
+        const originalTimeoutId = setTimeout(() => {}, DEFAULT_TIME);
+        const originalIntervalId = setInterval(() => {}, DEFAULT_TIME);
+        session.turn.turnTimers = originalTimeoutId;
+        session.turn.countdownInterval = originalIntervalId;
+
+        const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+
+        jest.spyOn(gameSessionService as any, 'getNextPlayer').mockReturnValue(createValidPlayer('Test Player', FAST_SPEED));
+        jest.spyOn(gameSessionService as any, 'emitTransitionStarted').mockImplementation(() => {});
+        jest.spyOn(gameSessionService as any, 'emitTransitionCountdown').mockImplementation(() => {});
+        jest.spyOn(gameSessionService as any, 'startPlayerTurn').mockImplementation(() => {});
+
+        gameSessionService['startTransitionPhase'](MOCK_LOBBY.accessCode);
+
+        expect(clearTimeoutSpy).toHaveBeenCalledWith(originalTimeoutId);
+        expect(clearIntervalSpy).toHaveBeenCalledWith(originalIntervalId);
+
+        expect(session.turn.turnTimers).not.toEqual(originalTimeoutId);
+        expect(session.turn.countdownInterval).not.toEqual(originalIntervalId);
+    });
+
+    it('should update combat state in game session if it exists', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+
+        gameSessionService.setCombatState(MOCK_LOBBY.accessCode, true);
+        expect(session.turn.isInCombat).toBe(true);
+
+        gameSessionService.setCombatState(MOCK_LOBBY.accessCode, false);
+        expect(session.turn.isInCombat).toBe(false);
+    });
+
+    it('should return false if game session does not exist', () => {
+        const result = gameSessionService.isCurrentPlayer('non-existent-code', 'Player1');
+        expect(result).toBe(false);
+    });
+
+    it('should return false if the game session exists but currentPlayer is not set', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+        session.turn.currentPlayer = null;
+        const result = gameSessionService.isCurrentPlayer(MOCK_LOBBY.accessCode, 'Player1');
+        expect(result).toBe(false);
+    });
+
+    it('should return true if the given player is the current player', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const player = createValidPlayer('CurrentPlayer', FAST_SPEED);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+        session.turn.currentPlayer = player;
+        const result = gameSessionService.isCurrentPlayer(MOCK_LOBBY.accessCode, 'CurrentPlayer');
+        expect(result).toBe(true);
+    });
+
+    it('should return false if the given player is not the current player', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const player = createValidPlayer('CurrentPlayer', FAST_SPEED);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+        session.turn.currentPlayer = player;
+        const result = gameSessionService.isCurrentPlayer(MOCK_LOBBY.accessCode, 'OtherPlayer');
+        expect(result).toBe(false);
+    });
+
+    it('should return orderedPlayers if game session exists', () => {
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+
+        const players = gameSessionService.getPlayers(MOCK_LOBBY.accessCode);
+
+        expect(players).toEqual(session.turn.orderedPlayers);
+    });
+
+    it('should return early if gameSession does not exist', () => {
+        const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
+        expect(() => {
+            gameSessionService['startPlayerTurn']('non-existent-code', createValidPlayer('Test', FAST_SPEED));
+        }).not.toThrow();
+        expect(updatePlayerSpy).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when getting next player for non-existent session', () => {
+        expect(() => {
+            (gameSessionService as any).getNextPlayer('invalid-code');
+        }).toThrow('Game session not found');
+    });
+
+    it('should return early in startTransitionPhase if session not found', () => {
+        const invalidCode = 'non-existent-code';
+        const emitSpy = jest.spyOn(eventEmitter, 'emit');
+        const setTimeoutSpy = jest.spyOn(global, 'setTimeout');
+        const setIntervalSpy = jest.spyOn(global, 'setInterval');
+
+        expect(() => {
+            (gameSessionService as any).startTransitionPhase(invalidCode);
+        }).not.toThrow();
+
+        expect(setTimeoutSpy).not.toHaveBeenCalled();
+        expect(setIntervalSpy).not.toHaveBeenCalled();
+        expect(emitSpy).not.toHaveBeenCalled();
+    });
+
+    it("should maintain order when speeds are equal and randomization doesn't trigger swap", () => {
+        const players = [createValidPlayer('PlayerA', SLOW_SPEED), createValidPlayer('PlayerB', SLOW_SPEED)];
+
+        /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */ // Just a random number higher than 0,5 to test both Player options
+        jest.spyOn(Math, 'random').mockReturnValue(0.6);
+
+        const ordered = gameSessionService['orderPlayersBySpeed'](players);
+
+        expect(ordered[0].name).toBe('PlayerA');
+        expect(ordered[1].name).toBe('PlayerB');
+    });
+
+    it('should return 0 when attempting to pause non-existent session', () => {
+        const result = gameSessionService.pauseGameTurn('invalid-code');
+
+        expect(result).toBe(0);
+
+        const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+        expect(clearTimeoutSpy).not.toHaveBeenCalled();
+        expect(clearIntervalSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return empty array when getting players for non-existent session', () => {
+        const players = gameSessionService.getPlayers('invalid-access-code');
+        expect(players).toEqual([]);
+    });
+
+    it('should do nothing when ending turn for non-existent session', () => {
+        const invalidCode = 'invalid-code';
+
+        const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+        const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
+        const startTransitionSpy = jest.spyOn(gameSessionService as any, 'startTransitionPhase');
+
+        gameSessionService.endTurn(invalidCode);
+
+        expect(clearTimeoutSpy).not.toHaveBeenCalled();
+        expect(clearIntervalSpy).not.toHaveBeenCalled();
+        expect(updatePlayerSpy).not.toHaveBeenCalled();
+        expect(startTransitionSpy).not.toHaveBeenCalled();
+    });
+
+    it('should return null when handling abandon for non-existent session', () => {
+        const result = gameSessionService.handlePlayerAbandoned('invalid-code', 'AnyPlayer');
+
+        expect(result).toBeNull();
+
+        const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
+        expect(updatePlayerSpy).not.toHaveBeenCalled();
     });
 });
