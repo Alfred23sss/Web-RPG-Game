@@ -18,3 +18,28 @@ img {
     width: 100%; 
     height: 100%;
 }
+
+.split-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+}
+
+.half-container {
+    width: 50%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.half-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}

@@ -17,7 +17,10 @@ export class GridComponent {
     @Input() availablePath: Tile[] | undefined = [];
     @Input() quickestPath: Tile[] | undefined = [];
     @Input() isEditionMode: boolean = false;
+
     @Output() tileHovered = new EventEmitter<Tile>();
+    @Output() tileClicked = new EventEmitter<Tile>();
+
     tileType = TileType;
 
     isInQuickestPath(tile: Tile): boolean {
@@ -26,5 +29,11 @@ export class GridComponent {
 
     isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+    }
+
+    onTileClick(tile: Tile): void {
+        if (this.isAvailablePath(tile)) {
+            this.tileClicked.emit(tile);
+        }
     }
 }

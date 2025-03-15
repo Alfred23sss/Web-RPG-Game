@@ -80,6 +80,7 @@
                 [quickestPath]="quickestPath"
                 [isEditionMode]="false"
                 (tileHovered)="updateQuickestPath($event)"
+                (tileClicked)="handleTileClick($event)"
                 [ngClass]="{ 'red-border': isInCombatMode }"
             ></app-grid>
         </div>
@@ -91,14 +92,14 @@
             }
             <p>Temps restant: {{ turnTimer }} secondes</p>
         </div>
+    </div>
 
-        <div class="action-buttons">
-            @if(currentPlayer.name === clientPlayer.name){
-            <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
-            }
-            <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
-            <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
-        </div>
+    <div class="action-buttons">
+        @if(currentPlayer.name === clientPlayer.name){
+        <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
+        }
+        <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
+        <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
     </div>
 
     <div class="game-messages">
