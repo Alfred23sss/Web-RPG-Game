@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { TestBed } from '@angular/core/testing';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';

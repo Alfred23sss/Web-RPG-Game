@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-shadow*/
+/* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { DiceType } from '@app/enums/global.enums';

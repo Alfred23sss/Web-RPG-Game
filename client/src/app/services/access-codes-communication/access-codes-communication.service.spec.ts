@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-deprecated
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AccessCodesCommunicationService } from './access-codes-communication.service';
@@ -9,6 +10,7 @@ describe('AccessCodesCommunicationService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
+            // eslint-disable-next-line import/no-deprecated
             imports: [HttpClientTestingModule],
             providers: [AccessCodesCommunicationService],
         });
