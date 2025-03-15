@@ -69,6 +69,14 @@ describe('PlayerInfoService', () => {
         expect(player.inventory).toEqual([mockItem, null]);
     });
 
+    it('should not add item if no empty slot', () => {
+        MOCK_PLAYER.inventory = [{} as Item, {} as Item];
+        service.initializePlayer(MOCK_PLAYER);
+        const success = service.addItemToInventory(mockItem);
+
+        expect(success).toBeFalse();
+    });
+
     it('should restore health to max when restoreHealth is called', () => {
         const injuredPlayer: Player = {
             ...MOCK_PLAYER,
@@ -80,5 +88,96 @@ describe('PlayerInfoService', () => {
 
         const player = (service as any).playerState.value as Player;
         expect(player.hp.current).toEqual(MAX_HP);
+    });
+
+    describe('updateHealth()', () => {
+        const MAX_HP = 100;
+
+        it('should increase current HP when positive healthVariation is applied', () => {
+            const initialHp = 50;
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(30);
+
+            expect(service.getPlayerSnapshot().hp.current).toBe(80);
+        });
+
+        it('should decrease current HP when negative healthVariation is applied', () => {
+            const initialHp = 70;
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(-20);
+
+            expect(service.getPlayerSnapshot().hp.current).toBe(50);
+        });
+
+        it('should clamp to max HP when health increase exceeds maximum', () => {
+            const initialHp = 95;
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(10);
+
+            expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP);
+        });
+
+        it('should clamp to 0 when health decrease exceeds current HP', () => {
+            const initialHp = 25;
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(-30);
+
+            expect(service.getPlayerSnapshot().hp.current).toBe(0);
+        });
+
+        it('should handle exact maximum boundary', () => {
+            const initialHp = 90;
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(10);
+
+            expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP);
+        });
+
+        it('should handle exact zero boundary', () => {
+            const initialHp = 30;
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(-30);
+
+            expect(service.getPlayerSnapshot().hp.current).toBe(0);
+        });
+
+        it('should not modify max HP value', () => {
+            const player = { ...MOCK_PLAYER, hp: { current: 50, max: MAX_HP } };
+            service.initializePlayer(player);
+
+            service.updateHealth(20);
+
+            expect(service.getPlayerSnapshot().hp.max).toBe(MAX_HP);
+        });
+
+        it('should preserve other player properties', () => {
+            const player = {
+                ...MOCK_PLAYER,
+                hp: { current: 50, max: MAX_HP },
+                inventory: [mockItem, null],
+            } as Player;
+            service.initializePlayer(player);
+            const originalPlayer = service.getPlayerSnapshot();
+
+            service.updateHealth(25);
+            const updatedPlayer = service.getPlayerSnapshot();
+
+            expect(updatedPlayer.hp.current).toBe(75);
+            expect(updatedPlayer.inventory).toEqual(originalPlayer.inventory);
+            expect(updatedPlayer.name).toBe(originalPlayer.name);
+            expect(updatedPlayer.speed).toBe(originalPlayer.speed);
+        });
     });
 });

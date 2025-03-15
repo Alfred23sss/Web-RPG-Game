@@ -415,4 +415,54 @@ describe('SocketClientService', () => {
         fakeSocket.trigger('gameDeleted');
         expect(callback).toHaveBeenCalled();
     });
+
+    describe('Game Combat Event Handlers', () => {
+        it('onGameCombatStarted: should register a callback on "combatStarted"', () => {
+            const callback = jasmine.createSpy('callback');
+            const mockData = {
+                attacker: { name: 'Attacker' } as Player,
+                defender: { name: 'Defender' } as Player,
+                firstFighter: { name: 'FirstFighter' } as Player,
+            };
+
+            service.onGameCombatStarted(callback);
+            fakeSocket.trigger('combatStarted', mockData);
+
+            expect(callback).toHaveBeenCalledWith(mockData);
+        });
+
+        it('onGameCombatTimerUpdate: should register a callback on "combatTimerUpdate"', () => {
+            const callback = jasmine.createSpy('callback');
+            const mockData = { timeLeft: 30 };
+
+            service.onGameCombatTimerUpdate(callback);
+            fakeSocket.trigger('combatTimerUpdate', mockData);
+
+            expect(callback).toHaveBeenCalledWith(mockData);
+        });
+
+        it('onGameCombatTimeout: should register a callback on "combatTimeout"', () => {
+            const callback = jasmine.createSpy('callback');
+            const mockData = { fighter: { name: 'Fighter' } as Player };
+
+            service.onGameCombatTimeout(callback);
+            fakeSocket.trigger('combatTimeout', mockData);
+
+            expect(callback).toHaveBeenCalledWith(mockData);
+        });
+
+        it('onGameCombatTurnStarted: should register a callback on "combatTurnStarted"', () => {
+            const callback = jasmine.createSpy('callback');
+            const mockData = {
+                fighter: { name: 'Fighter' } as Player,
+                duration: 10,
+                escapeAttemptsLeft: 2,
+            };
+
+            service.onGameCombatTurnStarted(callback);
+            fakeSocket.trigger('combatTurnStarted', mockData);
+
+            expect(callback).toHaveBeenCalledWith(mockData);
+        });
+    });
 });
