@@ -29,7 +29,7 @@ export class CharacterFormComponent implements OnInit {
     selectedAttackDice: DiceType | null = null;
     selectedDefenseDice: DiceType | null = null;
     avatarTypes: string[] = Object.values(AvatarType);
-
+    // test comment
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
