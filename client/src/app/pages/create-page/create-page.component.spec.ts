@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 // import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
+import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
@@ -77,5 +78,19 @@ describe('CreatePageComponent', () => {
     it('should return empty array when no games are visible', () => {
         component.games = undefined as unknown as Game[];
         expect(component.visibleGames).toEqual([]);
+    });
+
+    it('should open character form dialog with correct data', () => {
+        const dialog = TestBed.inject(MatDialog);
+        const dialogSpy = spyOn(dialog, 'open');
+
+        component.openDialog(MOCK_GAMES[0]);
+
+        expect(dialogSpy).toHaveBeenCalledWith(CharacterFormComponent, {
+            data: {
+                game: MOCK_GAMES[0],
+                isLobbyCreated: false,
+            },
+        });
     });
 });
