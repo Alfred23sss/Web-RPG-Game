@@ -105,7 +105,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.clientPlayer.movementPoints =
                     this.clientPlayer.movementPoints -
                     this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
-
                 this.updateAvailablePath();
             }
         });

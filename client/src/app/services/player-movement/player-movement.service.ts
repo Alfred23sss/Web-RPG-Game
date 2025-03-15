@@ -27,13 +27,13 @@ export class PlayerMovementService {
 
         while (queue.length) {
             const dequeued = queue.shift();
-            if (!dequeued) continue; // 33
+            if (!dequeued) continue;
             const { tile, remainingPoints } = dequeued;
 
             for (const neighbor of this.getNeighbors(tile, grid)) {
                 if (this.isNeighborBlocked(neighbor)) continue;
 
-                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity; // 39
+                const moveCost = this.movementCosts.get(neighbor.type) ?? Infinity;
                 const newRemainingPoints = remainingPoints - moveCost;
                 const neighborRemainingPoints = visited.get(neighbor) ?? -Infinity;
 
@@ -60,7 +60,7 @@ export class PlayerMovementService {
         while (queue.length > 0) {
             queue.sort((a, b) => a.cost - b.cost);
             const next = queue.shift();
-            if (!next) break; // 67
+            if (!next) break;
             const { tile: currentTile, cost: currentCost } = next;
 
             if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);
@@ -73,7 +73,6 @@ export class PlayerMovementService {
 
                 const newCost = currentCost + moveCost;
                 if (!costs.has(neighbor) || newCost < (costs.get(neighbor) ?? Infinity)) {
-                    // 79
                     costs.set(neighbor, newCost);
                     previous.set(neighbor, currentTile);
                     queue.push({ tile: neighbor, cost: newCost });
@@ -100,7 +99,7 @@ export class PlayerMovementService {
     }
 
     private getMoveCost(neighbor: Tile): number {
-        return this.movementCosts.get(neighbor.type) ?? Infinity; // 99
+        return this.movementCosts.get(neighbor.type) ?? Infinity;
     }
 
     private isValidNeighbor(neighbor: Tile): boolean {
@@ -112,7 +111,7 @@ export class PlayerMovementService {
         const neighbors: Tile[] = [];
 
         const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
-        if (!match) return neighbors; // 111
+        if (!match) return neighbors;
 
         const x = parseInt(match[1], 10);
         const y = parseInt(match[2], 10);
