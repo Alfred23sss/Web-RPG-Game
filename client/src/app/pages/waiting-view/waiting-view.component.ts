@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Routes } from '@app/enums/global.enums';
+import { MIN_PLAYERS } from '@app/constants/global.constants';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -123,7 +124,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             }
         }
         this.removeSocketListeners();
-        // pas oublier de off des sockets ensuite
     }
     changeLobbyLockStatus(): void {
         if (this.lobby.isLocked) {
@@ -148,10 +148,19 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     navigateToGame() {
+        if (!this.lobby.isLocked) {
+            this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
+            return;
+        }
+        if (this.lobby.players.length < MIN_PLAYERS) {
+            this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
+            return;
+        }
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             this.isGameStartedEmitted = true;
             this.socketClientService.alertGameStarted(this.accessCode);
         }
+
         this.isGameStarting = true;
         sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
@@ -161,6 +170,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.socketClientService.socket.off('joinLobby');
         this.socketClientService.socket.off('lobbyUpdate');
         this.socketClientService.socket.off('leaveLobby');
+        this.socketClientService.socket.off('kicked');
         this.socketClientService.socket.off('lobbyLocked');
         this.socketClientService.socket.off('lobbyUnlocked');
         this.socketClientService.socket.off('lobbyDeleted');

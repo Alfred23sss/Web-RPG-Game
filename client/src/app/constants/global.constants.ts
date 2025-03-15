@@ -64,6 +64,7 @@ export const ACCESS_CODE_MAX_VALUE = 9999;
 export const ACCESS_CODE_RANGE = 9000;
 export const ACCESS_CODE_LENGTH = 4;
 export const CODE_EDGE_CASES = [0, 0.999];
+export const MIN_PLAYERS = 2;
 
 export const MOCK_GAMES = [
     {

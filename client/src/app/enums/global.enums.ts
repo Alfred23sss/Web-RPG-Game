@@ -148,6 +148,8 @@ export enum ErrorMessages {
     SomeTilesInnacessible = '❌ Il y a des tuiles inaccesseibles sur le terrain',
     MustPlaceHouseItems = 'items maisons doivent être placées',
     TooManyItemsPlaced = '❌ Trop d’items ont été placés',
+    NotEnoughPlayers = '❌ Il n’y a pas assez de joueurs pour commencer la partie',
+    LobbyNotLocked = '❌ Le lobby n’est pas verrouillé',
 }
 
 export enum TileType {
