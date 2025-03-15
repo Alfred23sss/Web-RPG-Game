@@ -132,6 +132,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         this.handleLeaveLobby(data, client);
 
+        this.server.to(data.accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(data.accessCode)); // Update players in the lobby
+
         this.server.to(client.id).emit('kicked', { accessCode: data.accessCode, playerName: data.playerName });
 
         this.logger.log(`Player ${data.playerName} was kicked from lobby ${data.accessCode}`);
