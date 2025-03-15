@@ -1,6 +1,6 @@
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
-import { GameManagerService } from '@app/services/combat-manager/combat-manager.service';
+import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
@@ -18,7 +18,7 @@ export class GameGateway {
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly gameSessionService: GameSessionService,
-        private readonly gameCombatService: GameManagerService,
+        private readonly gameCombatService: GameCombatService,
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)

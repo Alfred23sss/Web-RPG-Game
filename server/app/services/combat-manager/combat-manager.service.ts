@@ -13,7 +13,7 @@ const DICE_RANDOMIZER = 6;
 const ESCAPE_THRESHOLD = 0.5;
 
 @Injectable()
-export class GameManagerService {
+export class GameCombatService {
     private combatStates: GameCombatMap = {};
 
     constructor(
