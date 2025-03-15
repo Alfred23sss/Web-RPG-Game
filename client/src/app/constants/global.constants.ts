@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, GameMode, GameModeType, GameSize } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
+import { Lobby } from '@app/interfaces/lobby';
 export const BONUS_VALUE = 2;
 
 export const INITIAL_VALUES = {
@@ -88,3 +89,11 @@ export const MOCK_GAMES = [
         grid: [],
     },
 ];
+
+export const DEFAULT_LOBBY: Lobby = {
+    isLocked: false,
+    accessCode: '',
+    players: [],
+    game: null,
+    maxPlayers: 0,
+};

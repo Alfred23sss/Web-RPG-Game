@@ -21,7 +21,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         private router: Router,
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
-        private readonly snackbarService: SnackbarService, // private readonly cdr: ChangeDetectorRef,
+        private readonly snackbarService: SnackbarService,
     ) {}
 
     ngOnInit(): void {
@@ -39,7 +39,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (storedPlayer) {
             this.player = JSON.parse(storedPlayer);
         }
-        console.log(this.player);
 
         this.socketClientService.getLobby(this.accessCode).subscribe({
             next: (lobby) => {
@@ -131,8 +130,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     kickPlayer(player: Player): void {
         if (this.accessCode) {
             this.socketClientService.kickPlayer(this.accessCode, player.name);
-            // possibly not needed! (fetching lobby list from server anyways...)
-            this.lobby.players = this.lobby.players.filter((p) => p.name !== player.name);
         }
     }
 
