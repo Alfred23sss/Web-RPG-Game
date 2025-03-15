@@ -8,5 +8,5 @@ export enum LobbyEvents {
     LockLobby = 'lockLobby',
     UnlockLobby = 'unlockLobby',
     SelectAvatar = 'selectAvatar',
-    UpdateWaitingAvatars = 'updateWaitingAvatars', 
+    UpdateWaitingAvatars = 'updateWaitingAvatars',
 }

@@ -130,11 +130,8 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     kickPlayer(player: Player): void {
         if (this.accessCode) {
-            this.socketClientService.emit('kickPlayer', {
-                accessCode: this.accessCode,
-                playerName: player.name,
-            });
-
+            this.socketClientService.kickPlayer(this.accessCode, player.name);
+            // possibly not needed! (fetching lobby list from server anyways...)
             this.lobby.players = this.lobby.players.filter((p) => p.name !== player.name);
         }
     }

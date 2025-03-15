@@ -8,6 +8,7 @@ import { Injectable, Logger } from '@nestjs/common';
 @Injectable()
 export class LobbyService {
     private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
+    private playerSockets: Map<string, string> = new Map<string, string>();
 
     constructor(
         private readonly accessCodeService: AccessCodesService,
@@ -107,6 +108,18 @@ export class LobbyService {
             avatars: lobby.players.map((player) => player.avatar),
         };
         return unavailableData;
+    }
+
+    setPlayerSocket(playerName: string, socketId: string): void {
+        this.playerSockets.set(playerName, socketId);
+    }
+
+    getPlayerSocket(playerName: string): string | undefined {
+        return this.playerSockets.get(playerName);
+    }
+
+    removePlayerSocket(playerName: string): void {
+        this.playerSockets.delete(playerName);
     }
 
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {

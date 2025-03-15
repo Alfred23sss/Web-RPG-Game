@@ -71,6 +71,9 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
+
+            this.lobbyService.setPlayerSocket(player.name, client.id);
+
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
             client.emit('joinedLobby'); // prq ca?
 
@@ -80,6 +83,20 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         } else {
             client.emit('joinError', 'Unable to join lobby');
         }
+    }
+
+    @SubscribeMessage('joinRoom')
+    handleJoinRoom(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) {
+            client.emit('error', 'Lobby not found');
+            return;
+        }
+
+        client.join(accessCode);
+        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+
+        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
     }
 
     @SubscribeMessage(LobbyEvents.DeleteLobby)
@@ -130,11 +147,23 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         this.logger.log(`Admin requested to kick player ${data.playerName} from lobby ${data.accessCode}`);
 
-        this.handleLeaveLobby(data, client);
+        // const lobby = this.lobbyService.getLobby(data.accessCode);
+        // const admin = lobby?.players.find((p) => p.isAdmin);
 
-        this.server.to(data.accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(data.accessCode)); // Update players in the lobby
+        // if (!admin || admin.name !== client.id) {
+        //     client.emit('error', 'You are not authorized to kick players');
+        //     return;
+        // }
 
-        this.server.to(client.id).emit('kicked', { accessCode: data.accessCode, playerName: data.playerName });
+        const kickedPlayerSocketId = this.lobbyService.getPlayerSocket(data.playerName);
+        if (kickedPlayerSocketId) {
+            const kickedSocket = this.server.sockets.sockets.get(kickedPlayerSocketId);
+            if (kickedSocket) {
+                this.handleLeaveLobby(data, kickedSocket);
+            }
+            this.server.to(kickedPlayerSocketId).emit('kicked', { accessCode: data.accessCode, playerName: data.playerName });
+            this.lobbyService.removePlayerSocket(data.playerName);
+        }
 
         this.logger.log(`Player ${data.playerName} was kicked from lobby ${data.accessCode}`);
     }
@@ -259,19 +288,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.lobbyService.leaveLobby(accessCode, client.id);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         }
+        this.lobbyService.removePlayerSocket(client.id);
         this.logger.log(`User disconnected: ${client.id}`);
-    }
-    @SubscribeMessage('joinRoom')
-    handleJoinRoom(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
-        const lobby = this.lobbyService.getLobby(accessCode);
-        if (!lobby) {
-            client.emit('error', 'Lobby not found');
-            return;
-        }
-
-        client.join(accessCode);
-        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
-
-        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
     }
 }
