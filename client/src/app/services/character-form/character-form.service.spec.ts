@@ -256,4 +256,87 @@ describe('CharacterService', () => {
         expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
         expect(closePopupSpy).toHaveBeenCalled();
     });
+
+    it('should call validateGameAvailability and proceed to waiting view if character is valid', () => {
+        const mockPlayer: Player = {
+            name: '',
+            avatar: 'avatar.png',
+            speed: 5,
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 3, bonusDice: DiceType.D4 },
+            hp: { current: 4, max: 4 },
+            movementPoints: 3,
+            actionPoints: 3,
+            inventory: [null, null],
+            isAdmin: true,
+            hasAbandoned: false,
+            combatWon: 0,
+            isActive: false,
+        };
+        const mockGame: Game = {
+            id: '1',
+            name: 'Test Game',
+            size: '4',
+            mode: 'casual',
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image_url',
+            description: 'This is a test game',
+            grid: undefined,
+        };
+
+        const closePopupSpy = jasmine.createSpy();
+
+        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
+        service['showMissingDetailsError']();
+
+        service.submitCharacter(mockPlayer, mockGame, closePopupSpy);
+
+        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MissingCharacterDetails);
+    });
+
+    describe('checkCharacterNameLength()', () => {
+        const maxLength = 20;
+
+        it('should not show a message if the name is below the maximum length', () => {
+            const shortName = 'A'.repeat(maxLength - 1);
+            service.checkCharacterNameLength(shortName);
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should not show a message if the name is exactly the maximum length', () => {
+            const exactLengthName = 'A'.repeat(maxLength - 1);
+            service.checkCharacterNameLength(exactLengthName);
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should show a message if the name exceeds the maximum length', () => {
+            const longName = 'A'.repeat(maxLength + 1);
+            service.checkCharacterNameLength(longName);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`La longueur maximale du nom est de ${maxLength} caractères`);
+        });
+
+        it('should handle an empty name without showing a message', () => {
+            const emptyName = '';
+            service.checkCharacterNameLength(emptyName);
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should handle a name with spaces without showing a message', () => {
+            const spacedName = '   ';
+            service.checkCharacterNameLength(spacedName);
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should handle a name with special characters without showing a message', () => {
+            const specialCharName = 'Test@123';
+            service.checkCharacterNameLength(specialCharName);
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+    });
+
+    it('should navigate to the home page', () => {
+        service.returnHome();
+        expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
+    });
 });
