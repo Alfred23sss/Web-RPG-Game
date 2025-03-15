@@ -38,10 +38,10 @@ export class GameGateway {
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
         const lobby = this.lobbyService.getLobby(payload.accessCode);
         this.logger.log(`Lobby ${lobby} has left lobby`);
-
+        // add leave lobby here but with boolean to not delete if admin is leaving
         if (lobby.players.length <= 2) {
             // stop game session here'
-            this.lobbyService.leaveLobby(payload.accessCode, payload.player.name);
+            this.lobbyService.leaveLobby(payload.accessCode, payload.player.name); //
             client.leave(payload.accessCode);
             this.lobbyService.clearLobby(payload.accessCode);
             this.gameSessionService.deleteGameSession(payload.accessCode);

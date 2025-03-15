@@ -227,6 +227,7 @@ export class GameSessionService {
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         gameSession.turn.countdownInterval = setInterval(() => {
             transitionTimeLeft--;
+            // probablemement pas necessaire
             gameSession.turn.transitionTimeRemaining = transitionTimeLeft;
 
             this.emitTransitionCountdown(accessCode, transitionTimeLeft);
@@ -275,6 +276,7 @@ export class GameSessionService {
 
         this.emitTurnStarted(accessCode, player);
 
+        // ?
         if (gameSession.turn.countdownInterval) {
             clearInterval(gameSession.turn.countdownInterval);
             gameSession.turn.countdownInterval = null;
