@@ -184,11 +184,7 @@ export class GameSessionService {
             });
         }
     }
-    private updatePlayer(player: Player, updates: Partial<Player>): void {
-        if (player) {
-            Object.assign(player, updates);
-        }
-    }
+
     private initializeTurn(accessCode: string): Turn {
         return {
             orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),
