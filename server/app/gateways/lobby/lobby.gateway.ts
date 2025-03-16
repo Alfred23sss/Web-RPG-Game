@@ -63,8 +63,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             client.emit('joinError', 'Lobby is locked and cannot be joined');
             return;
         }
-
-        const success = this.lobbyService.joinLobby(accessCode, player);
+        // changement ajout de .success
+        const success = this.lobbyService.joinLobby(accessCode, player).success;
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);

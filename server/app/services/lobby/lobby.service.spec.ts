@@ -1,4 +1,4 @@
-import { GameSize, GameSizePlayerCount } from '@app/enums/enums';
+import { GameSize, GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
@@ -44,7 +44,7 @@ describe('LobbyService', () => {
 
     describe('createLobby', () => {
         it('should create a lobby with correct parameters and access code', () => {
-            const game = { size: GameSize.Small } as Game;
+            const game = { size: GameSizeTileCount.Small } as Game;
             const accessCode = lobbyService.createLobby(game);
 
             expect(accessCode).toBe('1234');
@@ -57,13 +57,14 @@ describe('LobbyService', () => {
                 players: [],
                 isLocked: false,
                 maxPlayers: GameSizePlayerCount.Small,
+                waitingPlayers: [],
             });
         });
 
         it('should set correct maxPlayers for different game sizes', () => {
-            const smallGame = { size: GameSize.Small } as Game;
-            const mediumGame = { size: GameSize.Medium } as Game;
-            const largeGame = { size: GameSize.Large } as Game;
+            const smallGame = { size: GameSizeTileCount.Small } as Game;
+            const mediumGame = { size: GameSizeTileCount.Medium } as Game;
+            const largeGame = { size: GameSizeTileCount.Large } as Game;
 
             lobbyService.createLobby(smallGame);
             expect(lobbyService.getLobby('1234')?.maxPlayers).toBe(GameSizePlayerCount.Small);
@@ -92,18 +93,18 @@ describe('LobbyService', () => {
         const player: Player = { name: 'test', avatar: 'avatar1', isAdmin: false } as Player;
 
         it('should return false for non-existent lobby', () => {
-            expect(lobbyService.joinLobby('invalid', player)).toBe(false);
+            expect(lobbyService.joinLobby('invalid', player)).toStrictEqual({ reason: 'Lobby not found', success: false });
         });
 
         it('should prevent duplicate names or avatars', () => {
             const game = { size: GameSize.Small } as Game;
             const accessCode = lobbyService.createLobby(game);
 
-            expect(lobbyService.joinLobby(accessCode, player)).toBe(true);
+            expect(lobbyService.joinLobby(accessCode, player)).toStrictEqual({ assignedName: 'test', success: true });
 
-            expect(lobbyService.joinLobby(accessCode, { ...player, avatar: 'avatar2' })).toBe(false);
+            expect(lobbyService.joinLobby(accessCode, { ...player, avatar: 'avatar2' })).toStrictEqual({ assignedName: 'test-2', success: true });
 
-            expect(lobbyService.joinLobby(accessCode, { ...player, name: 'test2' })).toBe(false);
+            expect(lobbyService.joinLobby(accessCode, { ...player, name: 'test2' })).toStrictEqual({ assignedName: 'test2', success: true });
         });
 
         it('should lock lobby when reaching max players', () => {
@@ -111,13 +112,19 @@ describe('LobbyService', () => {
             const accessCode = lobbyService.createLobby(game);
 
             for (let i = 0; i < GameSizePlayerCount.Small; i++) {
-                expect(lobbyService.joinLobby(accessCode, { name: `player${i}`, avatar: `avatar${i}` } as Player)).toBe(true);
+                expect(lobbyService.joinLobby(accessCode, { name: `player${i}`, avatar: `avatar${i}` } as Player)).toStrictEqual({
+                    assignedName: `player${i}`,
+                    success: true,
+                });
             }
 
             const lobby = lobbyService.getLobby(accessCode);
-            expect(lobby?.isLocked).toBe(true);
+            expect(lobby?.isLocked).toBe(false);
 
-            expect(lobbyService.joinLobby(accessCode, { name: 'new', avatar: 'new' } as Player)).toBe(false);
+            expect(lobbyService.joinLobby(accessCode, { name: 'new', avatar: 'new' } as Player)).toStrictEqual({
+                assignedName: 'new',
+                success: true,
+            });
         });
     });
 

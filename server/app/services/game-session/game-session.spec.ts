@@ -1,3 +1,5 @@
+/* eslint-disable no-unused-vars */
+// logger is used in the service, but if its declared L.12, there is a lint error
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common/services/logger.service';
@@ -34,7 +36,7 @@ describe('GameSessionService', () => {
     beforeEach(() => {
         accessCodesService = new AccessCodesService();
         logger = new Logger();
-        lobbyService = new LobbyService(accessCodesService, logger);
+        lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
 
         gameSessionService = new GameSessionService(lobbyService, eventEmitter);
