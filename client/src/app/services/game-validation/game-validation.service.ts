@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ErrorMessages, GameMode, TileType } from '@app/enums/global.enums';
+import { ErrorMessages, GameMode, ItemName, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GridPosition } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
@@ -134,7 +134,7 @@ export class GameValidationService {
         if (game.mode !== GameMode.CTF) return null;
         for (const row of game.grid) {
             for (const tile of row) {
-                if (tile.item?.name === 'flag') {
+                if (tile.item?.name === ItemName.Flag) {
                     return null;
                 }
             }
@@ -153,7 +153,7 @@ export class GameValidationService {
         let homeItemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
-                if (tile.item?.name === 'home') {
+                if (tile.item?.name === ItemName.Home) {
                     homeItemCount++;
                 }
             }
@@ -166,7 +166,7 @@ export class GameValidationService {
         let itemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
-                if (tile.item && tile.item.name !== 'home' && tile.item.name !== 'flag') {
+                if (tile.item && tile.item.name !== ItemName.Home && tile.item.name !== ItemName.Flag) {
                     itemCount++;
                 }
             }
