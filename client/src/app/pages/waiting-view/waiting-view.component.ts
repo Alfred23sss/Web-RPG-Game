@@ -113,6 +113,11 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
             this.navigateToGame();
         });
+
+        this.socketClientService.onAdminLeft((data) => {
+            this.snackbarService.showMessage(data.message);
+        });
+        
     }
 
     ngOnDestroy(): void {

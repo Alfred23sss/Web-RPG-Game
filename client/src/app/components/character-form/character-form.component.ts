@@ -161,6 +161,7 @@ export class CharacterFormComponent implements OnInit {
 
     closePopup(): void {
         this.deselectAvatar();
+        this.socketClientService.removePlayerFromLobby(this.currentAccessCode, this.createdPlayer.name)
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }

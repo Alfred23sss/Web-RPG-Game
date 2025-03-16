@@ -126,7 +126,16 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, playerName } = data;
         client.leave(accessCode);
-        
+
+        const lobby = this.lobbyService.getLobby(accessCode); //FAIRE UNE FONCTION QUI FAIT CA PCQ JE LE FAIS AU MOINS 2 FOIS
+        if (!lobby) return;
+        const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
+        if (isAdminLeaving) {
+            this.server.to(accessCode).emit('adminLeft', { message: "L'admin a quitté la partie, le lobby est fermé." });
+            this.server.to(accessCode).emit('lobbyDeleted');
+            this.lobbyService.leaveLobby(accessCode, playerName);
+        } 
+
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
 
         if (isLobbyDeleted) {
@@ -140,7 +149,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             }
         }
 
-        const lobby = this.lobbyService.getLobby(accessCode); //FAIRE UNE FONCTION QUI FAIT CA PCQ JE LE FAIS AU MOINS 2 FOIS
         if (lobby && lobby.players.length < lobby.maxPlayers) {
             this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
         }
@@ -150,7 +158,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
 
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-
     }
 
     @SubscribeMessage('kickPlayer')

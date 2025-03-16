@@ -129,4 +129,12 @@ export class LobbyService {
 
         return uniqueName;
     }
+
+    isAdminLeaving(accessCode: string, playerName: string): boolean {
+        const lobby = this.lobbies.get(accessCode);
+        if (!lobby) return false;
+        
+        return lobby.players.some((p) => p.name === playerName && p.isAdmin);
+    }
+    
 }

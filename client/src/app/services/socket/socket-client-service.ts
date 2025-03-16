@@ -4,9 +4,9 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 
 @Injectable({
     providedIn: 'root',
@@ -282,6 +282,13 @@ export class SocketClientService {
             callback();
         });
     }
+
+    onAdminLeft(callback: (data: { message: string }) => void): void {
+        this.socket.on('adminLeft', (data) => {
+            callback(data);
+        });
+    }
+
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
     }
