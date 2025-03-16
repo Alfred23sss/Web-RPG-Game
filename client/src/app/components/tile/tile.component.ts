@@ -47,6 +47,7 @@ export class TileComponent {
     @HostListener('mouseenter')
     onMouseEnter(): void {
         if (!this.isEditionMode) return;
+
         if (TileComponent.activeButton === MouseButton.Left) {
             this.tileService.applyTool(this.tile);
         }
