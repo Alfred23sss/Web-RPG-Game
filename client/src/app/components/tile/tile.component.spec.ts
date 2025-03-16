@@ -2,8 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { ImageType, ItemDescription, ItemType, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
-import { TileService } from '@app/services/tile/Tile.service';
+import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { TileComponent } from './tile.component';
 
 describe('TileComponent', () => {

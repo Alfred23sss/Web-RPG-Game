@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { TileType } from '@app/enums/global.enums';
+import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
-import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ItemBarComponent } from './item-bar.component';
 
 describe('ItemBarComponent', () => {
