@@ -205,14 +205,29 @@ export class GameValidationService {
     }
 
     private performBFS(game: Game, startRow: number, startCol: number): boolean[][] {
-        if (!game.grid) return [];
+        if (!game.grid || game.grid.length === 0 || game.grid[0].length === 0) return [];
 
         const numRows = game.grid.length;
         const numCols = game.grid[0].length;
-        const visited: boolean[][] = Array.from({ length: numRows }, () => Array(numCols).fill(false));
-        const queue: { row: number; col: number }[] = [];
+        const visited: boolean[][] = this.initializeVisited(numRows, numCols);
+        const queue: { row: number; col: number }[] = [{ row: startRow, col: startCol }];
         visited[startRow][startCol] = true;
-        queue.push({ row: startRow, col: startCol });
+
+        while (queue.length > 0) {
+            const next = queue.shift();
+            if (next) {
+                this.processNeighbors(next.row, next.col, game, visited, queue);
+            }
+        }
+        return visited;
+    }
+
+    private initializeVisited(rows: number, cols: number): boolean[][] {
+        return Array.from({ length: rows }, () => Array(cols).fill(false));
+    }
+
+    private processNeighbors(row: number, col: number, game: Game, visited: boolean[][], queue: { row: number; col: number }[]): void {
+        if (!game.grid) return;
 
         const directions = [
             { dr: -1, dc: 0 },
@@ -221,25 +236,26 @@ export class GameValidationService {
             { dr: 0, dc: 1 },
         ];
 
-        while (queue.length > 0) {
-            const next = queue.shift();
-            if (next) {
-                const { row, col } = next;
-                for (const { dr, dc } of directions) {
-                    const newRow = row + dr;
-                    const newCol = col + dc;
-                    if (newRow < 0 || newRow >= numRows || newCol < 0 || newCol >= numCols) {
-                        continue;
-                    }
-                    if (visited[newRow][newCol] || game.grid[newRow]?.[newCol]?.type === TileType.Wall) {
-                        continue;
-                    }
-                    visited[newRow][newCol] = true;
-                    queue.push({ row: newRow, col: newCol });
-                }
+        for (const { dr, dc } of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            if (this.isValidMove(newRow, newCol, game, visited)) {
+                visited[newRow][newCol] = true;
+                queue.push({ row: newRow, col: newCol });
             }
         }
-        return visited;
+    }
+
+    private isValidMove(row: number, col: number, game: Game, visited: boolean[][]): boolean {
+        return (
+            !!game.grid &&
+            row >= 0 &&
+            row < game.grid.length &&
+            col >= 0 &&
+            col < game.grid[0].length &&
+            !visited[row][col] &&
+            (game.grid[row]?.[col]?.type ?? TileType.Default) !== TileType.Wall
+        );
     }
 
     private checkForInaccessible(game: Game, visited: boolean[][]): string[] {
