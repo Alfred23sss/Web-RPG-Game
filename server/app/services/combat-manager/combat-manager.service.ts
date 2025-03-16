@@ -1,4 +1,5 @@
 import { CombatState } from '@app/interfaces/CombatState';
+import { DiceType } from '@app/interfaces/Dice';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
@@ -10,7 +11,6 @@ const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
-const DICE_RANDOMIZER = 6;
 const ESCAPE_THRESHOLD = 0.5;
 
 @Injectable()
@@ -53,22 +53,32 @@ export class GameCombatService {
         if (!combatState) return;
 
         const { attacker, defender, currentFighter } = combatState;
+        combatState.playerPerformedAction = true;
 
         if (currentFighter.name !== attackerName) {
             this.logger.warn(`Not ${attackerName}'s turn in combat`);
             return;
         }
 
-        const attackerScore = currentFighter.attack.value + Math.floor(Math.random() * DICE_RANDOMIZER) + 1;
+        const attackerScore = currentFighter.attack.value + Math.floor(Math.random() * this.extractDiceValue(currentFighter.attack.bonusDice)) + 1;
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
-        const defenseScore = defenderPlayer.defense.value + Math.floor(Math.random() * DICE_RANDOMIZER) + 1;
+        const defenseScore = defenderPlayer.defense.value + Math.floor(Math.random() * this.extractDiceValue(defenderPlayer.defense.bonusDice)) + 1;
         const attackSuccessful = attackerScore > defenseScore;
 
-        this.emitCombatAttackResult(accessCode, currentFighter, attackSuccessful, attackerScore, defenseScore);
+        this.emitCombatAttackResult(
+            this.lobbyService.getPlayerSocket(currentFighter.name),
+            this.lobbyService.getPlayerSocket(defenderPlayer.name),
+            attackSuccessful,
+            attackerScore,
+            defenseScore,
+        );
 
         if (attackSuccessful) {
-            combatState.winner = currentFighter;
-            this.endCombat(accessCode);
+            const attackDamage = attackerScore - defenseScore;
+            defenderPlayer.hp.current -= attackDamage;
+            if (defenderPlayer.hp.current <= 0) {
+                this.endCombat(accessCode);
+            }
         } else {
             this.endCombatTurn(accessCode);
         }
@@ -79,7 +89,7 @@ export class GameCombatService {
         if (!combatState) return;
 
         const { currentFighter, remainingEscapeAttempts } = combatState;
-
+        combatState.playerPerformedAction = true;
         if (currentFighter.name !== playerName) {
             this.logger.warn(`Not ${playerName}'s turn in combat`);
             return;
@@ -167,6 +177,7 @@ export class GameCombatService {
             combatCountdownInterval: null,
             combatTurnTimeRemaining: 0,
             pausedGameTurnTimeRemaining: pausedTimeRemaining,
+            playerPerformedAction: false,
         };
 
         this.gameSessionService.setCombatState(accessCode, true);
@@ -200,10 +211,14 @@ export class GameCombatService {
         return currentFighter.name === attacker.name ? defender : attacker;
     }
 
+    private extractDiceValue(dice: DiceType): number {
+        return parseInt(dice.replace(/\D/g, ''), 10) || 1;
+    }
+
     private startCombatTurn(accessCode: string, player: Player): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
-
+        combatState.playerPerformedAction = false;
         combatState.currentFighter = player;
 
         const escapeAttemptsRemaining = combatState.remainingEscapeAttempts.get(player.name) || 0;
@@ -235,6 +250,9 @@ export class GameCombatService {
         }, SECOND);
 
         combatState.combatTurnTimers = setTimeout(() => {
+            if (!combatState.playerPerformedAction) {
+                this.performAttack(accessCode, combatState.attacker.name);
+            }
             this.endCombatTurn(accessCode, true);
         }, turnDuration);
     }
@@ -260,10 +278,10 @@ export class GameCombatService {
         this.eventEmitter.emit('game.combat.timeout', { accessCode, fighter });
     }
 
-    private emitCombatAttackResult(accessCode: string, attacker: Player, success: boolean, attackScore: number, defenseScore: number): void {
+    private emitCombatAttackResult(attackerId: string, defenderId: string, success: boolean, attackScore: number, defenseScore: number): void {
         this.eventEmitter.emit('game.combat.attack.result', {
-            accessCode,
-            attacker,
+            attackerId,
+            defenderId,
             success,
             attackScore,
             defenseScore,

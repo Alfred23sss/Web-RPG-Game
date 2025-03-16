@@ -119,6 +119,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.isInCombatMode = true;
         });
 
+        this.socketClientService.onAttackResult((data) => {
+            if (data.success) {
+                console.log(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+            } else {
+                console.log(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+            }
+        });
+
         this.socketClientService.onDoorClickedUpdate((data) => {
             if (!this.game || !this.game.grid) {
                 return;
@@ -130,7 +138,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.socketClientService.onGameCombatTurnStarted((data) => {
             this.currentPlayer = data.fighter;
-            this.snackbarService.showMessage(`C'est a ${data.fighter.name} d'attaquer!`);
         });
 
         this.socketClientService.onGameCombatTimerUpdate((data) => {

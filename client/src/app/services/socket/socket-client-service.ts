@@ -234,6 +234,11 @@ export class SocketClientService {
         this.socket.on('combatStarted', callback);
     }
 
+    onAttackResult(callback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void) {
+        console.log('combat resultat recu');
+        this.socket.on('attackResult', callback);
+    }
+
     onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
         this.socket.on('combatTimerUpdate', callback);
     }

@@ -137,6 +137,14 @@ export class GameGateway {
         });
     }
 
+    @OnEvent('game.combat.attack.result')
+    handleCombatResult(payload: { attackerId: string; defenderId: string; success: boolean; attackScore: number; defenseScore: number }) {
+        this.logger.log('emiting combat attack result');
+        this.server
+            .to([payload.attackerId, payload.defenderId])
+            .emit('combatStarted', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
+    }
+
     @OnEvent('game.turn.timer')
     handleTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
         this.server.to(payload.accessCode).emit('timerUpdate', {
