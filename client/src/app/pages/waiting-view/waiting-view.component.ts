@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Routes } from '@app/enums/global.enums';
+import { MIN_PLAYERS } from '@app/constants/global.constants';
+import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -64,10 +65,6 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             });
         });
 
-        this.socketClientService.onLobbyUpdate((players: Player[]) => {
-            this.lobby.players = players;
-        });
-
         this.socketClientService.onLeaveLobby(() => {
             this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
                 next: (players) => {
@@ -77,6 +74,22 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
                     throw new Error('Error fetching players');
                 },
             });
+        });
+
+        this.socketClientService.onLobbyUpdate((players: Player[]) => {
+            this.lobby.players = players;
+            const updatedPlayer = players.find((p) => p.avatar === this.player.avatar);
+            if (updatedPlayer) {
+                this.player.name = updatedPlayer.name;
+                sessionStorage.setItem('player', JSON.stringify(this.player));
+            }
+        });
+
+        this.socketClientService.onKicked(({ accessCode, playerName }) => {
+            if (accessCode === this.accessCode && playerName === this.player.name) {
+                this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
+                this.navigateToHome();
+            }
         });
 
         this.socketClientService.onLobbyLocked(({ accessCode, isLocked }) => {
@@ -103,16 +116,15 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if (this.accessCode && this.player && !this.isGameStarting) {
+        const isPlayerInLobby = this.lobby.players.some((p) => p.name === this.player.name);
+        if (this.accessCode && isPlayerInLobby && !this.isGameStarting) {
             this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
             if (this.player.isAdmin) {
                 this.socketClientService.deleteLobby(this.accessCode);
             }
         }
         this.removeSocketListeners();
-        // pas oublier de off des sockets ensuite
     }
-
     changeLobbyLockStatus(): void {
         if (this.lobby.isLocked) {
             if (this.lobby.players.length < this.lobby.maxPlayers) {
@@ -124,15 +136,31 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.socketClientService.lockLobby(this.accessCode);
         }
     }
+
+    kickPlayer(player: Player): void {
+        if (this.accessCode) {
+            this.socketClientService.kickPlayer(this.accessCode, player.name);
+        }
+    }
+
     navigateToHome(): void {
         this.router.navigate([Routes.HomePage]);
     }
 
     navigateToGame() {
+        if (!this.lobby.isLocked) {
+            this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
+            return;
+        }
+        if (this.lobby.players.length < MIN_PLAYERS) {
+            this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
+            return;
+        }
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             this.isGameStartedEmitted = true;
             this.socketClientService.alertGameStarted(this.accessCode);
         }
+
         this.isGameStarting = true;
         sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
@@ -142,6 +170,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.socketClientService.socket.off('joinLobby');
         this.socketClientService.socket.off('lobbyUpdate');
         this.socketClientService.socket.off('leaveLobby');
+        this.socketClientService.socket.off('kicked');
         this.socketClientService.socket.off('lobbyLocked');
         this.socketClientService.socket.off('lobbyUnlocked');
         this.socketClientService.socket.off('lobbyDeleted');

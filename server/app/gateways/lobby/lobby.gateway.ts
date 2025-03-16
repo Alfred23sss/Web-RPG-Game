@@ -27,9 +27,17 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
     @SubscribeMessage('requestUnavailableOptions')
     handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
-        const updatedUnavailableOptions = this.lobbyService.getUnavailableNamesAndAvatars(accessCode);
+        const lobby = this.lobbyService.getLobby(accessCode);
 
-        client.emit('updateUnavailableOptions', updatedUnavailableOptions);
+        if (!lobby) {
+            client.emit('error', 'Lobby not found');
+            return;
+        }
+
+        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+
+        this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
+        client.emit('updateUnavailableOptions', unavailableAvatars);
     }
 
     @SubscribeMessage(LobbyEvents.CreateLobby)
@@ -55,13 +63,16 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             client.emit('joinError', 'Lobby is locked and cannot be joined');
             return;
         }
-
-        const success = this.lobbyService.joinLobby(accessCode, player);
+        // changement ajout de .success
+        const success = this.lobbyService.joinLobby(accessCode, player).success;
         if (success) {
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
+
+            this.lobbyService.setPlayerSocket(player.name, client.id);
+
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-            client.emit('joinedLobby'); // prq ca?
+            client.emit('joinedLobby');
 
             if (lobby.players.length >= lobby.maxPlayers) {
                 this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
@@ -69,6 +80,20 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         } else {
             client.emit('joinError', 'Unable to join lobby');
         }
+    }
+
+    @SubscribeMessage('joinRoom')
+    handleJoinRoom(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) {
+            client.emit('error', 'Lobby not found');
+            return;
+        }
+
+        client.join(accessCode);
+        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+
+        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
     }
 
     @SubscribeMessage(LobbyEvents.DeleteLobby)
@@ -113,6 +138,23 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
                 this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
             }
         }
+    }
+
+    @SubscribeMessage('kickPlayer')
+    handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }) {
+        this.logger.log(`Admin requested to kick player ${data.playerName} from lobby ${data.accessCode}`);
+
+        const kickedPlayerSocketId = this.lobbyService.getPlayerSocket(data.playerName);
+        if (kickedPlayerSocketId) {
+            const kickedSocket = this.server.sockets.sockets.get(kickedPlayerSocketId);
+            if (kickedSocket) {
+                this.handleLeaveLobby(data, kickedSocket);
+            }
+            this.server.to(kickedPlayerSocketId).emit('kicked', { accessCode: data.accessCode, playerName: data.playerName });
+            this.lobbyService.removePlayerSocket(data.playerName);
+        }
+
+        this.logger.log(`Player ${data.playerName} was kicked from lobby ${data.accessCode}`);
     }
 
     @SubscribeMessage(LobbyEvents.GetLobbyPlayers)
@@ -175,6 +217,49 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
     }
 
+    @SubscribeMessage('selectAvatar')
+    handleSelectAvatar(@MessageBody() data: { accessCode: string; avatar: string }, @ConnectedSocket() client: Socket) {
+        const { accessCode, avatar } = data;
+        const lobby = this.lobbyService.getLobby(accessCode);
+
+        if (!lobby) {
+            client.emit('error', 'Lobby not found');
+            return;
+        }
+
+        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
+
+        const isAvatarTaken = lobby.players.some((p) => p.avatar === avatar) || lobby.waitingPlayers.some((wp) => wp.avatar === avatar);
+
+        if (isAvatarTaken) {
+            client.emit('error', 'Cet avatar est déjà pris !');
+            return;
+        }
+
+        lobby.waitingPlayers.push({ socketId: client.id, avatar });
+
+        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+
+        this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
+        client.emit('avatarSelected', { avatar });
+    }
+
+    @SubscribeMessage('deselectAvatar')
+    handleDeselectAvatar(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) {
+            client.emit('error', 'Lobby not found');
+            return;
+        }
+
+        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
+
+        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+
+        this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
+        client.emit('avatarDeselected');
+    }
+
     afterInit() {
         this.logger.log('LobbyGateway initialized.');
     }
@@ -195,6 +280,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.lobbyService.leaveLobby(accessCode, client.id);
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         }
+        this.lobbyService.removePlayerSocket(client.id);
         this.logger.log(`User disconnected: ${client.id}`);
     }
 }

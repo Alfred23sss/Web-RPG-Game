@@ -87,6 +87,12 @@ export enum GameSize {
     None = '',
 }
 
+export enum GameSizeTileCount {
+    Small = '10',
+    Medium = '15',
+    Large = '20',
+}
+
 export enum GameSizePlayerCount {
     Small = 2,
     Medium = 4,

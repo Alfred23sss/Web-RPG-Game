@@ -76,6 +76,10 @@ export class SocketClientService {
         this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
+    kickPlayer(accessCode: string, playerName: string): void {
+        this.socket.emit('kickPlayer', { accessCode, playerName });
+    }
+
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
             this.socket.emit('getLobbyPlayers', accessCode);
@@ -133,6 +137,10 @@ export class SocketClientService {
         this.socket.on('error', callback);
     }
 
+    onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
+        this.socket.on('kicked', callback);
+    }
+
     onLobbyCreated(callback: (players: unknown[]) => void) {
         this.socket.on('lobbyCreated', callback);
     }
@@ -168,20 +176,14 @@ export class SocketClientService {
     getSocketId() {
         return this.socket.id;
     }
-
-    on(event: string, callback: (data: unknown) => void): void {
-        // AJOUT!!!!!!!!
-        this.socket.on(event, callback);
-    }
-
     emit(event: string, data: unknown): void {
-        // AJOUT2!!!!!
         this.socket.emit(event, data);
     }
 
     onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
-        // AJOUT2!!!!!
-        this.socket.on('updateUnavailableOptions', callback);
+        this.socket.on('updateUnavailableOptions', (data) => {
+            callback(data);
+        });
     }
 
     onJoinError(callback: (message: string) => void): void {
@@ -259,5 +261,28 @@ export class SocketClientService {
 
     onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player }) => void): void {
         this.socket.on('playerMovement', callback);
+    }
+
+    selectAvatar(accessCode: string, avatar: string): void {
+        this.socket.emit('selectAvatar', { accessCode, avatar });
+    }
+
+    deselectAvatar(accessCode: string): void {
+        this.socket.emit('deselectAvatar', { accessCode });
+    }
+
+    onAvatarSelected(callback: (data: { avatar: string }) => void): void {
+        this.socket.on('avatarSelected', (data) => {
+            callback(data);
+        });
+    }
+
+    onAvatarDeselected(callback: () => void): void {
+        this.socket.on('avatarDeselected', () => {
+            callback();
+        });
+    }
+    on<T>(event: string, callback: (data: T) => void): void {
+        this.socket.on(event, callback);
     }
 }

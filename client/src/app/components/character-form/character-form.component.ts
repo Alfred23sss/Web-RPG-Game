@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -16,6 +16,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
     templateUrl: './character-form.component.html',
     styleUrls: ['./character-form.component.scss'],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, CommonModule],
 })
 export class CharacterFormComponent implements OnInit {
@@ -23,17 +24,16 @@ export class CharacterFormComponent implements OnInit {
     xSword: string = GameDecorations.XSwords;
     isLobbyCreated: boolean;
     currentAccessCode: string;
-    game?: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
+    game?: Game;
     createdPlayer: Player;
     selectedAttackDice: DiceType | null = null;
     selectedDefenseDice: DiceType | null = null;
     avatarTypes: string[] = Object.values(AvatarType);
-
+    // test comment
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
 
-    unavailableNames: string[] = [];
     unavailableAvatars: string[] = [];
     errorMessage: string = '';
 
@@ -47,7 +47,8 @@ export class CharacterFormComponent implements OnInit {
         private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
         private readonly snackbarService: SnackbarService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        private readonly cdr: ChangeDetectorRef,
+        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean },
     ) {
         this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
@@ -70,12 +71,15 @@ export class CharacterFormComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
+        this.socketClientService.emit('joinRoom', this.currentAccessCode);
 
-        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            this.unavailableNames = [...data.names];
+        this.socketClientService.onUpdateUnavailableOptions((data: { avatars: string[] }) => {
             this.unavailableAvatars = [...data.avatars];
+
+            this.cdr.detectChanges();
         });
+
+        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
     }
 
     assignBonus(attribute: AttributeType): void {
@@ -119,6 +123,36 @@ export class CharacterFormComponent implements OnInit {
         }
     }
 
+    selectAvatar(avatar: string): void {
+        if (this.createdPlayer.avatar) {
+            this.deselectAvatar();
+        }
+
+        if (!this.unavailableAvatars.includes(avatar)) {
+            this.createdPlayer.avatar = avatar;
+            this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
+
+            this.unavailableAvatars = [...this.unavailableAvatars, avatar];
+
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
+        } else {
+            this.snackbarService.showMessage('Cet avatar est déjà pris !');
+        }
+    }
+
+    deselectAvatar(): void {
+        if (this.createdPlayer.avatar) {
+            this.socketClientService.deselectAvatar(this.currentAccessCode);
+
+            this.unavailableAvatars = this.unavailableAvatars.filter((av) => av !== this.createdPlayer.avatar);
+            this.createdPlayer.avatar = '';
+
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
+        }
+    }
+
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
@@ -126,6 +160,12 @@ export class CharacterFormComponent implements OnInit {
     }
 
     closePopup(): void {
+        this.deselectAvatar();
+        this.characterService.resetAttributes();
+        this.dialogRef.close();
+    }
+
+    resetPopup(): void {
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
@@ -149,15 +189,6 @@ export class CharacterFormComponent implements OnInit {
             return false;
         }
 
-        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            this.snackbarService.showMessage('Ce nom est déjà utilisé !');
-            return false;
-        }
-        if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
-            this.snackbarService.showMessage('Cet avatar est déjà pris !');
-            return false;
-        }
-
         return true;
     }
 
@@ -168,13 +199,12 @@ export class CharacterFormComponent implements OnInit {
 
         this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
             sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-            this.closePopup();
+            this.resetPopup();
         });
     }
 
     private returnHome(): void {
-        this.characterService.resetAttributes();
-        this.dialogRef.close();
+        this.closePopup();
         this.characterService.returnHome();
     }
 }

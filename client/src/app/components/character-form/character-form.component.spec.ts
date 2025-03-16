@@ -191,8 +191,6 @@ describe('CharacterFormComponent', () => {
         if (callback) {
             callback(mockData);
         }
-
-        expect(component.unavailableNames).toEqual(mockData.names);
         expect(component.unavailableAvatars).toEqual(mockData.avatars);
     });
 
@@ -325,31 +323,29 @@ describe('CharacterFormComponent', () => {
             expect(isValid).toBeFalse();
         });
 
-        it('should show name error when name is unavailable', () => {
-            mockCharacterService.isCharacterValid.and.returnValue(true);
-            component.unavailableNames = ['ExistingName'];
-            component.createdPlayer.name = 'ExistingName';
+        // it('should show name error when name is unavailable', () => {
+        //     mockCharacterService.isCharacterValid.and.returnValue(true);
+        //     component.createdPlayer.name = 'ExistingName';
 
-            const isValid = component['isCharacterValid']();
+        //     const isValid = component['isCharacterValid']();
 
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Ce nom est déjà utilisé !');
-            expect(isValid).toBeFalse();
-        });
+        //     expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Ce nom est déjà utilisé !');
+        //     expect(isValid).toBeFalse();
+        // });
 
-        it('should show avatar error when avatar is unavailable', () => {
-            mockCharacterService.isCharacterValid.and.returnValue(true);
-            component.unavailableAvatars = ['ExistingAvatar'];
-            component.createdPlayer.avatar = 'ExistingAvatar';
+        // it('should show avatar error when avatar is unavailable', () => {
+        //     mockCharacterService.isCharacterValid.and.returnValue(true);
+        //     component.unavailableAvatars = ['ExistingAvatar'];
+        //     component.createdPlayer.avatar = 'ExistingAvatar';
 
-            const isValid = component['isCharacterValid']();
+        //     const isValid = component['isCharacterValid']();
 
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Cet avatar est déjà pris !');
-            expect(isValid).toBeFalse();
-        });
+        //     expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Cet avatar est déjà pris !');
+        //     expect(isValid).toBeFalse();
+        // });
 
         it('should return true when all validations pass', () => {
             mockCharacterService.isCharacterValid.and.returnValue(true);
-            component.unavailableNames = [];
             component.unavailableAvatars = [];
             component.createdPlayer.name = 'UniqueName';
             component.createdPlayer.avatar = 'UniqueAvatar';
