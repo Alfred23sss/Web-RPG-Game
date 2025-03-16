@@ -1,5 +1,6 @@
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/interfaces/Tile';
 import { GameManagerService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -33,6 +34,14 @@ describe('GameGateway', () => {
         vitality: 0,
     };
 
+    const mockTile: Tile = {
+        id: 'test-tile',
+        player: mockPlayer,
+        isOccupied: true,
+    } as Tile;
+
+    const mockGrid: Tile[][] = [[mockTile]];
+
     beforeEach(async () => {
         serverMock = {
             to: jest.fn().mockReturnThis(),
@@ -57,6 +66,7 @@ describe('GameGateway', () => {
 
         loggerMock = {
             log: jest.fn(),
+            error: jest.fn(),
         };
 
         combatServiceMock = {
@@ -302,6 +312,51 @@ describe('GameGateway', () => {
 
             expect(loggerMock.log).toHaveBeenCalledWith('Player test-player is attempting to escape in game test123');
             expect(combatServiceMock.attemptEscape).toHaveBeenCalledWith('test123', 'test-player');
+        });
+    });
+
+    describe('handlePlayerMovementUpdate', () => {
+        const payload = {
+            accessCode: 'test123',
+            previousTile: mockTile,
+            newTile: mockTile,
+            movement: [mockTile],
+        };
+
+        const mockClient = {} as Socket;
+
+        it('should call updatePlayerPosition with correct parameters', async () => {
+            gameSessionServiceMock.updatePlayerPosition = jest.fn().mockResolvedValue(1);
+
+            await gateway.handlePlayerMovementUpdate(mockClient, payload);
+
+            expect(gameSessionServiceMock.updatePlayerPosition).toHaveBeenCalledWith('test123', [mockTile], mockPlayer);
+        });
+
+        it('should log error if updatePlayerPosition fails', async () => {
+            const error = new Error('Failed to update player position');
+            gameSessionServiceMock.updatePlayerPosition = jest.fn().mockRejectedValue(error);
+
+            await gateway.handlePlayerMovementUpdate(mockClient, payload);
+
+            expect(loggerMock.error).toHaveBeenCalledWith('Error updating player position', error);
+        });
+    });
+
+    it('handlePlayerMovement should emit playerMovement event with correct data', () => {
+        const payload = {
+            accessCode: 'test123',
+            grid: mockGrid,
+            player: mockPlayer,
+        };
+
+        gateway.handlePlayerMovement(payload);
+
+        expect(serverMock.to).toHaveBeenCalledWith('test123');
+
+        expect(serverMock.emit).toHaveBeenCalledWith('playerMovement', {
+            grid: mockGrid,
+            player: mockPlayer,
         });
     });
 });
