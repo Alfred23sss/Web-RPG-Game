@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router, RouterLink } from '@angular/router';
+import { GameInfoComponent } from '@app/components/game-info/game-info.component';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
@@ -13,7 +14,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
     selector: 'app-admin-page',
     templateUrl: './admin-page.component.html',
     styleUrls: ['./admin-page.component.scss'],
-    imports: [RouterLink, CommonModule, MatTooltipModule],
+    imports: [RouterLink, CommonModule, MatTooltipModule, GameInfoComponent],
 })
 export class AdminPageComponent implements OnInit {
     games: Game[];
