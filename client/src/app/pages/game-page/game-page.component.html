@@ -74,20 +74,18 @@
 
     <!-- Second column: Game grid and action buttons -->
     <div class="game-map-container">
-        <div class="game-grid-container">
-            <div class="game-map">
-                <app-grid
-                    [grid]="game?.grid"
-                    [availablePath]="availablePath"
-                    [quickestPath]="quickestPath"
-                    [isEditionMode]="false"
-                    (tileHovered)="updateQuickestPath($event)"
-                    (tileClicked)="handleTileClick($event)"
-                    (playerAttacked)="handleAttackClick($event)"
+        <div class="game-map">
+            <app-grid
+                [grid]="game?.grid"
+                [isActionMode]="isActionMode"
+                [availablePath]="availablePath"
+                [quickestPath]="quickestPath"
+                [isEditionMode]="false"
+                (tileHovered)="updateQuickestPath($event)"
+                (tileClicked)="handleTileClick($event)"
+                (playerAttacked)="handleAttackClick($event)"
                     (tileRightClicked)="handleTileRightClick($event)"
-                    [ngClass]="{ 'red-border': isInCombatMode }"
-                ></app-grid>
-            </div>
+            ></app-grid>
         </div>
     </div>
 
@@ -109,6 +107,12 @@
             <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
         </div>
+        @if(isInCombatMode){
+        <div class="dice-buttons">
+            <button class="dice" (click)="rollAttackDice()">Dé d'attaque</button>
+            <button class="dice" (click)="rollDefenseDice()">Dé de défense</button>
+        </div>
+        }
 
         <div class="game-messages">
             <h3>Messages</h3>

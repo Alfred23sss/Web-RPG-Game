@@ -191,6 +191,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     executeNextAction(): void {
+        console.log(this.isActionMode);
         this.isActionMode = !this.isActionMode;
         this.snackbarService.showMessage('Mode combat activé');
     }
@@ -204,6 +205,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.logBookSubscription.unsubscribe();
         sessionStorage.setItem('refreshed', 'false');
+    }
+
+    rollAttackDice(): void {
+        // this.emit(this.clientPlayer.attackDice)
+        return;
+    }
+
+    rollDefenseDice(): void {
+        // this.emit(this.clientPlayer.attackDice)
+        return;
     }
 
     private isAvailablePath(tile: Tile): boolean {

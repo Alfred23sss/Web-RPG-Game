@@ -23,7 +23,6 @@ html {
 }
 
 .game-info,
-.game-grid-container,
 .timer-chat-container {
     flex: 1;
 }
@@ -36,6 +35,31 @@ html {
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+.dice-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #3e4a65;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dice {
+    margin: 5px;
+    font-family: papyrus;
+    font-size: 1rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
 }
 
 .game-details,
@@ -76,6 +100,7 @@ html {
     flex-direction: column;
     align-items: center;
     width: 50%;
+    flex: 1;
 }
 
 .game-map {
@@ -93,6 +118,7 @@ app-grid {
 }
 
 .action-buttons {
+    height: 20%;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -105,7 +131,7 @@ app-grid {
 }
 
 .action-btn {
-    padding: 12px 24px;
+    padding: 3px 6px;
     margin: 5px;
     font-family: papyrus;
     font-size: 1.1rem;

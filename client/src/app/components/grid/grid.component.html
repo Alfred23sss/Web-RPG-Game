@@ -2,7 +2,7 @@
     @for (row of grid; track $index) {
     <div class="grid-row">
         @for (tile of row; track $index) {
-            <app-tile
+        <app-tile
             [tile]="tile"
             (mouseenter)="tileHovered.emit(tile)"
             (click)="onTileClick(tile)"
@@ -11,7 +11,9 @@
                 'invalid-drop': tile.type === tileType.Wall || tile.isOccupied,
                 'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied,
                 'available-path': isAvailablePath(tile),
-                'quickest-path': isInQuickestPath(tile) && isAvailablePath(tile)
+                'quickest-path': isInQuickestPath(tile) && isAvailablePath(tile),
+                'highlight-player': isActionMode && tile.player,
+                'highlight-door': isActionMode && tile.type === tileType.Door
             }"
             [isEditionMode]="isEditionMode"
         ></app-tile>
