@@ -94,7 +94,8 @@ export class GameCombatService {
 
                 this.resetHealth([currentFighter, defenderPlayer], [currentFighterSocket, defenderPlayerSocket], accessCode);
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
-                this.endCombat(accessCode, false, updatedGridAfterTeleportation);
+                this.endCombat(accessCode, false);
+                this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
 
                 if (combatState.attacker === defenderPlayer) {
                     this.gameSessionService.endTurn(accessCode);
@@ -135,7 +136,7 @@ export class GameCombatService {
         }
     }
 
-    endCombat(accessCode: string, isEscape: boolean = false, grid: Tile[][] = undefined): void {
+    endCombat(accessCode: string, isEscape: boolean = false): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
@@ -151,7 +152,7 @@ export class GameCombatService {
 
         const { attacker, defender, winner, pausedGameTurnTimeRemaining } = combatState;
 
-        this.emitCombatEnded(accessCode, attacker, defender, winner, isEscape, grid);
+        this.emitCombatEnded(accessCode, attacker, defender, winner, isEscape);
 
         this.gameSessionService.setCombatState(accessCode, false);
 
@@ -357,15 +358,13 @@ export class GameCombatService {
         });
     }
 
-    // eslint-disable-next-line max-params
-    private emitCombatEnded(accessCode: string, attacker: Player, defender: Player, winner: Player, isEscape: boolean, grid: Tile[][]): void {
+    private emitCombatEnded(accessCode: string, attacker: Player, defender: Player, winner: Player, isEscape: boolean): void {
         this.eventEmitter.emit('game.combat.ended', {
             accessCode,
             attacker,
             defender,
             winner,
             isEscape,
-            grid,
         });
     }
 }

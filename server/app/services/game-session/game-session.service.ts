@@ -63,10 +63,7 @@ export class GameSessionService {
                 }
             }
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
-            this.eventEmitter.emit('game.grid.update', {
-                accessCode,
-                grid: gameSession.game.grid,
-            });
+            this.emitGridUpdate(accessCode, gameSession.game.grid);
         }
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
@@ -193,6 +190,13 @@ export class GameSessionService {
         if (!gameSession) throw new Error('Game session not found');
         return gameSession;
     }
+
+    emitGridUpdate(accessCode: string, grid: Tile[][]): void {
+        this.eventEmitter.emit('game.grid.update', {
+            accessCode,
+            grid,
+        });
+    }
     private initializeTurn(accessCode: string): Turn {
         return {
             orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),
@@ -289,6 +293,7 @@ export class GameSessionService {
             this.endTurn(accessCode);
         }, TURN_DURATION);
     }
+
     private emitTransitionStarted(accessCode: string, nextPlayer: Player): void {
         this.eventEmitter.emit('game.transition.started', { accessCode, nextPlayer });
     }
