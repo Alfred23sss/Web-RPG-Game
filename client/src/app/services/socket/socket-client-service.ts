@@ -302,4 +302,7 @@ export class SocketClientService {
         };
         this.emit('doorUpdate', payload);
     }
+    onGridUpdate(callback: (data: { grid: Tile[][] }) => void): void {
+        this.socket.on('gridUpdate', callback);
+    }
 }

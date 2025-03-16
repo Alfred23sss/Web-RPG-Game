@@ -102,6 +102,12 @@ export class GameGateway {
         this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
+    @OnEvent('game.grid.update')
+    handleGridUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
+        this.server.to(payload.accessCode).emit('gridUpdate', {
+            grid: payload.grid,
+        });
+    }
 
     @OnEvent('game.player.movement')
     handlePlayerMovement(payload: { accessCode: string; grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) {

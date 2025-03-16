@@ -15,4 +15,5 @@ export interface Player {
     hasAbandoned: boolean;
     isActive: boolean;
     combatWon: number;
+    spawnPoint?: { x: number; y: number; tileId: string } | undefined;
 }

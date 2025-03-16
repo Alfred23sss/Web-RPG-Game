@@ -142,6 +142,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.onGameCombatTimerUpdate((data) => {
             this.turnTimer = data.timeLeft;
         });
+
+        this.socketClientService.onGridUpdate((data) => {
+            if (!this.game || !this.game.grid) {
+                return;
+            }
+            this.game.grid = data.grid;
+        });
     }
 
     handleDoorClick(targetTile: Tile): void {

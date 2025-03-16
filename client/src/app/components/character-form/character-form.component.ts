@@ -67,6 +67,7 @@ export class CharacterFormComponent implements OnInit {
             hasAbandoned: false,
             isActive: false,
             combatWon: 0,
+            spawnPoint: undefined,
         };
     }
 

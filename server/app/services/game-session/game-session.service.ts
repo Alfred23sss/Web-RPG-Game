@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import { ImageType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
@@ -29,10 +30,7 @@ export class GameSessionService {
         const turn = this.initializeTurn(accessCode);
         const updatedGrid = this.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
-        const gameSession: GameSession = {
-            game,
-            turn,
-        };
+        const gameSession: GameSession = { game, turn };
         this.gameSessions.set(accessCode, gameSession);
         this.startTransitionPhase(accessCode);
         return gameSession;
@@ -52,14 +50,21 @@ export class GameSessionService {
     handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return null;
-
         const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
         if (player) {
+            const spawnTileId = player.spawnPoint?.tileId;
             this.updatePlayer(player, { hasAbandoned: true });
-            // faudra ajouter la logiue d'enlever le spawnpoint
-            // if (tile) {
-            //     tile.player = null;
-            // }
+            if (spawnTileId) {
+                const spawnTile = this.findTileById(gameSession.game.grid, spawnTileId);
+                if (spawnTile) {
+                    spawnTile.item = undefined;
+                }
+            }
+            this.clearPlayerFromGrid(gameSession.game.grid, playerName);
+            this.eventEmitter.emit('game.grid.update', {
+                accessCode,
+                grid: gameSession.game.grid,
+            });
         }
         return player;
     }
@@ -147,14 +152,12 @@ export class GameSessionService {
         this.gameSessions.get(accessCode).game.grid = grid;
         this.eventEmitter.emit('game.door.update', { accessCode, grid });
     }
-
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
-
         for (let i = 1; i < movement.length; i++) {
             await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
-            this.clearPlayerFromGrid(gameSession.game.grid, player);
+            this.clearPlayerFromGrid(gameSession.game.grid, player.name);
             this.setPlayerOnTile(gameSession.game.grid, movement[i], player);
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
@@ -167,7 +170,9 @@ export class GameSessionService {
             });
         }
     }
-
+    private findTileById(grid: Tile[][], tileId: string): Tile | undefined {
+        return grid.flat().find((tile) => tile.id === tileId);
+    }
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;
         let tile2Pos: { row: number; col: number } | null = null;
@@ -190,10 +195,10 @@ export class GameSessionService {
         return isAdjacent;
     }
 
-    private clearPlayerFromGrid(grid: Tile[][], player: Player): void {
+    private clearPlayerFromGrid(grid: Tile[][], playerName: string): void {
         for (const row of grid) {
             for (const tile of row) {
-                if (tile.player && tile.player.name === player.name) {
+                if (tile.player?.name === playerName) {
                     tile.player = undefined;
                 }
             }
@@ -244,15 +249,36 @@ export class GameSessionService {
     }
     private assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): Tile[][] {
         const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - randomizer);
+
         players.forEach((player, index) => {
             if (index < shuffledSpawns.length) {
-                shuffledSpawns[index].player = player;
+                const spawnTile = shuffledSpawns[index];
+                spawnTile.player = player;
+                const coords = this.parseTileCoordinates(spawnTile.id);
+                if (coords) {
+                    player.spawnPoint = {
+                        x: coords.row,
+                        y: coords.col,
+                        tileId: spawnTile.id,
+                    };
+                }
             }
         });
         shuffledSpawns.slice(players.length).forEach((spawnPoint) => {
             spawnPoint.item = null;
         });
         return grid;
+    }
+    private parseTileCoordinates(tileId: string): { row: number; col: number } | null {
+        const match = tileId.match(/tile-(\d+)-(\d+)/);
+        if (!match) {
+            this.logger.error(`Invalid tile ID format: ${tileId}`);
+            return null;
+        }
+        return {
+            row: parseInt(match[1], 10),
+            col: parseInt(match[2], 10),
+        };
     }
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
@@ -285,50 +311,35 @@ export class GameSessionService {
             this.startPlayerTurn(accessCode, nextPlayer);
         }, TRANSITION_PHASE_DURATION);
     }
-
     private getNextPlayer(accessCode: string): Player {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) throw new Error('Game session not found');
-
         const activePlayers = gameSession.turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return; // reset tt les joueurs ont abandonné
-
         if (!gameSession.turn.currentPlayer) {
             return activePlayers[0];
         }
-
         const currentIndex = activePlayers.findIndex((p) => p.name === gameSession.turn.currentPlayer?.name);
-
         const nextIndex = (currentIndex + 1) % activePlayers.length;
-
         return activePlayers[nextIndex];
     }
-
     private startPlayerTurn(accessCode: string, player: Player): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-
         gameSession.turn.isTransitionPhase = false;
-
         gameSession.turn.currentPlayer = player;
         this.updatePlayer(player, { isActive: true });
-
         gameSession.turn.currentTurnCountdown = TURN_DURATION / SECOND;
-
         this.emitTurnStarted(accessCode, player);
-
         if (gameSession.turn.countdownInterval) {
             clearInterval(gameSession.turn.countdownInterval);
             gameSession.turn.countdownInterval = null;
         }
-
         let timeLeft = TURN_DURATION / SECOND;
         gameSession.turn.countdownInterval = setInterval(() => {
             timeLeft--;
             gameSession.turn.currentTurnCountdown = timeLeft;
-
             this.emitTimerUpdate(accessCode, timeLeft);
-
             if (timeLeft <= 0) {
                 if (gameSession.turn.countdownInterval) {
                     clearInterval(gameSession.turn.countdownInterval);
@@ -336,33 +347,23 @@ export class GameSessionService {
                 gameSession.turn.countdownInterval = null;
             }
         }, SECOND);
-
         gameSession.turn.turnTimers = setTimeout(() => {
             this.endTurn(accessCode);
         }, TURN_DURATION);
     }
-
     private emitTransitionStarted(accessCode: string, nextPlayer: Player): void {
         this.eventEmitter.emit('game.transition.started', { accessCode, nextPlayer });
     }
-
     private emitTransitionCountdown(accessCode: string, countdown: number): void {
         this.eventEmitter.emit('game.transition.countdown', { accessCode, countdown });
     }
-
     private emitTurnStarted(accessCode: string, player: Player): void {
         this.eventEmitter.emit('game.turn.started', { accessCode, player });
     }
-
     private emitTimerUpdate(accessCode: string, timeLeft: number): void {
         this.eventEmitter.emit('game.turn.timer', { accessCode, timeLeft });
     }
-
     private emitTurnResumed(accessCode: string, player: Player, remainingTime: number): void {
-        this.eventEmitter.emit('game.turn.resumed', {
-            accessCode,
-            player,
-            remainingTime,
-        });
+        this.eventEmitter.emit('game.turn.resumed', { accessCode, player, remainingTime });
     }
 }
