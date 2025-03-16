@@ -149,6 +149,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.game.grid = data.grid;
             this.clientPlayer.actionPoints = noActionPoints;
             this.isActionMode = false;
+            this.updateAvailablePath();
         });
 
         this.socketClientService.onGameCombatTurnStarted((data) => {
