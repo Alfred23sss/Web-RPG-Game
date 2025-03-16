@@ -1,3 +1,4 @@
+import { ImageType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
@@ -134,6 +135,12 @@ export class GameSessionService {
         const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
         if (!isAdjacent) return;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+        // ici changer pour quelque chose de plus clean
+        if (targetTile.isOpen) {
+            targetTile.imageSrc = ImageType.ClosedDoor;
+        } else {
+            targetTile.imageSrc = ImageType.OpenDoor;
+        }
         targetTile.isOpen = !targetTile.isOpen;
         this.logger.log('emit game.door.update');
         this.logger.log(grid);

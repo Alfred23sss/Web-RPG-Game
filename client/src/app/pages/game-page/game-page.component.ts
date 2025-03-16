@@ -126,6 +126,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
             console.log(data.grid);
             this.game.grid = data.grid;
+            this.clientPlayer.actionPoints = zeroActionPoints;
             this.isActionMode = false;
             console.log('door clicked client side adjusted');
         });
