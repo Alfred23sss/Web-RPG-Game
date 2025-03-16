@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations, JoinLobbyResult } from '@app/enums/global.enums';
+import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -40,14 +41,14 @@ export class CharacterFormComponent implements OnInit {
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
-    // eslint-disable-next-line max-params
+    /* eslint-disable-next-line max-params */ // they are all necessary and independent, which means they don't contribute to a high coupling
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
         private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
         private readonly snackbarService: SnackbarService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean }, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        @Inject(MAT_DIALOG_DATA) public data: CharacterDialogData, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
     ) {
         this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
