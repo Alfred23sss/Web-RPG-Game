@@ -467,4 +467,23 @@ describe('SocketClientService', () => {
             expect(callback).toHaveBeenCalledWith(mockData);
         });
     });
+
+    it('should emit kickPlayer event with correct parameters', () => {
+        spyOn(fakeSocket, 'emit');
+        const accessCode = 'testCode';
+        const playerName = 'player1';
+
+        service.kickPlayer(accessCode, playerName);
+
+        expect(fakeSocket.emit).toHaveBeenCalledWith('kickPlayer', { accessCode, playerName });
+    });
+
+    it('should call callback when onKicked event is received', () => {
+        spyOn(fakeSocket, 'on');
+        const callback = jasmine.createSpy('callback');
+
+        service.onKicked(callback);
+
+        expect(fakeSocket.on).toHaveBeenCalledWith('kicked', callback);
+    });
 });
