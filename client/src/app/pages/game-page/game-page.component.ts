@@ -13,7 +13,8 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Subscription } from 'rxjs';
 
-const zeroActionPoints = 0;
+const noActionPoints = 0;
+const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
 
 @Component({
@@ -87,6 +88,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.currentPlayer = data.player;
             this.isActionMode = false;
             this.isInCombatMode = false;
+            this.clientPlayer.actionPoints = defaultActionPoint;
             this.clientPlayer.movementPoints = this.clientPlayer.speed;
             this.turnTimer = data.turnDuration;
             this.updateAvailablePath();
@@ -124,11 +126,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
             if (!this.game || !this.game.grid) {
                 return;
             }
-            console.log(data.grid);
             this.game.grid = data.grid;
-            this.clientPlayer.actionPoints = zeroActionPoints;
+            this.clientPlayer.actionPoints = noActionPoints;
             this.isActionMode = false;
-            console.log('door clicked client side adjusted');
         });
 
         this.socketClientService.onGameCombatTurnStarted((data) => {
@@ -142,7 +142,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleDoorClick(targetTile: Tile): void {
-        if (this.isInCombatMode || this.clientPlayer.actionPoints === zeroActionPoints || !this.isActionMode) return;
+        if (this.isInCombatMode || this.clientPlayer.actionPoints === noActionPoints || !this.isActionMode) return;
         const currentTile = this.getClientPlayerPosition();
         if (!currentTile || !this.game || !this.game.grid) {
             return;
@@ -151,7 +151,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleAttackClick(targetTile: Tile): void {
-        if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === zeroActionPoints) return;
+        if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
         if (this.isActionMode && currentTile && currentTile.player) {
             this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
