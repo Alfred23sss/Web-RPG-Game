@@ -21,6 +21,7 @@ export class GridComponent {
     @Output() tileHovered = new EventEmitter<Tile>();
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
+    @Output() doorClicked = new EventEmitter<Tile>();
 
     tileType = TileType;
 
@@ -33,10 +34,11 @@ export class GridComponent {
     }
 
     onTileClick(tile: Tile): void {
-        console.log('clique');
-        // rajouter verification
         if (tile.player) {
             this.playerAttacked.emit(tile);
+        }
+        if (tile.type === TileType.Door) {
+            this.doorClicked.emit(tile);
         }
         if (this.isAvailablePath(tile)) {
             this.tileClicked.emit(tile);

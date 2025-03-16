@@ -13,6 +13,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Subscription } from 'rxjs';
 
+const zeroActionPoints = 0;
 const delayBeforeHome = 2000;
 
 @Component({
@@ -37,6 +38,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     logBookSubscription: Subscription;
     turnTimer: number;
     isInCombatMode: boolean = false;
+    isActionMode: boolean = false;
 
     constructor(
         private playerMovementService: PlayerMovementService,
@@ -83,6 +85,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.onTurnStarted((data) => {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             this.currentPlayer = data.player;
+            this.isActionMode = false;
+            this.isInCombatMode = false;
             this.clientPlayer.movementPoints = this.clientPlayer.speed;
             this.turnTimer = data.turnDuration;
             this.updateAvailablePath();
@@ -116,6 +120,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.isInCombatMode = true;
         });
 
+        this.socketClientService.onDoorClickedUpdate((data) => {
+            if (!this.game || !this.game.grid) {
+                return;
+            }
+            this.game.grid = data.updatedGrid;
+            this.clientPlayer = data.updatedPlayer;
+            this.isActionMode = false;
+            console.log('door clicked client side adjusted');
+        });
+
         this.socketClientService.onGameCombatTurnStarted((data) => {
             this.currentPlayer = data.fighter;
             this.snackbarService.showMessage(`C'est a ${data.fighter.name} d'attaquer!`);
@@ -126,17 +140,26 @@ export class GamePageComponent implements OnInit, OnDestroy {
         });
     }
 
-    handleAttackClick(targetTile: Tile): void {
-        if (!targetTile.player || targetTile.player === this.clientPlayer) return;
+    handleDoorClick(targetTile: Tile): void {
+        if (this.isInCombatMode || this.clientPlayer.actionPoints === zeroActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
-        if (this.isInCombatMode && currentTile && currentTile.player) {
+        if (!currentTile || !this.game || !this.game.grid) {
+            return;
+        }
+        this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode, this.clientPlayer);
+    }
+
+    handleAttackClick(targetTile: Tile): void {
+        if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === zeroActionPoints) return;
+        const currentTile = this.getClientPlayerPosition();
+        if (this.isActionMode && currentTile && currentTile.player) {
             this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
             return;
         }
     }
 
     handleTileClick(targetTile: Tile): void {
-        if (this.isInCombatMode) return;
+        if (this.isActionMode) return;
         const currentTile = this.getClientPlayerPosition();
         if (!currentTile || !this.game || !this.game.grid) {
             return;
@@ -161,7 +184,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     executeNextAction(): void {
-        this.isInCombatMode = !this.isInCombatMode;
+        this.isActionMode = !this.isActionMode;
         this.snackbarService.showMessage('Mode combat activé');
     }
     abandonGame(): void {

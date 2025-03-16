@@ -6,4 +6,5 @@ export enum GameEvents {
     PerformAttack = 'performAttack',
     AttemptEscape = 'attemptEscape',
     PlayerMovementUpdate = 'playerMovementUpdate',
+    DoorUpdate = 'doorUpdate',
 }

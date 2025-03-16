@@ -16,6 +16,7 @@ const PLAYER_MOVE_DELAY = 150;
 export class GameSessionService {
     private gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
     constructor(
+        private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
@@ -128,6 +129,18 @@ export class GameSessionService {
         return gameSession.turn.currentPlayer.name === playerName;
     }
 
+    updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile, player: Player, grid: Tile[][]): void {
+        const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        if (!isAdjacent) return;
+        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+        targetTile.isOpen = !targetTile.isOpen;
+        if (player.actionPoints > 0) {
+            player.actionPoints -= 1;
+        }
+        this.logger.log('emit game.door.update');
+        this.eventEmitter.emit('game.door.update', { accessCode, grid, player });
+    }
+
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
 
@@ -142,6 +155,28 @@ export class GameSessionService {
                 player,
             });
         }
+    }
+
+    private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
+        let tile1Pos: { row: number; col: number } | null = null;
+        let tile2Pos: { row: number; col: number } | null = null;
+        this.logger.log('on rentre dans la ofnction');
+        for (let row = 0; row < grid.length; row++) {
+            for (let col = 0; col < grid[row].length; col++) {
+                if (grid[row][col].id === tileId1) {
+                    tile1Pos = { row, col };
+                }
+                if (grid[row][col].id === tileId2) {
+                    tile2Pos = { row, col };
+                }
+                if (tile1Pos && tile2Pos) break;
+            }
+            if (tile1Pos && tile2Pos) break;
+        }
+        if (!tile1Pos || !tile2Pos) return false;
+        const isAdjacent = Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+        this.logger.log('on sort de la ofnction');
+        return isAdjacent;
     }
 
     private clearPlayerFromGrid(grid: Tile[][], player: Player): void {
