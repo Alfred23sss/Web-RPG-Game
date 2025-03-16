@@ -1,5 +1,6 @@
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
+import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -19,6 +20,7 @@ export class GameGateway {
         private readonly lobbyService: LobbyService,
         private readonly gameSessionService: GameSessionService,
         private readonly gameCombatService: GameCombatService,
+        private readonly accessCodesService: AccessCodesService,
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)
@@ -35,16 +37,17 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.AbandonedGame)
     handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
         this.logger.log(`Player ${payload.player.name} has abandoned game`);
+        this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
         const lobby = this.lobbyService.getLobby(payload.accessCode);
         this.logger.log(`Lobby ${lobby} has left lobby`);
+        this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
+        client.leave(payload.accessCode);
 
-        if (lobby.players.length <= 2) {
-            // stop game session here'
-            this.lobbyService.leaveLobby(payload.accessCode, payload.player.name);
-            client.leave(payload.accessCode);
+        if (lobby.players.length <= 1) {
             this.lobbyService.clearLobby(payload.accessCode);
             this.gameSessionService.deleteGameSession(payload.accessCode);
+            this.accessCodesService.removeAccessCode(payload.accessCode);
             this.server.to(payload.accessCode).emit('gameDeleted');
         }
         this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });

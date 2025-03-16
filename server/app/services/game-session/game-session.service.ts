@@ -4,14 +4,15 @@ import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
 import { Tile } from '@app/model/database/tile';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-const randomizer = 0.5;
 const TRANSITION_PHASE_DURATION = 3000;
 const TURN_DURATION = 30000;
 const SECOND = 1000;
+const RANDOMIZER = 0.5;
 const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
@@ -21,14 +22,15 @@ export class GameSessionService {
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
+        private readonly gridManager: GridManagerService,
     ) {}
     createGameSession(accessCode: string): GameSession {
         const lobby = this.lobbyService.getLobby(accessCode);
         const game = lobby.game;
         const grid = game.grid;
-        const spawnPoints = this.findSpawnPoints(grid);
+        const spawnPoints = this.gridManager.findSpawnPoints(grid);
         const turn = this.initializeTurn(accessCode);
-        const updatedGrid = this.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
+        const updatedGrid = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
         const gameSession: GameSession = { game, turn };
         this.gameSessions.set(accessCode, gameSession);
@@ -55,16 +57,19 @@ export class GameSessionService {
             const spawnTileId = player.spawnPoint?.tileId;
             this.updatePlayer(player, { hasAbandoned: true });
             if (spawnTileId) {
-                const spawnTile = this.findTileById(gameSession.game.grid, spawnTileId);
+                const spawnTile = this.gridManager.findTileById(gameSession.game.grid, spawnTileId);
                 if (spawnTile) {
                     spawnTile.item = undefined;
                 }
             }
-            this.clearPlayerFromGrid(gameSession.game.grid, playerName);
+            this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.eventEmitter.emit('game.grid.update', {
                 accessCode,
                 grid: gameSession.game.grid,
             });
+        }
+        if (gameSession.turn.currentPlayer.name === playerName) {
+            this.endTurn(accessCode);
         }
         return player;
     }
@@ -137,7 +142,7 @@ export class GameSessionService {
 
     updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
         const grid = this.gameSessions.get(accessCode).game.grid;
-        const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
         if (!isAdjacent) return;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
         // ici changer pour quelque chose de plus clean
@@ -152,13 +157,25 @@ export class GameSessionService {
         this.gameSessions.get(accessCode).game.grid = grid;
         this.eventEmitter.emit('game.door.update', { accessCode, grid });
     }
+
+    updatePlayer(player: Player, updates: Partial<Player>): void {
+        if (player) {
+            Object.assign(player, updates);
+        }
+    }
+
+    updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
+        const players = this.getPlayers(accessCode);
+        const player = players.find((p) => p.name === playername);
+        this.updatePlayer(player, updates);
+    }
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
         for (let i = 1; i < movement.length; i++) {
             await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
-            this.clearPlayerFromGrid(gameSession.game.grid, player.name);
-            this.setPlayerOnTile(gameSession.game.grid, movement[i], player);
+            this.gridManager.clearPlayerFromGrid(gameSession.game.grid, player.name);
+            this.gridManager.setPlayerOnTile(gameSession.game.grid, movement[i], player);
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
@@ -170,55 +187,11 @@ export class GameSessionService {
             });
         }
     }
-    private findTileById(grid: Tile[][], tileId: string): Tile | undefined {
-        return grid.flat().find((tile) => tile.id === tileId);
-    }
-    private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
-        let tile1Pos: { row: number; col: number } | null = null;
-        let tile2Pos: { row: number; col: number } | null = null;
-        this.logger.log('on rentre dans la ofnction');
-        for (let row = 0; row < grid.length; row++) {
-            for (let col = 0; col < grid[row].length; col++) {
-                if (grid[row][col].id === tileId1) {
-                    tile1Pos = { row, col };
-                }
-                if (grid[row][col].id === tileId2) {
-                    tile2Pos = { row, col };
-                }
-                if (tile1Pos && tile2Pos) break;
-            }
-            if (tile1Pos && tile2Pos) break;
-        }
-        if (!tile1Pos || !tile2Pos) return false;
-        const isAdjacent = Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
-        this.logger.log('on sort de la ofnction');
-        return isAdjacent;
-    }
 
-    private clearPlayerFromGrid(grid: Tile[][], playerName: string): void {
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.player?.name === playerName) {
-                    tile.player = undefined;
-                }
-            }
-        }
-    }
-
-    private setPlayerOnTile(grid: Tile[][], targetTile: Tile, player: Player): void {
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.id === targetTile.id) {
-                    tile.player = player;
-                    return;
-                }
-            }
-        }
-    }
-    private updatePlayer(player: Player, updates: Partial<Player>): void {
-        if (player) {
-            Object.assign(player, updates);
-        }
+    getGameSession(accessCode: string): GameSession {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) throw new Error('Game session not found');
+        return gameSession;
     }
     private initializeTurn(accessCode: string): Turn {
         return {
@@ -234,7 +207,7 @@ export class GameSessionService {
     private orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = [...players].sort((a, b) => {
             if (a.speed === b.speed) {
-                return Math.random() < randomizer ? -1 : 1;
+                return Math.random() < RANDOMIZER ? -1 : 1;
             }
             return b.speed - a.speed;
         });
@@ -244,42 +217,7 @@ export class GameSessionService {
         Logger.log(`Ordered Players: ${JSON.stringify(playerList.map((p) => ({ name: p.name, speed: p.speed, isActive: p.isActive })))}`);
         return playerList;
     }
-    private findSpawnPoints(grid: Tile[][]): Tile[] {
-        return grid.flat().filter((tile) => tile.item?.name === 'home');
-    }
-    private assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): Tile[][] {
-        const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - randomizer);
 
-        players.forEach((player, index) => {
-            if (index < shuffledSpawns.length) {
-                const spawnTile = shuffledSpawns[index];
-                spawnTile.player = player;
-                const coords = this.parseTileCoordinates(spawnTile.id);
-                if (coords) {
-                    player.spawnPoint = {
-                        x: coords.row,
-                        y: coords.col,
-                        tileId: spawnTile.id,
-                    };
-                }
-            }
-        });
-        shuffledSpawns.slice(players.length).forEach((spawnPoint) => {
-            spawnPoint.item = null;
-        });
-        return grid;
-    }
-    private parseTileCoordinates(tileId: string): { row: number; col: number } | null {
-        const match = tileId.match(/tile-(\d+)-(\d+)/);
-        if (!match) {
-            this.logger.error(`Invalid tile ID format: ${tileId}`);
-            return null;
-        }
-        return {
-            row: parseInt(match[1], 10),
-            col: parseInt(match[2], 10),
-        };
-    }
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;

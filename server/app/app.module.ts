@@ -14,6 +14,7 @@ import { GameCombatService } from './services/combat-manager/combat-manager.serv
 import { GameSessionService } from './services/game-session/game-session.service';
 import { GameService } from './services/game/game.service';
 import { LobbyService } from './services/lobby/lobby.service';
+import { GridManagerService } from './services/grid-manager/grid-manager.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -31,7 +32,17 @@ import { LobbyService } from './services/lobby/lobby.service';
         ]),
     ],
     controllers: [GameController, AccessCodesController],
-    providers: [LobbyGateway, LobbyService, GameGateway, Logger, GameService, AccessCodesService, GameSessionService, GameCombatService], // removed chat
+    providers: [
+        LobbyGateway,
+        LobbyService,
+        GameGateway,
+        Logger,
+        GameService,
+        AccessCodesService,
+        GameSessionService,
+        GameCombatService,
+        GridManagerService,
+    ], // removed chat
     exports: [AccessCodesService],
 })
 export class AppModule {}
