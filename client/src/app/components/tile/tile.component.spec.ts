@@ -152,4 +152,83 @@ describe('TileComponent', () => {
 
         expect(TileComponent.activeButton).toBe(1);
     });
+
+    describe('When isEditionMode is false', () => {
+        beforeEach(() => {
+            component.isEditionMode = false;
+        });
+
+        it('should not handle mousedown events', () => {
+            const event = new MouseEvent('mousedown', { button: 0 });
+            component.onMouseDown(event);
+
+            expect(itemDragServiceSpy.setSelectedItem).not.toHaveBeenCalled();
+            expect(tileServiceSpy.removeTileObject).not.toHaveBeenCalled();
+            expect(tileServiceSpy.removeTileType).not.toHaveBeenCalled();
+            expect(tileServiceSpy.applyTool).not.toHaveBeenCalled();
+        });
+
+        it('should not handle mouseenter events', () => {
+            TileComponent.activeButton = 0;
+            component.onMouseEnter();
+            expect(tileServiceSpy.applyTool).not.toHaveBeenCalled();
+
+            TileComponent.activeButton = 2;
+            component.onMouseEnter();
+            expect(tileServiceSpy.removeTileType).not.toHaveBeenCalled();
+        });
+
+        it('should not prevent context menu on right click', () => {
+            const event = new MouseEvent('contextmenu');
+            spyOn(event, 'preventDefault');
+            spyOn(event, 'stopPropagation');
+
+            component.onRightClick(event);
+
+            expect(event.preventDefault).not.toHaveBeenCalled();
+            expect(event.stopPropagation).not.toHaveBeenCalled();
+            expect(tileServiceSpy.removeTileObject).not.toHaveBeenCalled();
+        });
+
+        it('should not handle mouseup events', () => {
+            TileComponent.activeButton = 0;
+            const originalValue = TileComponent.activeButton;
+
+            component.onMouseUp(new MouseEvent('mouseup'));
+
+            expect(TileComponent.activeButton).toBe(originalValue);
+        });
+
+        it('should not handle dragover events', () => {
+            const event = new DragEvent('dragover');
+            component.onDragOver(event);
+
+            expect(TileComponent.isDraggedTest).toBeFalse();
+        });
+
+        it('should not handle drop events', () => {
+            const event = new DragEvent('drop');
+            component.onDrop(event);
+
+            expect(tileServiceSpy.drop).not.toHaveBeenCalled();
+            expect(TileComponent.activeButton).toBeNull();
+        });
+
+        it('should not modify activeButton state during interactions', () => {
+            const initialActiveButton = (TileComponent.activeButton = 0);
+
+            component.onMouseDown(new MouseEvent('mousedown'));
+            component.onMouseEnter();
+            component.onMouseUp(new MouseEvent('mouseup'));
+
+            expect(TileComponent.activeButton).toBe(initialActiveButton);
+        });
+
+        it('should not update drag state during drag interactions', () => {
+            component.onDragOver(new DragEvent('dragover'));
+            component.onDrop(new DragEvent('drop'));
+
+            expect(TileComponent.isDraggedTest).toBeFalse();
+        });
+    });
 });

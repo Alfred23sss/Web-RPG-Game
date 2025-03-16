@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 
 @Injectable({
     providedIn: 'root',
@@ -12,7 +14,10 @@ import { io, Socket } from 'socket.io-client';
 export class SocketClientService {
     socket: Socket;
 
-    constructor(private readonly accessCodeService: AccessCodesCommunicationService) {
+    constructor(
+        private readonly accessCodeService: AccessCodesCommunicationService,
+        private playerMovementService: PlayerMovementService,
+    ) {
         this.connect();
     }
 
@@ -238,6 +243,24 @@ export class SocketClientService {
 
     onGameCombatTurnStarted(callback: (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => void) {
         this.socket.on('combatTurnStarted', callback);
+    }
+
+    sendPlayerMovementUpdate(currentTile: Tile, targetTile: Tile, accessCode: string, grid: Tile[][]): void {
+        const movementPath = this.playerMovementService.quickestPath(currentTile, targetTile, grid);
+        if (!movementPath) {
+            return;
+        }
+        const payload = {
+            previousTile: currentTile,
+            newTile: targetTile,
+            movement: movementPath,
+            accessCode,
+        };
+        this.emit('playerMovementUpdate', payload);
+    }
+
+    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player }) => void): void {
+        this.socket.on('playerMovement', callback);
     }
 
     selectAvatar(accessCode: string, avatar: string): void {
