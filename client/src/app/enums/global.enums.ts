@@ -175,3 +175,8 @@ export enum AccessCodeGenerator {
     Minimum = 1000,
     Maximum = 9000,
 }
+
+export enum MouseButton {
+    Left = 0,
+    Right = 2,
+}

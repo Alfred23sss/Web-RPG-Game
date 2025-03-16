@@ -1,4 +1,5 @@
 import { Component, HostListener, Input } from '@angular/core';
+import { MouseButton } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { TileService } from '@app/services/tile/tile.service';
@@ -14,6 +15,7 @@ export class TileComponent {
     static isDraggedTest = false;
     @Input() tile!: Tile;
     @Input() isEditionMode: boolean = false;
+
     constructor(
         private itemDragService: ItemDragService,
         private tileService: TileService,
@@ -30,14 +32,14 @@ export class TileComponent {
 
         TileComponent.activeButton = event.button;
 
-        if (event.button === 2) {
+        if (event.button === MouseButton.Right) {
             if (this.tile.item) {
                 this.tileService.removeTileObject(this.tile);
                 TileComponent.activeButton = null;
             } else {
                 this.tileService.removeTileType(this.tile);
             }
-        } else if (event.button === 0 && !this.tile.item) {
+        } else if (event.button === MouseButton.Left && !this.tile.item) {
             this.tileService.applyTool(this.tile);
         }
     }
@@ -45,10 +47,10 @@ export class TileComponent {
     @HostListener('mouseenter')
     onMouseEnter(): void {
         if (!this.isEditionMode) return;
-        if (TileComponent.activeButton === 0) {
+        if (TileComponent.activeButton === MouseButton.Left) {
             this.tileService.applyTool(this.tile);
         }
-        if (TileComponent.activeButton === 2) {
+        if (TileComponent.activeButton === MouseButton.Right) {
             this.tileService.removeTileType(this.tile);
         }
     }
