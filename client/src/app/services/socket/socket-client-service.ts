@@ -239,6 +239,18 @@ export class SocketClientService {
         this.socket.on('attackResult', callback);
     }
 
+    onPlayerUpdate(callback: (data: { player: Player }) => void) {
+        this.socket.on('playerUpdate', callback);
+    }
+
+    onPlayerListUpdate(callback: (data: { players: Player[] }) => void) {
+        console.log('recu - setting up listener for playerListUpdate');
+        this.socket.on('playerListUpdate', (data) => {
+            console.log('Received playerListUpdate event:', data);
+            callback(data);
+        });
+    }
+
     onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
         this.socket.on('combatTimerUpdate', callback);
     }
@@ -310,5 +322,9 @@ export class SocketClientService {
     }
     onGridUpdate(callback: (data: { grid: Tile[][] }) => void): void {
         this.socket.on('gridUpdate', callback);
+    }
+
+    attack(playerName: string, accessCode: string) {
+        this.socket.emit('performAttack', { accessCode, attackerName: playerName });
     }
 }

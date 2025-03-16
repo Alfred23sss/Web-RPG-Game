@@ -15,7 +15,7 @@
                 [class.active]="player.isActive"
             >
                 {{ player.name }} <br />
-                Combat gagné: {{ player.combatWon }}
+                Combats gagnés: {{ player.combatWon }}
             </p>
             }
             <p>Joueur actif: {{ lobby.players.length }}</p>
@@ -67,6 +67,10 @@
                         <span class="resource-label">Actions restantes: </span>
                         <span class="resource-value">{{ clientPlayer.actionPoints }}</span>
                     </div>
+                    <div class="ressource">
+                        <span class="resource-label">Combats gagnés: </span>
+                        <span class="resource-value">{{ clientPlayer.combatWon }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -92,26 +96,28 @@
     <!-- Third column: Timer and Chat -->
     <div class="timer-chat-container">
         <div class="timer">
-            @if (currentPlayer.name === clientPlayer.name) {
+            @if (currentPlayer && clientPlayer.name){ @if (currentPlayer.name === clientPlayer.name) {
             <p>C'est votre tour</p>
-            } @else {
+            } @else { @if (currentPlayer) {
             <p>C'est le tour à {{ currentPlayer.name }}</p>
-            }
+            } }
             <p>Temps restant: {{ turnTimer }} secondes</p>
+            }
         </div>
 
         <div class="action-buttons">
-            @if(currentPlayer.name === clientPlayer.name){
+            @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){
             <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
             <!-- mettre qd cliquer quil parait plus pr indiquer tes en execute action et donner un feedback visuel qqqpart -->
             <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
             }
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
+            }
         </div>
         @if(isInCombatMode){
         <div class="dice-buttons">
-            <button class="dice" (click)="rollAttackDice()">Dé d'attaque</button>
-            <button class="dice" (click)="rollDefenseDice()">Dé de défense</button>
+            <button class="dice" (click)="rollAttackDice()">Attaquer</button>
+            <button class="dice" (click)="rollDefenseDice()">S'Évader</button>
         </div>
         }
 
