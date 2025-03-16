@@ -89,7 +89,6 @@
                 (tileClicked)="handleTileClick($event)"
                 (doorClicked)="handleDoorClick($event)"
                 (playerAttacked)="handleAttackClick($event)"
-                (tileRightClicked)="handleTileRightClick($event)"
             ></app-grid>
         </div>
     </div>
@@ -97,26 +96,22 @@
     <!-- Third column: Timer and Chat -->
     <div class="timer-chat-container">
         <div class="timer">
-            @if (currentPlayer && clientPlayer.name){
-                @if (currentPlayer.name === clientPlayer.name) {
-                <p>C'est votre tour</p>
-                } @else {
-                    @if (currentPlayer) {
-                        <p>C'est le tour à {{ currentPlayer.name }}</p>
-                    }
-                }
-                <p>Temps restant: {{ turnTimer }} secondes</p>
+            @if (currentPlayer && clientPlayer.name){ @if (currentPlayer.name === clientPlayer.name) {
+            <p>C'est votre tour</p>
+            } @else { @if (currentPlayer) {
+            <p>C'est le tour à {{ currentPlayer.name }}</p>
+            } }
+            <p>Temps restant: {{ turnTimer }} secondes</p>
             }
         </div>
 
         <div class="action-buttons">
-            @if(currentPlayer && clientPlayer) {
-                @if(currentPlayer.name === clientPlayer.name){
-                <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
-                <!-- mettre qd cliquer quil parait plus pr indiquer tes en execute action et donner un feedback visuel qqqpart -->
-                <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
-                }
-                <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
+            @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){
+            <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
+            <!-- mettre qd cliquer quil parait plus pr indiquer tes en execute action et donner un feedback visuel qqqpart -->
+            <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
+            }
+            <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
             }
         </div>
         @if(isInCombatMode){
