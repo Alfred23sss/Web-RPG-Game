@@ -76,6 +76,8 @@ export class GameCombatService {
         if (attackSuccessful) {
             const attackDamage = attackerScore - defenseScore;
             defenderPlayer.hp.current -= attackDamage;
+            this.logger.log(`${currentFighter.name} attacked ${defenderPlayer.name} for ${attackDamage} damage`);
+            this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current <= 0) {
                 this.endCombat(accessCode);
             }
