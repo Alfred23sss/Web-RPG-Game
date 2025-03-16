@@ -180,9 +180,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     handleAttackClick(targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
-        if (this.isActionMode && currentTile && currentTile.player) {
-            this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
-            return;
+        if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
+            if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
+                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
+                return;
+            }
         }
     }
 
@@ -246,6 +248,25 @@ export class GamePageComponent implements OnInit, OnDestroy {
     rollDefenseDice(): void {
         // this.emit(this.clientPlayer.attackDice)
         return;
+    }
+
+    private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
+        let tile1Pos: { row: number; col: number } | null = null;
+        let tile2Pos: { row: number; col: number } | null = null;
+        for (let row = 0; row < grid.length; row++) {
+            for (let col = 0; col < grid[row].length; col++) {
+                if (grid[row][col].id === tileId1) {
+                    tile1Pos = { row, col };
+                }
+                if (grid[row][col].id === tileId2) {
+                    tile2Pos = { row, col };
+                }
+                if (tile1Pos && tile2Pos) break;
+            }
+            if (tile1Pos && tile2Pos) break;
+        }
+        if (!tile1Pos || !tile2Pos) return false;
+        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
     }
 
     private isAvailablePath(tile: Tile): boolean {
