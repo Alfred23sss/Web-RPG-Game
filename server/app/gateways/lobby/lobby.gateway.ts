@@ -126,6 +126,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, playerName } = data;
         client.leave(accessCode);
+        
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
 
         if (isLobbyDeleted) {
@@ -138,6 +139,18 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
                 this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
             }
         }
+
+        const lobby = this.lobbyService.getLobby(accessCode); //FAIRE UNE FONCTION QUI FAIT CA PCQ JE LE FAIS AU MOINS 2 FOIS
+        if (lobby && lobby.players.length < lobby.maxPlayers) {
+            this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
+        }
+
+        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
+
+        const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+
+        this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
+
     }
 
     @SubscribeMessage('kickPlayer')
