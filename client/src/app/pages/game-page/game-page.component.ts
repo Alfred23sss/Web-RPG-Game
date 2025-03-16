@@ -56,6 +56,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // enlever session storage simplement recevoir accessCode de waiting-view et get du serveur les infos necessaire
         const lobby = sessionStorage.getItem('lobby');
         this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; // lobby peut etre inutile, car on a accesscode
         const clientPlayer = sessionStorage.getItem('player');
@@ -127,6 +128,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 console.log(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
             } else {
                 console.log(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+            }
+        });
+
+        this.socketClientService.onDefenderHealthUpdate((data) => {
+            console.log(`Santé du défenseur: ${data.health}`);
+            if (this.clientPlayer.name === data.playerName) {
+                this.clientPlayer.hp.current = data.health;
             }
         });
 

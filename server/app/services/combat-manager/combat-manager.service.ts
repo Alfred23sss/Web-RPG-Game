@@ -64,21 +64,17 @@ export class GameCombatService {
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
         const defenseScore = defenderPlayer.defense.value + Math.floor(Math.random() * this.extractDiceValue(defenderPlayer.defense.bonusDice)) + 1;
         const attackSuccessful = attackerScore > defenseScore;
-
-        this.emitCombatAttackResult(
-            this.lobbyService.getPlayerSocket(currentFighter.name),
-            this.lobbyService.getPlayerSocket(defenderPlayer.name),
-            attackSuccessful,
-            attackerScore,
-            defenseScore,
-        );
+        const currentFighterSocket = this.lobbyService.getPlayerSocket(currentFighter.name);
+        const defenderPlayerSocket = this.lobbyService.getPlayerSocket(defenderPlayer.name);
+        this.emitCombatAttackResult(currentFighterSocket, defenderPlayerSocket, attackSuccessful, attackerScore, defenseScore);
 
         if (attackSuccessful) {
             const attackDamage = attackerScore - defenseScore;
-            defenderPlayer.hp.current -= attackDamage;
+            defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
+            this.emitDefenderHealthUpdate(defenderPlayer.name, defenderPlayerSocket, defenderPlayer.hp.current);
             this.logger.log(`${currentFighter.name} attacked ${defenderPlayer.name} for ${attackDamage} damage`);
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
-            if (defenderPlayer.hp.current <= 0) {
+            if (defenderPlayer.hp.current === 0) {
                 this.endCombat(accessCode);
             }
         } else {
@@ -262,6 +258,11 @@ export class GameCombatService {
 
     private emitCombatStarted(accessCode: string, attackerSocketId: string, defenderSocketId: string, firstFighter: string): void {
         this.eventEmitter.emit('game.combat.started', { accessCode, attackerSocketId, defenderSocketId, firstFighter });
+    }
+
+    private emitDefenderHealthUpdate(playerName: string, defenderSocketId: string, health: number): void {
+        this.logger.log(`emitting defender health update TO SERVER for ${defenderSocketId} with ${health} hp`);
+        this.eventEmitter.emit('game.combat.defender.health', { playerName, defenderSocketId, health });
     }
 
     private emitCombatTurnStarted(accessCode: string, fighter: Player, duration: number, escapeAttemptsLeft: number): void {
