@@ -81,10 +81,12 @@
                 [isEditionMode]="false"
                 (tileHovered)="updateQuickestPath($event)"
                 (tileClicked)="handleTileClick($event)"
+                (playerAttacked)="handleAttackClick($event)"
                 [ngClass]="{ 'red-border': isInCombatMode }"
             ></app-grid>
         </div>
         <div class="timer">
+            <!-- Erreur ici viens du fait que desfois on change currentPlayer je crois celui-ci devient undefined desfois for some reason -->
             @if (currentPlayer.name === clientPlayer.name) {
             <p>C'est votre tour</p>
             } @else {

@@ -115,13 +115,29 @@ export class GamePageComponent implements OnInit, OnDestroy {
             );
             this.isInCombatMode = true;
         });
+
+        this.socketClientService.onGameCombatTurnStarted((data) => {
+            this.currentPlayer = data.fighter;
+            this.snackbarService.showMessage(`C'est a ${data.fighter.name} d'attaquer!`);
+        });
+
+        this.socketClientService.onGameCombatTimerUpdate((data) => {
+            this.turnTimer = data.timeLeft;
+        });
+    }
+
+    handleAttackClick(targetTile: Tile): void {
+        if (!targetTile.player || targetTile.player === this.clientPlayer) return;
+        const currentTile = this.getClientPlayerPosition();
+        if (this.isInCombatMode && currentTile && currentTile.player) {
+            this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
+            return;
+        }
     }
 
     handleTileClick(targetTile: Tile): void {
+        if (this.isInCombatMode) return;
         const currentTile = this.getClientPlayerPosition();
-        if (targetTile.player) {
-            this.socketClientService.startCombat(this.clientPlayer.name, targetTile.player.name, this.lobby.accessCode);
-        }
         if (!currentTile || !this.game || !this.game.grid) {
             return;
         }
@@ -146,6 +162,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     executeNextAction(): void {
         this.isInCombatMode = true;
+        this.availablePath;
         this.snackbarService.showMessage('Mode combat activé');
     }
     abandonGame(): void {
@@ -161,6 +178,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     private isAvailablePath(tile: Tile): boolean {
+        console.log('t rentre');
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
     }
 
