@@ -161,7 +161,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     executeNextAction(): void {
-        this.isInCombatMode = true;
+        this.isInCombatMode = !this.isInCombatMode;
         this.snackbarService.showMessage('Mode combat activé');
     }
     abandonGame(): void {
