@@ -229,7 +229,8 @@ export class SocketClientService {
         this.socket.on('gameDeleted', callback);
     }
 
-    onGameCombatStarted(callback: (data: { attacker: Player; defender: Player; firstFighter: Player }) => void) {
+    onGameCombatStarted(callback: () => void) {
+        console.log('combat commence recu');
         this.socket.on('combatStarted', callback);
     }
 

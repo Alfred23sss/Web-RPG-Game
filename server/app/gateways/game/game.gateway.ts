@@ -152,13 +152,11 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.started')
-    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; firstFighter: Player }) {
-        this.logger.log(`Combat started in game ${payload.accessCode}`);
-        this.server.to(payload.accessCode).emit('combatStarted', {
-            attacker: payload.attacker,
-            defender: payload.defender,
-            firstFighter: payload.firstFighter,
-        });
+    handleCombatStarted(payload: { accessCode: string; attackerSocketId: string; defenderSocketId: string }) {
+        this.logger.log(
+            `Combat started in game ${payload.accessCode}, socket attatque ${payload.attackerSocketId} et socket defense ${payload.defenderSocketId}`,
+        );
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatStarted');
     }
 
     @OnEvent('game.combat.timer')

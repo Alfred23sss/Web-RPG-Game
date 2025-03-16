@@ -2,6 +2,7 @@ import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -17,6 +18,7 @@ export class GameCombatService {
     private combatStates: GameCombatMap = {};
 
     constructor(
+        private readonly lobbyService: LobbyService,
         private readonly gameSessionService: GameSessionService,
         private readonly eventEmitter: EventEmitter2,
         private readonly logger: Logger,
@@ -171,7 +173,12 @@ export class GameCombatService {
 
         const orderedFighters = this.determineCombatOrder(attacker, defender);
 
-        this.emitCombatStarted(accessCode, attacker, defender, orderedFighters[0]);
+        this.emitCombatStarted(
+            accessCode,
+            this.lobbyService.getPlayerSocket(attackerId),
+            this.lobbyService.getPlayerSocket(defenderId),
+            orderedFighters[0].name,
+        );
 
         this.startCombatTurn(accessCode, orderedFighters[0]);
     }
@@ -232,8 +239,8 @@ export class GameCombatService {
         }, turnDuration);
     }
 
-    private emitCombatStarted(accessCode: string, attacker: Player, defender: Player, firstFighter: Player): void {
-        this.eventEmitter.emit('game.combat.started', { accessCode, attacker, defender, firstFighter });
+    private emitCombatStarted(accessCode: string, attackerSocketId: string, defenderSocketId: string, firstFighter: string): void {
+        this.eventEmitter.emit('game.combat.started', { accessCode, attackerSocketId, defenderSocketId, firstFighter });
     }
 
     private emitCombatTurnStarted(accessCode: string, fighter: Player, duration: number, escapeAttemptsLeft: number): void {
