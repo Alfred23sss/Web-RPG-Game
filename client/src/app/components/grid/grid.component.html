@@ -6,6 +6,7 @@
             [tile]="tile"
             (mouseenter)="tileHovered.emit(tile)"
             (click)="onTileClick(tile)"
+            (contextmenu)="onTileRightClick($event, tile)"
             [ngClass]="{
                 'invalid-drop': tile.type === tileType.Wall || tile.isOccupied,
                 'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied,

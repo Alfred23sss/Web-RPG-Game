@@ -167,6 +167,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
         this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
     }
+    handleTileRightClick(data: { tile: Tile; event: MouseEvent }): void {
+        // ajouter logique pour afficher un component
+        const { tile, event } = data;
+        console.log(tile, event);
+        return;
+    }
     updateQuickestPath(targetTile: Tile): void {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
             this.quickestPath = undefined;

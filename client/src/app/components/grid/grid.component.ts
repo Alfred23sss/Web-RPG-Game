@@ -22,6 +22,7 @@ export class GridComponent {
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
     @Output() doorClicked = new EventEmitter<Tile>();
+    @Output() tileRightClicked = new EventEmitter<{ tile: Tile; event: MouseEvent }>();
 
     tileType = TileType;
 
@@ -41,5 +42,10 @@ export class GridComponent {
         } else if (this.isAvailablePath(tile)) {
             this.tileClicked.emit(tile);
         }
+    }
+
+    onTileRightClick(event: MouseEvent, tile: Tile): void {
+        event.preventDefault();
+        this.tileRightClicked.emit({ tile, event });
     }
 }
