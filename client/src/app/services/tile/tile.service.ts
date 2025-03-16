@@ -61,7 +61,11 @@ export class TileService {
     }
 
     resetTool(): void {
-        this.toolService.setSelectedTool(TileType.Default, ImageType.Default);
+        const selection = {
+            tool: TileType.Wall,
+            image: ImageType.Wall,
+        };
+        this.toolService.setSelectedTool(selection);
     }
 
     private handleDoor(tile: Tile): void {

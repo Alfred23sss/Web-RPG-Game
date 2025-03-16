@@ -31,10 +31,17 @@ describe('ToolbarComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should call selectTool on ToolService when selectTool is called', () => {
+    it('should call setSelectedTool with correct parameters', () => {
         const tool = TileType.Ice;
         const image = ImageType.Ice;
+
         component.selectTool(tool, image);
-        expect(toolService.setSelectedTool).toHaveBeenCalledWith(tool, image);
+
+        const expectedSelection = {
+            tool: TileType.Ice,
+            image: ImageType.Ice,
+        };
+
+        expect(toolService.setSelectedTool).toHaveBeenCalledWith(expectedSelection);
     });
 });

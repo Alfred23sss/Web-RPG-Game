@@ -179,7 +179,11 @@ describe('TileService', () => {
     describe('resetTool', () => {
         it('should reset the selected tool to default values', () => {
             service.resetTool();
-            expect(toolServiceSpy.setSelectedTool).toHaveBeenCalledWith(TileType.Default, ImageType.Default);
+            const selection = {
+                tool: TileType.Wall,
+                image: ImageType.Wall,
+            };
+            expect(toolServiceSpy.setSelectedTool).toHaveBeenCalledWith(selection);
         });
     });
 });
