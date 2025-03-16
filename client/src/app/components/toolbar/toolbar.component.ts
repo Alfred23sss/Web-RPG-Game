@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ImageType, TileType } from '@app/enums/global.enums';
+import { Tool } from '@app/interfaces/tool';
 import { ToolService } from '@app/services/tool/tool.service';
 
 @Component({
@@ -8,7 +9,7 @@ import { ToolService } from '@app/services/tool/tool.service';
     styleUrls: ['./toolbar.component.scss'],
 })
 export class ToolbarComponent implements OnInit {
-    activeTool: { tool: TileType; image: string } | null = null;
+    activeTool: Tool | null = null;
     tileType = TileType;
     imageType = ImageType;
 
@@ -18,11 +19,13 @@ export class ToolbarComponent implements OnInit {
         this.toolService.selectedTool$.subscribe((tool) => {
             this.activeTool = tool;
         });
-
         this.activeTool = this.toolService.getSelectedTool();
     }
 
     selectTool(tool: TileType, image: ImageType): void {
-        this.toolService.setSelectedTool(tool, image);
+        this.toolService.setSelectedTool({
+            tool,
+            image,
+        });
     }
 }

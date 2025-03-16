@@ -1,7 +1,7 @@
 import { Component, HostListener, Input } from '@angular/core';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
-import { TileService } from '@app/services/tile/tile.service';
+import { TileService } from '@app/services/tile/Tile.service';
 
 @Component({
     selector: 'app-tile',
@@ -13,7 +13,7 @@ export class TileComponent {
     static activeButton: number | null = null;
     static isDraggedTest = false;
     @Input() tile!: Tile;
-    @Input() isEditionMode: boolean = false; // a voir
+    @Input() isEditionMode: boolean = false;
     constructor(
         private itemDragService: ItemDragService,
         private tileService: TileService,
