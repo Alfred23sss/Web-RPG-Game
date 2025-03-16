@@ -2,12 +2,12 @@ import { CombatState } from '@app/interfaces/CombatState';
 import { DiceType } from '@app/interfaces/Dice';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/interfaces/Tile';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { Tile } from '@app/interfaces/Tile';
 
 const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
@@ -110,6 +110,9 @@ export class GameCombatService {
                 this.gameSessionService.updateGameSessionPlayerList(accessCode, defenderPlayer.name, defenderPlayer); //
                 this.gameSessionService.updateGameSessionPlayerList(accessCode, currentFighter.name, currentFighter);
                 this.endCombat(accessCode, false, updatedGridAfterTeleportation);
+                if (combatState.attacker === defenderPlayer) {
+                    this.gameSessionService.endTurn(accessCode);
+                }
             }
         } else {
             this.logger.log(`attack was not successful for ${currentFighter.name}`);
