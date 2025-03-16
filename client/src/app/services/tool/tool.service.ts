@@ -1,23 +1,27 @@
 import { Injectable } from '@angular/core';
-import { Tool } from '@app/interfaces/tool';
+import { ImageType, TileType } from '@app/enums/global.enums';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class ToolService {
-    selectedTool$!: Observable<Tool | null>;
-    private selectedToolSubject = new BehaviorSubject<Tool | null>(null);
+    selectedTool$!: Observable<{ tool: TileType; image: ImageType }>;
+
+    private selectedToolSubject = new BehaviorSubject<{ tool: TileType; image: ImageType }>({
+        tool: TileType.Default,
+        image: ImageType.Default,
+    });
 
     constructor() {
         this.selectedTool$ = this.selectedToolSubject.asObservable();
     }
 
-    setSelectedTool(toolConfig: Tool): void {
-        this.selectedToolSubject.next(toolConfig);
+    setSelectedTool(tool: TileType, image: ImageType): void {
+        this.selectedToolSubject.next({ tool, image });
     }
 
-    getSelectedTool(): Tool | null {
+    getSelectedTool(): { tool: TileType; image: ImageType } | null {
         return this.selectedToolSubject.value;
     }
 }

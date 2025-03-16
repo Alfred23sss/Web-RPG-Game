@@ -35,6 +35,6 @@ describe('ToolbarComponent', () => {
         const tool = TileType.Ice;
         const image = ImageType.Ice;
         component.selectTool(tool, image);
-        expect(toolService.setSelectedTool).toHaveBeenCalledWith({ tool, image });
+        expect(toolService.setSelectedTool).toHaveBeenCalledWith(tool, image);
     });
 });

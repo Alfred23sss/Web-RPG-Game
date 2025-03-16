@@ -5,7 +5,7 @@ import { ImageType, ItemDescription, ItemType, TileType } from '@app/enums/globa
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
-import { TileService } from '@app/services/tile/Tile.service';
+import { TileService } from '@app/services/tile/tile.service';
 import { ToolService } from '@app/services/tool/tool.service';
 
 describe('TileService', () => {
@@ -179,10 +179,7 @@ describe('TileService', () => {
     describe('resetTool', () => {
         it('should reset the selected tool to default values', () => {
             service.resetTool();
-            expect(toolServiceSpy.setSelectedTool).toHaveBeenCalledWith({
-                tool: TileType.Default,
-                image: ImageType.Default,
-            });
+            expect(toolServiceSpy.setSelectedTool).toHaveBeenCalledWith(TileType.Default, ImageType.Default);
         });
     });
 });
