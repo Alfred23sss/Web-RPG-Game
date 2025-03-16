@@ -90,24 +90,12 @@ export class GameCombatService {
             this.logger.log(`${currentFighter.name} attacked ${defenderPlayer.name} for ${attackDamage} damage`);
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current === 0) {
-                defenderPlayer.hp.current = defenderPlayer.hp.max; // reset point de vie du joeur qui defend
-                currentFighter.hp.current = currentFighter.hp.max; // reset point de vie du joueur qui attaque
                 currentFighter.combatWon++;
-                // teleporte le defenderPlayer a son spawn point
-                const defenderSpawnPoint = this.gridManagerService.findTileBySpawnPoint(
-                    this.gameSessionService.getGameSession(accessCode).game.grid,
-                    defenderPlayer,
-                );
-                const updatedGridAfterTeleportation = this.gridManagerService.teleportPlayer(
-                    this.gameSessionService.getGameSession(accessCode).game.grid,
-                    defenderPlayer,
-                    defenderSpawnPoint,
-                );
-                this.gameSessionService.updateGameSessionPlayerList(accessCode, defenderPlayer.name, defenderPlayer); //
-                this.gameSessionService.updateGameSessionPlayerList(accessCode, currentFighter.name, currentFighter);
+
+                this.resetHealth([currentFighter, defenderPlayer], [currentFighterSocket, defenderPlayerSocket], accessCode);
+                const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false, updatedGridAfterTeleportation);
-                // reset health
-                this.resetHealth([currentFighter, defenderPlayer], [currentFighterSocket, defenderPlayerSocket]);
+
                 if (combatState.attacker === defenderPlayer) {
                     this.gameSessionService.endTurn(accessCode);
                 }
@@ -233,12 +221,23 @@ export class GameCombatService {
         this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
     }
 
-    private resetHealth(players: Player[], sockets: string[]): void {
+    private resetHealth(players: Player[], sockets: string[], accessCode): void {
         players.forEach((player, index) => {
             player.hp.current = player.hp.max;
             const playerSocketId = sockets[index];
             this.emitDefenderHealthUpdate(player.name, playerSocketId, player.hp.current);
+            this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         });
+    }
+
+    private resetLoserPlayerPosition(player: Player, accessCode: string): Tile[][] {
+        const defenderSpawnPoint = this.gridManagerService.findTileBySpawnPoint(this.gameSessionService.getGameSession(accessCode).game.grid, player);
+        const updatedGridAfterTeleportation = this.gridManagerService.teleportPlayer(
+            this.gameSessionService.getGameSession(accessCode).game.grid,
+            player,
+            defenderSpawnPoint,
+        );
+        return updatedGridAfterTeleportation;
     }
 
     private determineCombatOrder(attacker: Player, defender: Player): Player[] {
