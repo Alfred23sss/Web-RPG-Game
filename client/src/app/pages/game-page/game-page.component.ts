@@ -245,9 +245,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     rollDefenseDice(): void {
-        // this.emit(this.clientPlayer.attackDice)
-        return;
+        this.socketClientService.emit('evade', { accessCode: this.lobby.accessCode, player: this.clientPlayer });
     }
+    // rajouter socketService.on pr le retour du server.
 
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;

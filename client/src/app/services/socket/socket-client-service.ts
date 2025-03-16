@@ -176,6 +176,7 @@ export class SocketClientService {
     getSocketId() {
         return this.socket.id;
     }
+
     emit(event: string, data: unknown): void {
         this.socket.emit(event, data);
     }
@@ -304,9 +305,11 @@ export class SocketClientService {
             callback();
         });
     }
+
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
     }
+
     onDoorClickedUpdate(callback: (data: { grid: Tile[][] }) => void): void {
         this.socket.on('doorClicked', (data) => {
             callback(data);

@@ -72,11 +72,11 @@ export class GameGateway {
         this.gameCombatService.performAttack(payload.accessCode, payload.attackerName);
     }
 
-    @SubscribeMessage(GameEvents.AttemptEscape)
-    handleAttemptEscape(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; playerName: string }) {
-        this.logger.log(`Player ${payload.playerName} is attempting to escape in game ${payload.accessCode}`);
-        this.gameCombatService.attemptEscape(payload.accessCode, payload.playerName);
-    }
+    // @SubscribeMessage(GameEvents.AttemptEscape)
+    // handleAttemptEscape(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; playerName: string }) {
+    //     this.logger.log(`Player ${payload.playerName} is attempting to escape in game ${payload.accessCode}`);
+    //     this.gameCombatService.attemptEscape(payload.accessCode, payload.playerName);
+    // }
 
     @SubscribeMessage(GameEvents.PlayerMovementUpdate)
     async handlePlayerMovementUpdate(
@@ -95,6 +95,12 @@ export class GameGateway {
     handleDoorUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile }) {
         this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile);
         this.logger.log('Door update emitted');
+    }
+
+    @SubscribeMessage(GameEvents.Evade)
+    handleEvade(@MessageBody() payload: { accessCode: string; player: Player }) {
+        this.gameCombatService.attemptEscape(payload.accessCode, payload.player);
+        this.logger.log('Escape attempt received by server');
     }
 
     @OnEvent('game.door.update')

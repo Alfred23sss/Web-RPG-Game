@@ -8,6 +8,7 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { escape } from 'querystring';
 
 const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
@@ -111,32 +112,35 @@ export class GameCombatService {
         }
     }
 
-    attemptEscape(accessCode: string, playerName: string): void {
+    attemptEscape(accessCode: string, player: Player): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
         const { currentFighter, remainingEscapeAttempts } = combatState;
         combatState.playerPerformedAction = true;
-        if (currentFighter.name !== playerName) {
-            this.logger.warn(`Not ${playerName}'s turn in combat`);
+        // useless code?? button not even available when not player turn
+        if (currentFighter.name !== player.name) {
+            this.logger.warn(`Not ${player.name}'s turn in combat`);
             return;
         }
 
-        const attemptsLeft = remainingEscapeAttempts.get(playerName) || 0;
+        const attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         if (attemptsLeft <= 0) {
             this.emitCombatEscapeAttemptFailed(accessCode, currentFighter, false);
             return;
         }
 
-        remainingEscapeAttempts.set(playerName, attemptsLeft - 1);
+        remainingEscapeAttempts.set(player.name, attemptsLeft - 1);
 
-        const escapeSuccessful = Math.random() > ESCAPE_THRESHOLD;
+        const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
 
-        this.emitCombatEscapeAttemptResult(accessCode, currentFighter, escapeSuccessful, attemptsLeft - 1);
+        // this.emitCombatEscapeAttemptResult(accessCode, currentFighter, isEscapeSuccessful, attemptsLeft - 1);
 
-        if (escapeSuccessful) {
+        if (isEscapeSuccessful) {
+            this.logger.log(`Escape successful for ${player.name}`);
             this.endCombat(accessCode, true);
         } else {
+            this.logger.log(`Escape failed for ${player.name}`);
             this.endCombatTurn(accessCode);
         }
     }
