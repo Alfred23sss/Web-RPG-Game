@@ -239,7 +239,7 @@ export class SocketClientService {
         this.socket.on('attackResult', callback);
     }
 
-    onPlayerUpdate(callback: (data: { players: Player }) => void) {
+    onPlayerUpdate(callback: (data: { player: Player }) => void) {
         this.socket.on('playerUpdate', callback);
     }
 
