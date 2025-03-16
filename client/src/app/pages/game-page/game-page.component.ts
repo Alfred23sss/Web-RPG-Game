@@ -201,6 +201,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
         sessionStorage.setItem('refreshed', 'false');
     }
 
+    rollAttackDice(): void {
+        // this.emit(this.clientPlayer.attackDice)
+        return;
+    }
+
+    rollDefenseDice(): void {
+        // this.emit(this.clientPlayer.attackDice)
+        return;
+    }
+
     private isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
     }

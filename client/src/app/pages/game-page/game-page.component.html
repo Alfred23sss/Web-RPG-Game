@@ -106,6 +106,12 @@
             <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
         </div>
+        @if(isInCombatMode){
+        <div class="dice-buttons">
+            <button class="dice" (click)="rollAttackDice()">Dé d'attaque</button>
+            <button class="dice" (click)="rollDefenseDice()">Dé de défense</button>
+        </div>
+        }
 
         <div class="game-messages">
             <h3>Messages</h3>
