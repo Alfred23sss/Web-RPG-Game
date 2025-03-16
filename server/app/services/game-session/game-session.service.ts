@@ -150,16 +150,20 @@ export class GameSessionService {
 
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
+        let isCurrentlyMoving = true;
 
         for (let i = 1; i < movement.length; i++) {
             await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
             this.clearPlayerFromGrid(gameSession.game.grid, player);
             this.setPlayerOnTile(gameSession.game.grid, movement[i], player);
-
+            if (i === movement.length - 1) {
+                isCurrentlyMoving = false;
+            }
             this.eventEmitter.emit('game.player.movement', {
                 accessCode,
                 grid: gameSession.game.grid,
                 player,
+                isCurrentlyMoving,
             });
         }
     }

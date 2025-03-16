@@ -104,10 +104,11 @@ export class GameGateway {
     }
 
     @OnEvent('game.player.movement')
-    handlePlayerMovement(payload: { accessCode: string; grid: Tile[][]; player: Player }) {
+    handlePlayerMovement(payload: { accessCode: string; grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) {
         this.server.to(payload.accessCode).emit('playerMovement', {
             grid: payload.grid,
             player: payload.player,
+            isCurrentlyMoving: payload.isCurrentlyMoving,
         });
     }
 

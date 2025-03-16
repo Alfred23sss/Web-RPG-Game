@@ -263,7 +263,7 @@ export class SocketClientService {
         this.socket.emit('startCombat', { attackerName, defenderName, accessCode });
     }
 
-    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player }) => void): void {
+    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void): void {
         this.socket.on('playerMovement', callback);
     }
 
