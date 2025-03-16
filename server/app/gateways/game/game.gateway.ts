@@ -147,15 +147,21 @@ export class GameGateway {
             .emit('combatStarted', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
     }
 
-    @OnEvent('game.combat.defender.health')
-    handleDefenderHealthUpdate(payload: { playerName: string; defenderSocketId: string; health: number }) {
-        if (!payload.defenderSocketId) {
+    @OnEvent('update.player')
+    handleDefenderHealthUpdate(payload: { player: Player; playerSocketId: string }) {
+        if (!payload.playerSocketId) {
             this.logger.error('defenderSocketId is undefined or null');
         }
-        this.logger.log("emitting defender's health update TO CLIENT " + payload.defenderSocketId + ' health ' + payload.health);
-        this.server.to(payload.defenderSocketId).emit('defenderHealthUpdate', {
-            playerName: payload.playerName,
-            health: payload.health,
+        this.logger.log('emitting player updates ' + payload.playerSocketId);
+        this.server.to(payload.playerSocketId).emit('playerUpdate', {
+            player: payload.player,
+        });
+    }
+
+    @OnEvent('update.player.list')
+    handleUpdatePlayerList(payload: { players: Player[]; accessCode: string }) {
+        this.server.to(payload.accessCode).emit('playerListUpdate', {
+            players: payload.players, // Fix: changed "player" to "players"
         });
     }
 

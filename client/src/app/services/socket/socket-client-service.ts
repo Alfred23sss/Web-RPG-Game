@@ -239,8 +239,16 @@ export class SocketClientService {
         this.socket.on('attackResult', callback);
     }
 
-    onDefenderHealthUpdate(callback: (data: { playerName: string; health: number }) => void) {
-        this.socket.on('defenderHealthUpdate', callback);
+    onPlayerUpdate(callback: (data: { players: Player }) => void) {
+        this.socket.on('playerUpdate', callback);
+    }
+
+    onPlayerListUpdate(callback: (data: { players: Player[] }) => void) {
+        console.log('recu - setting up listener for playerListUpdate');
+        this.socket.on('playerListUpdate', (data) => {
+            console.log('Received playerListUpdate event:', data);
+            callback(data);
+        });
     }
 
     onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {

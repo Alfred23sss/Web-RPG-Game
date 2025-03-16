@@ -131,11 +131,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
         });
 
-        this.socketClientService.onDefenderHealthUpdate((data) => {
-            console.log(`Santé du défenseur: ${data.health}`);
-            if (this.clientPlayer.name === data.playerName) {
-                this.clientPlayer.hp.current = data.health;
+        this.socketClientService.onPlayerUpdate((data) => {
+            if (this.clientPlayer.name === data.player.name) {
+                this.clientPlayer = data.player;
             }
+        });
+
+        this.socketClientService.onPlayerListUpdate((data) => {
+            console.log(data.players);
+            this.playerList = data.players;
         });
 
         this.socketClientService.onDoorClickedUpdate((data) => {

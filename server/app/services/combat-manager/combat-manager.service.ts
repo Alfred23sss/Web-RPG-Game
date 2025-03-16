@@ -86,7 +86,7 @@ export class GameCombatService {
         if (attackSuccessful) {
             const attackDamage = attackerScore - defenseScore;
             defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
-            this.emitDefenderHealthUpdate(defenderPlayer.name, defenderPlayerSocket, defenderPlayer.hp.current);
+            this.emitUpdatePlayer(defenderPlayer, defenderPlayerSocket);
             this.logger.log(`${currentFighter.name} attacked ${defenderPlayer.name} for ${attackDamage} damage`);
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current === 0) {
@@ -96,6 +96,9 @@ export class GameCombatService {
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false);
                 this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
+
+                this.logger.log(`player list from gamessession ${this.gameSessionService.getPlayers(accessCode)}`);
+                this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
 
                 if (combatState.attacker === defenderPlayer) {
                     this.gameSessionService.endTurn(accessCode);
@@ -226,7 +229,7 @@ export class GameCombatService {
         players.forEach((player, index) => {
             player.hp.current = player.hp.max;
             const playerSocketId = sockets[index];
-            this.emitDefenderHealthUpdate(player.name, playerSocketId, player.hp.current);
+            this.emitUpdatePlayer(player, playerSocketId);
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         });
     }
@@ -309,9 +312,18 @@ export class GameCombatService {
         this.eventEmitter.emit('game.combat.started', { accessCode, attackerSocketId, defenderSocketId, firstFighter });
     }
 
-    private emitDefenderHealthUpdate(playerName: string, defenderSocketId: string, health: number): void {
-        this.logger.log(`emitting defender health update TO SERVER for ${defenderSocketId} with ${health} hp`);
-        this.eventEmitter.emit('game.combat.defender.health', { playerName, defenderSocketId, health });
+    // private emitDefenderHealthUpdate(playerName: string, defenderSocketId: string, health: number): void {
+    //     this.logger.log(`emitting defender health update TO SERVER for ${defenderSocketId} with ${health} hp`);
+    //     this.eventEmitter.emit('game.combat.defender.health', { playerName, defenderSocketId, health });
+    // }
+
+    private emitUpdatePlayer(player: Player, playerSocketId: string) {
+        this.eventEmitter.emit('update.player', { player, playerSocketId });
+    }
+
+    private emitUpdatePlayerList(players: Player[], accessCode: string) {
+        this.logger.log(players);
+        this.eventEmitter.emit('update.player.list', { players, accessCode });
     }
 
     private emitCombatTurnStarted(accessCode: string, fighter: Player, duration: number, escapeAttemptsLeft: number): void {

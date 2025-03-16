@@ -15,7 +15,7 @@
                 [class.active]="player.isActive"
             >
                 {{ player.name }} <br />
-                Combat gagné: {{ player.combatWon }}
+                Combats gagnés: {{ player.combatWon }}
             </p>
             }
             <p>Joueur actif: {{ lobby.players.length }}</p>
@@ -67,6 +67,10 @@
                         <span class="resource-label">Actions restantes: </span>
                         <span class="resource-value">{{ clientPlayer.actionPoints }}</span>
                     </div>
+                    <div class="ressource">
+                        <span class="resource-label">Combats gagnés: </span>
+                        <span class="resource-value">{{ clientPlayer.combatWon }}</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -85,7 +89,7 @@
                 (tileClicked)="handleTileClick($event)"
                 (doorClicked)="handleDoorClick($event)"
                 (playerAttacked)="handleAttackClick($event)"
-                    (tileRightClicked)="handleTileRightClick($event)"
+                (tileRightClicked)="handleTileRightClick($event)"
             ></app-grid>
         </div>
     </div>
