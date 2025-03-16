@@ -41,6 +41,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isInCombatMode: boolean = false;
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
+    hasEscapeAttemptsLeft: boolean = true;
 
     constructor(
         private playerMovementService: PlayerMovementService,
@@ -166,6 +167,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
             this.game.grid = data.grid;
         });
+
+        this.socketClientService.on('noMoreEscapesLeft', () => {
+            this.hasEscapeAttemptsLeft = false;
+        });
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -240,11 +245,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
         sessionStorage.setItem('refreshed', 'false');
     }
 
-    rollAttackDice(): void {
+    attack(): void {
         this.socketClientService.attack(this.clientPlayer.name, this.lobby.accessCode);
     }
 
-    rollDefenseDice(): void {
+    evade(): void {
         this.socketClientService.emit('evade', { accessCode: this.lobby.accessCode, player: this.clientPlayer });
     }
     // rajouter socketService.on pr le retour du server.

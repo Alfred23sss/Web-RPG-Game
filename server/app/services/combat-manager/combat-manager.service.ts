@@ -8,7 +8,6 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { escape } from 'querystring';
 
 const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
@@ -125,8 +124,8 @@ export class GameCombatService {
         }
 
         const attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
-        if (attemptsLeft <= 0) {
-            this.emitCombatEscapeAttemptFailed(accessCode, currentFighter, false);
+        if (attemptsLeft === 0) {
+            this.emitNoMoreEscapesLeft(currentFighter);
             return;
         }
 
@@ -359,20 +358,20 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEscapeAttemptResult(accessCode: string, player: Player, success: boolean, attemptsLeft: number): void {
-        this.eventEmitter.emit('game.combat.escape.result', {
-            accessCode,
-            player,
-            success,
-            attemptsLeft,
-        });
-    }
+    // private emitCombatEscapeAttemptResult(accessCode: string, player: Player, success: boolean, attemptsLeft: number): void {
+    //     this.eventEmitter.emit('game.combat.escape.result', {
+    //         accessCode,
+    //         player,
+    //         success,
+    //         attemptsLeft,
+    //     });
+    // }
 
-    private emitCombatEscapeAttemptFailed(accessCode: string, player: Player, hasAttempts: boolean): void {
+    private emitNoMoreEscapesLeft(player: Player): void {
+        const playerSocketId = this.lobbyService.getPlayerSocket(player.name);
         this.eventEmitter.emit('game.combat.escape.failed', {
-            accessCode,
             player,
-            hasAttempts,
+            playerSocketId,
         });
     }
 

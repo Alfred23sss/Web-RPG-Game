@@ -103,6 +103,13 @@ export class GameGateway {
         this.logger.log('Escape attempt received by server');
     }
 
+    @OnEvent('game.combat.escape.failed')
+    handleNoMoreEscapeAttempts(payload: { player: Player; playerSocketId: string }): void {
+        this.server.to(payload.playerSocketId).emit('noMoreEscapesLeft', {
+            player: payload.player,
+        });
+    }
+
     @OnEvent('game.door.update')
     handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
         this.server.to(payload.accessCode).emit('doorClicked', {
