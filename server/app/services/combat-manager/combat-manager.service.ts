@@ -40,6 +40,7 @@ export class GameCombatService {
     }
 
     endCombatTurn(accessCode: string, isTimeout: boolean = false): void {
+        this.logger.log('Ending combat turn ...');
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
@@ -47,25 +48,30 @@ export class GameCombatService {
             clearTimeout(combatState.combatTurnTimers);
             combatState.combatTurnTimers = null;
         }
-
         if (combatState.combatCountdownInterval) {
             clearInterval(combatState.combatCountdownInterval);
             combatState.combatCountdownInterval = null;
         }
 
-        const currentFighter = combatState.currentFighter;
-        const nextFighter = this.getNextCombatFighter(accessCode);
-
         if (isTimeout) {
-            this.emitCombatTimeoutAction(accessCode, currentFighter);
+            this.emitCombatTimeoutAction(accessCode, combatState.currentFighter);
         }
-
+        const nextFighter = this.getNextCombatFighter(accessCode);
         this.startCombatTurn(accessCode, nextFighter);
     }
 
     performAttack(accessCode: string, attackerName: string): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
+
+        if (combatState.combatTurnTimers) {
+            clearTimeout(combatState.combatTurnTimers);
+            combatState.combatTurnTimers = null;
+        }
+        if (combatState.combatCountdownInterval) {
+            clearInterval(combatState.combatCountdownInterval);
+            combatState.combatCountdownInterval = null;
+        }
 
         const { attacker, defender, currentFighter } = combatState;
         combatState.playerPerformedAction = true;
@@ -100,15 +106,14 @@ export class GameCombatService {
 
                 this.logger.log(`player list from gamessession ${this.gameSessionService.getPlayers(accessCode)}`);
                 this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
-
                 if (combatState.attacker === defenderPlayer) {
                     this.gameSessionService.endTurn(accessCode);
+                    return;
                 }
+                return;
             }
-        } else {
-            this.logger.log(`attack was not successful for ${currentFighter.name}`);
-            this.endCombatTurn(accessCode);
         }
+        this.endCombatTurn(accessCode);
     }
 
     attemptEscape(accessCode: string, player: Player): void {
@@ -308,8 +313,6 @@ export class GameCombatService {
             if (!combatState.playerPerformedAction) {
                 this.performAttack(accessCode, combatState.currentFighter.name);
             }
-            // probably un probleme ici
-            this.endCombatTurn(accessCode, true);
         }, turnDuration);
     }
 
