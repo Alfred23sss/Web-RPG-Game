@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ErrorMessages, GameMode, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { GridPosition } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
@@ -188,7 +189,7 @@ export class GameValidationService {
         return this.checkForInaccessible(game, visited);
     }
 
-    private findAccessibleStart(game: Game): { row: number; col: number } | null {
+    private findAccessibleStart(game: Game): GridPosition | null {
         if (!game.grid) return null;
 
         const numRows = game.grid.length;
@@ -210,7 +211,7 @@ export class GameValidationService {
         const numRows = game.grid.length;
         const numCols = game.grid[0].length;
         const visited: boolean[][] = this.initializeVisited(numRows, numCols);
-        const queue: { row: number; col: number }[] = [{ row: startRow, col: startCol }];
+        const queue: GridPosition[] = [{ row: startRow, col: startCol }];
         visited[startRow][startCol] = true;
 
         while (queue.length > 0) {
