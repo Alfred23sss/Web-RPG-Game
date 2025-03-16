@@ -1,29 +1,29 @@
 <div class="game-container">
-    <!-- Carte du jeu -->
-
-    <!-- Panneau d'informations -->
+    <!-- First column: Game info -->
     <div class="game-info">
         <div class="game-details">
             <h3>Informations de partie</h3>
-            <p>Taille de la carte: {{ game?.size }}</p>
-            <p>
-                Joueurs actuels: @for(player of playerList; track $index){
-                <span
-                    class="player-name"
-                    [class.player-admin]="player.isAdmin"
-                    [class.player-regular]="!player.isAdmin"
-                    [class.abandoned]="player.hasAbandoned"
-                    [class.active]="player.isActive"
-                >
-                    {{ player.name }} Combat gagné: {{ player.combatWon }}
-                </span>
-                }
+            <p>Taille de la carte: {{ game?.size }}x{{ game?.size }}</p>
+            <p>Joueurs actuels:</p>
+            <!-- Use @for to loop through playerList -->
+            @for(player of playerList; track $index){
+            <p
+                class="player-name"
+                [class.player-admin]="player.isAdmin"
+                [class.player-regular]="!player.isAdmin"
+                [class.abandoned]="player.hasAbandoned"
+                [class.active]="player.isActive"
+            >
+                {{ player.name }} <br />
+                Combat gagné: {{ player.combatWon }}
             </p>
+            }
             <p>Joueur actif: {{ lobby.players.length }}</p>
         </div>
 
         <div class="inventory">
             <h3>Inventaire</h3>
+            <!-- Use @for to loop through inventory slots -->
             <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
         </div>
 
@@ -35,7 +35,7 @@
             </div>
             <div class="player-stats">
                 <div class="health-bar">
-                    <div class="health-label">Points de vie: {{ clientPlayer.hp.current }} / {{ clientPlayer.hp.max }}</div>
+                    <span class="health-label">Points de vie: {{ clientPlayer.hp.current }} / {{ clientPlayer.hp.max }}</span>
                     <div class="health-bar-outer">
                         <div class="health-bar-inner" [style.width.%]="(clientPlayer.hp.current / clientPlayer.hp.max) * 100"></div>
                     </div>
@@ -72,22 +72,27 @@
         </div>
     </div>
 
+    <!-- Second column: Game grid and action buttons -->
     <div class="game-map-container">
-        <div class="game-map">
-            <app-grid
-                [grid]="game?.grid"
-                [availablePath]="availablePath"
-                [quickestPath]="quickestPath"
-                [isEditionMode]="false"
-                (tileHovered)="updateQuickestPath($event)"
-                (tileClicked)="handleTileClick($event)"
-                (playerAttacked)="handleAttackClick($event)"
-                (doorClicked)="handleDoorClick($event)"
-                [ngClass]="{ 'red-border': isActionMode }"
-            ></app-grid>
+        <div class="game-grid-container">
+            <div class="game-map">
+                <app-grid
+                    [grid]="game?.grid"
+                    [availablePath]="availablePath"
+                    [quickestPath]="quickestPath"
+                    [isEditionMode]="false"
+                    (tileHovered)="updateQuickestPath($event)"
+                    (tileClicked)="handleTileClick($event)"
+                    (playerAttacked)="handleAttackClick($event)"
+                    [ngClass]="{ 'red-border': isInCombatMode }"
+                ></app-grid>
+            </div>
         </div>
+    </div>
+
+    <!-- Third column: Timer and Chat -->
+    <div class="timer-chat-container">
         <div class="timer">
-            <!-- Erreur ici viens du fait que desfois on change currentPlayer je crois celui-ci devient undefined desfois for some reason -->
             @if (currentPlayer.name === clientPlayer.name) {
             <p>C'est votre tour</p>
             } @else {
@@ -95,58 +100,33 @@
             }
             <p>Temps restant: {{ turnTimer }} secondes</p>
         </div>
-    </div>
 
-    <div class="action-buttons">
-        @if(currentPlayer.name === clientPlayer.name){
-        <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
-        }
-        <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
-        <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
-    </div>
-
-    <div class="game-messages">
-        <h3>Messages</h3>
-
-        <!-- Boutons pour basculer entre les panneaux -->
-        <div class="message-toggle">
-            <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
-            <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
-        </div>
-
-        <!-- Panneau des messages -->
-        <div class="messages-content" *ngIf="activeTab === 'chat'">
-            <p>Panneau des messages (clavardage).</p>
-        </div>
-
-        <!-- Panneau du journal de bord -->
-        <div class="log-content" *ngIf="activeTab === 'log'">
-            @for(entry of logEntries; track $index) {
-            <p class="log-entry">
-                {{ entry }}
-            </p>
+        <div class="action-buttons">
+            @if(currentPlayer.name === clientPlayer.name){
+            <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
             }
+            <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
+            <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
+        </div>
+
+        <div class="game-messages">
+            <h3>Messages</h3>
+            <div class="message-toggle">
+                <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
+                <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
+            </div>
+
+            <div class="messages-content" *ngIf="activeTab === 'chat'">
+                <p>Panneau des messages (clavardage).</p>
+            </div>
+
+            <div class="log-content" *ngIf="activeTab === 'log'">
+                @for(entry of logEntries; track $index) {
+                <p class="log-entry">
+                    {{ entry }}
+                </p>
+                }
+            </div>
         </div>
     </div>
-    <!-- Compte à rebours 
-    <div class="countdown">
-        @if(Player.isInCombat)
-        {
-            <p>Temps restant: {{ game?.countdown }}</p>
-        }
-        @else
-        {
-            <p>Pas en combat</p>
-        }
-
-    </div>-->
-
-    <!-- Interface de combat 
-    <div class="combat-interface" *ngIf="player?.isInCombat">
-        <h3>Combat</h3>
-        <p>Résultats des dés: {{ game?.combatDiceResults }}</p>
-        <p>Tentatives d'évasion restantes: {{ player?.escapeAttempts }}</p>
-        <button (click)="attack()" *ngIf="game?.playerTurn === player">Attaquer</button>
-        <button (click)="evade()" *ngIf="player?.escapeAttempts > 0">Évasion</button>
-    </div>-->
 </div>
