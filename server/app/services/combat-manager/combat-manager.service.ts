@@ -6,6 +6,8 @@ import { GameSessionService } from '@app/services/game-session/game-session.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { Tile } from '@app/interfaces/Tile';
 
 const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
@@ -22,6 +24,7 @@ export class GameCombatService {
         private readonly gameSessionService: GameSessionService,
         private readonly eventEmitter: EventEmitter2,
         private readonly logger: Logger,
+        private readonly gridManagerService: GridManagerService,
     ) {}
 
     endCombatTurn(accessCode: string, isTimeout: boolean = false): void {
@@ -79,13 +82,22 @@ export class GameCombatService {
             this.logger.log(`${currentFighter.name} attacked ${defenderPlayer.name} for ${attackDamage} damage`);
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current <= 0) {
-                // teleporte le defenderPlayer a son spawn point
                 defenderPlayer.hp.current = defenderPlayer.hp.max; // reset point de vie du joeur qui defend
                 currentFighter.hp.current = currentFighter.hp.max; // reset point de vie du joueur qui attaque
                 currentFighter.combatWon++;
+                // teleporte le defenderPlayer a son spawn point
+                const defenderSpawnPoint = this.gridManagerService.findTileBySpawnPoint(
+                    this.gameSessionService.getGameSession(accessCode).game.grid,
+                    defenderPlayer,
+                );
+                const updatedGridAfterTeleportation = this.gridManagerService.teleportPlayer(
+                    this.gameSessionService.getGameSession(accessCode).game.grid,
+                    defenderPlayer,
+                    defenderSpawnPoint,
+                );
                 this.gameSessionService.updateGameSessionPlayerList(accessCode, defenderPlayer.name, defenderPlayer); //
                 this.gameSessionService.updateGameSessionPlayerList(accessCode, currentFighter.name, currentFighter);
-                this.endCombat(accessCode);
+                this.endCombat(accessCode, false, updatedGridAfterTeleportation);
             }
         } else {
             this.logger.log(`attack was not successful for ${currentFighter.name}`);
@@ -122,7 +134,7 @@ export class GameCombatService {
         }
     }
 
-    endCombat(accessCode: string, isEscape: boolean = false): void {
+    endCombat(accessCode: string, isEscape: boolean = false, grid: Tile[][] = undefined): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
@@ -138,7 +150,7 @@ export class GameCombatService {
 
         const { attacker, defender, winner, pausedGameTurnTimeRemaining } = combatState;
 
-        this.emitCombatEnded(accessCode, attacker, defender, winner, isEscape);
+        this.emitCombatEnded(accessCode, attacker, defender, winner, isEscape, grid);
 
         this.gameSessionService.setCombatState(accessCode, false);
 
@@ -314,13 +326,15 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEnded(accessCode: string, attacker: Player, defender: Player, winner: Player, isEscape: boolean): void {
+    // eslint-disable-next-line max-params
+    private emitCombatEnded(accessCode: string, attacker: Player, defender: Player, winner: Player, isEscape: boolean, grid: Tile[][]): void {
         this.eventEmitter.emit('game.combat.ended', {
             accessCode,
             attacker,
             defender,
             winner,
             isEscape,
+            grid,
         });
     }
 }
