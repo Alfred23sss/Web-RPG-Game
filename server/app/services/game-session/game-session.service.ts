@@ -68,6 +68,9 @@ export class GameSessionService {
                 grid: gameSession.game.grid,
             });
         }
+        if (gameSession.turn.currentPlayer.name === playerName) {
+            this.endTurn(accessCode);
+        }
         return player;
     }
     getPlayers(accessCode: string): Player[] {

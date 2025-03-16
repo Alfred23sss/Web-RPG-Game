@@ -24,6 +24,18 @@ export class GameCombatService {
         private readonly logger: Logger,
     ) {}
 
+    handleCombatSessionAbandon(accessCode: string, playerName: string): void {
+        const combatState = this.combatStates[accessCode];
+        if (!combatState) return;
+
+        if (combatState.currentFighter.name === playerName || combatState.defender.name === playerName) {
+            const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
+            this.updateWinningPlayerAfterCombat(playerToUpdate, accessCode);
+
+            this.endCombat(accessCode);
+        }
+    }
+
     endCombatTurn(accessCode: string, isTimeout: boolean = false): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
@@ -200,6 +212,12 @@ export class GameCombatService {
         );
 
         this.startCombatTurn(accessCode, orderedFighters[0]);
+    }
+
+    private updateWinningPlayerAfterCombat(player: Player, accessCode: string): void {
+        player.hp.current = player.hp.max;
+        player.combatWon++;
+        this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
     }
 
     private determineCombatOrder(attacker: Player, defender: Player): Player[] {
