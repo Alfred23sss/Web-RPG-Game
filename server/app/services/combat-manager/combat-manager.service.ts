@@ -79,6 +79,12 @@ export class GameCombatService {
             this.logger.log(`${currentFighter.name} attacked ${defenderPlayer.name} for ${attackDamage} damage`);
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current <= 0) {
+                // teleporte le defenderPlayer a son spawn point
+                defenderPlayer.hp.current = defenderPlayer.hp.max; // reset point de vie du joeur qui defend
+                currentFighter.hp.current = currentFighter.hp.max; // reset point de vie du joueur qui attaque
+                currentFighter.combatWon++;
+                this.gameSessionService.updateGameSessionPlayerList(accessCode, defenderPlayer.name, defenderPlayer); //
+                this.gameSessionService.updateGameSessionPlayerList(accessCode, currentFighter.name, currentFighter);
                 this.endCombat(accessCode);
             }
         } else {

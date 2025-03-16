@@ -152,6 +152,18 @@ export class GameSessionService {
         this.gameSessions.get(accessCode).game.grid = grid;
         this.eventEmitter.emit('game.door.update', { accessCode, grid });
     }
+
+    updatePlayer(player: Player, updates: Partial<Player>): void {
+        if (player) {
+            Object.assign(player, updates);
+        }
+    }
+
+    updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
+        const players = this.getPlayers(accessCode);
+        const player = players.find((p) => p.name === playername);
+        this.updatePlayer(player, updates);
+    }
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
@@ -215,11 +227,7 @@ export class GameSessionService {
             }
         }
     }
-    private updatePlayer(player: Player, updates: Partial<Player>): void {
-        if (player) {
-            Object.assign(player, updates);
-        }
-    }
+
     private initializeTurn(accessCode: string): Turn {
         return {
             orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),
