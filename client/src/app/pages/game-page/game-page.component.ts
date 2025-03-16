@@ -40,6 +40,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     turnTimer: number;
     isInCombatMode: boolean = false;
     isActionMode: boolean = false;
+    isCurrentlyMoving: boolean = false;
 
     constructor(
         private playerMovementService: PlayerMovementService,
@@ -86,6 +87,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.onTurnStarted((data) => {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             this.currentPlayer = data.player;
+            this.isCurrentlyMoving = false;
             this.isActionMode = false;
             this.isInCombatMode = false;
             this.clientPlayer.actionPoints = defaultActionPoint;
@@ -103,7 +105,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.game = data.updatedGame;
         });
 
-        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player }) => {
+        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player, isCurrentlyMoving: boolean }) => {
             if (this.game && this.game.grid) {
                 this.game.grid = data.grid;
             }
@@ -111,6 +113,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 this.clientPlayer.movementPoints =
                     this.clientPlayer.movementPoints -
                     this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
+                this.isCurrentlyMoving = data.isCurrentlyMoving;
                 this.updateAvailablePath();
             }
         });
@@ -143,6 +146,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.onGameCombatTimerUpdate((data) => {
             this.turnTimer = data.timeLeft;
         });
+
+        this.socketClientService.onGridUpdate((data) => {
+            if (!this.game || !this.game.grid) {
+                return;
+            }
+            this.game.grid = data.grid;
+        });
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -164,7 +174,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleTileClick(targetTile: Tile): void {
-        if (this.isActionMode) return;
+        if (this.isActionMode || this.isCurrentlyMoving) return;
         const currentTile = this.getClientPlayerPosition();
         if (!currentTile || !this.game || !this.game.grid) {
             return;
