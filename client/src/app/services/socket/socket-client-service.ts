@@ -323,4 +323,8 @@ export class SocketClientService {
     onGridUpdate(callback: (data: { grid: Tile[][] }) => void): void {
         this.socket.on('gridUpdate', callback);
     }
+
+    attack(playerName: string, accessCode: string) {
+        this.socket.emit('performAttack', { accessCode, attackerName: playerName });
+    }
 }

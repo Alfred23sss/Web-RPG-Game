@@ -239,8 +239,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     rollAttackDice(): void {
-        // this.emit(this.clientPlayer.attackDice)
-        return;
+        this.socketClientService.attack(this.clientPlayer.name, this.lobby.accessCode);
     }
 
     rollDefenseDice(): void {

@@ -70,6 +70,7 @@ export class GameCombatService {
         const { attacker, defender, currentFighter } = combatState;
         combatState.playerPerformedAction = true;
 
+        this.logger.log(`${currentFighter.name}, ${attackerName}`);
         if (currentFighter.name !== attackerName) {
             this.logger.warn(`Not ${attackerName}'s turn in combat`);
             return;
@@ -106,6 +107,7 @@ export class GameCombatService {
             }
         } else {
             this.logger.log(`attack was not successful for ${currentFighter.name}`);
+            this.endCombatTurn(accessCode);
         }
     }
 
