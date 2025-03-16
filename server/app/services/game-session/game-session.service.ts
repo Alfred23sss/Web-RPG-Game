@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 import { ImageType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
