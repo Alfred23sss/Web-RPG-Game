@@ -130,14 +130,6 @@ export class GameGateway {
         });
     }
 
-    // peut-etre pas necessaire finalement, a voir si on veut garder le countdown pour la transition
-    @OnEvent('game.transition.countdown')
-    handleTransitionCountdown(payload: { accessCode: string; countdown: number }) {
-        this.server.to(payload.accessCode).emit('transitionCountdown', {
-            countdown: payload.countdown,
-        });
-    }
-
     @OnEvent('game.turn.started')
     handleTurnStarted(payload: { accessCode: string; player: Player }) {
         this.logger.log(`Received turn started event for game ${payload.accessCode}`);
@@ -153,6 +145,18 @@ export class GameGateway {
         this.server
             .to([payload.attackerId, payload.defenderId])
             .emit('combatStarted', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
+    }
+
+    @OnEvent('game.combat.defender.health')
+    handleDefenderHealthUpdate(payload: { playerName: string; defenderSocketId: string; health: number }) {
+        if (!payload.defenderSocketId) {
+            this.logger.error('defenderSocketId is undefined or null');
+        }
+        this.logger.log("emitting defender's health update TO CLIENT " + payload.defenderSocketId + ' health ' + payload.health);
+        this.server.to(payload.defenderSocketId).emit('defenderHealthUpdate', {
+            playerName: payload.playerName,
+            health: payload.health,
+        });
     }
 
     @OnEvent('game.turn.timer')

@@ -239,6 +239,10 @@ export class SocketClientService {
         this.socket.on('attackResult', callback);
     }
 
+    onDefenderHealthUpdate(callback: (data: { playerName: string; health: number }) => void) {
+        this.socket.on('defenderHealthUpdate', callback);
+    }
+
     onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
         this.socket.on('combatTimerUpdate', callback);
     }
