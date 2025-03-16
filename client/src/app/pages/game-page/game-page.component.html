@@ -74,19 +74,17 @@
 
     <!-- Second column: Game grid and action buttons -->
     <div class="game-map-container">
-        <div class="game-grid-container">
-            <div class="game-map">
-                <app-grid
-                    [grid]="game?.grid"
-                    [availablePath]="availablePath"
-                    [quickestPath]="quickestPath"
-                    [isEditionMode]="false"
-                    (tileHovered)="updateQuickestPath($event)"
-                    (tileClicked)="handleTileClick($event)"
-                    (playerAttacked)="handleAttackClick($event)"
-                    [ngClass]="{ 'red-border': isInCombatMode }"
-                ></app-grid>
-            </div>
+        <div class="game-map">
+            <app-grid
+                [grid]="game?.grid"
+                [isActionMode]="isActionMode"
+                [availablePath]="availablePath"
+                [quickestPath]="quickestPath"
+                [isEditionMode]="false"
+                (tileHovered)="updateQuickestPath($event)"
+                (tileClicked)="handleTileClick($event)"
+                (playerAttacked)="handleAttackClick($event)"
+            ></app-grid>
         </div>
     </div>
 

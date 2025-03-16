@@ -23,7 +23,6 @@ html {
 }
 
 .game-info,
-.game-grid-container,
 .timer-chat-container {
     flex: 1;
 }
@@ -76,6 +75,7 @@ html {
     flex-direction: column;
     align-items: center;
     width: 50%;
+    flex: 1;
 }
 
 .game-map {

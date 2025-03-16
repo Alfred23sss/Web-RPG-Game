@@ -18,6 +18,15 @@
     height: fit-content;
 }
 
+.highlight-player {
+    border-color: red;
+    border: 2px solid red;
+}
+.highlight-door {
+    border-color: red;
+    border: 2px solid red;
+}
+
 app-tile {
     display: inline-block;
     box-sizing: border-box;

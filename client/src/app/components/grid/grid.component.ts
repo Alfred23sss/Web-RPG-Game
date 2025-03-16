@@ -17,6 +17,7 @@ export class GridComponent {
     @Input() availablePath: Tile[] | undefined = [];
     @Input() quickestPath: Tile[] | undefined = [];
     @Input() isEditionMode: boolean = false;
+    @Input() isActionMode: boolean = false;
 
     @Output() tileHovered = new EventEmitter<Tile>();
     @Output() tileClicked = new EventEmitter<Tile>();
