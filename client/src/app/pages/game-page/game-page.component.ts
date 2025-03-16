@@ -162,7 +162,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     executeNextAction(): void {
         this.isInCombatMode = true;
-        this.availablePath;
         this.snackbarService.showMessage('Mode combat activé');
     }
     abandonGame(): void {
@@ -178,7 +177,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     private isAvailablePath(tile: Tile): boolean {
-        console.log('t rentre');
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
     }
 
