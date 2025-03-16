@@ -81,6 +81,12 @@ export enum GameMode {
     CTF = 'CTF',
     None = '',
 }
+
+export enum GameModeLabel {
+    Classic = 'Classique',
+    CTF = 'Capture Le Drapeau',
+}
+
 export enum GameSize {
     Small = 'small',
     Medium = 'medium',

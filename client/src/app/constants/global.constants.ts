@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
-import { AttributeType, GameMode, GameModeType, GameSize, ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
+import { AttributeType, GameMode, GameModeLabel, GameModeType, GameSize, ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 export const BONUS_VALUE = 2;
 
@@ -41,13 +41,13 @@ export const GAME_SIZES_LIST = [
 export const GAME_MODES_LIST = [
     {
         key: GameMode.Classic,
-        label: 'Classique',
+        label: GameModeLabel.Classic,
         description: 'Un mode de jeu traditionnel où la stratégie est la clé.',
         backgroundImage: `url('${GameModeType.Classic}')`,
     },
     {
         key: GameMode.CTF,
-        label: 'Capture Le Drapeau',
+        label: GameModeLabel.CTF,
         description: 'Rivalisez pour sécuriser le drapeau de votre adversaire !',
         backgroundImage: `url('${GameModeType.CTF}')`,
     },
@@ -69,8 +69,8 @@ export const MOCK_GAMES = [
         id: '1',
         name: 'Game 1',
         isVisible: false,
-        size: 'medium',
-        mode: 'Classic',
+        size: GameSize.Medium,
+        mode: GameMode.Classic,
         lastModified: new Date(),
         previewImage: 'image1.jpg',
         description: 'Description 1',
