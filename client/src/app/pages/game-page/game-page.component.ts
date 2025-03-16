@@ -115,10 +115,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             }
         });
 
-        this.socketClientService.onGameCombatStarted((data) => {
-            this.snackbarService.showMessage(
-                `Combat commencé entre ${data.attacker.name} et ${data.defender.name}, c'est à ${data.firstFighter.name} de jouer`,
-            );
+        this.socketClientService.onGameCombatStarted(() => {
             this.isInCombatMode = true;
         });
 
