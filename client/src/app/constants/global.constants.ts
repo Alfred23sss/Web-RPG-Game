@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, GameMode, GameModeType, GameSize } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
+import { Lobby } from '@app/interfaces/lobby';
 export const BONUS_VALUE = 2;
 
 export const INITIAL_VALUES = {
@@ -63,6 +64,7 @@ export const ACCESS_CODE_MAX_VALUE = 9999;
 export const ACCESS_CODE_RANGE = 9000;
 export const ACCESS_CODE_LENGTH = 4;
 export const CODE_EDGE_CASES = [0, 0.999];
+export const MIN_PLAYERS = 2;
 
 export const MOCK_GAMES = [
     {
@@ -91,3 +93,11 @@ export const MOCK_GAMES = [
 
 export const ESCAPE_CHANCE = 0.3;
 export const NO_ESCAPES_TIMER = 3;
+
+export const DEFAULT_LOBBY: Lobby = {
+    isLocked: false,
+    accessCode: '',
+    players: [],
+    game: null,
+    maxPlayers: 0,
+};

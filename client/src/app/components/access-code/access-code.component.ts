@@ -83,6 +83,7 @@ export class AccessCodeComponent {
 
     private openCharacterForm(lobby: Lobby): void {
         this.closeDialog();
+
         this.dialog.open(CharacterFormComponent, {
             data: {
                 accessCode: this.accessCode,

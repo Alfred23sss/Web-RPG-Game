@@ -3,11 +3,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
+import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
 
@@ -48,7 +48,7 @@ describe('GameSessionService', () => {
             coordinates: { x: 0, y: 0 },
         }) as unknown as Tile;
 
-    const MOCK_LOBBY = {
+    const MOCK_LOBBY: Lobby = {
         accessCode: 'test-code',
         isLocked: false,
         maxPlayers: 4,
@@ -67,12 +67,13 @@ describe('GameSessionService', () => {
             description: 'Test game description',
         } as unknown as Game,
         players: [createValidPlayer('Player 1', SLOW_SPEED), createValidPlayer('Player 2', FAST_SPEED)],
+        waitingPlayers: [],
     };
 
     beforeEach(() => {
         jest.useFakeTimers();
         accessCodesService = new AccessCodesService();
-        lobbyService = new LobbyService(accessCodesService, new Logger());
+        lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
 
         jest.spyOn(lobbyService, 'getLobby').mockReturnValue(MOCK_LOBBY);

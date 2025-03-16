@@ -15,10 +15,10 @@
         <div class="character-form_avatars">
             @for (avatar of avatarTypes; track avatar) {
             <img
+                (click)="selectAvatar(avatar)"
                 [src]="avatar"
-                (click)="!unavailableAvatars.includes(avatar) ? (createdPlayer.avatar = avatar) : null"
                 [class.selected]="createdPlayer.avatar === avatar"
-                [class.disabled]="unavailableAvatars.includes(avatar)"
+                [class.disabled]="unavailableAvatars.includes(avatar) && createdPlayer.avatar !== avatar"
                 alt="Avatar"
             />
             }
