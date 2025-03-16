@@ -188,6 +188,11 @@ export class GameSessionService {
         }
     }
 
+    getGameSession(accessCode: string): GameSession {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) throw new Error('Game session not found');
+        return gameSession;
+    }
     private initializeTurn(accessCode: string): Turn {
         return {
             orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),

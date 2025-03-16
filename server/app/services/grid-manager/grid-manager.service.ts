@@ -12,6 +12,14 @@ export class GridManagerService {
         return grid.flat().find((tile) => tile.id === tileId);
     }
 
+    findTileByPlayer(grid: Tile[][], player: Player): Tile | undefined {
+        return grid.flat().find((tile) => tile.player?.name === player.name);
+    }
+
+    findTileBySpawnPoint(grid: Tile[][], player: Player): Tile | undefined {
+        return grid.flat().find((tile) => tile.id === player.spawnPoint.tileId);
+    }
+
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;
         let tile2Pos: { row: number; col: number } | null = null;
@@ -79,6 +87,18 @@ export class GridManagerService {
         shuffledSpawns.slice(players.length).forEach((spawnPoint) => {
             spawnPoint.item = null;
         });
+
+        return grid;
+    }
+
+    teleportPlayer(grid: Tile[][], player: Player, targetTile: Tile): Tile[][] {
+        const currentPlayerTile = this.findTileByPlayer(grid, player);
+        if (!currentPlayerTile) {
+            this.logger.warn(`Player ${player.name} not found on any tile.`);
+            return grid;
+        }
+        targetTile.player = player;
+        currentPlayerTile.player = undefined;
 
         return grid;
     }

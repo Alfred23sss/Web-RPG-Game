@@ -182,7 +182,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
     }
     handleTileRightClick(data: { tile: Tile; event: MouseEvent }): void {
-        // ajouter logique pour afficher un component
+        if (data.tile.player) {
+            console.log(data.tile.player.name);
+        } else {
+            console.log(this.playerMovementService.getMoveCost(data.tile));
+        }
         const { tile, event } = data;
         console.log(tile, event);
         return;
