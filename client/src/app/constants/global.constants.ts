@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
-import { AttributeType, GameMode, GameModeType, GameSize } from '@app/enums/global.enums';
+import { AttributeType, GameMode, GameModeType, GameSize, ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 export const BONUS_VALUE = 2;
 
@@ -91,3 +91,79 @@ export const MOCK_GAMES = [
 
 export const ESCAPE_CHANCE = 0.3;
 export const NO_ESCAPES_TIMER = 3;
+
+export const ITEM_BAR_ITEMS = [
+    {
+        id: '0',
+        name: ItemName.Lightning,
+        imageSrc: ItemType.Lightning,
+        imageSrcGrey: ItemType.LightningGray,
+        itemCounter: 1,
+        description: ItemDescription.Lightning,
+    },
+    {
+        id: '1',
+        name: ItemName.Potion,
+        imageSrc: ItemType.Potion,
+        imageSrcGrey: ItemType.PotionGray,
+        itemCounter: 1,
+        description: ItemDescription.Potion,
+    },
+    {
+        id: '2',
+        name: ItemName.Rubik,
+        imageSrc: ItemType.Rubik,
+        imageSrcGrey: ItemType.RubikGray,
+        itemCounter: 1,
+        description: ItemDescription.Rubik,
+    },
+    {
+        id: '3',
+        name: ItemName.Stop,
+        imageSrc: ItemType.Stop,
+        imageSrcGrey: ItemType.StopGray,
+        itemCounter: 1,
+        description: ItemDescription.Stop,
+    },
+    {
+        id: '4',
+        name: ItemName.Fire,
+        imageSrc: ItemType.Fire,
+        imageSrcGrey: ItemType.FireGray,
+        itemCounter: 1,
+        description: ItemDescription.Fire,
+    },
+    {
+        id: '5',
+        name: ItemName.Swap,
+        imageSrc: ItemType.Swap,
+        imageSrcGrey: ItemType.SwapGray,
+        itemCounter: 1,
+        description: ItemDescription.Swap,
+    },
+    {
+        id: '6',
+        name: ItemName.Home,
+        imageSrc: ItemType.Home,
+        imageSrcGrey: ItemType.HomeGray,
+        itemCounter: 2,
+        description: ItemDescription.Home,
+    },
+    {
+        id: '7',
+        name: ItemName.QuestionMark,
+        imageSrc: ItemType.QuestionMark,
+        imageSrcGrey: ItemType.QuestionMarkGray,
+        itemCounter: 2,
+        description: ItemDescription.QuestionMark,
+    },
+];
+
+export const ITEM_COUNTS: Record<GameSize, number> = {
+    [GameSize.Small]: 2,
+    [GameSize.Medium]: 4,
+    [GameSize.Large]: 6,
+    [GameSize.None]: 0,
+};
+
+export const ITEMS_TO_UPDATE = new Set(['home', 'question']);

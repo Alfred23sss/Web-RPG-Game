@@ -55,6 +55,7 @@ describe('ItemBarComponent', () => {
         fixture = TestBed.createComponent(ItemBarComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
+        TEST_ITEM.itemCounter = 1;
     });
 
     it('should create the component', () => {
