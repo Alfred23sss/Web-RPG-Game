@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/classes/item';
 import { ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
+import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
-import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 
 @Component({
     selector: 'app-item-bar',
