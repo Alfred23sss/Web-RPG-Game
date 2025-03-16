@@ -83,7 +83,7 @@
                 (tileClicked)="handleTileClick($event)"
                 (playerAttacked)="handleAttackClick($event)"
                 (doorClicked)="handleDoorClick($event)"
-                [ngClass]="{ 'red-border': isInCombatMode }"
+                [ngClass]="{ 'red-border': isActionMode }"
             ></app-grid>
         </div>
         <div class="timer">

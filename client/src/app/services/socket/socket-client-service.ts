@@ -301,6 +301,5 @@ export class SocketClientService {
             accessCode,
         };
         this.emit('doorUpdate', payload);
-        console.log('Door update sent');
     }
 }
