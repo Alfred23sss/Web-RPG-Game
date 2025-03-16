@@ -40,7 +40,8 @@ export class GridComponent {
             this.playerAttacked.emit(tile);
         } else if (tile.type === TileType.Door) {
             this.doorClicked.emit(tile);
-        } else if (this.isAvailablePath(tile)) {
+        }
+        if (this.isAvailablePath(tile)) {
             this.tileClicked.emit(tile);
         }
     }
