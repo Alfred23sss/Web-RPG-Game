@@ -97,10 +97,64 @@ export class GridManagerService {
             this.logger.warn(`Player ${player.name} not found on any tile.`);
             return grid;
         }
-        targetTile.player = player;
+        if (currentPlayerTile === targetTile) {
+            return grid;
+        }
+
+        let destinationTile = targetTile;
+        const isPlayerSpawnPoint = player.spawnPoint.tileId === targetTile.id;
+
+        if (targetTile.player || targetTile.type === 'mur' || (targetTile.type === 'porte' && !targetTile.isOpen)) {
+            if (isPlayerSpawnPoint) {
+                destinationTile = this.findClosestAvailableTile(grid, targetTile) || currentPlayerTile;
+            } else {
+                return grid;
+            }
+        }
+
+        destinationTile.player = player;
         currentPlayerTile.player = undefined;
 
         return grid;
+    }
+
+    private findClosestAvailableTile(grid: Tile[][], startTile: Tile): Tile | undefined {
+        const queue: Tile[] = [startTile];
+        const visited = new Set<string>();
+        visited.add(startTile.id);
+
+        while (queue.length > 0) {
+            const tile = queue.shift();
+            if (!tile) continue;
+
+            if (!tile.player && (!tile.type || tile.type !== 'mur') && (!tile.type || tile.type !== 'porte' || tile.isOpen)) {
+                return tile;
+            }
+
+            const neighbors = this.getAdjacentTiles(grid, tile);
+            for (const neighbor of neighbors) {
+                if (!visited.has(neighbor.id)) {
+                    visited.add(neighbor.id);
+                    queue.push(neighbor);
+                }
+            }
+        }
+
+        return undefined;
+    }
+    private getAdjacentTiles(grid: Tile[][], tile: Tile): Tile[] {
+        const coords = this.parseTileCoordinates(tile.id);
+        if (!coords) return [];
+
+        const { row, col } = coords;
+        const adjacentTiles: Tile[] = [];
+
+        if (row > 0) adjacentTiles.push(grid[row - 1][col]);
+        if (row < grid.length - 1) adjacentTiles.push(grid[row + 1][col]);
+        if (col > 0) adjacentTiles.push(grid[row][col - 1]);
+        if (col < grid[row].length - 1) adjacentTiles.push(grid[row][col + 1]);
+
+        return adjacentTiles;
     }
 
     private parseTileCoordinates(tileId: string): { row: number; col: number } | null {
