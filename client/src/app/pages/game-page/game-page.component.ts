@@ -226,7 +226,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     executeNextAction(): void {
         console.log(this.isActionMode);
         this.isActionMode = !this.isActionMode;
-        this.snackbarService.showMessage('Mode combat activé');
+        this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
         // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?
