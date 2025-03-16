@@ -76,6 +76,8 @@ export class GameCombatService {
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current === 0) {
                 this.endCombat(accessCode);
+                // reset health
+                this.resetHealth([currentFighter, defenderPlayer], [currentFighterSocket, defenderPlayerSocket]);
             }
         } else {
             this.logger.log(`attack was not successful for ${currentFighter.name}`);
@@ -190,6 +192,14 @@ export class GameCombatService {
         );
 
         this.startCombatTurn(accessCode, orderedFighters[0]);
+    }
+
+    private resetHealth(players: Player[], sockets: string[]): void {
+        players.forEach((player, index) => {
+            player.hp.current = player.hp.max;
+            const playerSocketId = sockets[index];
+            this.emitDefenderHealthUpdate(player.name, playerSocketId, player.hp.current);
+        });
     }
 
     private determineCombatOrder(attacker: Player, defender: Player): Player[] {
