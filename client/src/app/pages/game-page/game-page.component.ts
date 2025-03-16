@@ -105,7 +105,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.game = data.updatedGame;
         });
 
-        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player, isCurrentlyMoving: boolean }) => {
+        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
             if (this.game && this.game.grid) {
                 this.game.grid = data.grid;
             }
