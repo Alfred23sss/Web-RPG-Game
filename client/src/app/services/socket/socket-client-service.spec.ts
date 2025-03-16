@@ -486,4 +486,47 @@ describe('SocketClientService', () => {
 
         expect(fakeSocket.on).toHaveBeenCalledWith('kicked', callback);
     });
+
+    it('should register a callback for playerMovement socket events', () => {
+        spyOn(fakeSocket, 'on');
+        const callback = jasmine.createSpy('callback');
+
+        service.onPlayerMovement(callback);
+
+        expect(fakeSocket.on).toHaveBeenCalledWith('playerMovement', callback);
+    });
+
+    it('should register a callback for avatarSelected socket events', () => {
+        const callback = jasmine.createSpy('callback');
+        const mockAvatarData = { avatar: 'warrior' };
+        service.onAvatarSelected(callback);
+        fakeSocket.trigger('avatarSelected', mockAvatarData);
+        expect(callback).toHaveBeenCalledWith(mockAvatarData);
+    });
+
+    it('should register a callback for avatarDeselected socket events', () => {
+        const callback = jasmine.createSpy('callback');
+        service.onAvatarDeselected(callback);
+        fakeSocket.trigger('avatarDeselected');
+        expect(callback).toHaveBeenCalled();
+    });
+
+    it('should emit selectAvatar event with correct parameters', () => {
+        spyOn(fakeSocket, 'emit');
+        const accessCode = 'TEST1234';
+        const avatar = 'warrior';
+
+        service.selectAvatar(accessCode, avatar);
+
+        expect(fakeSocket.emit).toHaveBeenCalledWith('selectAvatar', { accessCode, avatar });
+    });
+
+    it('should emit selectAvatar event with correct parameters', () => {
+        spyOn(fakeSocket, 'emit');
+        const accessCode = 'TEST1234';
+
+        service.deselectAvatar(accessCode);
+
+        expect(fakeSocket.emit).toHaveBeenCalledWith('deselectAvatar', { accessCode });
+    });
 });
