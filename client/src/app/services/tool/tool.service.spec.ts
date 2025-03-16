@@ -38,7 +38,7 @@ describe('TimeService', () => {
         { tool: TileType.Door, image: ImageType.OpenDoor },
     ].forEach(({ tool, image }) => {
         it(`should emit the updated tool : ${tool}, with image : ${image}`, (done) => {
-            service.setSelectedTool(tool, image);
+            service.setSelectedTool({ tool, image });
 
             service.selectedTool$.subscribe((tile) => {
                 expect(tile).toEqual({ tool, image });
