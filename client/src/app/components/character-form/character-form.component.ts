@@ -73,9 +73,9 @@ export class CharacterFormComponent implements OnInit {
     ngOnInit(): void {
         this.socketClientService.emit('joinRoom', this.currentAccessCode);
 
-        this.socketClientService.onUpdateUnavailableOptions((data: { avatars: string[] }) => {
+        this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
+            if (!data.avatars) return;
             this.unavailableAvatars = [...data.avatars];
-
             this.cdr.detectChanges();
         });
 
