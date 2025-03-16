@@ -124,7 +124,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
             if (!this.game || !this.game.grid) {
                 return;
             }
-            this.game.grid = data.updatedGrid;
+            console.log(data.grid);
+            this.game.grid = data.grid;
             this.isActionMode = false;
             console.log('door clicked client side adjusted');
         });
@@ -140,7 +141,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleDoorClick(targetTile: Tile): void {
-        if (this.isInCombatMode || this.clientPlayer.actionPoints === zeroActionPoints) return;
+        if (this.isInCombatMode || this.clientPlayer.actionPoints === zeroActionPoints || !this.isActionMode) return;
         const currentTile = this.getClientPlayerPosition();
         if (!currentTile || !this.game || !this.game.grid) {
             return;

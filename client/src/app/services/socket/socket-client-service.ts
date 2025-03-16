@@ -289,8 +289,10 @@ export class SocketClientService {
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
     }
-    onDoorClickedUpdate(callback: (data: { updatedGrid: Tile[][] }) => void): void {
-        this.socket.on('doorClicked', callback);
+    onDoorClickedUpdate(callback: (data: { grid: Tile[][] }) => void): void {
+        this.socket.on('doorClicked', (data) => {
+            callback(data);
+        });
     }
     sendDoorUpdate(currentTile: Tile, targetTile: Tile, accessCode: string): void {
         const payload = {
