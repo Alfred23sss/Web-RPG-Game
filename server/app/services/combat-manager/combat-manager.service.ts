@@ -82,7 +82,7 @@ export class GameCombatService {
                 this.endCombat(accessCode);
             }
         } else {
-            this.endCombatTurn(accessCode);
+            this.logger.log(`attack was not successful for ${currentFighter.name}`);
         }
     }
 
@@ -253,8 +253,9 @@ export class GameCombatService {
 
         combatState.combatTurnTimers = setTimeout(() => {
             if (!combatState.playerPerformedAction) {
-                this.performAttack(accessCode, combatState.attacker.name);
+                this.performAttack(accessCode, combatState.currentFighter.name);
             }
+            // probably un probleme ici
             this.endCombatTurn(accessCode, true);
         }, turnDuration);
     }
