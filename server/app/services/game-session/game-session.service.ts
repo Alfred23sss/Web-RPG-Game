@@ -184,10 +184,11 @@ export class GameSessionService {
             });
         }
     }
-    private updatePlayer(player: Player, updates: Partial<Player>): void {
-        if (player) {
-            Object.assign(player, updates);
-        }
+
+    getGameSession(accessCode: string): GameSession {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) throw new Error('Game session not found');
+        return gameSession;
     }
     private initializeTurn(accessCode: string): Turn {
         return {
