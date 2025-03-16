@@ -89,21 +89,17 @@ export class GameGateway {
         }
     }
     @SubscribeMessage(GameEvents.DoorUpdate)
-    handleDoorUpdate(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile; player: Player },
-    ) {
-        const lobby = this.lobbyService.getLobby(payload.accessCode);
-        this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile, payload.player, lobby.game.grid);
+    handleDoorUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile }) {
+        this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile);
         this.logger.log('Door update emitted');
     }
 
     @OnEvent('game.door.update')
-    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][]; player: Player }) {
+    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
-            player: payload.player,
         });
+        this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
 

@@ -289,15 +289,14 @@ export class SocketClientService {
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
     }
-    onDoorClickedUpdate(callback: (data: { updatedGrid: Tile[][]; updatedPlayer: Player }) => void): void {
+    onDoorClickedUpdate(callback: (data: { updatedGrid: Tile[][] }) => void): void {
         this.socket.on('doorClicked', callback);
     }
-    sendDoorUpdate(currentTile: Tile, targetTile: Tile, accessCode: string, player: Player): void {
+    sendDoorUpdate(currentTile: Tile, targetTile: Tile, accessCode: string): void {
         const payload = {
             currentTile,
             targetTile,
             accessCode,
-            player,
         };
         this.emit('doorUpdate', payload);
         console.log('Door update sent');

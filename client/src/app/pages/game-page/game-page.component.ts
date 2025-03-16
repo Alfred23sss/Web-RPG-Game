@@ -125,7 +125,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
                 return;
             }
             this.game.grid = data.updatedGrid;
-            this.clientPlayer = data.updatedPlayer;
             this.isActionMode = false;
             console.log('door clicked client side adjusted');
         });
@@ -146,7 +145,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (!currentTile || !this.game || !this.game.grid) {
             return;
         }
-        this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode, this.clientPlayer);
+        this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode);
     }
 
     handleAttackClick(targetTile: Tile): void {

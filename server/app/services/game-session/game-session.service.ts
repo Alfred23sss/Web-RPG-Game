@@ -129,16 +129,16 @@ export class GameSessionService {
         return gameSession.turn.currentPlayer.name === playerName;
     }
 
-    updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile, player: Player, grid: Tile[][]): void {
+    updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
+        const grid = this.gameSessions.get(accessCode).game.grid;
         const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
         if (!isAdjacent) return;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
         targetTile.isOpen = !targetTile.isOpen;
-        if (player.actionPoints > 0) {
-            player.actionPoints -= 1;
-        }
         this.logger.log('emit game.door.update');
-        this.eventEmitter.emit('game.door.update', { accessCode, grid, player });
+        this.logger.log(grid);
+        this.gameSessions.get(accessCode).game.grid = grid;
+        this.eventEmitter.emit('game.door.update', { accessCode, grid });
     }
 
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
