@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
+import { DiceAssignment } from '@app/interfaces/character-attributes';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -37,14 +38,17 @@ export class CharacterService {
         }
     }
 
-    assignDice(attribute: AttributeType): { attack: string | null; defense: string | null } {
+    assignDice(attribute: AttributeType): DiceAssignment {
         if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
             this.diceAssigned[attribute] = true;
             this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
-            return attribute === AttributeType.Attack ? { attack: DiceType.D6, defense: DiceType.D4 } : { attack: DiceType.D4, defense: DiceType.D6 };
+
+            return attribute === AttributeType.Attack
+                ? ({ attack: DiceType.D6, defense: DiceType.D4 } as DiceAssignment)
+                : ({ attack: DiceType.D4, defense: DiceType.D6 } as DiceAssignment);
         }
 
-        return { attack: null, defense: null };
+        return { attack: null, defense: null } as DiceAssignment;
     }
 
     submitCharacter(player: Player, game: Game, closePopup: () => void): void {
