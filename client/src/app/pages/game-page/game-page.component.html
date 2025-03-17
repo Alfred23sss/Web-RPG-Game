@@ -126,9 +126,16 @@
             >
                 {{ hasEscapeAttemptsLeft ? "S'Évader" : 'Aucune tentative' }}
             </button>
+            @if(attackResult){
+                <p>Résultat du combat :</p>
+                @if(attackResult.success){
+                <p>✅ Victoire! Score Attaque: {{ attackResult.attackScore }}, Score Défense: {{ attackResult.defenseScore }}</p>
+                } @else {
+                <p>❌ Défaite! Score Attaque: {{ attackResult.attackScore }}, Score Défense: {{ attackResult.defenseScore }}</p>
+                }
+            }
         </div>
-        }
-
+    }
         <div class="game-messages">
             <h3>Messages</h3>
             <div class="message-toggle">

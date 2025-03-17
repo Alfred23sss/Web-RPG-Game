@@ -41,6 +41,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
     hasEscapeAttemptsLeft: boolean = true;
+    attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
 
     /* eslint-disable-next-line max-params */ // to fix
     constructor(
