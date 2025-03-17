@@ -166,6 +166,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
+    updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number }) {
+        this.attackResult = data;
+    }
+
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;
         let tile2Pos: { row: number; col: number } | null = null;

@@ -92,12 +92,7 @@ export class GameSocketService {
         });
 
         this.socketClientService.onAttackResult((data: { success: boolean; attackScore: number; defenseScore: number }) => {
-            component.attackResult = data;
-            if (data.success) {
-                this.snackbarService.showMessage(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
-            } else {
-                this.snackbarService.showMessage(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
-            }
+            component.updateAttackResult(data);
         });
 
         this.socketClientService.onPlayerUpdate((data: { player: Player }) => {

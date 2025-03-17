@@ -164,7 +164,7 @@ export class GameGateway {
         this.logger.log('emiting combat attack result');
         this.server
             .to([payload.attackerId, payload.defenderId])
-            .emit('combatStarted', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
+            .emit('attackResult', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
     }
 
     @OnEvent('update.player')
