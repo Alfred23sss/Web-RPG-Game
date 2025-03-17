@@ -4,6 +4,8 @@ import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attribute
 import { Lobby } from '@app/interfaces/lobby';
 export const BONUS_VALUE = 2;
 
+export const POPUP_DELAY = 2000;
+
 export const INITIAL_VALUES = {
     attributes: {
         [AttributeType.Vitality]: 4,

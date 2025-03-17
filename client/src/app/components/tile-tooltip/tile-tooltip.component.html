@@ -5,7 +5,7 @@
     } @else {
     <p><strong>Type:</strong> {{ data.tile.type }}</p>
 
-    @if (movementCost === Infinity) {
+    @if (isInfinity(movementCost)) {
     <p><strong>Coût:</strong> Case inatteignable</p>
     } @else {
     <p><strong>Coût:</strong> {{ movementCost }}</p>

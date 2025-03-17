@@ -2,12 +2,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component'; // ajustez le chemin si nécessaire
+import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component';
 import { TileComponent } from '@app/components/tile/tile.component';
+import { POPUP_DELAY } from '@app/constants/global.constants';
 import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
-
-const POPUP_DELAY = 2000;
 
 @Component({
     selector: 'app-grid',
@@ -53,9 +52,8 @@ export class GridComponent {
     }
 
     onTileRightClick(event: MouseEvent, tile: Tile): void {
-        event.preventDefault(); // Empêche l'ouverture du menu contextuel
+        event.preventDefault();
 
-        // Ouvre le tooltip personnalisé sous forme de dialog
         const dialogRef = this.dialog.open(TileTooltipComponent, {
             data: { tile },
             panelClass: 'custom-tooltip-dialog',
@@ -63,9 +61,8 @@ export class GridComponent {
             position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
         });
 
-        // Ferme automatiquement après 2 secondes
         setTimeout(() => {
-            dialogRef.close();
+            dialogRef.close(); //65
         }, POPUP_DELAY);
     }
 }
