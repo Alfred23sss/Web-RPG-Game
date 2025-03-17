@@ -88,14 +88,18 @@ export class SocketClientService {
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
             this.socket.emit('getLobbyPlayers', accessCode);
+            
             this.socket.on('updatePlayers', (players: Player[]) => {
+                console.log("📡 Liste des joueurs reçue du serveur :", players);
                 observer.next(players);
             });
+    
             this.socket.on('error', (errorMessage: string) => {
                 observer.error(errorMessage);
             });
         });
     }
+    
 
     getLobby(accessCode: string): Observable<Lobby> {
         return new Observable<Lobby>((observer) => {
