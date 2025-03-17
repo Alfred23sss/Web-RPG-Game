@@ -155,5 +155,9 @@ export class GameSocketService {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
         });
+        this.socketClientService.on('adminModeChangedServerSide', (data: { accessCode: boolean }) => {
+            component.isDebugMode = !component.isDebugMode;
+            this.snackbarService.showMessage(`Mode debug ${component.isDebugMode ? 'activé' : 'désactivé'}`);
+        });
     }
 }

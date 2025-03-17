@@ -43,6 +43,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     escapeAttempts: number = 2;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
     movementPointsRemaining: number = 0;
+    isDebugMode: boolean = false;
 
     /* eslint-disable-next-line max-params */ // to fix
     constructor(
@@ -60,6 +61,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.logEntries = logBook;
         });
         this.gameSocketService.initializeSocketListeners(this);
+        document.addEventListener('keydown', this.handleKeyPress.bind(this));
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -89,6 +91,14 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
+    }
+
+    handleTeleport(targetTile: Tile): void {
+        console.log(targetTile);
+        if (!this.isDebugMode) return;
+        if (this.clientPlayer.name === this.currentPlayer.name) {
+            this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
+        }
     }
     updateQuickestPath(targetTile: Tile): void {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
@@ -121,6 +131,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.logBookSubscription.unsubscribe();
         sessionStorage.setItem('refreshed', 'false');
+        document.removeEventListener('keydown', this.handleKeyPress.bind(this));
     }
 
     attack(): void {
@@ -191,5 +202,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     private isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+    }
+    private handleKeyPress(event: KeyboardEvent): void {
+        if (event.key.toLowerCase() === 'd' && this.clientPlayer.isAdmin) {
+            console.log('Touche D pressée');
+            this.socketClientService.sendAdminModeUpdate(this.lobby.accessCode);
+        }
     }
 }

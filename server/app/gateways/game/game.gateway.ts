@@ -103,6 +103,20 @@ export class GameGateway {
         this.logger.log('Escape attempt received by server');
     }
 
+    @SubscribeMessage(GameEvents.AdminModeUpdate)
+    handleAdminModeUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+        this.server.to(payload.accessCode).emit('adminModeChangedServerSide', { accessCode: payload.accessCode });
+        this.logger.log('Admin Mode Changed');
+    }
+
+    @SubscribeMessage(GameEvents.TeleportPlayer)
+    handleTeleportPlayer(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; targetTile: Tile }) {
+        this.logger.log('on est dans le gateway');
+        this.logger.log(payload.targetTile);
+        this.gameSessionService.callTeleport(payload.accessCode, payload.player, payload.targetTile);
+        this.logger.log('player teleported');
+    }
+
     @OnEvent('game.combat.ended')
     handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string }): void {
         this.logger.log('sending to client combat ended');

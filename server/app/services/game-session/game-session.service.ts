@@ -29,10 +29,11 @@ export class GameSessionService {
         const grid = game.grid;
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
         const turn = this.initializeTurn(accessCode);
-        const updatedGrid = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
+        const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(this.getPlayers(accessCode), spawnPoints, grid);
         game.grid = updatedGrid;
         const gameSession: GameSession = { game, turn };
         this.gameSessions.set(accessCode, gameSession);
+        this.getGameSession(accessCode).turn.orderedPlayers = players;
         this.startTransitionPhase(accessCode);
         return gameSession;
     }
@@ -194,6 +195,11 @@ export class GameSessionService {
         return gameSession;
     }
 
+    callTeleport(accessCode: string, player: Player, targetTile: Tile): void {
+        const updatedGrid = this.gridManager.teleportPlayer(this.getGameSession(accessCode).game.grid, player, targetTile);
+        this.getGameSession(accessCode).game.grid = updatedGrid;
+        this.emitGridUpdate(accessCode, updatedGrid);
+    }
     emitGridUpdate(accessCode: string, grid: Tile[][]): void {
         this.eventEmitter.emit('game.grid.update', {
             accessCode,

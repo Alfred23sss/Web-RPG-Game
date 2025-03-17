@@ -66,7 +66,7 @@ export class GridManagerService {
         return grid.flat().filter((tile) => tile.item?.name === 'home');
     }
 
-    assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): Tile[][] {
+    assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): [Player[], Tile[][]] {
         const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - RANDOMIZER);
 
         players.forEach((player, index) => {
@@ -88,7 +88,7 @@ export class GridManagerService {
             spawnPoint.item = null;
         });
 
-        return grid;
+        return [players, grid];
     }
 
     teleportPlayer(grid: Tile[][], player: Player, targetTile: Tile): Tile[][] {
