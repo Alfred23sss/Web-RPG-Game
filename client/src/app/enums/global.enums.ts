@@ -176,3 +176,9 @@ export enum AccessCodeGenerator {
     Minimum = 1000,
     Maximum = 9000,
 }
+
+export enum ItemCount {
+    SmallItemCount = 2,
+    MediumItemCount = 4,
+    LargeItemCount = 6,
+}
