@@ -111,9 +111,10 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.escape.failed')
-    handleNoMoreEscapeAttempts(payload: { player: Player; playerSocketId: string }): void {
+    handleNoMoreEscapeAttempts(payload: { player: Player; playerSocketId: string; attemptsLeft: number }): void {
         this.server.to(payload.playerSocketId).emit('noMoreEscapesLeft', {
             player: payload.player,
+            attemptsLeft: payload.attemptsLeft,
         });
     }
 
@@ -164,7 +165,7 @@ export class GameGateway {
         this.logger.log('emiting combat attack result');
         this.server
             .to([payload.attackerId, payload.defenderId])
-            .emit('combatStarted', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
+            .emit('attackResult', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
     }
 
     @OnEvent('update.player')
@@ -198,6 +199,23 @@ export class GameGateway {
             `Combat started in game ${payload.accessCode}, socket attatque ${payload.attackerSocketId} et socket defense ${payload.defenderSocketId}`,
         );
         this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatStarted');
+    }
+
+    @OnEvent('game.ended')
+    handleGameEnded(payload: { accessCode: string; winner: string }) {
+        this.logger.log('emitting game ended to client');
+
+        this.gameSessionService.deleteGameSession(payload.accessCode);
+        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner });
+
+        const lobbyPlayers = this.lobbyService.getLobbyPlayers(payload.accessCode);
+        for (const player of lobbyPlayers) {
+            const socketId = this.lobbyService.getPlayerSocket(player.name);
+            const socket = this.server.sockets.sockets.get(socketId);
+            if (socket) {
+                socket.disconnect(true);
+            }
+        }
     }
 
     @OnEvent('game.combat.timer')

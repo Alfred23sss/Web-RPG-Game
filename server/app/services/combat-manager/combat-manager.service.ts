@@ -14,8 +14,9 @@ const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
-const ESCAPE_THRESHOLD = 0;
-const ICE_PENALITY = -2;
+const ESCAPE_THRESHOLD = 0.3;
+const ICE_PENALTY = -2;
+const WIN_CONDITION = 3;
 
 @Injectable()
 export class GameCombatService {
@@ -58,17 +59,16 @@ export class GameCombatService {
     performAttack(accessCode: string, attackerName: string): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
-
-        this.resetCombatTimers(accessCode);
-
         const { attacker, defender, currentFighter } = combatState;
+        if (currentFighter.name !== attackerName) {
+            this.logger.warn(`Not ${attackerName}'s turn in combat`);
+
+            return;
+        }
+        this.resetCombatTimers(accessCode);
         combatState.playerPerformedAction = true;
 
         this.logger.log(`${currentFighter.name}, ${attackerName}`);
-        if (currentFighter.name !== attackerName) {
-            this.logger.warn(`Not ${attackerName}'s turn in combat`);
-            return;
-        }
 
         const attackerScore = this.getRandomAttackScore(currentFighter, accessCode);
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
@@ -91,7 +91,11 @@ export class GameCombatService {
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false);
                 this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
-
+                if (this.checkPlayerWon(accessCode, currentFighter)) {
+                    this.logger.log('ending combat in gameCombat');
+                    this.endCombat(accessCode);
+                    return;
+                }
                 this.logger.log(`player list from gamessession ${this.gameSessionService.getPlayers(accessCode)}`);
                 this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
                 if (combatState.attacker === defenderPlayer) {
@@ -120,11 +124,12 @@ export class GameCombatService {
 
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
+        this.emitNoMoreEscapesLeft(currentFighter, attemptsLeft);
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
-        if (attemptsLeft === 0) {
-            this.emitNoMoreEscapesLeft(currentFighter);
-        }
+        // if (attemptsLeft === 0) {
+        //     this.emitNoMoreEscapesLeft(currentFighter);
+        // }
 
         if (isEscapeSuccessful) {
             this.logger.log(`Escape successful for ${player.name}`);
@@ -136,6 +141,14 @@ export class GameCombatService {
             this.logger.log(`Escape failed for ${player.name}`);
             this.endCombatTurn(accessCode);
         }
+    }
+
+    checkPlayerWon(accessCode: string, player: Player): boolean {
+        if (player.combatWon === WIN_CONDITION) {
+            this.gameSessionService.endGameSession(accessCode, player.name);
+            return true;
+        }
+        return false;
     }
 
     endCombat(accessCode: string, isEscape: boolean = false): void {
@@ -213,6 +226,9 @@ export class GameCombatService {
     private updateWinningPlayerAfterCombat(player: Player, accessCode: string): void {
         player.hp.current = player.hp.max;
         player.combatWon++;
+        if (this.checkPlayerWon(accessCode, player)) {
+            this.gameSessionService.endGameSession(accessCode, player.name);
+        }
         this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         this.emitUpdatePlayer(player, this.lobbyService.getPlayerSocket(player.name));
         this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
@@ -253,7 +269,7 @@ export class GameCombatService {
         let iceDisadvantage;
         const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, attacker);
         if (tile) {
-            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALITY : 0;
+            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALTY : 0;
         }
         this.logger.log(`player on ice has attack reduce by ${iceDisadvantage}`);
         return attacker.attack.value + Math.floor(Math.random() * this.extractDiceValue(attacker.attack.bonusDice)) + 1 + iceDisadvantage;
@@ -263,7 +279,7 @@ export class GameCombatService {
         let iceDisadvantage;
         const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, defender);
         if (tile) {
-            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALITY : 0;
+            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALTY : 0;
         }
         return defender.defense.value + Math.floor(Math.random() * this.extractDiceValue(defender.defense.bonusDice)) + 1 + iceDisadvantage;
     }
@@ -370,11 +386,12 @@ export class GameCombatService {
         });
     }
 
-    private emitNoMoreEscapesLeft(player: Player): void {
+    private emitNoMoreEscapesLeft(player: Player, attemptsLeft: number): void {
         const playerSocketId = this.lobbyService.getPlayerSocket(player.name);
         this.eventEmitter.emit('game.combat.escape.failed', {
             player,
             playerSocketId,
+            attemptsLeft,
         });
     }
 

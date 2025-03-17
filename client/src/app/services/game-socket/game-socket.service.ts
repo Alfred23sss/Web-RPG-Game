@@ -12,6 +12,8 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 const noActionPoints = 0;
 const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
+const delayBeforeEndingGame = 5000;
+const defaultEscapeAttempts = 2;
 
 @Injectable({
     providedIn: 'root',
@@ -40,6 +42,7 @@ export class GameSocketService {
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
+            component.backToHome();
         });
 
         this.socketClientService.onGameDeleted(() => {
@@ -47,6 +50,13 @@ export class GameSocketService {
             setTimeout(() => {
                 component.backToHome();
             }, delayBeforeHome);
+        });
+
+        this.socketClientService.onGameEnded((data) => {
+            this.snackbarService.showMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+            setTimeout(() => {
+                component.abandonGame();
+            }, delayBeforeEndingGame);
         });
 
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
@@ -92,11 +102,7 @@ export class GameSocketService {
         });
 
         this.socketClientService.onAttackResult((data: { success: boolean; attackScore: number; defenseScore: number }) => {
-            if (data.success) {
-                this.snackbarService.showMessage(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
-            } else {
-                this.snackbarService.showMessage(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
-            }
+            component.updateAttackResult(data);
         });
 
         this.socketClientService.onPlayerUpdate((data: { player: Player }) => {
@@ -134,15 +140,16 @@ export class GameSocketService {
             component.game.grid = data.grid;
         });
 
-        this.socketClientService.on('noMoreEscapesLeft', () => {
-            component.hasEscapeAttemptsLeft = false;
+        this.socketClientService.on('noMoreEscapesLeft', (data: { player: Player; attemptsLeft: number }) => {
+            component.escapeAttempts = data.attemptsLeft;
         });
 
         this.socketClientService.on('combatEnded', () => {
-            component.hasEscapeAttemptsLeft = true;
+            component.escapeAttempts = defaultEscapeAttempts;
             component.isInCombatMode = false;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
+            component.attackResult = null;
         });
     }
 }

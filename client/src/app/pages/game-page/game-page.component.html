@@ -116,19 +116,35 @@
         </div>
         @if(isInCombatMode){
         <div class="dice-buttons">
-            <button class="dice" (click)="attack()">Attaquer</button>
+            <button
+                class="dice"
+                (click)="attack()"
+                [disabled]="clientPlayer.name !== currentPlayer.name"
+                [ngClass]="{ 'disabled-btn': clientPlayer.name !== currentPlayer.name }"
+            >
+                Attaquer
+            </button>
 
             <button
                 class="dice"
                 (click)="evade()"
-                [disabled]="!hasEscapeAttemptsLeft"
-                [ngClass]="{ 'disabled-btn': !hasEscapeAttemptsLeft }"
+                [disabled]="escapeAttempts === 0 || clientPlayer.name !== currentPlayer.name"
+                [ngClass]="{ 'disabled-btn': escapeAttempts === 0 || clientPlayer.name !== currentPlayer.name }"
             >
-                {{ hasEscapeAttemptsLeft ? "S'Évader" : 'Aucune tentative' }}
+                {{ escapeAttempts > 0 ? "S'Évader (" + escapeAttempts + ')' : 'Aucune tentative' }}
             </button>
         </div>
+        <div class="combat-result">
+            @if(attackResult){
+                <p>Résultat du combat :</p>
+                @if(attackResult.success){
+                <p>✅ Attaque réussi! <br> Dé Attaque: {{ attackResult.attackScore-4 }} <br> Dé Défense: {{ attackResult.defenseScore-4 }} <br> Dégats infligés: {{ attackResult.attackScore - attackResult.defenseScore}}</p> 
+                } @else {
+                <p>❌ Attaque ratée! <br> Dé Attaque: {{ attackResult.attackScore-4 }} <br> Dé Défense: {{ attackResult.defenseScore-4 }} <br> Dégats infligés: 0</p>
+                }
+            }
+        </div>
         }
-
         <div class="game-messages">
             <h3>Messages</h3>
             <div class="message-toggle">

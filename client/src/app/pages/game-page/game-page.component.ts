@@ -40,7 +40,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isInCombatMode: boolean = false;
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
-    hasEscapeAttemptsLeft: boolean = true;
+    escapeAttempts: number = 2;
+    attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
 
     /* eslint-disable-next-line max-params */ // to fix
     constructor(
@@ -50,14 +51,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private logbookService: LogBookService,
         private snackbarService: SnackbarService,
         private gameSocketService: GameSocketService,
-    ) {
+    ) {}
+
+    ngOnInit(): void {
         this.logEntries = this.logbookService.logBook;
         this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
             this.logEntries = logBook;
         });
-    }
-
-    ngOnInit(): void {
         this.gameSocketService.initializeSocketListeners(this);
     }
 
@@ -163,6 +163,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         } else {
             sessionStorage.setItem('refreshed', 'true');
         }
+    }
+
+    updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
+        this.attackResult = data;
     }
 
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {

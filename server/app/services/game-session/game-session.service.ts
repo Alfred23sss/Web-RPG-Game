@@ -184,6 +184,10 @@ export class GameSessionService {
         }
     }
 
+    endGameSession(accessCode: string, winner: string) {
+        this.emitGameEnded(accessCode, winner);
+    }
+
     getGameSession(accessCode: string): GameSession {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) throw new Error('Game session not found');
@@ -291,6 +295,11 @@ export class GameSessionService {
         gameSession.turn.turnTimers = setTimeout(() => {
             this.endTurn(accessCode);
         }, TURN_DURATION);
+    }
+
+    private emitGameEnded(accessCode: string, winner: string) {
+        this.logger.log('emit game ended in gameSession');
+        this.eventEmitter.emit('game.ended', { accessCode, winner });
     }
 
     private emitTransitionStarted(accessCode: string, nextPlayer: Player): void {
