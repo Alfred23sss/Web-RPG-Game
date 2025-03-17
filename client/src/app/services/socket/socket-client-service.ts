@@ -142,10 +142,15 @@ export class SocketClientService {
         this.socket.on('error', callback);
     }
 
+    // onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
+    //     // this.socket.on('kicked', callback);
+    //     this.socket.on('kicked', (data) => {
+    //         callback(data);
+    //     });
+    // }
     onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
-        // this.socket.on('kicked', callback);
         this.socket.on('kicked', (data) => {
-            console.log(`🔴 Le joueur ${data.playerName} a été expulsé du serveur`);
+            console.log("🚨 Événement 'kicked' reçu :", data);
             callback(data);
         });
     }
