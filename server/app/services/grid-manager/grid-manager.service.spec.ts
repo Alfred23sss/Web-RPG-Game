@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
@@ -128,6 +129,33 @@ describe('GridManagerService', () => {
         expect(emptySpawn?.item).toBeNull();
     });
 
+    it('should handle undefined tile in queue by continuing', () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: undefined } as Tile,
+                { id: 'tile-0-1', type: TileType.Default, isOpen: true, player: undefined } as Tile,
+            ],
+        ];
+        const startTile = grid[0][0];
+
+        const originalShift = Array.prototype.shift;
+        let callCount = 0;
+        Array.prototype.shift = function () {
+            callCount++;
+            if (callCount === 1) {
+                return undefined;
+            }
+            return originalShift.apply(this, arguments);
+        };
+
+        try {
+            const result = (service as any).findClosestAvailableTile(grid, startTile);
+            expect(result).toBe(grid[0][0]);
+        } finally {
+            Array.prototype.shift = originalShift;
+        }
+    });
+
     it('should teleport a player to an empty tile', () => {
         service.setPlayerOnTile(mockGrid, mockGrid[0][0], mockPlayer);
         service.teleportPlayer(mockGrid, mockPlayer, mockGrid[1][0]);
@@ -208,5 +236,11 @@ describe('GridManagerService', () => {
 
         expect(result).toBeNull();
         expect(logger.error).toHaveBeenCalledWith(`Invalid tile ID format: ${invalidTileId}`);
+    });
+
+    it('should return empty array for invalid tile ID', () => {
+        const invalidTile = { id: 'invalid-tile' } as Tile;
+        const adjacentTiles = (service as any).getAdjacentTiles(mockGrid, invalidTile);
+        expect(adjacentTiles).toEqual([]);
     });
 });
