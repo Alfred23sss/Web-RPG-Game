@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */ // the original file respects this condition
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
-const DEFAULT_TIME = 3000;
-const SHORT_TIME = 1000;
-const FAST_SPEED = 6;
-const SLOW_SPEED = 4;
+// const DEFAULT_TIME = 3000;
+// const SHORT_TIME = 1000;
+// const FAST_SPEED = 6;
+// const SLOW_SPEED = 4;
 
 describe('GameSessionService', () => {
     // let gameSessionService: GameSessionService;
