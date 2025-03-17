@@ -8,8 +8,9 @@ import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 // import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { CharacterService } from '@app/services/character-form/character-form.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+// import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-character-form',
@@ -20,6 +21,9 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
     imports: [FormsModule, CommonModule],
 })
 export class CharacterFormComponent implements OnInit {
+    unavailableAvatars: string[] = [];
+    private readonly subscriptions = new Subscription();
+
     showForm: boolean = true;
     xSword: string = GameDecorations.XSwords;
     isLobbyCreated: boolean;
@@ -32,7 +36,7 @@ export class CharacterFormComponent implements OnInit {
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
 
-    unavailableAvatars: string[] = [];
+    // unavailableAvatars: string[] = [];
     errorMessage: string = '';
 
     protected attributeKeys = ATTRIBUTE_KEYS;
@@ -44,7 +48,7 @@ export class CharacterFormComponent implements OnInit {
         private readonly characterService: CharacterService,
         // private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
-        private readonly snackbarService: SnackbarService,
+        // private readonly snackbarService: SnackbarService,
         private readonly cdr: ChangeDetectorRef,
         @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean },
     ) {
@@ -55,10 +59,13 @@ export class CharacterFormComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.characterService.initializeLobby(this.currentAccessCode, (avatars) => {
-            this.unavailableAvatars = avatars;
-            this.cdr.detectChanges();
-        });
+        this.characterService.initializeLobby(this.currentAccessCode);
+        this.subscriptions.add(
+            this.characterService.unavailableAvatars$.subscribe(avatars => {
+                this.unavailableAvatars = avatars;
+                this.cdr.detectChanges(); // Force la mise à jour de l'affichage
+            })
+        );
     }
 
     assignBonus(attribute: AttributeType): void {
@@ -69,37 +76,7 @@ export class CharacterFormComponent implements OnInit {
     assignDice(attribute: AttributeType): void {
         this.characterService.assignDice(this.createdPlayer, attribute);
     }
-
-    // async submitCharacter(): Promise<void> {
-    //     // if (!this.game) {
-    //     //     this.returnHome();
-    //     //     return;
-    //     // }//laisser ca ici
-    //     // if (!this.isCharacterValid()) return;
-
-    //     // this.accessCodeService.setAccessCode(this.currentAccessCode);
-
-    //     // if (this.isLobbyCreated) {
-    //     //     const joinResult = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
-    //     //     this.handleLobbyJoining(joinResult);
-    //     // } else {
-    //     //     this.createdPlayer.isAdmin = true;
-    //     //     await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
-    //     //     // this.submitCharacterForm();
-
-    //     //     if (!this.game) {
-    //     //         return;
-    //     //     }
     
-    //         this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated,this.game, () => {
-    //             sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-    //             this.resetPopup();
-    //         });
-
-
-    //         console.log("Personnage final avant validation :", this.createdPlayer); // ✅ Vérification avant soumission
-        
-    // }
     async submitCharacter(): Promise<void> {
             if (!this.game) {
                 this.returnHome();
@@ -114,50 +91,19 @@ export class CharacterFormComponent implements OnInit {
         );
     }
 
-    // private submitCharacterForm(): void {
-    //     if (!this.game) {
-    //         return;
-    //     }
-
-    //     this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
-    //         sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-    //         this.resetPopup();
-    //     });
-    // }
-
     selectAvatar(avatar: string): void {
-        if (this.createdPlayer.avatar) {
-            this.deselectAvatar();
-        }
-
-        if (!this.unavailableAvatars.includes(avatar)) {
-            this.createdPlayer.avatar = avatar;
-            this.socketClientService.selectAvatar(this.currentAccessCode, avatar);
-
-            this.unavailableAvatars = [...this.unavailableAvatars, avatar];
-
-            this.cdr.markForCheck();
-            this.cdr.detectChanges();
-        } else {
-            this.snackbarService.showMessage('Cet avatar est déjà pris !');
-        }
+        this.characterService.selectAvatar(this.createdPlayer,avatar, this.currentAccessCode)
     }
 
     deselectAvatar(): void {
-        if (this.createdPlayer.avatar) {
-            this.socketClientService.deselectAvatar(this.currentAccessCode);
-
-            this.unavailableAvatars = this.unavailableAvatars.filter((av) => av !== this.createdPlayer.avatar);
-            this.createdPlayer.avatar = '';
-
-            this.cdr.markForCheck();
-            this.cdr.detectChanges();
-        }
+        this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
     }
 
     checkCharacterNameLength(): void {
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
         }
     }
 
@@ -173,40 +119,13 @@ export class CharacterFormComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    // private handleLobbyJoining(joinStatus: string): void {
-    //     switch (joinStatus) {
-    //         case JoinLobbyResult.JoinedLobby:
-    //             // this.submitCharacterForm();
-    //             if (!this.game) {
-    //                 return;
-    //             }
-        
-    //             this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
-    //                 sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-    //                 this.resetPopup();
-    //             });
-    //             break;
-    //         case JoinLobbyResult.StayInLobby:
-    //             break;
-    //         case JoinLobbyResult.RedirectToHome:
-    //             this.returnHome();
-    //             break;
-    //     }
-    // }
-
-    // private isCharacterValid(): boolean {
-    //     if (!this.characterService.isCharacterValid(this.createdPlayer)) {
-    //         this.characterService.showMissingDetailsError();
-    //         return false;
-    //     }
-
-    //     return true;
-    // }
-
-
 
     private returnHome(): void {
         this.closePopup();
         this.characterService.returnHome();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
 }

@@ -8,14 +8,19 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { BehaviorSubject } from 'rxjs';
+
 
 @Injectable({
     providedIn: 'root',
 })
 export class CharacterService {
+    private unavailableAvatarsSubject = new BehaviorSubject<string[]>([]);
+    unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
     attributes = { ...INITIAL_VALUES.attributes };
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
+    unavailableAvatars: string[] = [];
 
 
     constructor(
@@ -40,19 +45,20 @@ export class CharacterService {
         player.isActive = false;
         player.combatWon = 0;
     }
-
-    initializeLobby(accessCode: string, updateAvatarsCallback: (avatars: string[]) => void): void {
-        this.socketClientService.emit('joinRoom', accessCode);
     
+
+    initializeLobby(accessCode: string): void {
+        this.socketClientService.emit('joinRoom', accessCode);
+
         this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
             if (!data.avatars) return;
-            updateAvatarsCallback([...data.avatars]);
+            this.unavailableAvatars = [...data.avatars];
+            this.unavailableAvatarsSubject.next([...data.avatars]);
         });
-    
+
         this.socketClientService.emit('requestUnavailableOptions', accessCode);
     }
     
-
     assignBonus(player:Player, attribute: AttributeType): void {//decompose en fonctions??
         if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
             const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
@@ -89,31 +95,7 @@ export class CharacterService {
         }
     }
 
-    // async submitCharacter(player: Player, currentAccessCode:string, isLobbyCreated:boolean ,game: Game, closePopup: () => void): Promise<void> {//beaucoup d'arguments
 
-    //     if (!this.isCharacterValid(player)){
-    //         this.showMissingDetailsError()
-    //         return;
-    //     } 
-
-    //     this.accessCodeService.setAccessCode(currentAccessCode);
-
-    //     if (isLobbyCreated) {
-    //         const joinResult = await this.joinExistingLobby(currentAccessCode, player);
-    //         this.handleLobbyJoining(joinResult);
-    //     } else {
-    //         player.isAdmin = true;
-    //         await this.createAndJoinLobby(game, player);
-    //     this.validateGameAvailability(game, closePopup);
-
-    //     if (this.isCharacterValid(player)) {
-    //         sessionStorage.setItem('player', JSON.stringify(player));
-    //         this.proceedToWaitingView(closePopup);
-    //     } else {
-    //         this.showMissingDetailsError();
-    //     }
-    // }
-    // }
     async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game, closePopup: () => void): Promise<void> {
         if (!this.isCharacterValid(player)) {
             this.showMissingDetailsError();
@@ -163,10 +145,6 @@ export class CharacterService {
             this.showMissingDetailsError();
         }
     }
-    
-
-    
-    
 
     async joinExistingLobby(accessCode: string, player: Player): Promise<string> {
         return new Promise((resolve) => {
@@ -196,6 +174,30 @@ export class CharacterService {
     async createAndJoinLobby(game: Game, player: Player): Promise<void> {
         const accessCode = await this.socketClientService.createLobby(game, player);
         this.accessCodeService.setAccessCode(accessCode);
+    }
+
+    selectAvatar(player: Player, avatar: string, currentAccessCode: string): void {
+        if (player.avatar) {
+            this.deselectAvatar(player, currentAccessCode);
+        }
+
+        if (!this.unavailableAvatarsSubject.value.includes(avatar)) {
+            player.avatar = avatar;
+            this.socketClientService.selectAvatar(currentAccessCode, avatar);
+
+            const updatedAvatars = [...this.unavailableAvatarsSubject.value, avatar];
+            this.unavailableAvatarsSubject.next(updatedAvatars); // Mise à jour immédiate
+        }
+    }
+
+    deselectAvatar(player: Player, currentAccessCode: string): void {
+        if (player.avatar) {
+            this.socketClientService.deselectAvatar(currentAccessCode);
+
+            const updatedAvatars = this.unavailableAvatarsSubject.value.filter(av => av !== player.avatar);
+            this.unavailableAvatarsSubject.next(updatedAvatars); // Mise à jour immédiate
+            player.avatar = '';
+        }
     }
 
     resetAttributes(): void {
