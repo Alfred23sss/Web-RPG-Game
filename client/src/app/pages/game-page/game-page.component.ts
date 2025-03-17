@@ -131,6 +131,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.logBookSubscription.unsubscribe();
+        this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
         document.removeEventListener('keydown', this.handleKeyPress.bind(this));
     }
