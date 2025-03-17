@@ -16,6 +16,7 @@ const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
 const ESCAPE_THRESHOLD = 0.3;
 const ICE_PENALTY = -2;
+const WIN_CONDITION = 3;
 
 @Injectable()
 export class GameCombatService {
@@ -90,7 +91,11 @@ export class GameCombatService {
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false);
                 this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
-
+                if (this.checkPlayerWon(accessCode, currentFighter)) {
+                    this.logger.log('ending combat in gameCombat');
+                    this.endCombat(accessCode);
+                    return;
+                }
                 this.logger.log(`player list from gamessession ${this.gameSessionService.getPlayers(accessCode)}`);
                 this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
                 if (combatState.attacker === defenderPlayer) {
@@ -136,6 +141,14 @@ export class GameCombatService {
             this.logger.log(`Escape failed for ${player.name}`);
             this.endCombatTurn(accessCode);
         }
+    }
+
+    checkPlayerWon(accessCode: string, player: Player): boolean {
+        if (player.combatWon === WIN_CONDITION) {
+            this.gameSessionService.endGameSession(accessCode, player.name);
+            return true;
+        }
+        return false;
     }
 
     endCombat(accessCode: string, isEscape: boolean = false): void {
@@ -213,6 +226,9 @@ export class GameCombatService {
     private updateWinningPlayerAfterCombat(player: Player, accessCode: string): void {
         player.hp.current = player.hp.max;
         player.combatWon++;
+        if (this.checkPlayerWon(accessCode, player)) {
+            this.gameSessionService.endGameSession(accessCode, player.name);
+        }
         this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         this.emitUpdatePlayer(player, this.lobbyService.getPlayerSocket(player.name));
         this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);

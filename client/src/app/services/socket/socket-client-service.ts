@@ -149,6 +149,10 @@ export class SocketClientService {
         this.socket.on('lobbyDeleted', callback);
     }
 
+    onGameEnded(callback: (data: { winner: string }) => void) {
+        this.socket.on('gameEnded', callback);
+    }
+
     onLeaveLobby(callback: () => void) {
         this.socket.on('leftLobby', callback);
     }
