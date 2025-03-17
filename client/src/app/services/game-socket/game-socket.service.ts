@@ -63,7 +63,6 @@ export class GameSocketService {
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
-            component.backToHome();
         });
 
         this.socketClientService.onGameDeleted(() => {
