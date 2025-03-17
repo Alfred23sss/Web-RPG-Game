@@ -123,6 +123,7 @@ export class GameSocketService {
 
         this.socketClientService.onAttackResult((data: { success: boolean; attackScore: number; defenseScore: number }) => {
             component.updateAttackResult(data);
+            component.evadeResult = null;
         });
 
         this.socketClientService.onPlayerUpdate((data: { player: Player }) => {
@@ -160,16 +161,20 @@ export class GameSocketService {
             component.game.grid = data.grid;
         });
 
-        this.socketClientService.on('noMoreEscapesLeft', (data: { player: Player; attemptsLeft: number }) => {
+        this.socketClientService.on('escapeAttempt', (data: { attemptsLeft: number; isEscapeSuccessful: boolean }) => {
+            component.evadeResult = data;
+            component.attackResult = null;
             component.escapeAttempts = data.attemptsLeft;
         });
 
         this.socketClientService.on('combatEnded', () => {
-            component.escapeAttempts = defaultEscapeAttempts;
             component.isInCombatMode = false;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
+            component.evadeResult = null;
             component.attackResult = null;
+
+            component.escapeAttempts = defaultEscapeAttempts;
         });
     }
 

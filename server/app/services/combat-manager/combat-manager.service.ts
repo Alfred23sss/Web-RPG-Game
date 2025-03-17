@@ -91,13 +91,15 @@ export class GameCombatService {
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false);
                 this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
+                // moved this before the if statement
+                this.logger.log(`player list from gamessession ${this.gameSessionService.getPlayers(accessCode)}`);
+                this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
                 if (this.checkPlayerWon(accessCode, currentFighter)) {
                     this.logger.log('ending combat in gameCombat');
                     this.endCombat(accessCode);
                     return;
                 }
-                this.logger.log(`player list from gamessession ${this.gameSessionService.getPlayers(accessCode)}`);
-                this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
+
                 if (combatState.attacker === defenderPlayer) {
                     this.gameSessionService.endTurn(accessCode);
                     return;
@@ -124,9 +126,9 @@ export class GameCombatService {
 
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
-        this.emitNoMoreEscapesLeft(currentFighter, attemptsLeft);
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
+        this.emitNEscapesLeft(currentFighter, attemptsLeft, isEscapeSuccessful);
         // if (attemptsLeft === 0) {
         //     this.emitNoMoreEscapesLeft(currentFighter);
         // }
@@ -386,12 +388,12 @@ export class GameCombatService {
         });
     }
 
-    private emitNoMoreEscapesLeft(player: Player, attemptsLeft: number): void {
+    private emitNEscapesLeft(player: Player, attemptsLeft: number, isEscapeSuccessful: boolean): void {
         const playerSocketId = this.lobbyService.getPlayerSocket(player.name);
-        this.eventEmitter.emit('game.combat.escape.failed', {
-            player,
+        this.eventEmitter.emit('game.combat.escape', {
             playerSocketId,
             attemptsLeft,
+            isEscapeSuccessful,
         });
     }
 

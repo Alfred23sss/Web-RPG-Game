@@ -41,6 +41,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
     escapeAttempts: number = 2;
+    evadeResult: { attemptsLeft: number; isEscapeSuccessful: boolean } | null = null;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
 
     /* eslint-disable-next-line max-params */ // to fix
@@ -108,7 +109,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     executeNextAction(): void {
         this.isActionMode = !this.isActionMode;
-        this.snackbarService.showMessage('Mode action activé');
+        const message = this.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
+        this.snackbarService.showMessage(message);
     }
     abandonGame(): void {
         // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?

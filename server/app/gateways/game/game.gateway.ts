@@ -111,11 +111,11 @@ export class GameGateway {
         this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatEnded');
     }
 
-    @OnEvent('game.combat.escape.failed')
-    handleNoMoreEscapeAttempts(payload: { player: Player; playerSocketId: string; attemptsLeft: number }): void {
-        this.server.to(payload.playerSocketId).emit('noMoreEscapesLeft', {
-            player: payload.player,
+    @OnEvent('game.combat.escape')
+    handleNoMoreEscapeAttempts(payload: { playerSocketId: string; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
+        this.server.to(payload.playerSocketId).emit('escapeAttempt', {
             attemptsLeft: payload.attemptsLeft,
+            isEscapeSuccessful: payload.isEscapeSuccessful,
         });
     }
 
