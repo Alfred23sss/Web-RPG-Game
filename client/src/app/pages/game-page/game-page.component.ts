@@ -76,9 +76,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     handleAttackClick(targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
+
         if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
-                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
+                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode, this.isDebugMode);
                 return;
             }
         }

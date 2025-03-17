@@ -278,8 +278,8 @@ export class SocketClientService {
         this.emit('playerMovementUpdate', payload);
     }
 
-    startCombat(attackerName: string, defenderName: string, accessCode: string) {
-        this.socket.emit('startCombat', { attackerName, defenderName, accessCode });
+    startCombat(attackerName: string, defenderName: string, accessCode: string, isDebugMode: boolean) {
+        this.socket.emit('startCombat', { attackerName, defenderName, accessCode, isDebugMode });
     }
 
     onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void): void {
