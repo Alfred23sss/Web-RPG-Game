@@ -14,8 +14,8 @@ const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
-const ESCAPE_THRESHOLD = 0;
-const ICE_PENALITY = -2;
+const ESCAPE_THRESHOLD = 0.3;
+const ICE_PENALTY = -2;
 
 @Injectable()
 export class GameCombatService {
@@ -253,7 +253,7 @@ export class GameCombatService {
         let iceDisadvantage;
         const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, attacker);
         if (tile) {
-            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALITY : 0;
+            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALTY : 0;
         }
         this.logger.log(`player on ice has attack reduce by ${iceDisadvantage}`);
         return attacker.attack.value + Math.floor(Math.random() * this.extractDiceValue(attacker.attack.bonusDice)) + 1 + iceDisadvantage;
@@ -263,7 +263,7 @@ export class GameCombatService {
         let iceDisadvantage;
         const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, defender);
         if (tile) {
-            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALITY : 0;
+            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALTY : 0;
         }
         return defender.defense.value + Math.floor(Math.random() * this.extractDiceValue(defender.defense.bonusDice)) + 1 + iceDisadvantage;
     }

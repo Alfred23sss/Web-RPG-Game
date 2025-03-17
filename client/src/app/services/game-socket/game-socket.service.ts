@@ -140,6 +140,7 @@ export class GameSocketService {
             component.isInCombatMode = false;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
+            component.attackResult = null;
         });
     }
 }

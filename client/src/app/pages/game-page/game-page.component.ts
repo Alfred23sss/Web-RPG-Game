@@ -165,7 +165,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         }
     }
 
-    updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number }) {
+    updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
         this.attackResult = data;
     }
 
