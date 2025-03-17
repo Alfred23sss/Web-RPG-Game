@@ -92,6 +92,7 @@ export class GameSocketService {
                 component.clientPlayer.movementPoints =
                     component.clientPlayer.movementPoints -
                     this.playerMovementService.calculateRemainingMovementPoints(component.getClientPlayerPosition(), data.player);
+                component.movementPointsRemaining = component.clientPlayer.movementPoints;
                 component.isCurrentlyMoving = data.isCurrentlyMoving;
                 component.updateAvailablePath();
             }
@@ -150,6 +151,9 @@ export class GameSocketService {
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
             component.attackResult = null;
+            if (component.clientPlayer.name === component.currentPlayer.name) {
+                component.clientPlayer.movementPoints = component.movementPointsRemaining;
+            }
         });
     }
 }
