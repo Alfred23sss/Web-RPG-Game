@@ -104,7 +104,12 @@ export class GridManagerService {
         let destinationTile = targetTile;
         const isPlayerSpawnPoint = player.spawnPoint.tileId === targetTile.id;
 
-        if (targetTile.player || targetTile.type === 'mur' || (targetTile.type === 'porte' && !targetTile.isOpen) || targetTile.item) {
+        if (
+            targetTile.player ||
+            targetTile.type === 'mur' ||
+            (targetTile.type === 'porte' && !targetTile.isOpen) ||
+            (targetTile.item && targetTile.item.name !== 'home')
+        ) {
             if (isPlayerSpawnPoint) {
                 destinationTile = this.findClosestAvailableTile(grid, targetTile) || currentPlayerTile;
             } else {

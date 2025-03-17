@@ -59,6 +59,13 @@ export class GameSocketService {
             }, delayBeforeEndingGame);
         });
 
+        this.socketClientService.on('adminModeDisabled', () => {
+            if (component.isDebugMode) {
+                this.snackbarService.showMessage("Mode debug 'désactivé'");
+            }
+            component.isDebugMode = false;
+        });
+
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
             this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
             if (data.nextPlayer.name === component.clientPlayer.name) {
@@ -158,7 +165,7 @@ export class GameSocketService {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
         });
-        this.socketClientService.on('adminModeChangedServerSide', (data: { accessCode: boolean }) => {
+        this.socketClientService.on('adminModeChangedServerSide', () => {
             component.isDebugMode = !component.isDebugMode;
             this.snackbarService.showMessage(`Mode debug ${component.isDebugMode ? 'activé' : 'désactivé'}`);
         });

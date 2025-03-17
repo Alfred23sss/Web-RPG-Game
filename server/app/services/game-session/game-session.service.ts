@@ -68,6 +68,9 @@ export class GameSessionService {
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
         }
+        if (player.isAdmin) {
+            this.emitAdminModeDisabled(accessCode);
+        }
         return player;
     }
     getPlayers(accessCode: string): Player[] {
@@ -336,5 +339,9 @@ export class GameSessionService {
     }
     private emitTurnResumed(accessCode: string, player: Player, remainingTime: number): void {
         this.eventEmitter.emit('game.turn.resumed', { accessCode, player, remainingTime });
+    }
+
+    private emitAdminModeDisabled(accessCode: string) {
+        this.eventEmitter.emit('admin.mode.disabled', { accessCode });
     }
 }

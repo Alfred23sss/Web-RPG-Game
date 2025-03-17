@@ -105,7 +105,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.AdminModeUpdate)
     handleAdminModeUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
-        this.server.to(payload.accessCode).emit('adminModeChangedServerSide', { accessCode: payload.accessCode });
+        this.server.to(payload.accessCode).emit('adminModeChangedServerSide');
         this.logger.log('Admin Mode Changed');
     }
 
@@ -245,6 +245,11 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit('combatTimeout', {
             fighter: payload.fighter,
         });
+    }
+
+    @OnEvent('admin.mode.disabled')
+    handleAdminModeDisabled(payload: { accessCode: string }) {
+        this.server.to(payload.accessCode).emit('adminModeDisabled');
     }
 
     @OnEvent('game.combat.turn.started')
