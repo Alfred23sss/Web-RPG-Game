@@ -127,10 +127,18 @@ export class GameSocketService {
                 component.updateAvailablePath();
             }
 
-            // rajouter cas ou ya de la glace et cas ou on a pu de mouvement mais action disponible autour du joeur
-
-            if (!component.clientPlayer.actionPoints && !component.clientPlayer.movementPoints) {
-                component.endTurn();
+            const clientPlayerPosition = component.getClientPlayerPosition();
+            if (!clientPlayerPosition) return;
+            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, data.grid);
+            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, data.grid);
+            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce) {
+                    component.endTurn();
+                }
+            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce && !hasActionAvailable) {
+                    component.endTurn();
+                }
             }
         });
 

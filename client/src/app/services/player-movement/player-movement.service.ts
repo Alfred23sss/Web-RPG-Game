@@ -93,6 +93,13 @@ export class PlayerMovementService {
     getMoveCost(neighbor: Tile): number {
         return this.movementCosts.get(neighbor.type) ?? Infinity;
     }
+    hasAdjacentIce(clientPlayerTile: Tile, grid: Tile[][]): boolean {
+        return this.getNeighbors(clientPlayerTile, grid).some((tile) => tile.type === TileType.Ice);
+    }
+    hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
+        const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
+        return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
+    }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
         return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
