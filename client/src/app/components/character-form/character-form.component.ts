@@ -3,10 +3,10 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit }
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType, AvatarType, DiceType, GameDecorations, JoinLobbyResult } from '@app/enums/global.enums';
+import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums'; //joinLobbyResult est plus la
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
-import { AccessCodeService } from '@app/services/access-code/access-code.service';
+// import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
@@ -25,9 +25,7 @@ export class CharacterFormComponent implements OnInit {
     isLobbyCreated: boolean;
     currentAccessCode: string;
     game?: Game;
-    createdPlayer: Player;
-    selectedAttackDice: DiceType | null = null;
-    selectedDefenseDice: DiceType | null = null;
+    createdPlayer: Player = {} as Player;//verifier que j ai le droit d utiliser le any ici
     avatarTypes: string[] = Object.values(AvatarType);
     // test comment
     attributes = this.characterService.attributes;
@@ -44,7 +42,7 @@ export class CharacterFormComponent implements OnInit {
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
-        private readonly accessCodeService: AccessCodeService,
+        // private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
         private readonly snackbarService: SnackbarService,
         private readonly cdr: ChangeDetectorRef,
@@ -53,75 +51,79 @@ export class CharacterFormComponent implements OnInit {
         this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
         this.currentAccessCode = data.accessCode;
-        this.createdPlayer = {
-            name: '',
-            avatar: '',
-            speed: 4,
-            attack: { value: 4, bonusDice: DiceType.Uninitialized },
-            defense: { value: 4, bonusDice: DiceType.Uninitialized },
-            hp: { current: 4, max: 4 },
-            movementPoints: 4,
-            actionPoints: 3,
-            inventory: [null, null],
-            isAdmin: false,
-            hasAbandoned: false,
-            isActive: false,
-            combatWon: 0,
-        };
+        this.characterService.initializePlayer(this.createdPlayer);
     }
 
     ngOnInit(): void {
-        this.socketClientService.emit('joinRoom', this.currentAccessCode);
-
-        this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
-            if (!data.avatars) return;
-            this.unavailableAvatars = [...data.avatars];
+        this.characterService.initializeLobby(this.currentAccessCode, (avatars) => {
+            this.unavailableAvatars = avatars;
             this.cdr.detectChanges();
         });
-
-        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
     }
 
     assignBonus(attribute: AttributeType): void {
-        this.characterService.assignBonus(attribute);
-        if (attribute === AttributeType.Vitality) {
-            this.createdPlayer.hp.current = this.createdPlayer.hp.max = this.characterService.attributes[AttributeType.Vitality];
-        } else if (attribute === AttributeType.Speed) {
-            this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed];
-            this.createdPlayer.movementPoints = this.createdPlayer.speed;
-        }
+        this.characterService.assignBonus(this.createdPlayer, attribute);
+        console.log("Personnage après assignation du bonus :", this.createdPlayer); // ✅ Vérification après modification
     }
 
     assignDice(attribute: AttributeType): void {
-        const { attack, defense } = this.characterService.assignDice(attribute);
-        if (attack) {
-            this.createdPlayer.attack.bonusDice = attack as DiceType;
-        }
-        if (defense) {
-            this.createdPlayer.defense.bonusDice = defense as DiceType;
-        }
-        this.selectedAttackDice = attack ? (attack as DiceType) : null;
-        this.selectedDefenseDice = defense ? (defense as DiceType) : null;
+        this.characterService.assignDice(this.createdPlayer, attribute);
     }
 
+    // async submitCharacter(): Promise<void> {
+    //     // if (!this.game) {
+    //     //     this.returnHome();
+    //     //     return;
+    //     // }//laisser ca ici
+    //     // if (!this.isCharacterValid()) return;
+
+    //     // this.accessCodeService.setAccessCode(this.currentAccessCode);
+
+    //     // if (this.isLobbyCreated) {
+    //     //     const joinResult = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
+    //     //     this.handleLobbyJoining(joinResult);
+    //     // } else {
+    //     //     this.createdPlayer.isAdmin = true;
+    //     //     await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
+    //     //     // this.submitCharacterForm();
+
+    //     //     if (!this.game) {
+    //     //         return;
+    //     //     }
+    
+    //         this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated,this.game, () => {
+    //             sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+    //             this.resetPopup();
+    //         });
+
+
+    //         console.log("Personnage final avant validation :", this.createdPlayer); // ✅ Vérification avant soumission
+        
+    // }
     async submitCharacter(): Promise<void> {
-        if (!this.game) {
-            this.returnHome();
-            return;
-        }
-        if (!this.isCharacterValid()) return;
-
-        this.accessCodeService.setAccessCode(this.currentAccessCode);
-
-        if (this.isLobbyCreated) {
-            const joinResult = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
-            this.handleLobbyJoining(joinResult);
-        } else {
-            this.createdPlayer.isAdmin = true;
-            await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
-            this.submitCharacterForm();
-        }
+            if (!this.game) {
+                this.returnHome();
+                return;
+            }//laisser ca ici
+        await this.characterService.submitCharacter(
+            this.createdPlayer,
+            this.currentAccessCode,
+            this.isLobbyCreated,
+            this.game!,
+            () => this.resetPopup()
+        );
     }
+
+    // private submitCharacterForm(): void {
+    //     if (!this.game) {
+    //         return;
+    //     }
+
+    //     this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+    //         sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+    //         this.resetPopup();
+    //     });
+    // }
 
     selectAvatar(avatar: string): void {
         if (this.createdPlayer.avatar) {
@@ -171,38 +173,37 @@ export class CharacterFormComponent implements OnInit {
         this.dialogRef.close();
     }
 
-    private handleLobbyJoining(joinStatus: string): void {
-        switch (joinStatus) {
-            case JoinLobbyResult.JoinedLobby:
-                this.submitCharacterForm();
-                break;
-            case JoinLobbyResult.StayInLobby:
-                break;
-            case JoinLobbyResult.RedirectToHome:
-                this.returnHome();
-                break;
-        }
-    }
+    // private handleLobbyJoining(joinStatus: string): void {
+    //     switch (joinStatus) {
+    //         case JoinLobbyResult.JoinedLobby:
+    //             // this.submitCharacterForm();
+    //             if (!this.game) {
+    //                 return;
+    //             }
+        
+    //             this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
+    //                 sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
+    //                 this.resetPopup();
+    //             });
+    //             break;
+    //         case JoinLobbyResult.StayInLobby:
+    //             break;
+    //         case JoinLobbyResult.RedirectToHome:
+    //             this.returnHome();
+    //             break;
+    //     }
+    // }
 
-    private isCharacterValid(): boolean {
-        if (!this.characterService.isCharacterValid(this.createdPlayer)) {
-            this.characterService.showMissingDetailsError();
-            return false;
-        }
+    // private isCharacterValid(): boolean {
+    //     if (!this.characterService.isCharacterValid(this.createdPlayer)) {
+    //         this.characterService.showMissingDetailsError();
+    //         return false;
+    //     }
 
-        return true;
-    }
+    //     return true;
+    // }
 
-    private submitCharacterForm(): void {
-        if (!this.game) {
-            return;
-        }
 
-        this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
-            sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-            this.resetPopup();
-        });
-    }
 
     private returnHome(): void {
         this.closePopup();

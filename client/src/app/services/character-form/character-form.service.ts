@@ -17,6 +17,7 @@ export class CharacterService {
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
+
     constructor(
         private readonly router: Router,
         private readonly snackbarService: SnackbarService,
@@ -24,32 +25,137 @@ export class CharacterService {
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
     ) {}
+    initializePlayer(player: Player): void {
+        player.name = '';
+        player.avatar = '';
+        player.speed = 4;
+        player.attack = { value: 4, bonusDice: DiceType.Uninitialized };
+        player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
+        player.hp = { current: 4, max: 4 };
+        player.movementPoints = 4;
+        player.actionPoints = 3;
+        player.inventory = [null, null];
+        player.isAdmin = false;
+        player.hasAbandoned = false;
+        player.isActive = false;
+        player.combatWon = 0;
+    }
 
-    assignBonus(attribute: AttributeType): void {
+    initializeLobby(accessCode: string, updateAvatarsCallback: (avatars: string[]) => void): void {
+        this.socketClientService.emit('joinRoom', accessCode);
+    
+        this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
+            if (!data.avatars) return;
+            updateAvatarsCallback([...data.avatars]);
+        });
+    
+        this.socketClientService.emit('requestUnavailableOptions', accessCode);
+    }
+    
+
+    assignBonus(player:Player, attribute: AttributeType): void {//decompose en fonctions??
         if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
-            if (!this.bonusAssigned[attribute]) {
-                this.attributes[attribute] += BONUS_VALUE;
-                this.bonusAssigned[attribute] = true;
-                const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
+            const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
+            if (this.bonusAssigned[otherAttribute]) {
                 this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
                 this.bonusAssigned[otherAttribute] = false;
             }
+            this.attributes[attribute] = INITIAL_VALUES.attributes[attribute] + BONUS_VALUE;
+            this.bonusAssigned[attribute] = true;
         }
+            if (attribute === AttributeType.Vitality) {
+                player.hp.current = player.hp.max = this.attributes[AttributeType.Vitality];
+                player.speed = INITIAL_VALUES.attributes[AttributeType.Speed];
+            } else if (attribute === AttributeType.Speed) {
+                player.speed = this.attributes[AttributeType.Speed];
+                player.movementPoints = player.speed;
+                player.hp.current = player.hp.max = INITIAL_VALUES.attributes[AttributeType.Vitality];
+            }
     }
 
-    assignDice(attribute: AttributeType): { attack: string | null; defense: string | null } {
+    assignDice(player:Player, attribute: AttributeType): void {
         if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
             this.diceAssigned[attribute] = true;
             this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
-            return attribute === AttributeType.Attack ? { attack: DiceType.D6, defense: DiceType.D4 } : { attack: DiceType.D4, defense: DiceType.D6 };
+            if (attribute === AttributeType.Attack) {
+                player.attack.bonusDice = DiceType.D6;
+                player.defense.bonusDice = DiceType.D4;
+            }
+            if (attribute === AttributeType.Defense) {
+                player.attack.bonusDice = DiceType.D4;
+                player.defense.bonusDice = DiceType.D6;
+            }
+            
         }
-
-        return { attack: null, defense: null };
     }
 
-    submitCharacter(player: Player, game: Game, closePopup: () => void): void {
+    // async submitCharacter(player: Player, currentAccessCode:string, isLobbyCreated:boolean ,game: Game, closePopup: () => void): Promise<void> {//beaucoup d'arguments
+
+    //     if (!this.isCharacterValid(player)){
+    //         this.showMissingDetailsError()
+    //         return;
+    //     } 
+
+    //     this.accessCodeService.setAccessCode(currentAccessCode);
+
+    //     if (isLobbyCreated) {
+    //         const joinResult = await this.joinExistingLobby(currentAccessCode, player);
+    //         this.handleLobbyJoining(joinResult);
+    //     } else {
+    //         player.isAdmin = true;
+    //         await this.createAndJoinLobby(game, player);
+    //     this.validateGameAvailability(game, closePopup);
+
+    //     if (this.isCharacterValid(player)) {
+    //         sessionStorage.setItem('player', JSON.stringify(player));
+    //         this.proceedToWaitingView(closePopup);
+    //     } else {
+    //         this.showMissingDetailsError();
+    //     }
+    // }
+    // }
+    async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game, closePopup: () => void): Promise<void> {
+        if (!this.isCharacterValid(player)) {
+            this.showMissingDetailsError();
+            return;
+        }
+    
+        this.accessCodeService.setAccessCode(currentAccessCode);
+    
+        if (isLobbyCreated) {
+            const joinResult = await this.joinExistingLobby(currentAccessCode, player);
+            this.handleLobbyJoining(joinResult, player, game, closePopup);
+        } else {
+            player.isAdmin = true;
+            await this.createAndJoinLobby(game, player);
+            this.finalizeCharacterSubmission(player, closePopup);
+        }
+    }
+    
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, closePopup: () => void): void {
+        switch (joinStatus) {
+            case JoinLobbyResult.JoinedLobby:
+                this.finalizeCharacterSubmission(player, closePopup);
+                break;
+            case JoinLobbyResult.StayInLobby:
+                // Ne fait rien, l'utilisateur reste dans le lobby
+                break;
+            case JoinLobbyResult.RedirectToHome:
+                this.returnHome();
+                break;
+        }
         this.validateGameAvailability(game, closePopup);
 
+            if (this.isCharacterValid(player)) {
+                sessionStorage.setItem('player', JSON.stringify(player));
+                this.proceedToWaitingView(closePopup);
+            } else {
+                this.showMissingDetailsError();
+            }
+        
+    }
+    
+    private finalizeCharacterSubmission(player: Player, closePopup: () => void): void {
         if (this.isCharacterValid(player)) {
             sessionStorage.setItem('player', JSON.stringify(player));
             this.proceedToWaitingView(closePopup);
@@ -57,6 +163,10 @@ export class CharacterService {
             this.showMissingDetailsError();
         }
     }
+    
+
+    
+    
 
     async joinExistingLobby(accessCode: string, player: Player): Promise<string> {
         return new Promise((resolve) => {
