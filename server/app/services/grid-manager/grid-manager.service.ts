@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Tile } from '@app/model/database/tile';
 import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/model/database/tile';
+import { Injectable, Logger } from '@nestjs/common';
 
 const RANDOMIZER = 0.5;
 
