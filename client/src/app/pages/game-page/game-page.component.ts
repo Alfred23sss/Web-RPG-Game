@@ -44,6 +44,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
+    private keyPressHandler: (event: KeyboardEvent) => void;
 
     /* eslint-disable-next-line max-params */ // to fix
     constructor(
@@ -61,7 +62,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.logEntries = logBook;
         });
         this.gameSocketService.initializeSocketListeners(this);
-        document.addEventListener('keydown', this.handleKeyPress.bind(this));
+        this.keyPressHandler = this.handleKeyPress.bind(this);
+        document.addEventListener('keydown', this.keyPressHandler);
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -129,10 +131,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
+        document.removeEventListener('keydown', this.keyPressHandler);
         this.logBookSubscription.unsubscribe();
         this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
-        document.removeEventListener('keydown', this.handleKeyPress.bind(this));
     }
 
     attack(): void {
