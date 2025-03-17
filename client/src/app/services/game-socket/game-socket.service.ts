@@ -177,7 +177,6 @@ export class GameSocketService {
         });
 
         this.socketClientService.on('combatEnded', (data: { winner: Player }) => {
-            console.log(`combat termine winner : ${data.winner}`);
             component.isInCombatMode = false;
             component.escapeAttempts = defaultEscapeAttempts;
             component.isActionMode = false;

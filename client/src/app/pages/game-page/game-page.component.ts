@@ -95,8 +95,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleTeleport(targetTile: Tile): void {
-        console.log(targetTile);
-        if (!this.isDebugMode) return;
+        if (!this.isDebugMode || this.isInCombatMode) return;
         if (this.clientPlayer.name === this.currentPlayer.name) {
             this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
         }
@@ -207,7 +206,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     private handleKeyPress(event: KeyboardEvent): void {
         if (event.key.toLowerCase() === 'd' && this.clientPlayer.isAdmin) {
-            console.log('Touche D pressée');
             this.socketClientService.sendAdminModeUpdate(this.lobby.accessCode);
         }
     }
