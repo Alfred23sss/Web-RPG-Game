@@ -7,6 +7,7 @@ import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { LogBookService } from '@app/services/logbook/logbook.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -14,8 +15,6 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 import { Subscription } from 'rxjs';
 
 const noActionPoints = 0;
-const defaultActionPoint = 1;
-const delayBeforeHome = 2000;
 
 @Component({
     selector: 'app-game-page',
@@ -48,7 +47,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private router: Router,
         private socketClientService: SocketClientService,
         private logbookService: LogBookService,
-        private snackbarService: SnackbarService, // private gameSocketService: GameSocketService,
+        private snackbarService: SnackbarService,
+        private gameSocketService: GameSocketService,
     ) {
         this.logEntries = this.logbookService.logBook;
         this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
@@ -57,129 +57,129 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        // this.gameSocketService.initializeSocketListeners(this);
+        this.gameSocketService.initializeSocketListeners(this);
 
-        // enlever session storage simplement recevoir accessCode de waiting-view et get du serveur les infos necessaire
-        const lobby = sessionStorage.getItem('lobby');
-        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; // lobby peut etre inutile, car on a accesscode
-        const clientPlayer = sessionStorage.getItem('player');
-        this.clientPlayer = clientPlayer ? (JSON.parse(clientPlayer) as Player) : this.clientPlayer;
-        this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
-        const game = sessionStorage.getItem('game');
-        this.game = game ? (JSON.parse(game) as Game) : this.game;
+        // // enlever session storage simplement recevoir accessCode de waiting-view et get du serveur les infos necessaire
+        // const lobby = sessionStorage.getItem('lobby');
+        // this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; // lobby peut etre inutile, car on a accesscode
+        // const clientPlayer = sessionStorage.getItem('player');
+        // this.clientPlayer = clientPlayer ? (JSON.parse(clientPlayer) as Player) : this.clientPlayer;
+        // this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
+        // const game = sessionStorage.getItem('game');
+        // this.game = game ? (JSON.parse(game) as Game) : this.game;
 
-        this.handlePageRefresh();
+        // this.handlePageRefresh();
 
-        this.socketClientService.onAbandonGame((data) => {
-            const abandonedPlayer = this.playerList.find((p) => p.name === data.player.name);
-            if (!abandonedPlayer) return;
-            abandonedPlayer.hasAbandoned = true;
-            this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
-        });
+        // this.socketClientService.onAbandonGame((data) => {
+        //     const abandonedPlayer = this.playerList.find((p) => p.name === data.player.name);
+        //     if (!abandonedPlayer) return;
+        //     abandonedPlayer.hasAbandoned = true;
+        //     this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
+        // });
 
-        this.socketClientService.onGameDeleted(() => {
-            this.snackbarService.showMessage("Trop de joueurs ont abandonnés la partie, vous allez être redirigé vers la page d'accueil");
-            setTimeout(() => {
-                this.backToHome();
-            }, delayBeforeHome);
-        });
+        // this.socketClientService.onGameDeleted(() => {
+        //     this.snackbarService.showMessage("Trop de joueurs ont abandonnés la partie, vous allez être redirigé vers la page d'accueil");
+        //     setTimeout(() => {
+        //         this.backToHome();
+        //     }, delayBeforeHome);
+        // });
 
-        this.socketClientService.onTransitionStarted((data) => {
-            this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
-        });
+        // this.socketClientService.onTransitionStarted((data) => {
+        //     this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+        // });
 
-        this.socketClientService.onTurnStarted((data) => {
-            this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
-            this.currentPlayer = data.player;
-            this.isCurrentlyMoving = false;
-            this.isActionMode = false;
-            this.isInCombatMode = false;
-            this.clientPlayer.actionPoints = defaultActionPoint;
-            this.clientPlayer.movementPoints = this.clientPlayer.speed;
-            this.turnTimer = data.turnDuration;
-            this.updateAvailablePath();
-        });
+        // this.socketClientService.onTurnStarted((data) => {
+        //     this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
+        //     this.currentPlayer = data.player;
+        //     this.isCurrentlyMoving = false;
+        //     this.isActionMode = false;
+        //     this.isInCombatMode = false;
+        //     this.clientPlayer.actionPoints = defaultActionPoint;
+        //     this.clientPlayer.movementPoints = this.clientPlayer.speed;
+        //     this.turnTimer = data.turnDuration;
+        //     this.updateAvailablePath();
+        // });
 
-        this.socketClientService.onTimerUpdate((data) => {
-            this.turnTimer = data.timeLeft;
-        });
+        // this.socketClientService.onTimerUpdate((data) => {
+        //     this.turnTimer = data.timeLeft;
+        // });
 
-        this.socketClientService.onAlertGameStarted((data) => {
-            this.playerList = data.orderedPlayers;
-            this.game = data.updatedGame;
-        });
+        // this.socketClientService.onAlertGameStarted((data) => {
+        //     this.playerList = data.orderedPlayers;
+        //     this.game = data.updatedGame;
+        // });
 
-        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
-            if (this.game && this.game.grid) {
-                this.game.grid = data.grid;
-            }
-            if (this.clientPlayer.name === data.player.name) {
-                this.clientPlayer.movementPoints =
-                    this.clientPlayer.movementPoints -
-                    this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
-                this.isCurrentlyMoving = data.isCurrentlyMoving;
-                this.updateAvailablePath();
-            }
-        });
+        // this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
+        //     if (this.game && this.game.grid) {
+        //         this.game.grid = data.grid;
+        //     }
+        //     if (this.clientPlayer.name === data.player.name) {
+        //         this.clientPlayer.movementPoints =
+        //             this.clientPlayer.movementPoints -
+        //             this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
+        //         this.isCurrentlyMoving = data.isCurrentlyMoving;
+        //         this.updateAvailablePath();
+        //     }
+        // });
 
-        this.socketClientService.onGameCombatStarted(() => {
-            this.isInCombatMode = true;
-        });
+        // this.socketClientService.onGameCombatStarted(() => {
+        //     this.isInCombatMode = true;
+        // });
 
-        this.socketClientService.onAttackResult((data) => {
-            if (data.success) {
-                console.log(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
-            } else {
-                console.log(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
-            }
-        });
+        // this.socketClientService.onAttackResult((data) => {
+        //     if (data.success) {
+        //         console.log(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+        //     } else {
+        //         console.log(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+        //     }
+        // });
 
-        this.socketClientService.onPlayerUpdate((data) => {
-            if (this.clientPlayer.name === data.player.name) {
-                this.clientPlayer = data.player;
-            }
-        });
+        // this.socketClientService.onPlayerUpdate((data) => {
+        //     if (this.clientPlayer.name === data.player.name) {
+        //         this.clientPlayer = data.player;
+        //     }
+        // });
 
-        this.socketClientService.onPlayerListUpdate((data) => {
-            console.log(data.players);
-            this.playerList = data.players;
-        });
+        // this.socketClientService.onPlayerListUpdate((data) => {
+        //     console.log(data.players);
+        //     this.playerList = data.players;
+        // });
 
-        this.socketClientService.onDoorClickedUpdate((data) => {
-            if (!this.game || !this.game.grid) {
-                return;
-            }
-            this.game.grid = data.grid;
-            this.clientPlayer.actionPoints = noActionPoints;
-            this.isActionMode = false;
-            this.updateAvailablePath();
-        });
+        // this.socketClientService.onDoorClickedUpdate((data) => {
+        //     if (!this.game || !this.game.grid) {
+        //         return;
+        //     }
+        //     this.game.grid = data.grid;
+        //     this.clientPlayer.actionPoints = noActionPoints;
+        //     this.isActionMode = false;
+        //     this.updateAvailablePath();
+        // });
 
-        this.socketClientService.onGameCombatTurnStarted((data) => {
-            this.currentPlayer = data.fighter;
-        });
+        // this.socketClientService.onGameCombatTurnStarted((data) => {
+        //     this.currentPlayer = data.fighter;
+        // });
 
-        this.socketClientService.onGameCombatTimerUpdate((data) => {
-            this.turnTimer = data.timeLeft;
-        });
+        // this.socketClientService.onGameCombatTimerUpdate((data) => {
+        //     this.turnTimer = data.timeLeft;
+        // });
 
-        this.socketClientService.onGridUpdate((data) => {
-            if (!this.game || !this.game.grid) {
-                return;
-            }
-            this.game.grid = data.grid;
-        });
+        // this.socketClientService.onGridUpdate((data) => {
+        //     if (!this.game || !this.game.grid) {
+        //         return;
+        //     }
+        //     this.game.grid = data.grid;
+        // });
 
-        this.socketClientService.on('noMoreEscapesLeft', () => {
-            this.hasEscapeAttemptsLeft = false;
-        });
+        // this.socketClientService.on('noMoreEscapesLeft', () => {
+        //     this.hasEscapeAttemptsLeft = false;
+        // });
 
-        this.socketClientService.on('combatEnded', () => {
-            this.hasEscapeAttemptsLeft = true;
-            this.isInCombatMode = false;
-            this.isActionMode = false;
-            this.clientPlayer.actionPoints = noActionPoints;
-        });
+        // this.socketClientService.on('combatEnded', () => {
+        //     this.hasEscapeAttemptsLeft = true;
+        //     this.isInCombatMode = false;
+        //     this.isActionMode = false;
+        //     this.clientPlayer.actionPoints = noActionPoints;
+        // });
     }
 
     handleDoorClick(targetTile: Tile): void {
