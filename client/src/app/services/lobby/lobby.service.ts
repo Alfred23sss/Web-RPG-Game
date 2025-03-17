@@ -1,233 +1,155 @@
-import { Injectable } from '@angular/core';
-import { DEFAULT_LOBBY } from '@app/constants/global.constants';
-import { DiceType } from '@app/enums/global.enums';
-import { Lobby } from '@app/interfaces/lobby';
-import { Player } from '@app/interfaces/player';
-import { AccessCodeService } from '@app/services/access-code/access-code.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
-import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { BehaviorSubject } from 'rxjs';
-import { Subject } from 'rxjs';
+// import { Injectable } from '@angular/core';
+// import { DEFAULT_LOBBY } from '@app/constants/global.constants';
+// import { Lobby } from '@app/interfaces/lobby';
+// import { Player } from '@app/interfaces/player';
+// import { AccessCodeService } from '@app/services/access-code/access-code.service';
+// import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+// import { SocketClientService } from '@app/services/socket/socket-client-service';
+// import { BehaviorSubject } from 'rxjs';
 
-@Injectable({
-    providedIn: 'root',
-})
-export class LobbyService {
-    // accessCode: string;
-    private accessCodeSubject = new BehaviorSubject<string>('');
+// @Injectable({
+//     providedIn: 'root',
+// })
+// export class LobbyService {
+//     private lobbySubject = new BehaviorSubject<Lobby>(DEFAULT_LOBBY);
+//     private isLoadingSubject = new BehaviorSubject<boolean>(true);
+//     private player: Player;
+//     private kickedPlayerSubject = new BehaviorSubject<Player | null>(null);
 
+//     constructor(
+//         private socketClientService: SocketClientService,
+//         private accessCodeService: AccessCodeService,
+//         private snackbarService: SnackbarService,
+//     ) {}
 
-    private lobbySubject = new BehaviorSubject<Lobby>(DEFAULT_LOBBY);
-    private isLoadingSubject = new BehaviorSubject<boolean>(true);
-    private kickedPlayerSubject = new Subject<Player>();
-    private player: Player;
-    private gameStartedSubject = new BehaviorSubject<any>(null);
-    private adminLeftSubject = new BehaviorSubject<string | null>(null);
+//     get kickedPlayer() {
+//         return this.kickedPlayerSubject.asObservable();
+//     }
 
+//     get lobby() {
+//         return this.lobbySubject.asObservable();
+//     }
 
+//     get isLoading() {
+//         return this.isLoadingSubject.asObservable();
+//     }
 
-    constructor(
-        private socketClientService: SocketClientService,
-        private accessCodeService: AccessCodeService,
-        private snackbarService: SnackbarService,
-    ) {}
-    initializeLobby(): void {
-        this.initializeAccessCode();
-        this.initializePlayer();
-        this.loadLobbyFromServer();
-        this.subscribeToSocketEvents();
-    }
+//     initializeLobby() {
+//         const accessCode = this.accessCodeService.getAccessCode();
+//         const storedPlayer = sessionStorage.getItem('player');
+//         if (storedPlayer) {
+//             this.player = JSON.parse(storedPlayer);
+//         }
 
-    private initializeAccessCode(): void {
-        this.accessCodeSubject.next(this.accessCodeService.getAccessCode());
-    }
+//         this.socketClientService.getLobby(accessCode).subscribe({
+//             next: (lobby) => {
+//                 this.lobbySubject.next(lobby);
+//                 this.isLoadingSubject.next(false);
+//             },
+//             error: () => {
+//                 this.isLoadingSubject.next(false);
+//                 this.snackbarService.showMessage('Erreur lors du chargement du lobby');
+//             },
+//         });
 
-    private initializePlayer(): void {
-        this.player = this.getPlayer();
-    }
-    
-    private loadLobbyFromServer(): void {
-        this.isLoadingSubject.next(true);
-    
-        this.socketClientService.getLobby(this.accessCodeSubject.value).subscribe({
-            next: (lobby) => {
-                this.lobbySubject.next(lobby);
-                this.isLoadingSubject.next(false);
-            },
-            error: () => {
-                this.isLoadingSubject.next(false);
-                this.snackbarService.showMessage('Erreur lors du chargement du lobby');
-            },
-        });
-    }
+//         this.subscribeToSocketEvents();
+//     }
 
-    private subscribeToSocketEvents(): void {
-        this.socketClientService.onJoinLobby(this.updatePlayersList.bind(this));
-        this.socketClientService.onLeaveLobby(this.updatePlayersList.bind(this));
-        this.socketClientService.onLobbyUpdate(this.handleLobbyUpdate.bind(this));
-        this.socketClientService.onLobbyLocked(this.handleLobbyLock.bind(this));
-        this.socketClientService.onLobbyUnlocked(this.handleLobbyUnlock.bind(this));
-        this.socketClientService.onLobbyDeleted(() => this.snackbarService.showMessage('Le lobby a été supprimé.'));
-        this.socketClientService.onAlertGameStarted((data) => this.gameStartedSubject.next(data));
-        this.socketClientService.onAdminLeft((data) => this.adminLeftSubject.next(data.message));
-    }
-    
+//     changeLobbyLockStatus(): void {
+//         const lobby = this.lobbySubject.value;
+//         if (lobby.isLocked) {
+//             if (lobby.players.length < lobby.maxPlayers) {
+//                 this.socketClientService.unlockLobby(lobby.accessCode);
+//             } else {
+//                 this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
+//             }
+//         } else {
+//             this.socketClientService.lockLobby(lobby.accessCode);
+//         }
+//     }
 
-    private updatePlayersList(): void {
-        this.socketClientService.getLobbyPlayers(this.accessCodeSubject.value).subscribe({
-            next: (players) => {
-                this.lobbySubject.next({ ...this.lobbySubject.value, players });
-            },
-            error: () => {
-                this.snackbarService.showMessage('Erreur lors de la récupération des joueurs');
-            },
-        });
-    }
-    
+//     kickPlayer(player: Player): void {
+//         const lobby = this.lobbySubject.value;
+//         if (lobby.accessCode) {
+//             this.socketClientService.kickPlayer(lobby.accessCode, player.name);
+//         }
+//     }
 
-    private handleLobbyUpdate(players: Player[]): void {
-        const updatedLobby = { ...this.lobbySubject.value, players };
-        this.lobbySubject.next(updatedLobby);
-    
-        // Met à jour le nom du joueur si nécessaire
-        const updatedPlayer = players.find((p) => p.avatar === this.player.avatar);
-        if (updatedPlayer) {
-            this.player.name = updatedPlayer.name;
-            sessionStorage.setItem('player', JSON.stringify(this.player));
-        }
-    }
-    
-    private handleLobbyLock({ accessCode, isLocked }: { accessCode: string; isLocked: boolean }): void {
-        if (accessCode === this.accessCodeSubject.value) {
-            this.lobbySubject.next({ ...this.lobbySubject.value, isLocked });
-        }
-    }
-    
-    private handleLobbyUnlock({ accessCode, isLocked }: { accessCode: string; isLocked: boolean }): void {
-        if (accessCode === this.accessCodeSubject.value) {
-            this.lobbySubject.next({ ...this.lobbySubject.value, isLocked });
-        }
-    }
-    
+//     leaveLobby(): void {
+//         const lobby = this.lobbySubject.value;
+//         if (lobby) {
+//             this.socketClientService.removePlayerFromLobby(lobby.accessCode, this.player.name);
+//             if (this.player.isAdmin) {
+//                 this.socketClientService.deleteLobby(lobby.accessCode);
+//             }
+//         }
+//     }
 
-    initializeKickSocket(): void {
-        this.socketClientService.onKicked(({ accessCode, playerName }) => {
-            console.log(`🚨 Joueur expulsé détecté : ${playerName}`);
-    
-            if (accessCode === this.accessCodeSubject.value) {
-                if (playerName === this.player.name) {
-                    this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
-                    this.kickedPlayerSubject.next(this.player);
-                }
-    
-                this.socketClientService.getLobby(accessCode).subscribe({
-                    next: (lobby) => {
-                        console.log("🔄 Mise à jour forcée du lobby après expulsion :", lobby);
-                        this.lobbySubject.next({ ...lobby }); // ✅ Remplace complètement l'objet pour forcer le changement
-                    },
-                    error: () => {
-                        this.snackbarService.showMessage('Erreur lors de la mise à jour du lobby après expulsion');
-                    },
-                });
-                
-            }
-        });
-    }
-    
-    
+//     private subscribeToSocketEvents() {
+//         const accessCode = this.accessCodeService.getAccessCode();
 
-    get kickedPlayer$() {
-        return this.kickedPlayerSubject.asObservable();
-    }
+//         this.socketClientService.onJoinLobby(() => {
+//             this.fetchLobbyPlayers();
+//         });
 
-    get lobby () {
-        return this.lobbySubject.asObservable();
-    }
+//         this.socketClientService.onLeaveLobby(() => {
+//             this.fetchLobbyPlayers();
+//         });
 
-    get isLoading() {
-        return this.isLoadingSubject.asObservable();
-    }
+//         this.socketClientService.onLobbyUpdate((players: Player[]) => {
+//             this.updateLobbyPlayers(players);
+//         });
 
-getPlayer(): Player {
-    const storedPlayer = sessionStorage.getItem('player');
-    if (storedPlayer) {
-        return JSON.parse(storedPlayer);
-    }
-    
-    console.warn("Aucun joueur trouvé dans sessionStorage. Retour d'un joueur par défaut.");
-    
-    return {
-        name: '',
-        avatar: '',
-        speed: 4,
-        attack: { value: 4, bonusDice: DiceType.Uninitialized },
-        defense: { value: 4, bonusDice: DiceType.Uninitialized },
-        hp: { current: 4, max: 4 },
-        movementPoints: 4,
-        actionPoints: 3,
-        inventory: [null, null],
-        isAdmin: false,
-        hasAbandoned: false,
-        isActive: false,
-        combatWon: 0
-    };
-}
+//         this.socketClientService.onKicked(({ accessCode: eventAccessCode, playerName }) => {
+//             if (eventAccessCode === accessCode && playerName === this.player.name) {
+//                 this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
+//                 this.kickedPlayerSubject.next(this.player);
+//             }
+//         });
 
-    getAccessCode(): string {
-        return this.accessCodeService.getAccessCode();
-    }
+//         this.socketClientService.onLobbyLocked(({ accessCode: eventAccessCode, isLocked }) => {
+//             if (eventAccessCode === accessCode) {
+//                 this.updateLobbyLockStatus(isLocked);
+//             }
+//         });
 
+//         this.socketClientService.onLobbyUnlocked(({ accessCode: eventAccessCode, isLocked }) => {
+//             if (eventAccessCode === accessCode) {
+//                 this.updateLobbyLockStatus(isLocked);
+//             }
+//         });
 
-    showSnackbarMessage(message: string): void {
-        this.snackbarService.showMessage(message);
-    }
+//         this.socketClientService.onLobbyDeleted(() => {
+//             this.snackbarService.showMessage('Le lobby a été supprimé.');
+//         });
+//     }
 
-    changeLobbyLockStatus(): void {
-        const lobby = this.lobbySubject.value;
-        if (!lobby) return;
+//     private fetchLobbyPlayers() {
+//         const accessCode = this.accessCodeService.getAccessCode();
+//         this.socketClientService.getLobbyPlayers(accessCode).subscribe({
+//             next: (players) => {
+//                 const updatedLobby = { ...this.lobbySubject.value, players };
+//                 this.lobbySubject.next(updatedLobby);
+//             },
+//             error: () => {
+//                 this.snackbarService.showMessage('Erreur lors de la récupération des joueurs');
+//             },
+//         });
+//     }
 
-        if (lobby.isLocked) {
-        if (lobby.players.length < lobby.maxPlayers) {
-            this.socketClientService.unlockLobby(lobby.accessCode);
-            this.snackbarService.showMessage('Lobby déverrouillé.');
-        } else {
-            this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
-        }
-        } else {
-        this.socketClientService.lockLobby(lobby.accessCode);
-        this.snackbarService.showMessage('Lobby verrouillé.');
-    }
-        
-    }
+//     private updateLobbyPlayers(players: Player[]) {
+//         const updatedLobby = { ...this.lobbySubject.value, players };
+//         this.lobbySubject.next(updatedLobby);
+//         const updatedPlayer = players.find((p) => p.avatar === this.player.avatar);
+//         if (updatedPlayer) {
+//             this.player.name = updatedPlayer.name;
+//             sessionStorage.setItem('player', JSON.stringify(this.player));
+//         }
+//     }
 
-    kickPlayer(player: Player): void {
-        if (this.accessCodeSubject.value) {
-            console.log(this.accessCodeSubject.value);
-            this.socketClientService.kickPlayer(this.accessCodeSubject.value, player.name);
-        }
-    }
+//     private updateLobbyLockStatus(isLocked: boolean) {
+//         const updatedLobby = { ...this.lobbySubject.value, isLocked };
+//         this.lobbySubject.next(updatedLobby);
+//     }
+// }
 
-    // leaveLobby(): void {
-    //     const lobby = this.lobbySubject.value;
-    //     if (lobby) {
-    //         this.socketClientService.removePlayerFromLobby(lobby.accessCode, this.player.name);
-    //         if (this.player.isAdmin) {
-    //             this.socketClientService.deleteLobby(lobby.accessCode);
-    //         }
-    //     }
-    // }
-
-    removeSocketListeners(): void {
-        this.socketClientService.socket.off('joinLobby');
-        this.socketClientService.socket.off('lobbyUpdate');
-        this.socketClientService.socket.off('leaveLobby');
-        this.socketClientService.socket.off('kicked');
-        this.socketClientService.socket.off('lobbyLocked');
-        this.socketClientService.socket.off('lobbyUnlocked');
-        this.socketClientService.socket.off('lobbyDeleted');
-        this.socketClientService.socket.off('alertGameStarted');
-        this.socketClientService.socket.off('updatePlayers'); 
-
-    }
-
-}
