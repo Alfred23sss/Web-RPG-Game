@@ -37,7 +37,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
 
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-        client.emit('updateUnavailableOptions', unavailableAvatars);
+        client.emit('updateUnavailableOptions', unavailableAvatars); // ????
     }
 
     @SubscribeMessage(LobbyEvents.CreateLobby)
@@ -114,8 +114,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
                     clientSocket.emit('leftLobby');
                 }
             });
-
-            this.lobbyService.leaveLobby(accessCode, '');
+            this.lobbyService.leaveLobby(accessCode, ''); // ???
             this.logger.log(`Lobby ${accessCode} deleted.`);
         } else {
             client.emit('error', `Lobby ${accessCode} does not exist.`);
@@ -127,26 +126,21 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const { accessCode, playerName } = data;
         client.leave(accessCode);
 
-        const lobby = this.lobbyService.getLobby(accessCode); //FAIRE UNE FONCTION QUI FAIT CA PCQ JE LE FAIS AU MOINS 2 FOIS
+        const lobby = this.lobbyService.getLobby(accessCode); // FAIRE UNE FONCTION QUI FAIT CA PCQ JE LE FAIS AU MOINS 2 FOIS
         if (!lobby) return;
         const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
         if (isAdminLeaving) {
             this.server.to(accessCode).emit('adminLeft', { message: "L'admin a quitté la partie, le lobby est fermé." });
             this.server.to(accessCode).emit('lobbyDeleted');
             this.lobbyService.leaveLobby(accessCode, playerName);
-        } 
-
+        }
+        // on chek 2 fois si c admin ??
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
 
         if (isLobbyDeleted) {
             this.server.to(accessCode).emit('lobbyDeleted');
         } else {
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-
-            const lobby = this.lobbyService.getLobby(accessCode);
-            if (lobby && lobby.players.length < lobby.maxPlayers) {
-                this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
-            }
         }
 
         if (lobby && lobby.players.length < lobby.maxPlayers) {

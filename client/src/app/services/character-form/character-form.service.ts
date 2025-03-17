@@ -28,7 +28,8 @@ export class CharacterService {
         private readonly accessCodeService: AccessCodeService,
     ) {}
 
-    initializePlayer(player: Player): void {//fichier de cinstantes player=defaultplayer
+    initializePlayer(player: Player): void {
+        // fichier de cinstantes player=defaultplayer
         player.name = '';
         player.avatar = '';
         player.speed = 4;
@@ -49,7 +50,6 @@ export class CharacterService {
 
         this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
             if (!data.avatars) return;
-            this.unavailableAvatarsSubject.next([...data.avatars]);
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
 
@@ -142,6 +142,10 @@ export class CharacterService {
                         this.socketClientService.joinLobby(accessCode, player);
                         resolve(JoinLobbyResult.JoinedLobby);
                     }
+                },
+                error: () => {
+                    this.snackbarService.showMessage(ErrorMessages.UnavailableGame);
+                    resolve(JoinLobbyResult.RedirectToHome);
                 },
             });
         });

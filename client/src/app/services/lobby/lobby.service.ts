@@ -53,7 +53,6 @@ export class LobbyService {
             },
             error: () => {
                 this.isLoadingSubject.next(false);
-                this.snackbarService.showMessage('Error fetching lobby. Please try again.'); // debug only !!!!
                 this.navigateToHome();
             },
         });

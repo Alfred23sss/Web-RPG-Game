@@ -112,6 +112,13 @@ export class LobbyService {
         return this.getLobby(accessCode).waitingPlayers;
     }
 
+    isAdminLeaving(accessCode: string, playerName: string): boolean {
+        const lobby = this.lobbies.get(accessCode);
+        if (!lobby) return false;
+
+        return lobby.players.some((p) => p.name === playerName && p.isAdmin);
+    }
+
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {
         const existingNames = lobby.players.map((player) => player.name.toLowerCase());
 
@@ -129,12 +136,4 @@ export class LobbyService {
 
         return uniqueName;
     }
-
-    isAdminLeaving(accessCode: string, playerName: string): boolean {
-        const lobby = this.lobbies.get(accessCode);
-        if (!lobby) return false;
-        
-        return lobby.players.some((p) => p.name === playerName && p.isAdmin);
-    }
-    
 }
