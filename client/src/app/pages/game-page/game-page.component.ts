@@ -127,7 +127,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
-        // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?
+        //
         this.clientPlayer.hasAbandoned = true;
         this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
         this.backToHome();
@@ -177,6 +177,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
+            // if refresh abandons game
             this.abandonGame();
         } else {
             sessionStorage.setItem('refreshed', 'true');

@@ -36,9 +36,8 @@ export class GameCombatService {
         if (combatState.attacker.name === playerName || combatState.defender.name === playerName) {
             const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
             this.updateWinningPlayerAfterCombat(playerToUpdate, accessCode);
-
+            this.emitUpdatePlayerList(this.gameSessionService.getPlayers(accessCode), accessCode);
             this.endCombat(accessCode);
-            this.resetCombatTimers(accessCode);
         }
     }
 
