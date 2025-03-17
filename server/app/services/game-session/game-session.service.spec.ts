@@ -1,19 +1,19 @@
 /* eslint-disable max-lines */ // the original file respects this condition
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
+/* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
+import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { AccessCodesService } from '../access-codes/access-codes.service';
-import { GridManagerService } from '../grid-manager/grid-manager.service';
-import { LobbyService } from '../lobby/lobby.service';
 import { GameSessionService } from './game-session.service';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;
 const FAST_SPEED = 6;
