@@ -122,10 +122,12 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.ended')
-    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string; winner: Player }): void {
+    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string; winner: Player; hasEvaded: boolean }): void {
         this.logger.log('sending to client combat ended');
         this.logger.log(`winner is ${payload.winner.name}`);
-        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatEnded', { winner: payload.winner });
+        this.server
+            .to([payload.attackerSocketId, payload.defenderSocketId])
+            .emit('combatEnded', { winner: payload.winner, hasEvaded: payload.hasEvaded });
     }
 
     @OnEvent('game.combat.escape.failed')

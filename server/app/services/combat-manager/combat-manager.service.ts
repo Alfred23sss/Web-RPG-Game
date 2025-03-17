@@ -134,6 +134,7 @@ export class GameCombatService {
             const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
             const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
             this.resetHealth([attacker, defender], [attackerSocketId, defenderSocketId], accessCode);
+            combatState.hasEvaded = true;
             this.endCombat(accessCode, true);
         } else {
             this.logger.log(`Escape failed for ${player.name}`);
@@ -157,7 +158,7 @@ export class GameCombatService {
 
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining } = combatState;
 
-        this.emitCombatEnded(attacker, defender, currentFighter);
+        this.emitCombatEnded(attacker, defender, currentFighter, combatState.hasEvaded);
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
 
@@ -206,6 +207,7 @@ export class GameCombatService {
             pausedGameTurnTimeRemaining: pausedTimeRemaining,
             playerPerformedAction: false,
             isDebugMode,
+            hasEvaded: false,
         };
 
         this.gameSessionService.setCombatState(accessCode, true);
@@ -403,7 +405,7 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEnded(attacker: Player, defender: Player, winner: Player): void {
+    private emitCombatEnded(attacker: Player, defender: Player, winner: Player, hasEvade: boolean): void {
         this.logger.log('emitting to gateaway game ended');
         const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
@@ -412,6 +414,8 @@ export class GameCombatService {
             attackerSocketId,
             defenderSocketId,
             winner,
+            hasEvade,
         });
+        // eslint-disable-next-line max-lines
     }
 }
