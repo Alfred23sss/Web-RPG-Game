@@ -93,9 +93,9 @@ export class GameSocketService {
 
         this.socketClientService.onAttackResult((data: { success: boolean; attackScore: number; defenseScore: number }) => {
             if (data.success) {
-                console.log(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+                this.snackbarService.showMessage(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
             } else {
-                console.log(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+                this.snackbarService.showMessage(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
             }
         });
 

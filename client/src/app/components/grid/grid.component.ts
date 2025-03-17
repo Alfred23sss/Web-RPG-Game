@@ -7,6 +7,8 @@ import { TileComponent } from '@app/components/tile/tile.component';
 import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 
+const POPUP_DELAY = 2000;
+
 @Component({
     selector: 'app-grid',
     standalone: true,
@@ -64,6 +66,6 @@ export class GridComponent {
         // Ferme automatiquement après 2 secondes
         setTimeout(() => {
             dialogRef.close();
-        }, 2000);
+        }, POPUP_DELAY);
     }
 }

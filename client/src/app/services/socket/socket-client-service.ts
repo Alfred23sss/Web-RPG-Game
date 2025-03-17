@@ -231,12 +231,10 @@ export class SocketClientService {
     }
 
     onGameCombatStarted(callback: () => void) {
-        console.log('combat commence recu');
         this.socket.on('combatStarted', callback);
     }
 
     onAttackResult(callback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void) {
-        console.log('combat resultat recu');
         this.socket.on('attackResult', callback);
     }
 
@@ -245,9 +243,7 @@ export class SocketClientService {
     }
 
     onPlayerListUpdate(callback: (data: { players: Player[] }) => void) {
-        console.log('recu - setting up listener for playerListUpdate');
         this.socket.on('playerListUpdate', (data) => {
-            console.log('Received playerListUpdate event:', data);
             callback(data);
         });
     }
