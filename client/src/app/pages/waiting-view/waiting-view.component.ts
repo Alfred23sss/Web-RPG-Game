@@ -7,144 +7,111 @@ import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { LobbyService } from '@app/services/lobby/lobby.service';
+import { Subscription } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 @Component({
     selector: 'app-waiting-view',
     templateUrl: './waiting-view.component.html',
     styleUrls: ['./waiting-view.component.scss'],
+    standalone: true,
+    imports: [AsyncPipe,],
 })
 export class WaitingViewComponent implements OnInit, OnDestroy {
     accessCode: string;
     player: Player;
+    // lobby: Lobby;
+    // isLoading: boolean = true;
     lobby: Lobby;
-    isLoading: boolean = true;
+
+    lobby$ = this.lobbyService.lobby;
+    isLoading$ = this.lobbyService.isLoading;
     isGameStarting: boolean = false;
     isGameStartedEmitted: boolean = false;
+    private subscriptions = new Subscription();
 
     constructor(
+        //
         private router: Router,
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
         private readonly snackbarService: SnackbarService,
+        //
+        private readonly lobbyService: LobbyService,
     ) {}
 
     ngOnInit(): void {
-        this.accessCode = this.accessCodeService.getAccessCode();
-
-        this.lobby = {
-            isLocked: false,
-            accessCode: this.accessCode,
-            players: [],
-            game: null,
-            maxPlayers: 0,
-        };
-
-        const storedPlayer = sessionStorage.getItem('player');
-        if (storedPlayer) {
-            this.player = JSON.parse(storedPlayer);
-        }
-
-        this.socketClientService.getLobby(this.accessCode).subscribe({
-            next: (lobby) => {
-                this.lobby = lobby;
-                this.isLoading = false;
-            },
-            error: () => {
-                this.isLoading = false;
-                this.navigateToHome();
-            },
-        });
-
-        this.socketClientService.onJoinLobby(() => {
-            this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
-                next: (players) => {
-                    this.lobby.players = players;
-                },
-                error: () => {
-                    throw new Error('Error fetching players');
-                },
-            });
-        });
-
-        this.socketClientService.onLeaveLobby(() => {
-            this.socketClientService.getLobbyPlayers(this.accessCode).subscribe({
-                next: (players) => {
-                    this.lobby.players = players;
-                },
-                error: () => {
-                    throw new Error('Error fetching players');
-                },
-            });
-        });
-
-        this.socketClientService.onLobbyUpdate((players: Player[]) => {
-            this.lobby.players = players;
-            const updatedPlayer = players.find((p) => p.avatar === this.player.avatar);
-            if (updatedPlayer) {
-                this.player.name = updatedPlayer.name;
-                sessionStorage.setItem('player', JSON.stringify(this.player));
-            }
-        });
-
-        this.socketClientService.onKicked(({ accessCode, playerName }) => {
-            if (accessCode === this.accessCode && playerName === this.player.name) {
-                this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
-                this.navigateToHome();
-            }
-        });
-
-        this.socketClientService.onLobbyLocked(({ accessCode, isLocked }) => {
-            if (this.accessCode === accessCode) {
-                this.lobby.isLocked = isLocked;
-            }
-        });
-
-        this.socketClientService.onLobbyUnlocked(({ accessCode, isLocked }) => {
-            if (this.accessCode === accessCode) {
-                this.lobby.isLocked = isLocked;
-            }
-        });
-
-        this.socketClientService.onLobbyDeleted(() => {
-            this.navigateToHome();
-        });
-
-        this.socketClientService.onAlertGameStarted((data) => {
-            sessionStorage.setItem('game', JSON.stringify(data.updatedGame));
-            sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
-            this.navigateToGame();
-        });
-
-        this.socketClientService.onAdminLeft((data) => {
-            this.snackbarService.showMessage(data.message);
-        });
+        this.lobbyService.initializeLobby();
+        this.subscriptions.add(
+            this.lobbyService.lobby.subscribe((lobby) => {
+                console.log("Mise à jour du lobby :", lobby);
+            })
+        );
+        // this.subscriptions.add(
+        //     this.lobbyService.isLoading.subscribe((loading) => {
+        //         console.log("isLoading :", loading);
+        //     })
+        // );
+        this.player = this.lobbyService.getPlayer();
+        console.log("Player chargé :", this.player);
         
     }
 
     ngOnDestroy(): void {
-        const isPlayerInLobby = this.lobby.players.some((p) => p.name === this.player.name);
-        if (this.accessCode && isPlayerInLobby && !this.isGameStarting) {
-            this.socketClientService.removePlayerFromLobby(this.accessCode, this.player.name);
-            if (this.player.isAdmin) {
-                this.socketClientService.deleteLobby(this.accessCode);
+        const accessCode = this.accessCodeService.getAccessCode(); // ✅ Récupération correcte du code d'accès
+    
+        this.lobbyService.lobby.subscribe((lobby) => {
+            if (!lobby || !lobby.players || !accessCode) return; // ✅ Évite les erreurs si le lobby n'est pas chargé
+    
+            const isPlayerInLobby = lobby.players.some((p) => p.name === this.player.name);
+    
+            if (isPlayerInLobby && !this.isGameStarting) {
+                this.socketClientService.removePlayerFromLobby(accessCode, this.player.name);
+    
+                if (this.player.isAdmin) {
+                    this.socketClientService.deleteLobby(accessCode);
+                }
             }
-        }
-        this.removeSocketListeners();
+            sessionStorage.removeItem('player');
+            this.removeSocketListeners();
+            this.subscriptions.unsubscribe();
+        });
     }
+    
+    
+    // changeLobbyLockStatus(): void {
+    //     if (this.lobby.isLocked) {
+    //         if (this.lobby.players.length < this.lobby.maxPlayers) {
+    //             this.socketClientService.unlockLobby(this.accessCode);
+    //         } else {
+    //             this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
+    //         }
+    //     } else {
+    //         this.socketClientService.lockLobby(this.accessCode);
+    //     }
+    // }
     changeLobbyLockStatus(): void {
-        if (this.lobby.isLocked) {
-            if (this.lobby.players.length < this.lobby.maxPlayers) {
-                this.socketClientService.unlockLobby(this.accessCode);
+        this.lobbyService.lobby.subscribe((lobby) => {
+            if (!lobby) return;
+    
+            if (lobby.isLocked) {
+                if (lobby.players.length < lobby.maxPlayers) {
+                    this.socketClientService.unlockLobby(this.lobbyService.getAccessCode());
+                } else {
+                    this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
+                }
             } else {
-                this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
+                this.socketClientService.lockLobby(this.lobbyService.getAccessCode());
             }
-        } else {
-            this.socketClientService.lockLobby(this.accessCode);
-        }
+        });
     }
+    
 
     kickPlayer(player: Player): void {
         if (this.accessCode) {
+            console.log(this.accessCode);
             this.socketClientService.kickPlayer(this.accessCode, player.name);
+            
         }
     }
 
@@ -152,24 +119,49 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.router.navigate([Routes.HomePage]);
     }
 
-    navigateToGame() {
-        if (!this.lobby.isLocked) {
-            this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
-            return;
-        }
-        if (this.lobby.players.length < MIN_PLAYERS) {
-            this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
-            return;
-        }
-        if (this.player.isAdmin && !this.isGameStartedEmitted) {
-            this.isGameStartedEmitted = true;
-            this.socketClientService.alertGameStarted(this.accessCode);
-        }
+    // navigateToGame() {
+    //     if (!this.lobby.isLocked) {
+    //         this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
+    //         return;
+    //     }
+    //     if (this.lobby.players.length < MIN_PLAYERS) {
+    //         this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
+    //         return;
+    //     }
+    //     if (this.player.isAdmin && !this.isGameStartedEmitted) {
+    //         this.isGameStartedEmitted = true;
+    //         this.socketClientService.alertGameStarted(this.accessCode);
+    //     }
 
-        this.isGameStarting = true;
-        sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
-        this.router.navigate([Routes.Game]);
+    //     this.isGameStarting = true;
+    //     sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
+    //     this.router.navigate([Routes.Game]);
+    // }
+    navigateToGame(): void {
+        this.lobbyService.lobby.subscribe((lobby) => {
+            if (!lobby) return;
+    
+            if (!lobby.isLocked) {
+                this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
+                return;
+            }
+    
+            if (lobby.players.length < MIN_PLAYERS) {
+                this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
+                return;
+            }
+    
+            if (this.player.isAdmin && !this.isGameStartedEmitted) {
+                this.isGameStartedEmitted = true;
+                this.socketClientService.alertGameStarted(this.lobbyService.getAccessCode());
+            }
+    
+            this.isGameStarting = true;
+            sessionStorage.setItem('lobby', JSON.stringify(lobby));
+            this.router.navigate([Routes.Game]);
+        });
     }
+    
 
     private removeSocketListeners(): void {
         this.socketClientService.socket.off('joinLobby');

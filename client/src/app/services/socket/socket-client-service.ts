@@ -76,9 +76,14 @@ export class SocketClientService {
         this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
+    // kickPlayer(accessCode: string, playerName: string): void {
+    //     this.socket.emit('kickPlayer', { accessCode, playerName });
+    // }
     kickPlayer(accessCode: string, playerName: string): void {
+        console.log(`🟡 Tentative d'expulsion du joueur: ${playerName} du lobby: ${accessCode}`);
         this.socket.emit('kickPlayer', { accessCode, playerName });
     }
+    
 
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
@@ -138,7 +143,11 @@ export class SocketClientService {
     }
 
     onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
-        this.socket.on('kicked', callback);
+        // this.socket.on('kicked', callback);
+        this.socket.on('kicked', (data) => {
+            console.log(`🔴 Le joueur ${data.playerName} a été expulsé du serveur`);
+            callback(data);
+        });
     }
 
     onLobbyCreated(callback: (players: unknown[]) => void) {

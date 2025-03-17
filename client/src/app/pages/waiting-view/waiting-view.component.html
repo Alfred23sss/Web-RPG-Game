@@ -1,15 +1,15 @@
 <div class="waiting-view">
-    @if (isLoading) {
-    <p>Chargement en cours...</p>
+    @if ((isLoading$ | async)) {
+        <p>Chargement en cours...</p>
     } @else {
     <p>En attente de participants...</p>
     <p>
-        Votre code d'accès: <strong>{{ accessCode }}</strong>
+        Votre code d'accès: <strong>{{ (lobby$ | async)?.accessCode }}</strong>
     </p>
     <div class="waiting-line">
         <h2>Liste des joueurs en attente</h2>
         <ul>
-            @for (player of lobby.players; track $index) {
+            @for (player of (lobby$ | async)?.players; track $index) {
             <li>
                 <div class="player-info">
                     <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
@@ -19,7 +19,7 @@
                     @if (player.isAdmin) {
                     <span class="admin-badge">Admin</span>
                     } @if (this.player.isAdmin && !player.isAdmin) {
-                    <button class="kick-button" (click)="kickPlayer(player)">Expulser</button>
+                    <button class="kick-button" (click)="kickPlayer(player); ">Expulser</button>
                     }
                 </div>
             </li>
@@ -31,7 +31,7 @@
     @if (player.isAdmin) {
     <button class="button" (click)="navigateToGame()">Commencer la partie</button>
     <button class="button" (click)="changeLobbyLockStatus()">
-        {{ lobby.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
+        {{ (lobby$ | async)?.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
     </button>
     } }
 </div>

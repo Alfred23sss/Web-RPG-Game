@@ -16,7 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 export class CharacterService {
     unavailableAvatarsSubject = new BehaviorSubject<string[]>([]); // not private to fix lint error
     unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
-    attributes = { ...INITIAL_VALUES.attributes }; // private?
+    attributes = { ...INITIAL_VALUES.attributes }; // private? +getteur
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
@@ -28,7 +28,7 @@ export class CharacterService {
         private readonly accessCodeService: AccessCodeService,
     ) {}
 
-    initializePlayer(player: Player): void {
+    initializePlayer(player: Player): void {//fichier de cinstantes player=defaultplayer
         player.name = '';
         player.avatar = '';
         player.speed = 4;
