@@ -61,6 +61,9 @@ export class GameSocketService {
 
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
             this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+            if (data.nextPlayer.name === component.clientPlayer.name) {
+                component.clientPlayer = data.nextPlayer;
+            }
         });
 
         this.socketClientService.onTurnStarted((data: { player: Player; turnDuration: number }) => {
