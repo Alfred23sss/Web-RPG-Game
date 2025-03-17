@@ -238,8 +238,8 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.timer')
-    handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
-        this.server.to(payload.accessCode).emit('combatTimerUpdate', {
+    handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number; attackerSocketId: string; defenderSocketId: string }) {
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatTimerUpdate', {
             timeLeft: payload.timeLeft,
         });
     }
@@ -258,9 +258,16 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.turn.started')
-    handleCombatTurnStarted(payload: { accessCode: string; fighter: Player; duration: number; escapeAttemptsLeft: number }) {
+    handleCombatTurnStarted(payload: {
+        accessCode: string;
+        fighter: Player;
+        duration: number;
+        escapeAttemptsLeft: number;
+        attackerSocketId: string;
+        defenderSocketId: string;
+    }) {
         this.logger.log(`Combat turn started for ${payload.fighter.name} in game ${payload.accessCode}`);
-        this.server.to(payload.accessCode).emit('combatTurnStarted', {
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatTurnStarted', {
             fighter: payload.fighter,
             duration: payload.duration,
             escapeAttemptsLeft: payload.escapeAttemptsLeft,

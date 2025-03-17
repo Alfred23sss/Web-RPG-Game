@@ -312,6 +312,7 @@ export class GameCombatService {
         if (!combatState) return;
         combatState.playerPerformedAction = false;
         combatState.currentFighter = player;
+        const defender = combatState.currentFighter === combatState.attacker ? combatState.defender : combatState.attacker;
 
         const escapeAttemptsRemaining = combatState.remainingEscapeAttempts.get(player.name) || 0;
         const turnDuration = escapeAttemptsRemaining > 0 ? COMBAT_TURN_DURATION : COMBAT_ESCAPE_LIMITED_DURATION;
@@ -319,7 +320,7 @@ export class GameCombatService {
 
         combatState.combatTurnTimeRemaining = turnDurationInSeconds;
 
-        this.emitCombatTurnStarted(accessCode, player, turnDurationInSeconds, escapeAttemptsRemaining);
+        this.emitCombatTurnStarted(accessCode, player, turnDurationInSeconds, escapeAttemptsRemaining, defender);
 
         if (combatState.combatCountdownInterval) {
             clearInterval(combatState.combatCountdownInterval);
@@ -327,12 +328,12 @@ export class GameCombatService {
         }
 
         let timeLeft = turnDurationInSeconds;
-        this.emitCombatTimerUpdate(accessCode, timeLeft);
+        this.emitCombatTimerUpdate(accessCode, timeLeft, combatState.attacker, combatState.defender);
         combatState.combatCountdownInterval = setInterval(() => {
             timeLeft--;
             combatState.combatTurnTimeRemaining = timeLeft;
 
-            this.emitCombatTimerUpdate(accessCode, timeLeft);
+            this.emitCombatTimerUpdate(accessCode, timeLeft, combatState.attacker, combatState.defender);
 
             if (timeLeft <= 0) {
                 if (combatState.combatCountdownInterval) {
@@ -361,17 +362,23 @@ export class GameCombatService {
         this.eventEmitter.emit('update.player.list', { players, accessCode });
     }
 
-    private emitCombatTurnStarted(accessCode: string, fighter: Player, duration: number, escapeAttemptsLeft: number): void {
+    private emitCombatTurnStarted(accessCode: string, fighter: Player, duration: number, escapeAttemptsLeft: number, defender: Player): void {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(fighter.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
         this.eventEmitter.emit('game.combat.turn.started', {
             accessCode,
             fighter,
             duration,
             escapeAttemptsLeft,
+            attackerSocketId,
+            defenderSocketId,
         });
     }
 
-    private emitCombatTimerUpdate(accessCode: string, timeLeft: number): void {
-        this.eventEmitter.emit('game.combat.timer', { accessCode, timeLeft });
+    private emitCombatTimerUpdate(accessCode: string, timeLeft: number, attacker: Player, defender: Player): void {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
+        this.eventEmitter.emit('game.combat.timer', { accessCode, timeLeft, attackerSocketId, defenderSocketId });
     }
 
     private emitCombatTimeoutAction(accessCode: string, fighter: Player): void {
