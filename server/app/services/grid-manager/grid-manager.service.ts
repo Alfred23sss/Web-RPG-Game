@@ -104,7 +104,7 @@ export class GridManagerService {
         let destinationTile = targetTile;
         const isPlayerSpawnPoint = player.spawnPoint.tileId === targetTile.id;
 
-        if (targetTile.player || targetTile.type === 'mur' || (targetTile.type === 'porte' && !targetTile.isOpen)) {
+        if (targetTile.player || targetTile.type === 'mur' || (targetTile.type === 'porte' && !targetTile.isOpen) || targetTile.item) {
             if (isPlayerSpawnPoint) {
                 destinationTile = this.findClosestAvailableTile(grid, targetTile) || currentPlayerTile;
             } else {
@@ -127,7 +127,7 @@ export class GridManagerService {
             const tile = queue.shift();
             if (!tile) continue;
 
-            if (!tile.player && (!tile.type || tile.type !== 'mur') && (!tile.type || tile.type !== 'porte' || tile.isOpen)) {
+            if (!tile.player && (!tile.type || tile.type !== 'mur') && (!tile.type || tile.type !== 'porte' || tile.isOpen) && !tile.item) {
                 return tile;
             }
 
