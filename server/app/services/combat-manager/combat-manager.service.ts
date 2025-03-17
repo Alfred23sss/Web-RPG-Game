@@ -86,7 +86,6 @@ export class GameCombatService {
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current === 0) {
                 currentFighter.combatWon++;
-
                 this.resetHealth([currentFighter, defenderPlayer], [currentFighterSocket, defenderPlayerSocket], accessCode);
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false);
@@ -157,15 +156,15 @@ export class GameCombatService {
 
         this.resetCombatTimers(accessCode);
 
-        const { attacker, defender, winner, pausedGameTurnTimeRemaining } = combatState;
+        const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining } = combatState;
 
-        this.emitCombatEnded(attacker, defender);
+        this.emitCombatEnded(attacker, defender, currentFighter);
 
         this.gameSessionService.setCombatState(accessCode, false);
 
-        if (!isEscape && winner && this.gameSessionService.isCurrentPlayer(accessCode, winner.name)) {
+        if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-        } else if (!isEscape && winner) {
+        } else if (!isEscape && currentFighter) {
             this.gameSessionService.endTurn(accessCode);
         } else {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
@@ -398,7 +397,7 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEnded(attacker: Player, defender: Player): void {
+    private emitCombatEnded(attacker: Player, defender: Player, winner: Player): void {
         this.logger.log('emitting to gateaway game ended');
         const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
@@ -406,6 +405,7 @@ export class GameCombatService {
         this.eventEmitter.emit('game.combat.ended', {
             attackerSocketId,
             defenderSocketId,
+            winner,
         });
     }
 }
