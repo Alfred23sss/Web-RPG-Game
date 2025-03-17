@@ -22,12 +22,14 @@ export class GridComponent {
     @Input() quickestPath: Tile[] | undefined = [];
     @Input() isEditionMode: boolean = false;
     @Input() isActionMode: boolean = false;
+    @Input() isDebugMode: boolean = false;
 
     @Output() tileHovered = new EventEmitter<Tile>();
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
     @Output() doorClicked = new EventEmitter<Tile>();
     @Output() tileRightClicked = new EventEmitter<{ tile: Tile; event: MouseEvent }>();
+    @Output() teleportClicked = new EventEmitter<Tile>();
 
     tileType = TileType;
 
@@ -53,19 +55,23 @@ export class GridComponent {
     }
 
     onTileRightClick(event: MouseEvent, tile: Tile): void {
-        event.preventDefault(); // Empêche l'ouverture du menu contextuel
+        if (this.isDebugMode) {
+            event.preventDefault();
 
-        // Ouvre le tooltip personnalisé sous forme de dialog
-        const dialogRef = this.dialog.open(TileTooltipComponent, {
-            data: { tile },
-            panelClass: 'custom-tooltip-dialog',
-            hasBackdrop: false,
-            position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
-        });
+            this.teleportClicked.emit(tile);
+        } else {
+            event.preventDefault();
 
-        // Ferme automatiquement après 2 secondes
-        setTimeout(() => {
-            dialogRef.close();
-        }, POPUP_DELAY);
+            const dialogRef = this.dialog.open(TileTooltipComponent, {
+                data: { tile },
+                panelClass: 'custom-tooltip-dialog',
+                hasBackdrop: false,
+                position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
+            });
+
+            setTimeout(() => {
+                dialogRef.close();
+            }, POPUP_DELAY);
+        }
     }
 }

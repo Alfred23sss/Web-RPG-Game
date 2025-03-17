@@ -70,9 +70,9 @@ export class GameCombatService {
 
         this.logger.log(`${currentFighter.name}, ${attackerName}`);
 
-        const attackerScore = this.getRandomAttackScore(currentFighter, accessCode);
+        const attackerScore = this.getRandomAttackScore(currentFighter, accessCode, combatState.isDebugMode);
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
-        const defenseScore = this.getRandomDefenseScore(defenderPlayer, accessCode);
+        const defenseScore = this.getRandomDefenseScore(defenderPlayer, accessCode, combatState.isDebugMode);
         const attackSuccessful = attackerScore > defenseScore;
         const currentFighterSocket = this.lobbyService.getPlayerSocket(currentFighter.name);
         const defenderPlayerSocket = this.lobbyService.getPlayerSocket(defenderPlayer.name);
@@ -86,7 +86,6 @@ export class GameCombatService {
             this.logger.log(`${defenderPlayer.name} has ${defenderPlayer.hp.current} hp left, combat will stop if under 0`);
             if (defenderPlayer.hp.current === 0) {
                 currentFighter.combatWon++;
-
                 this.resetHealth([currentFighter, defenderPlayer], [currentFighterSocket, defenderPlayerSocket], accessCode);
                 const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
                 this.endCombat(accessCode, false);
@@ -157,17 +156,17 @@ export class GameCombatService {
 
         this.resetCombatTimers(accessCode);
 
-        const { attacker, defender, winner, pausedGameTurnTimeRemaining } = combatState;
+        const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining } = combatState;
 
-        this.emitCombatEnded(attacker, defender);
+        this.emitCombatEnded(attacker, defender, currentFighter);
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
 
         this.gameSessionService.setCombatState(accessCode, false);
 
-        if (!isEscape && winner && this.gameSessionService.isCurrentPlayer(accessCode, winner.name)) {
+        if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-        } else if (!isEscape && winner) {
+        } else if (!isEscape && currentFighter) {
             this.gameSessionService.endTurn(accessCode);
         } else {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
@@ -182,7 +181,7 @@ export class GameCombatService {
         return this.combatStates[accessCode] || null;
     }
 
-    startCombat(accessCode: string, attackerId: string, defenderId: string): void {
+    startCombat(accessCode: string, attackerId: string, defenderId: string, isDebugMode: boolean = false): void {
         const players = this.gameSessionService.getPlayers(accessCode);
         const attacker = players.find((p) => p.name === attackerId);
         const defender = players.find((p) => p.name === defenderId);
@@ -207,6 +206,7 @@ export class GameCombatService {
             combatTurnTimeRemaining: 0,
             pausedGameTurnTimeRemaining: pausedTimeRemaining,
             playerPerformedAction: false,
+            isDebugMode,
         };
 
         this.gameSessionService.setCombatState(accessCode, true);
@@ -265,23 +265,25 @@ export class GameCombatService {
         }
     }
 
-    private getRandomAttackScore(attacker: Player, accessCode: string): number {
-        let iceDisadvantage;
+    private getRandomAttackScore(attacker: Player, accessCode: string, isDebugMode: boolean): number {
+        let iceDisadvantage = 0;
         const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, attacker);
-        if (tile) {
-            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALTY : 0;
+        if (tile && tile.type === TileType.Ice) {
+            iceDisadvantage = ICE_PENALTY;
         }
-        this.logger.log(`player on ice has attack reduce by ${iceDisadvantage}`);
-        return attacker.attack.value + Math.floor(Math.random() * this.extractDiceValue(attacker.attack.bonusDice)) + 1 + iceDisadvantage;
+        const diceValue = this.extractDiceValue(attacker.attack.bonusDice);
+        const attackBonus = isDebugMode ? diceValue : Math.floor(Math.random() * diceValue) + 1;
+        return attacker.attack.value + attackBonus + iceDisadvantage;
     }
 
-    private getRandomDefenseScore(defender: Player, accessCode: string): number {
-        let iceDisadvantage;
+    private getRandomDefenseScore(defender: Player, accessCode: string, isDebugMode: boolean): number {
+        let iceDisadvantage = 0;
         const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, defender);
-        if (tile) {
-            iceDisadvantage = tile.type === TileType.Ice ? ICE_PENALTY : 0;
+        if (tile && tile.type === TileType.Ice) {
+            iceDisadvantage = ICE_PENALTY;
         }
-        return defender.defense.value + Math.floor(Math.random() * this.extractDiceValue(defender.defense.bonusDice)) + 1 + iceDisadvantage;
+        const defenseBonus = isDebugMode ? 1 : Math.floor(Math.random() * this.extractDiceValue(defender.defense.bonusDice)) + 1;
+        return defender.defense.value + defenseBonus + iceDisadvantage;
     }
 
     private determineCombatOrder(attacker: Player, defender: Player): Player[] {
@@ -395,7 +397,7 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEnded(attacker: Player, defender: Player): void {
+    private emitCombatEnded(attacker: Player, defender: Player, winner: Player): void {
         this.logger.log('emitting to gateaway game ended');
         const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
@@ -403,6 +405,7 @@ export class GameCombatService {
         this.eventEmitter.emit('game.combat.ended', {
             attackerSocketId,
             defenderSocketId,
+            winner,
         });
     }
 }

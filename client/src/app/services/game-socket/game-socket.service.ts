@@ -14,6 +14,7 @@ const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
 const delayBeforeEndingGame = 5000;
 const defaultEscapeAttempts = 2;
+const delayMessageAfterCombatEnded = 3000;
 const events = [
     'abandonGame',
     'gameDeleted',
@@ -79,8 +80,18 @@ export class GameSocketService {
             }, delayBeforeEndingGame);
         });
 
+        this.socketClientService.on('adminModeDisabled', () => {
+            if (component.isDebugMode) {
+                this.snackbarService.showMessage("Mode debug 'désactivé'");
+            }
+            component.isDebugMode = false;
+        });
+
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
             this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+            if (data.nextPlayer.name === component.clientPlayer.name) {
+                component.clientPlayer = data.nextPlayer;
+            }
         });
 
         this.socketClientService.onTurnStarted((data: { player: Player; turnDuration: number }) => {
@@ -165,15 +176,25 @@ export class GameSocketService {
             component.escapeAttempts = data.attemptsLeft;
         });
 
-        this.socketClientService.on('combatEnded', () => {
-            component.escapeAttempts = defaultEscapeAttempts;
+        this.socketClientService.on('combatEnded', (data: { winner: Player }) => {
             component.isInCombatMode = false;
+            component.escapeAttempts = defaultEscapeAttempts;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
             component.attackResult = null;
+            component.escapeAttempts = defaultEscapeAttempts;
+            if (data && data.winner) {
+                // sa cache le changement de tour a fix
+                this.snackbarService.showMessage(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
+            }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
+        });
+
+        this.socketClientService.on('adminModeChangedServerSide', () => {
+            component.isDebugMode = !component.isDebugMode;
+            this.snackbarService.showMessage(`Mode debug ${component.isDebugMode ? 'activé' : 'désactivé'}`);
         });
     }
 

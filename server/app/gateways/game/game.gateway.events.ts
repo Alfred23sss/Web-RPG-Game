@@ -8,4 +8,6 @@ export enum GameEvents {
     PlayerMovementUpdate = 'playerMovementUpdate',
     DoorUpdate = 'doorUpdate',
     Evade = 'evade',
+    AdminModeUpdate = 'adminModeUpdate',
+    TeleportPlayer = 'teleportPlayer',
 }

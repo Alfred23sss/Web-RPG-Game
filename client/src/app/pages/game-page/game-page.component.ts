@@ -43,6 +43,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     escapeAttempts: number = 2;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
     movementPointsRemaining: number = 0;
+    isDebugMode: boolean = false;
 
     /* eslint-disable-next-line max-params */ // to fix
     constructor(
@@ -60,6 +61,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.logEntries = logBook;
         });
         this.gameSocketService.initializeSocketListeners(this);
+        document.addEventListener('keydown', this.handleKeyPress.bind(this));
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -74,9 +76,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     handleAttackClick(targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
+
         if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
-                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
+                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode, this.isDebugMode);
                 return;
             }
         }
@@ -89,6 +92,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
+    }
+
+    handleTeleport(targetTile: Tile): void {
+        if (!this.isDebugMode || this.isInCombatMode) return;
+        if (this.clientPlayer.name === this.currentPlayer.name) {
+            this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
+        }
     }
     updateQuickestPath(targetTile: Tile): void {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
@@ -122,6 +132,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.logBookSubscription.unsubscribe();
         this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
+        document.removeEventListener('keydown', this.handleKeyPress.bind(this));
     }
 
     attack(): void {
@@ -192,5 +203,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     private isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+    }
+    private handleKeyPress(event: KeyboardEvent): void {
+        if (event.key.toLowerCase() === 'd' && this.clientPlayer.isAdmin) {
+            this.socketClientService.sendAdminModeUpdate(this.lobby.accessCode);
+        }
     }
 }

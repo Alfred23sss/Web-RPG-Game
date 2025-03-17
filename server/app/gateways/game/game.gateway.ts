@@ -62,9 +62,12 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.StartCombat)
-    handleStartCombat(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; attackerName: string; defenderName: string }) {
+    handleStartCombat(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() payload: { accessCode: string; attackerName: string; defenderName: string; isDebugMode: boolean },
+    ) {
         this.logger.log(`Starting combat for game ${payload.accessCode}`);
-        this.gameCombatService.startCombat(payload.accessCode, payload.attackerName, payload.defenderName);
+        this.gameCombatService.startCombat(payload.accessCode, payload.attackerName, payload.defenderName, payload.isDebugMode);
     }
 
     @SubscribeMessage(GameEvents.PerformAttack)
@@ -104,11 +107,25 @@ export class GameGateway {
         this.logger.log('Escape attempt received by server');
     }
 
+    @SubscribeMessage(GameEvents.AdminModeUpdate)
+    handleAdminModeUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+        this.server.to(payload.accessCode).emit('adminModeChangedServerSide');
+        this.logger.log('Admin Mode Changed');
+    }
+
+    @SubscribeMessage(GameEvents.TeleportPlayer)
+    handleTeleportPlayer(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; targetTile: Tile }) {
+        this.logger.log('on est dans le gateway');
+        this.logger.log(payload.targetTile);
+        this.gameSessionService.callTeleport(payload.accessCode, payload.player, payload.targetTile);
+        this.logger.log('player teleported');
+    }
+
     @OnEvent('game.combat.ended')
-    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string }): void {
+    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string; winner: Player }): void {
         this.logger.log('sending to client combat ended');
-        this.logger.log(`socked id 1 : ${payload.attackerSocketId}, socket id 2: ${payload.defenderSocketId}`);
-        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatEnded');
+        this.logger.log(`winner is ${payload.winner.name}`);
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatEnded', { winner: payload.winner });
     }
 
     @OnEvent('game.combat.escape.failed')
@@ -233,6 +250,11 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit('combatTimeout', {
             fighter: payload.fighter,
         });
+    }
+
+    @OnEvent('admin.mode.disabled')
+    handleAdminModeDisabled(payload: { accessCode: string }) {
+        this.server.to(payload.accessCode).emit('adminModeDisabled');
     }
 
     @OnEvent('game.combat.turn.started')
