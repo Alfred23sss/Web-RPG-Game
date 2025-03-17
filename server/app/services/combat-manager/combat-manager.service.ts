@@ -160,6 +160,8 @@ export class GameCombatService {
         const { attacker, defender, winner, pausedGameTurnTimeRemaining } = combatState;
 
         this.emitCombatEnded(attacker, defender);
+        delete this.combatStates[accessCode];
+        if (!this.gameSessionService.getGameSession(accessCode)) return;
 
         this.gameSessionService.setCombatState(accessCode, false);
 
@@ -170,8 +172,6 @@ export class GameCombatService {
         } else {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
         }
-
-        delete this.combatStates[accessCode];
     }
 
     isCombatActive(accessCode: string): boolean {
