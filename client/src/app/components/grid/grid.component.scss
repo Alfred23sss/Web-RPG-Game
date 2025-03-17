@@ -18,6 +18,15 @@
     height: fit-content;
 }
 
+.highlight-player {
+    border-color: red;
+    border: 2px solid red;
+}
+.highlight-door {
+    border-color: red;
+    border: 2px solid red;
+}
+
 app-tile {
     display: inline-block;
     box-sizing: border-box;
@@ -51,4 +60,16 @@ app-tile:hover {
         left: 50%;
         transform: translate(-50%, -50%); // Centre le point dans la tuile
     }
+}
+
+.tooltip-content {
+    text-align: center;
+    font-size: 14px;
+}
+
+.tooltip-image {
+    max-width: 100px;
+    max-height: 100px;
+    margin-top: 8px;
+    border-radius: 4px;
 }

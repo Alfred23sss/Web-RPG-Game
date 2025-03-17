@@ -90,16 +90,16 @@ export class PlayerMovementService {
         return player.movementPoints;
     }
 
+    getMoveCost(neighbor: Tile): number {
+        return this.movementCosts.get(neighbor.type) ?? Infinity;
+    }
+
     private isNeighborBlocked(neighbor: Tile): boolean {
         return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
     }
 
     private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
         return newRemaining >= 0 && newRemaining > neighborRemaining;
-    }
-
-    private getMoveCost(neighbor: Tile): number {
-        return this.movementCosts.get(neighbor.type) ?? Infinity;
     }
 
     private isValidNeighbor(neighbor: Tile): boolean {
