@@ -54,7 +54,116 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.gameSocketService.initializeSocketListeners(this);
+        // enlever session storage simplement recevoir accessCode de waiting-view et get du serveur les infos necessaire
+        const lobby = sessionStorage.getItem('lobby');
+        this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; // lobby peut etre inutile, car on a accesscode
+        const clientPlayer = sessionStorage.getItem('player');
+        this.clientPlayer = clientPlayer ? (JSON.parse(clientPlayer) as Player) : this.clientPlayer;
+        this.playerList = JSON.parse(sessionStorage.getItem('orderedPlayers') || '[]');
+        const game = sessionStorage.getItem('game');
+        this.game = game ? (JSON.parse(game) as Game) : this.game;
+
+        this.handlePageRefresh();
+
+        this.socketClientService.onAbandonGame((data) => {
+            const abandonedPlayer = this.playerList.find((p) => p.name === data.player.name);
+            if (!abandonedPlayer) return;
+            abandonedPlayer.hasAbandoned = true;
+            this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
+        });
+
+        this.socketClientService.onGameDeleted(() => {
+            this.snackbarService.showMessage("Trop de joueurs ont abandonnés la partie, vous allez être redirigé vers la page d'accueil");
+            setTimeout(() => {
+                this.backToHome();
+            }, delayBeforeHome);
+        });
+
+        this.socketClientService.onTransitionStarted((data) => {
+            this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+        });
+
+        this.socketClientService.onTurnStarted((data) => {
+            this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
+            this.currentPlayer = data.player;
+            this.isCurrentlyMoving = false;
+            this.isActionMode = false;
+            this.isInCombatMode = false;
+            this.clientPlayer.actionPoints = defaultActionPoint;
+            this.clientPlayer.movementPoints = this.clientPlayer.speed;
+            this.turnTimer = data.turnDuration;
+            this.updateAvailablePath();
+        });
+
+        this.socketClientService.onTimerUpdate((data) => {
+            this.turnTimer = data.timeLeft;
+        });
+
+        this.socketClientService.onAlertGameStarted((data) => {
+            this.playerList = data.orderedPlayers;
+            this.game = data.updatedGame;
+        });
+
+        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
+            if (this.game && this.game.grid) {
+                this.game.grid = data.grid;
+            }
+            if (this.clientPlayer.name === data.player.name) {
+                this.clientPlayer.movementPoints =
+                    this.clientPlayer.movementPoints -
+                    this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
+                this.isCurrentlyMoving = data.isCurrentlyMoving;
+                this.updateAvailablePath();
+            }
+        });
+
+        this.socketClientService.onGameCombatStarted(() => {
+            this.isInCombatMode = true;
+        });
+
+        this.socketClientService.onAttackResult((data) => {
+            if (data.success) {
+                console.log(`Combat reussi score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+            } else {
+                console.log(`Combat perdu score attaque: ${data.attackScore}, score defense: ${data.defenseScore}`);
+            }
+        });
+
+        this.socketClientService.onPlayerUpdate((data) => {
+            if (this.clientPlayer.name === data.player.name) {
+                this.clientPlayer = data.player;
+            }
+        });
+
+        this.socketClientService.onPlayerListUpdate((data) => {
+            console.log(data.players);
+            this.playerList = data.players;
+        });
+
+        this.socketClientService.onDoorClickedUpdate((data) => {
+            if (!this.game || !this.game.grid) {
+                return;
+            }
+            this.game.grid = data.grid;
+            this.clientPlayer.actionPoints = noActionPoints;
+            this.isActionMode = false;
+            this.updateAvailablePath();
+        });
+
+        this.socketClientService.onGameCombatTurnStarted((data) => {
+            this.currentPlayer = data.fighter;
+        });
+
+        this.socketClientService.onGameCombatTimerUpdate((data) => {
+            this.turnTimer = data.timeLeft;
+        });
+
+        this.socketClientService.onGridUpdate((data) => {
+            if (!this.game || !this.game.grid) {
+                return;
+            }
+            this.game.grid = data.grid;
+        });
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -69,9 +178,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     handleAttackClick(targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
-        if (this.isActionMode && currentTile && currentTile.player) {
-            this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
-            return;
+        if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
+            if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
+                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
+                return;
+            }
         }
     }
 
@@ -82,11 +193,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
-    }
-    handleTileRightClick(data: { tile: Tile; event: MouseEvent }): void {
-        const { tile, event } = data;
-        console.log(tile, event);
-        return;
     }
     updateQuickestPath(targetTile: Tile): void {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
@@ -108,7 +214,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     executeNextAction(): void {
         console.log(this.isActionMode);
         this.isActionMode = !this.isActionMode;
-        this.gameSocketService.showMessage('Mode combat activé');
+        this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
         this.clientPlayer.hasAbandoned = true;
@@ -122,20 +228,39 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     rollAttackDice(): void {
-        return;
+        this.socketClientService.attack(this.clientPlayer.name, this.lobby.accessCode);
     }
 
     rollDefenseDice(): void {
         return;
     }
 
-    updateAvailablePath(): void {
-        if (this.currentPlayer.name === this.clientPlayer.name && this.game && this.game.grid) {
-            this.availablePath = this.playerMovementService.availablePath(
-                this.getClientPlayerPosition(),
-                this.clientPlayer.movementPoints,
-                this.game.grid,
-            );
+    private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
+        let tile1Pos: { row: number; col: number } | null = null;
+        let tile2Pos: { row: number; col: number } | null = null;
+        for (let row = 0; row < grid.length; row++) {
+            for (let col = 0; col < grid[row].length; col++) {
+                if (grid[row][col].id === tileId1) {
+                    tile1Pos = { row, col };
+                }
+                if (grid[row][col].id === tileId2) {
+                    tile2Pos = { row, col };
+                }
+                if (tile1Pos && tile2Pos) break;
+            }
+            if (tile1Pos && tile2Pos) break;
+        }
+        if (!tile1Pos || !tile2Pos) return false;
+        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+    }
+
+    private isAvailablePath(tile: Tile): boolean {
+        return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+    }
+
+    private handlePageRefresh(): void {
+        if (sessionStorage.getItem('refreshed') === 'true') {
+            this.abandonGame();
         } else {
             this.availablePath = [];
         }
