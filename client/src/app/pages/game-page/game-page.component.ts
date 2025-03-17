@@ -48,7 +48,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private router: Router,
         private socketClientService: SocketClientService,
         private logbookService: LogBookService,
-        private snackbarService: SnackbarService,
+        private snackbarService: SnackbarService, // private gameSocketService: GameSocketService,
     ) {
         this.logEntries = this.logbookService.logBook;
         this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
@@ -57,6 +57,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        // this.gameSocketService.initializeSocketListeners(this);
+
         // enlever session storage simplement recevoir accessCode de waiting-view et get du serveur les infos necessaire
         const lobby = sessionStorage.getItem('lobby');
         this.lobby = lobby ? (JSON.parse(lobby) as Lobby) : this.lobby; // lobby peut etre inutile, car on a accesscode
@@ -251,6 +253,40 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     // rajouter socketService.on pr le retour du server.
 
+    getClientPlayerPosition(): Tile | undefined {
+        if (!this.game || !this.game.grid || !this.clientPlayer) {
+            return undefined;
+        }
+        for (const row of this.game.grid) {
+            for (const tile of row) {
+                if (tile.player && tile.player.name === this.clientPlayer.name) {
+                    return tile;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    updateAvailablePath(): void {
+        if (this.currentPlayer.name === this.clientPlayer.name && this.game && this.game.grid) {
+            this.availablePath = this.playerMovementService.availablePath(
+                this.getClientPlayerPosition(),
+                this.clientPlayer.movementPoints,
+                this.game.grid,
+            );
+        } else {
+            this.availablePath = [];
+        }
+    }
+
+    handlePageRefresh(): void {
+        if (sessionStorage.getItem('refreshed') === 'true') {
+            this.abandonGame();
+        } else {
+            sessionStorage.setItem('refreshed', 'true');
+        }
+    }
+
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;
         let tile2Pos: { row: number; col: number } | null = null;
@@ -272,39 +308,5 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     private isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
-    }
-
-    private handlePageRefresh(): void {
-        if (sessionStorage.getItem('refreshed') === 'true') {
-            this.abandonGame();
-        } else {
-            sessionStorage.setItem('refreshed', 'true');
-        }
-    }
-
-    private getClientPlayerPosition(): Tile | undefined {
-        if (!this.game || !this.game.grid || !this.clientPlayer) {
-            return undefined;
-        }
-        for (const row of this.game.grid) {
-            for (const tile of row) {
-                if (tile.player && tile.player.name === this.clientPlayer.name) {
-                    return tile;
-                }
-            }
-        }
-        return undefined;
-    }
-
-    private updateAvailablePath(): void {
-        if (this.currentPlayer.name === this.clientPlayer.name && this.game && this.game.grid) {
-            this.availablePath = this.playerMovementService.availablePath(
-                this.getClientPlayerPosition(),
-                this.clientPlayer.movementPoints,
-                this.game.grid,
-            );
-        } else {
-            this.availablePath = [];
-        }
     }
 }
