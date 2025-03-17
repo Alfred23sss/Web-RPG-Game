@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -18,10 +18,7 @@ import { Subscription } from 'rxjs';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, CommonModule],
 })
-export class CharacterFormComponent implements OnInit {
-    unavailableAvatars: string[] = []; //
-    private readonly subscriptions = new Subscription();
-
+export class CharacterFormComponent implements OnInit, OnDestroy {
     showForm: boolean = true;
     xSword: string = GameDecorations.XSwords;
     isLobbyCreated: boolean;
@@ -32,10 +29,11 @@ export class CharacterFormComponent implements OnInit {
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
-
+    unavailableAvatars: string[] = []; //
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
+    private readonly subscriptions = new Subscription();
 
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
@@ -55,14 +53,13 @@ export class CharacterFormComponent implements OnInit {
         this.subscriptions.add(
             this.characterService.unavailableAvatars$.subscribe((avatars) => {
                 this.unavailableAvatars = avatars;
-                this.cdr.detectChanges(); 
+                this.cdr.detectChanges();
             }),
         );
     }
 
     assignBonus(attribute: AttributeType): void {
         this.characterService.assignBonus(this.createdPlayer, attribute);
-        console.log('Personnage après assignation du bonus :', this.createdPlayer); // ✅ Vérification après modification
     }
 
     assignDice(attribute: AttributeType): void {
@@ -90,7 +87,7 @@ export class CharacterFormComponent implements OnInit {
             this.returnHome();
             return;
         }
-        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game!, () =>
+        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game, () =>
             this.resetPopup(),
         );
     }
@@ -107,12 +104,12 @@ export class CharacterFormComponent implements OnInit {
         this.dialogRef.close();
     }
 
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
+
     private returnHome(): void {
         this.closePopup();
         this.characterService.returnHome();
-    }
-
-    ngOnDestroy(): void {
-        this.subscriptions.unsubscribe();
     }
 }

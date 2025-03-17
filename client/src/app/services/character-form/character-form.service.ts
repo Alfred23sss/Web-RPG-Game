@@ -14,12 +14,11 @@ import { BehaviorSubject } from 'rxjs';
     providedIn: 'root',
 })
 export class CharacterService {
-    private unavailableAvatarsSubject = new BehaviorSubject<string[]>([]);
+    unavailableAvatarsSubject = new BehaviorSubject<string[]>([]); // not private to fix lint error
     unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
-    attributes = { ...INITIAL_VALUES.attributes };
+    attributes = { ...INITIAL_VALUES.attributes }; // private?
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
-    unavailableAvatars: string[] = [];
 
     constructor(
         private readonly router: Router,
@@ -28,6 +27,7 @@ export class CharacterService {
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
     ) {}
+
     initializePlayer(player: Player): void {
         player.name = '';
         player.avatar = '';
@@ -49,7 +49,7 @@ export class CharacterService {
 
         this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
             if (!data.avatars) return;
-            this.unavailableAvatars = [...data.avatars];
+            this.unavailableAvatarsSubject.next([...data.avatars]);
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
 
@@ -63,23 +63,6 @@ export class CharacterService {
             this.bonusAssigned[attribute] = true;
         }
         this.updatePlayerStats(player, attribute);
-    }
-    private resetOtherBonus(attribute: AttributeType): void {
-        const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
-        if (this.bonusAssigned[otherAttribute]) {
-            this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
-            this.bonusAssigned[otherAttribute] = false;
-        }
-    }
-    private updatePlayerStats(player: Player, attribute: AttributeType): void {
-        if (attribute === AttributeType.Vitality) {
-            player.hp.current = player.hp.max = this.attributes[AttributeType.Vitality];
-            player.speed = INITIAL_VALUES.attributes[AttributeType.Speed];
-        } else if (attribute === AttributeType.Speed) {
-            player.speed = this.attributes[AttributeType.Speed];
-            player.movementPoints = player.speed;
-            player.hp.current = player.hp.max = INITIAL_VALUES.attributes[AttributeType.Vitality];
-        }
     }
 
     assignDice(player: Player, attribute: AttributeType): void {
@@ -139,36 +122,6 @@ export class CharacterService {
         }
     }
 
-    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, closePopup: () => void): void {
-        switch (joinStatus) {
-            case JoinLobbyResult.JoinedLobby:
-                this.finalizeCharacterSubmission(player, closePopup);
-                break;
-            case JoinLobbyResult.StayInLobby:
-                break;
-            case JoinLobbyResult.RedirectToHome:
-                this.returnHome();
-                break;
-        }
-        this.validateGameAvailability(game, closePopup);
-
-        if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
-        } else {
-            this.showMissingDetailsError();
-        }
-    }
-
-    private finalizeCharacterSubmission(player: Player, closePopup: () => void): void {
-        if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
-        } else {
-            this.showMissingDetailsError();
-        }
-    }
-
     async joinExistingLobby(accessCode: string, player: Player): Promise<string> {
         return new Promise((resolve) => {
             this.socketClientService.getLobby(accessCode).subscribe({
@@ -222,6 +175,54 @@ export class CharacterService {
 
     showMissingDetailsError(): void {
         this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
+    }
+
+    private resetOtherBonus(attribute: AttributeType): void {
+        const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
+        if (this.bonusAssigned[otherAttribute]) {
+            this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
+            this.bonusAssigned[otherAttribute] = false;
+        }
+    }
+    private updatePlayerStats(player: Player, attribute: AttributeType): void {
+        if (attribute === AttributeType.Vitality) {
+            player.hp.current = player.hp.max = this.attributes[AttributeType.Vitality];
+            player.speed = INITIAL_VALUES.attributes[AttributeType.Speed];
+        } else if (attribute === AttributeType.Speed) {
+            player.speed = this.attributes[AttributeType.Speed];
+            player.movementPoints = player.speed;
+            player.hp.current = player.hp.max = INITIAL_VALUES.attributes[AttributeType.Vitality];
+        }
+    }
+
+    private finalizeCharacterSubmission(player: Player, closePopup: () => void): void {
+        if (this.isCharacterValid(player)) {
+            sessionStorage.setItem('player', JSON.stringify(player));
+            this.proceedToWaitingView(closePopup);
+        } else {
+            this.showMissingDetailsError();
+        }
+    }
+
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, closePopup: () => void): void {
+        switch (joinStatus) {
+            case JoinLobbyResult.JoinedLobby:
+                this.finalizeCharacterSubmission(player, closePopup);
+                break;
+            case JoinLobbyResult.StayInLobby:
+                break;
+            case JoinLobbyResult.RedirectToHome:
+                this.returnHome();
+                break;
+        }
+        this.validateGameAvailability(game, closePopup);
+
+        if (this.isCharacterValid(player)) {
+            sessionStorage.setItem('player', JSON.stringify(player));
+            this.proceedToWaitingView(closePopup);
+        } else {
+            this.showMissingDetailsError();
+        }
     }
 
     private hasBonusAssigned(player: Player): boolean {
