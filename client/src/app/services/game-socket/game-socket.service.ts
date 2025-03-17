@@ -126,6 +126,12 @@ export class GameSocketService {
                 component.isCurrentlyMoving = data.isCurrentlyMoving;
                 component.updateAvailablePath();
             }
+
+            // rajouter cas ou ya de la glace et cas ou on a pu de mouvement mais action disponible autour du joeur
+
+            if (!component.clientPlayer.actionPoints && !component.clientPlayer.movementPoints) {
+                component.endTurn();
+            }
         });
 
         this.socketClientService.onGameCombatStarted(() => {
@@ -188,6 +194,9 @@ export class GameSocketService {
             }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
+            }
+            if (!component.clientPlayer.actionPoints || !component.clientPlayer.movementPoints) {
+                component.endTurn();
             }
         });
 

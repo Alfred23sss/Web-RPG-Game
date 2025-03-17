@@ -71,6 +71,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode);
+        if (!this.clientPlayer.actionPoints || !this.movementPointsRemaining) {
+            this.endTurn();
+        }
     }
 
     handleAttackClick(targetTile: Tile): void {
