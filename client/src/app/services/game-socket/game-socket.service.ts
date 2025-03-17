@@ -40,6 +40,7 @@ export class GameSocketService {
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
+            component.backToHome();
         });
 
         this.socketClientService.onGameDeleted(() => {
@@ -47,6 +48,12 @@ export class GameSocketService {
             setTimeout(() => {
                 component.backToHome();
             }, delayBeforeHome);
+        });
+
+        this.socketClientService.onGameEnded((data) => {
+            this.snackbarService.showMessage(`${data.winner} a gagne la partie! Vous allez etre redirige a la page d'acceuil!`);
+            component.abandonGame();
+            // rediriger to home
         });
 
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {

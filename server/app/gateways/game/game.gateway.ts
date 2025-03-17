@@ -200,6 +200,14 @@ export class GameGateway {
         this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatStarted');
     }
 
+    @OnEvent('game.ended')
+    handleGameEnded(payload: { accessCode: string; winner: string }) {
+        this.logger.log('emitting game ended to client');
+        this.gameSessionService.deleteGameSession(payload.accessCode);
+        // disconect from lobby here
+        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner });
+    }
+
     @OnEvent('game.combat.timer')
     handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
         this.server.to(payload.accessCode).emit('combatTimerUpdate', {
