@@ -10,4 +10,5 @@ export interface CombatState {
     combatTurnTimeRemaining: number;
     pausedGameTurnTimeRemaining?: number;
     winner?: Player;
+    playerPerformedAction: boolean;
 }

@@ -61,12 +61,13 @@ export class CharacterFormComponent implements OnInit {
             defense: { value: 4, bonusDice: DiceType.Uninitialized },
             hp: { current: 4, max: 4 },
             movementPoints: 4,
-            actionPoints: 3,
+            actionPoints: 1,
             inventory: [null, null],
             isAdmin: false,
             hasAbandoned: false,
             isActive: false,
             combatWon: 0,
+            spawnPoint: undefined,
         };
     }
 

@@ -48,4 +48,8 @@ export class PlayerDto {
 
     @IsNumber()
     combatWon: number;
+
+    @IsOptional()
+    @ValidateNested()
+    spawnPoint?: { x: number; y: number; tileId: string } | undefined;
 }
