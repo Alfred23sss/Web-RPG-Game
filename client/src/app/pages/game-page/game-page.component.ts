@@ -171,6 +171,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.socketClientService.on('noMoreEscapesLeft', () => {
             this.hasEscapeAttemptsLeft = false;
         });
+
+        this.socketClientService.on('combatEnded', () => {
+            this.hasEscapeAttemptsLeft = true;
+            this.isInCombatMode = false;
+            this.isActionMode = false;
+            this.clientPlayer.actionPoints = noActionPoints;
+        });
     }
 
     handleDoorClick(targetTile: Tile): void {

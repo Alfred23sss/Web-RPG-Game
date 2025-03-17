@@ -13,7 +13,7 @@ const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
-const ESCAPE_THRESHOLD = 0.5;
+const ESCAPE_THRESHOLD = 0.3;
 
 @Injectable()
 export class GameCombatService {
@@ -120,7 +120,16 @@ export class GameCombatService {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
-        const { currentFighter, remainingEscapeAttempts } = combatState;
+        if (combatState.combatTurnTimers) {
+            clearTimeout(combatState.combatTurnTimers);
+            combatState.combatTurnTimers = null;
+        }
+        if (combatState.combatCountdownInterval) {
+            clearInterval(combatState.combatCountdownInterval);
+            combatState.combatCountdownInterval = null;
+        }
+
+        const { currentFighter, remainingEscapeAttempts, attacker, defender } = combatState;
         combatState.playerPerformedAction = true;
         // useless code?? button not even available when not player turn
         if (currentFighter.name !== player.name) {
@@ -128,20 +137,19 @@ export class GameCombatService {
             return;
         }
 
-        const attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
+        let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
+        attemptsLeft--;
+        remainingEscapeAttempts.set(player.name, attemptsLeft);
+        const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
         if (attemptsLeft === 0) {
             this.emitNoMoreEscapesLeft(currentFighter);
-            return;
         }
-
-        remainingEscapeAttempts.set(player.name, attemptsLeft - 1);
-
-        const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
-
-        // this.emitCombatEscapeAttemptResult(accessCode, currentFighter, isEscapeSuccessful, attemptsLeft - 1);
 
         if (isEscapeSuccessful) {
             this.logger.log(`Escape successful for ${player.name}`);
+            const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
+            const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
+            this.resetHealth([attacker, defender], [attackerSocketId, defenderSocketId], accessCode);
             this.endCombat(accessCode, true);
         } else {
             this.logger.log(`Escape failed for ${player.name}`);
@@ -165,7 +173,7 @@ export class GameCombatService {
 
         const { attacker, defender, winner, pausedGameTurnTimeRemaining } = combatState;
 
-        this.emitCombatEnded(accessCode, attacker, defender, winner, isEscape);
+        this.emitCombatEnded(attacker, defender);
 
         this.gameSessionService.setCombatState(accessCode, false);
 
@@ -378,13 +386,12 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEnded(accessCode: string, attacker: Player, defender: Player, winner: Player, isEscape: boolean): void {
+    private emitCombatEnded(attacker: Player, defender: Player): void {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
         this.eventEmitter.emit('game.combat.ended', {
-            accessCode,
-            attacker,
-            defender,
-            winner,
-            isEscape,
+            attackerSocketId,
+            defenderSocketId,
         });
     }
 }

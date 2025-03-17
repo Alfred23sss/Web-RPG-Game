@@ -103,6 +103,11 @@ export class GameGateway {
         this.logger.log('Escape attempt received by server');
     }
 
+    @OnEvent('game.combat.ended')
+    handleCombatEnded(payload: { attackSocketId: string; defenseSocketId: string }): void {
+        this.server.to([payload.attackSocketId, payload.defenseSocketId]).emit('combatEnded');
+    }
+
     @OnEvent('game.combat.escape.failed')
     handleNoMoreEscapeAttempts(payload: { player: Player; playerSocketId: string }): void {
         this.server.to(payload.playerSocketId).emit('noMoreEscapesLeft', {
