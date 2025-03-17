@@ -58,17 +58,16 @@ export class GameCombatService {
     performAttack(accessCode: string, attackerName: string): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
-
-        this.resetCombatTimers(accessCode);
-
         const { attacker, defender, currentFighter } = combatState;
+        if (currentFighter.name !== attackerName) {
+            this.logger.warn(`Not ${attackerName}'s turn in combat`);
+
+            return;
+        }
+        this.resetCombatTimers(accessCode);
         combatState.playerPerformedAction = true;
 
         this.logger.log(`${currentFighter.name}, ${attackerName}`);
-        if (currentFighter.name !== attackerName) {
-            this.logger.warn(`Not ${attackerName}'s turn in combat`);
-            return;
-        }
 
         const attackerScore = this.getRandomAttackScore(currentFighter, accessCode);
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
@@ -120,11 +119,12 @@ export class GameCombatService {
 
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
+        this.emitNoMoreEscapesLeft(currentFighter, attemptsLeft);
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
-        if (attemptsLeft === 0) {
-            this.emitNoMoreEscapesLeft(currentFighter);
-        }
+        // if (attemptsLeft === 0) {
+        //     this.emitNoMoreEscapesLeft(currentFighter);
+        // }
 
         if (isEscapeSuccessful) {
             this.logger.log(`Escape successful for ${player.name}`);
@@ -370,11 +370,12 @@ export class GameCombatService {
         });
     }
 
-    private emitNoMoreEscapesLeft(player: Player): void {
+    private emitNoMoreEscapesLeft(player: Player, attemptsLeft: number): void {
         const playerSocketId = this.lobbyService.getPlayerSocket(player.name);
         this.eventEmitter.emit('game.combat.escape.failed', {
             player,
             playerSocketId,
+            attemptsLeft,
         });
     }
 

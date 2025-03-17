@@ -12,6 +12,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 const noActionPoints = 0;
 const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
+const defaultEscapeAttempts = 2;
 
 @Injectable({
     providedIn: 'root',
@@ -135,12 +136,12 @@ export class GameSocketService {
             component.game.grid = data.grid;
         });
 
-        this.socketClientService.on('noMoreEscapesLeft', () => {
-            component.hasEscapeAttemptsLeft = false;
+        this.socketClientService.on('noMoreEscapesLeft', (data: { player: Player; attemptsLeft: number }) => {
+            component.escapeAttempts = data.attemptsLeft;
         });
 
         this.socketClientService.on('combatEnded', () => {
-            component.hasEscapeAttemptsLeft = true;
+            component.escapeAttempts = defaultEscapeAttempts;
             component.isInCombatMode = false;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;

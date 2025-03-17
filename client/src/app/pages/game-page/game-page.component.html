@@ -116,26 +116,33 @@
         </div>
         @if(isInCombatMode){
         <div class="dice-buttons">
-            <button class="dice" (click)="attack()">Attaquer</button>
+            <button
+                class="dice"
+                (click)="attack()"
+                [disabled]="clientPlayer.name !== currentPlayer.name"
+                [ngClass]="{ 'disabled-btn': clientPlayer.name !== currentPlayer.name }"
+            >
+                Attaquer
+            </button>
 
             <button
                 class="dice"
                 (click)="evade()"
-                [disabled]="!hasEscapeAttemptsLeft"
-                [ngClass]="{ 'disabled-btn': !hasEscapeAttemptsLeft }"
+                [disabled]="escapeAttempts === 0 || clientPlayer.name !== currentPlayer.name"
+                [ngClass]="{ 'disabled-btn': escapeAttempts === 0 || clientPlayer.name !== currentPlayer.name }"
             >
-                {{ hasEscapeAttemptsLeft ? "S'Évader" : 'Aucune tentative' }}
+                {{ escapeAttempts > 0 ? "S'Évader (" + escapeAttempts + ')' : 'Aucune tentative' }}
             </button>
+
             @if(attackResult){
-                <p>Résultat du combat :</p>
-                @if(attackResult.success){
-                <p>✅ Victoire! Score Attaque: {{ attackResult.attackScore }}, Score Défense: {{ attackResult.defenseScore }}</p>
-                } @else {
-                <p>❌ Défaite! Score Attaque: {{ attackResult.attackScore }}, Score Défense: {{ attackResult.defenseScore }}</p>
-                }
-            }
+            <p>Résultat du combat :</p>
+            @if(attackResult.success){
+            <p>✅ Victoire! Score Attaque: {{ attackResult.attackScore }}, Score Défense: {{ attackResult.defenseScore }}</p>
+            } @else {
+            <p>❌ Défaite! Score Attaque: {{ attackResult.attackScore }}, Score Défense: {{ attackResult.defenseScore }}</p>
+            } }
         </div>
-    }
+        }
         <div class="game-messages">
             <h3>Messages</h3>
             <div class="message-toggle">

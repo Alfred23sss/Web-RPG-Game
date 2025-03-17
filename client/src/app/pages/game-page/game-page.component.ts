@@ -15,6 +15,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 import { Subscription } from 'rxjs';
 
 const noActionPoints = 0;
+const messageTimer = 2000;
 
 @Component({
     selector: 'app-game-page',
@@ -40,7 +41,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isInCombatMode: boolean = false;
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
-    hasEscapeAttemptsLeft: boolean = true;
+    escapeAttempts: number = 2;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
 
     /* eslint-disable-next-line max-params */ // to fix
@@ -51,14 +52,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private logbookService: LogBookService,
         private snackbarService: SnackbarService,
         private gameSocketService: GameSocketService,
-    ) {
+    ) {}
+
+    ngOnInit(): void {
         this.logEntries = this.logbookService.logBook;
         this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
             this.logEntries = logBook;
         });
-    }
-
-    ngOnInit(): void {
         this.gameSocketService.initializeSocketListeners(this);
     }
 
