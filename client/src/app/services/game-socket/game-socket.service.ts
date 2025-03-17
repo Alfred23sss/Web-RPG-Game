@@ -12,6 +12,7 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
 const noActionPoints = 0;
 const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
+const delayBeforeEndingGame = 5000;
 const defaultEscapeAttempts = 2;
 
 @Injectable({
@@ -52,9 +53,10 @@ export class GameSocketService {
         });
 
         this.socketClientService.onGameEnded((data) => {
-            this.snackbarService.showMessage(`${data.winner} a gagne la partie! Vous allez etre redirige a la page d'acceuil!`);
-            component.abandonGame();
-            // rediriger to home
+            this.snackbarService.showMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+            setTimeout(() => {
+                component.abandonGame();
+            }, delayBeforeEndingGame);
         });
 
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
