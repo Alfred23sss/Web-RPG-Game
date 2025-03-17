@@ -42,16 +42,12 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.lobbyService.initializeLobby();
-        this.subscriptions.add(
-            this.lobbyService.lobby.subscribe((lobby) => {
-                console.log('Mise à jour du lobby :', lobby);
-            }),
-        );
+        this.lobbyService.initializeKickSocket();
 
         this.player = this.lobbyService.getPlayer();
         console.log('Player chargé :', this.player);
 
-        this.subscriptions.add(
+        this.subscriptions.add(//deplacer dans une fnction
             this.lobbyService.kickedPlayer$.subscribe((kickedPlayer) => {
                 if (kickedPlayer.name === this.player.name) {
                     this.router.navigate([Routes.HomePage]);
@@ -93,7 +89,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.router.navigate([Routes.HomePage]);
     }
 
-    navigateToGame(): void {//c est quand q on l utilise
+    navigateToGame(): void {//chtml
         this.lobbyService.lobby.subscribe((lobby) => {
             if (!lobby) return;
 
