@@ -14,6 +14,26 @@ const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
 const delayBeforeEndingGame = 5000;
 const defaultEscapeAttempts = 2;
+const events = [
+    'abandonGame',
+    'gameDeleted',
+    'gameEnded',
+    'transitionStarted',
+    'turnStarted',
+    'timerUpdate',
+    'alertGameStarted',
+    'playerMovement',
+    'gameCombatStarted',
+    'attackResult',
+    'playerUpdate',
+    'playerListUpdate',
+    'doorClickedUpdate',
+    'gameCombatTurnStarted',
+    'gameCombatTimerUpdate',
+    'gridUpdate',
+    'noMoreEscapesLeft',
+    'combatEnded',
+];
 
 @Injectable({
     providedIn: 'root',
@@ -154,6 +174,12 @@ export class GameSocketService {
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
+        });
+    }
+
+    unsubscribeSocketListeners(): void {
+        events.forEach((event) => {
+            this.socketClientService.socket.off(event);
         });
     }
 }

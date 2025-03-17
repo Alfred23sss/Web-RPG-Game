@@ -190,7 +190,7 @@ export class GameSessionService {
 
     getGameSession(accessCode: string): GameSession {
         const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) throw new Error('Game session not found');
+        if (!gameSession) return;
         return gameSession;
     }
 
