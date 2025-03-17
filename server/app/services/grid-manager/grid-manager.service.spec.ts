@@ -155,6 +155,20 @@ describe('GridManagerService', () => {
         expect(grid[1][3].player).toBe(mockPlayer);
     });
 
+    it('should not teleport player even if spawnPoint if no available tile', () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Wall, player: undefined, isOpen: true } as Tile,
+                { id: 'tile-0-1', type: TileType.Door, player: undefined, isOpen: false } as Tile,
+            ],
+            [
+                { id: 'tile-1-0', type: TileType.Default, player: { name: 'Player1' } as Player, isOpen: true } as Tile,
+                { id: 'tile-1-1', type: TileType.Default, player: { name: 'Player2' } as Player, isOpen: true } as Tile,
+            ],
+        ];
+        expect(service.teleportPlayer(grid, mockPlayer, grid[0][0])).toBe(grid);
+    });
+
     it('should not teleport if player is not in grid and should send warning', () => {
         expect(service.teleportPlayer(mockGrid, mockPlayer, mockGrid[1][0])).toBe(mockGrid);
         expect(logger.warn).toHaveBeenCalledWith('Player Player1 not found on any tile.');

@@ -106,7 +106,10 @@ export class GridManagerService {
 
         if (targetTile.player || targetTile.type === 'mur' || (targetTile.type === 'porte' && !targetTile.isOpen)) {
             if (isPlayerSpawnPoint) {
-                destinationTile = this.findClosestAvailableTile(grid, targetTile) || currentPlayerTile;
+                destinationTile = this.findClosestAvailableTile(grid, targetTile);
+                if (!destinationTile) {
+                    return grid;
+                }
             } else {
                 return grid;
             }
