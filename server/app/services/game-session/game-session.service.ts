@@ -137,7 +137,8 @@ export class GameSessionService {
     isCurrentPlayer(accessCode: string, playerName: string): boolean {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession || !gameSession.turn.currentPlayer) return false;
-        return gameSession.turn.currentPlayer.name === playerName;
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        return gameSession.turn.currentPlayer.name === playerName && !player?.hasAbandoned;
     }
 
     updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {

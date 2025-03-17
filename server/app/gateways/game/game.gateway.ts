@@ -122,10 +122,12 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.ended')
-    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string; winner: Player }): void {
+    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string; winner: Player; hasEvaded: boolean }): void {
         this.logger.log('sending to client combat ended');
         this.logger.log(`winner is ${payload.winner.name}`);
-        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatEnded', { winner: payload.winner });
+        this.server
+            .to([payload.attackerSocketId, payload.defenderSocketId])
+            .emit('combatEnded', { winner: payload.winner, hasEvaded: payload.hasEvaded });
     }
 
     @OnEvent('game.combat.escape.failed')
@@ -238,8 +240,8 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.timer')
-    handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
-        this.server.to(payload.accessCode).emit('combatTimerUpdate', {
+    handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number; attackerSocketId: string; defenderSocketId: string }) {
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatTimerUpdate', {
             timeLeft: payload.timeLeft,
         });
     }
@@ -258,9 +260,16 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.turn.started')
-    handleCombatTurnStarted(payload: { accessCode: string; fighter: Player; duration: number; escapeAttemptsLeft: number }) {
+    handleCombatTurnStarted(payload: {
+        accessCode: string;
+        fighter: Player;
+        duration: number;
+        escapeAttemptsLeft: number;
+        attackerSocketId: string;
+        defenderSocketId: string;
+    }) {
         this.logger.log(`Combat turn started for ${payload.fighter.name} in game ${payload.accessCode}`);
-        this.server.to(payload.accessCode).emit('combatTurnStarted', {
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatTurnStarted', {
             fighter: payload.fighter,
             duration: payload.duration,
             escapeAttemptsLeft: payload.escapeAttemptsLeft,

@@ -63,7 +63,6 @@ export class GameSocketService {
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
-            component.backToHome();
         });
 
         this.socketClientService.onGameDeleted(() => {
@@ -127,6 +126,20 @@ export class GameSocketService {
                 component.isCurrentlyMoving = data.isCurrentlyMoving;
                 component.updateAvailablePath();
             }
+
+            const clientPlayerPosition = component.getClientPlayerPosition();
+            if (!clientPlayerPosition) return;
+            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, data.grid);
+            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, data.grid);
+            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce) {
+                    component.endTurn();
+                }
+            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce && !hasActionAvailable) {
+                    component.endTurn();
+                }
+            }
         });
 
         this.socketClientService.onGameCombatStarted(() => {
@@ -176,19 +189,22 @@ export class GameSocketService {
             component.escapeAttempts = data.attemptsLeft;
         });
 
-        this.socketClientService.on('combatEnded', (data: { winner: Player }) => {
+        this.socketClientService.on('combatEnded', (data: { winner: Player; hasEvaded: boolean }) => {
             component.isInCombatMode = false;
             component.escapeAttempts = defaultEscapeAttempts;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
             component.attackResult = null;
             component.escapeAttempts = defaultEscapeAttempts;
-            if (data && data.winner) {
+            if (data && data.winner && !data.hasEvaded) {
                 // sa cache le changement de tour a fix
                 this.snackbarService.showMessage(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
             }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
+            }
+            if (!component.clientPlayer.actionPoints || !component.clientPlayer.movementPoints) {
+                component.endTurn();
             }
         });
 

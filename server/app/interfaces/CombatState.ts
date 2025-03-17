@@ -12,4 +12,5 @@ export interface CombatState {
     winner?: Player;
     playerPerformedAction: boolean;
     isDebugMode: boolean;
+    hasEvaded: boolean;
 }

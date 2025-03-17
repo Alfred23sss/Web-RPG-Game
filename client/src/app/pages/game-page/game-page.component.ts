@@ -44,6 +44,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
+    private keyPressHandler: (event: KeyboardEvent) => void;
 
     /* eslint-disable-next-line max-params */ // to fix
     constructor(
@@ -61,7 +62,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.logEntries = logBook;
         });
         this.gameSocketService.initializeSocketListeners(this);
-        document.addEventListener('keydown', this.handleKeyPress.bind(this));
+        this.keyPressHandler = this.handleKeyPress.bind(this);
+        document.addEventListener('keydown', this.keyPressHandler);
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -71,6 +73,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode);
+        if (!this.clientPlayer.actionPoints || !this.movementPointsRemaining) {
+            this.endTurn();
+        }
     }
 
     handleAttackClick(targetTile: Tile): void {
@@ -122,17 +127,17 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
-        // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?
+        //
         this.clientPlayer.hasAbandoned = true;
         this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
         this.backToHome();
     }
 
     ngOnDestroy(): void {
+        document.removeEventListener('keydown', this.keyPressHandler);
         this.logBookSubscription.unsubscribe();
         this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
-        document.removeEventListener('keydown', this.handleKeyPress.bind(this));
     }
 
     attack(): void {
@@ -172,6 +177,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
+            // if refresh abandons game
             this.abandonGame();
         } else {
             sessionStorage.setItem('refreshed', 'true');
