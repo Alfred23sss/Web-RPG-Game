@@ -104,8 +104,10 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.ended')
-    handleCombatEnded(payload: { attackSocketId: string; defenseSocketId: string }): void {
-        this.server.to([payload.attackSocketId, payload.defenseSocketId]).emit('combatEnded');
+    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string }): void {
+        this.logger.log('sending to client combat ended');
+        this.logger.log(`socked id 1 : ${payload.attackerSocketId}, socket id 2: ${payload.defenderSocketId}`);
+        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatEnded');
     }
 
     @OnEvent('game.combat.escape.failed')

@@ -387,8 +387,10 @@ export class GameCombatService {
     }
 
     private emitCombatEnded(attacker: Player, defender: Player): void {
+        this.logger.log('emitting to gateaway game ended');
         const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
+
         this.eventEmitter.emit('game.combat.ended', {
             attackerSocketId,
             defenderSocketId,
