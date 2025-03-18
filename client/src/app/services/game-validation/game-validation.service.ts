@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GRID_DIMENSIONS } from '@app/constants/global.constants';
-import { ErrorMessages, GameMode, ItemName, GameSize, ItemCount, TileType, GameSizeNumber } from '@app/enums/global.enums';
+import { ErrorMessages, GameMode, ItemName, ItemCount, TileType, GameSizeNumber } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GridPosition } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
@@ -80,7 +79,7 @@ export class GameValidationService {
             return errors;
         }
         const terrainProportionMin = 0.5;
-        const gridSize = Math.pow(GRID_DIMENSIONS[game.size as GameSize], 2);
+        const gridSize = Math.pow(Number(game.size), 2);
         let terrainTileCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
