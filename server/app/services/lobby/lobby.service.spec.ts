@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable max-lines */ // the original file respects this condition
 import { GameSize, GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
@@ -5,6 +7,8 @@ import { AccessCodesService } from '@app/services/access-codes/access-codes.serv
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
+import { DiceType } from '@app/interfaces/Dice';
+import { Lobby } from '@app/interfaces/Lobby';
 
 describe('LobbyService', () => {
     let lobbyService: LobbyService;
@@ -240,6 +244,251 @@ describe('LobbyService', () => {
                 names: ['test1', 'test2'],
                 avatars: ['avatar1', 'avatar2'],
             });
+        });
+    });
+    describe('setPlayerSocket', () => {
+        it('should set the socket ID for a player', () => {
+            const playerName = 'Player1';
+            const socketId = 'socket-123';
+
+            lobbyService.setPlayerSocket(playerName, socketId);
+
+            expect(lobbyService.getPlayerSocket(playerName)).toBe(socketId);
+        });
+    });
+
+    describe('getPlayerSocket', () => {
+        it('should return the socket ID for a player', () => {
+            const playerName = 'Player1';
+            const socketId = 'socket-123';
+
+            lobbyService.setPlayerSocket(playerName, socketId);
+
+            expect(lobbyService.getPlayerSocket(playerName)).toBe(socketId);
+        });
+
+        it('should return undefined for a non-existent player', () => {
+            expect(lobbyService.getPlayerSocket('NonExistentPlayer')).toBeUndefined();
+        });
+    });
+
+    describe('removePlayerSocket', () => {
+        it('should remove the socket ID for a player', () => {
+            const playerName = 'Player1';
+            const socketId = 'socket-123';
+
+            lobbyService.setPlayerSocket(playerName, socketId);
+            lobbyService.removePlayerSocket(playerName);
+
+            expect(lobbyService.getPlayerSocket(playerName)).toBeUndefined();
+        });
+
+        it('should do nothing if the player does not exist', () => {
+            expect(() => {
+                lobbyService.removePlayerSocket('NonExistentPlayer');
+            }).not.toThrow();
+        });
+    });
+
+    describe('getWaitingAvatars', () => {
+        it('should return the waiting players for a lobby', () => {
+            const accessCode = '1234';
+            const waitingPlayers: Player[] = [
+                {
+                    name: 'Player1',
+                    avatar: 'avatar1',
+                    speed: 5,
+                    vitality: 10,
+                    attack: { value: 4, bonusDice: DiceType.D6 },
+                    defense: { value: 4, bonusDice: DiceType.D4 },
+                    hp: { current: 10, max: 10 },
+                    movementPoints: 3,
+                    actionPoints: 3,
+                    inventory: [null, null],
+                    isAdmin: false,
+                    hasAbandoned: false,
+                    isActive: false,
+                    combatWon: 0,
+                },
+                {
+                    name: 'Player2',
+                    avatar: 'avatar2',
+                    speed: 5,
+                    vitality: 10,
+                    attack: { value: 4, bonusDice: DiceType.D6 },
+                    defense: { value: 4, bonusDice: DiceType.D4 },
+                    hp: { current: 10, max: 10 },
+                    movementPoints: 3,
+                    actionPoints: 3,
+                    inventory: [null, null],
+                    isAdmin: false,
+                    hasAbandoned: false,
+                    isActive: false,
+                    combatWon: 0,
+                },
+            ];
+            (lobbyService as any).lobbies = new Map([
+                [
+                    accessCode,
+                    {
+                        waitingPlayers,
+                    },
+                ],
+            ]);
+
+            expect(lobbyService.getWaitingAvatars(accessCode)).toEqual(waitingPlayers);
+        });
+    });
+    describe('isAdminLeaving', () => {
+        it('should return true if the admin is leaving', () => {
+            const accessCode = '1234';
+            const adminPlayer: Player = {
+                name: 'Admin',
+                avatar: 'admin-avatar',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: true,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+            };
+            (lobbyService as any).lobbies = new Map([
+                [
+                    accessCode,
+                    {
+                        players: [adminPlayer],
+                    },
+                ],
+            ]);
+            expect(lobbyService.isAdminLeaving(accessCode, adminPlayer.name)).toBe(true);
+        });
+        it('should return false if a non-admin is leaving', () => {
+            const accessCode = '1234';
+            const regularPlayer: Player = {
+                name: 'Player1',
+                avatar: 'avatar1',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+            };
+            (lobbyService as any).lobbies = new Map([
+                [
+                    accessCode,
+                    {
+                        players: [regularPlayer],
+                    },
+                ],
+            ]);
+            expect(lobbyService.isAdminLeaving(accessCode, regularPlayer.name)).toBe(false);
+        });
+        it('should return false for a non-existent lobby', () => {
+            expect(lobbyService.isAdminLeaving('invalid', 'Admin')).toBe(false);
+        });
+    });
+    describe('isNameTaken', () => {
+        it('should return true if the player name is already taken', () => {
+            const player1: Player = {
+                name: 'Player1',
+                avatar: 'avatar1',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+            };
+            const player2: Player = {
+                name: 'Player1', // Same name as player1
+                avatar: 'avatar2',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+            };
+            const lobby: Lobby = {
+                accessCode: '1234',
+                game: {} as Game,
+                players: [player1],
+                isLocked: false,
+                maxPlayers: 4,
+                waitingPlayers: [],
+            };
+            expect(lobbyService.isNameTaken(lobby, player2)).toBe(true);
+        });
+
+        it('should return false if the player name is not taken', () => {
+            const player1: Player = {
+                name: 'Player1',
+                avatar: 'avatar1',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+            };
+            const player2: Player = {
+                name: 'Player2',
+                avatar: 'avatar2',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+            };
+
+            const lobby: Lobby = {
+                accessCode: '1234',
+                game: {} as Game,
+                players: [player1],
+                isLocked: false,
+                maxPlayers: 4,
+                waitingPlayers: [],
+            };
+
+            expect(lobbyService.isNameTaken(lobby, player2)).toBe(false);
         });
     });
 });
