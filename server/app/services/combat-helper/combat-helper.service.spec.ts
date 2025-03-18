@@ -97,7 +97,7 @@ describe('CombatHelperService', () => {
         const player = { attack: { value: 5, bonusDice: 'd6' }, defense: { value: 5, bonusDice: 'd6' } } as unknown as Player;
         const tile = { type: TileType.Ice } as Tile;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(tile);
-        expect(service.getRandomAttackScore(player, false, [[]])).toBeLessThan(9);
+        expect(service.getRandomAttackScore(player, false, [[]])).toBeLessThanOrEqual(9);
         expect(service.getRandomDefenseScore(player, false, [[]])).toBeLessThanOrEqual(9);
     });
 
