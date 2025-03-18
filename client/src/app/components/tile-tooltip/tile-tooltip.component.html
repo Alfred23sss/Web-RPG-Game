@@ -1,0 +1,18 @@
+<div class="tooltip-content">
+    @if (data.tile.player) {
+    <p><strong>Joueur:</strong> {{ data.tile.player.name }}</p>
+    <img [src]="data.tile.player.avatar" alt="Avatar" class="tooltip-avatar" />
+    } @else {
+    <p><strong>Type:</strong> {{ data.tile.type }}</p>
+
+    @if (isInfinity(movementCost)) {
+    <p><strong>Coût:</strong> Case inatteignable</p>
+    } @else {
+    <p><strong>Coût:</strong> {{ movementCost }}</p>
+    } @if (data.tile.type === tileType.Ice) {
+    <p><strong>Attention:</strong> Cette tuile est glissante !</p>
+    } @if (data.tile.item) {
+    <p><strong>Objet:</strong> {{ data.tile.item.name }}</p>
+    <p><strong>Effet:</strong> {{ data.tile.item.description }}</p>
+    } }
+</div>

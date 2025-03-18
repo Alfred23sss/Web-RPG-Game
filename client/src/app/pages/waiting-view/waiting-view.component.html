@@ -3,8 +3,10 @@
     <p>Chargement en cours...</p>
     } @else {
     <p>En attente de participants...</p>
+
+    @if (lobby) {
     <p>
-        Votre code d'accès: <strong>{{ accessCode }}</strong>
+        Votre code d'accès: <strong>{{ lobby.accessCode }}</strong>
     </p>
 
     <div class="waiting-line">
@@ -12,20 +14,28 @@
         <ul>
             @for (player of lobby.players; track $index) {
             <li>
-                <span class="player-name">{{ player.name }}</span>
-                @if (player.isAdmin) {
-                <span class="admin-badge">Admin</span>
-                }
+                <div class="player-info">
+                    <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
+                    <span class="player-name">{{ player.name }}</span>
+                </div>
+                <div class="player-actions">
+                    @if (player.isAdmin) {
+                    <span class="admin-badge">Admin</span>
+                    } @if (player && this.player?.isAdmin && !player.isAdmin) {
+                    <button class="kick-button" (click)="kickPlayer(player)">Expulser</button>
+                    }
+                </div>
             </li>
             }
         </ul>
     </div>
 
     <button class="button" (click)="navigateToHome()">Quitter</button>
-    @if (player.isAdmin) {
+
+    @if (player?.isAdmin) {
     <button class="button" (click)="navigateToGame()">Commencer la partie</button>
     <button class="button" (click)="changeLobbyLockStatus()">
         {{ lobby.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
     </button>
-    } }
+    } } }
 </div>

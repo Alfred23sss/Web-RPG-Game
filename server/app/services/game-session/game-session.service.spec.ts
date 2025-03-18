@@ -1,11 +1,14 @@
 /* eslint-disable max-lines */ // the original file respects this condition
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
+
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
+import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/model/database/tile';
+import { Tile } from '@app/interfaces/Tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -21,6 +24,8 @@ describe('GameSessionService', () => {
     let lobbyService: LobbyService;
     let accessCodesService: AccessCodesService;
     let eventEmitter: EventEmitter2;
+    let logger: Logger;
+    let gridManagerService: GridManagerService;
 
     const createValidPlayer = (name: string, speed: number): Player => ({
         name,
@@ -41,6 +46,7 @@ describe('GameSessionService', () => {
 
     const createValidTile = (hasHome: boolean): Tile =>
         ({
+            id: 'tile-1-1',
             item: hasHome ? { name: 'home', effect: 'spawn' } : null,
             player: null,
             isOccupied: false,
@@ -48,7 +54,7 @@ describe('GameSessionService', () => {
             coordinates: { x: 0, y: 0 },
         }) as unknown as Tile;
 
-    const MOCK_LOBBY = {
+    const MOCK_LOBBY: Lobby = {
         accessCode: 'test-code',
         isLocked: false,
         maxPlayers: 4,
@@ -67,18 +73,21 @@ describe('GameSessionService', () => {
             description: 'Test game description',
         } as unknown as Game,
         players: [createValidPlayer('Player 1', SLOW_SPEED), createValidPlayer('Player 2', FAST_SPEED)],
+        waitingPlayers: [],
     };
 
     beforeEach(() => {
         jest.useFakeTimers();
         accessCodesService = new AccessCodesService();
-        lobbyService = new LobbyService(accessCodesService, new Logger());
+        lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
+        logger = new Logger();
+        gridManagerService = new GridManagerService(logger);
 
         jest.spyOn(lobbyService, 'getLobby').mockReturnValue(MOCK_LOBBY);
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(MOCK_LOBBY.players);
 
-        gameSessionService = new GameSessionService(lobbyService, eventEmitter);
+        gameSessionService = new GameSessionService(logger, lobbyService, eventEmitter, gridManagerService);
     });
 
     afterEach(() => {
@@ -195,6 +204,9 @@ describe('GameSessionService', () => {
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+
+        gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode).turn.currentPlayer = players[0];
+
         gameSessionService.handlePlayerAbandoned(MOCK_LOBBY.accessCode, 'Player1');
 
         gameSessionService.endTurn(MOCK_LOBBY.accessCode);
@@ -211,6 +223,9 @@ describe('GameSessionService', () => {
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+
+        gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode).turn.currentPlayer = players[0];
+
         gameSessionService.handlePlayerAbandoned(MOCK_LOBBY.accessCode, 'P1');
         gameSessionService.handlePlayerAbandoned(MOCK_LOBBY.accessCode, 'P2');
 
@@ -218,14 +233,8 @@ describe('GameSessionService', () => {
         jest.advanceTimersByTime(DEFAULT_TIME);
 
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+
         expect(session?.turn.currentPlayer?.name).toBe('P3');
-    });
-
-    it('should return empty array when no spawn points', () => {
-        const grid = [[createValidTile(false), createValidTile(false)]];
-        const spawns = gameSessionService['findSpawnPoints'](grid);
-
-        expect(spawns).toHaveLength(0);
     });
 
     it('should emit timer updates during player turn', () => {

@@ -17,23 +17,13 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 export class AccessCodeComponent {
     accessCode: string = '';
     isLobbyCreated: boolean = true;
-    accessCodes: string[];
     constructor(
         public dialogRef: MatDialogRef<AccessCodeComponent>,
         private dialog: MatDialog,
         private readonly accessCodeCommunicationService: AccessCodesCommunicationService,
         private readonly snackbarService: SnackbarService,
         private readonly accessCodeService: AccessCodeService,
-    ) {
-        this.accessCodeCommunicationService.getAllAccessCodes().subscribe({
-            next: (response: string[]) => {
-                this.accessCodes = response;
-            },
-            error: () => {
-                throw new Error('Error fetching access codes');
-            },
-        });
-    }
+    ) {}
 
     closeDialog() {
         this.dialogRef.close();
@@ -83,6 +73,7 @@ export class AccessCodeComponent {
 
     private openCharacterForm(lobby: Lobby): void {
         this.closeDialog();
+
         this.dialog.open(CharacterFormComponent, {
             data: {
                 accessCode: this.accessCode,

@@ -1,104 +1,87 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType, AvatarType, DiceType, GameDecorations, JoinLobbyResult } from '@app/enums/global.enums';
+import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
 import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
-import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { CharacterService } from '@app/services/character-form/character-form.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
     styleUrls: ['./character-form.component.scss'],
     standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [FormsModule, CommonModule],
 })
-export class CharacterFormComponent implements OnInit {
+export class CharacterFormComponent implements OnInit, OnDestroy {
     showForm: boolean = true;
     xSword: string = GameDecorations.XSwords;
     isLobbyCreated: boolean;
     currentAccessCode: string;
-    game?: Game; // repasser dessus et voir si ca marche meme sans le !!!!!!!
-    createdPlayer: Player;
-    selectedAttackDice: DiceType | null = null;
-    selectedDefenseDice: DiceType | null = null;
+    game?: Game;
+    createdPlayer: Player = {} as Player; //
     avatarTypes: string[] = Object.values(AvatarType);
-
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
-
-    unavailableNames: string[] = [];
-    unavailableAvatars: string[] = [];
-    errorMessage: string = '';
-
+    unavailableAvatars: string[] = []; //
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
-    /* eslint-disable-next-line max-params */ // they are all necessary and independent, which means they don't contribute to a high coupling
+    private readonly subscriptions = new Subscription();
+
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
-        private readonly accessCodeService: AccessCodeService,
         private readonly socketClientService: SocketClientService,
-        private readonly snackbarService: SnackbarService,
-        @Inject(MAT_DIALOG_DATA) public data: CharacterDialogData, // Correction de `MAT_DIALOG_DATA` pour s'assurer que `game` est bien incluss
+        private readonly cdr: ChangeDetectorRef,
+        @Inject(MAT_DIALOG_DATA) public data: CharacterDialogData,
     ) {
         this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
         this.currentAccessCode = data.accessCode;
-        this.createdPlayer = {
-            name: '',
-            avatar: '',
-            speed: 4,
-            attack: { value: 4, bonusDice: DiceType.Uninitialized },
-            defense: { value: 4, bonusDice: DiceType.Uninitialized },
-            hp: { current: 4, max: 4 },
-            movementPoints: 4,
-            actionPoints: 3,
-            inventory: [null, null],
-            isAdmin: false,
-            hasAbandoned: false,
-            isActive: false,
-            combatWon: 0,
-        };
+        this.characterService.initializePlayer(this.createdPlayer);
     }
 
     ngOnInit(): void {
-        this.socketClientService.emit('requestUnavailableOptions', this.currentAccessCode);
-
-        this.socketClientService.onUpdateUnavailableOptions((data: { names: string[]; avatars: string[] }) => {
-            this.unavailableNames = [...data.names];
-            this.unavailableAvatars = [...data.avatars];
-        });
+        this.characterService.initializeLobby(this.currentAccessCode);
+        this.subscriptions.add(
+            this.characterService.unavailableAvatars$.subscribe((avatars) => {
+                this.unavailableAvatars = avatars;
+                this.cdr.detectChanges();
+            }),
+        );
     }
 
     assignBonus(attribute: AttributeType): void {
-        this.characterService.assignBonus(attribute);
-        if (attribute === AttributeType.Vitality) {
-            this.createdPlayer.hp.current = this.createdPlayer.hp.max = this.characterService.attributes[AttributeType.Vitality];
-        } else if (attribute === AttributeType.Speed) {
-            this.createdPlayer.speed = this.characterService.attributes[AttributeType.Speed];
-            this.createdPlayer.movementPoints = this.createdPlayer.speed;
-        }
+        this.characterService.assignBonus(this.createdPlayer, attribute);
     }
 
     assignDice(attribute: AttributeType): void {
-        const { attack, defense } = this.characterService.assignDice(attribute);
-        if (attack) {
-            this.createdPlayer.attack.bonusDice = attack as DiceType;
+        this.characterService.assignDice(this.createdPlayer, attribute);
+    }
+
+    selectAvatar(avatar: string): void {
+        this.characterService.selectAvatar(this.createdPlayer, avatar, this.currentAccessCode);
+    }
+
+    deselectAvatar(): void {
+        this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
+    }
+
+    checkCharacterNameLength(): void {
+        // ca doit rester ici pcq y a les cdr pour refresh la page
+        if (this.createdPlayer) {
+            this.characterService.checkCharacterNameLength(this.createdPlayer.name);
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
         }
-        if (defense) {
-            this.createdPlayer.defense.bonusDice = defense as DiceType;
-        }
-        this.selectedAttackDice = attack ? (attack as DiceType) : null;
-        this.selectedDefenseDice = defense ? (defense as DiceType) : null;
     }
 
     async submitCharacter(): Promise<void> {
@@ -106,76 +89,32 @@ export class CharacterFormComponent implements OnInit {
             this.returnHome();
             return;
         }
-        if (!this.isCharacterValid()) return;
-
-        this.accessCodeService.setAccessCode(this.currentAccessCode);
-
-        if (this.isLobbyCreated) {
-            const joinResult = await this.characterService.joinExistingLobby(this.currentAccessCode, this.createdPlayer);
-            this.handleLobbyJoining(joinResult);
-        } else {
-            this.createdPlayer.isAdmin = true;
-            await this.characterService.createAndJoinLobby(this.game, this.createdPlayer);
-            this.submitCharacterForm();
-        }
-    }
-
-    checkCharacterNameLength(): void {
-        if (this.createdPlayer) {
-            this.characterService.checkCharacterNameLength(this.createdPlayer.name);
-        }
+        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game, () =>
+            this.resetPopup(),
+        );
     }
 
     closePopup(): void {
+        // mettre une bonne partie dans le service qui va me permettre d'elever deselect component ca je l utilise pas dans le HTML
+        this.createdPlayer.name = '';
+        this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
+        this.socketClientService.removePlayerFromLobby(this.currentAccessCode, this.createdPlayer.name);
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
 
-    private handleLobbyJoining(joinStatus: string): void {
-        switch (joinStatus) {
-            case JoinLobbyResult.JoinedLobby:
-                this.submitCharacterForm();
-                break;
-            case JoinLobbyResult.StayInLobby:
-                break;
-            case JoinLobbyResult.RedirectToHome:
-                this.returnHome();
-                break;
-        }
+    resetPopup(): void {
+        // doit rester ici pcq on  a besoin que ca reste ici pcw on a besoin de faire le .close que je peux pas avoir dans le service
+        this.characterService.resetAttributes();
+        this.dialogRef.close();
     }
 
-    private isCharacterValid(): boolean {
-        if (!this.characterService.isCharacterValid(this.createdPlayer)) {
-            this.characterService.showMissingDetailsError();
-            return false;
-        }
-
-        if (this.unavailableNames.includes(this.createdPlayer.name)) {
-            this.snackbarService.showMessage('Ce nom est déjà utilisé !');
-            return false;
-        }
-        if (this.unavailableAvatars.includes(this.createdPlayer.avatar)) {
-            this.snackbarService.showMessage('Cet avatar est déjà pris !');
-            return false;
-        }
-
-        return true;
-    }
-
-    private submitCharacterForm(): void {
-        if (!this.game) {
-            return;
-        }
-
-        this.characterService.submitCharacter(this.createdPlayer, this.game, () => {
-            sessionStorage.setItem('player', JSON.stringify(this.createdPlayer));
-            this.closePopup();
-        });
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
     }
 
     private returnHome(): void {
-        this.characterService.resetAttributes();
-        this.dialogRef.close();
+        this.closePopup();
         this.characterService.returnHome();
     }
 }

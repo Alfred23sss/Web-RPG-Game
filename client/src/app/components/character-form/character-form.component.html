@@ -15,10 +15,10 @@
         <div class="character-form_avatars">
             @for (avatar of avatarTypes; track avatar) {
             <img
+                (click)="selectAvatar(avatar)"
                 [src]="avatar"
-                (click)="!unavailableAvatars.includes(avatar) ? (createdPlayer.avatar = avatar) : null"
                 [class.selected]="createdPlayer.avatar === avatar"
-                [class.disabled]="unavailableAvatars.includes(avatar)"
+                [class.disabled]="unavailableAvatars.includes(avatar) && createdPlayer.avatar !== avatar"
                 alt="Avatar"
             />
             }
@@ -28,9 +28,12 @@
             @for (attribute of attributeKeys; track attribute) {
             <div>
                 <span>
-                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} @if (attribute ===
-                    attributeTypes.Attack && selectedAttackDice) { + {{ selectedAttackDice }} } @if (attribute === attributeTypes.Defense &&
-                    selectedDefenseDice) { + {{ selectedDefenseDice }}
+                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} 
+                    @if (attribute === attributeTypes.Attack && createdPlayer.attack.bonusDice) { 
+                        + {{ createdPlayer.attack.bonusDice }} 
+                    } 
+                    @if (attribute === attributeTypes.Defense && createdPlayer.defense.bonusDice) { 
+                        + {{ createdPlayer.defense.bonusDice }} 
                     }
                 </span>
 

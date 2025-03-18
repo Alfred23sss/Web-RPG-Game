@@ -28,7 +28,6 @@ export enum AvatarType {
     Valkyrie = './assets/avatars/avatar_valkyrie.png',
     Vampire = './assets/avatars/avatar_vampire.png',
     Wizard = './assets/avatars/avatar_wizard.png',
-    Default = './assets/avatar/avatar_archer.png',
 }
 
 export enum ImageType {
@@ -155,6 +154,8 @@ export enum ErrorMessages {
     SomeTilesInnacessible = '❌ Il y a des tuiles inaccesseibles sur le terrain',
     MustPlaceHouseItems = 'items maisons doivent être placées',
     TooManyItemsPlaced = '❌ Trop d’items ont été placés',
+    NotEnoughPlayers = '❌ Il n’y a pas assez de joueurs pour commencer la partie',
+    LobbyNotLocked = '❌ Le lobby n’est pas verrouillé',
 }
 
 export enum TileType {
@@ -185,4 +186,10 @@ export enum AccessCodeGenerator {
 export enum MouseButton {
     Left = 0,
     Right = 2,
+}
+
+export enum ItemCount {
+    SmallItemCount = 2,
+    MediumItemCount = 4,
+    LargeItemCount = 6,
 }

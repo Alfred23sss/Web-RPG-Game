@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
 
@@ -12,7 +14,10 @@ import { io, Socket } from 'socket.io-client';
 export class SocketClientService {
     socket: Socket;
 
-    constructor(private readonly accessCodeService: AccessCodesCommunicationService) {
+    constructor(
+        private readonly accessCodeService: AccessCodesCommunicationService,
+        private playerMovementService: PlayerMovementService,
+    ) {
         this.connect();
     }
 
@@ -71,12 +76,21 @@ export class SocketClientService {
         this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
+    // kickPlayer(accessCode: string, playerName: string): void {
+    //     this.socket.emit('kickPlayer', { accessCode, playerName });
+    // }
+    kickPlayer(accessCode: string, playerName: string): void {
+        this.socket.emit('kickPlayer', { accessCode, playerName });
+    }
+
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
             this.socket.emit('getLobbyPlayers', accessCode);
+
             this.socket.on('updatePlayers', (players: Player[]) => {
                 observer.next(players);
             });
+
             this.socket.on('error', (errorMessage: string) => {
                 observer.error(errorMessage);
             });
@@ -128,12 +142,28 @@ export class SocketClientService {
         this.socket.on('error', callback);
     }
 
+    // onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
+    //     // this.socket.on('kicked', callback);
+    //     this.socket.on('kicked', (data) => {
+    //         callback(data);
+    //     });
+    // }
+    onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
+        this.socket.on('kicked', (data) => {
+            callback(data);
+        });
+    }
+
     onLobbyCreated(callback: (players: unknown[]) => void) {
         this.socket.on('lobbyCreated', callback);
     }
 
     onLobbyDeleted(callback: () => void) {
         this.socket.on('lobbyDeleted', callback);
+    }
+
+    onGameEnded(callback: (data: { winner: string }) => void) {
+        this.socket.on('gameEnded', callback);
     }
 
     onLeaveLobby(callback: () => void) {
@@ -164,19 +194,14 @@ export class SocketClientService {
         return this.socket.id;
     }
 
-    on(event: string, callback: (data: unknown) => void): void {
-        // AJOUT!!!!!!!!
-        this.socket.on(event, callback);
-    }
-
     emit(event: string, data: unknown): void {
-        // AJOUT2!!!!!
         this.socket.emit(event, data);
     }
 
     onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
-        // AJOUT2!!!!!
-        this.socket.on('updateUnavailableOptions', callback);
+        this.socket.on('updateUnavailableOptions', (data) => {
+            callback(data);
+        });
     }
 
     onJoinError(callback: (message: string) => void): void {
@@ -222,8 +247,22 @@ export class SocketClientService {
         this.socket.on('gameDeleted', callback);
     }
 
-    onGameCombatStarted(callback: (data: { attacker: Player; defender: Player; firstFighter: Player }) => void) {
+    onGameCombatStarted(callback: () => void) {
         this.socket.on('combatStarted', callback);
+    }
+
+    onAttackResult(callback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void) {
+        this.socket.on('attackResult', callback);
+    }
+
+    onPlayerUpdate(callback: (data: { player: Player }) => void) {
+        this.socket.on('playerUpdate', callback);
+    }
+
+    onPlayerListUpdate(callback: (data: { players: Player[] }) => void) {
+        this.socket.on('playerListUpdate', (data) => {
+            callback(data);
+        });
     }
 
     onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
@@ -236,5 +275,87 @@ export class SocketClientService {
 
     onGameCombatTurnStarted(callback: (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => void) {
         this.socket.on('combatTurnStarted', callback);
+    }
+
+    sendPlayerMovementUpdate(currentTile: Tile, targetTile: Tile, accessCode: string, grid: Tile[][]): void {
+        const movementPath = this.playerMovementService.quickestPath(currentTile, targetTile, grid);
+        if (!movementPath) {
+            return;
+        }
+        const payload = {
+            previousTile: currentTile,
+            newTile: targetTile,
+            movement: movementPath,
+            accessCode,
+        };
+        this.emit('playerMovementUpdate', payload);
+    }
+
+    startCombat(attackerName: string, defenderName: string, accessCode: string, isDebugMode: boolean) {
+        this.socket.emit('startCombat', { attackerName, defenderName, accessCode, isDebugMode });
+    }
+
+    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void): void {
+        this.socket.on('playerMovement', callback);
+    }
+
+    selectAvatar(accessCode: string, avatar: string): void {
+        this.socket.emit('selectAvatar', { accessCode, avatar });
+    }
+
+    deselectAvatar(accessCode: string): void {
+        this.socket.emit('deselectAvatar', { accessCode });
+    }
+
+    onAvatarSelected(callback: (data: { avatar: string }) => void): void {
+        this.socket.on('avatarSelected', (data) => {
+            callback(data);
+        });
+    }
+
+    onAvatarDeselected(callback: () => void): void {
+        this.socket.on('avatarDeselected', () => {
+            callback();
+        });
+    }
+
+    onAdminLeft(callback: (data: { message: string }) => void): void {
+        this.socket.on('adminLeft', (data) => {
+            callback(data);
+        });
+    }
+
+    on<T>(event: string, callback: (data: T) => void): void {
+        this.socket.on(event, callback);
+    }
+
+    onDoorClickedUpdate(callback: (data: { grid: Tile[][] }) => void): void {
+        this.socket.on('doorClicked', (data) => {
+            callback(data);
+        });
+    }
+    sendDoorUpdate(currentTile: Tile, targetTile: Tile, accessCode: string): void {
+        const payload = {
+            currentTile,
+            targetTile,
+            accessCode,
+        };
+        this.emit('doorUpdate', payload);
+    }
+    onGridUpdate(callback: (data: { grid: Tile[][] }) => void): void {
+        this.socket.on('gridUpdate', callback);
+    }
+
+    attack(playerName: string, accessCode: string) {
+        this.socket.emit('performAttack', { accessCode, attackerName: playerName });
+    }
+    sendAdminModeUpdate(accessCode: string): void {
+        this.socket.emit('adminModeUpdate', { accessCode });
+    }
+    onAdminModeChangedServerSide(callback: (data: { accessCode: string }) => void): void {
+        this.socket.on('adminModeChangedServerSide', callback);
+    }
+    sendTeleportPlayer(accessCode: string, player: Player, targetTile: Tile): void {
+        this.socket.emit('teleportPlayer', { accessCode, player, targetTile });
     }
 }

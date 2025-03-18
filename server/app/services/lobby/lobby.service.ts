@@ -1,28 +1,28 @@
-import { GameSize, GameSizePlayerCount } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/Lobby';
+import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
+import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
     private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
+    private playerSockets: Map<string, string> = new Map<string, string>();
 
-    constructor(
-        private readonly accessCodeService: AccessCodesService,
-        private readonly logger: Logger,
-    ) {}
+    constructor(private readonly accessCodeService: AccessCodesService) {}
 
     createLobby(game: Game): string {
         const accessCode = this.accessCodeService.generateAccessCode();
         const maxPlayers =
-            game.size === GameSize.Small
+            game.size === GameSizeTileCount.Small
                 ? GameSizePlayerCount.Small
-                : game.size === GameSize.Medium
+                : game.size === GameSizeTileCount.Medium
                 ? GameSizePlayerCount.Medium
                 : GameSizePlayerCount.Large;
-        this.lobbies.set(accessCode, { accessCode, game, players: [], isLocked: false, maxPlayers });
+
+        const lobby = { accessCode, game, players: [], isLocked: false, maxPlayers, waitingPlayers: [] };
+        this.lobbies.set(accessCode, lobby);
         return accessCode;
     }
 
@@ -30,17 +30,11 @@ export class LobbyService {
         return this.lobbies.get(accessCode);
     }
 
-    joinLobby(accessCode: string, player: Player): boolean {
+    joinLobby(accessCode: string, player: Player): { success: boolean; reason?: string; assignedName?: string } {
         const lobby = this.lobbies.get(accessCode);
-        if (!lobby) return false;
-        if (lobby.players.some((p) => p.name === player.name || p.avatar === player.avatar)) {
-            return false;
-        }
+        if (!lobby) return { success: false, reason: 'Lobby not found' };
 
-        if (lobby.players.length >= lobby.maxPlayers) {
-            lobby.isLocked = true;
-            return false;
-        }
+        player.name = this.generateUniqueName(lobby, player.name);
 
         lobby.players.push(player);
 
@@ -48,17 +42,21 @@ export class LobbyService {
             lobby.isLocked = true;
         }
 
-        return true;
+        return { success: true, assignedName: player.name };
     }
-    leaveLobby(accessCode: string, playerName: string): boolean {
+
+    isNameTaken(lobby: Lobby, player: Player): boolean {
+        return lobby.players.some((p) => p.name === player.name);
+    }
+
+    leaveLobby(accessCode: string, playerName: string, isGameStarted: boolean = false): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
 
-        const wasAdmin = lobby.players.some((p) => p.name === playerName && p.isAdmin);
+        const isAdmin = lobby.players.some((p) => p.name === playerName && p.isAdmin);
 
         lobby.players = lobby.players.filter((p) => p.name !== playerName);
-
-        if (lobby.players.length === 0 || wasAdmin) {
+        if (lobby.players.length === 0 || (isAdmin && !isGameStarted)) {
             this.lobbies.delete(accessCode);
             this.accessCodeService.removeAccessCode(accessCode);
             return true;
@@ -97,5 +95,46 @@ export class LobbyService {
             avatars: lobby.players.map((player) => player.avatar),
         };
         return unavailableData;
+    }
+
+    setPlayerSocket(playerName: string, socketId: string): void {
+        this.playerSockets.set(playerName, socketId);
+    }
+
+    getPlayerSocket(playerName: string): string | undefined {
+        return this.playerSockets.get(playerName);
+    }
+
+    removePlayerSocket(playerName: string): void {
+        this.playerSockets.delete(playerName);
+    }
+
+    getWaitingAvatars(accessCode: string): WaintingPlayers[] {
+        return this.getLobby(accessCode).waitingPlayers;
+    }
+
+    isAdminLeaving(accessCode: string, playerName: string): boolean {
+        const lobby = this.lobbies.get(accessCode);
+        if (!lobby) return false;
+
+        return lobby.players.some((p) => p.name === playerName && p.isAdmin);
+    }
+
+    private generateUniqueName(lobby: Lobby, duplicatedName: string): string {
+        const existingNames = lobby.players.map((player) => player.name.toLowerCase());
+
+        if (!existingNames.includes(duplicatedName.toLowerCase())) {
+            return duplicatedName;
+        }
+
+        let counter = 2;
+        let uniqueName;
+
+        do {
+            uniqueName = `${duplicatedName}-${counter}`;
+            counter++;
+        } while (existingNames.includes(uniqueName.toLowerCase()));
+
+        return uniqueName;
     }
 }

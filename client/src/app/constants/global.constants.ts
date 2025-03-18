@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
 import { AttributeType, GameMode, GameModeLabel, GameModeType, GameSize, ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
+import { Lobby } from '@app/interfaces/lobby';
 export const BONUS_VALUE = 2;
+
+export const POPUP_DELAY = 2000;
 
 export const INITIAL_VALUES = {
     attributes: {
@@ -63,6 +66,7 @@ export const ACCESS_CODE_MAX_VALUE = 9999;
 export const ACCESS_CODE_RANGE = 9000;
 export const ACCESS_CODE_LENGTH = 4;
 export const CODE_EDGE_CASES = [0, 0.999];
+export const MIN_PLAYERS = 2;
 
 export const MOCK_GAMES = [
     {
@@ -167,3 +171,11 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 };
 
 export const ITEMS_TO_UPDATE = new Set(['home', 'question']);
+
+export const DEFAULT_LOBBY: Lobby = {
+    isLocked: false,
+    accessCode: '',
+    players: [],
+    game: null,
+    maxPlayers: 0,
+};

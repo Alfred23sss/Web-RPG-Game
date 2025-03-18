@@ -4,10 +4,6 @@
     box-sizing: border-box;
 }
 
-.red-border {
-    border: 5px solid red;
-}
-
 body,
 html {
     margin: 0;
@@ -23,25 +19,16 @@ html {
     font-family: 'Arial', sans-serif;
     color: #f8f0a1;
     background-color: #1f2a44;
-}
-
-.game-map-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 20px;
-    width: 100%;
-    max-height: 1080px;
 }
 
-.action-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
+.game-info,
+.timer-chat-container {
+    flex: 1;
 }
+
 .game-info {
-    flex: 0 0 250px;
+    width: 20%;
     padding: 15px;
     background-color: #2c3b56;
     border-right: 1px solid #4e5a73;
@@ -50,8 +37,42 @@ html {
     gap: 20px;
 }
 
+.dice-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #3e4a65;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dice {
+    margin: 5px;
+    font-family: papyrus;
+    font-size: 1rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* 🔹 Disabled "S'Évader" Button */
+.disabled-btn {
+    background-color: grey !important;
+    color: white !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .game-details,
-.inventory {
+.inventory,
+.player-info {
     background-color: #3e4a65;
     border-radius: 8px;
     padding: 12px;
@@ -67,6 +88,11 @@ html {
     padding-bottom: 5px;
 }
 
+.game-details p {
+    margin-top: 1px;
+    margin-bottom: 1px;
+}
+
 .inventory-slot {
     background-color: #1f2a44;
     border: 1px dashed #f8f0a1;
@@ -77,8 +103,15 @@ html {
     color: #f8f0a1;
 }
 
-.game-map {
+.game-map-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 50%;
     flex: 1;
+}
+
+.game-map {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -88,21 +121,75 @@ html {
 }
 
 app-grid {
-    width: 600px;
+    width: 700px;
+    height: 700px;
 }
 
-.player-name.active {
-    color: green !important;
+.action-buttons {
+    height: 20%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    background-color: #3e4a65;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.action-btn {
+    padding: 3px 6px;
+    margin: 5px;
+    font-family: papyrus;
+    font-size: 1.1rem;
     font-weight: bold;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.timer-chat-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 30%;
+}
+
+.timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff5722;
+    text-align: center;
+    margin: 10px 0;
 }
 
 .game-messages {
-    flex: 0 0 300px;
+    flex: 1;
     padding: 15px;
     background-color: #2c3b56;
-    border-left: 1px solid #4e5a73;
     display: flex;
     flex-direction: column;
+}
+
+.messages-content,
+.log-content {
+    padding: 10px;
+    background-color: #3e4a65;
+    height: 150px;
+    overflow-y: auto;
+}
+
+.message-toggle button {
+    margin: 5px;
+}
+
+.message-toggle button.active {
+    background-color: #ffa500;
 }
 
 .game-messages h3 {
@@ -113,29 +200,12 @@ app-grid {
     padding-bottom: 5px;
 }
 
-.messages-content {
-    flex: 1;
-    background-color: #1f2a44;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    overflow-y: auto;
-    min-height: 200px;
+.player-name.active {
+    color: green !important;
+    font-weight: bold;
 }
 
-.player-info,
-.player-list,
-.countdown,
-.action-buttons,
-.combat-interface {
-    margin-top: 15px;
-    background-color: #3e4a65;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-player-name {
+.player-name {
     display: inline-block;
     margin-right: 8px;
     padding: 3px 8px;
@@ -150,22 +220,14 @@ player-name {
     font-weight: 700;
 }
 
-.timer {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #ff5722;
-    text-align: center;
-    margin: 10px 0;
+.player-admin::before {
+    content: '👑 ';
 }
 
 .player-regular {
     background-color: #f8f0a1;
     color: #2c3b56;
     border: 1px solid #b38a00;
-}
-
-.player-admin::before {
-    content: '👑 ';
 }
 
 .player-name:hover {
@@ -177,41 +239,46 @@ player-name {
     width: 40px;
 }
 
-.action-buttons {
-    padding-top: 350px;
-}
-
-button {
-    justify-content: center;
-    align-items: center;
-    padding: 12px 24px;
-    margin: 5px;
-    width: 200px;
-    font-family: papyrus;
-    font-size: 1.1rem;
-    font-weight: bold;
-
-    background: linear-gradient(135deg, #ffd700, #ffa500);
-    color: black;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-
-    &:hover {
-        background: #bbb;
-    }
-}
-
 .abandoned {
     text-decoration: line-through;
     color: #b0b0b0;
+}
+
+.red-border {
+    border: 5px solid red;
+}
+
+.timer {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff5722;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.inventory-slot {
+    background-color: #1f2a44;
+    border: 1px dashed #f8f0a1;
+    padding: 10px;
+    margin: 5px 0;
+    text-align: center;
+    border-radius: 4px;
+    color: #f8f0a1;
 }
 
 .game-messages {
     border: 1px solid #ffc400;
     padding: 10px;
     margin: 10px;
+    background-color: #3e4a65;
+}
+
+.messages-content,
+.log-content {
+    border: 1px solid #ddd;
+    padding: 10px;
+    height: 150px;
+    overflow-y: auto;
     background-color: #3e4a65;
 }
 
@@ -224,20 +291,11 @@ button {
     height: 100px;
     flex: 1;
     border: none;
-    background-color: #0044f1;
+    background-color: #ffa500;
     cursor: pointer;
     transition: background-color 0.3s;
 }
 
 .message-toggle button.active {
-    background-color: #0044f1;
-}
-
-.messages-content,
-.log-content {
-    border: 1px solid #ddd;
-    padding: 10px;
-    height: 150px;
-    overflow-y: auto;
-    background-color: #3e4a65;
+    background-color: #ffa500;
 }
