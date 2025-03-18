@@ -129,7 +129,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         if (!lobby) return;
         const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
         if (isAdminLeaving) {
-            this.server.to(accessCode).emit('adminLeft', { message: "L'admin a quitté la partie, le lobby est fermé." });
+            this.server.to(accessCode).emit('adminLeft', { playerSocketId: client.id, message: "L'admin a quitté la partie, le lobby est fermé." });
         }
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
         lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);

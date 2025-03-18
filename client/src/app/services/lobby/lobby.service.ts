@@ -158,8 +158,10 @@ export class LobbyService {
             this.navigateToGame();
         });
 
-        this.socketClientService.on('adminLeft', (data: { message: string }) => {
-            this.snackbarService.showMessage(data.message);
+        this.socketClientService.on('adminLeft', (data: { playerSocketId: string; message: string }) => {
+            if (this.socketClientService.getSocketId() !== data.playerSocketId) {
+                this.snackbarService.showMessage(data.message);
+            }
         });
     }
 

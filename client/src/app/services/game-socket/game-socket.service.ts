@@ -104,6 +104,7 @@ export class GameSocketService {
             component.clientPlayer.actionPoints = defaultActionPoint;
             component.clientPlayer.movementPoints = component.clientPlayer.speed;
             component.turnTimer = data.turnDuration;
+            component.hasTurnEnded = component.clientPlayer.name !== component.currentPlayer.name;
             component.updateAvailablePath();
         });
 

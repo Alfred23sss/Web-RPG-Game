@@ -37,6 +37,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     logBookSubscription: Subscription;
     turnTimer: number;
     isInCombatMode: boolean = false;
+    hasTurnEnded = false;
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
     escapeAttempts: number = 2;
@@ -126,6 +127,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     endTurn(): void {
+        this.hasTurnEnded = true;
         this.turnTimer = 0;
         this.socketClientService.emit('endTurn', { accessCode: this.lobby.accessCode });
     }
