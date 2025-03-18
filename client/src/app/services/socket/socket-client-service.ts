@@ -278,8 +278,8 @@ export class SocketClientService {
         this.emit('playerMovementUpdate', payload);
     }
 
-    startCombat(attackerName: string, defenderName: string, accessCode: string) {
-        this.socket.emit('startCombat', { attackerName, defenderName, accessCode });
+    startCombat(attackerName: string, defenderName: string, accessCode: string, isDebugMode: boolean) {
+        this.socket.emit('startCombat', { attackerName, defenderName, accessCode, isDebugMode });
     }
 
     onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void): void {
@@ -329,5 +329,14 @@ export class SocketClientService {
 
     attack(playerName: string, accessCode: string) {
         this.socket.emit('performAttack', { accessCode, attackerName: playerName });
+    }
+    sendAdminModeUpdate(accessCode: string): void {
+        this.socket.emit('adminModeUpdate', { accessCode });
+    }
+    onAdminModeChangedServerSide(callback: (data: { accessCode: string }) => void): void {
+        this.socket.on('adminModeChangedServerSide', callback);
+    }
+    sendTeleportPlayer(accessCode: string, player: Player, targetTile: Tile): void {
+        this.socket.emit('teleportPlayer', { accessCode, player, targetTile });
     }
 }

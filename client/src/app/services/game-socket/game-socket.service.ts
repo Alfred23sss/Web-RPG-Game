@@ -14,6 +14,28 @@ const defaultActionPoint = 1;
 const delayBeforeHome = 2000;
 const delayBeforeEndingGame = 5000;
 const defaultEscapeAttempts = 2;
+const delayMessageAfterCombatEnded = 3000;
+const events = [
+    'abandonGame',
+    'gameDeleted',
+    'gameEnded',
+    'transitionStarted',
+    'turnStarted',
+    'timerUpdate',
+    'alertGameStarted',
+    'playerMovement',
+    'gameCombatStarted',
+    'attackResult',
+    'playerUpdate',
+    'playerListUpdate',
+    'doorClickedUpdate',
+    'gameCombatTurnStarted',
+    'gameCombatTimerUpdate',
+    'gridUpdate',
+    'noMoreEscapesLeft',
+    'combatEnded',
+    'adminModeChangedServerSide',
+];
 
 @Injectable({
     providedIn: 'root',
@@ -42,7 +64,6 @@ export class GameSocketService {
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
-            component.backToHome();
         });
 
         this.socketClientService.onGameDeleted(() => {
@@ -59,8 +80,18 @@ export class GameSocketService {
             }, delayBeforeEndingGame);
         });
 
+        this.socketClientService.on('adminModeDisabled', () => {
+            if (component.isDebugMode) {
+                this.snackbarService.showMessage("Mode debug 'désactivé'");
+            }
+            component.isDebugMode = false;
+        });
+
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
-            this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+            this.snackbarService.showMultipleMessages(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+            if (data.nextPlayer.name === component.clientPlayer.name) {
+                component.clientPlayer = data.nextPlayer;
+            }
         });
 
         this.socketClientService.onTurnStarted((data: { player: Player; turnDuration: number }) => {
@@ -92,8 +123,23 @@ export class GameSocketService {
                 component.clientPlayer.movementPoints =
                     component.clientPlayer.movementPoints -
                     this.playerMovementService.calculateRemainingMovementPoints(component.getClientPlayerPosition(), data.player);
+                component.movementPointsRemaining = component.clientPlayer.movementPoints;
                 component.isCurrentlyMoving = data.isCurrentlyMoving;
                 component.updateAvailablePath();
+            }
+
+            const clientPlayerPosition = component.getClientPlayerPosition();
+            if (!clientPlayerPosition) return;
+            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, data.grid);
+            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, data.grid);
+            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce) {
+                    component.endTurn();
+                }
+            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce && !hasActionAvailable) {
+                    component.endTurn();
+                }
             }
         });
 
@@ -144,12 +190,43 @@ export class GameSocketService {
             component.escapeAttempts = data.attemptsLeft;
         });
 
-        this.socketClientService.on('combatEnded', () => {
-            component.escapeAttempts = defaultEscapeAttempts;
+        this.socketClientService.on('combatEnded', (data: { winner: Player; hasEvaded: boolean }) => {
             component.isInCombatMode = false;
+            component.escapeAttempts = defaultEscapeAttempts;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
             component.attackResult = null;
+            component.escapeAttempts = defaultEscapeAttempts;
+            if (data && data.winner && !data.hasEvaded) {
+                this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
+            }
+            if (component.clientPlayer.name === component.currentPlayer.name) {
+                component.clientPlayer.movementPoints = component.movementPointsRemaining;
+            }
+            const clientPlayerPosition = component.getClientPlayerPosition();
+            if (!clientPlayerPosition || !component.game || !component.game.grid) return;
+            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
+            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, component.game.grid);
+            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce) {
+                    component.endTurn();
+                }
+            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce && !hasActionAvailable) {
+                    component.endTurn();
+                }
+            }
+        });
+
+        this.socketClientService.on('adminModeChangedServerSide', () => {
+            component.isDebugMode = !component.isDebugMode;
+            this.snackbarService.showMessage(`Mode debug ${component.isDebugMode ? 'activé' : 'désactivé'}`);
+        });
+    }
+
+    unsubscribeSocketListeners(): void {
+        events.forEach((event) => {
+            this.socketClientService.socket.off(event);
         });
     }
 }

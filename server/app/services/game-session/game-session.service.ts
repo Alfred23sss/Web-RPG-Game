@@ -29,10 +29,11 @@ export class GameSessionService {
         const grid = game.grid;
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
         const turn = this.initializeTurn(accessCode);
-        const updatedGrid = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
+        const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
         const gameSession: GameSession = { game, turn };
         this.gameSessions.set(accessCode, gameSession);
+        this.updatePlayerListSpawnPoint(players, accessCode);
         this.startTransitionPhase(accessCode);
         return gameSession;
     }
@@ -66,6 +67,9 @@ export class GameSessionService {
         }
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
+        }
+        if (player.isAdmin) {
+            this.emitAdminModeDisabled(accessCode);
         }
         return player;
     }
@@ -133,7 +137,8 @@ export class GameSessionService {
     isCurrentPlayer(accessCode: string, playerName: string): boolean {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession || !gameSession.turn.currentPlayer) return false;
-        return gameSession.turn.currentPlayer.name === playerName;
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        return gameSession.turn.currentPlayer.name === playerName && !player?.hasAbandoned;
     }
 
     updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
@@ -190,15 +195,32 @@ export class GameSessionService {
 
     getGameSession(accessCode: string): GameSession {
         const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) throw new Error('Game session not found');
+        if (!gameSession) return;
         return gameSession;
     }
 
+    callTeleport(accessCode: string, player: Player, targetTile: Tile): void {
+        const updatedGrid = this.gridManager.teleportPlayer(this.getGameSession(accessCode).game.grid, player, targetTile);
+        this.getGameSession(accessCode).game.grid = updatedGrid;
+        this.emitGridUpdate(accessCode, updatedGrid);
+    }
     emitGridUpdate(accessCode: string, grid: Tile[][]): void {
         this.eventEmitter.emit('game.grid.update', {
             accessCode,
             grid,
         });
+    }
+
+    private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
+        const gameSession = this.getGameSession(accessCode);
+        for (const playerUpdated of players) {
+            if (playerUpdated.spawnPoint) {
+                const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerUpdated.name);
+                if (player) {
+                    this.updatePlayer(player, playerUpdated);
+                }
+            }
+        }
     }
     private initializeTurn(accessCode: string): Turn {
         return {
@@ -239,6 +261,7 @@ export class GameSessionService {
         gameSession.turn.isTransitionPhase = true;
         gameSession.turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
         const nextPlayer = this.getNextPlayer(accessCode);
+        this.logger.log(nextPlayer);
         this.emitTransitionStarted(accessCode, nextPlayer);
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         gameSession.turn.countdownInterval = setInterval(() => {
@@ -259,6 +282,7 @@ export class GameSessionService {
     private getNextPlayer(accessCode: string): Player {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) throw new Error('Game session not found');
+        this.logger.log(gameSession.turn.orderedPlayers);
         const activePlayers = gameSession.turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return; // reset tt les joueurs ont abandonné
         if (!gameSession.turn.currentPlayer) {
@@ -316,5 +340,9 @@ export class GameSessionService {
     }
     private emitTurnResumed(accessCode: string, player: Player, remainingTime: number): void {
         this.eventEmitter.emit('game.turn.resumed', { accessCode, player, remainingTime });
+    }
+
+    private emitAdminModeDisabled(accessCode: string) {
+        this.eventEmitter.emit('admin.mode.disabled', { accessCode });
     }
 }

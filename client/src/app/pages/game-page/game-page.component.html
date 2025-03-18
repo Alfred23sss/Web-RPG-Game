@@ -67,10 +67,6 @@
                         <span class="resource-label">Actions restantes: </span>
                         <span class="resource-value">{{ clientPlayer.actionPoints }}</span>
                     </div>
-                    <div class="ressource">
-                        <span class="resource-label">Combats gagnés: </span>
-                        <span class="resource-value">{{ clientPlayer.combatWon }}</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -85,10 +81,12 @@
                 [availablePath]="availablePath"
                 [quickestPath]="quickestPath"
                 [isEditionMode]="false"
+                [isDebugMode]="isDebugMode"
                 (tileHovered)="updateQuickestPath($event)"
                 (tileClicked)="handleTileClick($event)"
                 (doorClicked)="handleDoorClick($event)"
                 (playerAttacked)="handleAttackClick($event)"
+                (teleportClicked)="handleTeleport($event)"
             ></app-grid>
         </div>
     </div>
@@ -107,9 +105,10 @@
 
         <div class="action-buttons">
             @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){
-            <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
-            <!-- mettre qd cliquer quil parait plus pr indiquer tes en execute action et donner un feedback visuel qqqpart -->
-            <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
+                @if(!isInCombatMode){
+                    <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
+                    <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
+                }
             }
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
             }
@@ -151,18 +150,16 @@
                 <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
                 <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
             </div>
-
-            <div class="messages-content" *ngIf="activeTab === 'chat'">
+            @if (activeTab === 'chat'){
+                <div class="messages-content">
                 <p>Panneau des messages (clavardage).</p>
-            </div>
-
-            <div class="log-content" *ngIf="activeTab === 'log'">
-                @for(entry of logEntries; track $index) {
-                <p class="log-entry">
-                    {{ entry }}
-                </p>
-                }
-            </div>
+                </div>
+            }
+            @if(activeTab === 'log'){
+                <div class="log-content">
+                    <p>Panneau du journal de bord (journal de bord).</p>
+                </div>
+            }
         </div>
     </div>
 </div>

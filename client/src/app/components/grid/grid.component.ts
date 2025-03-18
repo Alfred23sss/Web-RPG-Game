@@ -21,12 +21,14 @@ export class GridComponent {
     @Input() quickestPath: Tile[] | undefined = [];
     @Input() isEditionMode: boolean = false;
     @Input() isActionMode: boolean = false;
+    @Input() isDebugMode: boolean = false;
 
     @Output() tileHovered = new EventEmitter<Tile>();
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
     @Output() doorClicked = new EventEmitter<Tile>();
     @Output() tileRightClicked = new EventEmitter<{ tile: Tile; event: MouseEvent }>();
+    @Output() teleportClicked = new EventEmitter<Tile>();
 
     tileType = TileType;
 
@@ -52,17 +54,23 @@ export class GridComponent {
     }
 
     onTileRightClick(event: MouseEvent, tile: Tile): void {
-        event.preventDefault();
+        if (this.isDebugMode) {
+            event.preventDefault();
 
-        const dialogRef = this.dialog.open(TileTooltipComponent, {
-            data: { tile },
-            panelClass: 'custom-tooltip-dialog',
-            hasBackdrop: false,
-            position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
-        });
+            this.teleportClicked.emit(tile);
+        } else {
+            event.preventDefault();
 
-        setTimeout(() => {
-            dialogRef.close(); //65
-        }, POPUP_DELAY);
+            const dialogRef = this.dialog.open(TileTooltipComponent, {
+                data: { tile },
+                panelClass: 'custom-tooltip-dialog',
+                hasBackdrop: false,
+                position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
+            });
+
+            setTimeout(() => {
+                dialogRef.close();
+            }, POPUP_DELAY);
+        }
     }
 }

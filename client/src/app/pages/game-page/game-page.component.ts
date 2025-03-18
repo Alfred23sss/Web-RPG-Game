@@ -8,7 +8,6 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
-import { LogBookService } from '@app/services/logbook/logbook.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
@@ -42,23 +41,22 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isCurrentlyMoving: boolean = false;
     escapeAttempts: number = 2;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
+    movementPointsRemaining: number = 0;
+    isDebugMode: boolean = false;
+    private keyPressHandler: (event: KeyboardEvent) => void;
 
-    /* eslint-disable-next-line max-params */ // to fix
     constructor(
         private playerMovementService: PlayerMovementService,
         private router: Router,
         private socketClientService: SocketClientService,
-        private logbookService: LogBookService,
         private snackbarService: SnackbarService,
         private gameSocketService: GameSocketService,
     ) {}
 
     ngOnInit(): void {
-        this.logEntries = this.logbookService.logBook;
-        this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
-            this.logEntries = logBook;
-        });
         this.gameSocketService.initializeSocketListeners(this);
+        this.keyPressHandler = this.handleKeyPress.bind(this);
+        document.addEventListener('keydown', this.keyPressHandler);
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -68,14 +66,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode);
+        if (!this.clientPlayer.actionPoints || !this.movementPointsRemaining) {
+            this.endTurn();
+        }
     }
 
     handleAttackClick(targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
         const currentTile = this.getClientPlayerPosition();
+
         if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
-                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode);
+                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode, this.isDebugMode);
                 return;
             }
         }
@@ -88,6 +90,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
             return;
         }
         this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
+    }
+
+    handleTeleport(targetTile: Tile): void {
+        if (this.isInCombatMode) return;
+        if (this.clientPlayer.name === this.currentPlayer.name) {
+            this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
+        }
     }
     updateQuickestPath(targetTile: Tile): void {
         if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
@@ -111,14 +120,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
-        // for some reason marche pas quand on cliques sur boutton mais marche quand on refresh?
+        //
         this.clientPlayer.hasAbandoned = true;
         this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
         this.backToHome();
     }
 
     ngOnDestroy(): void {
-        this.logBookSubscription.unsubscribe();
+        document.removeEventListener('keydown', this.keyPressHandler);
+        this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
     }
 
@@ -159,6 +169,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
+            // if refresh abandons game
             this.abandonGame();
         } else {
             sessionStorage.setItem('refreshed', 'true');
@@ -190,5 +201,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     private isAvailablePath(tile: Tile): boolean {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+    }
+    private handleKeyPress(event: KeyboardEvent): void {
+        if (event.key.toLowerCase() === 'd' && this.clientPlayer.isAdmin) {
+            this.socketClientService.sendAdminModeUpdate(this.lobby.accessCode);
+        }
     }
 }
