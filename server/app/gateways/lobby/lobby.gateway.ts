@@ -139,7 +139,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
         }
 
-
         client.leave(accessCode);
 
         if (lobby && lobby.players.length < lobby.maxPlayers) {
@@ -147,8 +146,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
 
         lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
-}
-
+    }
 
     @SubscribeMessage('kickPlayer')
     handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }) {

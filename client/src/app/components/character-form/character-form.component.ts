@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
@@ -74,7 +74,8 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
         this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
     }
 
-    checkCharacterNameLength(): void {//ca doit rester ici pcq y a les cdr pour refresh la page 
+    checkCharacterNameLength(): void {
+        // ca doit rester ici pcq y a les cdr pour refresh la page
         if (this.createdPlayer) {
             this.characterService.checkCharacterNameLength(this.createdPlayer.name);
             this.cdr.markForCheck();
@@ -92,13 +93,17 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
         );
     }
 
-    closePopup(): void { //mettre une bonne partie dans le service qui va me permettre d'elever deselect component ca je l utilise pas dans le HTML
+    closePopup(): void {
+        // mettre une bonne partie dans le service qui va me permettre d'elever deselect component ca je l utilise pas dans le HTML
+        this.createdPlayer.name = '';
         this.socketClientService.removePlayerFromLobby(this.currentAccessCode, this.createdPlayer.name);
         this.characterService.resetAttributes();
+        this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
         this.dialogRef.close();
     }
 
-    resetPopup(): void {// doit rester ici pcq on  a besoin que ca reste ici pcw on a besoin de faire le .close que je peux pas avoir dans le service
+    resetPopup(): void {
+        // doit rester ici pcq on  a besoin que ca reste ici pcw on a besoin de faire le .close que je peux pas avoir dans le service
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }

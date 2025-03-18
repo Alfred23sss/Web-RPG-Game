@@ -54,6 +54,7 @@ export class LobbyService {
         if (!lobby) return false;
 
         const isAdmin = lobby.players.some((p) => p.name === playerName && p.isAdmin);
+
         lobby.players = lobby.players.filter((p) => p.name !== playerName);
         if (lobby.players.length === 0 || isAdmin) {
             this.lobbies.delete(accessCode);
