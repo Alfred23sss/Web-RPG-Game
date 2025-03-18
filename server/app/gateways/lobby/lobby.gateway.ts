@@ -127,8 +127,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) return;
-
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
+        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
 
         if (isLobbyDeleted) {
             this.server.to(accessCode).emit('lobbyDeleted');
@@ -137,6 +137,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
             this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
+            this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
         }
 
         client.leave(accessCode);
@@ -144,8 +145,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         if (lobby && lobby.players.length < lobby.maxPlayers) {
             this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
         }
-
-        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
     }
 
     @SubscribeMessage('kickPlayer')

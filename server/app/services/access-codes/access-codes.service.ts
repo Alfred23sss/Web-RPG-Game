@@ -25,7 +25,7 @@ export class AccessCodesService {
         this.accessCodes.delete(code);
     }
 
-    getAllAccessCodes(): string[] {
-        return Array.from(this.accessCodes);
-    }
+    // getAllAccessCodes(): string[] {
+    //     return Array.from(this.accessCodes);
+    // }
 }
