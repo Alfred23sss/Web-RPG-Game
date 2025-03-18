@@ -66,12 +66,12 @@ export class LobbyService {
 
         const isPlayerInLobby = lobby.players.some((p) => p.name === player.name);
         if (this.accessCode && isPlayerInLobby && !this.isGameStartingSubject.value) {
-            this.socketClientService.socket.emit('leaveLobby', {
+            this.socketClientService.emit('leaveLobby', {
                 accessCode: this.accessCode,
                 playerName: player.name,
             });
             if (player.isAdmin) {
-                this.socketClientService.socket.emit('deleteLobby', this.accessCode);
+                this.socketClientService.emit('deleteLobby', this.accessCode);
             }
         }
     }

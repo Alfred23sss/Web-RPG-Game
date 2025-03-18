@@ -1,5 +1,6 @@
-import { TestBed } from '@angular/core/testing';
-import { MatSnackBar, MatSnackBarModule, MatSnackBarRef } from '@angular/material/snack-bar';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { MatSnackBar, MatSnackBarModule, MatSnackBarRef, TextOnlySnackBar } from '@angular/material/snack-bar';
 import { ConfirmComponent } from '@app/components/confirm/confirm.component';
 import { SNACKBAR_CONFIG } from '@app/constants/global.constants';
 import { Subject } from 'rxjs';
@@ -21,6 +22,7 @@ describe('SnackbarService', () => {
         snackBarRefMock.onAction.and.returnValue(actionSubject.asObservable());
 
         snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open', 'openFromComponent']);
+        snackBarSpy.open.and.returnValue(snackBarRefMock as unknown as MatSnackBarRef<TextOnlySnackBar>);
         snackBarSpy.openFromComponent.and.returnValue(snackBarRefMock);
 
         TestBed.configureTestingModule({
@@ -86,6 +88,72 @@ describe('SnackbarService', () => {
             });
 
             actionSubject.next();
+        });
+    });
+
+    describe('showMultipleMessages', () => {
+        it('should not add duplicate messages to the queue', () => {
+            (service as any).messageQueue = ['Existing message'];
+            service.showMultipleMessages('Existing message');
+            expect((service as any).messageQueue).toEqual(['Existing message']);
+        });
+
+        it('should add to queue and update when already displaying', () => {
+            (service as any).isDisplaying = true;
+            (service as any).snackBarRef = snackBarRefMock;
+
+            service.showMultipleMessages('New message');
+
+            expect((service as any).messageQueue).toEqual(['New message']);
+            expect(snackBarRefMock.dismiss).toHaveBeenCalled();
+            expect(snackBarSpy.open).toHaveBeenCalledWith('New message', SNACKBAR_CONFIG.action, jasmine.any(Object));
+        });
+
+        it('should initialize display when first message', () => {
+            service.showMultipleMessages('First message');
+
+            expect((service as any).isDisplaying).toBeTrue();
+            expect((service as any).messageQueue).toEqual(['First message']);
+            expect(snackBarSpy.open).toHaveBeenCalledWith('First message', SNACKBAR_CONFIG.action, jasmine.any(Object));
+        });
+
+        it('should combine multiple messages and handle dismissal', fakeAsync(() => {
+            service.showMultipleMessages('Message 1');
+            service.showMultipleMessages('Message 2');
+
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Message 1\nMessage 2', SNACKBAR_CONFIG.action, jasmine.any(Object));
+
+            dismissSubject.next({ dismissedByAction: false });
+            tick();
+
+            expect((service as any).isDisplaying).toBeFalse();
+            expect((service as any).messageQueue).toEqual([]);
+            expect((service as any).snackBarRef).toBeNull();
+        }));
+    });
+
+    describe('displayNextMessage', () => {
+        it('should show combined messages and clear queue on dismiss', () => {
+            (service as any).messageQueue = ['Message 1', 'Message 2'];
+            (service as any).displayNextMessage(SNACKBAR_CONFIG.action, SNACKBAR_CONFIG.duration);
+
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Message 1\nMessage 2', SNACKBAR_CONFIG.action, { duration: SNACKBAR_CONFIG.duration });
+
+            dismissSubject.next({ dismissedByAction: false });
+            expect((service as any).isDisplaying).toBeFalse();
+            expect((service as any).messageQueue).toEqual([]);
+            expect((service as any).snackBarRef).toBeNull();
+        });
+
+        it('should handle multiple updates correctly', () => {
+            (service as any).messageQueue = ['Message 1'];
+            (service as any).displayNextMessage(SNACKBAR_CONFIG.action, SNACKBAR_CONFIG.duration);
+
+            (service as any).messageQueue = ['Message 1', 'Message 2'];
+            (service as any).updateSnackbarMessage();
+
+            expect(snackBarRefMock.dismiss).toHaveBeenCalled();
+            expect(snackBarSpy.open).toHaveBeenCalledWith('Message 1\nMessage 2', SNACKBAR_CONFIG.action, { duration: SNACKBAR_CONFIG.duration });
         });
     });
 });
