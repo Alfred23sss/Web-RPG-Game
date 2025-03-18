@@ -526,6 +526,35 @@ describe('GameCombatService', () => {
             expect(gameSessionService.resumeGameTurn).toHaveBeenCalledWith(accessCode, combatState.pausedGameTurnTimeRemaining);
             expect(gameSessionService.endTurn).not.toHaveBeenCalled();
         });
+
+        it('should end combat immediately if a player has won', () => {
+            const accessCode = 'testAccessCode';
+            const combatState = mockCombatState();
+            combatState.currentFighter = mockPlayer('currentFighter', 5);
+            service['combatStates'][accessCode] = combatState;
+
+            jest.spyOn(service, 'checkPlayerWon').mockReturnValue(true);
+            const endCombatSpy = jest.spyOn(service, 'endCombat');
+
+            service['handleCombatEnd'](combatState, mockPlayer('currentFighter', 5), accessCode);
+
+            expect(service.checkPlayerWon).toHaveBeenCalledWith(accessCode, combatState.currentFighter);
+            expect(endCombatSpy).toHaveBeenCalledWith(accessCode);
+        });
+
+        it('should end turn if the defender was the attacker', () => {
+            const accessCode = 'testAccessCode';
+            const combatState = mockCombatState();
+            const defender = mockPlayer('currentFighter', 5);
+            combatState.attacker = defender;
+            service['combatStates'][accessCode] = combatState;
+
+            const endTurnSpy = jest.spyOn(gameSessionService, 'endTurn');
+
+            service['handleCombatEnd'](combatState, defender, accessCode);
+
+            expect(endTurnSpy).toHaveBeenCalledWith(accessCode);
+        });
     });
 
     describe('isCombatActive', () => {
@@ -984,5 +1013,66 @@ describe('GameCombatService', () => {
             expect(endCombatTurnSpy).toHaveBeenCalledWith(accessCode);
             expect(eventEmitter.emit).toHaveBeenCalledWith('update.player', { player: defenderPlayer });
         });
+    });
+
+    it('should perform attack automatically when timer expires and player did not perform action', () => {
+        jest.useFakeTimers();
+        const accessCode = 'test';
+        const combatState = mockCombatState();
+        combatState.playerPerformedAction = false;
+        service['combatStates'] = { [accessCode]: combatState };
+        const performAttackSpy = jest.spyOn(service as any, 'performAttack').mockImplementation(() => {});
+        (service as any).handleTimerTimeout(accessCode, combatState, 1000);
+
+        expect(performAttackSpy).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(1000);
+        expect(performAttackSpy).toHaveBeenCalledWith(accessCode, combatState.currentFighter.name);
+    });
+
+    it('should not perform attack automatically when timer expires but player already performed action', () => {
+        jest.useFakeTimers();
+        const accessCode = 'test';
+        const combatState = mockCombatState();
+        combatState.playerPerformedAction = true;
+        service['combatStates'] = { [accessCode]: combatState };
+        const performAttackSpy = jest.spyOn(service as any, 'performAttack').mockImplementation(() => {});
+        (service as any).handleTimerTimeout(accessCode, combatState, 1000);
+
+        jest.advanceTimersByTime(1000);
+        expect(performAttackSpy).not.toHaveBeenCalled();
+    });
+    it('should initialize combat timer and emit events', () => {
+        jest.useFakeTimers();
+        const accessCode = 'test';
+        const combatState = mockCombatState();
+        const turnDurationInSeconds = 5;
+        const mockDefender = mockPlayer('defender', 4);
+
+        combatHelper.getDefender.mockReturnValue(mockDefender);
+
+        const emitEventSpy = jest.spyOn(service as any, 'emitEvent').mockImplementation(() => {});
+
+        (service as any).initializeCombatTimer(accessCode, combatState, turnDurationInSeconds);
+        expect(emitEventSpy).toHaveBeenCalledWith('game.combat.timer', {
+            accessCode,
+            attacker: combatState.currentFighter,
+            defender: mockDefender,
+            timeLeft: turnDurationInSeconds,
+        });
+
+        emitEventSpy.mockClear();
+        jest.advanceTimersByTime(1000);
+        expect(combatState.combatTurnTimeRemaining).toBe(turnDurationInSeconds - 1);
+        expect(emitEventSpy).toHaveBeenCalledWith('game.combat.timer', {
+            accessCode,
+            attacker: combatState.currentFighter,
+            defender: mockDefender,
+            timeLeft: turnDurationInSeconds - 1,
+        });
+        emitEventSpy.mockClear();
+
+        jest.advanceTimersByTime((turnDurationInSeconds - 1) * 1000);
+        expect(combatState.combatCountdownInterval).toBeNull();
+        expect(combatState.combatTurnTimeRemaining).toBe(0);
     });
 });

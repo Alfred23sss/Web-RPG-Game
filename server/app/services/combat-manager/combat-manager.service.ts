@@ -263,6 +263,7 @@ export class GameCombatService {
         combatState.combatTurnTimeRemaining = turnDurationInSeconds;
         this.emitEvent('game.combat.turn.started', { accessCode, player: combatState.currentFighter, defender });
 
+        // test this condition not tested
         if (combatState.combatCountdownInterval) {
             clearInterval(combatState.combatCountdownInterval);
             combatState.combatCountdownInterval = null;
