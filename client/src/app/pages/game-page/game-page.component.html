@@ -110,8 +110,8 @@
         <div class="action-buttons">
             @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){ @if(!isInCombatMode){
             <button class="action-btn end-turn" (click)="endTurn()" [disabled]="hasTurnEnded">Terminer tour</button>
-            <button class="action-btn execute-action" (click)="executeNextAction()">
-                {{ isActionMode ? 'Canceler action' : 'Exécuter action' }}
+            <button class="action-btn execute-action" (click)="executeNextAction()" [disabled]="clientPlayer.actionPoints === 0">
+                {{ clientPlayer.actionPoints === 0 ? 'Aucune action restante ' : isActionMode ? 'Canceler action' : 'Exécuter action' }}
             </button>
             } }
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>

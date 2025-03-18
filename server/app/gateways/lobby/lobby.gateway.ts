@@ -74,7 +74,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
             client.emit('joinedLobby');
 
-            if (lobby.players.length >= lobby.maxPlayers) {
+            if (lobby.isLocked) {
                 this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
             }
         } else {
@@ -145,10 +145,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
 
         client.leave(accessCode);
-
-        if (lobby && lobby.players.length < lobby.maxPlayers) {
-            this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
-        }
     }
 
     @SubscribeMessage('kickPlayer')
