@@ -120,7 +120,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
-        //
         this.clientPlayer.hasAbandoned = true;
         this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
         this.backToHome();
