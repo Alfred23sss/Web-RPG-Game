@@ -4,8 +4,8 @@ export interface Turn {
     orderedPlayers: Player[];
     currentPlayer: Player | null;
     currentTurnCountdown: number;
-    turnTimers: NodeJS.Timeout | null; // For setTimeout
-    countdownInterval: NodeJS.Timeout | null; // For setInterval
+    turnTimers: NodeJS.Timeout | null;
+    countdownInterval: NodeJS.Timeout | null;
     isTransitionPhase: boolean;
     isInCombat: boolean;
     transitionTimeRemaining?: number;

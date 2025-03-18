@@ -133,7 +133,6 @@ export class GameSessionService {
         }
         targetTile.isOpen = !targetTile.isOpen;
         this.logger.log('emit game.door.update');
-        this.logger.log(grid);
         this.gameSessions.get(accessCode).game.grid = grid;
         this.eventEmitter.emit('game.door.update', { accessCode, grid });
     }

@@ -30,14 +30,14 @@ export class GameSessionTurnService {
     }
 
     startTransitionPhase(accessCode: string, turn: Turn): Turn {
-        if (turn.turnTimers) {
-            clearTimeout(turn.turnTimers);
-            turn.turnTimers = null;
-        }
-        if (turn.countdownInterval) {
-            clearInterval(turn.countdownInterval);
-            turn.countdownInterval = null;
-        }
+        // if (turn.turnTimers) {
+        //     clearTimeout(turn.turnTimers);
+        //     turn.turnTimers = null;
+        // }
+        // if (turn.countdownInterval) {
+        //     clearInterval(turn.countdownInterval);
+        //     turn.countdownInterval = null;
+        // }
         turn.isTransitionPhase = true;
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
         const nextPlayer = this.getNextPlayer(accessCode, turn);
@@ -67,10 +67,10 @@ export class GameSessionTurnService {
         this.updatePlayer(player, { isActive: true });
         turn.currentTurnCountdown = TURN_DURATION / SECOND;
         this.emitEvent('game.turn.started', { accessCode, player });
-        if (turn.countdownInterval) {
-            clearInterval(turn.countdownInterval);
-            turn.countdownInterval = null;
-        }
+        // if (turn.countdownInterval) {
+        //     clearInterval(turn.countdownInterval);
+        //     turn.countdownInterval = null;
+        // }
         let timeLeft = TURN_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
             timeLeft--;
@@ -145,7 +145,8 @@ export class GameSessionTurnService {
         if (!turn.currentPlayer) {
             return activePlayers[0];
         }
-        const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer?.name);
+        const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer.name);
+
         const nextIndex = (currentIndex + 1) % activePlayers.length;
         return activePlayers[nextIndex];
     }
@@ -168,7 +169,6 @@ export class GameSessionTurnService {
             Object.assign(player, updates);
         }
     }
-
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
