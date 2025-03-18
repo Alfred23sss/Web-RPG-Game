@@ -72,7 +72,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             if (this.lobby.players.length < this.lobby.maxPlayers) {
                 this.socketClientService.emit('unlockLobby', this.accessCode);
             } else {
-                this.snackbarService.showMessage('Le lobby est plein, impossible de le dÃ©verrouiller.');
+                this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
             }
         } else {
             this.socketClientService.emit('lockLobby', this.accessCode);
