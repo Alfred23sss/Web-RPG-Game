@@ -19,7 +19,7 @@ export class CombatHelperService {
         return attacker.speed > defender.speed ? [attacker, defender] : [defender, attacker];
     }
 
-    getRandomDefenseScore(defender: Player, accessCode: string, isDebugMode: boolean, grid: Tile[][]): number {
+    getRandomDefenseScore(defender: Player, isDebugMode: boolean, grid: Tile[][]): number {
         let iceDisadvantage = 0;
         const tile = this.gridManagerService.findTileByPlayer(grid, defender);
         if (tile && tile.type === TileType.Ice) {
@@ -29,7 +29,7 @@ export class CombatHelperService {
         return defender.defense.value + defenseBonus + iceDisadvantage;
     }
 
-    getRandomAttackScore(attacker: Player, accessCode: string, isDebugMode: boolean, grid: Tile[][]): number {
+    getRandomAttackScore(attacker: Player, isDebugMode: boolean, grid: Tile[][]): number {
         let iceDisadvantage = 0;
         const tile = this.gridManagerService.findTileByPlayer(grid, attacker);
         if (tile && tile.type === TileType.Ice) {
@@ -40,7 +40,7 @@ export class CombatHelperService {
         return attacker.attack.value + attackBonus + iceDisadvantage;
     }
 
-    resetLoserPlayerPosition(player: Player, accessCode: string, grid: Tile[][]): Tile[][] {
+    resetLoserPlayerPosition(player: Player, grid: Tile[][]): Tile[][] {
         const defenderSpawnPoint = this.gridManagerService.findTileBySpawnPoint(grid, player);
         const updatedGridAfterTeleportation = this.gridManagerService.teleportPlayer(grid, player, defenderSpawnPoint);
         return updatedGridAfterTeleportation;
