@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GRID_DIMENSIONS } from '@app/constants/global.constants';
-import { ErrorMessages, GameMode, ItemName, GameSize, ItemCount, TileType } from '@app/enums/global.enums';
+import { ErrorMessages, GameMode, ItemName, GameSize, ItemCount, TileType, GameSizeNumber } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GridPosition } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
@@ -133,9 +133,9 @@ export class GameValidationService {
     private validateHomeItemsPlaced(game: Game): string | null {
         if (!game.grid) return ErrorMessages.GridNotFound;
         const requiredHomeItems =
-            game.size === GameSize.Small
+            game.size === GameSizeNumber.SmallSize
                 ? ItemCount.SmallItemCount
-                : game.size === GameSize.Medium
+                : game.size === GameSizeNumber.MediumSize
                 ? ItemCount.MediumItemCount
                 : ItemCount.LargeItemCount;
         let homeItemCount = 0;
@@ -160,9 +160,9 @@ export class GameValidationService {
             }
         }
         const requiredItemCount =
-            game.size === GameSize.Small
+            game.size === GameSizeNumber.SmallSize
                 ? ItemCount.SmallItemCount
-                : game.size === GameSize.Medium
+                : game.size === GameSizeNumber.MediumSize
                 ? ItemCount.MediumItemCount
                 : ItemCount.LargeItemCount;
         return itemCount < requiredItemCount ? ErrorMessages.ItemsNotPlaced : itemCount > requiredItemCount ? ErrorMessages.TooManyItemsPlaced : null;

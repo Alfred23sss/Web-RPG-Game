@@ -93,6 +93,13 @@ export enum GameSize {
     None = '',
 }
 
+export enum GameSizeNumber {
+    SmallSize = '10',
+    MediumSize = '15',
+    LargeSize = '20',
+    Default = '',
+}
+
 export enum AttributeType {
     Vitality = 'Vitalité',
     Speed = 'Vitesse',
