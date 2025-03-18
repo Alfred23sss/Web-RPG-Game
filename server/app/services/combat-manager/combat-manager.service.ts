@@ -77,7 +77,7 @@ export class GameCombatService {
         }
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
-        this.emitEvent('game.combat.escape.failed', { currentFighter, attemptsLeft });
+        this.emitEvent('game.combat.escape.failed', { player: currentFighter, attemptsLeft });
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
         if (isEscapeSuccessful) {
@@ -291,24 +291,44 @@ export class GameCombatService {
     private startCombatTurn(accessCode: string, player: Player): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
+
         combatState.playerPerformedAction = false;
         combatState.currentFighter = player;
-        const defender = combatState.currentFighter === combatState.attacker ? combatState.defender : combatState.attacker;
+        const defender = this.getDefender(combatState);
         const escapeAttemptsRemaining = combatState.remainingEscapeAttempts.get(player.name) || 0;
-        const turnDuration = escapeAttemptsRemaining > 0 ? COMBAT_TURN_DURATION : COMBAT_ESCAPE_LIMITED_DURATION;
+        const turnDuration = this.calculateTurnDuration(escapeAttemptsRemaining);
         const turnDurationInSeconds = turnDuration / SECOND;
+
         combatState.combatTurnTimeRemaining = turnDurationInSeconds;
-        this.emitEvent('game.combat.turn.started', { accessCode, player, defender });
+        this.emitEvent('game.combat.turn.started', { accessCode, player: combatState.currentFighter, defender });
+
         if (combatState.combatCountdownInterval) {
             clearInterval(combatState.combatCountdownInterval);
             combatState.combatCountdownInterval = null;
         }
+
+        this.initializeCombatTimer(accessCode, combatState, turnDurationInSeconds);
+        this.handleTimerTimeout(accessCode, combatState, turnDuration);
+    }
+
+    private getDefender(combatState: CombatState): Player {
+        return combatState.currentFighter === combatState.attacker ? combatState.defender : combatState.attacker;
+    }
+
+    private calculateTurnDuration(escapeAttemptsRemaining: number): number {
+        return escapeAttemptsRemaining > 0 ? COMBAT_TURN_DURATION : COMBAT_ESCAPE_LIMITED_DURATION;
+    }
+
+    private initializeCombatTimer(accessCode: string, combatState: CombatState, turnDurationInSeconds: number): void {
         let timeLeft = turnDurationInSeconds;
+        const defender = this.getDefender(combatState);
         this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
+
         combatState.combatCountdownInterval = setInterval(() => {
             timeLeft--;
             combatState.combatTurnTimeRemaining = timeLeft;
             this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
+
             if (timeLeft <= 0) {
                 if (combatState.combatCountdownInterval) {
                     clearInterval(combatState.combatCountdownInterval);
@@ -316,12 +336,50 @@ export class GameCombatService {
                 combatState.combatCountdownInterval = null;
             }
         }, SECOND);
+    }
+
+    private handleTimerTimeout(accessCode: string, combatState: CombatState, turnDuration: number): void {
         combatState.combatTurnTimers = setTimeout(() => {
             if (!combatState.playerPerformedAction) {
                 this.performAttack(accessCode, combatState.currentFighter.name);
             }
         }, turnDuration);
     }
+
+    // private startCombatTurn(accessCode: string, player: Player): void {
+    //     const combatState = this.combatStates[accessCode];
+    //     if (!combatState) return;
+    //     combatState.playerPerformedAction = false;
+    //     combatState.currentFighter = player;
+    //     const defender = combatState.currentFighter === combatState.attacker ? combatState.defender : combatState.attacker;
+    //     const escapeAttemptsRemaining = combatState.remainingEscapeAttempts.get(player.name) || 0;
+    //     const turnDuration = escapeAttemptsRemaining > 0 ? COMBAT_TURN_DURATION : COMBAT_ESCAPE_LIMITED_DURATION;
+    //     const turnDurationInSeconds = turnDuration / SECOND;
+    //     combatState.combatTurnTimeRemaining = turnDurationInSeconds;
+    //     this.emitEvent('game.combat.turn.started', { accessCode, player, defender });
+    //     if (combatState.combatCountdownInterval) {
+    //         clearInterval(combatState.combatCountdownInterval);
+    //         combatState.combatCountdownInterval = null;
+    //     }
+    //     let timeLeft = turnDurationInSeconds;
+    //     this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
+    //     combatState.combatCountdownInterval = setInterval(() => {
+    //         timeLeft--;
+    //         combatState.combatTurnTimeRemaining = timeLeft;
+    //         this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
+    //         if (timeLeft <= 0) {
+    //             if (combatState.combatCountdownInterval) {
+    //                 clearInterval(combatState.combatCountdownInterval);
+    //             }
+    //             combatState.combatCountdownInterval = null;
+    //         }
+    //     }, SECOND);
+    //     combatState.combatTurnTimers = setTimeout(() => {
+    //         if (!combatState.playerPerformedAction) {
+    //             this.performAttack(accessCode, combatState.currentFighter.name);
+    //         }
+    //     }, turnDuration);
+    // }
 
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
