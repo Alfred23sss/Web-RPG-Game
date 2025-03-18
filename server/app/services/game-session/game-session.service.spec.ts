@@ -787,8 +787,7 @@ describe('GameSessionService', () => {
 
     describe('callTeleport', () => {
         it('should teleport player and update grid', () => {
-            const accessCode = ACCESS_CODE;
-            const gameSession = gameSessionService.createGameSession(accessCode);
+            const gameSession = gameSessionService.createGameSession(ACCESS_CODE);
             const originalGrid = gameSession.game.grid;
             const player = MOCK_LOBBY.players[0];
             const targetTile = createValidTile(false);
@@ -797,16 +796,15 @@ describe('GameSessionService', () => {
 
             const emitSpy = jest.spyOn(gameSessionService, 'emitGridUpdate');
 
-            gameSessionService.callTeleport(accessCode, player, targetTile);
+            gameSessionService.callTeleport(ACCESS_CODE, player, targetTile);
 
             expect(gridManagerService.teleportPlayer).toHaveBeenCalledWith(originalGrid, player, targetTile);
-            expect(gameSessionService.getGameSession(accessCode).game.grid).toBe(updatedGridMock);
-            expect(emitSpy).toHaveBeenCalledWith(accessCode, updatedGridMock);
+            expect(gameSessionService.getGameSession(ACCESS_CODE).game.grid).toBe(updatedGridMock);
+            expect(emitSpy).toHaveBeenCalledWith(ACCESS_CODE, updatedGridMock);
         });
 
         it('should teleport player and update grid', () => {
-            const accessCode = ACCESS_CODE;
-            const gameSession = gameSessionService.createGameSession(accessCode);
+            const gameSession = gameSessionService.createGameSession(ACCESS_CODE);
             const originalGrid = gameSession.game.grid;
             const player = MOCK_LOBBY.players[0];
             const targetTile = createValidTile(false);
@@ -815,11 +813,11 @@ describe('GameSessionService', () => {
             jest.spyOn(gridManagerService, 'teleportPlayer').mockReturnValue(updatedGridMock);
 
             const emitSpy = jest.spyOn(gameSessionService, 'emitGridUpdate');
-            gameSessionService.callTeleport(accessCode, player, targetTile);
+            gameSessionService.callTeleport(ACCESS_CODE, player, targetTile);
 
             expect(gridManagerService.teleportPlayer).toHaveBeenCalledWith(originalGrid, player, targetTile);
-            expect(gameSessionService.getGameSession(accessCode).game.grid).toBe(updatedGridMock);
-            expect(emitSpy).toHaveBeenCalledWith(accessCode, updatedGridMock);
+            expect(gameSessionService.getGameSession(ACCESS_CODE).game.grid).toBe(updatedGridMock);
+            expect(emitSpy).toHaveBeenCalledWith(ACCESS_CODE, updatedGridMock);
         });
     });
 
