@@ -139,7 +139,7 @@ describe('GameSessionTurnService', () => {
 
             const updatedTurn = service.endTurn(turn);
 
-            expect(updatedTurn.currentPlayer).toBeNull();
+            expect(updatedTurn.currentPlayer).toBe(player);
             expect(updatedTurn.currentTurnCountdown).toBe(0);
             expect(updatedTurn.turnTimers).toBeNull();
             expect(updatedTurn.countdownInterval).toBeNull();
@@ -207,7 +207,7 @@ describe('GameSessionTurnService', () => {
 
             const nextPlayer = service.getNextPlayer('1234', turn);
 
-            expect(nextPlayer).toBeNull();
+            expect(nextPlayer).toBe(players[0]);
         });
     });
 

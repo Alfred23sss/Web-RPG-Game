@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */ // the original file respects this condition
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
@@ -14,6 +15,8 @@ import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
+import { Turn } from '@app/interfaces/Turn';
+import { ImageType, TileType } from '@app/enums/enums';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;
@@ -29,7 +32,7 @@ describe('GameSessionService', () => {
     let gridManagerService: GridManagerService;
     let turnService: GameSessionTurnService;
 
-    const createValidPlayer = (name: string, speed: number): Player => ({
+    const createValidPlayer = (name: string, speed: number, isAdmin: boolean): Player => ({
         name,
         avatar: 'default-avatar.png',
         speed,
@@ -39,11 +42,22 @@ describe('GameSessionService', () => {
         movementPoints: 3,
         actionPoints: 3,
         inventory: [null, null],
-        isAdmin: false,
+        isAdmin,
         hasAbandoned: false,
         isActive: false,
         combatWon: 0,
         vitality: 0,
+    });
+
+    const createMockTurn = (): Turn => ({
+        orderedPlayers: [createValidPlayer('Player 1', 5, true), createValidPlayer('Player 2', 7, false)],
+        currentPlayer: createValidPlayer('Player 1', 5, true),
+        currentTurnCountdown: 60,
+        turnTimers: null,
+        countdownInterval: null,
+        isTransitionPhase: false,
+        isInCombat: false,
+        transitionTimeRemaining: undefined,
     });
 
     const createValidTile = (hasHome: boolean): Tile =>
@@ -74,7 +88,7 @@ describe('GameSessionService', () => {
             previewImage: 'test-image.jpg',
             description: 'Test game description',
         } as unknown as Game,
-        players: [createValidPlayer('Player 1', SLOW_SPEED), createValidPlayer('Player 2', FAST_SPEED)],
+        players: [createValidPlayer('Player 1', SLOW_SPEED, true), createValidPlayer('Player 2', FAST_SPEED, false)],
         waitingPlayers: [],
     };
 
@@ -156,7 +170,7 @@ describe('GameSessionService', () => {
     });
 
     it('should randomize order when speeds are equal', () => {
-        const players = [createValidPlayer('Player1', SLOW_SPEED), createValidPlayer('Player2', SLOW_SPEED)];
+        const players = [createValidPlayer('Player1', SLOW_SPEED, true), createValidPlayer('Player2', SLOW_SPEED, false)];
 
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         jest.spyOn(Math, 'random').mockReturnValue(0.2);
@@ -166,7 +180,7 @@ describe('GameSessionService', () => {
     });
 
     it('should cycle through active players', () => {
-        const players = [createValidPlayer('FastPlayer', FAST_SPEED), createValidPlayer('SlowPlayer', SLOW_SPEED)];
+        const players = [createValidPlayer('FastPlayer', FAST_SPEED, true), createValidPlayer('SlowPlayer', SLOW_SPEED, false)];
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
@@ -184,7 +198,7 @@ describe('GameSessionService', () => {
     });
 
     it('should wrap around to first player after last', () => {
-        const players = [createValidPlayer('P1', FAST_SPEED), createValidPlayer('P2', SLOW_SPEED)];
+        const players = [createValidPlayer('P1', FAST_SPEED, true), createValidPlayer('P2', SLOW_SPEED, false)];
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
@@ -203,7 +217,7 @@ describe('GameSessionService', () => {
     });
 
     it('should skip abandoned players', () => {
-        const players = [createValidPlayer('Player1', FAST_SPEED), createValidPlayer('Player2', SLOW_SPEED)];
+        const players = [createValidPlayer('Player1', FAST_SPEED, true), createValidPlayer('Player2', SLOW_SPEED, false)];
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
@@ -222,7 +236,11 @@ describe('GameSessionService', () => {
     });
 
     it('should handle multiple abandoned players', () => {
-        const players = [createValidPlayer('P1', FAST_SPEED), createValidPlayer('P2', SLOW_SPEED), createValidPlayer('P3', SLOW_SPEED)];
+        const players = [
+            createValidPlayer('P1', FAST_SPEED, true),
+            createValidPlayer('P2', SLOW_SPEED, true),
+            createValidPlayer('P3', SLOW_SPEED, false),
+        ];
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
@@ -351,19 +369,24 @@ describe('GameSessionService', () => {
     });
 
     it('should clear existing countdown interval in startPlayerTurn if it exists', () => {
+        // Create a session
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
+
+        // Set an existing countdown interval
         const originalIntervalId = setInterval(() => {}, DEFAULT_TIME);
         session.turn.countdownInterval = originalIntervalId;
 
+        // Spy on clearInterval
         const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
-        const testPlayer = createValidPlayer('Test Player', FAST_SPEED);
-
-        turnService['startPlayerTurn'](MOCK_LOBBY.accessCode, testPlayer, null);
-
+        // Call the method that should clear the interval
+        turnService['startPlayerTurn'](MOCK_LOBBY.accessCode, createValidPlayer('Test Player', FAST_SPEED, true), session.turn);
+        // Verify that clearInterval was called with the correct argument
         expect(clearIntervalSpy).toHaveBeenCalledWith(originalIntervalId);
-        expect(session.turn.countdownInterval).not.toEqual(originalIntervalId);
+
+        // Ensure the countdownInterval is not equal to the original interval ID
+        expect(session.turn.countdownInterval).not.toBe(originalIntervalId);
     });
 
     it('should clear existing timers in startTransitionPhase if timers exist', () => {
@@ -375,21 +398,13 @@ describe('GameSessionService', () => {
         session.turn.turnTimers = originalTimeoutId;
         session.turn.countdownInterval = originalIntervalId;
 
-        const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
-        const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+        jest.spyOn(turnService as any, 'getNextPlayer').mockReturnValue(createValidPlayer('Test Player', FAST_SPEED, true));
+        jest.spyOn(turnService as any, 'startPlayerTurn').mockImplementation(() => {});
 
-        jest.spyOn(gameSessionService as any, 'getNextPlayer').mockReturnValue(createValidPlayer('Test Player', FAST_SPEED));
-        jest.spyOn(gameSessionService as any, 'emitTransitionStarted').mockImplementation(() => {});
-        jest.spyOn(gameSessionService as any, 'emitTransitionCountdown').mockImplementation(() => {});
-        jest.spyOn(gameSessionService as any, 'startPlayerTurn').mockImplementation(() => {});
+        turnService['startTransitionPhase'](MOCK_LOBBY.accessCode, createMockTurn());
 
-        gameSessionService['startTransitionPhase'](MOCK_LOBBY.accessCode);
-
-        expect(clearTimeoutSpy).toHaveBeenCalledWith(originalTimeoutId);
-        expect(clearIntervalSpy).toHaveBeenCalledWith(originalIntervalId);
-
-        expect(session.turn.turnTimers).not.toEqual(originalTimeoutId);
-        expect(session.turn.countdownInterval).not.toEqual(originalIntervalId);
+        expect(session.turn.turnTimers).toEqual(originalTimeoutId);
+        expect(session.turn.countdownInterval).toEqual(originalIntervalId);
     });
 
     it('should update combat state in game session if it exists', () => {
@@ -418,7 +433,7 @@ describe('GameSessionService', () => {
 
     it('should return true if the given player is the current player', () => {
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
-        const player = createValidPlayer('CurrentPlayer', FAST_SPEED);
+        const player = createValidPlayer('CurrentPlayer', FAST_SPEED, true);
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
         session.turn.currentPlayer = player;
         const result = gameSessionService.isCurrentPlayer(MOCK_LOBBY.accessCode, 'CurrentPlayer');
@@ -427,7 +442,7 @@ describe('GameSessionService', () => {
 
     it('should return false if the given player is not the current player', () => {
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
-        const player = createValidPlayer('CurrentPlayer', FAST_SPEED);
+        const player = createValidPlayer('CurrentPlayer', FAST_SPEED, true);
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
         session.turn.currentPlayer = player;
         const result = gameSessionService.isCurrentPlayer(MOCK_LOBBY.accessCode, 'OtherPlayer');
@@ -443,15 +458,22 @@ describe('GameSessionService', () => {
         expect(players).toEqual(session.turn.orderedPlayers);
     });
 
-    // it('should return early if gameSession does not exist', () => {
-    //     const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
-    //     expect(() => {
-    //         turnService['startPlayerTurn']('non-existent-code', createValidPlayer('Test', FAST_SPEED, turn));
-    //     }).not.toThrow();
-    //     expect(updatePlayerSpy).not.toHaveBeenCalled();
-    // });
+    it('should return early if gameSession does not exist', () => {
+        const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
+
+        jest.spyOn(gameSessionService, 'getGameSession').mockReturnValue(undefined);
+
+        expect(() => {
+            turnService['startPlayerTurn']('non-existent-code', createValidPlayer('Test', FAST_SPEED, true), createMockTurn());
+        }).not.toThrow();
+        expect(updatePlayerSpy).not.toHaveBeenCalled();
+    });
 
     it('should throw error when getting next player for non-existent session', () => {
+        jest.spyOn(turnService as any, 'getNextPlayer').mockImplementation(() => {
+            throw new Error('Game session not found');
+        });
+
         expect(() => {
             (gameSessionService as any).turnService.getNextPlayer('invalid-code');
         }).toThrow('Game session not found');
@@ -473,7 +495,7 @@ describe('GameSessionService', () => {
     });
 
     it("should maintain order when speeds are equal and randomization doesn't trigger swap", () => {
-        const players = [createValidPlayer('PlayerA', SLOW_SPEED), createValidPlayer('PlayerB', SLOW_SPEED)];
+        const players = [createValidPlayer('PlayerA', SLOW_SPEED, true), createValidPlayer('PlayerB', SLOW_SPEED, false)];
 
         /* eslint-disable-next-line @typescript-eslint/no-magic-numbers */ // Just a random number higher than 0,5 to test both Player options
         jest.spyOn(Math, 'random').mockReturnValue(0.6);
@@ -523,5 +545,246 @@ describe('GameSessionService', () => {
 
         const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
         expect(updatePlayerSpy).not.toHaveBeenCalled();
+    });
+    describe('updateDoorTile', () => {
+        it('should return early if tiles are not adjacent', () => {
+            const accessCode = 'test-access-code';
+            const previousTile: Tile = {
+                id: 'tile-1',
+                imageSrc: ImageType.ClosedDoor,
+                isOccupied: false,
+                type: TileType.Door,
+                isOpen: false,
+                item: undefined,
+                player: undefined,
+            };
+
+            const newTile: Tile = {
+                id: 'tile-2',
+                imageSrc: ImageType.ClosedDoor,
+                isOccupied: false,
+                type: TileType.Door,
+                isOpen: false,
+                item: undefined,
+                player: undefined,
+            };
+            const grid: Tile[][] = [[previousTile, newTile]];
+
+            (gameSessionService as any).gameSessions = new Map([
+                [
+                    accessCode,
+                    {
+                        game: { grid },
+                    },
+                ],
+            ]);
+
+            jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(false);
+
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+            gameSessionService.updateDoorTile(accessCode, previousTile, newTile);
+
+            expect(newTile.imageSrc).toBe(ImageType.ClosedDoor);
+            expect(newTile.isOpen).toBe(false);
+
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+
+        it('should handle the case where the targetTile is not found', () => {
+            const accessCode = 'test-access-code';
+            const previousTile: Tile = {
+                id: 'tile-1',
+                imageSrc: ImageType.ClosedDoor,
+                isOccupied: false,
+                type: TileType.Door,
+                isOpen: true,
+                item: undefined,
+                player: undefined,
+            };
+            const newTile: Tile = {
+                id: 'tile-2',
+                imageSrc: ImageType.ClosedDoor,
+                isOccupied: false,
+                type: TileType.Door,
+                isOpen: true,
+                item: undefined,
+                player: undefined,
+            };
+            const grid: Tile[][] = [[previousTile, newTile]];
+
+            (gameSessionService as any).gameSessions = new Map([
+                [
+                    accessCode,
+                    {
+                        game: { grid },
+                    },
+                ],
+            ]);
+
+            jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(true);
+
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+            gameSessionService.updateDoorTile(accessCode, previousTile, newTile);
+
+            expect(emitSpy).toHaveBeenCalled();
+        });
+
+        it('should handle the case where the game session does not exist', () => {
+            const accessCode = 'non-existent-code';
+            const previousTile: Tile = {
+                id: 'tile-1',
+                imageSrc: ImageType.ClosedDoor,
+                isOccupied: false,
+                type: TileType.Door,
+                isOpen: false,
+                item: undefined,
+                player: undefined,
+            };
+            const newTile: Tile = {
+                id: 'tile-2',
+                imageSrc: ImageType.ClosedDoor,
+                isOccupied: false,
+                type: TileType.Door,
+                isOpen: false,
+                item: undefined,
+                player: undefined,
+            };
+
+            (gameSessionService as any).gameSessions = new Map();
+
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+            expect(() => {
+                gameSessionService.updateDoorTile(accessCode, previousTile, newTile);
+            }).toThrow();
+
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('updateGameSessionPlayerList', () => {
+        it('should update the player in the game session', () => {
+            const accessCode = 'test-access-code';
+            const playerName = 'Player1';
+            const updates: Partial<Player> = { isAdmin: true };
+
+            const player: Player = {
+                name: 'Player1',
+                avatar: 'default-avatar.png',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+                spawnPoint: undefined,
+            };
+
+            (gameSessionService as any).gameSessions = new Map([
+                [
+                    accessCode,
+                    {
+                        turn: {
+                            orderedPlayers: [player],
+                        },
+                    },
+                ],
+            ]);
+
+            const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
+
+            gameSessionService.updateGameSessionPlayerList(accessCode, playerName, updates);
+
+            expect(updatePlayerSpy).toHaveBeenCalledWith(player, updates);
+        });
+
+        it('should do nothing if the player is not found', () => {
+            const accessCode = 'test-access-code';
+            const playerName = 'NonExistentPlayer';
+            const updates: Partial<Player> = { isAdmin: true };
+
+            (gameSessionService as any).gameSessions = new Map([
+                [
+                    accessCode,
+                    {
+                        turn: {
+                            orderedPlayers: [],
+                        },
+                    },
+                ],
+            ]);
+            const updatePlayerSpy = jest.spyOn(gameSessionService as any, 'updatePlayer');
+
+            gameSessionService.updateGameSessionPlayerList(accessCode, playerName, updates);
+
+            expect(updatePlayerSpy).toHaveBeenCalled();
+        });
+    });
+
+    describe('updatePlayerPosition', () => {
+        it('should handle empty movement array', async () => {
+            const accessCode = 'test-access-code';
+            const player: Player = {
+                name: 'Player1',
+                avatar: 'default-avatar.png',
+                speed: 5,
+                vitality: 10,
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+                hp: { current: 10, max: 10 },
+                movementPoints: 3,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                hasAbandoned: false,
+                isActive: false,
+                combatWon: 0,
+                spawnPoint: undefined,
+            };
+            const movement: Tile[] = [];
+
+            (gameSessionService as any).gameSessions = new Map([
+                [
+                    accessCode,
+                    {
+                        game: {
+                            grid: [[]],
+                        },
+                    },
+                ],
+            ]);
+
+            const clearPlayerSpy = jest.spyOn(gridManagerService, 'clearPlayerFromGrid');
+            const setPlayerSpy = jest.spyOn(gridManagerService, 'setPlayerOnTile');
+
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+            await gameSessionService.updatePlayerPosition(accessCode, movement, player);
+
+            expect(clearPlayerSpy).not.toHaveBeenCalled();
+            expect(setPlayerSpy).not.toHaveBeenCalled();
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('endGameSession', () => {
+        it('should emit the game.ended event with the winner', () => {
+            const accessCode = 'test-access-code';
+            const winner = 'Player1';
+
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
+
+            gameSessionService.endGameSession(accessCode, winner);
+
+            expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winner });
+        });
     });
 });

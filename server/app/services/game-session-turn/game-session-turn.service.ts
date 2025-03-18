@@ -30,18 +30,9 @@ export class GameSessionTurnService {
     }
 
     startTransitionPhase(accessCode: string, turn: Turn): Turn {
-        // if (turn.turnTimers) {
-        //     clearTimeout(turn.turnTimers);
-        //     turn.turnTimers = null;
-        // }
-        // if (turn.countdownInterval) {
-        //     clearInterval(turn.countdownInterval);
-        //     turn.countdownInterval = null;
-        // }
         turn.isTransitionPhase = true;
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
         const nextPlayer = this.getNextPlayer(accessCode, turn);
-        this.logger.log(nextPlayer);
         this.emitEvent('game.transition.started', { accessCode, nextPlayer });
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
@@ -67,10 +58,10 @@ export class GameSessionTurnService {
         this.updatePlayer(player, { isActive: true });
         turn.currentTurnCountdown = TURN_DURATION / SECOND;
         this.emitEvent('game.turn.started', { accessCode, player });
-        // if (turn.countdownInterval) {
-        //     clearInterval(turn.countdownInterval);
-        //     turn.countdownInterval = null;
-        // }
+        if (turn.countdownInterval) {
+            clearInterval(turn.countdownInterval);
+            turn.countdownInterval = null;
+        }
         let timeLeft = TURN_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
             timeLeft--;
@@ -139,7 +130,6 @@ export class GameSessionTurnService {
     }
 
     getNextPlayer(accessCode: string, turn: Turn): Player {
-        this.logger.log(turn.orderedPlayers);
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
         if (!turn.currentPlayer) {
