@@ -160,15 +160,6 @@ describe('GameService', () => {
         expect(service.getGameById(testGame2.id)).toEqual(testGame2);
     });
 
-    // it('should call getAllGames from gamecommunication service', () => {
-    //     gameCommunicationServiceSpy.getAllGames.and.returnValue(of([testGame1]));
-
-    //     service.fetchGames().subscribe(() => {
-    //         expect(gameCommunicationServiceSpy.getAllGames).toHaveBeenCalled();
-    //         expect(service.getGames()).toEqual([testGame1]);
-    //     });
-    // });
-
     it('should update game visibility and save the game', () => {
         service.games = [testGame1];
         gameCommunicationServiceSpy.updateGame.and.returnValue(of(testGame1));
@@ -190,15 +181,6 @@ describe('GameService', () => {
         expect(gameCommunicationServiceSpy.updateGame).toHaveBeenCalledWith(testGame1.id, testGame1);
         expect(service.getGames()[0]).toEqual(updatedGame);
     });
-
-    // it('should save new game if it does not exist', fakeAsync(() => {
-    //     spyOn(service, 'getGameById').and.returnValue(undefined);
-
-    //     service.saveGame(testGame2);
-    //     tick();
-
-    //     expect(service.getGames()).toContain(testGame2);
-    // }));
 
     it('should return the current game if it exists', () => {
         service['currentGame'] = testGame1;
@@ -245,5 +227,22 @@ describe('GameService', () => {
 
         expect(screenShotServiceSpy.generatePreview).toHaveBeenCalledWith('game-preview');
         expect(result).toBe(mockPreviewImage);
+    });
+
+    it('should fetch games from the server and update the games array', (done) => {
+        const mockGames: Game[] = [testGame1, testGame2];
+        gameCommunicationServiceSpy.getAllGames.and.returnValue(of(mockGames));
+
+        (service.fetchGames as jasmine.Spy).and.callThrough();
+
+        service.fetchGames().subscribe({
+            next: (games) => {
+                expect(games).toEqual(mockGames);
+                expect(service.games).toEqual(mockGames);
+                expect(gameCommunicationServiceSpy.getAllGames).toHaveBeenCalledTimes(1);
+                done();
+            },
+            error: done.fail,
+        });
     });
 });

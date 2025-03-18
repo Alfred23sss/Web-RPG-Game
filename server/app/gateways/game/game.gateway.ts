@@ -50,7 +50,9 @@ export class GameGateway {
             this.gameSessionService.deleteGameSession(payload.accessCode);
             this.accessCodesService.removeAccessCode(payload.accessCode);
             this.server.to(payload.accessCode).emit('gameDeleted');
+            this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
         }
+        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
         this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
         this.logger.log('game abandoned emitted');
     }
@@ -239,7 +241,7 @@ export class GameGateway {
 
         this.gameSessionService.deleteGameSession(payload.accessCode);
         this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner });
-
+        this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
         const lobbyPlayers = this.lobbyService.getLobbyPlayers(payload.accessCode);
         this.lobbyService.clearLobby(payload.accessCode);
         for (const player of lobbyPlayers) {

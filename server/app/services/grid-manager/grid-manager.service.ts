@@ -111,7 +111,10 @@ export class GridManagerService {
             (targetTile.item && targetTile.item.name !== 'home')
         ) {
             if (isPlayerSpawnPoint) {
-                destinationTile = this.findClosestAvailableTile(grid, targetTile) || currentPlayerTile;
+                destinationTile = this.findClosestAvailableTile(grid, targetTile);
+                if (!destinationTile) {
+                    return grid;
+                }
             } else {
                 return grid;
             }

@@ -76,6 +76,9 @@ export class SocketClientService {
         this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
+    // kickPlayer(accessCode: string, playerName: string): void {
+    //     this.socket.emit('kickPlayer', { accessCode, playerName });
+    // }
     kickPlayer(accessCode: string, playerName: string): void {
         this.socket.emit('kickPlayer', { accessCode, playerName });
     }
@@ -83,9 +86,11 @@ export class SocketClientService {
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
             this.socket.emit('getLobbyPlayers', accessCode);
+
             this.socket.on('updatePlayers', (players: Player[]) => {
                 observer.next(players);
             });
+
             this.socket.on('error', (errorMessage: string) => {
                 observer.error(errorMessage);
             });
@@ -137,8 +142,16 @@ export class SocketClientService {
         this.socket.on('error', callback);
     }
 
+    // onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
+    //     // this.socket.on('kicked', callback);
+    //     this.socket.on('kicked', (data) => {
+    //         callback(data);
+    //     });
+    // }
     onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
-        this.socket.on('kicked', callback);
+        this.socket.on('kicked', (data) => {
+            callback(data);
+        });
     }
 
     onLobbyCreated(callback: (players: unknown[]) => void) {
@@ -303,6 +316,12 @@ export class SocketClientService {
     onAvatarDeselected(callback: () => void): void {
         this.socket.on('avatarDeselected', () => {
             callback();
+        });
+    }
+
+    onAdminLeft(callback: (data: { message: string }) => void): void {
+        this.socket.on('adminLeft', (data) => {
+            callback(data);
         });
     }
 
