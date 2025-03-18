@@ -11,3 +11,8 @@ export interface Tile {
     item?: Item;
     player?: Player;
 }
+
+export interface GridPosition {
+    row: number;
+    col: number;
+}

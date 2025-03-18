@@ -76,9 +76,6 @@ export class SocketClientService {
         this.accessCodeService.removeAccessCode(code).subscribe({});
     }
 
-    // kickPlayer(accessCode: string, playerName: string): void {
-    //     this.socket.emit('kickPlayer', { accessCode, playerName });
-    // }
     kickPlayer(accessCode: string, playerName: string): void {
         this.socket.emit('kickPlayer', { accessCode, playerName });
     }
@@ -112,169 +109,12 @@ export class SocketClientService {
         });
     }
 
-    alertGameStarted(accessCode: string) {
-        this.socket.emit('createGame', { accessCode });
-    }
-
-    onAlertGameStarted(callback: (data: { orderedPlayers: Player[]; updatedGame: Game }) => void) {
-        this.socket.on('gameStarted', (data) => {
-            callback(data);
-        });
-    }
-
-    addPlayerToLobby(accessCode: string, player: unknown) {
-        this.socket.emit('joinLobby', { accessCode, player });
-    }
-
-    removePlayerFromLobby(accessCode: string, playerName: string) {
-        this.socket.emit('leaveLobby', { accessCode, playerName });
-    }
-
-    deleteLobby(accessCode: string) {
-        this.socket.emit('deleteLobby', accessCode);
-    }
-
-    onLobbyUpdate(callback: (players: Player[]) => void) {
-        this.socket.on('updatePlayers', callback);
-    }
-
-    onLobbyError(callback: (error: string) => void) {
-        this.socket.on('error', callback);
-    }
-
-    // onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
-    //     // this.socket.on('kicked', callback);
-    //     this.socket.on('kicked', (data) => {
-    //         callback(data);
-    //     });
-    // }
-    onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
-        this.socket.on('kicked', (data) => {
-            callback(data);
-        });
-    }
-
-    onLobbyCreated(callback: (players: unknown[]) => void) {
-        this.socket.on('lobbyCreated', callback);
-    }
-
-    onLobbyDeleted(callback: () => void) {
-        this.socket.on('lobbyDeleted', callback);
-    }
-
-    onGameEnded(callback: (data: { winner: string }) => void) {
-        this.socket.on('gameEnded', callback);
-    }
-
-    onLeaveLobby(callback: () => void) {
-        this.socket.on('leftLobby', callback);
-    }
-
-    onJoinLobby(callback: () => void) {
-        this.socket.on('joinedLobby', callback);
-    }
-
-    lockLobby(accessCode: string): void {
-        this.socket.emit('lockLobby', accessCode);
-    }
-
-    unlockLobby(accessCode: string): void {
-        this.socket.emit('unlockLobby', accessCode);
-    }
-
-    onLobbyLocked(callback: (data: { accessCode: string; isLocked: boolean }) => void): void {
-        this.socket.on('lobbyLocked', callback);
-    }
-
-    onLobbyUnlocked(callback: (data: { accessCode: string; isLocked: boolean }) => void): void {
-        this.socket.on('lobbyUnlocked', callback);
-    }
-
     getSocketId() {
         return this.socket.id;
     }
 
     emit(event: string, data: unknown): void {
         this.socket.emit(event, data);
-    }
-
-    onUpdateUnavailableOptions(callback: (data: { names: string[]; avatars: string[] }) => void): void {
-        this.socket.on('updateUnavailableOptions', (data) => {
-            callback(data);
-        });
-    }
-
-    onJoinError(callback: (message: string) => void): void {
-        this.socket.on('joinError', callback);
-    }
-
-    abandonGame(player: Player, accessCode: string) {
-        this.socket.emit('abandonedGame', { player, accessCode });
-    }
-
-    onAbandonGame(callback: (data: { player: Player }) => void) {
-        this.socket.on('game-abandoned', callback);
-    }
-
-    onTransitionStarted(callback: (data: { nextPlayer: Player; transitionDuration: number }) => void) {
-        this.socket.on('transitionStarted', callback);
-    }
-
-    onTurnStarted(callback: (data: { player: Player; turnDuration: number }) => void) {
-        this.socket.on('turnStarted', callback);
-    }
-
-    onTimerUpdate(callback: (data: { timeLeft: number }) => void) {
-        this.socket.on('timerUpdate', callback);
-    }
-
-    endTurn(accessCode: string) {
-        this.socket.emit('endTurn', { accessCode });
-    }
-
-    // socket.on('turnStarted', (data) => {
-    //     console.log('Turn started', data);
-    //     // Update UI to show it's this player's turn
-    //     updateUI(`${data.player.name}'s turn (${data.turnDuration} seconds)`);
-
-    //     // If it's the current user's turn, enable controls
-    //     if (data.player.name === currentPlayerName) {
-    //       enableTurnControls();
-    //     }
-    //   });
-
-    onGameDeleted(callback: () => void) {
-        this.socket.on('gameDeleted', callback);
-    }
-
-    onGameCombatStarted(callback: () => void) {
-        this.socket.on('combatStarted', callback);
-    }
-
-    onAttackResult(callback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void) {
-        this.socket.on('attackResult', callback);
-    }
-
-    onPlayerUpdate(callback: (data: { player: Player }) => void) {
-        this.socket.on('playerUpdate', callback);
-    }
-
-    onPlayerListUpdate(callback: (data: { players: Player[] }) => void) {
-        this.socket.on('playerListUpdate', (data) => {
-            callback(data);
-        });
-    }
-
-    onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
-        this.socket.on('combatTimerUpdate', callback);
-    }
-
-    onGameCombatTimeout(callback: (data: { fighter: Player }) => void) {
-        this.socket.on('combatTimeout', callback);
-    }
-
-    onGameCombatTurnStarted(callback: (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => void) {
-        this.socket.on('combatTurnStarted', callback);
     }
 
     sendPlayerMovementUpdate(currentTile: Tile, targetTile: Tile, accessCode: string, grid: Tile[][]): void {
@@ -291,71 +131,7 @@ export class SocketClientService {
         this.emit('playerMovementUpdate', payload);
     }
 
-    startCombat(attackerName: string, defenderName: string, accessCode: string, isDebugMode: boolean) {
-        this.socket.emit('startCombat', { attackerName, defenderName, accessCode, isDebugMode });
-    }
-
-    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void): void {
-        this.socket.on('playerMovement', callback);
-    }
-
-    selectAvatar(accessCode: string, avatar: string): void {
-        this.socket.emit('selectAvatar', { accessCode, avatar });
-    }
-
-    deselectAvatar(accessCode: string): void {
-        this.socket.emit('deselectAvatar', { accessCode });
-    }
-
-    onAvatarSelected(callback: (data: { avatar: string }) => void): void {
-        this.socket.on('avatarSelected', (data) => {
-            callback(data);
-        });
-    }
-
-    onAvatarDeselected(callback: () => void): void {
-        this.socket.on('avatarDeselected', () => {
-            callback();
-        });
-    }
-
-    onAdminLeft(callback: (data: { message: string }) => void): void {
-        this.socket.on('adminLeft', (data) => {
-            callback(data);
-        });
-    }
-
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
-    }
-
-    onDoorClickedUpdate(callback: (data: { grid: Tile[][] }) => void): void {
-        this.socket.on('doorClicked', (data) => {
-            callback(data);
-        });
-    }
-    sendDoorUpdate(currentTile: Tile, targetTile: Tile, accessCode: string): void {
-        const payload = {
-            currentTile,
-            targetTile,
-            accessCode,
-        };
-        this.emit('doorUpdate', payload);
-    }
-    onGridUpdate(callback: (data: { grid: Tile[][] }) => void): void {
-        this.socket.on('gridUpdate', callback);
-    }
-
-    attack(playerName: string, accessCode: string) {
-        this.socket.emit('performAttack', { accessCode, attackerName: playerName });
-    }
-    sendAdminModeUpdate(accessCode: string): void {
-        this.socket.emit('adminModeUpdate', { accessCode });
-    }
-    onAdminModeChangedServerSide(callback: (data: { accessCode: string }) => void): void {
-        this.socket.on('adminModeChangedServerSide', callback);
-    }
-    sendTeleportPlayer(accessCode: string, player: Player, targetTile: Tile): void {
-        this.socket.emit('teleportPlayer', { accessCode, player, targetTile });
     }
 }

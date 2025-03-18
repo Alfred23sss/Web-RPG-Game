@@ -1,17 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
+import { ITEM_COUNTS, ITEMS_TO_UPDATE } from '@app/constants/global.constants';
 import { GameSize } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
-
-const ITEM_COUNTS: Record<GameSize, number> = {
-    [GameSize.Small]: 2,
-    [GameSize.Medium]: 4,
-    [GameSize.Large]: 6,
-    [GameSize.None]: 0,
-};
-
-const ITEMS_TO_UPDATE = new Set(['home', 'question']);
 
 @Injectable({
     providedIn: 'root',

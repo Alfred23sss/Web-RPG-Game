@@ -2,6 +2,12 @@ import { DOCUMENT } from '@angular/common';
 import { Inject, Injectable } from '@angular/core';
 import { Html2CanvasWrapper } from './html2canvas-wrapper';
 
+interface CaptureOptions {
+    scale?: number;
+    quality?: number;
+    imageFormat?: string;
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -13,21 +19,15 @@ export class ScreenshotService {
     }
 
     async generatePreview(elementId: string): Promise<string> {
-        return this.captureElement(elementId, {
+        const previewOptions: CaptureOptions = {
             scale: 0.8,
             quality: 0.7,
             imageFormat: 'image/jpeg',
-        });
+        };
+        return this.captureElement(elementId, previewOptions);
     }
 
-    private async captureElement(
-        elementId: string,
-        options?: {
-            scale?: number;
-            quality?: number;
-            imageFormat?: string;
-        },
-    ): Promise<string> {
+    private async captureElement(elementId: string, options?: CaptureOptions): Promise<string> {
         window.scrollTo(0, 0);
 
         const target = this.document.getElementById(elementId);

@@ -7,7 +7,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Item } from '@app/classes/item';
-import { ErrorMessages, GameMode, GameSize, TileType } from '@app/enums/global.enums';
+import { ErrorMessages, GameMode, GameSize, GameSizeNumber, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
@@ -38,7 +38,7 @@ describe('GameValidationService', () => {
             id: '5',
             name: 'Correct Game',
             description: 'Test case for complete validation',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -55,7 +55,7 @@ describe('GameValidationService', () => {
             id: '5',
             name: 'Correct Game',
             description: 'Test case for complete validation',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -72,7 +72,7 @@ describe('GameValidationService', () => {
             id: '1',
             name: 'Invalid Door Game',
             description: 'Doors are placed incorrectly',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -89,7 +89,7 @@ describe('GameValidationService', () => {
             id: '2',
             name: 'Invalid Terrain Game',
             description: 'Too many walls',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -108,7 +108,7 @@ describe('GameValidationService', () => {
             id: '3',
             name: '',
             description: '',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -129,7 +129,7 @@ describe('GameValidationService', () => {
             id: '4',
             name: 'Inaccessible Game',
             description: 'Some terrain is unreachable',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -146,7 +146,7 @@ describe('GameValidationService', () => {
             id: '5',
             name: 'Missing Items Game',
             description: 'Not enough items placed',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -163,7 +163,7 @@ describe('GameValidationService', () => {
             id: '6',
             name: 'Missing Home Game',
             description: 'Not enough home items placed',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -180,7 +180,7 @@ describe('GameValidationService', () => {
             id: '7',
             name: 'Missing Flag Game',
             description: 'No flag in Capture the Flag mode',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.CTF,
             lastModified: new Date(),
             isVisible: true,
@@ -221,7 +221,7 @@ describe('GameValidationService', () => {
             id: '9',
             name: 'Flag Placed Game',
             description: 'This game has a flag placed on the grid',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             mode: GameMode.CTF,
             lastModified: new Date(),
             isVisible: true,
@@ -264,7 +264,7 @@ describe('GameValidationService', () => {
             id: '11',
             name: 'Jeu Moyen Valide',
             description: 'Cas de test pour une grille moyenne valide',
-            size: GameSize.Medium,
+            size: GameSizeNumber.MediumSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -281,7 +281,7 @@ describe('GameValidationService', () => {
             id: '12',
             name: 'Jeu Grand',
             description: 'Cas de test pou',
-            size: GameSize.Large,
+            size: GameSizeNumber.LargeSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -301,7 +301,7 @@ describe('GameValidationService', () => {
             id: '13',
             name: 'Jeu Moyen',
             description: 'Il manque un item',
-            size: GameSize.Medium,
+            size: GameSizeNumber.MediumSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -321,7 +321,7 @@ describe('GameValidationService', () => {
             id: '14',
             name: 'Jeu Grand',
             description: 'Il manque un ',
-            size: GameSize.Large,
+            size: GameSizeNumber.LargeSize,
             mode: GameMode.Classic,
             lastModified: new Date(),
             isVisible: true,
@@ -346,7 +346,7 @@ describe('GameValidationService', () => {
 
     it('should fail when terrain proportion is not sufficient in validateHalfTerrain', () => {
         const grid = Array.from({ length: 4 }, () => Array.from({ length: 4 }, () => ({ type: TileType.Wall })));
-        const game = { grid, size: GameSize.Small } as Game;
+        const game = { grid, size: GameSizeNumber.SmallSize } as Game;
         const result = service['validateHalfTerrain'](game);
         expect(result).toContain('❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)');
     });
@@ -434,7 +434,7 @@ describe('GameValidationService', () => {
         grid[2][9].item = createDummyItem('test');
         const game: Game = {
             id: 'game-small',
-            size: GameSize.Small,
+            size: GameSizeNumber.SmallSize,
             grid,
         } as Game;
 
