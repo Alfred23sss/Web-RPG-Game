@@ -304,11 +304,11 @@ export class GameCombatService {
             combatState.combatCountdownInterval = null;
         }
         let timeLeft = turnDurationInSeconds;
-        this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.attacker, defender, timeLeft });
+        this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
         combatState.combatCountdownInterval = setInterval(() => {
             timeLeft--;
             combatState.combatTurnTimeRemaining = timeLeft;
-            this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.attacker, defender, timeLeft });
+            this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
             if (timeLeft <= 0) {
                 if (combatState.combatCountdownInterval) {
                     clearInterval(combatState.combatCountdownInterval);

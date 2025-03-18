@@ -74,7 +74,7 @@ export class GameSessionService {
             this.endTurn(accessCode);
         }
         if (player.isAdmin) {
-            this.emitAdminModeDisabled(accessCode);
+            this.eventEmitter.emit('admin.mode.disabled', { accessCode });
         }
         return player;
     }
@@ -168,7 +168,7 @@ export class GameSessionService {
     }
 
     endGameSession(accessCode: string, winner: string) {
-        this.emitGameEnded(accessCode, winner);
+        this.emitEvent('game.ended', { accessCode, winner });
     }
 
     getGameSession(accessCode: string): GameSession {
@@ -209,13 +209,7 @@ export class GameSessionService {
         this.turnService.startTransitionPhase(accessCode, gameSession.turn);
     }
 
-    // These events are delegated to the turn service and don't need to be here
-    private emitGameEnded(accessCode: string, winner: string) {
-        this.logger.log('emit game ended in gameSession');
-        this.eventEmitter.emit('game.ended', { accessCode, winner });
-    }
-
-    private emitAdminModeDisabled(accessCode: string) {
-        this.eventEmitter.emit('admin.mode.disabled', { accessCode });
+    private emitEvent<T>(eventName: string, payload: T): void {
+        this.eventEmitter.emit(eventName, payload);
     }
 }

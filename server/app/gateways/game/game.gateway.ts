@@ -255,6 +255,7 @@ export class GameGateway {
     handleCombatTimerUpdate(payload: { accessCode: string; attacker: Player; defender: Player; timeLeft: number }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+        this.logger.log(`attacker socket id ${attackerSocketId}, defender socket it ${defenderSocketId}`);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatTimerUpdate', {
             timeLeft: payload.timeLeft,
@@ -270,6 +271,7 @@ export class GameGateway {
     handleCombatTurnStarted(payload: { accessCode: string; player: Player; defender: Player }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+        this.logger.log(`attacker socket id ${attackerSocketId}, defender socket it ${defenderSocketId}`);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatTurnStarted', {
             fighter: payload.player,

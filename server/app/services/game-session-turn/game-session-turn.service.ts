@@ -38,20 +38,16 @@ export class GameSessionTurnService {
             clearInterval(turn.countdownInterval);
             turn.countdownInterval = null;
         }
-
         turn.isTransitionPhase = true;
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
-
         const nextPlayer = this.getNextPlayer(accessCode, turn);
         this.logger.log(nextPlayer);
-
-        this.emitTransitionStarted(accessCode, nextPlayer);
-
+        this.emitEvent('game.transition.started', { accessCode, nextPlayer });
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
             transitionTimeLeft--;
             turn.transitionTimeRemaining = transitionTimeLeft;
-            this.emitTransitionCountdown(accessCode, transitionTimeLeft);
+            this.emitEvent('game.transition.countdown', { accessCode, timeLeft: transitionTimeLeft });
             if (transitionTimeLeft <= 0) {
                 if (turn.countdownInterval) {
                     clearInterval(turn.countdownInterval);
@@ -59,11 +55,9 @@ export class GameSessionTurnService {
                 turn.countdownInterval = null;
             }
         }, SECOND);
-
         turn.turnTimers = setTimeout(() => {
             this.startPlayerTurn(accessCode, nextPlayer, turn);
         }, TRANSITION_PHASE_DURATION);
-
         return turn;
     }
 
@@ -72,19 +66,16 @@ export class GameSessionTurnService {
         turn.currentPlayer = player;
         this.updatePlayer(player, { isActive: true });
         turn.currentTurnCountdown = TURN_DURATION / SECOND;
-
-        this.emitTurnStarted(accessCode, player);
-
+        this.emitEvent('game.turn.started', { accessCode, player });
         if (turn.countdownInterval) {
             clearInterval(turn.countdownInterval);
             turn.countdownInterval = null;
         }
-
         let timeLeft = TURN_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
             timeLeft--;
             turn.currentTurnCountdown = timeLeft;
-            this.emitTimerUpdate(accessCode, timeLeft);
+            this.emitEvent('game.turn.timer', { accessCode, timeLeft });
             if (timeLeft <= 0) {
                 if (turn.countdownInterval) {
                     clearInterval(turn.countdownInterval);
@@ -92,12 +83,9 @@ export class GameSessionTurnService {
                 turn.countdownInterval = null;
             }
         }, SECOND);
-
         turn.turnTimers = setTimeout(() => {
-            // This will be called by GameSessionService
             this.eventEmitter.emit('game.turn.timeout', { accessCode });
         }, TURN_DURATION);
-
         return turn;
     }
 
@@ -110,17 +98,14 @@ export class GameSessionTurnService {
             clearInterval(turn.countdownInterval);
             turn.countdownInterval = null;
         }
-
         if (turn.currentPlayer) {
             this.updatePlayer(turn.currentPlayer, { isActive: false });
         }
-
         return turn;
     }
 
     pauseTurn(turn: Turn): number {
         const remainingTime = turn.currentTurnCountdown;
-
         if (turn.turnTimers) {
             clearTimeout(turn.turnTimers);
             turn.turnTimers = null;
@@ -129,20 +114,17 @@ export class GameSessionTurnService {
             clearInterval(turn.countdownInterval);
             turn.countdownInterval = null;
         }
-
         return remainingTime;
     }
 
     resumeTurn(accessCode: string, turn: Turn, remainingTime: number): Turn {
         turn.currentTurnCountdown = remainingTime;
-
-        this.emitTurnResumed(accessCode, turn.currentPlayer, remainingTime);
-
+        this.emitEvent('game.turn.resumed', { accessCode, player: turn.currentPlayer, remainingTime });
         let timeLeft = remainingTime;
         turn.countdownInterval = setInterval(() => {
             timeLeft--;
             turn.currentTurnCountdown = timeLeft;
-            this.emitTimerUpdate(accessCode, timeLeft);
+            this.emitEvent('game.turn.timer', { accessCode, timeLeft });
             if (timeLeft <= 0) {
                 if (turn.countdownInterval) {
                     clearInterval(turn.countdownInterval);
@@ -150,27 +132,21 @@ export class GameSessionTurnService {
                 turn.countdownInterval = null;
             }
         }, SECOND);
-
         turn.turnTimers = setTimeout(() => {
             this.eventEmitter.emit('game.turn.timeout', { accessCode });
         }, remainingTime * SECOND);
-
         return turn;
     }
 
     getNextPlayer(accessCode: string, turn: Turn): Player {
         this.logger.log(turn.orderedPlayers);
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
-
         if (activePlayers.length === 0) return null;
-
         if (!turn.currentPlayer) {
             return activePlayers[0];
         }
-
         const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer?.name);
         const nextIndex = (currentIndex + 1) % activePlayers.length;
-
         return activePlayers[nextIndex];
     }
 
@@ -181,13 +157,9 @@ export class GameSessionTurnService {
             }
             return b.speed - a.speed;
         });
-
         if (playerList.length > 0) {
             playerList[0].isActive = true;
         }
-
-        Logger.log(`Ordered Players: ${JSON.stringify(playerList.map((p) => ({ name: p.name, speed: p.speed, isActive: p.isActive })))}`);
-
         return playerList;
     }
 
@@ -197,23 +169,7 @@ export class GameSessionTurnService {
         }
     }
 
-    private emitTransitionStarted(accessCode: string, nextPlayer: Player): void {
-        this.eventEmitter.emit('game.transition.started', { accessCode, nextPlayer });
-    }
-
-    private emitTransitionCountdown(accessCode: string, timeLeft: number): void {
-        this.eventEmitter.emit('game.transition.countdown', { accessCode, timeLeft });
-    }
-
-    private emitTurnStarted(accessCode: string, player: Player): void {
-        this.eventEmitter.emit('game.turn.started', { accessCode, player });
-    }
-
-    private emitTimerUpdate(accessCode: string, timeLeft: number): void {
-        this.eventEmitter.emit('game.turn.timer', { accessCode, timeLeft });
-    }
-
-    private emitTurnResumed(accessCode: string, player: Player, remainingTime: number): void {
-        this.eventEmitter.emit('game.turn.resumed', { accessCode, player, remainingTime });
+    private emitEvent<T>(eventName: string, payload: T): void {
+        this.eventEmitter.emit(eventName, payload);
     }
 }
