@@ -214,6 +214,7 @@ export class GameGateway {
 
     @OnEvent('game.turn.timer')
     handleTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
+        this.logger.log(`emitting time : ${payload.timeLeft}`);
         this.server.to(payload.accessCode).emit('timerUpdate', {
             timeLeft: payload.timeLeft,
         });

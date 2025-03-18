@@ -1,4 +1,3 @@
-// import { ChatGateway } from '@app/gateways/chat/chat.gateway';
 import { Game, gameSchema } from '@app/model/database/game';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -10,6 +9,7 @@ import { GameGateway } from './gateways/game/game.gateway';
 import { LobbyGateway } from './gateways/lobby/lobby.gateway';
 import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
+import { CombatHelperService } from './services/combat-helper/combat-helper.service';
 import { GameCombatService } from './services/combat-manager/combat-manager.service';
 import { GameSessionTurnService } from './services/game-session-turn/game-session-turn.service';
 import { GameSessionService } from './services/game-session/game-session.service';
@@ -44,6 +44,7 @@ import { LobbyService } from './services/lobby/lobby.service';
         GameCombatService,
         GridManagerService,
         GameSessionTurnService,
+        CombatHelperService,
     ],
     exports: [AccessCodesService],
 })
