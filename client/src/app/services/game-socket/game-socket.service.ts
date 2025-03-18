@@ -149,6 +149,10 @@ export class GameSocketService {
             component.isInCombatMode = true;
         });
 
+        this.socketClientService.on('gameTurnResumed', (data: { player: Player }) => {
+            component.currentPlayer = data.player;
+        });
+
         this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: number; defenseScore: number }) => {
             component.updateAttackResult(data);
             component.evadeResult = null;

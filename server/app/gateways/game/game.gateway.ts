@@ -134,6 +134,13 @@ export class GameGateway {
         });
     }
 
+    @OnEvent('game.turn.resumed')
+    handleGameTurnResumed(payload: { accessCode: string; player: Player }): void {
+        this.server.to(payload.accessCode).emit('gameTurnResumed', {
+            player: payload.player,
+        });
+    }
+
     @OnEvent('game.combat.escape')
     handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
         const playerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
