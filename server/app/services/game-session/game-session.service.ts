@@ -1,34 +1,37 @@
 import { ImageType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
-import { Turn } from '@app/interfaces/Turn';
 import { Tile } from '@app/model/database/tile';
+import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-const TRANSITION_PHASE_DURATION = 3000;
-const TURN_DURATION = 30000;
-const SECOND = 1000;
-const RANDOMIZER = 0.5;
 const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
 export class GameSessionService {
     private gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
+
     constructor(
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
-    ) {}
+        private readonly turnService: GameSessionTurnService,
+    ) {
+        this.eventEmitter.on('game.turn.timeout', ({ accessCode }) => {
+            this.endTurn(accessCode);
+        });
+    }
+
     createGameSession(accessCode: string): GameSession {
         const lobby = this.lobbyService.getLobby(accessCode);
         const game = lobby.game;
         const grid = game.grid;
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
-        const turn = this.initializeTurn(accessCode);
+        const turn = this.turnService.initializeTurn(accessCode);
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
         const gameSession: GameSession = { game, turn };
@@ -37,6 +40,7 @@ export class GameSessionService {
         this.startTransitionPhase(accessCode);
         return gameSession;
     }
+
     deleteGameSession(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (gameSession) {
@@ -49,6 +53,7 @@ export class GameSessionService {
             this.gameSessions.delete(accessCode);
         }
     }
+
     handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return null;
@@ -69,71 +74,45 @@ export class GameSessionService {
             this.endTurn(accessCode);
         }
         if (player.isAdmin) {
-            this.emitAdminModeDisabled(accessCode);
+            this.eventEmitter.emit('admin.mode.disabled', { accessCode });
         }
         return player;
     }
+
     getPlayers(accessCode: string): Player[] {
         const gameSession = this.gameSessions.get(accessCode);
         return gameSession ? gameSession.turn.orderedPlayers : [];
     }
+
     endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-        if (gameSession.turn.turnTimers) {
-            clearTimeout(gameSession.turn.turnTimers);
-            gameSession.turn.turnTimers = null;
-        }
-        if (gameSession.turn.countdownInterval) {
-            clearInterval(gameSession.turn.countdownInterval);
-            gameSession.turn.countdownInterval = null;
-        }
-        if (gameSession.turn.currentPlayer) {
-            this.updatePlayer(gameSession.turn.currentPlayer, { isActive: false });
-        }
+
+        this.turnService.endTurn(gameSession.turn);
         this.startTransitionPhase(accessCode);
     }
+
     pauseGameTurn(accessCode: string): number {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return 0;
-        const remainingTime = gameSession.turn.currentTurnCountdown;
-        if (gameSession.turn.turnTimers) {
-            clearTimeout(gameSession.turn.turnTimers);
-            gameSession.turn.turnTimers = null;
-        }
-        if (gameSession.turn.countdownInterval) {
-            clearInterval(gameSession.turn.countdownInterval);
-            gameSession.turn.countdownInterval = null;
-        }
-        return remainingTime;
+
+        return this.turnService.pauseTurn(gameSession.turn);
     }
+
     resumeGameTurn(accessCode: string, remainingTime: number): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-        gameSession.turn.currentTurnCountdown = remainingTime;
-        this.emitTurnResumed(accessCode, gameSession.turn.currentPlayer, remainingTime);
-        let timeLeft = remainingTime;
-        gameSession.turn.countdownInterval = setInterval(() => {
-            timeLeft--;
-            gameSession.turn.currentTurnCountdown = timeLeft;
-            this.emitTimerUpdate(accessCode, timeLeft);
-            if (timeLeft <= 0) {
-                if (gameSession.turn.countdownInterval) {
-                    clearInterval(gameSession.turn.countdownInterval);
-                }
-                gameSession.turn.countdownInterval = null;
-            }
-        }, SECOND);
-        gameSession.turn.turnTimers = setTimeout(() => {
-            this.endTurn(accessCode);
-        }, remainingTime * SECOND);
+
+        this.turnService.resumeTurn(accessCode, gameSession.turn, remainingTime);
     }
+
     setCombatState(accessCode: string, isInCombat: boolean): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (gameSession) {
             gameSession.turn.isInCombat = isInCombat;
         }
     }
+
     isCurrentPlayer(accessCode: string, playerName: string): boolean {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession || !gameSession.turn.currentPlayer) return false;
@@ -146,7 +125,7 @@ export class GameSessionService {
         const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
         if (!isAdjacent) return;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
-        // ici changer pour quelque chose de plus clean
+
         if (targetTile.isOpen) {
             targetTile.imageSrc = ImageType.ClosedDoor;
         } else {
@@ -154,15 +133,12 @@ export class GameSessionService {
         }
         targetTile.isOpen = !targetTile.isOpen;
         this.logger.log('emit game.door.update');
-        this.logger.log(grid);
         this.gameSessions.get(accessCode).game.grid = grid;
         this.eventEmitter.emit('game.door.update', { accessCode, grid });
     }
 
     updatePlayer(player: Player, updates: Partial<Player>): void {
-        if (player) {
-            Object.assign(player, updates);
-        }
+        this.turnService.updatePlayer(player, updates);
     }
 
     updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
@@ -170,6 +146,7 @@ export class GameSessionService {
         const player = players.find((p) => p.name === playername);
         this.updatePlayer(player, updates);
     }
+
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
@@ -190,7 +167,7 @@ export class GameSessionService {
     }
 
     endGameSession(accessCode: string, winner: string) {
-        this.emitGameEnded(accessCode, winner);
+        this.emitEvent('game.ended', { accessCode, winner });
     }
 
     getGameSession(accessCode: string): GameSession {
@@ -204,6 +181,7 @@ export class GameSessionService {
         this.getGameSession(accessCode).game.grid = updatedGrid;
         this.emitGridUpdate(accessCode, updatedGrid);
     }
+
     emitGridUpdate(accessCode: string, grid: Tile[][]): void {
         this.eventEmitter.emit('game.grid.update', {
             accessCode,
@@ -222,127 +200,15 @@ export class GameSessionService {
             }
         }
     }
-    private initializeTurn(accessCode: string): Turn {
-        return {
-            orderedPlayers: this.orderPlayersBySpeed(this.lobbyService.getLobbyPlayers(accessCode)),
-            currentPlayer: null,
-            currentTurnCountdown: 0,
-            turnTimers: null,
-            isTransitionPhase: false,
-            countdownInterval: null,
-            isInCombat: false,
-        };
-    }
-    private orderPlayersBySpeed(players: Player[]): Player[] {
-        const playerList = [...players].sort((a, b) => {
-            if (a.speed === b.speed) {
-                return Math.random() < RANDOMIZER ? -1 : 1;
-            }
-            return b.speed - a.speed;
-        });
-        if (playerList.length > 0) {
-            playerList[0].isActive = true;
-        }
-        Logger.log(`Ordered Players: ${JSON.stringify(playerList.map((p) => ({ name: p.name, speed: p.speed, isActive: p.isActive })))}`);
-        return playerList;
-    }
 
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-        if (gameSession.turn.turnTimers) {
-            clearTimeout(gameSession.turn.turnTimers);
-            gameSession.turn.turnTimers = null;
-        }
-        if (gameSession.turn.countdownInterval) {
-            clearInterval(gameSession.turn.countdownInterval);
-            gameSession.turn.countdownInterval = null;
-        }
-        gameSession.turn.isTransitionPhase = true;
-        gameSession.turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
-        const nextPlayer = this.getNextPlayer(accessCode);
-        this.logger.log(nextPlayer);
-        this.emitTransitionStarted(accessCode, nextPlayer);
-        let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
-        gameSession.turn.countdownInterval = setInterval(() => {
-            transitionTimeLeft--;
-            gameSession.turn.transitionTimeRemaining = transitionTimeLeft;
-            this.emitTransitionCountdown(accessCode, transitionTimeLeft);
-            if (transitionTimeLeft <= 0) {
-                if (gameSession.turn.countdownInterval) {
-                    clearInterval(gameSession.turn.countdownInterval);
-                }
-                gameSession.turn.countdownInterval = null;
-            }
-        }, SECOND);
-        gameSession.turn.turnTimers = setTimeout(() => {
-            this.startPlayerTurn(accessCode, nextPlayer);
-        }, TRANSITION_PHASE_DURATION);
-    }
-    private getNextPlayer(accessCode: string): Player {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) throw new Error('Game session not found');
-        this.logger.log(gameSession.turn.orderedPlayers);
-        const activePlayers = gameSession.turn.orderedPlayers.filter((p) => !p.hasAbandoned);
-        if (activePlayers.length === 0) return; // reset tt les joueurs ont abandonné
-        if (!gameSession.turn.currentPlayer) {
-            return activePlayers[0];
-        }
-        const currentIndex = activePlayers.findIndex((p) => p.name === gameSession.turn.currentPlayer?.name);
-        const nextIndex = (currentIndex + 1) % activePlayers.length;
-        return activePlayers[nextIndex];
-    }
-    private startPlayerTurn(accessCode: string, player: Player): void {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return;
-        gameSession.turn.isTransitionPhase = false;
-        gameSession.turn.currentPlayer = player;
-        this.updatePlayer(player, { isActive: true });
-        gameSession.turn.currentTurnCountdown = TURN_DURATION / SECOND;
-        this.emitTurnStarted(accessCode, player);
-        if (gameSession.turn.countdownInterval) {
-            clearInterval(gameSession.turn.countdownInterval);
-            gameSession.turn.countdownInterval = null;
-        }
-        let timeLeft = TURN_DURATION / SECOND;
-        gameSession.turn.countdownInterval = setInterval(() => {
-            timeLeft--;
-            gameSession.turn.currentTurnCountdown = timeLeft;
-            this.emitTimerUpdate(accessCode, timeLeft);
-            if (timeLeft <= 0) {
-                if (gameSession.turn.countdownInterval) {
-                    clearInterval(gameSession.turn.countdownInterval);
-                }
-                gameSession.turn.countdownInterval = null;
-            }
-        }, SECOND);
-        gameSession.turn.turnTimers = setTimeout(() => {
-            this.endTurn(accessCode);
-        }, TURN_DURATION);
+
+        this.turnService.startTransitionPhase(accessCode, gameSession.turn);
     }
 
-    private emitGameEnded(accessCode: string, winner: string) {
-        this.logger.log('emit game ended in gameSession');
-        this.eventEmitter.emit('game.ended', { accessCode, winner });
-    }
-
-    private emitTransitionStarted(accessCode: string, nextPlayer: Player): void {
-        this.eventEmitter.emit('game.transition.started', { accessCode, nextPlayer });
-    }
-    private emitTransitionCountdown(accessCode: string, countdown: number): void {
-        this.eventEmitter.emit('game.transition.countdown', { accessCode, countdown });
-    }
-    private emitTurnStarted(accessCode: string, player: Player): void {
-        this.eventEmitter.emit('game.turn.started', { accessCode, player });
-    }
-    private emitTimerUpdate(accessCode: string, timeLeft: number): void {
-        this.eventEmitter.emit('game.turn.timer', { accessCode, timeLeft });
-    }
-    private emitTurnResumed(accessCode: string, player: Player, remainingTime: number): void {
-        this.eventEmitter.emit('game.turn.resumed', { accessCode, player, remainingTime });
-    }
-
-    private emitAdminModeDisabled(accessCode: string) {
-        this.eventEmitter.emit('admin.mode.disabled', { accessCode });
+    private emitEvent<T>(eventName: string, payload: T): void {
+        this.eventEmitter.emit(eventName, payload);
     }
 }

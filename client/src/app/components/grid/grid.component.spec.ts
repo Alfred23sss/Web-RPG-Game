@@ -122,4 +122,14 @@ describe('GridComponent', () => {
             expect(mockDialogRef.close).toHaveBeenCalled();
         }));
     });
+
+    it('when in debug mode should emit teleport event with clicked tile', () => {
+        const mockEvent = new MouseEvent('contextmenu');
+        const testTile = { id: 'debug-tile' } as Tile;
+        component.isDebugMode = true;
+        spyOn(component.teleportClicked, 'emit');
+        component.onTileRightClick(mockEvent, testTile);
+        expect(component.teleportClicked.emit).toHaveBeenCalledWith(testTile);
+        expect(mockDialog.open).not.toHaveBeenCalled();
+    });
 });

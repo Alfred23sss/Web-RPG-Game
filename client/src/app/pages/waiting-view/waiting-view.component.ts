@@ -70,18 +70,21 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (!this.lobby) return;
         if (this.lobby.isLocked) {
             if (this.lobby.players.length < this.lobby.maxPlayers) {
-                this.socketClientService.unlockLobby(this.accessCode);
+                this.socketClientService.emit('unlockLobby', this.accessCode);
             } else {
                 this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
             }
         } else {
-            this.socketClientService.lockLobby(this.accessCode);
+            this.socketClientService.emit('lockLobby', this.accessCode);
         }
     }
 
     kickPlayer(player: Player): void {
         if (this.accessCode) {
-            this.socketClientService.kickPlayer(this.accessCode, player.name);
+            this.socketClientService.emit('kickPlayer', {
+                accessCode: this.accessCode,
+                playerName: player.name,
+            });
         }
     }
 
@@ -103,7 +106,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             this.isGameStartedEmitted = true;
-            this.socketClientService.alertGameStarted(this.accessCode);
+            this.socketClientService.emit('createGame', { accessCode: this.accessCode });
         }
 
         this.lobbyService.setIsGameStarting(true);

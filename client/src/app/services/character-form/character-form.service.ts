@@ -48,7 +48,7 @@ export class CharacterService {
     initializeLobby(accessCode: string): void {
         this.socketClientService.emit('joinRoom', accessCode);
 
-        this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
+        this.socketClientService.on<{ avatars?: string[] }>('updateUnavailableOptions', (data) => {
             if (!data.avatars) return;
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
@@ -87,7 +87,7 @@ export class CharacterService {
 
         if (!this.unavailableAvatarsSubject.value.includes(avatar)) {
             player.avatar = avatar;
-            this.socketClientService.selectAvatar(currentAccessCode, avatar);
+            this.socketClientService.emit('selectAvatar', { accessCode: currentAccessCode, avatar });
 
             const updatedAvatars = [...this.unavailableAvatarsSubject.value, avatar];
             this.unavailableAvatarsSubject.next(updatedAvatars);
@@ -96,7 +96,7 @@ export class CharacterService {
 
     deselectAvatar(player: Player, currentAccessCode: string): void {
         if (player.avatar) {
-            this.socketClientService.deselectAvatar(currentAccessCode);
+            this.socketClientService.emit('deselectAvatar', { accessCode: currentAccessCode });
 
             const updatedAvatars = this.unavailableAvatarsSubject.value.filter((av) => av !== player.avatar);
             this.unavailableAvatarsSubject.next(updatedAvatars);

@@ -1,7 +1,8 @@
 import { Component, HostListener, Input } from '@angular/core';
+import { MouseButton } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
-import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
-import { TileService } from '@app/services/tile/Tile.service';
+import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
+import { TileService } from '@app/services/tile/tile.service';
 
 @Component({
     selector: 'app-tile',
@@ -13,7 +14,8 @@ export class TileComponent {
     static activeButton: number | null = null;
     static isDraggedTest = false;
     @Input() tile!: Tile;
-    @Input() isEditionMode: boolean = false; // a voir
+    @Input() isEditionMode: boolean = false;
+
     constructor(
         private itemDragService: ItemDragService,
         private tileService: TileService,
@@ -30,14 +32,14 @@ export class TileComponent {
 
         TileComponent.activeButton = event.button;
 
-        if (event.button === 2) {
-            if (this.tile.item !== undefined) {
+        if (event.button === MouseButton.Right) {
+            if (this.tile.item) {
                 this.tileService.removeTileObject(this.tile);
                 TileComponent.activeButton = null;
             } else {
                 this.tileService.removeTileType(this.tile);
             }
-        } else if (event.button === 0 && !this.tile.item) {
+        } else if (event.button === MouseButton.Left && !this.tile.item) {
             this.tileService.applyTool(this.tile);
         }
     }
@@ -45,10 +47,11 @@ export class TileComponent {
     @HostListener('mouseenter')
     onMouseEnter(): void {
         if (!this.isEditionMode) return;
-        if (TileComponent.activeButton === 0) {
+
+        if (TileComponent.activeButton === MouseButton.Left) {
             this.tileService.applyTool(this.tile);
         }
-        if (TileComponent.activeButton === 2) {
+        if (TileComponent.activeButton === MouseButton.Right) {
             this.tileService.removeTileType(this.tile);
         }
     }

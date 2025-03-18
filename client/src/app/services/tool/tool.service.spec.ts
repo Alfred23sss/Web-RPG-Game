@@ -23,8 +23,8 @@ describe('TimeService', () => {
     });
 
     it('should emit the default selected tool on subscription', (done) => {
-        service.selectedTool$.subscribe((tile) => {
-            expect(tile).toEqual({
+        service.selectedTool$.subscribe((selection) => {
+            expect(selection).toEqual({
                 tool: TileType.Default,
                 image: ImageType.Default,
             });
@@ -36,12 +36,12 @@ describe('TimeService', () => {
         { tool: TileType.Water, image: ImageType.Water },
         { tool: TileType.Wall, image: ImageType.Wall },
         { tool: TileType.Door, image: ImageType.OpenDoor },
-    ].forEach(({ tool, image }) => {
-        it(`should emit the updated tool : ${tool}, with image : ${image}`, (done) => {
-            service.setSelectedTool(tool, image);
+    ].forEach((testCase) => {
+        it(`should emit ${testCase.tool} with ${testCase.image} when selected`, (done) => {
+            service.setSelectedTool(testCase);
 
-            service.selectedTool$.subscribe((tile) => {
-                expect(tile).toEqual({ tool, image });
+            service.selectedTool$.subscribe((selection) => {
+                expect(selection).toEqual(testCase);
                 done();
             });
         });

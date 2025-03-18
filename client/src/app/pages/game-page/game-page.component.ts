@@ -65,7 +65,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (!currentTile || !this.game || !this.game.grid) {
             return;
         }
-        this.socketClientService.sendDoorUpdate(currentTile, targetTile, this.lobby.accessCode);
+        this.socketClientService.emit('doorUpdate', {
+            currentTile,
+            targetTile,
+            accessCode: this.lobby.accessCode,
+        });
+
         if (!this.clientPlayer.actionPoints || !this.movementPointsRemaining) {
             this.endTurn();
         }
@@ -77,7 +82,12 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
-                this.socketClientService.startCombat(currentTile.player.name, targetTile.player.name, this.lobby.accessCode, this.isDebugMode);
+                this.socketClientService.emit('startCombat', {
+                    attackerName: currentTile.player.name,
+                    defenderName: targetTile.player.name,
+                    accessCode: this.lobby.accessCode,
+                    isDebugMode: this.isDebugMode,
+                });
                 return;
             }
         }
@@ -95,7 +105,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     handleTeleport(targetTile: Tile): void {
         if (this.isInCombatMode) return;
         if (this.clientPlayer.name === this.currentPlayer.name) {
-            this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
+            this.socketClientService.emit('teleportPlayer', {
+                accessCode: this.lobby.accessCode,
+                player: this.clientPlayer,
+                targetTile,
+            });
         }
     }
     updateQuickestPath(targetTile: Tile): void {
@@ -112,7 +126,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     endTurn(): void {
         this.turnTimer = 0;
-        this.socketClientService.endTurn(this.lobby.accessCode);
+        this.socketClientService.emit('endTurn', { accessCode: this.lobby.accessCode });
     }
 
     executeNextAction(): void {
@@ -120,9 +134,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
-        //
         this.clientPlayer.hasAbandoned = true;
-        this.socketClientService.abandonGame(this.clientPlayer, this.lobby.accessCode);
+        this.socketClientService.emit('abandonedGame', { player: this.clientPlayer, accessCode: this.lobby.accessCode });
         this.backToHome();
     }
 
@@ -133,7 +146,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     attack(): void {
-        this.socketClientService.attack(this.clientPlayer.name, this.lobby.accessCode);
+        this.socketClientService.emit('performAttack', {
+            accessCode: this.lobby.accessCode,
+            attackerName: this.clientPlayer.name,
+        });
     }
 
     evade(): void {
@@ -204,7 +220,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
     private handleKeyPress(event: KeyboardEvent): void {
         if (event.key.toLowerCase() === 'd' && this.clientPlayer.isAdmin) {
-            this.socketClientService.sendAdminModeUpdate(this.lobby.accessCode);
+            this.socketClientService.emit('adminModeUpdate', { accessCode: this.lobby.accessCode });
         }
     }
 }
