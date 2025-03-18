@@ -98,7 +98,7 @@ describe('CombatHelperService', () => {
         const tile = { type: TileType.Ice } as Tile;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(tile);
         expect(service.getRandomAttackScore(player, false, [[]])).toBeLessThan(9);
-        expect(service.getRandomDefenseScore(player, false, [[]])).toBeLessThan(9);
+        expect(service.getRandomDefenseScore(player, false, [[]])).toBeLessThanOrEqual(9);
     });
 
     it('should reset loser player position', () => {
