@@ -37,7 +37,7 @@ export class CharacterService {
         player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
         player.hp = { current: 4, max: 4 };
         player.movementPoints = 4;
-        player.actionPoints = 3;
+        player.actionPoints = 1;
         player.inventory = [null, null];
         player.isAdmin = false;
         player.hasAbandoned = false;
