@@ -96,31 +96,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.server.to(client.id).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
     }
 
-    @SubscribeMessage(LobbyEvents.DeleteLobby)
-    handleDeleteLobby(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
-        const lobby = this.lobbyService.getLobby(accessCode);
-        if (!lobby) {
-            client.emit('error', 'Lobby does not exist');
-            return;
-        }
-
-        const roomSockets = this.server.sockets.adapter.rooms.get(accessCode);
-        if (roomSockets) {
-            this.server.to(accessCode).emit('lobbyDeleted');
-            roomSockets.forEach((socketId) => {
-                const clientSocket = this.server.sockets.sockets.get(socketId);
-                if (clientSocket) {
-                    clientSocket.leave(accessCode);
-                    clientSocket.emit('leftLobby');
-                }
-            });
-            this.lobbyService.leaveLobby(accessCode, ''); // ???
-            this.logger.log(`Lobby ${accessCode} deleted.`);
-        } else {
-            client.emit('error', `Lobby ${accessCode} does not exist.`);
-        }
-    }
-
     @SubscribeMessage(LobbyEvents.LeaveLobby)
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, playerName } = data;

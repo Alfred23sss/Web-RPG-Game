@@ -70,9 +70,6 @@ export class LobbyService {
                 accessCode: this.accessCode,
                 playerName: player.name,
             });
-            if (player.isAdmin) {
-                this.socketClientService.socket.emit('deleteLobby', this.accessCode);
-            }
         }
     }
     navigateToHome(): void {
