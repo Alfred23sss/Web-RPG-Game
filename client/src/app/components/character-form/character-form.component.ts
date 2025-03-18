@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
+import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
@@ -40,7 +41,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
         private readonly characterService: CharacterService,
         private readonly socketClientService: SocketClientService,
         private readonly cdr: ChangeDetectorRef,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game; accessCode: string; isLobbyCreated: boolean },
+        @Inject(MAT_DIALOG_DATA) public data: CharacterDialogData,
     ) {
         this.game = data.game;
         this.isLobbyCreated = data.isLobbyCreated;
@@ -97,7 +98,10 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
         // mettre une bonne partie dans le service qui va me permettre d'elever deselect component ca je l utilise pas dans le HTML
         this.createdPlayer.name = '';
         this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
-        this.socketClientService.removePlayerFromLobby(this.currentAccessCode, this.createdPlayer.name);
+        this.socketClientService.emit('leaveLobby', {
+            accessCode: this.currentAccessCode,
+            playerName: this.createdPlayer.name,
+        });
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }

@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
+import { GameInfoComponent } from '@app/components/game-info/game-info.component';
 import { Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
@@ -12,11 +13,10 @@ import { GameService } from '@app/services/game/game.service';
     selector: 'app-create-page',
     templateUrl: './create-page.component.html',
     styleUrls: ['./create-page.component.scss'],
-    imports: [MatTooltipModule, CommonModule],
+    imports: [MatTooltipModule, CommonModule, GameInfoComponent],
 })
 export class CreatePageComponent implements OnInit {
     games: Game[] = this.gameService.games;
-    private isLobbyCreated: boolean = false;
     constructor(
         private readonly dialog: MatDialog,
         private readonly gameService: GameService,
@@ -35,7 +35,7 @@ export class CreatePageComponent implements OnInit {
 
     openDialog(game: Game): void {
         this.dialog.open(CharacterFormComponent, {
-            data: { game, isLobbyCreated: this.isLobbyCreated },
+            data: { game },
         });
     }
 
