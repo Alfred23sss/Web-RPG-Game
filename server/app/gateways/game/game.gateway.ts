@@ -76,12 +76,6 @@ export class GameGateway {
         this.gameCombatService.performAttack(payload.accessCode, payload.attackerName);
     }
 
-    // @SubscribeMessage(GameEvents.AttemptEscape)
-    // handleAttemptEscape(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; playerName: string }) {
-    //     this.logger.log(`Player ${payload.playerName} is attempting to escape in game ${payload.accessCode}`);
-    //     this.gameCombatService.attemptEscape(payload.accessCode, payload.playerName);
-    // }
-
     @SubscribeMessage(GameEvents.PlayerMovementUpdate)
     async handlePlayerMovementUpdate(
         @ConnectedSocket() client: Socket,
