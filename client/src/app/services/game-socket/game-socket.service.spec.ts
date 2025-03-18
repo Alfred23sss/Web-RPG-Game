@@ -1,3 +1,8 @@
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/no-explicit-any */ // all any uses are to allow the testing of a private service.
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-empty-function */
+
 import { TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
 import { TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
@@ -184,30 +189,16 @@ describe('GameSocketService', () => {
 
     it('should handle transitionStarted event correctly when nextPlayer is the clientPlayer', () => {
         let transitionStartedCallback: (data: { nextPlayer: Player; transitionDuration: number }) => void = () => {};
-
-        // Capture le callback lors de l'enregistrement de l'événement
         mockSocketClientService.onTransitionStarted.and.callFake((callback: any) => {
             transitionStartedCallback = callback;
-            return () => {}; // Simuler la fonction de désabonnement
+            return () => {};
         });
-
-        // Initialiser les écouteurs
         service.initializeSocketListeners(mockComponent);
-
-        // Vérifie que l'écouteur a bien été enregistré
         expect(transitionStartedCallback).toBeDefined();
-
-        // Données de test
         const player1 = { name: 'Player1' } as Player;
-        mockComponent.clientPlayer = player1; // Simuler que le clientPlayer est Player1
-
-        // Simuler l'événement avec des données de test
+        mockComponent.clientPlayer = player1;
         transitionStartedCallback({ nextPlayer: player1, transitionDuration: 5 });
-
-        // Vérifier que le message est affiché
         expect(mockSnackbarService.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${player1.name} commence dans 5 secondes`);
-
-        // Vérifier que le clientPlayer est mis à jour
         expect(mockComponent.clientPlayer).toEqual(player1);
     });
 
@@ -408,15 +399,15 @@ describe('GameSocketService', () => {
             isOpen: true,
         };
         mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
-        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0); // Aucun point de mouvement restant
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false); // Glace adjacente
-        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false); // Pas d'action disponible
+        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0);
+        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
+        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
         playerMovementCallback({ grid, player, isCurrentlyMoving });
         expect(mockComponent.endTurn).toHaveBeenCalled();
     });
 
     it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice--222', () => {
-        //test 140-141
+        // test 140-141
         let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
         mockSocketClientService.onPlayerMovement.and.callFake((callback: any) => {
             playerMovementCallback = callback;
@@ -470,9 +461,9 @@ describe('GameSocketService', () => {
             isOpen: true,
         };
         mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
-        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0); // Aucun point de mouvement restant
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false); // Glace adjacente
-        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false); // Pas d'action disponible
+        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0);
+        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
+        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
         playerMovementCallback({ grid, player, isCurrentlyMoving });
         expect(mockComponent.endTurn).toHaveBeenCalled();
     });
@@ -777,7 +768,7 @@ describe('GameSocketService', () => {
         expect(mockComponent.escapeAttempts).toEqual(attemptsLeft);
     });
 
-    it('should toggle debug mode to true and show "Mode debug activé" message when adminModeChangedServerSide is triggered and debug mode was false', () => {
+    it('should toggle debug mode to true and show "Mode debug activé" when adminModeChangedServerSide is triggered', () => {
         let adminModeChangedCallback: () => void = () => {};
         mockSocketClientService.on.and.callFake((event: string, callback: any) => {
             if (event === 'adminModeChangedServerSide') {
@@ -800,7 +791,7 @@ describe('GameSocketService', () => {
         expect(mockSocketClientService.socket.off).toHaveBeenCalledTimes(events.length);
     });
 
-    //LUI FAIT MARCHE LA CONDITION
+    // LUI FAIT MARCHE LA CONDITION
     it('should handle combat ended with actionPoints 1 and movementPoints 0 and no adjacent ice, no action available', () => {
         let combatEndedCallback: (data: { winner: Player; hasEvaded: boolean }) => void = () => {};
         mockSocketClientService.on.and.callFake((event: string, callback: any) => {
@@ -810,8 +801,6 @@ describe('GameSocketService', () => {
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
-
-        // Configurer les mocks
         mockComponent.clientPlayer = {
             name: 'Player1',
             speed: 5,
@@ -825,7 +814,7 @@ describe('GameSocketService', () => {
         } as Player;
 
         mockComponent.currentPlayer = {
-            name: 'Player1', // Même nom que clientPlayer
+            name: 'Player1',
             speed: 5,
             movementPoints: 0,
             actionPoints: 1,
