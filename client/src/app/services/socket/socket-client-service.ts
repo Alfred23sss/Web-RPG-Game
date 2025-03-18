@@ -80,26 +80,22 @@ export class SocketClientService {
     //     this.socket.emit('kickPlayer', { accessCode, playerName });
     // }
     kickPlayer(accessCode: string, playerName: string): void {
-        console.log(`🟡 Tentative d'expulsion du joueur: ${playerName} du lobby: ${accessCode}`);
         this.socket.emit('kickPlayer', { accessCode, playerName });
     }
-    
 
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
             this.socket.emit('getLobbyPlayers', accessCode);
-            
+
             this.socket.on('updatePlayers', (players: Player[]) => {
-                console.log("📡 Liste des joueurs reçue du serveur :", players);
                 observer.next(players);
             });
-    
+
             this.socket.on('error', (errorMessage: string) => {
                 observer.error(errorMessage);
             });
         });
     }
-    
 
     getLobby(accessCode: string): Observable<Lobby> {
         return new Observable<Lobby>((observer) => {
@@ -154,7 +150,6 @@ export class SocketClientService {
     // }
     onKicked(callback: (data: { accessCode: string; playerName: string }) => void): void {
         this.socket.on('kicked', (data) => {
-            console.log("🚨 Événement 'kicked' reçu :", data);
             callback(data);
         });
     }
@@ -329,7 +324,6 @@ export class SocketClientService {
             callback(data);
         });
     }
-
 
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
