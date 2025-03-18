@@ -1,6 +1,5 @@
-// approved by education team, disabling magic numbers and any in test are aloud
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */ // approved by education team, disabling magic numbers and any in test are allowed
+/* eslint-disable @typescript-eslint/no-explicit-any */ // To test private methods
 import { TileType } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { Player } from '@app/model/database/player';

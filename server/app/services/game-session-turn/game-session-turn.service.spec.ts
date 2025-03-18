@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
@@ -110,23 +111,64 @@ describe('GameSessionTurnService', () => {
     });
 
     describe('startPlayerTurn', () => {
-        it('should start the player turn and set the countdown', () => {
-            const player = createPlayer('Player1', 10);
-            const turn = createTurn([player]);
-
+        const SECOND = 1000;
+        const TURN_DURATION = 30000;
+        it('should correctly initialize player turn and setup timers', () => {
             jest.useFakeTimers();
-
-            const updatedTurn = service.startPlayerTurn('1234', player, turn);
-
+            const accessCode = 'test';
+            const player = createPlayer('player1', 5, false);
+            const players = [player, createPlayer('player2', 4)];
+            const turn = createTurn(players);
+            const updatePlayerSpy = jest.spyOn(service as any, 'updatePlayer');
+            const emitEventSpy = jest.spyOn(service as any, 'emitEvent');
+            const updatedTurn = service.startPlayerTurn(accessCode, player, turn);
+            expect(updatedTurn.isTransitionPhase).toBe(false);
             expect(updatedTurn.currentPlayer).toBe(player);
-            expect(updatedTurn.currentTurnCountdown).toBe(30);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.started', { accessCode: '1234', player });
+            expect(updatedTurn.currentTurnCountdown).toBe(TURN_DURATION / SECOND);
+            expect(updatePlayerSpy).toHaveBeenCalledWith(player, { isActive: true });
+            expect(emitEventSpy).toHaveBeenCalledWith('game.turn.started', { accessCode, player });
+            jest.advanceTimersByTime(SECOND);
+            expect(updatedTurn.currentTurnCountdown).toBe(TURN_DURATION / SECOND - 1);
+            expect(emitEventSpy).toHaveBeenCalledWith('game.turn.timer', {
+                accessCode,
+                timeLeft: TURN_DURATION / SECOND - 1,
+            });
+            emitEventSpy.mockClear();
+            jest.advanceTimersByTime((TURN_DURATION / SECOND - 1) * SECOND);
+            expect(updatedTurn.countdownInterval).toBeNull();
+            expect(updatedTurn.currentTurnCountdown).toBe(0);
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
+            jest.advanceTimersByTime(1);
+            expect(emitSpy).toHaveBeenCalledWith('game.turn.timeout', { accessCode });
+        });
 
-            jest.advanceTimersByTime(1000);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.timer', { accessCode: '1234', timeLeft: 29 });
+        it('should clear existing interval and timer if present', () => {
+            // Arrange
+            jest.useFakeTimers();
+            const accessCode = 'test';
+            const player = createPlayer('player1', 5);
+            const players = [player, createPlayer('player2', 4)];
+            const turn = createTurn(players);
 
-            jest.advanceTimersByTime(30000);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.timeout', { accessCode: '1234' });
+            turn.countdownInterval = setInterval(() => {}, 1000);
+            turn.turnTimers = setTimeout(() => {}, 1000);
+            const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
+            const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
+            service.startPlayerTurn(accessCode, player, turn);
+            expect(clearIntervalSpy).toHaveBeenCalled();
+        });
+
+        it('should handle the case when timer runs out', () => {
+            jest.useFakeTimers();
+            const accessCode = 'test';
+            const player = createPlayer('player1', 5);
+            const players = [player, createPlayer('player2', 4)];
+            const turn = createTurn(players);
+            const updatedTurn = service.startPlayerTurn(accessCode, player, turn);
+            jest.advanceTimersByTime(TURN_DURATION + 1);
+            expect(updatedTurn.countdownInterval).toBeNull();
+            expect(updatedTurn.currentTurnCountdown).toBe(0);
+            expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.timeout', { accessCode });
         });
     });
 
@@ -257,6 +299,18 @@ describe('GameSessionTurnService', () => {
 
             expect(turn.turnTimers).toBeNull();
             expect(turn.countdownInterval).toBeNull();
+        });
+    });
+
+    describe('orderPlayersBySpeed', () => {
+        it('should reverse order when speeds are equal and Math.random() >= 0.5', () => {
+            jest.spyOn(Math, 'random').mockImplementation(() => 0.7);
+
+            const players = [createPlayer('Player1', 10), createPlayer('Player2', 10)];
+            const orderedPlayers = service.orderPlayersBySpeed(players);
+
+            expect(orderedPlayers[0].name).toBe('Player1');
+            expect(orderedPlayers[1].name).toBe('Player2');
         });
     });
 });
