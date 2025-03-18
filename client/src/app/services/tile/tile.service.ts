@@ -3,8 +3,8 @@ import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
+import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
-import { ItemDragService } from '@app/services/itemDrag/ItemDrag.service';
 import { ToolService } from '@app/services/tool/tool.service';
 
 @Injectable({
@@ -61,7 +61,11 @@ export class TileService {
     }
 
     resetTool(): void {
-        this.toolService.setSelectedTool(TileType.Default, ImageType.Default);
+        const selection = {
+            tool: TileType.Wall,
+            image: ImageType.Wall,
+        };
+        this.toolService.setSelectedTool(selection);
     }
 
     private handleDoor(tile: Tile): void {

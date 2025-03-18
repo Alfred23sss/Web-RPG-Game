@@ -1,15 +1,21 @@
 import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
+import { GRID_DIMENSIONS } from '@app/constants/global.constants';
 import { GameSize, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { ItemService } from './item.service';
 
 const EXPECTED_ITEM_COUNT_MEDIUM = 4;
-const GAME_SIZE_10 = '10';
-const GAME_SIZE_15 = '15';
-const GAME_SIZE_20 = '20';
 const DEFAULT_GAME_SIZE = GameSize.Small;
+
+const getSizeString = (size: GameSize) => GRID_DIMENSIONS[size].toString();
+
+const SIZE_MAPPING: Record<string, GameSize> = {
+    [getSizeString(GameSize.Small)]: GameSize.Small,
+    [getSizeString(GameSize.Medium)]: GameSize.Medium,
+    [getSizeString(GameSize.Large)]: GameSize.Large,
+};
 
 describe('ItemService', () => {
     let service: ItemService;
@@ -174,13 +180,8 @@ describe('ItemService', () => {
         service.setItemCount();
 
         const rawSize = mockGame.size as unknown as number;
-        const sizeMapping: Record<string, GameSize> = {
-            [GAME_SIZE_10]: GameSize.Small,
-            [GAME_SIZE_15]: GameSize.Medium,
-            [GAME_SIZE_20]: GameSize.Large,
-        };
 
-        const mappedSize = sizeMapping[rawSize] ?? DEFAULT_GAME_SIZE;
+        const mappedSize = SIZE_MAPPING[rawSize] ?? DEFAULT_GAME_SIZE;
 
         expect(mappedSize).toBe(GameSize.Small);
     });
@@ -203,13 +204,8 @@ describe('ItemService', () => {
         service.setItemCount();
 
         const rawSize = mockGame.size as unknown as number;
-        const sizeMapping: Record<string, GameSize> = {
-            [GAME_SIZE_10]: GameSize.Small,
-            [GAME_SIZE_15]: GameSize.Medium,
-            [GAME_SIZE_20]: GameSize.Large,
-        };
 
-        const mappedSize = sizeMapping[rawSize] ?? DEFAULT_GAME_SIZE;
+        const mappedSize = SIZE_MAPPING[rawSize] ?? DEFAULT_GAME_SIZE;
 
         expect(mappedSize).toBe(GameSize.Small);
     });
