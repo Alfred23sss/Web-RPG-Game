@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
 import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -65,9 +66,12 @@ export class LobbyService {
 
         const isPlayerInLobby = lobby.players.some((p) => p.name === player.name);
         if (this.accessCode && isPlayerInLobby && !this.isGameStartingSubject.value) {
-            this.socketClientService.removePlayerFromLobby(this.accessCode, player.name);
+            this.socketClientService.socket.emit('leaveLobby', {
+                accessCode: this.accessCode,
+                playerName: player.name,
+            });
             if (player.isAdmin) {
-                this.socketClientService.deleteLobby(this.accessCode);
+                this.socketClientService.socket.emit('deleteLobby', this.accessCode);
             }
         }
     }
@@ -102,10 +106,10 @@ export class LobbyService {
     }
 
     private initializeSocketListeners(): void {
-        this.socketClientService.onJoinLobby(() => this.updatePlayers());
-        this.socketClientService.onLeaveLobby(() => this.updatePlayers());
+        this.socketClientService.on('joinedLobby', () => this.updatePlayers());
+        this.socketClientService.on('leftLobby', () => this.updatePlayers());
 
-        this.socketClientService.onLobbyUpdate((players: Player[]) => {
+        this.socketClientService.on('updatePlayers', (players: Player[]) => {
             const lobby = this.lobbySubject.value;
             if (lobby) {
                 lobby.players = players;
@@ -123,36 +127,38 @@ export class LobbyService {
             }
         });
 
-        this.socketClientService.onKicked(({ accessCode, playerName }) => {
+        this.socketClientService.on<{ accessCode: string; playerName: string }>('kicked', (data) => {
+            const { accessCode, playerName } = data;
+
             if (accessCode === this.accessCode && playerName === this.playerSubject.value?.name) {
                 this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
                 this.navigateToHome();
             }
         });
 
-        this.socketClientService.onLobbyLocked(({ accessCode, isLocked }) => {
+        this.socketClientService.on<{ accessCode: string; isLocked: boolean }>('lobbyLocked', ({ accessCode, isLocked }) => {
             const lobby = this.lobbySubject.value;
             if (lobby && accessCode === this.accessCode) {
                 this.lobbySubject.next({ ...lobby, isLocked });
             }
         });
 
-        this.socketClientService.onLobbyUnlocked(({ accessCode, isLocked }) => {
+        this.socketClientService.on<{ accessCode: string; isLocked: boolean }>('lobbyUnlocked', ({ accessCode, isLocked }) => {
             const lobby = this.lobbySubject.value;
             if (lobby && accessCode === this.accessCode) {
                 this.lobbySubject.next({ ...lobby, isLocked });
             }
         });
 
-        this.socketClientService.onLobbyDeleted(() => this.navigateToHome());
+        this.socketClientService.on('lobbyDeleted', () => this.navigateToHome());
 
-        this.socketClientService.onAlertGameStarted((data) => {
+        this.socketClientService.on('gameStarted', (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
             sessionStorage.setItem('game', JSON.stringify(data.updatedGame));
             sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
             this.navigateToGame();
         });
 
-        this.socketClientService.onAdminLeft((data) => {
+        this.socketClientService.on('adminLeft', (data: { message: string }) => {
             this.snackbarService.showMessage(data.message);
         });
     }

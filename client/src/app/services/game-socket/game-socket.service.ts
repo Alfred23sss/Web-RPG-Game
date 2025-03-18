@@ -59,21 +59,21 @@ export class GameSocketService {
         const game = sessionStorage.getItem('game');
         component.game = game ? (JSON.parse(game) as Game) : component.game;
 
-        this.socketClientService.onAbandonGame((data: { player: Player }) => {
+        this.socketClientService.on('game-abandoned', (data: { player: Player }) => {
             const abandonedPlayer = component.playerList.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
         });
 
-        this.socketClientService.onGameDeleted(() => {
+        this.socketClientService.on('gameDeleted', () => {
             this.snackbarService.showMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
             setTimeout(() => {
                 component.backToHome();
             }, delayBeforeHome);
         });
 
-        this.socketClientService.onGameEnded((data) => {
+        this.socketClientService.on('gameEnded', (data: { winner: string }) => {
             this.snackbarService.showMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
             setTimeout(() => {
                 component.abandonGame();
@@ -87,14 +87,14 @@ export class GameSocketService {
             component.isDebugMode = false;
         });
 
-        this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
+        this.socketClientService.on('transitionStarted', (data: { nextPlayer: Player; transitionDuration: number }) => {
             this.snackbarService.showMultipleMessages(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
             if (data.nextPlayer.name === component.clientPlayer.name) {
                 component.clientPlayer = data.nextPlayer;
             }
         });
 
-        this.socketClientService.onTurnStarted((data: { player: Player; turnDuration: number }) => {
+        this.socketClientService.on('turnStarted', (data: { player: Player; turnDuration: number }) => {
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
             component.currentPlayer = data.player;
             component.isCurrentlyMoving = false;
@@ -106,16 +106,16 @@ export class GameSocketService {
             component.updateAvailablePath();
         });
 
-        this.socketClientService.onTimerUpdate((data: { timeLeft: number }) => {
+        this.socketClientService.on('timerUpdate', (data: { timeLeft: number }) => {
             component.turnTimer = data.timeLeft;
         });
 
-        this.socketClientService.onAlertGameStarted((data: { orderedPlayers: Player[]; updatedGame: Game }) => {
+        this.socketClientService.socket.on('gameStarted', (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
             component.playerList = data.orderedPlayers;
             component.game = data.updatedGame;
         });
 
-        this.socketClientService.onPlayerMovement((data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
+        this.socketClientService.on('playerMovement', (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
             if (component.game && component.game.grid) {
                 component.game.grid = data.grid;
             }
@@ -143,25 +143,25 @@ export class GameSocketService {
             }
         });
 
-        this.socketClientService.onGameCombatStarted(() => {
+        this.socketClientService.on('combatStarted', () => {
             component.isInCombatMode = true;
         });
 
-        this.socketClientService.onAttackResult((data: { success: boolean; attackScore: number; defenseScore: number }) => {
+        this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: number; defenseScore: number }) => {
             component.updateAttackResult(data);
         });
 
-        this.socketClientService.onPlayerUpdate((data: { player: Player }) => {
+        this.socketClientService.on('playerUpdate', (data: { player: Player }) => {
             if (component.clientPlayer.name === data.player.name) {
                 component.clientPlayer = data.player;
             }
         });
 
-        this.socketClientService.onPlayerListUpdate((data: { players: Player[] }) => {
+        this.socketClientService.on('playerListUpdate', (data: { players: Player[] }) => {
             component.playerList = data.players;
         });
 
-        this.socketClientService.onDoorClickedUpdate((data: { grid: Tile[][] }) => {
+        this.socketClientService.on('doorClicked', (data: { grid: Tile[][] }) => {
             if (!component.game || !component.game.grid) {
                 return;
             }
@@ -171,15 +171,15 @@ export class GameSocketService {
             component.updateAvailablePath();
         });
 
-        this.socketClientService.onGameCombatTurnStarted((data: { fighter: Player }) => {
+        this.socketClientService.on('combatTurnStarted', (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => {
             component.currentPlayer = data.fighter;
         });
 
-        this.socketClientService.onGameCombatTimerUpdate((data: { timeLeft: number }) => {
+        this.socketClientService.on('combatTimerUpdate', (data: { timeLeft: number }) => {
             component.turnTimer = data.timeLeft;
         });
 
-        this.socketClientService.onGridUpdate((data: { grid: Tile[][] }) => {
+        this.socketClientService.on('gridUpdate', (data: { grid: Tile[][] }) => {
             if (!component.game || !component.game.grid) {
                 return;
             }
