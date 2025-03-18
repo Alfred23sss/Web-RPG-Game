@@ -1,3 +1,7 @@
+// to the private function
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// to test if grid is in called function even if it may be null
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { Routes } from '@app/enums/global.enums';
@@ -14,6 +18,7 @@ import { GamePageComponent } from './game-page.component';
 const mockPlayer: Player = { name: 'player1', actionPoints: 3, movementPoints: 5, isAdmin: false } as Player;
 const mockLobby: Lobby = { accessCode: '1234' } as Lobby;
 const mockTile: Tile = { id: 'tile-0-0' } as Tile;
+const playerTile: Tile = { ...mockTile, player: mockPlayer };
 const mockGame: Game = { grid: [[mockTile]] } as Game;
 
 describe('GamePageComponent', () => {
@@ -26,17 +31,7 @@ describe('GamePageComponent', () => {
     let gameSocketSpy: jasmine.SpyObj<GameSocketService>;
 
     beforeEach(async () => {
-        socketSpy = jasmine.createSpyObj('SocketClientService', [
-            'sendDoorUpdate',
-            'startCombat',
-            'sendPlayerMovementUpdate',
-            'sendTeleportPlayer',
-            'endTurn',
-            'attack',
-            'emit',
-            'sendAdminModeUpdate',
-            'abandonGame',
-        ]);
+        socketSpy = jasmine.createSpyObj('SocketClientService', ['emit', 'sendPlayerMovementUpdate']);
 
         movementSpy = jasmine.createSpyObj('PlayerMovementService', ['availablePath', 'quickestPath']);
 
@@ -87,13 +82,17 @@ describe('GamePageComponent', () => {
 
         component.handleDoorClick(mockTile);
 
-        expect(socketSpy.sendDoorUpdate).toHaveBeenCalled();
+        expect(socketSpy.emit).toHaveBeenCalledWith('doorUpdate', {
+            currentTile,
+            targetTile: mockTile,
+            accessCode: mockLobby.accessCode,
+        });
     });
 
     it('should not handle door click in combat mode', () => {
         component.isInCombatMode = true;
         component.handleDoorClick(mockTile);
-        expect(socketSpy.sendDoorUpdate).not.toHaveBeenCalled();
+        expect(socketSpy.emit).not.toHaveBeenCalled();
     });
 
     it('should not handle door if currentTile undefined', () => {
@@ -104,21 +103,34 @@ describe('GamePageComponent', () => {
 
         component.handleDoorClick(mockTile);
 
-        expect(socketSpy.sendDoorUpdate).not.toHaveBeenCalled();
+        expect(socketSpy.emit).not.toHaveBeenCalled();
     });
 
-    it('should handle attack click on adjacent tile', () => {
-        component.isActionMode = true;
-        component.clientPlayer.actionPoints = 3;
-        const targetTile = { ...mockTile, player: { ...mockPlayer, name: 'player2' }, id: 't2' } as Tile;
+    describe('handleAttackClick', () => {
+        it('should handle attack click on adjacent tile', () => {
+            component.isActionMode = true;
+            component.clientPlayer.actionPoints = 3;
+            const targetTile = { ...mockTile, player: { ...mockPlayer, name: 'player2' }, id: 't2' } as Tile;
 
-        const currentTile = { ...mockTile, player: mockPlayer };
-        spyOn(component, 'getClientPlayerPosition').and.returnValue(currentTile);
-        spyOn(component as any, 'findAndCheckAdjacentTiles').and.returnValue(true);
+            const currentTile = { ...mockTile, player: mockPlayer };
+            spyOn(component, 'getClientPlayerPosition').and.returnValue(currentTile);
+            spyOn(component as any, 'findAndCheckAdjacentTiles').and.returnValue(true);
 
-        component.handleAttackClick(targetTile);
+            component.handleAttackClick(targetTile);
 
-        expect(socketSpy.startCombat).toHaveBeenCalled();
+            expect(socketSpy.emit).toHaveBeenCalledWith('startCombat', {
+                attackerName: currentTile.player.name,
+                defenderName: targetTile.player?.name,
+                accessCode: mockLobby.accessCode,
+                isDebugMode: component.isDebugMode,
+            });
+        });
+
+        it('should handle attack click on adjacent tile if tile does not have a player', () => {
+            component.handleAttackClick(mockTile);
+
+            expect(socketSpy.emit).not.toHaveBeenCalled();
+        });
     });
 
     describe('handleTileClick', () => {
@@ -156,7 +168,7 @@ describe('GamePageComponent', () => {
         it('should not handle teleport in combat mode', () => {
             component.isInCombatMode = true;
             component.handleTeleport(mockTile);
-            expect(socketSpy.sendTeleportPlayer).not.toHaveBeenCalled();
+            expect(socketSpy.emit).not.toHaveBeenCalled();
         });
 
         it("should handle teleport if it is the player's turn", () => {
@@ -164,7 +176,12 @@ describe('GamePageComponent', () => {
             component.clientPlayer.name = 'test';
             component.currentPlayer.name = 'test';
             component.handleTeleport(mockTile);
-            expect(socketSpy.sendTeleportPlayer).toHaveBeenCalledWith(mockLobby.accessCode, mockPlayer, mockTile);
+
+            expect(socketSpy.emit).toHaveBeenCalledWith('teleportPlayer', {
+                accessCode: mockLobby.accessCode,
+                player: mockPlayer,
+                targetTile: mockTile,
+            });
         });
 
         it("should not handle teleport if it is not the player's turn", () => {
@@ -172,7 +189,7 @@ describe('GamePageComponent', () => {
             component.clientPlayer.name = 'test';
             component.currentPlayer.name = 'otherPlayer';
             component.handleTeleport(mockTile);
-            expect(socketSpy.sendTeleportPlayer).not.toHaveBeenCalled();
+            expect(socketSpy.emit).not.toHaveBeenCalled();
         });
     });
 
@@ -188,6 +205,13 @@ describe('GamePageComponent', () => {
             spyOn(component as any, 'isAvailablePath').and.returnValue(false);
             component.updateQuickestPath(mockTile);
             expect(component.quickestPath).toEqual(undefined);
+        });
+
+        it('should update quickest path to empty array if updateQuickestPath returns undefined', () => {
+            spyOn(component as any, 'isAvailablePath').and.returnValue(true);
+            movementSpy.quickestPath.and.returnValue(undefined);
+            component.updateQuickestPath(mockTile);
+            expect(component.quickestPath).toEqual([]);
         });
     });
 
@@ -211,7 +235,10 @@ describe('GamePageComponent', () => {
     it('should abandon game', () => {
         component.abandonGame();
         expect(component.clientPlayer.hasAbandoned).toBeTrue();
-        expect(socketSpy.abandonGame).toHaveBeenCalled();
+        expect(socketSpy.emit).toHaveBeenCalledWith('abandonedGame', {
+            player: mockPlayer,
+            accessCode: mockLobby.accessCode,
+        });
         expect(routerSpy.navigate).toHaveBeenCalled();
     });
 
@@ -221,7 +248,10 @@ describe('GamePageComponent', () => {
 
         component.attack();
 
-        expect(socketSpy.attack).toHaveBeenCalledWith(mockPlayer.name, mockLobby.accessCode);
+        expect(socketSpy.emit).toHaveBeenCalledWith('performAttack', {
+            accessCode: mockLobby.accessCode,
+            attackerName: mockPlayer.name,
+        });
     });
 
     it('should emit evade event with correct parameters', () => {
@@ -244,8 +274,6 @@ describe('GamePageComponent', () => {
         });
 
         it('should return the tile where the client player is located', () => {
-            const playerTile: Tile = { ...mockTile, player: mockPlayer };
-
             component.game = {
                 id: 'game1',
                 grid: [[playerTile]],
@@ -258,69 +286,119 @@ describe('GamePageComponent', () => {
             expect(result).toEqual(playerTile);
         });
     });
+
+    describe('updateAvailablePath', () => {
+        it('should set availablePath using service when current player is client and game exists', () => {
+            component.game = { grid: [[playerTile]] } as Game;
+            spyOn(component, 'getClientPlayerPosition').and.returnValue(playerTile);
+            movementSpy.availablePath.and.returnValue([playerTile]);
+
+            component.updateAvailablePath();
+
+            expect(movementSpy.availablePath).toHaveBeenCalledWith(playerTile, mockPlayer.movementPoints, component.game.grid!);
+            expect(component.availablePath).toEqual([playerTile]);
+        });
+
+        it('should set availablePath to empty when current player is not client', () => {
+            component.currentPlayer.name = 'otherPlayer';
+            component.updateAvailablePath();
+            expect(component.availablePath).toEqual([]);
+        });
+
+        it('should set availablePath to empty when game is null', () => {
+            component.game = null;
+            component.updateAvailablePath();
+            expect(component.availablePath).toEqual([]);
+        });
+    });
+
+    describe('handlePageRefresh', () => {
+        it('should call abandonGame if refreshed is true', () => {
+            sessionStorage.setItem('refreshed', 'true');
+            const abandonSpy = spyOn(component, 'abandonGame');
+            component.handlePageRefresh();
+            expect(abandonSpy).toHaveBeenCalled();
+        });
+
+        it('should set refreshed to true if not already set', () => {
+            sessionStorage.setItem('refreshed', 'false');
+            component.handlePageRefresh();
+            expect(sessionStorage.getItem('refreshed')).toBe('true');
+        });
+    });
+
+    describe('updateAttackResult', () => {
+        it('should update attackResult with provided data', () => {
+            const mockData = { success: true, attackScore: 10, defenseScore: 5 };
+            component.updateAttackResult(mockData);
+            expect(component.attackResult).toEqual(mockData);
+        });
+
+        it('should set attackResult to null when data is null', () => {
+            component.updateAttackResult(null);
+            expect(component.attackResult).toBeNull();
+        });
+    });
+
+    describe('findAndCheckAdjacentTiles', () => {
+        it('should return true for horizontally adjacent tiles', () => {
+            const grid = [[{ id: 'tile-0-0' }, { id: 'tile-0-1' }]] as Tile[][];
+            expect(component['findAndCheckAdjacentTiles']('tile-0-0', 'tile-0-1', grid)).toBeTrue();
+        });
+
+        it('should return true for vertically adjacent tiles', () => {
+            const grid = [[{ id: 'tile-0-0' }], [{ id: 'tile-1-0' }]] as Tile[][];
+            expect(component['findAndCheckAdjacentTiles']('tile-0-0', 'tile-1-0', grid)).toBeTrue();
+        });
+
+        it('should return false for diagonal tiles', () => {
+            const grid = [
+                [{ id: 'tile-0-0' }, { id: 'tile-0-1' }],
+                [{ id: 'tile-1-0' }, { id: 'tile-1-1' }],
+            ] as Tile[][];
+            expect(component['findAndCheckAdjacentTiles']('tile-0-0', 'tile-1-1', grid)).toBeFalse();
+        });
+
+        it('should return false if tiles are not found', () => {
+            const grid = [[{ id: 'tile-0-0' }]] as Tile[][];
+            expect(component['findAndCheckAdjacentTiles']('tile-0-0', 'invalid', grid)).toBeFalse();
+        });
+    });
+
+    describe('isAvailablePath', () => {
+        it('should return true if tile is in availablePath', () => {
+            component.availablePath = [{ id: 'tile-0-0' } as Tile];
+            expect(component['isAvailablePath']({ id: 'tile-0-0' } as Tile)).toBeTrue();
+        });
+
+        it('should return false if tile is not in availablePath', () => {
+            component.availablePath = [{ id: 'tile-0-1' } as Tile];
+            expect(component['isAvailablePath']({ id: 'tile-0-0' } as Tile)).toBeFalse();
+        });
+
+        it('should return false if availablePath is undefined', () => {
+            component.availablePath = undefined;
+            expect(component['isAvailablePath']({ id: 'tile-0-0' } as Tile)).toBeFalse();
+        });
+    });
+
+    describe('handleKeyPress', () => {
+        it('should emit adminModeUpdate when "d" is pressed and client is admin', () => {
+            component.clientPlayer.isAdmin = true;
+            component['handleKeyPress'](new KeyboardEvent('keydown', { key: 'd' }));
+            expect(socketSpy.emit).toHaveBeenCalledWith('adminModeUpdate', { accessCode: mockLobby.accessCode });
+        });
+
+        it('should not emit when "d" is pressed and client is not admin', () => {
+            component.clientPlayer.isAdmin = false;
+            component['handleKeyPress'](new KeyboardEvent('keydown', { key: 'd' }));
+            expect(socketSpy.emit).not.toHaveBeenCalled();
+        });
+
+        it('should ignore other keys', () => {
+            component.clientPlayer.isAdmin = true;
+            component['handleKeyPress'](new KeyboardEvent('keydown', { key: 'a' }));
+            expect(socketSpy.emit).not.toHaveBeenCalled();
+        });
+    });
 });
-
-// it('should end turn correctly', () => {
-//     component.endTurn();
-//     expect(socketSpy.endTurn).toHaveBeenCalledWith(mockLobby.accessCode);
-// });
-
-// it('should toggle action mode', () => {
-//     component.executeNextAction();
-//     expect(component.isActionMode).toBeTrue();
-//     expect(snackbarSpy.showMessage).toHaveBeenCalled();
-// });
-
-// it('should abandon game', () => {
-//     component.abandonGame();
-//     expect(component.clientPlayer.hasAbandoned).toBeTrue();
-//     expect(socketSpy.abandonGame).toHaveBeenCalled();
-//     expect(routerSpy.navigate).toHaveBeenCalled();
-// });
-
-// it('should get player position', () => {
-//     const tile = component.getClientPlayerPosition();
-//     expect(tile).toBeDefined();
-// });
-
-// it('should update attack result', () => {
-//     const result = { success: true, attackScore: 15, defenseScore: 10 };
-//     component.updateAttackResult(result);
-//     expect(component.attackResult).toEqual(result);
-// });
-
-// it('should handle admin key press with cast', () => {
-//     const event = new KeyboardEvent('keydown', { key: 'd' });
-//     component.clientPlayer.isAdmin = true;
-
-//     spyOn(component as any, 'handleKeyPress').and.callThrough();
-
-//     document.dispatchEvent(event);
-
-//     expect(socketSpy.sendAdminModeUpdate).toHaveBeenCalledWith(mockLobby.accessCode);
-// });
-
-// it('should clean up on destroy', () => {
-//     spyOn(document, 'removeEventListener');
-//     component.ngOnDestroy();
-//     expect(document.removeEventListener).toHaveBeenCalled();
-//     expect(gameSocketSpy.unsubscribeSocketListeners).toHaveBeenCalled();
-// });
-
-// // Tests supplémentaires pour couvrir les branches restantes
-// it('should not attack same player', () => {
-//     const targetTile = { ...mockTile, player: mockPlayer };
-//     component.handleAttackClick(targetTile);
-//     expect(socketSpy.startCombat).not.toHaveBeenCalled();
-// });
-
-// it('should not teleport in combat', () => {
-//     component.isInCombatMode = true;
-//     component.handleTeleport(mockTile);
-//     expect(socketSpy.sendTeleportPlayer).not.toHaveBeenCalled();
-// });
-
-// it('should handle page refresh', () => {
-//     component.handlePageRefresh();
-//     expect(sessionStorage.getItem('refreshed')).toBe('true');
-// });

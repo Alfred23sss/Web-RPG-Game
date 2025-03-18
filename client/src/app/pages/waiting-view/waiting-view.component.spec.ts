@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */ // to access private methods
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { MIN_PLAYERS } from '@app/constants/global.constants';
+import { DiceType, ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { BehaviorSubject } from 'rxjs';
 import { WaitingViewComponent } from './waiting-view.component';
-import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { DiceType, ErrorMessages, Routes } from '@app/enums/global.enums';
 
 describe('WaitingViewComponent', () => {
     let component: WaitingViewComponent;
@@ -65,7 +65,13 @@ describe('WaitingViewComponent', () => {
             },
         );
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
-        mockSocketClientService = jasmine.createSpyObj('SocketClientService', ['unlockLobby', 'lockLobby', 'kickPlayer', 'alertGameStarted']);
+        mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
+            'unlockLobby',
+            'lockLobby',
+            'kickPlayer',
+            'alertGameStarted',
+            'emit', // Add the emit method to the mock
+        ]);
 
         await TestBed.configureTestingModule({
             imports: [WaitingViewComponent],
@@ -109,13 +115,13 @@ describe('WaitingViewComponent', () => {
     });
 
     describe('changeLobbyLockStatus', () => {
-        it('should unlock lobby when locked and has space', () => {
+        it('should emit unlockLobby event when unlocking lobby', () => {
             mockLobby.isLocked = true;
             mockLobby.players = [MOCK_PLAYER];
 
             component.changeLobbyLockStatus();
 
-            expect(mockSocketClientService.unlockLobby).toHaveBeenCalledWith('1234');
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('unlockLobby', '1234');
         });
 
         it('should show message when trying to unlock full lobby', () => {
@@ -127,33 +133,29 @@ describe('WaitingViewComponent', () => {
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Le lobby est plein, impossible de le déverrouiller.');
         });
 
-        it('should lock lobby when unlocked', () => {
+        it('should emit lockLobby event when locking lobby', () => {
             mockLobby.isLocked = false;
 
             component.changeLobbyLockStatus();
 
-            expect(mockSocketClientService.lockLobby).toHaveBeenCalledWith('1234');
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('lockLobby', '1234');
         });
 
         it('should do nothing if lobby is null', () => {
             component.lobby = null;
             component.changeLobbyLockStatus();
-            expect(mockSocketClientService.lockLobby).not.toHaveBeenCalled();
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
         });
     });
 
     describe('kickPlayer', () => {
-        it('should call kickPlayer with correct parameters', () => {
+        it('should emit kickPlayer event with correct parameters', () => {
             const testPlayer = { name: 'Test' } as Player;
             component.kickPlayer(testPlayer);
-            expect(mockSocketClientService.kickPlayer).toHaveBeenCalledWith('1234', 'Test');
-        });
-    });
-
-    describe('navigateToHome', () => {
-        it('should navigate to home page', () => {
-            component.navigateToHome();
-            expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('kickPlayer', {
+                accessCode: '1234',
+                playerName: 'Test',
+            });
         });
     });
 
@@ -163,7 +165,7 @@ describe('WaitingViewComponent', () => {
             component.navigateToGame();
 
             expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
-            expect(mockSocketClientService.alertGameStarted).not.toHaveBeenCalled();
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
             expect(mockRouter.navigate).not.toHaveBeenCalled();
         });
 
@@ -183,7 +185,7 @@ describe('WaitingViewComponent', () => {
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.NotEnoughPlayers);
         });
 
-        it('should start game if conditions met', fakeAsync(() => {
+        it('should emit createGame event and navigate if conditions met', fakeAsync(() => {
             component.lobby = {
                 ...mockLobby,
                 isLocked: true,
@@ -194,23 +196,23 @@ describe('WaitingViewComponent', () => {
             component.navigateToGame();
             tick();
 
-            expect(mockSocketClientService.alertGameStarted).toHaveBeenCalledWith('1234');
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234' });
             expect(mockLobbyService.setIsGameStarting).toHaveBeenCalledWith(true);
             expect(sessionStorage.getItem('lobby')).toBe(JSON.stringify(component.lobby));
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.Game]);
             expect(component.isGameStartedEmitted).toBeTrue();
         }));
 
-        it('should not emit game started multiple times', () => {
+        it('should not emit createGame event multiple times', () => {
             component.isGameStartedEmitted = true;
             component.navigateToGame();
-            expect(mockSocketClientService.alertGameStarted).not.toHaveBeenCalled();
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
         });
 
         it('should do nothing if no player', () => {
             component.player = null;
             component.navigateToGame();
-            expect(mockSocketClientService.alertGameStarted).not.toHaveBeenCalled();
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
         });
     });
 

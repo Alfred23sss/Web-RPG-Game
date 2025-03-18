@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
@@ -25,22 +26,7 @@ describe('LobbyService', () => {
         mockLobby = { accessCode: '1234', players: [mockPlayer], isLocked: false } as Lobby;
 
         const routerMock = jasmine.createSpyObj('Router', ['navigate']);
-        const socketMock = jasmine.createSpyObj('SocketClientService', [
-            'getLobby',
-            'getLobbyPlayers',
-            'removePlayerFromLobby',
-            'deleteLobby',
-            'onJoinLobby',
-            'onLeaveLobby',
-            'onLobbyUpdate',
-            'onKicked',
-            'onLobbyLocked',
-            'onLobbyUnlocked',
-            'onLobbyDeleted',
-            'onAlertGameStarted',
-            'onAdminLeft',
-            'socket',
-        ]);
+        const socketMock = jasmine.createSpyObj('SocketClientService', ['getLobby', 'getLobbyPlayers', 'emit', 'on', 'off']);
         const accessCodeMock = jasmine.createSpyObj('AccessCodeService', ['getAccessCode']);
         const snackbarMock = jasmine.createSpyObj('SnackbarService', ['showMessage']);
 
@@ -129,8 +115,11 @@ describe('LobbyService', () => {
 
             service.removePlayerAndCleanup(mockPlayer, mockLobby);
 
-            expect(socketSpy.removePlayerFromLobby).toHaveBeenCalledWith('1234', 'test');
-            expect(socketSpy.deleteLobby).toHaveBeenCalledWith('1234');
+            expect(socketSpy.emit).toHaveBeenCalledWith('leaveLobby', {
+                accessCode: '1234',
+                playerName: 'test',
+            });
+            expect(socketSpy.emit).toHaveBeenCalledWith('deleteLobby', '1234');
         });
 
         it('should do nothing if game is starting', () => {
@@ -142,13 +131,13 @@ describe('LobbyService', () => {
 
             service.removePlayerAndCleanup(mockPlayer, mockLobby);
 
-            expect(socketSpy.removePlayerFromLobby).not.toHaveBeenCalled();
+            expect(socketSpy.emit).not.toHaveBeenCalled();
         });
 
         it('should do nothing if player is null', () => {
             service.removePlayerAndCleanup(null, mockLobby);
 
-            expect(socketSpy.removePlayerFromLobby).not.toHaveBeenCalled();
+            expect(socketSpy.emit).not.toHaveBeenCalled();
         });
     });
 
@@ -195,10 +184,8 @@ describe('LobbyService', () => {
         it('should call updatePlayers on joinLobby event', () => {
             service.initializeLobby();
 
-            const joinLobbyCallback = socketSpy.onJoinLobby as jasmine.Spy;
-            const handler = joinLobbyCallback.calls.mostRecent().args[0];
-
-            handler();
+            const joinLobbyCallback = socketSpy.on.calls.argsFor(0)[1];
+            joinLobbyCallback({});
 
             expect(socketSpy.getLobbyPlayers).toHaveBeenCalledWith('1234');
         });
@@ -206,27 +193,23 @@ describe('LobbyService', () => {
         it('should call updatePlayers on leaveLobby event', () => {
             service.initializeLobby();
 
-            const leaveLobbyCallback = socketSpy.onLeaveLobby as jasmine.Spy;
-            const handler = leaveLobbyCallback.calls.mostRecent().args[0];
-
-            handler();
+            const leaveLobbyCallback = socketSpy.on.calls.argsFor(1)[1];
+            leaveLobbyCallback({});
 
             expect(socketSpy.getLobbyPlayers).toHaveBeenCalledWith('1234');
         });
 
-        it('should update lobby and player on lobbyUpdate event', () => {
+        it('should update players on lobbyUpdate event', () => {
             sessionStorage.setItem('player', JSON.stringify(mockPlayer));
             service.initializeLobby();
 
-            const lobbyUpdateCallback = socketSpy.onLobbyUpdate as jasmine.Spy;
-            const handler = lobbyUpdateCallback.calls.mostRecent().args[0];
-
+            const updatePlayersCallback = socketSpy.on.calls.argsFor(2)[1];
             const updatedPlayers = [
                 { ...mockPlayer, name: 'Updated Player' } as Player,
                 { name: 'Player 2', avatar: 'avatar2', isAdmin: false } as Player,
             ];
 
-            handler(updatedPlayers);
+            updatePlayersCallback(updatedPlayers);
 
             service.lobby$.subscribe((lobby) => {
                 expect(lobby?.players).toEqual(updatedPlayers);
@@ -244,10 +227,8 @@ describe('LobbyService', () => {
 
             service.initializeLobby();
 
-            const kickedCallback = socketSpy.onKicked as jasmine.Spy;
-            const handler = kickedCallback.calls.mostRecent().args[0];
-
-            handler({ accessCode: '1234', playerName: 'test' });
+            const kickedCallback = socketSpy.on.calls.argsFor(3)[1];
+            kickedCallback({ accessCode: '1234', playerName: 'test' });
 
             expect(snackbarSpy.showMessage).toHaveBeenCalledWith('Vous avez été expulsé du lobby.');
             expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
@@ -255,10 +236,10 @@ describe('LobbyService', () => {
 
         it('should update lobby on lock event', (done) => {
             service.initializeLobby();
-            const lockCallback = socketSpy.onLobbyLocked as jasmine.Spy;
-            const handler = lockCallback.calls.mostRecent().args[0];
 
-            handler({ accessCode: '1234', isLocked: true });
+            // Simuler l'écouteur 'lobbyLocked'
+            const lockCallback = socketSpy.on.calls.argsFor(4)[1]; // Index 4 pour 'lobbyLocked'
+            lockCallback({ accessCode: '1234', isLocked: true });
 
             service.lobby$.subscribe((lobby) => {
                 expect(lobby).toEqual({ ...mockLobby, isLocked: true });
@@ -266,12 +247,12 @@ describe('LobbyService', () => {
             });
         });
 
-        it('should update lobby on Unlock event', (done) => {
+        it('should update lobby on unlock event', (done) => {
             service.initializeLobby();
-            const UnlockCallback = socketSpy.onLobbyUnlocked as jasmine.Spy;
-            const handler = UnlockCallback.calls.mostRecent().args[0];
 
-            handler({ accessCode: '1234', isLocked: false });
+            // Simuler l'écouteur 'lobbyUnlocked'
+            const unlockCallback = socketSpy.on.calls.argsFor(5)[1]; // Index 5 pour 'lobbyUnlocked'
+            unlockCallback({ accessCode: '1234', isLocked: false });
 
             service.lobby$.subscribe((lobby) => {
                 expect(lobby).toEqual({ ...mockLobby, isLocked: false });
@@ -281,9 +262,10 @@ describe('LobbyService', () => {
 
         it('should navigate to home on lobby deleted event', () => {
             service.initializeLobby();
-            const deleteCallback = socketSpy.onLobbyDeleted as jasmine.Spy;
-            const handler = deleteCallback.calls.mostRecent().args[0];
-            handler();
+
+            const deleteCallback = socketSpy.on.calls.argsFor(6)[1];
+            deleteCallback({});
+
             expect(routerSpy.navigate).toHaveBeenCalledWith(['/home']);
         });
 
@@ -293,15 +275,13 @@ describe('LobbyService', () => {
             socketSpy.getLobby.and.returnValue(of(mockLobby));
             service.initializeLobby();
 
-            const gameStartedCallback = socketSpy.onAlertGameStarted as jasmine.Spy;
-            const handler = gameStartedCallback.calls.mostRecent().args[0];
-
+            const gameStartedCallback = socketSpy.on.calls.argsFor(7)[1];
             const gameData = {
                 updatedGame: { id: 'game1', name: 'Test Game' },
                 orderedPlayers: [{ name: 'Player1', avatar: 'avatar1' }],
             };
 
-            handler(gameData);
+            gameStartedCallback(gameData);
 
             expect(sessionStorage.getItem('game')).toEqual(JSON.stringify(gameData.updatedGame));
             expect(sessionStorage.getItem('orderedPlayers')).toEqual(JSON.stringify(gameData.orderedPlayers));
@@ -311,10 +291,11 @@ describe('LobbyService', () => {
 
         it('should show message when admin leaves', () => {
             service.initializeLobby();
-            const adminLeftCallback = socketSpy.onAdminLeft as jasmine.Spy;
-            const handler = adminLeftCallback.calls.mostRecent().args[0];
+
+            const adminLeftCallback = socketSpy.on.calls.argsFor(8)[1];
             const message = 'The admin has left the lobby.';
-            handler({ message });
+            adminLeftCallback({ message });
+
             expect(snackbarSpy.showMessage).toHaveBeenCalledWith(message);
         });
     });
