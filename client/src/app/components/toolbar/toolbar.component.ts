@@ -23,6 +23,6 @@ export class ToolbarComponent implements OnInit {
     }
 
     selectTool(tool: TileType, image: ImageType): void {
-        this.toolService.setSelectedTool(tool, image);
+        this.toolService.setSelectedTool({ tool, image });
     }
 }

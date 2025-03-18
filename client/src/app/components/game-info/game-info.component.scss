@@ -1,0 +1,12 @@
+.game-info {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    color: #ffd700;
+    font-family: 'Comic Sans MS';
+    font-size: 14px;
+}
+
+.game-info > * {
+    margin: 0.3rem;
+}
