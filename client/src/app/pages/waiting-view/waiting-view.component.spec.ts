@@ -227,4 +227,10 @@ describe('WaitingViewComponent', () => {
             expect(component.isGameStarting).toBeTrue();
         });
     });
+
+    it('navigateToHome should navigate to home page', () => {
+        component.navigateToHome();
+
+        expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
+    });
 });
