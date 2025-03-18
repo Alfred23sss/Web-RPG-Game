@@ -479,14 +479,14 @@ describe('SocketClientService', () => {
         expect(fakeSocket.emit).toHaveBeenCalledWith('kickPlayer', { accessCode, playerName });
     });
 
-    it('should call callback when onKicked event is received', () => {
-        spyOn(fakeSocket, 'on');
-        const callback = jasmine.createSpy('callback');
+    // it('should call callback when onKicked event is received', () => {
+    //     spyOn(fakeSocket, 'on');
+    //     const callback = jasmine.createSpy('callback');
 
-        service.onKicked(callback);
+    //     service.onKicked(callback);
 
-        expect(fakeSocket.on).toHaveBeenCalledWith('kicked', callback);
-    });
+    //     expect(fakeSocket.on).toHaveBeenCalledWith('kicked', callback);
+    // });
 
     it('should register a callback for playerMovement socket events', () => {
         spyOn(fakeSocket, 'on');

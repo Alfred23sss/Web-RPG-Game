@@ -37,7 +37,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
 
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-        client.emit('updateUnavailableOptions', unavailableAvatars);
+        client.emit('updateUnavailableOptions', unavailableAvatars); // ????
     }
 
     @SubscribeMessage(LobbyEvents.CreateLobby)
@@ -114,8 +114,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
                     clientSocket.emit('leftLobby');
                 }
             });
-
-            this.lobbyService.leaveLobby(accessCode, '');
+            this.lobbyService.leaveLobby(accessCode, ''); // ???
             this.logger.log(`Lobby ${accessCode} deleted.`);
         } else {
             client.emit('error', `Lobby ${accessCode} does not exist.`);
@@ -125,18 +124,30 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     @SubscribeMessage(LobbyEvents.LeaveLobby)
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
         const { accessCode, playerName } = data;
-        client.leave(accessCode);
+
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) return;
+        const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
+        if (isAdminLeaving) {
+            this.server.to(accessCode).emit('adminLeft', { message: "L'admin a quitté la partie, le lobby est fermé." });
+        }
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
+        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
 
         if (isLobbyDeleted) {
             this.server.to(accessCode).emit('lobbyDeleted');
+            this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
         } else {
+            const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+            this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
+            this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
+        }
 
-            const lobby = this.lobbyService.getLobby(accessCode);
-            if (lobby && lobby.players.length < lobby.maxPlayers) {
-                this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
-            }
+        client.leave(accessCode);
+
+        if (lobby && lobby.players.length < lobby.maxPlayers) {
+            this.server.to(accessCode).emit('lobbyUnlocked', { accessCode, isLocked: false });
         }
     }
 

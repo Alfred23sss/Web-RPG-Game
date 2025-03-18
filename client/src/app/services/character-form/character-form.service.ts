@@ -8,12 +8,15 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
 export class CharacterService {
-    attributes = { ...INITIAL_VALUES.attributes };
+    unavailableAvatarsSubject = new BehaviorSubject<string[]>([]); // not private to fix lint error
+    unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
+    attributes = { ...INITIAL_VALUES.attributes }; // private? +getteur
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
@@ -25,36 +28,97 @@ export class CharacterService {
         private readonly accessCodeService: AccessCodeService,
     ) {}
 
-    assignBonus(attribute: AttributeType): void {
+    initializePlayer(player: Player): void {
+        // fichier de cinstantes player=defaultplayer
+        player.name = '';
+        player.avatar = '';
+        player.speed = 4;
+        player.attack = { value: 4, bonusDice: DiceType.Uninitialized };
+        player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
+        player.hp = { current: 4, max: 4 };
+        player.movementPoints = 4;
+        player.actionPoints = 3;
+        player.inventory = [null, null];
+        player.isAdmin = false;
+        player.hasAbandoned = false;
+        player.isActive = false;
+        player.combatWon = 0;
+    }
+
+    initializeLobby(accessCode: string): void {
+        this.socketClientService.emit('joinRoom', accessCode);
+
+        this.socketClientService.onUpdateUnavailableOptions((data: { avatars?: string[] }) => {
+            if (!data.avatars) return;
+            this.unavailableAvatarsSubject.next([...data.avatars]);
+        });
+
+        this.socketClientService.emit('requestUnavailableOptions', accessCode);
+    }
+
+    assignBonus(player: Player, attribute: AttributeType): void {
         if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
-            if (!this.bonusAssigned[attribute]) {
-                this.attributes[attribute] += BONUS_VALUE;
-                this.bonusAssigned[attribute] = true;
-                const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
-                this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
-                this.bonusAssigned[otherAttribute] = false;
+            this.resetOtherBonus(attribute);
+            this.attributes[attribute] = INITIAL_VALUES.attributes[attribute] + BONUS_VALUE;
+            this.bonusAssigned[attribute] = true;
+        }
+        this.updatePlayerStats(player, attribute);
+    }
+
+    assignDice(player: Player, attribute: AttributeType): void {
+        if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
+            this.diceAssigned[attribute] = true;
+            this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
+            if (attribute === AttributeType.Attack) {
+                player.attack.bonusDice = DiceType.D6;
+                player.defense.bonusDice = DiceType.D4;
+            }
+            if (attribute === AttributeType.Defense) {
+                player.attack.bonusDice = DiceType.D4;
+                player.defense.bonusDice = DiceType.D6;
             }
         }
     }
 
-    assignDice(attribute: AttributeType): { attack: string | null; defense: string | null } {
-        if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
-            this.diceAssigned[attribute] = true;
-            this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
-            return attribute === AttributeType.Attack ? { attack: DiceType.D6, defense: DiceType.D4 } : { attack: DiceType.D4, defense: DiceType.D6 };
+    selectAvatar(player: Player, avatar: string, currentAccessCode: string): void {
+        if (player.avatar) {
+            this.deselectAvatar(player, currentAccessCode);
         }
 
-        return { attack: null, defense: null };
+        if (!this.unavailableAvatarsSubject.value.includes(avatar)) {
+            player.avatar = avatar;
+            this.socketClientService.selectAvatar(currentAccessCode, avatar);
+
+            const updatedAvatars = [...this.unavailableAvatarsSubject.value, avatar];
+            this.unavailableAvatarsSubject.next(updatedAvatars);
+        }
     }
 
-    submitCharacter(player: Player, game: Game, closePopup: () => void): void {
-        this.validateGameAvailability(game, closePopup);
+    deselectAvatar(player: Player, currentAccessCode: string): void {
+        if (player.avatar) {
+            this.socketClientService.deselectAvatar(currentAccessCode);
 
-        if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
-        } else {
+            const updatedAvatars = this.unavailableAvatarsSubject.value.filter((av) => av !== player.avatar);
+            this.unavailableAvatarsSubject.next(updatedAvatars);
+            player.avatar = '';
+        }
+    }
+
+    async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game, closePopup: () => void): Promise<void> {
+        if (!this.isCharacterValid(player)) {
             this.showMissingDetailsError();
+            return;
+        }
+
+        this.accessCodeService.setAccessCode(currentAccessCode);
+
+        if (isLobbyCreated) {
+            const joinResult = await this.joinExistingLobby(currentAccessCode, player);
+            this.handleLobbyJoining(joinResult, player, game, closePopup);
+        } else {
+            player.isAdmin = true;
+            await this.createAndJoinLobby(game, player);
+            this.finalizeCharacterSubmission(player, closePopup);
         }
     }
 
@@ -79,13 +143,12 @@ export class CharacterService {
                         resolve(JoinLobbyResult.JoinedLobby);
                     }
                 },
+                error: () => {
+                    this.snackbarService.showMessage(ErrorMessages.UnavailableGame);
+                    resolve(JoinLobbyResult.RedirectToHome);
+                },
             });
         });
-    }
-
-    async createAndJoinLobby(game: Game, player: Player): Promise<void> {
-        const accessCode = await this.socketClientService.createLobby(game, player);
-        this.accessCodeService.setAccessCode(accessCode);
     }
 
     resetAttributes(): void {
@@ -101,16 +164,77 @@ export class CharacterService {
         }
     }
 
-    returnHome(): void {
-        this.router.navigate([Routes.HomePage]);
+    async createAndJoinLobby(game: Game, player: Player): Promise<void> {
+        const accessCode = await this.socketClientService.createLobby(game, player);
+        this.accessCodeService.setAccessCode(accessCode);
     }
 
     isCharacterValid(player: Player): boolean {
         return !!player.name.trim() && !!player.avatar && this.hasBonusAssigned(player) && this.hasDiceAssigned(player);
     }
 
+    returnHome(): void {
+        this.router.navigate([Routes.HomePage]);
+    }
+
     showMissingDetailsError(): void {
         this.snackbarService.showMessage(ErrorMessages.MissingCharacterDetails);
+    }
+
+    private resetOtherBonus(attribute: AttributeType): void {
+        const otherAttribute = attribute === AttributeType.Vitality ? AttributeType.Speed : AttributeType.Vitality;
+        if (this.bonusAssigned[otherAttribute]) {
+            this.attributes[otherAttribute] = INITIAL_VALUES.attributes[otherAttribute];
+            this.bonusAssigned[otherAttribute] = false;
+        }
+    }
+    private updatePlayerStats(player: Player, attribute: AttributeType): void {
+        if (attribute === AttributeType.Vitality) {
+            player.hp.current = player.hp.max = this.attributes[AttributeType.Vitality];
+            player.speed = INITIAL_VALUES.attributes[AttributeType.Speed];
+        } else if (attribute === AttributeType.Speed) {
+            player.speed = this.attributes[AttributeType.Speed];
+            player.movementPoints = player.speed;
+            player.hp.current = player.hp.max = INITIAL_VALUES.attributes[AttributeType.Vitality];
+        }
+    }
+
+    private finalizeCharacterSubmission(player: Player, closePopup: () => void): void {
+        if (this.isCharacterValid(player)) {
+            sessionStorage.setItem('player', JSON.stringify(player));
+            this.proceedToWaitingView(closePopup);
+        } else {
+            this.showMissingDetailsError();
+        }
+    }
+
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, closePopup: () => void): void {
+        switch (joinStatus) {
+            case JoinLobbyResult.JoinedLobby:
+                this.finalizeCharacterSubmission(player, closePopup);
+                break;
+            case JoinLobbyResult.StayInLobby:
+                break;
+            case JoinLobbyResult.RedirectToHome:
+                this.returnHome();
+                break;
+        }
+        this.validateGameAvailability(game, closePopup);
+
+        if (this.isCharacterValid(player)) {
+            sessionStorage.setItem('player', JSON.stringify(player));
+            this.proceedToWaitingView(closePopup);
+        } else {
+            this.showMissingDetailsError();
+        }
+    }
+
+    private hasBonusAssigned(player: Player): boolean {
+        return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
+    }
+
+    private hasDiceAssigned(player: Player): boolean {
+        return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
     private validateGameAvailability(game: Game, closePopup: () => void): void {
@@ -123,14 +247,6 @@ export class CharacterService {
                 }
             },
         });
-    }
-
-    private hasBonusAssigned(player: Player): boolean {
-        return player.speed !== INITIAL_VALUES.attributes[AttributeType.Speed] || player.hp.max !== INITIAL_VALUES.attributes[AttributeType.Vitality];
-    }
-
-    private hasDiceAssigned(player: Player): boolean {
-        return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
     private proceedToWaitingView(closePopup: () => void): void {
