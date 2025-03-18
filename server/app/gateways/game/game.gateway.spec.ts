@@ -35,6 +35,14 @@ describe('GameGateway', () => {
         vitality: 0,
     };
 
+    // const mockTile: Tile = {
+    //     id: 'test-tile',
+    //     player: mockPlayer,
+    //     isOccupied: true,
+    // } as Tile;
+
+    // const mockGrid: Tile[][] = [[mockTile]];
+
     beforeEach(async () => {
         serverMock = {
             to: jest.fn().mockReturnThis(),
@@ -59,6 +67,7 @@ describe('GameGateway', () => {
 
         loggerMock = {
             log: jest.fn(),
+            error: jest.fn(),
         };
 
         combatServiceMock = {

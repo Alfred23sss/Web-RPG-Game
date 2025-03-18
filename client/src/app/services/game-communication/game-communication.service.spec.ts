@@ -151,7 +151,7 @@ describe('GameCommunicationService', () => {
             expect(game).toEqual(deletedGame);
         });
 
-        const req = httpMock.expectOne(`${apiUrl}/delete/1`);
+        const req = httpMock.expectOne(`${apiUrl}/1`);
         expect(req.request.method).toBe('DELETE');
         req.flush(deletedGame);
     });

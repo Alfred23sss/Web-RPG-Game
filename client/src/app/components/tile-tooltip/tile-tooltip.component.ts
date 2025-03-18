@@ -12,14 +12,16 @@ import { PlayerMovementService } from '@app/services/player-movement/player-move
 export class TileTooltipComponent {
     movementCost: number;
     tileType = TileType;
-    // Infinity impossible to change for camelCase because comes from a library
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    Infinity: number = Infinity;
+
     constructor(
         public dialogRef: MatDialogRef<TileTooltipComponent>,
         private playerMovementService: PlayerMovementService,
         @Inject(MAT_DIALOG_DATA) public data: { tile: Tile },
     ) {
         this.movementCost = this.playerMovementService.getMoveCost(data.tile);
+    }
+
+    isInfinity(cost: number): boolean {
+        return cost === Infinity;
     }
 }
