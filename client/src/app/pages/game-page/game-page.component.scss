@@ -299,3 +299,43 @@ app-grid {
 .message-toggle button.active {
     background-color: #ffa500;
 }
+
+.combat-mode .game-map {
+    border: 3px solid red;
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    background-color: #330000; /* Darker background */
+    transition: all 0.3s ease-in-out;
+}
+
+.combat-mode app-grid {
+    border: 2px solid #ff0000;
+    box-shadow: 0 0 10px rgba(255, 50, 50, 0.9);
+}
+
+.mode-indicator {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+    z-index: 10;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}

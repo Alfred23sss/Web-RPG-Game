@@ -18,13 +18,7 @@
                 Combats gagnés: {{ player.combatWon }}
             </p>
             }
-            <p>#Joueurs actifs: {{ lobby.players.length }}</p>
-        </div>
-
-        <div class="inventory">
-            <h3>Inventaire</h3>
-            <!-- Use @for to loop through inventory slots -->
-            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
+            <p>Joueur actif: {{ lobby.players.length }}</p>
         </div>
 
         <div class="player-info">
@@ -70,10 +64,20 @@
                 </div>
             </div>
         </div>
+        <div class="inventory">
+            <h3>Inventaire</h3>
+            <!-- Use @for to loop through inventory slots -->
+            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
+        </div>
     </div>
 
     <!-- Second column: Game grid and action buttons -->
-    <div class="game-map-container">
+    <div class="game-map-container" [ngClass]="{ 'combat-mode': isInCombatMode }">
+        @if (isActionMode || isInCombatMode) {
+        <div class="mode-indicator">
+            {{ isInCombatMode ? 'Mode combat' : 'Faites une action' }}
+        </div>
+        }
         <div class="game-map">
             <app-grid
                 [grid]="game?.grid"
@@ -134,7 +138,7 @@
             </button>
         </div>
         <div class="combat-result">
-            @if(attackResult){
+            @if (attackResult) {
             <p>Résultat du combat :</p>
             @if(attackResult.success){
             <p>
@@ -150,6 +154,10 @@
                 Dé Défense: {{ attackResult.defenseScore - 4 }} <br />
                 Dégats infligés: 0
             </p>
+            } } @if (evadeResult) { @if (evadeResult.isEscapeSuccessful) {
+            <p>✅ Évasion réussie!</p>
+            } @else {
+            <p>❌ Évasion ratée!</p>
             } }
         </div>
         }

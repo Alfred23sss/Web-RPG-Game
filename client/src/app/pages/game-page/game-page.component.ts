@@ -40,6 +40,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
     escapeAttempts: number = 2;
+    evadeResult: { attemptsLeft: number; isEscapeSuccessful: boolean } | null = null;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
@@ -131,7 +132,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     executeNextAction(): void {
         this.isActionMode = !this.isActionMode;
-        this.snackbarService.showMessage('Mode action activÃ©');
+        const message = this.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
+        this.snackbarService.showMessage(message);
     }
     abandonGame(): void {
         this.clientPlayer.hasAbandoned = true;
