@@ -153,7 +153,6 @@ describe('GameSessionTurnService', () => {
             turn.countdownInterval = setInterval(() => {}, 1000);
             turn.turnTimers = setTimeout(() => {}, 1000);
             const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
-            const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
             service.startPlayerTurn(accessCode, player, turn);
             expect(clearIntervalSpy).toHaveBeenCalled();
         });
