@@ -98,7 +98,10 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
         // mettre une bonne partie dans le service qui va me permettre d'elever deselect component ca je l utilise pas dans le HTML
         this.createdPlayer.name = '';
         this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
-        this.socketClientService.removePlayerFromLobby(this.currentAccessCode, this.createdPlayer.name);
+        this.socketClientService.emit('leaveLobby', {
+            accessCode: this.currentAccessCode,
+            playerName: this.createdPlayer.name,
+        });
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
