@@ -135,8 +135,9 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.escape')
-    handleNoMoreEscapeAttempts(payload: { playerSocketId: string; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
-        this.server.to(payload.playerSocketId).emit('escapeAttempt', {
+    handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
+        const playerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        this.server.to(playerSocketId).emit('escapeAttempt', {
             attemptsLeft: payload.attemptsLeft,
             isEscapeSuccessful: payload.isEscapeSuccessful,
         });
