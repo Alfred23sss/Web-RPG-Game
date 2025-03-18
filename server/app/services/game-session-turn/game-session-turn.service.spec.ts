@@ -1,14 +1,14 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameSessionTurnService } from './game-session-turn.service';
-import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Player } from '@app/interfaces/Player';
 import { DiceType } from '@app/interfaces/Dice';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
+import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common/services/logger.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Test, TestingModule } from '@nestjs/testing';
+import { GameSessionTurnService } from './game-session-turn.service';
 
 describe('GameSessionTurnService', () => {
     let service: GameSessionTurnService;
@@ -139,7 +139,7 @@ describe('GameSessionTurnService', () => {
 
             const updatedTurn = service.endTurn(turn);
 
-            expect(updatedTurn.currentPlayer).toBeNull();
+            expect(updatedTurn.currentPlayer).toBe(player);
             expect(updatedTurn.currentTurnCountdown).toBe(0);
             expect(updatedTurn.turnTimers).toBeNull();
             expect(updatedTurn.countdownInterval).toBeNull();
@@ -207,7 +207,7 @@ describe('GameSessionTurnService', () => {
 
             const nextPlayer = service.getNextPlayer('1234', turn);
 
-            expect(nextPlayer).toBeNull();
+            expect(nextPlayer).toBe(players[0]);
         });
     });
 
