@@ -1075,4 +1075,27 @@ describe('GameCombatService', () => {
         expect(combatState.combatCountdownInterval).toBeNull();
         expect(combatState.combatTurnTimeRemaining).toBe(0);
     });
+
+    describe('startCombatTurn', () => {
+        const SECOND = 1000;
+        it('should initialize a new combat turn correctly', () => {
+            jest.useFakeTimers();
+            const accessCode = 'test';
+            const player = mockPlayer('attacker', 6);
+            const defender = mockPlayer('defender', 4);
+            const combatState = mockCombatState();
+            const turnDuration = 5000;
+            service['combatStates'] = { [accessCode]: combatState };
+            combatHelper.getDefender.mockReturnValue(defender);
+            jest.spyOn(service as any, 'calculateTurnDuration').mockReturnValue(turnDuration);
+            jest.spyOn(service as any, 'emitEvent').mockImplementation(() => {});
+            jest.spyOn(service as any, 'initializeCombatTimer').mockImplementation(() => {});
+            jest.spyOn(service as any, 'handleTimerTimeout').mockImplementation(() => {});
+            combatState.combatCountdownInterval = setInterval(() => {}, 1000);
+            (service as any).startCombatTurn(accessCode, player);
+            expect(combatState.playerPerformedAction).toBe(false);
+            expect(combatState.currentFighter).toBe(player);
+            expect(combatState.combatTurnTimeRemaining).toBe(turnDuration / SECOND);
+        });
+    });
 });
