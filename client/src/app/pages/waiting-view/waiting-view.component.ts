@@ -20,6 +20,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     isLoading: boolean = true;
     isGameStarting: boolean = false;
     isGameStartedEmitted: boolean = false;
+    activeTab: 'chat' | 'log' = 'chat';
 
     private subscriptions: Subscription = new Subscription();
 
