@@ -596,8 +596,8 @@ describe('LobbyGateway', () => {
         expect(logger.log).toHaveBeenCalledWith('LobbyGateway initialized.');
     });
     it('should handle leaving a lobby and emit appropriate events', () => {
-        const accessCode = '1234';
-        const playerName = 'Player1';
+        const accessCode = TEST_ACCESS_CODE;
+        const playerName = TEST_PLAYER_NAME;
         const client = {
             id: 'client-123',
             leave: jest.fn(),
@@ -647,8 +647,8 @@ describe('LobbyGateway', () => {
     });
 
     it('should handle leaving a lobby without deleting it', () => {
-        const accessCode = '1234';
-        const playerName = 'Player1';
+        const accessCode = TEST_ACCESS_CODE;
+        const playerName = TEST_PLAYER_NAME;
         const client = {
             id: 'client-123',
             leave: jest.fn(),
@@ -701,8 +701,8 @@ describe('LobbyGateway', () => {
 
     describe('handleKickPlayer', () => {
         it('should call handleLeaveLobby if the kicked player has a valid socket', () => {
-            const accessCode = '1234';
-            const playerName = 'Player1';
+            const accessCode = TEST_ACCESS_CODE;
+            const playerName = TEST_PLAYER_NAME;
             const kickedPlayerSocketId = 'socket-123';
             const kickedSocket = {
                 id: kickedPlayerSocketId,
@@ -718,8 +718,8 @@ describe('LobbyGateway', () => {
             expect(lobbyService.removePlayerSocket).toHaveBeenCalledWith(playerName);
         });
         it('should not call handleLeaveLobby if the kicked player has no valid socket', () => {
-            const accessCode = '1234';
-            const playerName = 'Player1';
+            const accessCode = TEST_ACCESS_CODE;
+            const playerName = TEST_PLAYER_NAME;
             jest.spyOn(lobbyService, 'getPlayerSocket').mockReturnValue('socket-123');
             jest.spyOn(mockServer.sockets.sockets, 'get').mockReturnValue(null);
             const handleLeaveLobbySpy = jest.spyOn(gateway, 'handleLeaveLobby');
