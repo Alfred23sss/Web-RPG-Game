@@ -88,6 +88,8 @@ export class GameCombatService {
 
     checkPlayerWon(accessCode: string, player: Player): boolean {
         if (player.combatWon === WIN_CONDITION) {
+            this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
+            this.emitEvent('update.player.list', { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.gameSessionService.endGameSession(accessCode, player.name);
             return true;
         }
