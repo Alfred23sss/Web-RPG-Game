@@ -115,6 +115,7 @@ describe('LobbyGateway', () => {
                         setPlayerSocket: jest.fn(),
                         removePlayerSocket: jest.fn(),
                         getPlayerSocket: jest.fn(),
+                        isAdminLeaving: jest.fn(),
                     },
                 },
                 {
@@ -235,23 +236,6 @@ describe('LobbyGateway', () => {
 
             expect(lobbyService.getPlayerSocket).toHaveBeenCalledWith(undefined);
         });
-
-        // it('should call handleLeaveLobby when player has active socket', () => {
-        //     const mockKickedSocket = {
-        //         id: mockSocket.id,
-        //         leave: jest.fn(),
-        //         emit: jest.fn(),
-        //     } as unknown as Socket;
-
-        //     (lobbyService.getPlayerSocket as jest.Mock).mockReturnValue(mockSocket.id);
-        //     jest.spyOn(mockServer.sockets.sockets, 'get').mockReturnValue(mockKickedSocket);
-        //     const handleLeaveSpy = jest.spyOn(gateway, 'handleLeaveLobby');
-
-        //     gateway.handleKickPlayer(mockData);
-
-        //     expect(mockKickedSocket.leave).toHaveBeenCalledWith(mockData.accessCode);
-        //     expect(handleLeaveSpy).toHaveBeenCalledWith(mockData, mockKickedSocket);
-        // });
     });
 
     describe('handleJoinLobby', () => {
@@ -625,5 +609,115 @@ describe('LobbyGateway', () => {
     it('should log initialization', () => {
         gateway.afterInit();
         expect(logger.log).toHaveBeenCalledWith('LobbyGateway initialized.');
+    });
+    it('should handle leaving a lobby and emit appropriate events', () => {
+        const accessCode = '1234';
+        const playerName = 'Player1';
+        const client = {
+            id: 'client-123',
+            leave: jest.fn(),
+        } as unknown as Socket;
+
+        const lobby: Lobby = {
+            accessCode,
+            game: {} as Game,
+            players: [
+                {
+                    name: playerName,
+                    avatar: 'avatar1',
+                    speed: 5,
+                    vitality: 10,
+                    attack: { value: 4, bonusDice: DiceType.D6 },
+                    defense: { value: 4, bonusDice: DiceType.D4 },
+                    hp: { current: 10, max: 10 },
+                    movementPoints: 3,
+                    actionPoints: 3,
+                    inventory: [null, null],
+                    isAdmin: true,
+                    hasAbandoned: false,
+                    isActive: false,
+                    combatWon: 0,
+                },
+            ],
+            isLocked: false,
+            maxPlayers: 4,
+            waitingPlayers: [],
+        };
+
+        // Mock the lobbyService methods
+        jest.spyOn(lobbyService, 'getLobby').mockReturnValue(lobby);
+        jest.spyOn(lobbyService, 'isAdminLeaving').mockReturnValue(true);
+        jest.spyOn(lobbyService, 'leaveLobby').mockReturnValue(true);
+        jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(lobby.players);
+
+        // Call the method
+        gateway.handleLeaveLobby({ accessCode, playerName }, client);
+
+        // Verify the lobbyService methods were called
+        expect(lobbyService.getLobby).toHaveBeenCalledWith(accessCode);
+        expect(lobbyService.isAdminLeaving).toHaveBeenCalledWith(accessCode, playerName);
+        expect(lobbyService.leaveLobby).toHaveBeenCalledWith(accessCode, playerName);
+
+        // Verify the server emitted the correct events
+        expect(mockServer.to).toHaveBeenCalledWith(accessCode);
+        expect(mockServer.emit).toHaveBeenCalledWith('adminLeft', { message: "L'admin a quitté la partie, le lobby est fermé." });
+        expect(mockServer.emit).toHaveBeenCalledWith('lobbyDeleted');
+        expect(mockServer.emit).toHaveBeenCalledWith('updateUnavailableOptions', { avatars: [] });
+
+        // Verify the client left the lobby
+        expect(client.leave).toHaveBeenCalledWith(accessCode);
+    });
+
+    it('should handle leaving a lobby without deleting it', () => {
+        const accessCode = '1234';
+        const playerName = 'Player1';
+        const client = {
+            id: 'client-123',
+            leave: jest.fn(),
+        } as unknown as Socket;
+
+        const lobby: Lobby = {
+            accessCode,
+            game: {} as Game,
+            players: [
+                {
+                    name: playerName,
+                    avatar: 'avatar1',
+                    speed: 5,
+                    vitality: 10,
+                    attack: { value: 4, bonusDice: DiceType.D6 },
+                    defense: { value: 4, bonusDice: DiceType.D4 },
+                    hp: { current: 10, max: 10 },
+                    movementPoints: 3,
+                    actionPoints: 3,
+                    inventory: [null, null],
+                    isAdmin: false,
+                    hasAbandoned: false,
+                    isActive: false,
+                    combatWon: 0,
+                },
+            ],
+            isLocked: false,
+            maxPlayers: 4,
+            waitingPlayers: [],
+        };
+
+        jest.spyOn(lobbyService, 'getLobby').mockReturnValue(lobby);
+        jest.spyOn(lobbyService, 'isAdminLeaving').mockReturnValue(false);
+        jest.spyOn(lobbyService, 'leaveLobby').mockReturnValue(false);
+        jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(lobby.players);
+
+        gateway.handleLeaveLobby({ accessCode, playerName }, client);
+
+        expect(lobbyService.getLobby).toHaveBeenCalledWith(accessCode);
+        expect(lobbyService.isAdminLeaving).toHaveBeenCalledWith(accessCode, playerName);
+        expect(lobbyService.leaveLobby).toHaveBeenCalledWith(accessCode, playerName);
+
+        expect(mockServer.to).toHaveBeenCalledWith(accessCode);
+        expect(mockServer.emit).toHaveBeenCalledWith('updateUnavailableOptions', { avatars: ['avatar1'] });
+        expect(mockServer.emit).toHaveBeenCalledWith('updatePlayers', lobby.players);
+        expect(mockServer.emit).toHaveBeenCalledWith('lobbyUnlocked', { accessCode, isLocked: false });
+
+        expect(client.leave).toHaveBeenCalledWith(accessCode);
     });
 });
