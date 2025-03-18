@@ -3,21 +3,21 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
+import { ImageType, TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
+import { GameSession } from '@app/interfaces/GameSession';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
+import { Turn } from '@app/interfaces/Turn';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
+import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
-import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
-import { Turn } from '@app/interfaces/Turn';
-import { ImageType, TileType } from '@app/enums/enums';
-import { GameSession } from '@app/interfaces/GameSession';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;
