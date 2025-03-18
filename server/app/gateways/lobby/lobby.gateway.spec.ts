@@ -720,4 +720,36 @@ describe('LobbyGateway', () => {
 
         expect(client.leave).toHaveBeenCalledWith(accessCode);
     });
+
+    describe('handleKickPlayer', () => {
+        it('should call handleLeaveLobby if the kicked player has a valid socket', () => {
+            const accessCode = '1234';
+            const playerName = 'Player1';
+            const kickedPlayerSocketId = 'socket-123';
+            const kickedSocket = {
+                id: kickedPlayerSocketId,
+                leave: jest.fn(),
+            } as unknown as Socket;
+            jest.spyOn(lobbyService, 'getPlayerSocket').mockReturnValue(kickedPlayerSocketId);
+            jest.spyOn(mockServer.sockets.sockets, 'get').mockReturnValue(kickedSocket);
+            const handleLeaveLobbySpy = jest.spyOn(gateway, 'handleLeaveLobby');
+            gateway.handleKickPlayer({ accessCode, playerName });
+            expect(handleLeaveLobbySpy).toHaveBeenCalledWith({ accessCode, playerName }, kickedSocket);
+            expect(mockServer.to).toHaveBeenCalledWith(kickedPlayerSocketId);
+            expect(mockServer.emit).toHaveBeenCalledWith('kicked', { accessCode, playerName });
+            expect(lobbyService.removePlayerSocket).toHaveBeenCalledWith(playerName);
+        });
+        it('should not call handleLeaveLobby if the kicked player has no valid socket', () => {
+            const accessCode = '1234';
+            const playerName = 'Player1';
+            jest.spyOn(lobbyService, 'getPlayerSocket').mockReturnValue('socket-123');
+            jest.spyOn(mockServer.sockets.sockets, 'get').mockReturnValue(null);
+            const handleLeaveLobbySpy = jest.spyOn(gateway, 'handleLeaveLobby');
+            gateway.handleKickPlayer({ accessCode, playerName });
+            expect(handleLeaveLobbySpy).not.toHaveBeenCalled();
+            expect(mockServer.to).toHaveBeenCalledWith('socket-123');
+            expect(mockServer.emit).toHaveBeenCalledWith('kicked', { accessCode, playerName });
+            expect(lobbyService.removePlayerSocket).toHaveBeenCalledWith(playerName);
+        });
+    });
 });
