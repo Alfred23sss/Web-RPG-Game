@@ -131,7 +131,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     executeNextAction(): void {
         this.isActionMode = !this.isActionMode;
-        this.snackbarService.showMessage('Mode action activÃ©');
+        this.snackbarService.showMessage('Mode action activé');
     }
     abandonGame(): void {
         this.clientPlayer.hasAbandoned = true;
