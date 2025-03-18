@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
 import { TileType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
@@ -204,6 +205,28 @@ describe('PlayerMovementService', () => {
         it('should handle movement cost fallback', () => {
             const tile = createTile('tile-0-0', 'UndefinedType' as TileType);
             expect(service['getMoveCost'](tile)).toBe(Infinity);
+        });
+    });
+
+    describe('calculateRemainingMovementPoints', () => {
+        let player: Player;
+
+        beforeEach(() => {
+            player = { name: 'player1', movementPoints: 5 } as Player;
+        });
+
+        it('should return the movement cost of the given tile if tile is defined', () => {
+            const tile: Tile = { id: 'tile-1-1', type: TileType.Water, isOpen: true, isOccupied: false, imageSrc: '' };
+            expect(service.calculateRemainingMovementPoints(tile, player)).toBe(2);
+        });
+
+        it('should return the player movement points if tile is undefined', () => {
+            expect(service.calculateRemainingMovementPoints(undefined, player)).toBe(5);
+        });
+
+        it('should return Infinity if the tile type is not found in movement costs', () => {
+            const tile: Tile = { id: 'tile-2-2', type: TileType.Wall, isOpen: false, isOccupied: false, imageSrc: '' };
+            expect(service.calculateRemainingMovementPoints(tile, player)).toBe(Infinity);
         });
     });
 });

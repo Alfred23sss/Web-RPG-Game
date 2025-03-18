@@ -1,7 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Item } from './item';
 import { DiceType } from '@app/interfaces/Dice';
+import { Document, Schema as MongooseSchema } from 'mongoose';
 
+const spawnPointSchema = new MongooseSchema({
+    x: { type: Number, required: true },
+    y: { type: Number, required: true },
+    tileId: { type: String, required: true },
+});
 export type PlayerDocument = Player & Document;
 
 @Schema()
@@ -47,6 +53,16 @@ export class Player {
 
     @Prop({ required: true })
     combatWon: number;
+
+    @Prop({
+        type: spawnPointSchema,
+        required: false,
+    })
+    spawnPoint?: {
+        x: number;
+        y: number;
+        tileId: string;
+    };
 }
 
 export const playerSchema = SchemaFactory.createForClass(Player);

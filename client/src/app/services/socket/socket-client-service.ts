@@ -167,6 +167,10 @@ export class SocketClientService {
         this.socket.on('lobbyDeleted', callback);
     }
 
+    onGameEnded(callback: (data: { winner: string }) => void) {
+        this.socket.on('gameEnded', callback);
+    }
+
     onLeaveLobby(callback: () => void) {
         this.socket.on('leftLobby', callback);
     }
@@ -194,6 +198,7 @@ export class SocketClientService {
     getSocketId() {
         return this.socket.id;
     }
+
     emit(event: string, data: unknown): void {
         this.socket.emit(event, data);
     }
@@ -247,8 +252,22 @@ export class SocketClientService {
         this.socket.on('gameDeleted', callback);
     }
 
-    onGameCombatStarted(callback: (data: { attacker: Player; defender: Player; firstFighter: Player }) => void) {
+    onGameCombatStarted(callback: () => void) {
         this.socket.on('combatStarted', callback);
+    }
+
+    onAttackResult(callback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void) {
+        this.socket.on('attackResult', callback);
+    }
+
+    onPlayerUpdate(callback: (data: { player: Player }) => void) {
+        this.socket.on('playerUpdate', callback);
+    }
+
+    onPlayerListUpdate(callback: (data: { players: Player[] }) => void) {
+        this.socket.on('playerListUpdate', (data) => {
+            callback(data);
+        });
     }
 
     onGameCombatTimerUpdate(callback: (data: { timeLeft: number }) => void) {
@@ -277,7 +296,11 @@ export class SocketClientService {
         this.emit('playerMovementUpdate', payload);
     }
 
-    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player }) => void): void {
+    startCombat(attackerName: string, defenderName: string, accessCode: string, isDebugMode: boolean) {
+        this.socket.emit('startCombat', { attackerName, defenderName, accessCode, isDebugMode });
+    }
+
+    onPlayerMovement(callback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void): void {
         this.socket.on('playerMovement', callback);
     }
 
@@ -307,7 +330,38 @@ export class SocketClientService {
         });
     }
 
+
     on<T>(event: string, callback: (data: T) => void): void {
         this.socket.on(event, callback);
+    }
+
+    onDoorClickedUpdate(callback: (data: { grid: Tile[][] }) => void): void {
+        this.socket.on('doorClicked', (data) => {
+            callback(data);
+        });
+    }
+    sendDoorUpdate(currentTile: Tile, targetTile: Tile, accessCode: string): void {
+        const payload = {
+            currentTile,
+            targetTile,
+            accessCode,
+        };
+        this.emit('doorUpdate', payload);
+    }
+    onGridUpdate(callback: (data: { grid: Tile[][] }) => void): void {
+        this.socket.on('gridUpdate', callback);
+    }
+
+    attack(playerName: string, accessCode: string) {
+        this.socket.emit('performAttack', { accessCode, attackerName: playerName });
+    }
+    sendAdminModeUpdate(accessCode: string): void {
+        this.socket.emit('adminModeUpdate', { accessCode });
+    }
+    onAdminModeChangedServerSide(callback: (data: { accessCode: string }) => void): void {
+        this.socket.on('adminModeChangedServerSide', callback);
+    }
+    sendTeleportPlayer(accessCode: string, player: Player, targetTile: Tile): void {
+        this.socket.emit('teleportPlayer', { accessCode, player, targetTile });
     }
 }

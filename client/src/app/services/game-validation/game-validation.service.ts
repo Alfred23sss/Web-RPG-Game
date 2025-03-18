@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { ErrorMessages, GameMode, TileType } from '@app/enums/global.enums';
+import { GRID_DIMENSIONS } from '@app/constants/global.constants';
+import { ErrorMessages, GameMode, GameSize, ItemCount, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -11,19 +12,6 @@ enum TitleLength {
 enum DescriptionLength {
     Min = 0,
     Max = 100,
-}
-enum GameSize {
-    Small = '10',
-    Medium = '15',
-    Large = '20',
-    SmallItemCount = 2,
-    MediumItemCount = 4,
-    LargeItemCount = 6,
-}
-enum ItemCount {
-    Small = 2,
-    Medium = 4,
-    Large = 6,
 }
 
 enum MaxDuration {
@@ -91,7 +79,7 @@ export class GameValidationService {
             return errors;
         }
         const terrainProportionMin = 0.5;
-        const gridSize = Math.pow(Number(game.size), 2);
+        const gridSize = Math.pow(GRID_DIMENSIONS[game.size as GameSize], 2);
         let terrainTileCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
@@ -145,10 +133,10 @@ export class GameValidationService {
         if (!game.grid) return ErrorMessages.GridNotFound;
         const requiredHomeItems =
             game.size === GameSize.Small
-                ? GameSize.SmallItemCount
+                ? ItemCount.SmallItemCount
                 : game.size === GameSize.Medium
-                ? GameSize.MediumItemCount
-                : GameSize.LargeItemCount;
+                ? ItemCount.MediumItemCount
+                : ItemCount.LargeItemCount;
         let homeItemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
@@ -170,7 +158,12 @@ export class GameValidationService {
                 }
             }
         }
-        const requiredItemCount = game.size === GameSize.Small ? ItemCount.Small : game.size === GameSize.Medium ? ItemCount.Medium : ItemCount.Large;
+        const requiredItemCount =
+            game.size === GameSize.Small
+                ? ItemCount.SmallItemCount
+                : game.size === GameSize.Medium
+                ? ItemCount.MediumItemCount
+                : ItemCount.LargeItemCount;
         return itemCount < requiredItemCount ? ErrorMessages.ItemsNotPlaced : itemCount > requiredItemCount ? ErrorMessages.TooManyItemsPlaced : null;
     }
 

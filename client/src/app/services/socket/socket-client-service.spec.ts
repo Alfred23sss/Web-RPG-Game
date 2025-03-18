@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { TestBed } from '@angular/core/testing';
@@ -466,5 +467,67 @@ describe('SocketClientService', () => {
 
             expect(callback).toHaveBeenCalledWith(mockData);
         });
+    });
+
+    it('should emit kickPlayer event with correct parameters', () => {
+        spyOn(fakeSocket, 'emit');
+        const accessCode = 'testCode';
+        const playerName = 'player1';
+
+        service.kickPlayer(accessCode, playerName);
+
+        expect(fakeSocket.emit).toHaveBeenCalledWith('kickPlayer', { accessCode, playerName });
+    });
+
+    it('should call callback when onKicked event is received', () => {
+        spyOn(fakeSocket, 'on');
+        const callback = jasmine.createSpy('callback');
+
+        service.onKicked(callback);
+
+        expect(fakeSocket.on).toHaveBeenCalledWith('kicked', callback);
+    });
+
+    it('should register a callback for playerMovement socket events', () => {
+        spyOn(fakeSocket, 'on');
+        const callback = jasmine.createSpy('callback');
+
+        service.onPlayerMovement(callback);
+
+        expect(fakeSocket.on).toHaveBeenCalledWith('playerMovement', callback);
+    });
+
+    it('should register a callback for avatarSelected socket events', () => {
+        const callback = jasmine.createSpy('callback');
+        const mockAvatarData = { avatar: 'warrior' };
+        service.onAvatarSelected(callback);
+        fakeSocket.trigger('avatarSelected', mockAvatarData);
+        expect(callback).toHaveBeenCalledWith(mockAvatarData);
+    });
+
+    it('should register a callback for avatarDeselected socket events', () => {
+        const callback = jasmine.createSpy('callback');
+        service.onAvatarDeselected(callback);
+        fakeSocket.trigger('avatarDeselected');
+        expect(callback).toHaveBeenCalled();
+    });
+
+    it('should emit selectAvatar event with correct parameters', () => {
+        spyOn(fakeSocket, 'emit');
+        const accessCode = 'TEST1234';
+        const avatar = 'warrior';
+
+        service.selectAvatar(accessCode, avatar);
+
+        expect(fakeSocket.emit).toHaveBeenCalledWith('selectAvatar', { accessCode, avatar });
+    });
+
+    it('should emit selectAvatar event with correct parameters', () => {
+        spyOn(fakeSocket, 'emit');
+        const accessCode = 'TEST1234';
+
+        service.deselectAvatar(accessCode);
+
+        expect(fakeSocket.emit).toHaveBeenCalledWith('deselectAvatar', { accessCode });
     });
 });

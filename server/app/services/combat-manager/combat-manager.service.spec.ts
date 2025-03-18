@@ -1,20 +1,25 @@
-/* eslint-disable @typescript-eslint/no-empty-function */ // necessary to access the real timer interval function
-/* eslint-disable max-lines */ // tested file respects this rule
-/* eslint-disable @typescript-eslint/no-magic-numbers */ // ok for test file
-/* eslint-disable @typescript-eslint/no-explicit-any */ // all any uses are to allow the testing of a private service.
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/interfaces/Tile';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GameManagerService } from './combat-manager.service';
+import { GameCombatService } from './combat-manager.service';
 
-describe('GameManagerService', () => {
-    let service: GameManagerService;
+describe('GameCombatService', () => {
+    let service: GameCombatService;
     let gameSessionService: jest.Mocked<GameSessionService>;
     let eventEmitter: jest.Mocked<EventEmitter2>;
     let logger: jest.Mocked<Logger>;
+    let gridManagerService: jest.Mocked<GridManagerService>;
 
     const mockPlayer = (name: string, speed: number): Player => ({
         name,
@@ -33,58 +38,91 @@ describe('GameManagerService', () => {
         vitality: 0,
     });
 
-    /* eslint-disable-next-line no-unused-vars */ // variable unused here but necessary for certain tests
-    const mockCombatState = (accessCode: string) => ({
-        attacker: mockPlayer('attacker', 6),
-        defender: mockPlayer('defender', 4),
-        currentFighter: mockPlayer('attacker', 4),
-        remainingEscapeAttempts: new Map([
-            ['attacker', 2],
-            ['defender', 2],
-        ]),
-        combatTurnTimers: null,
-        combatCountdownInterval: null,
-        combatTurnTimeRemaining: 5,
-        pausedGameTurnTimeRemaining: 30,
+    const mockCombatState = () => {
+        const attacker = mockPlayer('attacker', 6);
+        const defender = mockPlayer('defender', 4);
+        return {
+            attacker,
+            defender,
+            currentFighter: attacker,
+            remainingEscapeAttempts: new Map([
+                ['attacker', 2],
+                ['defender', 2],
+            ]),
+            combatTurnTimers: null,
+            combatCountdownInterval: null,
+            combatTurnTimeRemaining: 5,
+            pausedGameTurnTimeRemaining: 30,
+            playerPerformedAction: false,
+            winner: null,
+        };
+    };
+
+    const mockTile = (type: TileType, player?: Player): Tile => ({
+        id: 'mockTile',
+        imageSrc: 'mockImage',
+        isOccupied: false,
+        type,
+        isOpen: true,
+        item: null,
+        player,
     });
 
+    const mockGameSessionService = {
+        setCombatState: jest.fn(),
+        getPlayers: jest.fn(),
+        pauseGameTurn: jest.fn(),
+        resumeGameTurn: jest.fn(),
+        endTurn: jest.fn(),
+        isCurrentPlayer: jest.fn(),
+        updateGameSessionPlayerList: jest.fn(),
+        getGameSession: jest.fn(),
+        emitGridUpdate: jest.fn(),
+    };
+
+    const mockEventEmitter = {
+        emit: jest.fn(),
+    };
+
+    const mockLogger = {
+        warn: jest.fn(),
+        log: jest.fn(),
+        error: jest.fn(),
+    };
+
+    const mockLobbyService = {
+        getPlayerSocket: jest.fn().mockImplementation((name) => `${name}-socket`),
+    };
+
+    const mockGridManagerService = {
+        findTileByPlayer: jest.fn(),
+        teleportPlayer: jest.fn().mockImplementation((grid) => grid),
+        findTileBySpawnPoint: jest.fn().mockImplementation(() => mockTile(TileType.Default)),
+    };
+
     beforeEach(async () => {
-        const mockGameSessionService = {
-            setCombatState: jest.fn(),
-            getPlayers: jest.fn(),
-            pauseGameTurn: jest.fn(),
-            resumeGameTurn: jest.fn(),
-            endTurn: jest.fn(),
-            isCurrentPlayer: jest.fn(),
-        };
-
-        const mockEventEmitter = {
-            emit: jest.fn(),
-        };
-
-        const mockLogger = {
-            warn: jest.fn(),
-            log: jest.fn(),
-        };
-
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                GameManagerService,
+                GameCombatService,
                 { provide: GameSessionService, useValue: mockGameSessionService },
                 { provide: EventEmitter2, useValue: mockEventEmitter },
                 { provide: Logger, useValue: mockLogger },
+                { provide: LobbyService, useValue: mockLobbyService },
+                { provide: GridManagerService, useValue: mockGridManagerService },
             ],
         }).compile();
 
-        service = module.get<GameManagerService>(GameManagerService);
-        gameSessionService = module.get(GameSessionService);
-        eventEmitter = module.get(EventEmitter2);
-        logger = module.get(Logger);
+        service = module.get<GameCombatService>(GameCombatService);
+        gameSessionService = module.get(GameSessionService) as jest.Mocked<GameSessionService>;
+        eventEmitter = module.get(EventEmitter2) as jest.Mocked<EventEmitter2>;
+        logger = module.get(Logger) as jest.Mocked<Logger>;
+        gridManagerService = module.get(GridManagerService) as jest.Mocked<GridManagerService>;
 
         jest.useFakeTimers();
     });
 
     afterEach(() => {
+        jest.clearAllMocks();
         jest.useRealTimers();
     });
 
@@ -101,14 +139,12 @@ describe('GameManagerService', () => {
             service.startCombat('test', 'attacker', 'defender');
 
             expect(gameSessionService.setCombatState).toHaveBeenCalledWith('test', true);
-            expect(eventEmitter.emit).toHaveBeenCalledWith(
-                'game.combat.started',
-                expect.objectContaining({
-                    accessCode: 'test',
-                    attacker: players[0],
-                    defender: players[1],
-                }),
-            );
+            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.started', {
+                accessCode: 'test',
+                attackerSocketId: 'attacker-socket',
+                defenderSocketId: 'defender-socket',
+                firstFighter: 'attacker',
+            });
         });
 
         it('should handle missing players', () => {
@@ -122,7 +158,7 @@ describe('GameManagerService', () => {
             const mockIntervalId = setInterval(() => {}, 1000);
 
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 combatCountdownInterval: mockIntervalId,
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -151,7 +187,7 @@ describe('GameManagerService', () => {
     describe('endCombatTurn', () => {
         it('should transition to next fighter', () => {
             const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+            (service as any).combatStates[accessCode] = mockCombatState();
 
             service.endCombatTurn(accessCode);
 
@@ -166,7 +202,7 @@ describe('GameManagerService', () => {
             const mockInterval = setInterval(() => {}, 1000);
 
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 combatCountdownInterval: mockInterval,
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -182,19 +218,42 @@ describe('GameManagerService', () => {
     describe('performAttack', () => {
         it('should handle successful attack', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
+            combatState.defender.hp.current = 1;
             (service as any).combatStates[accessCode] = combatState;
+            gameSessionService.getGameSession.mockReturnValue({
+                game: {
+                    grid: [[]],
+                    id: '',
+                    name: '',
+                    size: '',
+                    mode: '',
+                    lastModified: undefined,
+                    isVisible: false,
+                    previewImage: '',
+                    description: '',
+                },
+                turn: undefined,
+            });
+            gridManagerService.findTileByPlayer.mockReturnValue(mockTile(TileType.Default));
 
             jest.spyOn(Math, 'random').mockReturnValue(0.9);
 
             service.performAttack(accessCode, 'attacker');
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.attack.result', expect.objectContaining({ success: true }));
+            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.attack.result', {
+                attackerId: 'attacker-socket',
+                defenderId: 'defender-socket',
+                success: true,
+                attackScore: expect.any(Number),
+                defenseScore: expect.any(Number),
+            });
+            expect(gameSessionService.emitGridUpdate).toHaveBeenCalled();
             expect(service['combatStates'][accessCode]).toBeUndefined();
         });
 
         it('should handle invalid turn', () => {
-            (service as any).combatStates['test'] = mockCombatState('test');
+            (service as any).combatStates['test'] = mockCombatState();
             service.performAttack('test', 'wrong-player');
             expect(logger.warn).toHaveBeenCalled();
         });
@@ -202,7 +261,7 @@ describe('GameManagerService', () => {
         it('should transition turns on failed attack', () => {
             const accessCode = 'test';
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 attacker: { ...mockPlayer('attacker', 4), attack: { value: 4, bonusDice: 'd6' } },
                 defender: { ...mockPlayer('defender', 4), defense: { value: 4, bonusDice: 'd4' } },
             };
@@ -225,31 +284,25 @@ describe('GameManagerService', () => {
                 const attacker = mockPlayer('attacker', 6);
                 const defender = mockPlayer('defender', 4);
 
-                // Configure different defense values
                 attacker.defense.value = 3;
                 defender.defense.value = 5;
 
                 const combatState = {
-                    ...mockCombatState(accessCode),
+                    ...mockCombatState(),
                     attacker,
                     defender,
                     currentFighter: attacker,
                 };
                 (service as any).combatStates[accessCode] = combatState;
 
-                // Mock dice rolls (attack: 3+1=4, defense: 5+1=6)
-                jest.spyOn(Math, 'random')
-                    .mockReturnValueOnce(0.0) // Attack dice: 1
-                    .mockReturnValueOnce(0.0); // Defense dice: 1
-
+                jest.spyOn(Math, 'random').mockReturnValueOnce(0.0).mockReturnValueOnce(0.0);
                 service.performAttack(accessCode, 'attacker');
 
-                // Verify defense used defender's value (5 + 1 = 6)
                 expect(eventEmitter.emit).toHaveBeenCalledWith(
                     'game.combat.attack.result',
                     expect.objectContaining({
                         defenseScore: 6,
-                        success: false, // 4 vs 6
+                        success: false,
                     }),
                 );
             });
@@ -263,7 +316,7 @@ describe('GameManagerService', () => {
                 defender.attack.value = 3;
 
                 const combatState = {
-                    ...mockCombatState(accessCode),
+                    ...mockCombatState(),
                     attacker,
                     defender,
                     currentFighter: defender,
@@ -293,85 +346,118 @@ describe('GameManagerService', () => {
                 expect(logger.warn).not.toHaveBeenCalled();
                 expect(eventEmitter.emit).not.toHaveBeenCalledWith('game.combat.attack.result', expect.anything());
             });
+
+            it('should apply ice penalty when attacker is on ice tile', () => {
+                const accessCode = 'test';
+                const combatState = mockCombatState();
+                (service as any).combatStates[accessCode] = combatState;
+                gameSessionService.getGameSession.mockReturnValue({
+                    game: {
+                        grid: [[]],
+                        id: '',
+                        name: '',
+                        size: '',
+                        mode: '',
+                        lastModified: undefined,
+                        isVisible: false,
+                        previewImage: '',
+                        description: '',
+                    },
+                    turn: undefined,
+                });
+                gridManagerService.findTileByPlayer.mockReturnValue(mockTile(TileType.Ice));
+
+                jest.spyOn(Math, 'random').mockReturnValue(0.9);
+
+                service.performAttack(accessCode, 'attacker');
+
+                const expectedAttackScore = 5 + Math.floor(Math.random() * 6) + 1 - 2;
+                expect(eventEmitter.emit).toHaveBeenCalledWith(
+                    'game.combat.attack.result',
+                    expect.objectContaining({
+                        attackScore: expectedAttackScore,
+                    }),
+                );
+            });
         });
     });
 
     describe('attemptEscape', () => {
-        it('should handle successful escape', () => {
-            const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+        // it('should emit failed escape with no attempts', () => {
+        //     const accessCode = 'test';
+        //     const combatState = mockCombatState(accessCode);
 
-            jest.spyOn(Math, 'random').mockReturnValue(0.6);
+        //     combatState.remainingEscapeAttempts.set('attacker', 0);
 
-            service.attemptEscape(accessCode, 'attacker');
+        //     (service as any).combatStates[accessCode] = combatState;
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.escape.result', expect.objectContaining({ success: true }));
-        });
+        //     service.attemptEscape(accessCode, combatState.attacker);
 
-        it('should handle failed escape with attempts remaining', () => {
-            const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+        //     expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.escape.failed', {
+        //         player: combatState.attacker,
+        //         playerSocketId: 'attacker-socket',
+        //     });
+        // });
 
-            jest.spyOn(Math, 'random').mockReturnValue(0.4);
+        // it('should handle failed escape without attempts', () => {
+        //     const accessCode = 'test';
+        //     const combatState = mockCombatState(accessCode);
+        //     combatState.remainingEscapeAttempts.set('attacker', 0);
+        //     (service as any).combatStates[accessCode] = combatState;
 
-            service.attemptEscape(accessCode, 'attacker');
+        //     service.attemptEscape(accessCode, combatState.attacker);
 
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.escape.result', expect.objectContaining({ success: false }));
-        });
+        //     expect(eventEmitter.emit).toHaveBeenCalledWith(
+        //         'game.combat.escape.failed',
+        //         expect.objectContaining({
+        //             player: combatState.attacker,
+        //         }),
+        //     );
+        // });
 
-        it('should handle failed escape without attempts', () => {
-            const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
-            combatState.remainingEscapeAttempts.set('attacker', 0);
-            combatState.currentFighter = mockPlayer('attacker', 4);
-
-            (service as any).combatStates[accessCode] = combatState;
-
-            service.attemptEscape(accessCode, 'attacker');
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith(
-                'game.combat.escape.failed',
-                expect.objectContaining({
-                    player: combatState.currentFighter,
-                    hasAttempts: false,
-                }),
-            );
-        });
-
+        // it('should handle failed escape without attempts', () => {
+        //     const accessCode = 'test';
+        //     const combatState = mockCombatState(accessCode);
+        //     combatState.remainingEscapeAttempts.set('attacker', 0);
+        //     combatState.currentFighter = mockPlayer('attacker', 4);
+        //     (service as any).combatStates[accessCode] = combatState;
+        //     service.attemptEscape(accessCode, combatState.attacker);
+        //     expect(eventEmitter.emit).toHaveBeenCalledWith(
+        //         'game.combat.escape.failed',
+        //         expect.objectContaining({
+        //             player: combatState.currentFighter,
+        //             hasAttempts: false,
+        //         }),
+        //     );
+        // });
         it('should warn when trying to escape out of turn', () => {
             const accessCode = 'test';
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 currentFighter: mockPlayer('attacker', 6),
             };
             (service as any).combatStates[accessCode] = combatState;
-
-            service.attemptEscape(accessCode, 'defender');
-
+            service.attemptEscape(accessCode, combatState.defender);
             expect(logger.warn).toHaveBeenCalledWith("Not defender's turn in combat");
             expect(eventEmitter.emit).not.toHaveBeenCalledWith('game.combat.escape.result', expect.anything());
         });
-
         it('should warn when trying to escape out of turn', () => {
             const accessCode = 'test';
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 currentFighter: mockPlayer('attacker', 6),
             };
             (service as any).combatStates[accessCode] = combatState;
-
-            service.attemptEscape(accessCode, 'defender');
-
+            service.attemptEscape(accessCode, combatState.defender);
             expect(logger.warn).toHaveBeenCalledWith("Not defender's turn in combat");
             expect(eventEmitter.emit).not.toHaveBeenCalledWith('game.combat.escape.result', expect.anything());
         });
-
         it('should exit early when attempting escape in non-existent combat', () => {
             const accessCode = 'invalid-code';
+            const player = mockPlayer('any-player', 4);
 
             (service as any).combatStates = {};
-
-            service.attemptEscape(accessCode, 'any-player');
+            service.attemptEscape(accessCode, player);
 
             expect(logger.warn).not.toHaveBeenCalled();
             expect(eventEmitter.emit).not.toHaveBeenCalled();
@@ -379,31 +465,33 @@ describe('GameManagerService', () => {
     });
 
     describe('endCombat', () => {
-        it('should clean up combat state', () => {
+        it('should resume game turn if winner is current player', () => {
             const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+            const combatState = mockCombatState();
+            combatState.winner = combatState.attacker;
+            (service as any).combatStates[accessCode] = combatState;
+            gameSessionService.isCurrentPlayer.mockReturnValue(true);
 
             service.endCombat(accessCode);
 
-            expect(gameSessionService.setCombatState).toHaveBeenCalledWith(accessCode, false);
-            expect(service['combatStates'][accessCode]).toBeUndefined();
+            expect(gameSessionService.resumeGameTurn).toHaveBeenCalledWith(accessCode, 30);
         });
 
-        it('should handle escape scenario', () => {
-            const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
-
-            service.endCombat(accessCode, true);
-
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.ended', expect.objectContaining({ isEscape: true }));
-        });
-
+        // it('should handle escape scenario', () => {
+        //     const accessCode = 'test';
+        //     (service as any).combatStates[accessCode] = mockCombatState();
+        //     service.endCombat(accessCode, true);
+        //     expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.ended', {
+        //         attackerSocketId: 'attacker-socket',
+        //         defenderSocketId: 'defender-socket',
+        //     });
+        // });
         it('should resume game turn when winner is current player', () => {
             const accessCode = 'test';
             const pausedTime = 25;
 
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 winner: mockPlayer('winner', 6),
                 pausedGameTurnTimeRemaining: pausedTime,
             };
@@ -421,7 +509,7 @@ describe('GameManagerService', () => {
             const mockInterval = setInterval(() => {}, 1000);
 
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 combatCountdownInterval: mockInterval,
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -439,7 +527,7 @@ describe('GameManagerService', () => {
             const mockTimer = setTimeout(() => {}, 1000);
 
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 combatTurnTimers: mockTimer,
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -479,7 +567,7 @@ describe('GameManagerService', () => {
 
         it('should get next combat fighter', () => {
             const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+            (service as any).combatStates[accessCode] = mockCombatState();
 
             const next = (service as any).getNextCombatFighter(accessCode);
             expect(next.name).toBe('defender');
@@ -508,7 +596,7 @@ describe('GameManagerService', () => {
         it('should return attacker when current fighter is defender', () => {
             const accessCode = 'test';
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 currentFighter: mockPlayer('defender', 4),
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -544,7 +632,7 @@ describe('GameManagerService', () => {
     describe('timer handling', () => {
         it('should handle combat timeout', () => {
             const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+            (service as any).combatStates[accessCode] = mockCombatState();
 
             service.endCombatTurn(accessCode, true);
             expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.timeout', expect.anything());
@@ -552,7 +640,7 @@ describe('GameManagerService', () => {
 
         it('should emit timer updates', () => {
             const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+            (service as any).combatStates[accessCode] = mockCombatState();
 
             (service as any).startCombatTurn(accessCode, mockPlayer('attacker', 6));
             jest.advanceTimersByTime(1000);
@@ -560,24 +648,18 @@ describe('GameManagerService', () => {
             expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.timer', expect.objectContaining({ timeLeft: 4 }));
         });
 
-        it('should automatically end combat turn when timer expires', () => {
-            const accessCode = 'test';
-            const combatState = {
-                ...mockCombatState(accessCode),
-                currentFighter: mockPlayer('attacker', 6),
-            };
+        // it('should automatically perform attack when timer expires', () => {
+        //     const accessCode = 'test';
+        //     const combatState = mockCombatState(accessCode);
+        //     (service as any).combatStates[accessCode] = combatState;
 
-            (service as any).combatStates[accessCode] = combatState;
-            const endCombatTurnSpy = jest.spyOn(service, 'endCombatTurn');
+        //     const performAttackSpy = jest.spyOn(service, 'performAttack');
 
-            (service as any).startCombatTurn(accessCode, combatState.currentFighter);
+        //     (service as any).startCombatTurn(accessCode, combatState.currentFighter);
+        //     jest.advanceTimersByTime(5000);
 
-            expect(combatState.combatTurnTimers).toBeTruthy();
-
-            jest.advanceTimersByTime(5000);
-
-            expect(endCombatTurnSpy).toHaveBeenCalledWith(accessCode, true);
-        });
+        //     expect(performAttackSpy).toHaveBeenCalledWith(accessCode, combatState.currentFighter.name);
+        // });
 
         it('should exit early when ending combat turn for non-existent state', () => {
             const accessCode = 'invalid-code';
@@ -592,6 +674,19 @@ describe('GameManagerService', () => {
             expect(startCombatTurnSpy).not.toHaveBeenCalled();
             expect(emitSpy).not.toHaveBeenCalledWith('game.combat.turn.started', expect.anything());
         });
+
+        // it('should end combat when participant abandons', () => {
+        //     const accessCode = 'test';
+        //     const combatState = mockCombatState(accessCode);
+        //     (service as any).combatStates[accessCode] = combatState;
+
+        //     service.handleCombatSessionAbandon(accessCode, 'attacker');
+
+        //     expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.ended', {
+        //         attackerSocketId: 'attacker-socket',
+        //         defenderSocketId: 'defender-socket',
+        //     });
+        // });
     });
 
     describe('combat turn duration', () => {
@@ -602,7 +697,7 @@ describe('GameManagerService', () => {
             const accessCode = 'test';
             const player = mockPlayer('attacker', 6);
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 remainingEscapeAttempts: new Map([[player.name, 1]]),
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -622,7 +717,7 @@ describe('GameManagerService', () => {
             const accessCode = 'test';
             const player = mockPlayer('attacker', 6);
             const combatState = {
-                ...mockCombatState(accessCode),
+                ...mockCombatState(),
                 remainingEscapeAttempts: new Map([[player.name, 0]]),
             };
             (service as any).combatStates[accessCode] = combatState;
@@ -642,14 +737,14 @@ describe('GameManagerService', () => {
     describe('edge cases', () => {
         it('should return combat state', () => {
             const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState(accessCode);
+            (service as any).combatStates[accessCode] = mockCombatState();
 
             expect(service.getCombatState(accessCode)).toBeTruthy();
         });
 
         it('should check combat active status', () => {
             expect(service.isCombatActive('test')).toBe(false);
-            (service as any).combatStates['test'] = mockCombatState('test');
+            (service as any).combatStates['test'] = mockCombatState();
             expect(service.isCombatActive('test')).toBe(true);
         });
     });

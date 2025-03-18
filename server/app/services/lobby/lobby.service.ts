@@ -49,14 +49,14 @@ export class LobbyService {
         return lobby.players.some((p) => p.name === player.name);
     }
 
-    leaveLobby(accessCode: string, playerName: string): boolean {
+    leaveLobby(accessCode: string, playerName: string, isGameStarted: boolean = false): boolean {
         const lobby = this.lobbies.get(accessCode);
         if (!lobby) return false;
 
         const isAdmin = lobby.players.some((p) => p.name === playerName && p.isAdmin);
 
         lobby.players = lobby.players.filter((p) => p.name !== playerName);
-        if (lobby.players.length === 0 || isAdmin) {
+        if (lobby.players.length === 0 || (isAdmin && !isGameStarted)) {
             this.lobbies.delete(accessCode);
             this.accessCodeService.removeAccessCode(accessCode);
             return true;
