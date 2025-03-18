@@ -197,14 +197,23 @@ export class GameSocketService {
             component.attackResult = null;
             component.escapeAttempts = defaultEscapeAttempts;
             if (data && data.winner && !data.hasEvaded) {
-                // sa cache le changement de tour a fix
                 this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
             }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
-            if (!component.clientPlayer.actionPoints || !component.clientPlayer.movementPoints) {
-                component.endTurn();
+            const clientPlayerPosition = component.getClientPlayerPosition();
+            if (!clientPlayerPosition || !component.game || !component.game.grid) return;
+            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
+            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, component.game.grid);
+            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce) {
+                    component.endTurn();
+                }
+            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+                if (!hasIce && !hasActionAvailable) {
+                    component.endTurn();
+                }
             }
         });
 

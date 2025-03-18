@@ -405,7 +405,7 @@ export class GameCombatService {
         });
     }
 
-    private emitCombatEnded(attacker: Player, defender: Player, winner: Player, hasEvade: boolean): void {
+    private emitCombatEnded(attacker: Player, defender: Player, winner: Player, hasEvaded: boolean): void {
         this.logger.log('emitting to gateaway game ended');
         const attackerSocketId = this.lobbyService.getPlayerSocket(attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
@@ -414,7 +414,7 @@ export class GameCombatService {
             attackerSocketId,
             defenderSocketId,
             winner,
-            hasEvade,
+            hasEvaded,
         });
         // eslint-disable-next-line max-lines
     }
