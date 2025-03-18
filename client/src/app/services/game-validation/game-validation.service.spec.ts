@@ -421,7 +421,7 @@ describe('GameValidationService', () => {
         const game: Game = {
             id: 'game-small',
             size: GameSize.Small,
-            grid: grid,
+            grid,
         } as Game;
 
         const result = service['validateItemCount'](game);
@@ -435,7 +435,7 @@ describe('GameValidationService', () => {
         const game: Game = {
             id: 'game-small',
             size: GameSize.Small,
-            grid: grid,
+            grid,
         } as Game;
 
         const result = service['validateItemCount'](game);

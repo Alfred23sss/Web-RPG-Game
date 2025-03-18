@@ -41,6 +41,7 @@ describe('TileTooltipComponent', () => {
     });
 
     it('should return false for isInfinity when cost is finite', () => {
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         expect(component.isInfinity(3)).toBeFalse();
     });
 });

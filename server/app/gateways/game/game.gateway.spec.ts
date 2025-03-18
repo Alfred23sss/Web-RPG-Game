@@ -1,6 +1,5 @@
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
@@ -36,13 +35,13 @@ describe('GameGateway', () => {
         vitality: 0,
     };
 
-    const mockTile: Tile = {
-        id: 'test-tile',
-        player: mockPlayer,
-        isOccupied: true,
-    } as Tile;
+    // const mockTile: Tile = {
+    //     id: 'test-tile',
+    //     player: mockPlayer,
+    //     isOccupied: true,
+    // } as Tile;
 
-    const mockGrid: Tile[][] = [[mockTile]];
+    // const mockGrid: Tile[][] = [[mockTile]];
 
     beforeEach(async () => {
         serverMock = {

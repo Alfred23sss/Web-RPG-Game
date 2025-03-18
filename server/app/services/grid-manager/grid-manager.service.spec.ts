@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */ // needed to access actual function
 /* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';

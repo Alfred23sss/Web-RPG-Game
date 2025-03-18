@@ -106,6 +106,7 @@ describe('GridComponent', () => {
             const mockEvent = new MouseEvent('contextmenu', { clientX: 100, clientY: 200 });
             const mockDialogRef = { close: jasmine.createSpy('close'), afterClosed: () => of(null) };
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             mockDialog.open.and.returnValue(mockDialogRef as any);
 
             component.onTileRightClick(mockEvent, mockTile1);

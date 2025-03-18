@@ -14,6 +14,7 @@ describe('MainPageComponent', () => {
 
     beforeEach(async () => {
         mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         mockDialog.open.and.returnValue({ afterClosed: () => of(true) } as any);
 
         await TestBed.configureTestingModule({
