@@ -85,6 +85,8 @@ export class LobbyService {
             this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
             return;
         }
+        this.setIsGameStarting(true);
+        sessionStorage.setItem('lobby', JSON.stringify(lobby));
         this.router.navigate([Routes.Game]);
     }
 

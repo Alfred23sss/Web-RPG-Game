@@ -63,6 +63,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.lobbyService.removePlayerAndCleanup(this.player, this.lobby);
         this.subscriptions.unsubscribe();
         this.lobbyService.removeSocketListeners();
+        this.lobbyService.setIsGameStarting(false);
     }
 
     changeLobbyLockStatus(): void {
@@ -105,7 +106,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.socketClientService.alertGameStarted(this.accessCode);
         }
 
-        this.isGameStarting = true;
+        this.lobbyService.setIsGameStarting(true);
         sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
     }
