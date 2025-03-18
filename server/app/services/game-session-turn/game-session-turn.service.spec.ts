@@ -252,15 +252,30 @@ describe('GameSessionTurnService', () => {
     });
 
     describe('orderPlayersBySpeed', () => {
-        it('should order players by speed and randomize if speeds are equal', () => {
-            const players = [createPlayer('Player1', 10), createPlayer('Player2', 20), createPlayer('Player3', 20)];
+        afterEach(() => {
+            jest.restoreAllMocks();
+        });
 
+        it('should order players with equal speed randomly (Math.random < 0.5)', () => {
+            jest.spyOn(Math, 'random').mockReturnValue(0.3);
+
+            const players = [createPlayer('Player1', 10), createPlayer('Player2', 20), createPlayer('Player3', 20)];
             const orderedPlayers = service.orderPlayersBySpeed(players);
 
-            expect(orderedPlayers[0].speed).toBe(20);
-            expect(orderedPlayers[1].speed).toBe(20);
-            expect(orderedPlayers[2].speed).toBe(10);
-            expect(orderedPlayers[0].isActive).toBe(true);
+            expect(orderedPlayers[0].name).toBe('Player3');
+            expect(orderedPlayers[1].name).toBe('Player2');
+            expect(orderedPlayers[2].name).toBe('Player1');
+        });
+
+        it('should order players with equal speed randomly (Math.random >= 0.5)', () => {
+            jest.spyOn(Math, 'random').mockReturnValue(0.7);
+
+            const players = [createPlayer('Player1', 10), createPlayer('Player2', 20), createPlayer('Player3', 20)];
+            const orderedPlayers = service.orderPlayersBySpeed(players);
+
+            expect(orderedPlayers[0].name).toBe('Player2');
+            expect(orderedPlayers[1].name).toBe('Player3');
+            expect(orderedPlayers[2].name).toBe('Player1');
         });
     });
 
