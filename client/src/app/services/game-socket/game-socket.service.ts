@@ -87,7 +87,7 @@ export class GameSocketService {
         });
 
         this.socketClientService.onTransitionStarted((data: { nextPlayer: Player; transitionDuration: number }) => {
-            this.snackbarService.showMessage(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+            this.snackbarService.showMultipleMessages(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
             if (data.nextPlayer.name === component.clientPlayer.name) {
                 component.clientPlayer = data.nextPlayer;
             }
@@ -198,7 +198,7 @@ export class GameSocketService {
             component.escapeAttempts = defaultEscapeAttempts;
             if (data && data.winner && !data.hasEvaded) {
                 // sa cache le changement de tour a fix
-                this.snackbarService.showMessage(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
+                this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
             }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
