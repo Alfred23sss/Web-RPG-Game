@@ -33,7 +33,6 @@ export class GameSessionTurnService {
         turn.isTransitionPhase = true;
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
         const nextPlayer = this.getNextPlayer(accessCode, turn);
-        this.logger.log(nextPlayer);
         this.emitEvent('game.transition.started', { accessCode, nextPlayer });
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
@@ -131,7 +130,6 @@ export class GameSessionTurnService {
     }
 
     getNextPlayer(accessCode: string, turn: Turn): Player {
-        this.logger.log(turn.orderedPlayers);
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
         if (!turn.currentPlayer) {

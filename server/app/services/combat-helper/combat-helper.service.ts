@@ -6,7 +6,7 @@ import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Injectable } from '@nestjs/common';
 
-const ICE_PENALTY = -0.3;
+const ICE_PENALTY = -2;
 
 @Injectable()
 export class CombatHelperService {
