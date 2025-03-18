@@ -114,7 +114,7 @@ export class CharacterService {
 
         if (isLobbyCreated) {
             const joinResult = await this.joinExistingLobby(currentAccessCode, player);
-            this.handleLobbyJoining(joinResult, player, game, closePopup);
+            this.handleLobbyJoining(joinResult, player, game, currentAccessCode, closePopup);
         } else {
             player.isAdmin = true;
             await this.createAndJoinLobby(game, player);
@@ -208,16 +208,21 @@ export class CharacterService {
         }
     }
 
-    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, closePopup: () => void): void {
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, currentAccessCode: string, closePopup: () => void): void {
         switch (joinStatus) {
             case JoinLobbyResult.JoinedLobby:
                 this.finalizeCharacterSubmission(player, closePopup);
                 break;
             case JoinLobbyResult.StayInLobby:
-                break;
+                return;
             case JoinLobbyResult.RedirectToHome:
                 this.returnHome();
-                break;
+                this.socketClientService.emit('leaveLobby', {
+                    accessCode: currentAccessCode,
+                    playerName: '',
+                });
+                closePopup();
+                return;
         }
         this.validateGameAvailability(game, closePopup);
 

@@ -16,7 +16,11 @@
             <li>
                 <div class="player-info">
                     <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
+                    @if (player.name === this.player?.name) {
+                    <span class="yellow-tag player-name">{{ player.name }}</span>
+                    } @else {
                     <span class="player-name">{{ player.name }}</span>
+                    }
                 </div>
                 <div class="player-actions">
                     @if (player.isAdmin) {
