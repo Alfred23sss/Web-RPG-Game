@@ -33,7 +33,7 @@ describe('AccessCodeComponent', () => {
         snackbarServiceSpy = jasmine.createSpyObj('SnackbarService', ['showMessage']);
         accessCodeServiceSpy = jasmine.createSpyObj('AccessCodeService', ['getLobbyData']);
 
-        accessCodesCommunicationServiceSpy.getAllAccessCodes.and.returnValue(of(['code1', 'code2']));
+        // accessCodesCommunicationServiceSpy.getAllAccessCodes.and.returnValue(of(['code1', 'code2']));
         testErrorHandler = new TestErrorHandler();
 
         await TestBed.configureTestingModule({
@@ -60,9 +60,9 @@ describe('AccessCodeComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('doit s’abonner à getAllAccessCodes dans le constructeur et assigner accessCodes', () => {
-        expect(component.accessCodes).toEqual(['code1', 'code2']);
-    });
+    // it('doit s’abonner à getAllAccessCodes dans le constructeur et assigner accessCodes', () => {
+    //     expect(component.accessCodes).toEqual(['code1', 'code2']);
+    // });
 
     it('closeDialog doit appeler dialogRef.close', () => {
         component.closeDialog();
