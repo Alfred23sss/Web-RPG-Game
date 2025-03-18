@@ -8,7 +8,6 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
-import { LogBookService } from '@app/services/logbook/logbook.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
@@ -46,21 +45,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
     isDebugMode: boolean = false;
     private keyPressHandler: (event: KeyboardEvent) => void;
 
-    /* eslint-disable-next-line max-params */ // to fix
     constructor(
         private playerMovementService: PlayerMovementService,
         private router: Router,
         private socketClientService: SocketClientService,
-        private logbookService: LogBookService,
         private snackbarService: SnackbarService,
         private gameSocketService: GameSocketService,
     ) {}
 
     ngOnInit(): void {
-        this.logEntries = this.logbookService.logBook;
-        this.logBookSubscription = this.logbookService.logBookUpdated.subscribe((logBook) => {
-            this.logEntries = logBook;
-        });
         this.gameSocketService.initializeSocketListeners(this);
         this.keyPressHandler = this.handleKeyPress.bind(this);
         document.addEventListener('keydown', this.keyPressHandler);
@@ -100,7 +93,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleTeleport(targetTile: Tile): void {
-        if (!this.isDebugMode || this.isInCombatMode) return;
+        if (this.isInCombatMode) return;
         if (this.clientPlayer.name === this.currentPlayer.name) {
             this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
         }
@@ -135,7 +128,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         document.removeEventListener('keydown', this.keyPressHandler);
-        this.logBookSubscription.unsubscribe();
         this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
     }
