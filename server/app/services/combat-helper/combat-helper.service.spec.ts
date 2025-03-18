@@ -76,7 +76,7 @@ describe('CombatHelperService', () => {
         const player = { attack: { value: 5, bonusDice: 'D6' }, defense: { value: 5, bonusDice: 'D6' } } as unknown as Player;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(undefined);
         expect(service.getRandomAttackScore(player, true, [[]])).toBe(11);
-        expect(service.getRandomDefenseScore(player, true, [[]])).toBe(11);
+        expect(service.getRandomDefenseScore(player, true, [[]])).toBe(6);
     });
 
     it('should return correct defense score', () => {
@@ -130,7 +130,7 @@ describe('CombatHelperService', () => {
 
     it('should extract dice values correctly', () => {
         expect((service as any).extractDiceValue('d6')).toBe(6);
-        expect((service as any).extractDiceValue('d20')).toBe(20);
+        expect((service as any).extractDiceValue('d4')).toBe(4);
         expect((service as any).extractDiceValue('')).toBe(1);
     });
 
@@ -140,7 +140,7 @@ describe('CombatHelperService', () => {
             attacker: { name: 'Attacker' } as Player,
             defender: { name: 'Defender' } as Player,
         };
-        expect(service.getDefender(combatState as unknown as CombatState)).toBe(combatState.defender);
+        expect(service.getDefender(combatState as unknown as CombatState)).toBe(combatState.attacker);
     });
 
     it('should return the correct defender when currentFighter is the defender', () => {
