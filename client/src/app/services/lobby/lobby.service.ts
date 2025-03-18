@@ -163,9 +163,6 @@ export class LobbyService {
                     this.lobbySubject.next({ ...lobby, players });
                 }
             },
-            error: () => {
-                this.snackbarService.showMessage('Error fetching players'); // debug
-            },
         });
     }
 }
