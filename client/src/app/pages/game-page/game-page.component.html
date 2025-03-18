@@ -149,18 +149,16 @@
                 <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
                 <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
             </div>
-
-            <div class="messages-content" *ngIf="activeTab === 'chat'">
+            @if (activeTab === 'chat'){
+                <div class="messages-content">
                 <p>Panneau des messages (clavardage).</p>
-            </div>
-
-            <div class="log-content" *ngIf="activeTab === 'log'">
-                @for(entry of logEntries; track $index) {
-                <p class="log-entry">
-                    {{ entry }}
-                </p>
-                }
-            </div>
+                </div>
+            }
+            @if(activeTab === 'log'){
+                <div class="log-content">
+                    <p>Panneau du journal de bord (journal de bord).</p>
+                </div>
+            }
         </div>
     </div>
 </div>
