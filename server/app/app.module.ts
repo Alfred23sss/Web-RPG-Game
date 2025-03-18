@@ -44,7 +44,7 @@ import { LobbyService } from './services/lobby/lobby.service';
         GameCombatService,
         GridManagerService,
         GameSessionTurnService,
-    ], // removed chat
+    ],
     exports: [AccessCodesService],
 })
 export class AppModule {}
