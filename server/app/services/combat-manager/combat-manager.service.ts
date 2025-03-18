@@ -189,14 +189,12 @@ export class GameCombatService {
         const { attacker, defender, currentFighter, isDebugMode } = combatState;
         const attackerScore = this.combatHelper.getRandomAttackScore(
             currentFighter,
-            accessCode,
             isDebugMode,
             this.gameSessionService.getGameSession(accessCode).game.grid,
         );
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
         const defenseScore = this.combatHelper.getRandomDefenseScore(
             defenderPlayer,
-            accessCode,
             isDebugMode,
             this.gameSessionService.getGameSession(accessCode).game.grid,
         );
@@ -230,7 +228,6 @@ export class GameCombatService {
         this.resetHealth([combatState.currentFighter, defenderPlayer], accessCode);
         const updatedGridAfterTeleportation = this.combatHelper.resetLoserPlayerPosition(
             defenderPlayer,
-            accessCode,
             this.gameSessionService.getGameSession(accessCode).game.grid,
         );
         this.endCombat(accessCode, false);
