@@ -1,11 +1,8 @@
-import { TileType } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
-import { DiceType } from '@app/interfaces/Dice';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
-import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -14,7 +11,6 @@ const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
 const ESCAPE_THRESHOLD = 0.3;
-const ICE_PENALTY = -2;
 const WIN_CONDITION = 3;
 
 @Injectable()
@@ -24,7 +20,7 @@ export class GameCombatService {
     constructor(
         private readonly gameSessionService: GameSessionService,
         private readonly eventEmitter: EventEmitter2,
-        private readonly gridManagerService: GridManagerService,
+        private readonly combatHelper: CombatHelperService,
     ) {}
 
     handleCombatSessionAbandon(accessCode: string, playerName: string): void {
@@ -48,7 +44,7 @@ export class GameCombatService {
 
     performAttack(accessCode: string, attackerName: string): void {
         const combatState = this.combatStates[accessCode];
-        if (!combatState || !this.isValidAttacker(combatState, attackerName)) return;
+        if (!combatState || !this.combatHelper.isValidAttacker(combatState, attackerName)) return;
         this.resetCombatTimers(accessCode);
         combatState.playerPerformedAction = true;
         const { attackSuccessful, attackerScore, defenseScore, defenderPlayer } = this.calculateAttackResult(combatState, accessCode);
@@ -133,7 +129,7 @@ export class GameCombatService {
         const pausedTimeRemaining = this.gameSessionService.pauseGameTurn(accessCode);
         this.initialiseCombatState(accessCode, attacker, defender, pausedTimeRemaining, isDebugMode);
         this.gameSessionService.setCombatState(accessCode, true);
-        const orderedFighters = this.determineCombatOrder(attacker, defender);
+        const orderedFighters = this.combatHelper.determineCombatOrder(attacker, defender);
         const currentPlayerName = orderedFighters[0].name;
         this.emitEvent('game.combat.started', { accessCode, attacker, defender, currentPlayerName });
         this.startCombatTurn(accessCode, orderedFighters[0]);
@@ -177,20 +173,6 @@ export class GameCombatService {
         });
     }
 
-    private resetLoserPlayerPosition(player: Player, accessCode: string): Tile[][] {
-        const defenderSpawnPoint = this.gridManagerService.findTileBySpawnPoint(this.gameSessionService.getGameSession(accessCode).game.grid, player);
-        const updatedGridAfterTeleportation = this.gridManagerService.teleportPlayer(
-            this.gameSessionService.getGameSession(accessCode).game.grid,
-            player,
-            defenderSpawnPoint,
-        );
-        return updatedGridAfterTeleportation;
-    }
-
-    private isValidAttacker(combatState: CombatState, attackerName: string): boolean {
-        return combatState.currentFighter.name === attackerName;
-    }
-
     private resetCombatTimers(accessCode: string) {
         const combatState = this.combatStates[accessCode];
         if (combatState.combatTurnTimers) {
@@ -205,9 +187,19 @@ export class GameCombatService {
 
     private calculateAttackResult(combatState: CombatState, accessCode: string) {
         const { attacker, defender, currentFighter, isDebugMode } = combatState;
-        const attackerScore = this.getRandomAttackScore(currentFighter, accessCode, isDebugMode);
+        const attackerScore = this.combatHelper.getRandomAttackScore(
+            currentFighter,
+            accessCode,
+            isDebugMode,
+            this.gameSessionService.getGameSession(accessCode).game.grid,
+        );
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
-        const defenseScore = this.getRandomDefenseScore(defenderPlayer, accessCode, isDebugMode);
+        const defenseScore = this.combatHelper.getRandomDefenseScore(
+            defenderPlayer,
+            accessCode,
+            isDebugMode,
+            this.gameSessionService.getGameSession(accessCode).game.grid,
+        );
         return {
             attackSuccessful: attackerScore > defenseScore,
             attackerScore,
@@ -236,7 +228,11 @@ export class GameCombatService {
     private handleCombatEnd(combatState: CombatState, defenderPlayer: Player, accessCode: string): void {
         combatState.currentFighter.combatWon++;
         this.resetHealth([combatState.currentFighter, defenderPlayer], accessCode);
-        const updatedGridAfterTeleportation = this.resetLoserPlayerPosition(defenderPlayer, accessCode);
+        const updatedGridAfterTeleportation = this.combatHelper.resetLoserPlayerPosition(
+            defenderPlayer,
+            accessCode,
+            this.gameSessionService.getGameSession(accessCode).game.grid,
+        );
         this.endCombat(accessCode, false);
         this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
         if (this.checkPlayerWon(accessCode, combatState.currentFighter)) {
@@ -249,43 +245,11 @@ export class GameCombatService {
         }
     }
 
-    private getRandomAttackScore(attacker: Player, accessCode: string, isDebugMode: boolean): number {
-        let iceDisadvantage = 0;
-        const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, attacker);
-        if (tile && tile.type === TileType.Ice) {
-            iceDisadvantage = ICE_PENALTY;
-        }
-        const diceValue = this.extractDiceValue(attacker.attack.bonusDice);
-        const attackBonus = isDebugMode ? diceValue : Math.floor(Math.random() * diceValue) + 1;
-        return attacker.attack.value + attackBonus + iceDisadvantage;
-    }
-
-    private getRandomDefenseScore(defender: Player, accessCode: string, isDebugMode: boolean): number {
-        let iceDisadvantage = 0;
-        const tile = this.gridManagerService.findTileByPlayer(this.gameSessionService.getGameSession(accessCode).game.grid, defender);
-        if (tile && tile.type === TileType.Ice) {
-            iceDisadvantage = ICE_PENALTY;
-        }
-        const defenseBonus = isDebugMode ? 1 : Math.floor(Math.random() * this.extractDiceValue(defender.defense.bonusDice)) + 1;
-        return defender.defense.value + defenseBonus + iceDisadvantage;
-    }
-
-    private determineCombatOrder(attacker: Player, defender: Player): Player[] {
-        if (attacker.speed === defender.speed) {
-            return [attacker, defender];
-        }
-        return attacker.speed > defender.speed ? [attacker, defender] : [defender, attacker];
-    }
-
     private getNextCombatFighter(accessCode: string): Player {
         const combatState = this.combatStates[accessCode];
-        if (!combatState) throw new Error('Combat state not found');
+        if (!combatState) return;
         const { attacker, defender, currentFighter } = combatState;
         return currentFighter.name === attacker.name ? defender : attacker;
-    }
-
-    private extractDiceValue(dice: DiceType): number {
-        return parseInt(dice.replace(/\D/g, ''), 10) || 1;
     }
 
     private startCombatTurn(accessCode: string, player: Player): void {
@@ -294,7 +258,7 @@ export class GameCombatService {
 
         combatState.playerPerformedAction = false;
         combatState.currentFighter = player;
-        const defender = this.getDefender(combatState);
+        const defender = this.combatHelper.getDefender(combatState);
         const escapeAttemptsRemaining = combatState.remainingEscapeAttempts.get(player.name) || 0;
         const turnDuration = this.calculateTurnDuration(escapeAttemptsRemaining);
         const turnDurationInSeconds = turnDuration / SECOND;
@@ -311,17 +275,13 @@ export class GameCombatService {
         this.handleTimerTimeout(accessCode, combatState, turnDuration);
     }
 
-    private getDefender(combatState: CombatState): Player {
-        return combatState.currentFighter === combatState.attacker ? combatState.defender : combatState.attacker;
-    }
-
     private calculateTurnDuration(escapeAttemptsRemaining: number): number {
         return escapeAttemptsRemaining > 0 ? COMBAT_TURN_DURATION : COMBAT_ESCAPE_LIMITED_DURATION;
     }
 
     private initializeCombatTimer(accessCode: string, combatState: CombatState, turnDurationInSeconds: number): void {
         let timeLeft = turnDurationInSeconds;
-        const defender = this.getDefender(combatState);
+        const defender = this.combatHelper.getDefender(combatState);
         this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
 
         combatState.combatCountdownInterval = setInterval(() => {
