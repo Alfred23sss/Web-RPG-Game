@@ -848,8 +848,12 @@ describe('GameCombatService', () => {
             const accessCode = 'testAccessCode';
             const combatState = mockCombatState();
 
-            const mockTimer = setTimeout(() => {}, 1000);
-            const mockInterval = setInterval(() => {}, 1000);
+            const mockTimer = setTimeout(() => {
+                return;
+            }, 1000);
+            const mockInterval = setInterval(() => {
+                return;
+            }, 1000);
 
             combatState.combatTurnTimers = mockTimer;
             combatState.combatCountdownInterval = mockInterval;
@@ -1021,7 +1025,9 @@ describe('GameCombatService', () => {
         const combatState = mockCombatState();
         combatState.playerPerformedAction = false;
         service['combatStates'] = { [accessCode]: combatState };
-        const performAttackSpy = jest.spyOn(service as any, 'performAttack').mockImplementation(() => {});
+        const performAttackSpy = jest.spyOn(service as any, 'performAttack').mockImplementation(() => {
+            return;
+        });
         (service as any).handleTimerTimeout(accessCode, combatState, 1000);
 
         expect(performAttackSpy).not.toHaveBeenCalled();
@@ -1035,7 +1041,9 @@ describe('GameCombatService', () => {
         const combatState = mockCombatState();
         combatState.playerPerformedAction = true;
         service['combatStates'] = { [accessCode]: combatState };
-        const performAttackSpy = jest.spyOn(service as any, 'performAttack').mockImplementation(() => {});
+        const performAttackSpy = jest.spyOn(service as any, 'performAttack').mockImplementation(() => {
+            return;
+        });
         (service as any).handleTimerTimeout(accessCode, combatState, 1000);
 
         jest.advanceTimersByTime(1000);
@@ -1050,7 +1058,9 @@ describe('GameCombatService', () => {
 
         combatHelper.getDefender.mockReturnValue(mockDefender);
 
-        const emitEventSpy = jest.spyOn(service as any, 'emitEvent').mockImplementation(() => {});
+        const emitEventSpy = jest.spyOn(service as any, 'emitEvent').mockImplementation(() => {
+            return;
+        });
 
         (service as any).initializeCombatTimer(accessCode, combatState, turnDurationInSeconds);
         expect(emitEventSpy).toHaveBeenCalledWith('game.combat.timer', {
@@ -1088,10 +1098,18 @@ describe('GameCombatService', () => {
             service['combatStates'] = { [accessCode]: combatState };
             combatHelper.getDefender.mockReturnValue(defender);
             jest.spyOn(service as any, 'calculateTurnDuration').mockReturnValue(turnDuration);
-            jest.spyOn(service as any, 'emitEvent').mockImplementation(() => {});
-            jest.spyOn(service as any, 'initializeCombatTimer').mockImplementation(() => {});
-            jest.spyOn(service as any, 'handleTimerTimeout').mockImplementation(() => {});
-            combatState.combatCountdownInterval = setInterval(() => {}, 1000);
+            jest.spyOn(service as any, 'emitEvent').mockImplementation(() => {
+                return;
+            });
+            jest.spyOn(service as any, 'initializeCombatTimer').mockImplementation(() => {
+                return;
+            });
+            jest.spyOn(service as any, 'handleTimerTimeout').mockImplementation(() => {
+                return;
+            });
+            combatState.combatCountdownInterval = setInterval(() => {
+                return;
+            }, 1000);
             (service as any).startCombatTurn(accessCode, player);
             expect(combatState.playerPerformedAction).toBe(false);
             expect(combatState.currentFighter).toBe(player);
