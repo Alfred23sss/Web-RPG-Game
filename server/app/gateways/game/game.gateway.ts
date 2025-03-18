@@ -246,14 +246,6 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.combat.timeout')
-    handleCombatTimeout(payload: { accessCode: string; fighter: Player }) {
-        this.logger.log(`Combat timeout for ${payload.fighter.name} in game ${payload.accessCode}`);
-        this.server.to(payload.accessCode).emit('combatTimeout', {
-            fighter: payload.fighter,
-        });
-    }
-
     @OnEvent('admin.mode.disabled')
     handleAdminModeDisabled(payload: { accessCode: string }) {
         this.server.to(payload.accessCode).emit('adminModeDisabled');

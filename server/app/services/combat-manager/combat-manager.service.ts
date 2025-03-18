@@ -41,16 +41,13 @@ export class GameCombatService {
         }
     }
 
-    endCombatTurn(accessCode: string, isTimeout: boolean = false): void {
+    endCombatTurn(accessCode: string): void {
         this.logger.log('Ending combat turn ...');
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
         this.resetCombatTimers(accessCode);
 
-        if (isTimeout) {
-            this.emitCombatTimeoutAction(accessCode, combatState.currentFighter);
-        }
         const nextFighter = this.getNextCombatFighter(accessCode);
         this.startCombatTurn(accessCode, nextFighter);
     }
@@ -381,11 +378,6 @@ export class GameCombatService {
         const defenderSocketId = this.lobbyService.getPlayerSocket(defender.name);
         this.eventEmitter.emit('game.combat.timer', { accessCode, timeLeft, attackerSocketId, defenderSocketId });
     }
-
-    private emitCombatTimeoutAction(accessCode: string, fighter: Player): void {
-        this.eventEmitter.emit('game.combat.timeout', { accessCode, fighter });
-    }
-
     private emitCombatAttackResult(attackerId: string, defenderId: string, success: boolean, attackScore: number, defenseScore: number): void {
         this.eventEmitter.emit('game.combat.attack.result', {
             attackerId,

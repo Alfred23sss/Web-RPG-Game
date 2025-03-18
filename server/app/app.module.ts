@@ -11,10 +11,11 @@ import { LobbyGateway } from './gateways/lobby/lobby.gateway';
 import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
 import { GameCombatService } from './services/combat-manager/combat-manager.service';
+import { GameSessionTurnService } from './services/game-session-turn/game-session-turn.service';
 import { GameSessionService } from './services/game-session/game-session.service';
 import { GameService } from './services/game/game.service';
-import { LobbyService } from './services/lobby/lobby.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
+import { LobbyService } from './services/lobby/lobby.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -42,6 +43,7 @@ import { GridManagerService } from './services/grid-manager/grid-manager.service
         GameSessionService,
         GameCombatService,
         GridManagerService,
+        GameSessionTurnService,
     ], // removed chat
     exports: [AccessCodesService],
 })
