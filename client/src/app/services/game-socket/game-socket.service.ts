@@ -206,13 +206,8 @@ export class GameSocketService {
             const clientPlayerPosition = component.getClientPlayerPosition();
             if (!clientPlayerPosition || !component.game || !component.game.grid) return;
             const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
-            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, component.game.grid);
             if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
                 if (!hasIce) {
-                    component.endTurn();
-                }
-            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce && !hasActionAvailable) {
                     component.endTurn();
                 }
             }

@@ -441,10 +441,71 @@ describe('GameSocketService', () => {
         };
         mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
         mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0); // Aucun point de mouvement restant
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(true); // Glace adjacente
+        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false); // Glace adjacente
         mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false); // Pas d'action disponible
         playerMovementCallback({ grid, player, isCurrentlyMoving });
-        expect(mockComponent.endTurn).not.toHaveBeenCalled();
+        expect(mockComponent.endTurn).toHaveBeenCalled();
+    });
+
+    it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice--222', () => {
+        let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
+        mockSocketClientService.onPlayerMovement.and.callFake((callback: any) => {
+            playerMovementCallback = callback;
+            return () => {};
+        });
+        service.initializeSocketListeners(mockComponent);
+        expect(playerMovementCallback).toBeDefined();
+        const grid: Tile[][] = [
+            [
+                {
+                    id: 'tile1',
+                    type: TileType.Default,
+                    isOccupied: false,
+                    imageSrc: 'default-tile.png',
+                    isOpen: true,
+                },
+                {
+                    id: 'tile2',
+                    type: TileType.Wall,
+                    isOccupied: true,
+                    imageSrc: 'wall-tile.png',
+                    isOpen: false,
+                },
+            ],
+            [
+                {
+                    id: 'tile3',
+                    type: TileType.Ice,
+                    isOccupied: false,
+                    imageSrc: 'ice-tile.png',
+                    isOpen: true,
+                },
+                {
+                    id: 'tile4',
+                    type: TileType.Door,
+                    isOccupied: true,
+                    imageSrc: 'door-tile.png',
+                    isOpen: false,
+                },
+            ],
+        ];
+        const player: Player = { name: 'Player1', movementPoints: 0, actionPoints: 1, speed: 5 } as Player;
+        const isCurrentlyMoving = false;
+        mockComponent.clientPlayer = player;
+        mockComponent.game = { grid } as Game;
+        const clientPlayerPosition: Tile = {
+            id: 'tile1',
+            type: TileType.Default,
+            isOccupied: true,
+            imageSrc: 'player-tile.png',
+            isOpen: true,
+        };
+        mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
+        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0); // Aucun point de mouvement restant
+        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false); // Glace adjacente
+        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false); // Pas d'action disponible
+        playerMovementCallback({ grid, player, isCurrentlyMoving });
+        expect(mockComponent.endTurn).toHaveBeenCalled();
     });
 
     it('should handle gameCombatStarted event correctly', () => {
@@ -813,6 +874,85 @@ describe('GameSocketService', () => {
     });
 
     //LUI FAIT MARCHE LA CONDITION
+    it('should handle combat ended with actionPoints 1 and movementPoints 0 and no adjacent ice, no action available', () => {
+        let combatEndedCallback: (data: { winner: Player; hasEvaded: boolean }) => void = () => {};
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'combatEnded') {
+                combatEndedCallback = callback;
+            }
+            return () => {};
+        });
+        service.initializeSocketListeners(mockComponent);
+
+        // Configurer les mocks
+        mockComponent.clientPlayer = {
+            name: 'Player1',
+            speed: 5,
+            movementPoints: 0,
+            actionPoints: 1,
+            inventory: [null, null],
+            isAdmin: false,
+            hasAbandoned: false,
+            isActive: true,
+            combatWon: 0,
+        } as Player;
+
+        mockComponent.currentPlayer = {
+            name: 'Player1', // Même nom que clientPlayer
+            speed: 5,
+            movementPoints: 0,
+            actionPoints: 1,
+            inventory: [null, null],
+            isAdmin: false,
+            hasAbandoned: false,
+            isActive: true,
+            combatWon: 0,
+        } as Player;
+
+        mockComponent.movementPointsRemaining = 0;
+
+        mockComponent.game = {
+            id: 'game1',
+            name: 'Test Game',
+            size: '10x10',
+            mode: 'classic',
+            lastModified: new Date('2023-10-01'),
+            isVisible: true,
+            previewImage: 'image-url',
+            description: 'This is a test game',
+            grid: [],
+        } as Game;
+
+        const clientPlayerPosition: Tile = {
+            id: 'tile1',
+            type: TileType.Default,
+            isOccupied: true,
+            imageSrc: 'player-tile.png',
+            isOpen: true,
+        };
+        mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
+        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false); // Pas de glace adjacente
+        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false); // Pas d'action disponible
+
+        // Simuler l'événement combatEnded
+        const winner: Player = {
+            name: 'Player1',
+            speed: 5,
+            movementPoints: 0,
+            actionPoints: 1,
+            inventory: [null, null],
+            isAdmin: false,
+            hasAbandoned: false,
+            isActive: true,
+            combatWon: 1,
+        } as Player;
+
+        combatEndedCallback({ winner, hasEvaded: false });
+
+        // Vérifier que endTurn est appelé
+        expect(mockComponent.endTurn).toHaveBeenCalled();
+    });
+
     it('should handle combat ended with actionPoints 1 and movementPoints 0 and no adjacent ice, no action available', () => {
         let combatEndedCallback: (data: { winner: Player; hasEvaded: boolean }) => void = () => {};
         mockSocketClientService.on.and.callFake((event: string, callback: any) => {
