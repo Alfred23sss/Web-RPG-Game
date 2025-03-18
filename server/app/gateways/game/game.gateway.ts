@@ -184,13 +184,19 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.attack.result')
-    handleCombatResult(payload: { attacker: Player; defender: Player; success: boolean; attackScore: number; defenseScore: number }) {
-        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
-        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+    handleCombatResult(payload: {
+        currentFighter: Player;
+        defenderPlayer: Player;
+        attackSuccessful: boolean;
+        attackerScore: number;
+        defenseScore: number;
+    }) {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.currentFighter.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defenderPlayer.name);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('attackResult', {
-            success: payload.success,
-            attackScore: payload.attackScore,
+            success: payload.attackSuccessful,
+            attackScore: payload.attackerScore,
             defenseScore: payload.defenseScore,
         });
     }
@@ -202,6 +208,7 @@ export class GameGateway {
             player: payload.player,
         });
     }
+
     @OnEvent('update.player.list')
     handleUpdatePlayerList(payload: { players: Player[]; accessCode: string }) {
         this.server.to(payload.accessCode).emit('playerListUpdate', {
@@ -260,14 +267,12 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.turn.started')
-    handleCombatTurnStarted(payload: { accessCode: string; fighter: Player; defender: Player; duration: number; escapeAttemptsLeft: number }) {
-        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.fighter.name);
+    handleCombatTurnStarted(payload: { accessCode: string; player: Player; defender: Player }) {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatTurnStarted', {
-            fighter: payload.fighter,
-            duration: payload.duration,
-            escapeAttemptsLeft: payload.escapeAttemptsLeft,
+            fighter: payload.player,
         });
     }
 }
