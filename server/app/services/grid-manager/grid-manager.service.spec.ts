@@ -244,4 +244,85 @@ describe('GridManagerService', () => {
         const adjacentTiles = (service as any).getAdjacentTiles(mockGrid, invalidTile);
         expect(adjacentTiles).toEqual([]);
     });
+    it('should not teleport if targetTile is occupied by another player', () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: mockPlayer } as Tile,
+                { id: 'tile-0-1', type: TileType.Default, isOpen: true, player: { name: 'Player2' } as Player } as Tile,
+            ],
+        ];
+
+        const result = service.teleportPlayer(grid, mockPlayer, grid[0][1]);
+        expect(result).toBe(grid);
+        expect(grid[0][0].player).toBe(mockPlayer);
+    });
+
+    it('should not teleport if targetTile is a wall', () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: mockPlayer } as Tile,
+                { id: 'tile-0-1', type: TileType.Wall, isOpen: false, player: null } as Tile,
+            ],
+        ];
+
+        const result = service.teleportPlayer(grid, mockPlayer, grid[0][1]);
+        expect(result).toBe(grid);
+        expect(grid[0][0].player).toBe(mockPlayer);
+    });
+
+    it('should not teleport if targetTile is a closed door', () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: mockPlayer } as Tile,
+                { id: 'tile-0-1', type: TileType.Door, isOpen: false, player: null } as Tile,
+            ],
+        ];
+
+        const result = service.teleportPlayer(grid, mockPlayer, grid[0][1]);
+        expect(result).toBe(grid);
+        expect(grid[0][0].player).toBe(mockPlayer);
+    });
+
+    it('should not teleport if targetTile has an item that is not a home', () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: mockPlayer } as Tile,
+                { id: 'tile-0-1', type: TileType.Default, isOpen: true, player: null, item: { name: 'key' } as Item } as Tile,
+            ],
+        ];
+
+        const result = service.teleportPlayer(grid, mockPlayer, grid[0][1]);
+        expect(result).toBe(grid);
+        expect(grid[0][0].player).toBe(mockPlayer);
+    });
+
+    it("should teleport to closest available tile if targetTile is the player's spawn point and is obstructed", () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: mockPlayer } as Tile,
+                { id: 'tile-0-1', type: TileType.Wall, isOpen: false, player: null, item: { name: 'home' } as Item } as Tile,
+                { id: 'tile-0-2', type: TileType.Default, isOpen: true, player: null } as Tile,
+            ],
+        ];
+
+        mockPlayer.spawnPoint.tileId = 'tile-0-1';
+
+        const result = service.teleportPlayer(grid, mockPlayer, grid[0][1]);
+        expect(result).toBe(grid);
+        expect(grid[0][0].player).toBeUndefined();
+        expect(grid[0][2].player).toBe(mockPlayer);
+    });
+
+    it("should not teleport if targetTile is not the player's spawn point and is obstructed", () => {
+        const grid: Tile[][] = [
+            [
+                { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: mockPlayer } as Tile,
+                { id: 'tile-0-1', type: TileType.Wall, isOpen: false, player: null } as Tile,
+            ],
+        ];
+
+        const result = service.teleportPlayer(grid, mockPlayer, grid[0][1]);
+        expect(result).toBe(grid);
+        expect(grid[0][0].player).toBe(mockPlayer);
+    });
 });
