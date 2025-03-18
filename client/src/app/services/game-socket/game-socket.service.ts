@@ -34,6 +34,7 @@ const events = [
     'gridUpdate',
     'noMoreEscapesLeft',
     'combatEnded',
+    'adminModeChangedServerSide',
 ];
 
 @Injectable({

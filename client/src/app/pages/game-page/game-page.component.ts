@@ -93,7 +93,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleTeleport(targetTile: Tile): void {
-        if (!this.isDebugMode || this.isInCombatMode) return;
+        if (this.isInCombatMode) return;
         if (this.clientPlayer.name === this.currentPlayer.name) {
             this.socketClientService.sendTeleportPlayer(this.lobby.accessCode, this.clientPlayer, targetTile);
         }
