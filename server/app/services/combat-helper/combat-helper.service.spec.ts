@@ -63,33 +63,33 @@ describe('CombatHelperService', () => {
     it('should apply correct attack score without ice penalty', () => {
         const player = { attack: { value: 5, bonusDice: 'D6' } } as unknown as Player;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(undefined);
-        expect(service.getRandomAttackScore(player, '', false, [[]])).toBeGreaterThanOrEqual(6);
+        expect(service.getRandomAttackScore(player, false, [[]])).toBeGreaterThanOrEqual(6);
     });
 
     it('should apply correct defense score without ice penalty', () => {
         const player = { defense: { value: 5, bonusDice: 'D6' } } as unknown as Player;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(undefined);
-        expect(service.getRandomDefenseScore(player, '', false, [[]])).toBeGreaterThanOrEqual(6);
+        expect(service.getRandomDefenseScore(player, false, [[]])).toBeGreaterThanOrEqual(6);
     });
 
     it('should return predictable values in debug mode', () => {
         const player = { attack: { value: 5, bonusDice: 'D6' }, defense: { value: 5, bonusDice: 'D6' } } as unknown as Player;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(undefined);
-        expect(service.getRandomAttackScore(player, '', true, [[]])).toBe(11);
-        expect(service.getRandomDefenseScore(player, '', true, [[]])).toBe(11);
+        expect(service.getRandomAttackScore(player, true, [[]])).toBe(11);
+        expect(service.getRandomDefenseScore(player, true, [[]])).toBe(11);
     });
 
     it('should return correct defense score', () => {
         const defender = { defense: { value: 5, bonusDice: 'd6' } } as unknown as Player;
         jest.spyOn(global.Math, 'random').mockReturnValue(0.5);
-        expect(service.getRandomDefenseScore(defender, '', false, [])).toBeGreaterThan(5);
+        expect(service.getRandomDefenseScore(defender, false, [])).toBeGreaterThan(5);
         jest.spyOn(global.Math, 'random').mockRestore();
     });
 
     it('should return correct attack score', () => {
         const attacker = { attack: { value: 5, bonusDice: 'd6' } } as unknown as Player;
         jest.spyOn(global.Math, 'random').mockReturnValue(0.5);
-        expect(service.getRandomAttackScore(attacker, '', false, [])).toBeGreaterThan(5);
+        expect(service.getRandomAttackScore(attacker, false, [])).toBeGreaterThan(5);
         jest.spyOn(global.Math, 'random').mockRestore();
     });
 
@@ -97,8 +97,8 @@ describe('CombatHelperService', () => {
         const player = { attack: { value: 5, bonusDice: 'd6' }, defense: { value: 5, bonusDice: 'd6' } } as unknown as Player;
         const tile = { type: TileType.Ice } as Tile;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(tile);
-        expect(service.getRandomAttackScore(player, '', false, [[]])).toBeLessThan(9);
-        expect(service.getRandomDefenseScore(player, '', false, [[]])).toBeLessThan(9);
+        expect(service.getRandomAttackScore(player, false, [[]])).toBeLessThan(9);
+        expect(service.getRandomDefenseScore(player, false, [[]])).toBeLessThan(9);
     });
 
     it('should reset loser player position', () => {
@@ -106,7 +106,7 @@ describe('CombatHelperService', () => {
         const grid = [[{} as Tile]];
         (gridManagerService.findTileBySpawnPoint as jest.Mock).mockReturnValue({} as Tile);
         (gridManagerService.teleportPlayer as jest.Mock).mockReturnValue(grid);
-        expect(service.resetLoserPlayerPosition(player, '', grid)).toBe(grid);
+        expect(service.resetLoserPlayerPosition(player, grid)).toBe(grid);
     });
 
     it('should validate attacker', () => {
