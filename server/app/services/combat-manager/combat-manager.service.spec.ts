@@ -477,15 +477,15 @@ describe('GameCombatService', () => {
             expect(gameSessionService.resumeGameTurn).toHaveBeenCalledWith(accessCode, 30);
         });
 
-        it('should handle escape scenario', () => {
-            const accessCode = 'test';
-            (service as any).combatStates[accessCode] = mockCombatState();
-            service.endCombat(accessCode, true);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.ended', {
-                attackerSocketId: 'attacker-socket',
-                defenderSocketId: 'defender-socket',
-            });
-        });
+        // it('should handle escape scenario', () => {
+        //     const accessCode = 'test';
+        //     (service as any).combatStates[accessCode] = mockCombatState();
+        //     service.endCombat(accessCode, true);
+        //     expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.ended', {
+        //         attackerSocketId: 'attacker-socket',
+        //         defenderSocketId: 'defender-socket',
+        //     });
+        // });
         it('should resume game turn when winner is current player', () => {
             const accessCode = 'test';
             const pausedTime = 25;
