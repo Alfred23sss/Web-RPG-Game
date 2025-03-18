@@ -63,6 +63,7 @@ export class GameSocketService {
             const abandonedPlayer = component.playerList.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
+            component.lobby.players = component.lobby.players.filter((p) => p.name !== data.player.name);
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
         });
 
@@ -199,6 +200,8 @@ export class GameSocketService {
             component.escapeAttempts = defaultEscapeAttempts;
             if (data && data.winner && !data.hasEvaded) {
                 this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
+            } else {
+                this.snackbarService.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, delayMessageAfterCombatEnded);
             }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;

@@ -12,13 +12,13 @@
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
                 [class.abandoned]="player.hasAbandoned"
-                [class.active]="player.isActive"
+                [class.active]="player.name === currentPlayer.name"
             >
                 {{ player.name }} <br />
                 Combats gagnés: {{ player.combatWon }}
             </p>
             }
-            <p>Joueur actif: {{ lobby.players.length }}</p>
+            <p>#Joueurs actifs: {{ lobby.players.length }}</p>
         </div>
 
         <div class="inventory">
@@ -104,12 +104,12 @@
         </div>
 
         <div class="action-buttons">
-            @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){
-                @if(!isInCombatMode){
-                    <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
-                    <button class="action-btn execute-action" (click)="executeNextAction()">Exécuter action</button>
-                }
-            }
+            @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){ @if(!isInCombatMode){
+            <button class="action-btn end-turn" (click)="endTurn()">Terminer tour</button>
+            <button class="action-btn execute-action" (click)="executeNextAction()">
+                {{ isActionMode ? 'Canceler action' : 'Exécuter action' }}
+            </button>
+            } }
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
             }
         </div>
@@ -135,13 +135,22 @@
         </div>
         <div class="combat-result">
             @if(attackResult){
-                <p>Résultat du combat :</p>
-                @if(attackResult.success){
-                <p>✅ Attaque réussi! <br> Dé Attaque: {{ attackResult.attackScore-4 }} <br> Dé Défense: {{ attackResult.defenseScore-4 }} <br> Dégats infligés: {{ attackResult.attackScore - attackResult.defenseScore}}</p> 
-                } @else {
-                <p>❌ Attaque ratée! <br> Dé Attaque: {{ attackResult.attackScore-4 }} <br> Dé Défense: {{ attackResult.defenseScore-4 }} <br> Dégats infligés: 0</p>
-                }
-            }
+            <p>Résultat du combat :</p>
+            @if(attackResult.success){
+            <p>
+                ✅ Attaque réussi! <br />
+                Dé Attaque: {{ attackResult.attackScore - 4 }} <br />
+                Dé Défense: {{ attackResult.defenseScore - 4 }} <br />
+                Dégats infligés: {{ attackResult.attackScore - attackResult.defenseScore }}
+            </p>
+            } @else {
+            <p>
+                ❌ Attaque ratée! <br />
+                Dé Attaque: {{ attackResult.attackScore - 4 }} <br />
+                Dé Défense: {{ attackResult.defenseScore - 4 }} <br />
+                Dégats infligés: 0
+            </p>
+            } }
         </div>
         }
         <div class="game-messages">
@@ -151,14 +160,13 @@
                 <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
             </div>
             @if (activeTab === 'chat'){
-                <div class="messages-content">
+            <div class="messages-content">
                 <p>Panneau des messages (clavardage).</p>
-                </div>
-            }
-            @if(activeTab === 'log'){
-                <div class="log-content">
-                    <p>Panneau du journal de bord (journal de bord).</p>
-                </div>
+            </div>
+            } @if(activeTab === 'log'){
+            <div class="log-content">
+                <p>Panneau du journal de bord (journal de bord).</p>
+            </div>
             }
         </div>
     </div>
