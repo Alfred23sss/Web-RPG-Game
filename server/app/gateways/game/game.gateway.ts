@@ -124,12 +124,14 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.ended')
-    handleCombatEnded(payload: { attackerSocketId: string; defenderSocketId: string; winner: Player; hasEvaded: boolean }): void {
-        this.logger.log('sending to client combat ended');
-        this.logger.log(`winner is ${payload.winner.name}`);
-        this.server
-            .to([payload.attackerSocketId, payload.defenderSocketId])
-            .emit('combatEnded', { winner: payload.winner, hasEvaded: payload.hasEvaded });
+    handleCombatEnded(payload: { attacker: Player; defender: Player; winner: Player; hasEvaded: boolean }): void {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+
+        this.server.to([attackerSocketId, defenderSocketId]).emit('combatEnded', {
+            winner: payload.winner,
+            hasEvaded: payload.hasEvaded,
+        });
     }
 
     @OnEvent('game.combat.escape')
@@ -183,20 +185,27 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.attack.result')
-    handleCombatResult(payload: { attackerId: string; defenderId: string; success: boolean; attackScore: number; defenseScore: number }) {
-        this.logger.log('emiting combat attack result');
-        this.server
-            .to([payload.attackerId, payload.defenderId])
-            .emit('attackResult', { success: payload.success, attackScore: payload.attackScore, defenseScore: payload.defenseScore });
+    handleCombatResult(payload: {
+        currentFighter: Player;
+        defenderPlayer: Player;
+        attackSuccessful: boolean;
+        attackerScore: number;
+        defenseScore: number;
+    }) {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.currentFighter.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defenderPlayer.name);
+
+        this.server.to([attackerSocketId, defenderSocketId]).emit('attackResult', {
+            success: payload.attackSuccessful,
+            attackScore: payload.attackerScore,
+            defenseScore: payload.defenseScore,
+        });
     }
 
     @OnEvent('update.player')
-    handleDefenderHealthUpdate(payload: { player: Player; playerSocketId: string }) {
-        if (!payload.playerSocketId) {
-            this.logger.error('defenderSocketId is undefined or null');
-        }
-        this.logger.log('emitting player updates ' + payload.playerSocketId);
-        this.server.to(payload.playerSocketId).emit('playerUpdate', {
+    handleDefenderHealthUpdate(payload: { player: Player }) {
+        const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        this.server.to(socketId).emit('playerUpdate', {
             player: payload.player,
         });
     }
@@ -210,17 +219,20 @@ export class GameGateway {
 
     @OnEvent('game.turn.timer')
     handleTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
+        this.logger.log(`emitting time : ${payload.timeLeft}`);
         this.server.to(payload.accessCode).emit('timerUpdate', {
             timeLeft: payload.timeLeft,
         });
     }
 
     @OnEvent('game.combat.started')
-    handleCombatStarted(payload: { accessCode: string; attackerSocketId: string; defenderSocketId: string }) {
-        this.logger.log(
-            `Combat started in game ${payload.accessCode}, socket attatque ${payload.attackerSocketId} et socket defense ${payload.defenderSocketId}`,
-        );
-        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatStarted');
+    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; firstFighter: string }) {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+
+        this.server.to([attackerSocketId, defenderSocketId]).emit('combatStarted', {
+            firstFighter: payload.firstFighter,
+        });
     }
 
     @OnEvent('game.ended')
@@ -242,17 +254,13 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.timer')
-    handleCombatTimerUpdate(payload: { accessCode: string; timeLeft: number; attackerSocketId: string; defenderSocketId: string }) {
-        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatTimerUpdate', {
-            timeLeft: payload.timeLeft,
-        });
-    }
+    handleCombatTimerUpdate(payload: { accessCode: string; attacker: Player; defender: Player; timeLeft: number }) {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+        this.logger.log(`attacker socket id ${attackerSocketId}, defender socket it ${defenderSocketId}`);
 
-    @OnEvent('game.combat.timeout')
-    handleCombatTimeout(payload: { accessCode: string; fighter: Player }) {
-        this.logger.log(`Combat timeout for ${payload.fighter.name} in game ${payload.accessCode}`);
-        this.server.to(payload.accessCode).emit('combatTimeout', {
-            fighter: payload.fighter,
+        this.server.to([attackerSocketId, defenderSocketId]).emit('combatTimerUpdate', {
+            timeLeft: payload.timeLeft,
         });
     }
 
@@ -262,19 +270,13 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.turn.started')
-    handleCombatTurnStarted(payload: {
-        accessCode: string;
-        fighter: Player;
-        duration: number;
-        escapeAttemptsLeft: number;
-        attackerSocketId: string;
-        defenderSocketId: string;
-    }) {
-        this.logger.log(`Combat turn started for ${payload.fighter.name} in game ${payload.accessCode}`);
-        this.server.to([payload.attackerSocketId, payload.defenderSocketId]).emit('combatTurnStarted', {
-            fighter: payload.fighter,
-            duration: payload.duration,
-            escapeAttemptsLeft: payload.escapeAttemptsLeft,
+    handleCombatTurnStarted(payload: { accessCode: string; player: Player; defender: Player }) {
+        const attackerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
+        this.logger.log(`attacker socket id ${attackerSocketId}, defender socket it ${defenderSocketId}`);
+
+        this.server.to([attackerSocketId, defenderSocketId]).emit('combatTurnStarted', {
+            fighter: payload.player,
         });
     }
 }
