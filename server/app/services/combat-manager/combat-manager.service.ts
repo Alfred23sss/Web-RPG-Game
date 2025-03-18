@@ -346,41 +346,6 @@ export class GameCombatService {
         }, turnDuration);
     }
 
-    // private startCombatTurn(accessCode: string, player: Player): void {
-    //     const combatState = this.combatStates[accessCode];
-    //     if (!combatState) return;
-    //     combatState.playerPerformedAction = false;
-    //     combatState.currentFighter = player;
-    //     const defender = combatState.currentFighter === combatState.attacker ? combatState.defender : combatState.attacker;
-    //     const escapeAttemptsRemaining = combatState.remainingEscapeAttempts.get(player.name) || 0;
-    //     const turnDuration = escapeAttemptsRemaining > 0 ? COMBAT_TURN_DURATION : COMBAT_ESCAPE_LIMITED_DURATION;
-    //     const turnDurationInSeconds = turnDuration / SECOND;
-    //     combatState.combatTurnTimeRemaining = turnDurationInSeconds;
-    //     this.emitEvent('game.combat.turn.started', { accessCode, player, defender });
-    //     if (combatState.combatCountdownInterval) {
-    //         clearInterval(combatState.combatCountdownInterval);
-    //         combatState.combatCountdownInterval = null;
-    //     }
-    //     let timeLeft = turnDurationInSeconds;
-    //     this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
-    //     combatState.combatCountdownInterval = setInterval(() => {
-    //         timeLeft--;
-    //         combatState.combatTurnTimeRemaining = timeLeft;
-    //         this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
-    //         if (timeLeft <= 0) {
-    //             if (combatState.combatCountdownInterval) {
-    //                 clearInterval(combatState.combatCountdownInterval);
-    //             }
-    //             combatState.combatCountdownInterval = null;
-    //         }
-    //     }, SECOND);
-    //     combatState.combatTurnTimers = setTimeout(() => {
-    //         if (!combatState.playerPerformedAction) {
-    //             this.performAttack(accessCode, combatState.currentFighter.name);
-    //         }
-    //     }, turnDuration);
-    // }
-
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
