@@ -143,7 +143,6 @@ describe('GameSessionTurnService', () => {
         });
 
         it('should clear existing interval and timer if present', () => {
-            // Arrange
             jest.useFakeTimers();
             const accessCode = 'test';
             const player = createPlayer('player1', 5);
