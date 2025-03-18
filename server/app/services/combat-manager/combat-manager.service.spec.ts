@@ -31,7 +31,7 @@ describe('GameCombatService', () => {
         vitality: 0,
     });
 
-    const mockCombatState = (accessCode: string) => ({
+    const mockCombatState = () => ({
         attacker: mockPlayer('attacker', 6),
         defender: mockPlayer('defender', 4),
         currentFighter: mockPlayer('attacker', 6),
@@ -150,7 +150,7 @@ describe('GameCombatService', () => {
     describe('performAttack', () => {
         it('should handle successful attack reducing defender health', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
             (service as any).combatStates[accessCode] = combatState;
 
             combatHelper.getRandomAttackScore.mockReturnValue(15);
@@ -167,7 +167,7 @@ describe('GameCombatService', () => {
     describe('attemptEscape', () => {
         it('should handle successful escape', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
             (service as any).combatStates[accessCode] = combatState;
 
             jest.spyOn(Math, 'random').mockReturnValue(0.2);
@@ -182,7 +182,7 @@ describe('GameCombatService', () => {
     describe('endCombat', () => {
         it('should clean up state and resume game session', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
             (service as any).combatStates[accessCode] = combatState;
 
             service.endCombat(accessCode);
@@ -196,7 +196,7 @@ describe('GameCombatService', () => {
     describe('timer handling', () => {
         it('should handle combat turn timeout', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
             (service as any).combatStates[accessCode] = combatState;
 
             jest.useFakeTimers();
@@ -211,7 +211,7 @@ describe('GameCombatService', () => {
     describe('additional scenarios', () => {
         it('should handle debug mode attacks', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
             combatState.isDebugMode = true;
             (service as any).combatStates[accessCode] = combatState;
 
@@ -224,7 +224,7 @@ describe('GameCombatService', () => {
 
         it('should handle exhausted escape attempts', () => {
             const accessCode = 'test';
-            const combatState = mockCombatState(accessCode);
+            const combatState = mockCombatState();
             combatState.remainingEscapeAttempts.set('attacker', 0);
             (service as any).combatStates[accessCode] = combatState;
 
