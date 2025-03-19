@@ -1,3 +1,4 @@
+import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
@@ -109,13 +110,12 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.TeleportPlayer)
     handleTeleportPlayer(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; targetTile: Tile }) {
-        this.logger.log('on est dans le gateway');
         this.logger.log(payload.targetTile);
         this.gameSessionService.callTeleport(payload.accessCode, payload.player, payload.targetTile);
         this.logger.log('player teleported');
     }
 
-    @OnEvent('game.combat.ended')
+    @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean }): void {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
@@ -126,14 +126,14 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.turn.resumed')
+    @OnEvent(EventEmit.GameTurnResumed)
     handleGameTurnResumed(payload: { accessCode: string; player: Player }): void {
         this.server.to(payload.accessCode).emit('gameTurnResumed', {
             player: payload.player,
         });
     }
 
-    @OnEvent('game.combat.escape')
+    @OnEvent(EventEmit.GameCombatEscape)
     handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
         const playerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
         this.server.to(playerSocketId).emit('escapeAttempt', {
@@ -142,7 +142,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.door.update')
+    @OnEvent(EventEmit.GameDoorUpdate)
     handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
@@ -150,14 +150,14 @@ export class GameGateway {
         this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
-    @OnEvent('game.grid.update')
+    @OnEvent(EventEmit.GameGridUpdate)
     handleGridUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
         this.server.to(payload.accessCode).emit('gridUpdate', {
             grid: payload.grid,
         });
     }
 
-    @OnEvent('game.player.movement')
+    @OnEvent(EventEmit.GamePlayerMovement)
     handlePlayerMovement(payload: { accessCode: string; grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) {
         this.server.to(payload.accessCode).emit('playerMovement', {
             grid: payload.grid,
@@ -166,7 +166,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.transition.started')
+    @OnEvent(EventEmit.GameTransitionStarted)
     handleTransitionStarted(payload: { accessCode: string; nextPlayer: Player }) {
         this.logger.log(`Received transition started event for game ${payload.accessCode}`);
         this.server.to(payload.accessCode).emit('transitionStarted', {
@@ -175,7 +175,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.turn.started')
+    @OnEvent(EventEmit.GameTurnStarted)
     handleTurnStarted(payload: { accessCode: string; player: Player }) {
         this.logger.log(`Received turn started event for game ${payload.accessCode}`);
         this.server.to(payload.accessCode).emit('turnStarted', {
@@ -184,7 +184,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.combat.attack.result')
+    @OnEvent(EventEmit.GameCombatAttackResult)
     handleCombatResult(payload: {
         currentFighter: Player;
         defenderPlayer: Player;
@@ -202,7 +202,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('update.player')
+    @OnEvent(EventEmit.UpdatePlayer)
     handleDefenderHealthUpdate(payload: { player: Player }) {
         const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
         this.server.to(socketId).emit('playerUpdate', {
@@ -210,14 +210,14 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('update.player.list')
+    @OnEvent(EventEmit.UpdatePlayerList)
     handleUpdatePlayerList(payload: { players: Player[]; accessCode: string }) {
         this.server.to(payload.accessCode).emit('playerListUpdate', {
             players: payload.players,
         });
     }
 
-    @OnEvent('game.turn.timer')
+    @OnEvent(EventEmit.GameTurnTimer)
     handleTimerUpdate(payload: { accessCode: string; timeLeft: number }) {
         this.logger.log(`emitting time : ${payload.timeLeft}`);
         this.server.to(payload.accessCode).emit('timerUpdate', {
@@ -225,7 +225,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.combat.started')
+    @OnEvent(EventEmit.GameCombatStarted)
     handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; firstFighter: string }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
@@ -235,7 +235,7 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('game.ended')
+    @OnEvent(EventEmit.GameEnded)
     handleGameEnded(payload: { accessCode: string; winner: string }) {
         this.logger.log('emitting game ended to client');
 
@@ -253,7 +253,7 @@ export class GameGateway {
         }
     }
 
-    @OnEvent('game.combat.timer')
+    @OnEvent(EventEmit.GameCombatEnded)
     handleCombatTimerUpdate(payload: { accessCode: string; attacker: Player; defender: Player; timeLeft: number }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
@@ -264,12 +264,12 @@ export class GameGateway {
         });
     }
 
-    @OnEvent('admin.mode.disabled')
+    @OnEvent(EventEmit.AdminModeDisabled)
     handleAdminModeDisabled(payload: { accessCode: string }) {
         this.server.to(payload.accessCode).emit('adminModeDisabled');
     }
 
-    @OnEvent('game.combat.turn.started')
+    @OnEvent(EventEmit.GameCombatTurnStarted)
     handleCombatTurnStarted(payload: { accessCode: string; player: Player; defender: Player }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);

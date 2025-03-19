@@ -150,11 +150,10 @@ describe('GameSessionService', () => {
         accessCodesService = new AccessCodesService();
         lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
-        logger = new Logger();
         gridManagerService = new GridManagerService(logger);
         turnService = new GameSessionTurnService(logger, lobbyService, eventEmitter);
 
-        gameSessionService = new GameSessionService(logger, lobbyService, eventEmitter, gridManagerService, turnService);
+        gameSessionService = new GameSessionService(lobbyService, eventEmitter, gridManagerService, turnService);
 
         jest.spyOn(lobbyService, 'getLobby').mockReturnValue(MOCK_LOBBY);
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(MOCK_LOBBY.players);
