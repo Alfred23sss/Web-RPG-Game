@@ -6,7 +6,6 @@ import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Logger } from '@nestjs/common/services/logger.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameSessionTurnService } from './game-session-turn.service';
@@ -55,10 +54,6 @@ describe('GameSessionTurnService', () => {
                 {
                     provide: EventEmitter2,
                     useValue: { emit: jest.fn() },
-                },
-                {
-                    provide: Logger,
-                    useValue: { log: jest.fn() },
                 },
             ],
         }).compile();

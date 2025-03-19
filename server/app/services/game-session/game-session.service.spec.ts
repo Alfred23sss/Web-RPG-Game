@@ -151,7 +151,7 @@ describe('GameSessionService', () => {
         lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
         gridManagerService = new GridManagerService(logger);
-        turnService = new GameSessionTurnService(logger, lobbyService, eventEmitter);
+        turnService = new GameSessionTurnService(lobbyService, eventEmitter);
 
         gameSessionService = new GameSessionService(lobbyService, eventEmitter, gridManagerService, turnService);
 

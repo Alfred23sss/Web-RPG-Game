@@ -2,7 +2,7 @@ import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const TRANSITION_PHASE_DURATION = 3000;
@@ -13,7 +13,6 @@ const RANDOMIZER = 0.5;
 @Injectable()
 export class GameSessionTurnService {
     constructor(
-        private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
     ) {}
