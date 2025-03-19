@@ -542,8 +542,8 @@ describe('GameSocketService', () => {
             }
             return () => {};
         });
-        service.initializeSocketListeners(mockComponent);
-        mockComponent.clientPlayer = {
+
+        const mockPlayer = {
             name: 'Player1',
             speed: 5,
             movementPoints: 0,
@@ -555,17 +555,10 @@ describe('GameSocketService', () => {
             combatWon: 0,
         } as Player;
 
-        mockComponent.currentPlayer = {
-            name: 'Player1',
-            speed: 5,
-            movementPoints: 0,
-            actionPoints: 1,
-            inventory: [null, null],
-            isAdmin: false,
-            hasAbandoned: false,
-            isActive: true,
-            combatWon: 0,
-        } as Player;
+        service.initializeSocketListeners(mockComponent);
+        mockComponent.clientPlayer = mockPlayer;
+
+        mockComponent.currentPlayer = mockPlayer;
 
         mockComponent.movementPointsRemaining = 0;
 
