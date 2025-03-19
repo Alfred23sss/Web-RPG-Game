@@ -1,3 +1,4 @@
+import { EventEmit } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
@@ -29,7 +30,7 @@ export class GameCombatService {
         if (combatState.attacker.name === playerName || combatState.defender.name === playerName) {
             const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
             this.updateWinningPlayerAfterCombat(playerToUpdate, accessCode);
-            this.emitEvent('update.player.list', { players: this.gameSessionService.getPlayers(accessCode), accessCode });
+            this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.endCombat(accessCode);
         }
     }
@@ -48,7 +49,7 @@ export class GameCombatService {
         this.resetCombatTimers(accessCode);
         combatState.playerPerformedAction = true;
         const { attackSuccessful, attackerScore, defenseScore, defenderPlayer } = this.calculateAttackResult(combatState, accessCode);
-        this.emitEvent('game.combat.attack.result', {
+        this.emitEvent(EventEmit.GameCombatAttackResult, {
             currentFighter: combatState.currentFighter,
             defenderPlayer,
             attackSuccessful,
@@ -76,7 +77,7 @@ export class GameCombatService {
 
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
-        this.emitEvent('game.combat.escape', { player, attemptsLeft, isEscapeSuccessful });
+        this.emitEvent(EventEmit.GameCombatEscape, { player, attemptsLeft, isEscapeSuccessful });
         if (isEscapeSuccessful) {
             this.resetHealth([attacker, defender], accessCode);
             combatState.hasEvaded = true;
@@ -89,7 +90,7 @@ export class GameCombatService {
     checkPlayerWon(accessCode: string, player: Player): boolean {
         if (player.combatWon === WIN_CONDITION) {
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
-            this.emitEvent('update.player.list', { players: this.gameSessionService.getPlayers(accessCode), accessCode });
+            this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.gameSessionService.endGameSession(accessCode, player.name);
             return true;
         }
@@ -101,7 +102,7 @@ export class GameCombatService {
         if (!combatState) return;
         this.resetCombatTimers(accessCode);
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
-        this.emitEvent('game.combat.ended', { attacker, defender, currentFighter, hasEvaded });
+        this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded });
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
         this.gameSessionService.setCombatState(accessCode, false);
@@ -134,7 +135,7 @@ export class GameCombatService {
         this.gameSessionService.setCombatState(accessCode, true);
         const orderedFighters = this.combatHelper.determineCombatOrder(attacker, defender);
         const currentPlayerName = orderedFighters[0].name;
-        this.emitEvent('game.combat.started', { accessCode, attacker, defender, currentPlayerName });
+        this.emitEvent(EventEmit.GameCombatStarted, { accessCode, attacker, defender, currentPlayerName });
         this.startCombatTurn(accessCode, orderedFighters[0]);
     }
 
@@ -164,14 +165,14 @@ export class GameCombatService {
             this.gameSessionService.endGameSession(accessCode, player.name);
         }
         this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
-        this.emitEvent('update.player', { player });
-        this.emitEvent('update.player.list', { players: this.gameSessionService.getPlayers(accessCode), accessCode });
+        this.emitEvent(EventEmit.UpdatePlayer, { player });
+        this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
     }
 
     private resetHealth(players: Player[], accessCode): void {
         players.forEach((player) => {
             player.hp.current = player.hp.max;
-            this.emitEvent('update.player', { player });
+            this.emitEvent(EventEmit.UpdatePlayer, { player });
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         });
     }
@@ -218,7 +219,7 @@ export class GameCombatService {
     ): void {
         const attackDamage = attackerScore - defenseScore;
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
-        this.emitEvent('update.player', { player: defenderPlayer });
+        this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
         if (defenderPlayer.hp.current === 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);
         } else {
@@ -239,7 +240,7 @@ export class GameCombatService {
             this.endCombat(accessCode);
             return;
         }
-        this.emitEvent('update.player.list', { players: this.gameSessionService.getPlayers(accessCode), accessCode });
+        this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
         if (combatState.attacker === defenderPlayer) {
             this.gameSessionService.endTurn(accessCode);
         }
@@ -264,9 +265,8 @@ export class GameCombatService {
         const turnDurationInSeconds = turnDuration / SECOND;
 
         combatState.combatTurnTimeRemaining = turnDurationInSeconds;
-        this.emitEvent('game.combat.turn.started', { accessCode, player: combatState.currentFighter, defender });
+        this.emitEvent(EventEmit.GameCombatTurnStarted, { accessCode, player: combatState.currentFighter, defender });
 
-        // test this condition not tested
         if (combatState.combatCountdownInterval) {
             clearInterval(combatState.combatCountdownInterval);
             combatState.combatCountdownInterval = null;
@@ -283,12 +283,12 @@ export class GameCombatService {
     private initializeCombatTimer(accessCode: string, combatState: CombatState, turnDurationInSeconds: number): void {
         let timeLeft = turnDurationInSeconds;
         const defender = this.combatHelper.getDefender(combatState);
-        this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
+        this.emitEvent(EventEmit.GameCombatTimer, { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
 
         combatState.combatCountdownInterval = setInterval(() => {
             timeLeft--;
             combatState.combatTurnTimeRemaining = timeLeft;
-            this.emitEvent('game.combat.timer', { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
+            this.emitEvent(EventEmit.GameCombatTimer, { accessCode, attacker: combatState.currentFighter, defender, timeLeft });
 
             if (timeLeft <= 0) {
                 if (combatState.combatCountdownInterval) {

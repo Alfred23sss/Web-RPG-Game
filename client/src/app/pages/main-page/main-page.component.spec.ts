@@ -19,11 +19,7 @@ describe('MainPageComponent', () => {
 
         await TestBed.configureTestingModule({
             imports: [MainPageComponent],
-            providers: [
-                provideHttpClientTesting(),
-                provideRouter(routes),
-                { provide: MatDialog, useValue: mockDialog }, // Injection du mock
-            ],
+            providers: [provideHttpClientTesting(), provideRouter(routes), { provide: MatDialog, useValue: mockDialog }],
         }).compileComponents();
     });
 

@@ -179,3 +179,25 @@ export enum ItemDescription {
     Swap = 'échange les personnages',
     Default = 'rien',
 }
+
+export enum EventEmit {
+    GameCombatTimer = 'game.combat.timer',
+    GameCombatTurnStarted = 'game.combat.turn.started',
+    UpdatePlayerList = 'update.player.list',
+    UpdatePlayer = 'update.player',
+    GameCombatStarted = 'game.combat.started',
+    GameCombatAttackResult = 'game.combat.attack.result',
+    GameCombatEscape = 'game.combat.escape',
+    GameCombatEnded = 'game.combat.ended',
+    AdminModeDisabled = 'admin.mode.disabled',
+    GameDoorUpdate = 'game.door.update',
+    GameTurnTimeout = 'game.turn.timeout',
+    GamePlayerMovement = 'game.player.movement',
+    GameEnded = 'game.ended',
+    GameGridUpdate = 'game.grid.update',
+    GameTransitionStarted = 'game.transition.started',
+    GameTransitionCountdown = 'game.transition.countdown',
+    GameTurnStarted = 'game.turn.started',
+    GameTurnTimer = 'game.turn.timer',
+    GameTurnResumed = 'game.turn.resumed',
+}

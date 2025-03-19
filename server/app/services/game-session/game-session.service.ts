@@ -1,11 +1,11 @@
-import { ImageType } from '@app/enums/enums';
+import { EventEmit, ImageType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const PLAYER_MOVE_DELAY = 150;
@@ -15,13 +15,12 @@ export class GameSessionService {
     private gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
 
     constructor(
-        private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
         private readonly turnService: GameSessionTurnService,
     ) {
-        this.eventEmitter.on('game.turn.timeout', ({ accessCode }) => {
+        this.eventEmitter.on(EventEmit.GameTurnTimeout, ({ accessCode }) => {
             this.endTurn(accessCode);
         });
     }
@@ -75,7 +74,7 @@ export class GameSessionService {
             this.endTurn(accessCode);
         }
         if (player.isAdmin) {
-            this.eventEmitter.emit('admin.mode.disabled', { accessCode });
+            this.eventEmitter.emit(EventEmit.AdminModeDisabled, { accessCode });
         }
         return player;
     }
@@ -133,9 +132,8 @@ export class GameSessionService {
             targetTile.imageSrc = ImageType.OpenDoor;
         }
         targetTile.isOpen = !targetTile.isOpen;
-        this.logger.log('emit game.door.update');
         this.gameSessions.get(accessCode).game.grid = grid;
-        this.eventEmitter.emit('game.door.update', { accessCode, grid });
+        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
     }
 
     updatePlayer(player: Player, updates: Partial<Player>): void {
@@ -158,7 +156,7 @@ export class GameSessionService {
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
-            this.eventEmitter.emit('game.player.movement', {
+            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                 accessCode,
                 grid: gameSession.game.grid,
                 player,
@@ -168,7 +166,7 @@ export class GameSessionService {
     }
 
     endGameSession(accessCode: string, winner: string) {
-        this.emitEvent('game.ended', { accessCode, winner });
+        this.emitEvent(EventEmit.GameEnded, { accessCode, winner });
     }
 
     getGameSession(accessCode: string): GameSession {
@@ -184,7 +182,7 @@ export class GameSessionService {
     }
 
     emitGridUpdate(accessCode: string, grid: Tile[][]): void {
-        this.eventEmitter.emit('game.grid.update', {
+        this.eventEmitter.emit(EventEmit.GameGridUpdate, {
             accessCode,
             grid,
         });

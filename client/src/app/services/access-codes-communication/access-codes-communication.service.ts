@@ -18,10 +18,6 @@ export class AccessCodesCommunicationService {
         return this.http.get<{ isValid: boolean }>(`${this.apiUrl}/${code}/validate`);
     }
 
-    // getAllAccessCodes(): Observable<string[]> {
-    //     return this.http.get<string[]>(`${this.apiUrl}`);
-    // }
-
     removeAccessCode(code: string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${code}`);
     }

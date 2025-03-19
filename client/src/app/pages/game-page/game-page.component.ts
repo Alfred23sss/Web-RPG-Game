@@ -155,7 +155,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     evade(): void {
         this.socketClientService.emit('evade', { accessCode: this.lobby.accessCode, player: this.clientPlayer });
     }
-    // rajouter socketService.on pr le retour du server.
 
     getClientPlayerPosition(): Tile | undefined {
         if (!this.game || !this.game.grid || !this.clientPlayer) {
@@ -185,7 +184,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
-            // if refresh abandons game
             this.abandonGame();
         } else {
             sessionStorage.setItem('refreshed', 'true');
