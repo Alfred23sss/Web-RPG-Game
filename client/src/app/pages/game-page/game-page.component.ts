@@ -72,10 +72,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             targetTile,
             accessCode: this.lobby.accessCode,
         });
-
-        // if (!this.clientPlayer.actionPoints || !this.movementPointsRemaining) {
-        //     this.endTurn();
-        // }
     }
 
     handleAttackClick(targetTile: Tile): void {

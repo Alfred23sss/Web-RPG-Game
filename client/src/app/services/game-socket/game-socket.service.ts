@@ -130,19 +130,7 @@ export class GameSocketService {
                 component.updateAvailablePath();
             }
 
-            const clientPlayerPosition = component.getClientPlayerPosition();
-            if (!clientPlayerPosition) return;
-            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, data.grid);
-            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, data.grid);
-            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce) {
-                    component.endTurn();
-                }
-            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce && !hasActionAvailable) {
-                    component.endTurn();
-                }
-            }
+            this.checkAvailableActions(component);
         });
 
         this.socketClientService.on('combatStarted', () => {
@@ -176,6 +164,7 @@ export class GameSocketService {
             component.clientPlayer.actionPoints = noActionPoints;
             component.isActionMode = false;
             component.updateAvailablePath();
+            this.checkAvailableActions(component);
         });
 
         this.socketClientService.on('combatTurnStarted', (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => {
@@ -215,19 +204,8 @@ export class GameSocketService {
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
-            const clientPlayerPosition = component.getClientPlayerPosition();
-            if (!clientPlayerPosition || !component.game || !component.game.grid) return;
-            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
-            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, component.game.grid);
-            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce) {
-                    component.endTurn();
-                }
-            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce && !hasActionAvailable) {
-                    component.endTurn();
-                }
-            }
+
+            this.checkAvailableActions(component);
         });
 
         this.socketClientService.on('adminModeChangedServerSide', () => {
@@ -240,5 +218,21 @@ export class GameSocketService {
         events.forEach((event) => {
             this.socketClientService.socket.off(event);
         });
+    }
+
+    private checkAvailableActions(component: GamePageComponent): void {
+        const clientPlayerPosition = component.getClientPlayerPosition();
+        if (!clientPlayerPosition || !component.game || !component.game.grid) return;
+        const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
+        const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, component.game.grid);
+        if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+            if (!hasIce) {
+                component.endTurn();
+            }
+        } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+            if (!hasIce && !hasActionAvailable) {
+                component.endTurn();
+            }
+        }
     }
 }
