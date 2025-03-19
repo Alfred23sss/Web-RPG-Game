@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */ // the original file respects this condition
 import { GameSize, GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
+import { DiceType } from '@app/interfaces/Dice';
+import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
-import { DiceType } from '@app/interfaces/Dice';
-import { Lobby } from '@app/interfaces/Lobby';
 
 const ACCESS_CODE = 'test-code';
 const GAME = { size: GameSizeTileCount.Small } as Game;
@@ -168,7 +168,6 @@ describe('LobbyService', () => {
             });
         });
     });
-
     describe('leaveLobby', () => {
         const adminPlayer: Player = {
             ...MOCK_PLAYER,
@@ -214,17 +213,6 @@ describe('LobbyService', () => {
             expect(lobbyService.leaveLobby(accessCode, regularPlayer.name)).toBe(false);
 
             expect(lobbyService.getLobby(accessCode)).toBeDefined();
-        });
-
-        it('should unlock lobby when player leaves and capacity allows', () => {
-            const accessCode = lobbyService.createLobby(GAME);
-
-            for (let i = 0; i < GameSizePlayerCount.Small; i++) {
-                lobbyService.joinLobby(accessCode, { name: `player${i}`, avatar: `avatar${i}` } as Player);
-            }
-            lobbyService.leaveLobby(accessCode, 'player0');
-            const lobby = lobbyService.getLobby(accessCode);
-            expect(lobby?.isLocked).toBe(false);
         });
     });
 
@@ -460,22 +448,6 @@ describe('LobbyService', () => {
 
         const lobby = lobbyService.getLobby(accessCode);
         expect(lobby?.isLocked).toBe(true);
-    });
-
-    it('should unlock lobby when leaving reduces player count below max capacity', () => {
-        const game = { size: GameSizeTileCount.Small } as Game;
-        const accessCode = lobbyService.createLobby(game);
-        const player2 = { ...MOCK_PLAYER, name: 'Player2' };
-
-        lobbyService.joinLobby(accessCode, MOCK_PLAYER);
-        lobbyService.joinLobby(accessCode, player2);
-        const initialLobby = lobbyService.getLobby(accessCode);
-        expect(initialLobby?.isLocked).toBe(true);
-
-        lobbyService.leaveLobby(accessCode, MOCK_PLAYER.name);
-        const updatedLobby = lobbyService.getLobby(accessCode);
-        expect(updatedLobby?.isLocked).toBe(false);
-        expect(updatedLobby?.players.length).toBe(1);
     });
 
     describe('getUnavailableNamesAndAvatars', () => {

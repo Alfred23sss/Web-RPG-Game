@@ -37,7 +37,7 @@ export class CharacterService {
         player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
         player.hp = { current: 4, max: 4 };
         player.movementPoints = 4;
-        player.actionPoints = 3;
+        player.actionPoints = 1;
         player.inventory = [null, null];
         player.isAdmin = false;
         player.hasAbandoned = false;
@@ -114,7 +114,7 @@ export class CharacterService {
 
         if (isLobbyCreated) {
             const joinResult = await this.joinExistingLobby(currentAccessCode, player);
-            this.handleLobbyJoining(joinResult, player, game, closePopup);
+            this.handleLobbyJoining(joinResult, player, game, currentAccessCode, closePopup);
         } else {
             player.isAdmin = true;
             await this.createAndJoinLobby(game, player);
@@ -208,16 +208,21 @@ export class CharacterService {
         }
     }
 
-    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, closePopup: () => void): void {
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, currentAccessCode: string, closePopup: () => void): void {
         switch (joinStatus) {
             case JoinLobbyResult.JoinedLobby:
                 this.finalizeCharacterSubmission(player, closePopup);
                 break;
             case JoinLobbyResult.StayInLobby:
-                break;
+                return;
             case JoinLobbyResult.RedirectToHome:
                 this.returnHome();
-                break;
+                this.socketClientService.emit('leaveLobby', {
+                    accessCode: currentAccessCode,
+                    playerName: '',
+                });
+                closePopup();
+                return;
         }
         this.validateGameAvailability(game, closePopup);
 

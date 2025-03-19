@@ -41,6 +41,7 @@ describe('GameSessionTurnService', () => {
         isTransitionPhase: false,
         countdownInterval: null,
         isInCombat: false,
+        beginnerPlayer: createPlayer('Player1', 10, false),
     });
 
     beforeEach(async () => {
@@ -212,7 +213,7 @@ describe('GameSessionTurnService', () => {
             const updatedTurn = service.resumeTurn('1234', turn, 10);
 
             expect(updatedTurn.currentTurnCountdown).toBe(10);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.resumed', { accessCode: '1234', player, remainingTime: 10 });
+            expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.resumed', { accessCode: '1234', player });
 
             jest.advanceTimersByTime(1000);
             expect(eventEmitter.emit).toHaveBeenCalledWith('game.turn.timer', { accessCode: '1234', timeLeft: 9 });

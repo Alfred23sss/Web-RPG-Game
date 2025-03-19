@@ -54,6 +54,7 @@ const createMockTurn = (): Turn => ({
     isTransitionPhase: false,
     isInCombat: false,
     transitionTimeRemaining: undefined,
+    beginnerPlayer: createValidPlayer('beginnerPlayer', 5, false),
 });
 
 const MOCK_TILE: Tile = {
@@ -510,6 +511,7 @@ describe('GameSessionService', () => {
                         countdownInterval: null,
                         isTransitionPhase: false,
                         isInCombat: false,
+                        beginnerPlayer: createValidPlayer('beginnerPlayer', 5, false),
                     },
                 };
                 gameSessionService['gameSessions'].set(ACCESS_CODE, gameSession);

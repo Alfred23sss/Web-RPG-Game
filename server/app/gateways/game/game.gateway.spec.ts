@@ -297,15 +297,16 @@ describe('GameGateway', () => {
             const payload = {
                 player: MOCK_PLAYER,
                 attemptsLeft: 2,
+                isEscapeSuccessful: false,
             };
 
             gateway.handleNoMoreEscapeAttempts(payload);
 
             expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith(payload.player.name);
             expect(serverMock.to).toHaveBeenCalledWith(`socket_${MOCK_PLAYER.name}`);
-            expect(serverMock.emit).toHaveBeenCalledWith('noMoreEscapesLeft', {
-                player: MOCK_PLAYER,
+            expect(serverMock.emit).toHaveBeenCalledWith('escapeAttempt', {
                 attemptsLeft: 2,
+                isEscapeSuccessful: false,
             });
         });
     });
@@ -395,7 +396,7 @@ describe('GameGateway', () => {
 
     describe('Event Handlers', () => {
         it('should handle combat ended event', () => {
-            const payload = { attacker: MOCK_PLAYER, defender: MOCK_PLAYER, winner: MOCK_PLAYER, hasEvaded: false };
+            const payload = { attacker: MOCK_PLAYER, defender: MOCK_PLAYER, currentFighter: MOCK_PLAYER, hasEvaded: false };
             gateway.handleCombatEnded(payload);
 
             expect(serverMock.to).toHaveBeenCalledWith(['socket_test-player', 'socket_test-player']);
@@ -457,6 +458,17 @@ describe('GameGateway', () => {
             expect(serverMock.emit).toHaveBeenCalledWith('turnStarted', {
                 player: MOCK_PLAYER,
                 turnDuration: 30,
+            });
+        });
+    });
+
+    describe('handleGameTurnResumed', () => {
+        it('should announce game turn resumed to the game room', () => {
+            gateway.handleGameTurnResumed(MOCK_PAYLOAD);
+
+            expect(serverMock.to).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
+            expect(serverMock.emit).toHaveBeenCalledWith('gameTurnResumed', {
+                player: MOCK_PLAYER,
             });
         });
     });

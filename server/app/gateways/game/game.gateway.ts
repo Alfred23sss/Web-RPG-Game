@@ -124,22 +124,29 @@ export class GameGateway {
     }
 
     @OnEvent('game.combat.ended')
-    handleCombatEnded(payload: { attacker: Player; defender: Player; winner: Player; hasEvaded: boolean }): void {
+    handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean }): void {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatEnded', {
-            winner: payload.winner,
+            winner: payload.currentFighter,
             hasEvaded: payload.hasEvaded,
         });
     }
 
-    @OnEvent('game.combat.escape.failed')
-    handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number }): void {
-        const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
-        this.server.to(socketId).emit('noMoreEscapesLeft', {
+    @OnEvent('game.turn.resumed')
+    handleGameTurnResumed(payload: { accessCode: string; player: Player }): void {
+        this.server.to(payload.accessCode).emit('gameTurnResumed', {
             player: payload.player,
+        });
+    }
+
+    @OnEvent('game.combat.escape')
+    handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
+        const playerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        this.server.to(playerSocketId).emit('escapeAttempt', {
             attemptsLeft: payload.attemptsLeft,
+            isEscapeSuccessful: payload.isEscapeSuccessful,
         });
     }
 
