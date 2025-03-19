@@ -46,7 +46,7 @@ describe('CharacterService', () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockCommunicationService = jasmine.createSpyObj('GameCommunicationService', ['getGameById']);
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
-        closePopupSpy = jasmine.createSpy('closePopup'); 
+        closePopupSpy = jasmine.createSpy('closePopup');
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
             'emit',
             'on',
@@ -193,28 +193,21 @@ describe('CharacterService', () => {
     it('should call finalizeCharacterSubmission when joinStatus is JoinedLobby', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
-    
+
         service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
-    
+
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
 
     it('should call joinExistingLobby and handleLobbyJoining when isLobbyCreated is true', async () => {
         spyOn(service, 'joinExistingLobby').and.resolveTo(JoinLobbyResult.JoinedLobby);
         spyOn(service as any, 'handleLobbyJoining');
-    
+
         await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
-    
+
         expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
-        expect(service['handleLobbyJoining']).toHaveBeenCalledWith(
-            JoinLobbyResult.JoinedLobby,
-            player,
-            mockGame,
-            currentAccessCode,
-            closePopupSpy 
-        );
+        expect(service['handleLobbyJoining']).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
     });
-    
 
     describe('joinExistingLobby', () => {
         const accessCode = '1234';
@@ -411,7 +404,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode,closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
@@ -427,21 +420,21 @@ describe('CharacterService', () => {
     });
 
     it('should call returnHome when joinStatus is RedirectToHome', () => {
-    spyOn(service as any, 'returnHome');
+        spyOn(service as any, 'returnHome');
 
-    service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode,closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
 
-    expect((service as any).returnHome).toHaveBeenCalled();
-    expect(closePopupSpy).toHaveBeenCalled(); 
-});
-
+        expect((service as any).returnHome).toHaveBeenCalled();
+        expect(closePopupSpy).toHaveBeenCalled();
+    });
 
     it('should validate game availability', () => {
         spyOn(service as any, 'validateGameAvailability');
-    
-        (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, closePopupSpy);
-    
-        expect((service as any).validateGameAvailability).toHaveBeenCalledWith(mockGame, closePopupSpy);
+        closePopupSpy = jasmine.createSpy('closePopup');
+
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+
+        expect(service['validateGameAvailability']).toHaveBeenCalledWith(mockGame, closePopupSpy);
     });
 
     describe('validateGameAvailability', () => {
@@ -560,14 +553,13 @@ describe('CharacterService', () => {
         spyOn(service, 'isCharacterValid').and.returnValue(true);
         spyOn(sessionStorage, 'setItem');
         spyOn(service as any, 'proceedToWaitingView');
-    
+
         service['finalizeCharacterSubmission'](player, closePopupSpy);
-    
+
         expect(service.isCharacterValid).toHaveBeenCalledWith(player);
         expect(sessionStorage.setItem).toHaveBeenCalledWith('player', JSON.stringify(player));
         expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
     });
-    
 
     it('should do nothing if attribute is neither Vitality nor Speed', () => {
         spyOn(service, 'assignBonus');
