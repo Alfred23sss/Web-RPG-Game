@@ -431,7 +431,7 @@ describe('CharacterService', () => {
     it('should validate game availability', () => {
         spyOn(service as any, 'validateGameAvailability');
 
-        (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, closePopupSpy);
+        (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect((service as any).validateGameAvailability).toHaveBeenCalledWith(mockGame, closePopupSpy);
     });
