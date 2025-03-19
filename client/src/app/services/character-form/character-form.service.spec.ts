@@ -393,7 +393,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
