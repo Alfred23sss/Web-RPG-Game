@@ -200,16 +200,6 @@ describe('CharacterService', () => {
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
 
-    it('should call joinExistingLobby and handleLobbyJoining when isLobbyCreated is true', async () => {
-        spyOn(service, 'joinExistingLobby').and.resolveTo(JoinLobbyResult.JoinedLobby);
-        spyOn(service as any, 'handleLobbyJoining');
-
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
-
-        expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
-        expect(service['handleLobbyJoining']).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
-    });
-
     describe('joinExistingLobby', () => {
         const accessCode = '1234';
 
@@ -423,15 +413,28 @@ describe('CharacterService', () => {
 
     it('should call returnHome when joinStatus is RedirectToHome', () => {
         spyOn(service as any, 'returnHome');
-        spyOn(service as any, 'returnHome');
 
-        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
         service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect((service as any).returnHome).toHaveBeenCalled();
         expect(closePopupSpy).toHaveBeenCalled();
-        expect((service as any).returnHome).toHaveBeenCalled();
-        expect(closePopupSpy).toHaveBeenCalled();
+    });
+
+    it('should call joinExistingLobby and handleLobbyJoining when isLobbyCreated is true', async () => {
+        spyOn(service, 'isCharacterValid').and.returnValue(true);
+        spyOn(service, 'joinExistingLobby').and.resolveTo(JoinLobbyResult.JoinedLobby);
+        spyOn(service as any, 'handleLobbyJoining');
+
+        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+
+        expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
+        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(
+            JoinLobbyResult.JoinedLobby,
+            player,
+            mockGame,
+            currentAccessCode,
+            closePopupSpy,
+        );
     });
 
     it('should validate game availability', () => {

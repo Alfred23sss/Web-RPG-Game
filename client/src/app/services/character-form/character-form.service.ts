@@ -29,7 +29,6 @@ export class CharacterService {
     ) {}
 
     initializePlayer(player: Player): void {
-        // fichier de cinstantes player=defaultplayer
         player.name = '';
         player.avatar = '';
         player.speed = 4;
