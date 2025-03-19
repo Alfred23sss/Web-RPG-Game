@@ -47,10 +47,15 @@ describe('CharacterService', () => {
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
             'emit',
-            'onUpdateUnavailableOptions',
-            'selectAvatar',
-            'deselectAvatar',
+            'on',
             'createLobby',
+            'joinLobby',
+            'getLobby',
+            'getLobbyPlayers',
+            'kickPlayer',
+            'removeAccessCode',
+            'sendPlayerMovementUpdate',
+            'getSocketId',
         ]);
         mockAccessCodeService = jasmine.createSpyObj('AccessCodeService', ['setAccessCode']);
 
@@ -109,14 +114,15 @@ describe('CharacterService', () => {
         expect(player.isActive).toBeFalse();
         expect(player.combatWon).toBe(0);
     });
-
     it('should emit joinRoom, request unavailable options, and update unavailable avatars', () => {
         spyOn(service.unavailableAvatarsSubject, 'next').and.callThrough();
 
         const mockAvatars = ['avatar1.png', 'avatar2.png'];
 
-        mockSocketClientService.onUpdateUnavailableOptions.and.callFake((callback) => {
-            callback({ names: [], avatars: mockAvatars });
+        mockSocketClientService.on.and.callFake((event: string, callback: (data: any) => void) => {
+            if (event === 'updateUnavailableOptions') {
+                callback({ avatars: mockAvatars });
+            }
         });
 
         service.initializeLobby(currentAccessCode);
@@ -137,7 +143,7 @@ describe('CharacterService', () => {
         spyOn(service.unavailableAvatarsSubject, 'next').and.callThrough();
         service.selectAvatar(player, 'newAvatar.png', currentAccessCode);
         expect(player.avatar).toBe('newAvatar.png');
-        expect(mockSocketClientService.selectAvatar).toHaveBeenCalledWith(currentAccessCode, 'newAvatar.png');
+        expect(mockSocketClientService.emit).toHaveBeenCalledWith('selectAvatar', { accessCode: currentAccessCode, avatar: 'newAvatar.png' });
     });
 
     it('should call deselectAvatar on socket service and reset player avatar', () => {
@@ -145,7 +151,7 @@ describe('CharacterService', () => {
         player.avatar = 'oldAvatar.png';
         service.unavailableAvatarsSubject.next(['oldAvatar.png', 'otherAvatar.png']);
         service.deselectAvatar(player, currentAccessCode);
-        expect(mockSocketClientService.deselectAvatar).toHaveBeenCalledWith(currentAccessCode);
+        expect(mockSocketClientService.emit).toHaveBeenCalledWith('deselectAvatar', { accessCode: currentAccessCode });
         const updatedAvatars = service.unavailableAvatarsSubject.value;
         expect(updatedAvatars).not.toContain('oldAvatar.png');
         expect(updatedAvatars).toContain('otherAvatar.png');
@@ -568,14 +574,14 @@ describe('CharacterService', () => {
     it('should process empty avatars list correctly', () => {
         spyOn(service.unavailableAvatarsSubject, 'next');
 
-        let callback: ((data: { names: string[]; avatars: string[] }) => void) | undefined;
-        mockSocketClientService.onUpdateUnavailableOptions.and.callFake((cb: (data: { names: string[]; avatars: string[] }) => void) => {
-            callback = cb;
+        mockSocketClientService.on.and.callFake(<T>(event: string, callback: (data: T) => void) => {
+            if (event === 'updateUnavailableOptions') {
+                callback({ avatars: [] } as any);
+            }
         });
+
         service.initializeLobby('testAccessCode');
-        if (callback) {
-            callback({ names: [], avatars: [] });
-        }
+
         expect(service.unavailableAvatarsSubject.next).toHaveBeenCalledWith([]);
     });
 
@@ -594,12 +600,13 @@ describe('CharacterService', () => {
     it('should not update unavailable avatars if avatars is undefined', () => {
         spyOn(service.unavailableAvatarsSubject, 'next');
 
-        mockSocketClientService.onUpdateUnavailableOptions.and.callFake((callback) => {
-            callback({ names: [] } as any);
+        mockSocketClientService.on.and.callFake(<T>(event: string, callback: (data: T) => void) => {
+            if (event === 'updateUnavailableOptions') {
+                callback({ names: [] } as any);
+            }
         });
 
         service.initializeLobby(currentAccessCode);
-
         expect(service.unavailableAvatarsSubject.next).not.toHaveBeenCalled();
     });
 });

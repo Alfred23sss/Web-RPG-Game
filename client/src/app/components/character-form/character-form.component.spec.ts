@@ -71,7 +71,7 @@ describe('CharacterFormComponent', () => {
         });
 
         mockDialogRef = jasmine.createSpyObj<MatDialogRef<CharacterFormComponent>>('MatDialogRef', ['close']);
-        mockSocketClientService = jasmine.createSpyObj<SocketClientService>('SocketClientService', ['removePlayerFromLobby']);
+        mockSocketClientService = jasmine.createSpyObj<SocketClientService>('SocketClientService', ['emit', 'on', 'createLobby', 'joinLobby']);
         mockCdr = jasmine.createSpyObj<ChangeDetectorRef>('ChangeDetectorRef', ['detectChanges', 'markForCheck']);
 
         mockGame = { id: '1', name: 'Test Game' } as Game;
