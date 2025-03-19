@@ -68,7 +68,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
             client.emit('joinedLobby');
 
-            if (lobby.isLocked) {
+            if (lobby.players.length >= lobby.maxPlayers) {
                 this.server.to(accessCode).emit('lobbyLocked', { accessCode, isLocked: true });
             }
         } else {
