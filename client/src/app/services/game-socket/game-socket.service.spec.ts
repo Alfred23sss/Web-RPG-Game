@@ -50,30 +50,9 @@ describe('GameSocketService', () => {
     ];
 
     beforeEach(() => {
-        mockSocketClientService = jasmine.createSpyObj<SocketClientService>(
-            'SocketClientService',
-            [
-                'onAbandonGame',
-                'onGameDeleted',
-                'onGameEnded',
-                'on',
-                'onTransitionStarted',
-                'onTurnStarted',
-                'onTimerUpdate',
-                'onAlertGameStarted',
-                'onPlayerMovement',
-                'onGameCombatStarted',
-                'onAttackResult',
-                'onPlayerUpdate',
-                'onPlayerListUpdate',
-                'onDoorClickedUpdate',
-                'onGameCombatTurnStarted',
-                'onGameCombatTimerUpdate',
-                'onGridUpdate',
-                'onAdminModeChangedServerSide',
-            ],
-            { socket: jasmine.createSpyObj('socket', ['off']) },
-        );
+        mockSocketClientService = jasmine.createSpyObj<SocketClientService>('SocketClientService', ['on'], {
+            socket: jasmine.createSpyObj('socket', ['off', 'on']),
+        });
 
         mockPlayerMovementService = jasmine.createSpyObj<PlayerMovementService>('PlayerMovementService', [
             'calculateRemainingMovementPoints',
@@ -124,8 +103,10 @@ describe('GameSocketService', () => {
 
     it('should handle abandonGame event correctly when player is found', () => {
         let abandonGameCallback: (data: { player: Player }) => void = () => {};
-        mockSocketClientService.onAbandonGame.and.callFake((callback: any) => {
-            abandonGameCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'abandonGame') {
+                abandonGameCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -141,8 +122,10 @@ describe('GameSocketService', () => {
 
     it('should handle abandonGame event correctly when player is not found', () => {
         let abandonGameCallback: (data: { player: Player }) => void = () => {};
-        mockSocketClientService.onAbandonGame.and.callFake((callback: any) => {
-            abandonGameCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'abandonGame') {
+                abandonGameCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -158,8 +141,10 @@ describe('GameSocketService', () => {
 
     it('should handle gameDeleted event correctly', fakeAsync(() => {
         let gameDeletedCallback: () => void = () => {};
-        mockSocketClientService.onGameDeleted.and.callFake((callback: any) => {
-            gameDeletedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'gameDeleted') {
+                gameDeletedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -173,8 +158,10 @@ describe('GameSocketService', () => {
 
     it('should handle gameEnded event correctly', fakeAsync(() => {
         let gameEndedCallback: (data: { winner: string }) => void = () => {};
-        mockSocketClientService.onGameEnded.and.callFake((callback: any) => {
-            gameEndedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'gameEnded') {
+                gameEndedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -189,8 +176,10 @@ describe('GameSocketService', () => {
 
     it('should handle transitionStarted event correctly when nextPlayer is the clientPlayer', () => {
         let transitionStartedCallback: (data: { nextPlayer: Player; transitionDuration: number }) => void = () => {};
-        mockSocketClientService.onTransitionStarted.and.callFake((callback: any) => {
-            transitionStartedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'transitionStarted') {
+                transitionStartedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -204,8 +193,10 @@ describe('GameSocketService', () => {
 
     it('should handle transitionStarted event correctly when nextPlayer is not the clientPlayer', () => {
         let transitionStartedCallback: (data: { nextPlayer: Player; transitionDuration: number }) => void = () => {};
-        mockSocketClientService.onTransitionStarted.and.callFake((callback: any) => {
-            transitionStartedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'transitionStarted') {
+                transitionStartedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -220,8 +211,10 @@ describe('GameSocketService', () => {
 
     it('should handle turnStarted event correctly', () => {
         let turnStartedCallback: (data: { player: Player; turnDuration: number }) => void = () => {};
-        mockSocketClientService.onTurnStarted.and.callFake((callback: any) => {
-            turnStartedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'turnStarted') {
+                turnStartedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -242,8 +235,10 @@ describe('GameSocketService', () => {
 
     it('should handle timerUpdate event correctly', () => {
         let timerUpdateCallback: (data: { timeLeft: number }) => void = () => {};
-        mockSocketClientService.onTimerUpdate.and.callFake((callback: any) => {
-            timerUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'timerUpdate') {
+                timerUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -255,8 +250,10 @@ describe('GameSocketService', () => {
 
     it('should handle alertGameStarted event correctly', () => {
         let alertGameStartedCallback: (data: { orderedPlayers: Player[]; updatedGame: Game }) => void = () => {};
-        mockSocketClientService.onAlertGameStarted.and.callFake((callback: any) => {
-            alertGameStartedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'alertGameStarted') {
+                alertGameStartedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -281,8 +278,10 @@ describe('GameSocketService', () => {
 
     it('should handle playerMovement event correctly when clientPlayer is moving', () => {
         let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
-        mockSocketClientService.onPlayerMovement.and.callFake((callback: any) => {
-            playerMovementCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'playerMovement') {
+                playerMovementCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -347,8 +346,10 @@ describe('GameSocketService', () => {
 
     it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice', () => {
         let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
-        mockSocketClientService.onPlayerMovement.and.callFake((callback: any) => {
-            playerMovementCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'playerMovement') {
+                playerMovementCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -409,8 +410,10 @@ describe('GameSocketService', () => {
     it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice--222', () => {
         // test 140-141
         let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
-        mockSocketClientService.onPlayerMovement.and.callFake((callback: any) => {
-            playerMovementCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'playerMovement') {
+                playerMovementCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -470,8 +473,10 @@ describe('GameSocketService', () => {
 
     it('should handle gameCombatStarted event correctly', () => {
         let gameCombatStartedCallback: () => void = () => {};
-        mockSocketClientService.onGameCombatStarted.and.callFake((callback: any) => {
-            gameCombatStartedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'gameCombatStarted') {
+                gameCombatStartedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -483,8 +488,10 @@ describe('GameSocketService', () => {
 
     it('should handle attackResult event correctly', () => {
         let attackResultCallback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void = () => {};
-        mockSocketClientService.onAttackResult.and.callFake((callback: any) => {
-            attackResultCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'attackResult') {
+                attackResultCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -500,8 +507,10 @@ describe('GameSocketService', () => {
 
     it('should update clientPlayer if updated player is the same as clientPlayer', () => {
         let playerUpdateCallback: (data: { player: Player }) => void = () => {};
-        mockSocketClientService.onPlayerUpdate.and.callFake((callback: any) => {
-            playerUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'playerUpdate') {
+                playerUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -515,8 +524,10 @@ describe('GameSocketService', () => {
 
     it('should handle playerListUpdate event correctly', () => {
         let playerListUpdateCallback: (data: { players: Player[] }) => void = () => {};
-        mockSocketClientService.onPlayerListUpdate.and.callFake((callback: any) => {
-            playerListUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'playerListUpdate') {
+                playerListUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -531,8 +542,10 @@ describe('GameSocketService', () => {
 
     it('should handle doorClickedUpdate event correctly when game and grid exist', () => {
         let doorClickedUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.onDoorClickedUpdate.and.callFake((callback: any) => {
-            doorClickedUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'doorClickedUpdate') {
+                doorClickedUpdateCallback = callback;
+            }
             return () => {};
         });
 
@@ -583,8 +596,10 @@ describe('GameSocketService', () => {
 
     it('should not update grid or properties if game or grid does not exist', () => {
         let doorClickedUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.onDoorClickedUpdate.and.callFake((callback: any) => {
-            doorClickedUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'doorClickedUpdate') {
+                doorClickedUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -634,8 +649,10 @@ describe('GameSocketService', () => {
 
     it('should handle gameCombatTurnStarted event correctly', () => {
         let gameCombatTurnStartedCallback: (data: { fighter: Player }) => void = () => {};
-        mockSocketClientService.onGameCombatTurnStarted.and.callFake((callback: any) => {
-            gameCombatTurnStartedCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'turnStarted') {
+                gameCombatTurnStartedCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -647,8 +664,10 @@ describe('GameSocketService', () => {
 
     it('should handle gameCombatTimerUpdate event correctly', () => {
         let gameCombatTimerUpdateCallback: (data: { timeLeft: number }) => void = () => {};
-        mockSocketClientService.onGameCombatTimerUpdate.and.callFake((callback: any) => {
-            gameCombatTimerUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'timerUpdate') {
+                gameCombatTimerUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -660,8 +679,10 @@ describe('GameSocketService', () => {
 
     it('should handle gridUpdate event correctly when game and grid exist', () => {
         let gridUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.onGridUpdate.and.callFake((callback: any) => {
-            gridUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'gridUpdate') {
+                gridUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
@@ -707,8 +728,10 @@ describe('GameSocketService', () => {
 
     it('should not update grid if game or grid does not exist', () => {
         let gridUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.onGridUpdate.and.callFake((callback: any) => {
-            gridUpdateCallback = callback;
+        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
+            if (event === 'gridUpdate') {
+                gridUpdateCallback = callback;
+            }
             return () => {};
         });
         service.initializeSocketListeners(mockComponent);
