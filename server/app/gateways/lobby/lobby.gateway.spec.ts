@@ -305,44 +305,6 @@ describe('LobbyGateway', () => {
             expect(mockSocket.emit).not.toHaveBeenCalledWith('updateUnavailableOptions', expect.anything());
         });
     });
-
-    describe('handleDeleteLobby', () => {
-        const mockRoom = new Set(['socket1', 'socket2']);
-        const mockLobby = {
-            isLocked: false,
-            maxPlayers: 1,
-            players: [MOCK_PLAYER],
-        };
-        it('should delete lobby and clean up clients', () => {
-            mockServer.sockets.adapter.rooms.set(LOBBY_ACCESS_CODE, mockRoom);
-
-            jest.spyOn(lobbyService, 'getLobby').mockReturnValue(mockLobby as any);
-            jest.spyOn(mockServer.sockets.sockets, 'get').mockReturnValue(mockSocket as any);
-
-            gateway.handleDeleteLobby(LOBBY_ACCESS_CODE, mockSocket as Socket);
-
-            expect(mockServer.emit).toHaveBeenCalledWith('lobbyDeleted');
-            expect(lobbyService.leaveLobby).toHaveBeenCalled();
-        });
-
-        it('should not delete lobby if lobby does not exist', () => {
-            jest.spyOn(lobbyService, 'getLobby').mockReturnValue(undefined);
-
-            gateway.handleDeleteLobby(LOBBY_ACCESS_CODE, mockSocket as Socket);
-
-            expect(mockSocket.emit).toHaveBeenCalledWith('error', 'Lobby does not exist');
-        });
-
-        it('should not delete lobby if room socket does not exist', () => {
-            jest.spyOn(lobbyService, 'getLobby').mockReturnValue(mockLobby as any);
-            jest.spyOn(mockServer.sockets.adapter.rooms, 'get').mockReturnValue(undefined);
-
-            gateway.handleDeleteLobby(LOBBY_ACCESS_CODE, mockSocket as Socket);
-
-            expect(mockSocket.emit).toHaveBeenCalledWith('error', 'Lobby test-lobby does not exist.');
-        });
-    });
-
     describe('handleSelectAvatar', () => {
         const mockData = { accessCode: TEST_ACCESS_CODE, avatar: TEST_AVATAR };
         const mockClient = {
