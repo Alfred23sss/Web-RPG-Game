@@ -62,10 +62,6 @@ export class LobbyService {
             return true;
         }
 
-        // if (lobby.isLocked && lobby.players.length < lobby.maxPlayers) {
-        //     lobby.isLocked = false;
-        // }
-
         return false;
     }
     getLobbyPlayers(accessCode: string): Player[] {

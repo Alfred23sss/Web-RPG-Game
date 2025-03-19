@@ -24,8 +24,4 @@ export class AccessCodesService {
     removeAccessCode(code: string): void {
         this.accessCodes.delete(code);
     }
-
-    // getAllAccessCodes(): string[] {
-    //     return Array.from(this.accessCodes);
-    // }
 }

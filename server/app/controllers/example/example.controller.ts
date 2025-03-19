@@ -31,7 +31,6 @@ export class ExampleController {
     })
     @Post('/send')
     send(@Body() requestBody: Message) {
-        // HTTP_STATUS_CREATED will be automatically sent par NestJS
         this.exampleService.storeMessage(requestBody);
     }
 

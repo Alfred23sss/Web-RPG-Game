@@ -35,7 +35,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
         this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-        client.emit('updateUnavailableOptions', unavailableAvatars); // ????
+        client.emit('updateUnavailableOptions', unavailableAvatars);
     }
 
     @SubscribeMessage(LobbyEvents.CreateLobby)
