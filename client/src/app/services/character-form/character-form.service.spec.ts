@@ -430,7 +430,6 @@ describe('CharacterService', () => {
 
         expect((service as any).returnHome).toHaveBeenCalled();
         expect(closePopupSpy).toHaveBeenCalled();
-    });
         expect((service as any).returnHome).toHaveBeenCalled();
         expect(closePopupSpy).toHaveBeenCalled();
     });
