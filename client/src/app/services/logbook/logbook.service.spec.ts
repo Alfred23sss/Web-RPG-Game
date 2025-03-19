@@ -52,7 +52,6 @@ describe('LogBookService', () => {
         expect(service.logBook.length).toBe(1);
         expect(service.logBook[0]).toContain(entry);
         expect(service.logBook[0]).toContain('Joueur1');
-        // expect(service.logBook[0]).toMatch(/\[\d{2}:\d{2}:\d{2}\] - Nouvelle entrée avec joueurs \(Joueurs impliqués : Joueur1, Joueur2\)/);
     });
 
     it('should format time correctly', () => {
