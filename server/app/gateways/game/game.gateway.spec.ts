@@ -462,6 +462,17 @@ describe('GameGateway', () => {
         });
     });
 
+    describe('handleGameTurnResumed', () => {
+        it('should announce game turn resumed to the game room', () => {
+            gateway.handleGameTurnResumed(MOCK_PAYLOAD);
+
+            expect(serverMock.to).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
+            expect(serverMock.emit).toHaveBeenCalledWith('gameTurnResumed', {
+                player: MOCK_PLAYER,
+            });
+        });
+    });
+
     describe('handleDefenderHealthUpdate', () => {
         it('should send player update to specific socket', () => {
             gateway.handleDefenderHealthUpdate(MOCK_PAYLOAD);
