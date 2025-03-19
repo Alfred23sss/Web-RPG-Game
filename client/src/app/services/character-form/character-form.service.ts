@@ -14,7 +14,7 @@ import { BehaviorSubject } from 'rxjs';
     providedIn: 'root',
 })
 export class CharacterService {
-    unavailableAvatarsSubject = new BehaviorSubject<string[]>([]); 
+    unavailableAvatarsSubject = new BehaviorSubject<string[]>([]);
     unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
     attributes = { ...INITIAL_VALUES.attributes };
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
