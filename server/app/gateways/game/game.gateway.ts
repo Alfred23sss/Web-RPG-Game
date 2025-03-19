@@ -253,7 +253,7 @@ export class GameGateway {
         }
     }
 
-    @OnEvent(EventEmit.GameCombatEnded)
+    @OnEvent(EventEmit.GameCombatTimer)
     handleCombatTimerUpdate(payload: { accessCode: string; attacker: Player; defender: Player; timeLeft: number }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
