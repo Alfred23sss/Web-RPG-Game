@@ -47,6 +47,7 @@ describe('CharacterService', () => {
         mockCommunicationService = jasmine.createSpyObj('GameCommunicationService', ['getGameById']);
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
         closePopupSpy = jasmine.createSpy('closePopup');
+        closePopupSpy = jasmine.createSpy('closePopup');
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
             'emit',
             'on',
@@ -405,6 +406,7 @@ describe('CharacterService', () => {
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
         service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
@@ -421,9 +423,14 @@ describe('CharacterService', () => {
 
     it('should call returnHome when joinStatus is RedirectToHome', () => {
         spyOn(service as any, 'returnHome');
+        spyOn(service as any, 'returnHome');
 
         service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
 
+        expect((service as any).returnHome).toHaveBeenCalled();
+        expect(closePopupSpy).toHaveBeenCalled();
+    });
         expect((service as any).returnHome).toHaveBeenCalled();
         expect(closePopupSpy).toHaveBeenCalled();
     });
