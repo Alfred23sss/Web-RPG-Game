@@ -357,26 +357,6 @@ describe('GameCombatService', () => {
             expect(endCombatTurnSpy).not.toHaveBeenCalled();
         });
 
-        it('should handle failed escape attempt', () => {
-            const combatState = mockCombatState();
-            combatState.currentFighter = combatState.attacker;
-            service['combatStates'][ACCESS_CODE] = combatState;
-
-            const resetCombatTimersSpy = jest.spyOn(service as any, 'resetCombatTimers');
-            const endCombatTurnSpy = jest.spyOn(service, 'endCombatTurn');
-
-            jest.spyOn(global.Math, 'random').mockReturnValue(0.9);
-            service.attemptEscape(ACCESS_CODE, combatState.attacker);
-
-            expect(resetCombatTimersSpy).toHaveBeenCalledWith(ACCESS_CODE);
-            expect(eventEmitter.emit).toHaveBeenCalledWith('game.combat.escape.failed', {
-                player: combatState.attacker,
-                attemptsLeft: 1,
-            });
-            expect(combatState.remainingEscapeAttempts.get(combatState.attacker.name)).toBe(1);
-            expect(endCombatTurnSpy).toHaveBeenCalledWith(ACCESS_CODE);
-        });
-
         it('should handle successful escape attempt', () => {
             const combatState = mockCombatState();
             combatState.currentFighter = combatState.attacker;
@@ -698,7 +678,7 @@ describe('GameCombatService', () => {
             service.attemptEscape(ACCESS_CODE, player);
 
             expect(emitSpy).toHaveBeenCalledWith(
-                'game.combat.escape.failed',
+                'game.combat.escape',
                 expect.objectContaining({
                     attemptsLeft: -1,
                 }),

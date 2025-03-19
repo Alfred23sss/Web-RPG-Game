@@ -297,15 +297,16 @@ describe('GameGateway', () => {
             const payload = {
                 player: MOCK_PLAYER,
                 attemptsLeft: 2,
+                isEscapeSuccessful: false,
             };
 
             gateway.handleNoMoreEscapeAttempts(payload);
 
             expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith(payload.player.name);
             expect(serverMock.to).toHaveBeenCalledWith(`socket_${MOCK_PLAYER.name}`);
-            expect(serverMock.emit).toHaveBeenCalledWith('noMoreEscapesLeft', {
-                player: MOCK_PLAYER,
+            expect(serverMock.emit).toHaveBeenCalledWith('escapeAttempt', {
                 attemptsLeft: 2,
+                isEscapeSuccessful: false,
             });
         });
     });
