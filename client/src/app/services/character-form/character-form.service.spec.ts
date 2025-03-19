@@ -441,7 +441,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'validateGameAvailability');
         closePopupSpy = jasmine.createSpy('closePopup');
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+        (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect(service['validateGameAvailability']).toHaveBeenCalledWith(mockGame, closePopupSpy);
     });
