@@ -26,6 +26,7 @@ export class GameSessionTurnService {
             isTransitionPhase: false,
             countdownInterval: null,
             isInCombat: false,
+            beginnerPlayer: undefined,
         };
     }
 
@@ -110,7 +111,7 @@ export class GameSessionTurnService {
 
     resumeTurn(accessCode: string, turn: Turn, remainingTime: number): Turn {
         turn.currentTurnCountdown = remainingTime;
-        this.emitEvent('game.turn.resumed', { accessCode, player: turn.currentPlayer, remainingTime });
+        this.emitEvent('game.turn.resumed', { accessCode, player: turn.beginnerPlayer });
         let timeLeft = remainingTime;
         turn.countdownInterval = setInterval(() => {
             timeLeft--;

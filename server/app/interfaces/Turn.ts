@@ -9,4 +9,5 @@ export interface Turn {
     isTransitionPhase: boolean;
     isInCombat: boolean;
     transitionTimeRemaining?: number;
+    beginnerPlayer: Player;
 }

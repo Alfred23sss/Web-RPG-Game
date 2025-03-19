@@ -73,9 +73,10 @@ export class GameCombatService {
         }
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
-        this.emitEvent('game.combat.escape.failed', { player: currentFighter, attemptsLeft });
+
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
+        this.emitEvent('game.combat.escape', { player, attemptsLeft, isEscapeSuccessful });
         if (isEscapeSuccessful) {
             this.resetHealth([attacker, defender], accessCode);
             combatState.hasEvaded = true;
@@ -87,6 +88,8 @@ export class GameCombatService {
 
     checkPlayerWon(accessCode: string, player: Player): boolean {
         if (player.combatWon === WIN_CONDITION) {
+            this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
+            this.emitEvent('update.player.list', { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.gameSessionService.endGameSession(accessCode, player.name);
             return true;
         }

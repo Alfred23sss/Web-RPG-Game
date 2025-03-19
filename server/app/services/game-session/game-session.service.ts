@@ -32,6 +32,7 @@ export class GameSessionService {
         const grid = game.grid;
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
         const turn = this.turnService.initializeTurn(accessCode);
+        turn.beginnerPlayer = turn.orderedPlayers[0];
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
         const gameSession: GameSession = { game, turn };
@@ -87,7 +88,7 @@ export class GameSessionService {
     endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-
+        gameSession.turn.beginnerPlayer = this.turnService.getNextPlayer(accessCode, gameSession.turn);
         this.turnService.endTurn(gameSession.turn);
         this.startTransitionPhase(accessCode);
     }

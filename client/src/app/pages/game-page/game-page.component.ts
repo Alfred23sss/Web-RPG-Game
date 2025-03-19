@@ -37,9 +37,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     logBookSubscription: Subscription;
     turnTimer: number;
     isInCombatMode: boolean = false;
+    hasTurnEnded = false;
     isActionMode: boolean = false;
     isCurrentlyMoving: boolean = false;
     escapeAttempts: number = 2;
+    evadeResult: { attemptsLeft: number; isEscapeSuccessful: boolean } | null = null;
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
@@ -70,10 +72,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
             targetTile,
             accessCode: this.lobby.accessCode,
         });
-
-        if (!this.clientPlayer.actionPoints || !this.movementPointsRemaining) {
-            this.endTurn();
-        }
     }
 
     handleAttackClick(targetTile: Tile): void {
@@ -125,13 +123,15 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     endTurn(): void {
+        this.hasTurnEnded = true;
         this.turnTimer = 0;
         this.socketClientService.emit('endTurn', { accessCode: this.lobby.accessCode });
     }
 
     executeNextAction(): void {
         this.isActionMode = !this.isActionMode;
-        this.snackbarService.showMessage('Mode action activé');
+        const message = this.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
+        this.snackbarService.showMessage(message);
     }
     abandonGame(): void {
         this.clientPlayer.hasAbandoned = true;

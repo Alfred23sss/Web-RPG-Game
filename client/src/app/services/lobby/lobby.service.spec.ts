@@ -26,7 +26,8 @@ describe('LobbyService', () => {
         mockLobby = { accessCode: '1234', players: [mockPlayer], isLocked: false } as Lobby;
 
         const routerMock = jasmine.createSpyObj('Router', ['navigate']);
-        const socketMock = jasmine.createSpyObj('SocketClientService', ['getLobby', 'getLobbyPlayers', 'emit', 'on', 'off']);
+        const socketMock = jasmine.createSpyObj('SocketClientService', ['getLobby', 'getLobbyPlayers', 'emit', 'on', 'off', 'getSocketId']);
+        socketMock.getSocketId.and.returnValue('mock-socket-id');
         const accessCodeMock = jasmine.createSpyObj('AccessCodeService', ['getAccessCode']);
         const snackbarMock = jasmine.createSpyObj('SnackbarService', ['showMessage']);
 
@@ -107,19 +108,19 @@ describe('LobbyService', () => {
     });
 
     describe('removePlayerAndCleanup', () => {
-        it('should remove player and delete lobby if admin', () => {
+        it('should remove player and trigger lobby deletion if admin', () => {
             mockPlayer.isAdmin = true;
             sessionStorage.setItem('player', JSON.stringify(mockPlayer));
 
             service.initializeLobby();
-
             service.removePlayerAndCleanup(mockPlayer, mockLobby);
 
             expect(socketSpy.emit).toHaveBeenCalledWith('leaveLobby', {
                 accessCode: '1234',
                 playerName: 'test',
             });
-            expect(socketSpy.emit).toHaveBeenCalledWith('deleteLobby', '1234');
+
+            expect(socketSpy.emit).toHaveBeenCalledTimes(1);
         });
 
         it('should do nothing if game is starting', () => {

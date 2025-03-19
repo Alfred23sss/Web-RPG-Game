@@ -16,7 +16,11 @@
             <li>
                 <div class="player-info">
                     <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
+                    @if (player.name === this.player?.name) {
+                    <span class="yellow-tag player-name">{{ player.name }}</span>
+                    } @else {
                     <span class="player-name">{{ player.name }}</span>
+                    }
                 </div>
                 <div class="player-actions">
                     @if (player.isAdmin) {
@@ -37,5 +41,14 @@
     <button class="button" (click)="changeLobbyLockStatus()">
         {{ lobby.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
     </button>
+    <button class="button">Générer joueur virtuel</button>
     } } }
+</div>
+
+<div class="game-messages">
+    <h3>Messages</h3>
+    <div class="messages-content">
+        <p>Panneau des messages (clavardage).</p>
+    </div>
+    <button class="message-btn">Envoyer</button>
 </div>

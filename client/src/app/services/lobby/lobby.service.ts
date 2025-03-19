@@ -70,9 +70,6 @@ export class LobbyService {
                 accessCode: this.accessCode,
                 playerName: player.name,
             });
-            if (player.isAdmin) {
-                this.socketClientService.emit('deleteLobby', this.accessCode);
-            }
         }
     }
     navigateToHome(): void {
@@ -158,8 +155,10 @@ export class LobbyService {
             this.navigateToGame();
         });
 
-        this.socketClientService.on('adminLeft', (data: { message: string }) => {
-            this.snackbarService.showMessage(data.message);
+        this.socketClientService.on('adminLeft', (data: { playerSocketId: string; message: string }) => {
+            if (this.socketClientService.getSocketId() !== data.playerSocketId) {
+                this.snackbarService.showMessage(data.message);
+            }
         });
     }
 

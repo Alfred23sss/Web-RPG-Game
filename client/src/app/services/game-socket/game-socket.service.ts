@@ -63,6 +63,7 @@ export class GameSocketService {
             const abandonedPlayer = component.playerList.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
+            component.lobby.players = component.lobby.players.filter((p) => p.name !== data.player.name);
             this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
         });
 
@@ -103,6 +104,7 @@ export class GameSocketService {
             component.clientPlayer.actionPoints = defaultActionPoint;
             component.clientPlayer.movementPoints = component.clientPlayer.speed;
             component.turnTimer = data.turnDuration;
+            component.hasTurnEnded = component.clientPlayer.name !== component.currentPlayer.name;
             component.updateAvailablePath();
         });
 
@@ -128,27 +130,20 @@ export class GameSocketService {
                 component.updateAvailablePath();
             }
 
-            const clientPlayerPosition = component.getClientPlayerPosition();
-            if (!clientPlayerPosition) return;
-            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, data.grid);
-            const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, data.grid);
-            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce) {
-                    component.endTurn();
-                }
-            } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce && !hasActionAvailable) {
-                    component.endTurn();
-                }
-            }
+            this.checkAvailableActions(component);
         });
 
         this.socketClientService.on('combatStarted', () => {
             component.isInCombatMode = true;
         });
 
+        this.socketClientService.on('gameTurnResumed', (data: { player: Player }) => {
+            component.currentPlayer = data.player;
+        });
+
         this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: number; defenseScore: number }) => {
             component.updateAttackResult(data);
+            component.evadeResult = null;
         });
 
         this.socketClientService.on('playerUpdate', (data: { player: Player }) => {
@@ -169,6 +164,7 @@ export class GameSocketService {
             component.clientPlayer.actionPoints = noActionPoints;
             component.isActionMode = false;
             component.updateAvailablePath();
+            this.checkAvailableActions(component);
         });
 
         this.socketClientService.on('combatTurnStarted', (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => {
@@ -184,9 +180,12 @@ export class GameSocketService {
                 return;
             }
             component.game.grid = data.grid;
+            component.updateAvailablePath();
         });
 
-        this.socketClientService.on('noMoreEscapesLeft', (data: { player: Player; attemptsLeft: number }) => {
+        this.socketClientService.on('escapeAttempt', (data: { attemptsLeft: number; isEscapeSuccessful: boolean }) => {
+            component.evadeResult = data;
+            component.attackResult = null;
             component.escapeAttempts = data.attemptsLeft;
         });
 
@@ -195,22 +194,19 @@ export class GameSocketService {
             component.escapeAttempts = defaultEscapeAttempts;
             component.isActionMode = false;
             component.clientPlayer.actionPoints = noActionPoints;
+            component.evadeResult = null;
             component.attackResult = null;
             component.escapeAttempts = defaultEscapeAttempts;
             if (data && data.winner && !data.hasEvaded) {
                 this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
+            } else {
+                this.snackbarService.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, delayMessageAfterCombatEnded);
             }
             if (component.clientPlayer.name === component.currentPlayer.name) {
                 component.clientPlayer.movementPoints = component.movementPointsRemaining;
             }
-            const clientPlayerPosition = component.getClientPlayerPosition();
-            if (!clientPlayerPosition || !component.game || !component.game.grid) return;
-            const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
-            if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
-                if (!hasIce) {
-                    component.endTurn();
-                }
-            }
+
+            this.checkAvailableActions(component);
         });
 
         this.socketClientService.on('adminModeChangedServerSide', () => {
@@ -223,5 +219,21 @@ export class GameSocketService {
         events.forEach((event) => {
             this.socketClientService.socket.off(event);
         });
+    }
+
+    private checkAvailableActions(component: GamePageComponent): void {
+        const clientPlayerPosition = component.getClientPlayerPosition();
+        if (!clientPlayerPosition || !component.game || !component.game.grid) return;
+        const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, component.game.grid);
+        const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, component.game.grid);
+        if (component.clientPlayer.actionPoints === 0 && component.clientPlayer.movementPoints === 0) {
+            if (!hasIce) {
+                component.endTurn();
+            }
+        } else if (component.clientPlayer.actionPoints === 1 && component.clientPlayer.movementPoints === 0) {
+            if (!hasIce && !hasActionAvailable) {
+                component.endTurn();
+            }
+        }
     }
 }
