@@ -2,12 +2,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component'; // ajustez le chemin si nécessaire
+import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component';
 import { TileComponent } from '@app/components/tile/tile.component';
+import { POPUP_DELAY } from '@app/constants/global.constants';
 import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
-
-const POPUP_DELAY = 2000;
 
 @Component({
     selector: 'app-grid',
@@ -22,12 +21,14 @@ export class GridComponent {
     @Input() quickestPath: Tile[] | undefined = [];
     @Input() isEditionMode: boolean = false;
     @Input() isActionMode: boolean = false;
+    @Input() isDebugMode: boolean = false;
 
     @Output() tileHovered = new EventEmitter<Tile>();
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
     @Output() doorClicked = new EventEmitter<Tile>();
     @Output() tileRightClicked = new EventEmitter<{ tile: Tile; event: MouseEvent }>();
+    @Output() teleportClicked = new EventEmitter<Tile>();
 
     tileType = TileType;
 
@@ -53,19 +54,23 @@ export class GridComponent {
     }
 
     onTileRightClick(event: MouseEvent, tile: Tile): void {
-        event.preventDefault(); // Empêche l'ouverture du menu contextuel
+        if (this.isDebugMode) {
+            event.preventDefault();
 
-        // Ouvre le tooltip personnalisé sous forme de dialog
-        const dialogRef = this.dialog.open(TileTooltipComponent, {
-            data: { tile },
-            panelClass: 'custom-tooltip-dialog',
-            hasBackdrop: false,
-            position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
-        });
+            this.teleportClicked.emit(tile);
+        } else {
+            event.preventDefault();
 
-        // Ferme automatiquement après 2 secondes
-        setTimeout(() => {
-            dialogRef.close();
-        }, POPUP_DELAY);
+            const dialogRef = this.dialog.open(TileTooltipComponent, {
+                data: { tile },
+                panelClass: 'custom-tooltip-dialog',
+                hasBackdrop: false,
+                position: { left: `${event.clientX}px`, top: `${event.clientY}px` },
+            });
+
+            setTimeout(() => {
+                dialogRef.close();
+            }, POPUP_DELAY);
+        }
     }
 }

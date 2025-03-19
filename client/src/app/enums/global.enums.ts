@@ -80,11 +80,24 @@ export enum GameMode {
     CTF = 'CTF',
     None = '',
 }
+
+export enum GameModeLabel {
+    Classic = 'Classique',
+    CTF = 'Capture Le Drapeau',
+}
+
 export enum GameSize {
     Small = 'small',
     Medium = 'medium',
     Large = 'large',
     None = '',
+}
+
+export enum GameSizeNumber {
+    SmallSize = '10',
+    MediumSize = '15',
+    LargeSize = '20',
+    Default = '',
 }
 
 export enum AttributeType {
@@ -175,4 +188,15 @@ export enum ItemDescription {
 export enum AccessCodeGenerator {
     Minimum = 1000,
     Maximum = 9000,
+}
+
+export enum MouseButton {
+    Left = 0,
+    Right = 2,
+}
+
+export enum ItemCount {
+    SmallItemCount = 2,
+    MediumItemCount = 4,
+    LargeItemCount = 6,
 }

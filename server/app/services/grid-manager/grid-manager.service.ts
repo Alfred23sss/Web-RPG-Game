@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Tile } from '@app/model/database/tile';
 import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/model/database/tile';
+import { Injectable, Logger } from '@nestjs/common';
 
 const RANDOMIZER = 0.5;
 
@@ -66,7 +66,7 @@ export class GridManagerService {
         return grid.flat().filter((tile) => tile.item?.name === 'home');
     }
 
-    assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): Tile[][] {
+    assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): [Player[], Tile[][]] {
         const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - RANDOMIZER);
 
         players.forEach((player, index) => {
@@ -88,7 +88,7 @@ export class GridManagerService {
             spawnPoint.item = null;
         });
 
-        return grid;
+        return [players, grid];
     }
 
     teleportPlayer(grid: Tile[][], player: Player, targetTile: Tile): Tile[][] {
@@ -104,16 +104,24 @@ export class GridManagerService {
         let destinationTile = targetTile;
         const isPlayerSpawnPoint = player.spawnPoint.tileId === targetTile.id;
 
-        if (targetTile.player || targetTile.type === 'mur' || (targetTile.type === 'porte' && !targetTile.isOpen)) {
+        if (
+            targetTile.player ||
+            targetTile.type === 'mur' ||
+            (targetTile.type === 'porte' && !targetTile.isOpen) ||
+            (targetTile.item && targetTile.item.name !== 'home')
+        ) {
             if (isPlayerSpawnPoint) {
-                destinationTile = this.findClosestAvailableTile(grid, targetTile) || currentPlayerTile;
+                destinationTile = this.findClosestAvailableTile(grid, targetTile);
+                if (!destinationTile) {
+                    return grid;
+                }
             } else {
                 return grid;
             }
         }
 
-        destinationTile.player = player;
         currentPlayerTile.player = undefined;
+        this.setPlayerOnTile(grid, destinationTile, player);
 
         return grid;
     }
@@ -127,7 +135,7 @@ export class GridManagerService {
             const tile = queue.shift();
             if (!tile) continue;
 
-            if (!tile.player && (!tile.type || tile.type !== 'mur') && (!tile.type || tile.type !== 'porte' || tile.isOpen)) {
+            if (!tile.player && (!tile.type || tile.type !== 'mur') && (!tile.type || tile.type !== 'porte' || tile.isOpen) && !tile.item) {
                 return tile;
             }
 

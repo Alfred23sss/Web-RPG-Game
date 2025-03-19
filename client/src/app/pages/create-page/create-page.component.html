@@ -6,21 +6,18 @@
         @for (game of visibleGames; let index = $index; track $index) {
         <li class="game-item" (click)="openDialog(game)">
             <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}"  matTooltipPosition="above" />
+                <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
             </div>
             <div class="game-info">
-                <h3>{{ game.name }}</h3>
-                <p>Taille: {{ game.size }}</p>
-                <p>Mode de jeu: {{ game.mode }}</p>
-                <p>Dernière modification: {{ game.lastModified | date: 'short' }}</p>
+                <app-game-info [game]="game"></app-game-info>
             </div>
         </li>
         }
     </ul>
     } @else {
-        <h2 class="game-missing">
-            <p>Aucun jeu disponible. Désolé!</p>
-        </h2>
+    <h2 class="game-missing">
+        <p>Aucun jeu disponible. Désolé!</p>
+    </h2>
     }
     <div class="button-container">
         <button class="create-button" (click)="navigateToHome()">Retour à l'acceuil</button>

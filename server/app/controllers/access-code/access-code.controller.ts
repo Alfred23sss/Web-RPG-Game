@@ -27,15 +27,6 @@ export class AccessCodesController {
         }
     }
 
-    @Get()
-    getAllAccessCodes(): string[] {
-        try {
-            return this.accessCodesService.getAllAccessCodes();
-        } catch (error) {
-            throw new HttpException({ message: 'Failed to fetch access codes', error: error.message }, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
     @Delete(':code')
     removeAccessCode(@Param('code') code: string): { message: string } {
         try {

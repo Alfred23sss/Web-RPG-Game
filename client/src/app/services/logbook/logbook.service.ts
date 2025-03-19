@@ -7,7 +7,7 @@ import { Subject } from 'rxjs';
 })
 export class LogBookService {
     logBook: string[] = [];
-    logBookUpdated = new Subject<string[]>(); // Émet un événement lorsque le logBook est mis à jour
+    logBookUpdated = new Subject<string[]>();
 
     addEntry(entry: string, players?: Player[]): void {
         const formattedTime = this.formatTime(new Date());

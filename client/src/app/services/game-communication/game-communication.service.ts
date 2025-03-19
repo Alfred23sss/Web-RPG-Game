@@ -25,7 +25,7 @@ export class GameCommunicationService {
     }
 
     deleteGame(id: string): Observable<Game> {
-        return this.http.delete<Game>(`${this.apiUrl}/delete/${id}`);
+        return this.http.delete<Game>(`${this.apiUrl}/${id}`);
     }
 
     getGameById(id: string): Observable<Game> {

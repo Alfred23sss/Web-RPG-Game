@@ -11,4 +11,6 @@ export interface CombatState {
     pausedGameTurnTimeRemaining?: number;
     winner?: Player;
     playerPerformedAction: boolean;
+    isDebugMode: boolean;
+    hasEvaded: boolean;
 }

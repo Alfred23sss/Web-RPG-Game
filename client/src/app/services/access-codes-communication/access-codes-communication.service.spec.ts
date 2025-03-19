@@ -48,16 +48,6 @@ describe('AccessCodesCommunicationService', () => {
         req.flush(expectedResponse);
     });
 
-    it('getAllAccessCodes should GET and return an array of strings', () => {
-        const expectedCodes = ['ABC123', 'DEF456'];
-        service.getAllAccessCodes().subscribe((codes) => {
-            expect(codes).toEqual(expectedCodes);
-        });
-        const req = httpMock.expectOne(apiUrl);
-        expect(req.request.method).toBe('GET');
-        req.flush(expectedCodes);
-    });
-
     it('removeAccessCode should DELETE and return void', () => {
         const codeToRemove = 'ABC123';
         service.removeAccessCode(codeToRemove).subscribe((response) => {
