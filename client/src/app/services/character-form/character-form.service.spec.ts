@@ -25,10 +25,12 @@ describe('CharacterService', () => {
     let mockAccessCodeService: jasmine.SpyObj<AccessCodeService>;
     let player: Player;
     let currentAccessCode: string;
+    let closePopupSpy: jasmine.Spy<jasmine.Func>;
+
     const mockGame: Game = {
         id: '1',
         name: 'Test Game',
-        size: '4', // verifier les attributs
+        size: '4',
         mode: 'casual',
         lastModified: new Date(),
         isVisible: true,
@@ -38,13 +40,13 @@ describe('CharacterService', () => {
     };
     const UNINITIALIZED_ATTRIBUTE_VALUE = 4;
     const ASSIGNED_ATTRIBUTE_VALUE = 6;
-    let closePopupSpy: jasmine.Spy;
     let game: Game;
 
     beforeEach(() => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
         mockCommunicationService = jasmine.createSpyObj('GameCommunicationService', ['getGameById']);
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+        closePopupSpy = jasmine.createSpy('closePopup'); 
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
             'emit',
             'on',
@@ -188,26 +190,31 @@ describe('CharacterService', () => {
         expect(player.defense.bonusDice).toBe(DiceType.D6);
     });
 
-    it('should call finalizeCharacterSubmission when creating a new lobby', async () => {
-        spyOn(service, 'isCharacterValid').and.returnValue(true);
-        spyOn(service, 'createAndJoinLobby').and.returnValue(Promise.resolve());
+    it('should call finalizeCharacterSubmission when joinStatus is JoinedLobby', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
-
-        await service.submitCharacter(player, currentAccessCode, false, mockGame, closePopupSpy);
-
+        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
+    
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+    
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
 
     it('should call joinExistingLobby and handleLobbyJoining when isLobbyCreated is true', async () => {
-        spyOn(service, 'isCharacterValid').and.returnValue(true);
         spyOn(service, 'joinExistingLobby').and.resolveTo(JoinLobbyResult.JoinedLobby);
         spyOn(service as any, 'handleLobbyJoining');
-
+    
         await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
-
+    
         expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
-        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame, closePopupSpy);
+        expect(service['handleLobbyJoining']).toHaveBeenCalledWith(
+            JoinLobbyResult.JoinedLobby,
+            player,
+            mockGame,
+            currentAccessCode,
+            closePopupSpy 
+        );
     });
+    
 
     describe('joinExistingLobby', () => {
         const accessCode = '1234';
@@ -404,7 +411,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode,closePopupSpy);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
@@ -420,20 +427,20 @@ describe('CharacterService', () => {
     });
 
     it('should call returnHome when joinStatus is RedirectToHome', () => {
-        spyOn(service as any, 'returnHome');
+    spyOn(service as any, 'returnHome');
 
-        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
+    service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode,closePopupSpy);
 
-        (service as any).handleLobbyJoining(JoinLobbyResult.RedirectToHome, player, mockGame, closePopupSpy);
+    expect((service as any).returnHome).toHaveBeenCalled();
+    expect(closePopupSpy).toHaveBeenCalled(); 
+});
 
-        expect((service as any).returnHome).toHaveBeenCalled();
-    });
 
     it('should validate game availability', () => {
         spyOn(service as any, 'validateGameAvailability');
-
+    
         (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, closePopupSpy);
-
+    
         expect((service as any).validateGameAvailability).toHaveBeenCalledWith(mockGame, closePopupSpy);
     });
 
@@ -553,14 +560,14 @@ describe('CharacterService', () => {
         spyOn(service, 'isCharacterValid').and.returnValue(true);
         spyOn(sessionStorage, 'setItem');
         spyOn(service as any, 'proceedToWaitingView');
-        spyOn(service as any, 'validateGameAvailability');
-
-        (service as any).handleLobbyJoining(JoinLobbyResult.StayInLobby, player, mockGame, closePopupSpy);
-
+    
+        service['finalizeCharacterSubmission'](player, closePopupSpy);
+    
         expect(service.isCharacterValid).toHaveBeenCalledWith(player);
         expect(sessionStorage.setItem).toHaveBeenCalledWith('player', JSON.stringify(player));
-        expect((service as any).proceedToWaitingView).toHaveBeenCalledWith(closePopupSpy);
+        expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
     });
+    
 
     it('should do nothing if attribute is neither Vitality nor Speed', () => {
         spyOn(service, 'assignBonus');
