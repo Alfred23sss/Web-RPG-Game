@@ -1,26 +1,25 @@
 <div class="game-container">
-    <!-- First column: Game info -->
     <div class="game-info">
         <div class="game-details">
             <h3>Informations de partie</h3>
             <p>Taille de la carte: {{ game?.size }}x{{ game?.size }}</p>
             <p>Joueurs actuels:</p>
-            <!-- Use @for to loop through playerList -->
             @for(player of playerList; track $index){
             <p
                 class="player-name"
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
                 [class.abandoned]="player.hasAbandoned"
-                [class.active]="player.name === currentPlayer.name"
+                [class.active]="currentPlayer && player.name === currentPlayer.name"
             >
-                {{ player.name }} <br />
+                {{ player?.name }} <br />
                 Combats gagnés: {{ player.combatWon }}
             </p>
             }
-            <p>Joueur actif: {{ lobby.players.length }}</p>
+            @if(lobby.players){
+                <p>Joueur actif: {{ lobby.players.length }}</p>
+            }
         </div>
-
         <div class="player-info">
             <h3>Informations du joueur</h3>
             <div class="player-header">

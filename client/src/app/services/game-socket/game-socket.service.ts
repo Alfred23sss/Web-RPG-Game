@@ -180,6 +180,7 @@ export class GameSocketService {
                 return;
             }
             component.game.grid = data.grid;
+            component.updateAvailablePath();
         });
 
         this.socketClientService.on('escapeAttempt', (data: { attemptsLeft: number; isEscapeSuccessful: boolean }) => {
