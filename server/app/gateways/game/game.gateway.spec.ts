@@ -395,7 +395,7 @@ describe('GameGateway', () => {
 
     describe('Event Handlers', () => {
         it('should handle combat ended event', () => {
-            const payload = { attacker: MOCK_PLAYER, defender: MOCK_PLAYER, winner: MOCK_PLAYER, hasEvaded: false };
+            const payload = { attacker: MOCK_PLAYER, defender: MOCK_PLAYER, currentFighter: MOCK_PLAYER, hasEvaded: false };
             gateway.handleCombatEnded(payload);
 
             expect(serverMock.to).toHaveBeenCalledWith(['socket_test-player', 'socket_test-player']);

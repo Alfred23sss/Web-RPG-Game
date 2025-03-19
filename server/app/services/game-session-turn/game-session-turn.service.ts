@@ -111,7 +111,6 @@ export class GameSessionTurnService {
 
     resumeTurn(accessCode: string, turn: Turn, remainingTime: number): Turn {
         turn.currentTurnCountdown = remainingTime;
-        this.logger.log(`quand on resume turn lui qui a start ${turn.beginnerPlayer.name}`);
         this.emitEvent('game.turn.resumed', { accessCode, player: turn.beginnerPlayer });
         let timeLeft = remainingTime;
         turn.countdownInterval = setInterval(() => {
