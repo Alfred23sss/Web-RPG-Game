@@ -1,6 +1,5 @@
-// approved by education team, disabling magic numbers and any in test are aloud
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */ // approved by education team, disabling magic numbers and any in test are allowed
+/* eslint-disable @typescript-eslint/no-explicit-any */ // To test private methods
 import { TileType } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { Player } from '@app/model/database/player';
@@ -97,7 +96,7 @@ describe('CombatHelperService', () => {
         const player = { attack: { value: 5, bonusDice: 'd6' }, defense: { value: 5, bonusDice: 'd6' } } as unknown as Player;
         const tile = { type: TileType.Ice } as Tile;
         (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(tile);
-        expect(service.getRandomAttackScore(player, false, [[]])).toBeLessThan(9);
+        expect(service.getRandomAttackScore(player, false, [[]])).toBeLessThanOrEqual(9);
         expect(service.getRandomDefenseScore(player, false, [[]])).toBeLessThanOrEqual(9);
     });
 
