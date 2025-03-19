@@ -15,6 +15,49 @@ import { PlayerMovementService } from '@app/services/player-movement/player-move
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 
+const CLIENT_PLAYER_POSITION: Tile = {
+    id: 'tile1',
+    type: TileType.Default,
+    isOccupied: true,
+    imageSrc: 'player-tile.png',
+    isOpen: true,
+};
+
+const MOCK_GRID: Tile[][] = [
+    [
+        {
+            id: 'tile1',
+            type: TileType.Default,
+            isOccupied: false,
+            imageSrc: 'default-tile.png',
+            isOpen: true,
+        },
+        {
+            id: 'tile2',
+            type: TileType.Wall,
+            isOccupied: true,
+            imageSrc: 'wall-tile.png',
+            isOpen: false,
+        },
+    ],
+    [
+        {
+            id: 'tile3',
+            type: TileType.Ice,
+            isOccupied: false,
+            imageSrc: 'ice-tile.png',
+            isOpen: true,
+        },
+        {
+            id: 'tile4',
+            type: TileType.Door,
+            isOccupied: true,
+            imageSrc: 'door-tile.png',
+            isOpen: false,
+        },
+    ],
+];
+
 const PLAYER_1_NAME = 'Player1';
 const PLAYER_2_NAME = 'Player2';
 
@@ -226,16 +269,15 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(turnStartedCallback).toBeDefined();
-        const player1 = { name: 'Player1', speed: 5, actionPoints: 0, movementPoints: 0 } as Player;
         const turnDuration = 60;
-        mockComponent.clientPlayer = player1;
-        turnStartedCallback({ player: player1, turnDuration });
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`C'est à ${player1.name} de jouer`);
-        expect(mockComponent.currentPlayer).toEqual(player1);
+        mockComponent.clientPlayer = MOCK_PLAYER_1;
+        turnStartedCallback({ player: MOCK_PLAYER_1, turnDuration });
+        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`C'est à ${MOCK_PLAYER_1.name} de jouer`);
+        expect(mockComponent.currentPlayer).toEqual(MOCK_PLAYER_1);
         expect(mockComponent.isCurrentlyMoving).toBeFalse();
         expect(mockComponent.isActionMode).toBeFalse();
         expect(mockComponent.isInCombatMode).toBeFalse();
-        expect(mockComponent.clientPlayer.movementPoints).toEqual(player1.speed);
+        expect(mockComponent.clientPlayer.movementPoints).toEqual(MOCK_PLAYER_1.speed);
         expect(mockComponent.turnTimer).toEqual(turnDuration);
         expect(mockComponent.updateAvailablePath).toHaveBeenCalled();
     });
@@ -265,53 +307,14 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(playerMovementCallback).toBeDefined();
-        const grid: Tile[][] = [
-            [
-                {
-                    id: 'tile1',
-                    type: TileType.Default,
-                    isOccupied: false,
-                    imageSrc: 'default-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile2',
-                    type: TileType.Wall,
-                    isOccupied: true,
-                    imageSrc: 'wall-tile.png',
-                    isOpen: false,
-                },
-            ],
-            [
-                {
-                    id: 'tile3',
-                    type: TileType.Ice,
-                    isOccupied: false,
-                    imageSrc: 'ice-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile4',
-                    type: TileType.Door,
-                    isOccupied: true,
-                    imageSrc: 'door-tile.png',
-                    isOpen: false,
-                },
-            ],
-        ];
-        const player: Player = { name: 'Player1', movementPoints: 5, actionPoints: 1, speed: 5 } as Player;
+
+        const player: Player = { ...MOCK_PLAYER_1, movementPoints: 5, actionPoints: 1, speed: 5 } as Player;
         const isCurrentlyMoving = true;
         mockComponent.clientPlayer = player;
+        const grid = MOCK_GRID;
         mockComponent.game = { grid } as Game;
 
-        const clientPlayerPosition: Tile = {
-            id: 'tile1',
-            type: TileType.Default,
-            isOccupied: true,
-            imageSrc: 'player-tile.png',
-            isOpen: true,
-        };
-        mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
+        mockComponent.getClientPlayerPosition.and.returnValue(CLIENT_PLAYER_POSITION);
         mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(2);
         mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
         mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
@@ -333,51 +336,12 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(playerMovementCallback).toBeDefined();
-        const grid: Tile[][] = [
-            [
-                {
-                    id: 'tile1',
-                    type: TileType.Default,
-                    isOccupied: false,
-                    imageSrc: 'default-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile2',
-                    type: TileType.Wall,
-                    isOccupied: true,
-                    imageSrc: 'wall-tile.png',
-                    isOpen: false,
-                },
-            ],
-            [
-                {
-                    id: 'tile3',
-                    type: TileType.Ice,
-                    isOccupied: false,
-                    imageSrc: 'ice-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile4',
-                    type: TileType.Door,
-                    isOccupied: true,
-                    imageSrc: 'door-tile.png',
-                    isOpen: false,
-                },
-            ],
-        ];
-        const player: Player = { name: 'Player1', movementPoints: 0, actionPoints: 0, speed: 5 } as Player;
+        const grid = MOCK_GRID;
+        const player = MOCK_PLAYER_1;
         const isCurrentlyMoving = false;
         mockComponent.clientPlayer = player;
         mockComponent.game = { grid } as Game;
-        const clientPlayerPosition: Tile = {
-            id: 'tile1',
-            type: TileType.Default,
-            isOccupied: true,
-            imageSrc: 'player-tile.png',
-            isOpen: true,
-        };
+        const clientPlayerPosition = CLIENT_PLAYER_POSITION;
         mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
         mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0);
         mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
@@ -387,7 +351,6 @@ describe('GameSocketService', () => {
     });
 
     it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice--222', () => {
-        // test 140-141
         let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
         mockSocketClientService.on.and.callFake((event: string, callback: any) => {
             if (event === 'playerMovement') {
@@ -397,51 +360,12 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(playerMovementCallback).toBeDefined();
-        const grid: Tile[][] = [
-            [
-                {
-                    id: 'tile1',
-                    type: TileType.Default,
-                    isOccupied: false,
-                    imageSrc: 'default-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile2',
-                    type: TileType.Wall,
-                    isOccupied: true,
-                    imageSrc: 'wall-tile.png',
-                    isOpen: false,
-                },
-            ],
-            [
-                {
-                    id: 'tile3',
-                    type: TileType.Ice,
-                    isOccupied: false,
-                    imageSrc: 'ice-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile4',
-                    type: TileType.Door,
-                    isOccupied: true,
-                    imageSrc: 'door-tile.png',
-                    isOpen: false,
-                },
-            ],
-        ];
-        const player: Player = { name: 'Player1', movementPoints: 0, actionPoints: 1, speed: 5 } as Player;
+        const grid = MOCK_GRID;
+        const player: Player = { ...MOCK_PLAYER_1, actionPoints: 1, speed: 5 } as Player;
         const isCurrentlyMoving = false;
         mockComponent.clientPlayer = player;
         mockComponent.game = { grid } as Game;
-        const clientPlayerPosition: Tile = {
-            id: 'tile1',
-            type: TileType.Default,
-            isOccupied: true,
-            imageSrc: 'player-tile.png',
-            isOpen: true,
-        };
+        const clientPlayerPosition = CLIENT_PLAYER_POSITION;
         mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
         mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0);
         mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
@@ -497,8 +421,8 @@ describe('GameSocketService', () => {
         service.initializeSocketListeners(mockComponent);
         expect(playerListUpdateCallback).toBeDefined();
         const players: Player[] = [
-            { name: 'Player1', movementPoints: 5, actionPoints: 1, speed: 5 } as Player,
-            { name: 'Player2', movementPoints: 3, actionPoints: 0, speed: 5 } as Player,
+            { ...MOCK_PLAYER_1, movementPoints: 5, actionPoints: 1, speed: 5 } as Player,
+            { ...MOCK_PLAYER_2, movementPoints: 3, speed: 5 } as Player,
         ];
         playerListUpdateCallback({ players });
         expect(mockComponent.playerList).toEqual(players);
@@ -514,40 +438,7 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(doorClickedUpdateCallback).toBeDefined();
-        const grid: Tile[][] = [
-            [
-                {
-                    id: 'tile1',
-                    type: TileType.Default,
-                    isOccupied: false,
-                    imageSrc: 'default-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile2',
-                    type: TileType.Wall,
-                    isOccupied: true,
-                    imageSrc: 'wall-tile.png',
-                    isOpen: false,
-                },
-            ],
-            [
-                {
-                    id: 'tile3',
-                    type: TileType.Ice,
-                    isOccupied: false,
-                    imageSrc: 'ice-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile4',
-                    type: TileType.Door,
-                    isOccupied: true,
-                    imageSrc: 'door-tile.png',
-                    isOpen: false,
-                },
-            ],
-        ];
+        const grid = MOCK_GRID;
         mockComponent.game = null;
         mockComponent.clientPlayer = { actionPoints: 1 } as Player;
         mockComponent.isActionMode = true;
@@ -582,40 +473,7 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(gridUpdateCallback).toBeDefined();
-        const grid: Tile[][] = [
-            [
-                {
-                    id: 'tile1',
-                    type: TileType.Default,
-                    isOccupied: false,
-                    imageSrc: 'default-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile2',
-                    type: TileType.Wall,
-                    isOccupied: true,
-                    imageSrc: 'wall-tile.png',
-                    isOpen: false,
-                },
-            ],
-            [
-                {
-                    id: 'tile3',
-                    type: TileType.Ice,
-                    isOccupied: false,
-                    imageSrc: 'ice-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile4',
-                    type: TileType.Door,
-                    isOccupied: true,
-                    imageSrc: 'door-tile.png',
-                    isOpen: false,
-                },
-            ],
-        ];
+        const grid = MOCK_GRID;
         mockComponent.game = { grid } as Game;
         gridUpdateCallback({ grid });
         expect(mockComponent.game.grid).toEqual(grid);
@@ -631,40 +489,7 @@ describe('GameSocketService', () => {
         });
         service.initializeSocketListeners(mockComponent);
         expect(gridUpdateCallback).toBeDefined();
-        const grid: Tile[][] = [
-            [
-                {
-                    id: 'tile1',
-                    type: TileType.Default,
-                    isOccupied: false,
-                    imageSrc: 'default-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile2',
-                    type: TileType.Wall,
-                    isOccupied: true,
-                    imageSrc: 'wall-tile.png',
-                    isOpen: false,
-                },
-            ],
-            [
-                {
-                    id: 'tile3',
-                    type: TileType.Ice,
-                    isOccupied: false,
-                    imageSrc: 'ice-tile.png',
-                    isOpen: true,
-                },
-                {
-                    id: 'tile4',
-                    type: TileType.Door,
-                    isOccupied: true,
-                    imageSrc: 'door-tile.png',
-                    isOpen: false,
-                },
-            ],
-        ];
+        const grid = MOCK_GRID;
         mockComponent.game = null;
         gridUpdateCallback({ grid });
         expect(mockComponent.game).toBeNull();
@@ -709,7 +534,6 @@ describe('GameSocketService', () => {
         expect(mockSocketClientService.socket.off).toHaveBeenCalledTimes(events.length);
     });
 
-    // LUI FAIT MARCHE LA CONDITION
     it('should handle combat ended with actionPoints 1 and movementPoints 0 and no adjacent ice, no action available', () => {
         let combatEndedCallback: (data: { winner: Player; hasEvaded: boolean }) => void = () => {};
         mockSocketClientService.on.and.callFake((event: string, callback: any) => {
@@ -787,7 +611,6 @@ describe('GameSocketService', () => {
         let combatTimerUpdateCallback: (data: { timeLeft: number }) => void = () => {};
         mockSocketClientService.on.and.callFake((event: string, callback: any) => {
             if (event === 'combatTimerUpdate') {
-                // Match exact event name from service
                 combatTimerUpdateCallback = callback;
             }
             return () => {};
@@ -865,16 +688,14 @@ describe('GameSocketService', () => {
         service.initializeSocketListeners(mockComponent);
         expect(gameAbandonedCallback).toBeDefined();
 
-        const player1 = { name: 'Player1', hasAbandoned: false } as Player;
-        const player2 = { name: 'Player2', hasAbandoned: false } as Player;
-        mockComponent.playerList = [player1, player2];
+        mockComponent.playerList = [MOCK_PLAYER_1, MOCK_PLAYER_2];
 
-        gameAbandonedCallback({ player: player1 });
+        gameAbandonedCallback({ player: MOCK_PLAYER_1 });
 
         const abandonedPlayer = mockComponent.playerList.find((p) => p.name === 'Player1');
         expect(abandonedPlayer?.hasAbandoned).toBeTrue();
         expect(mockLogbookService.addEntry).toHaveBeenCalledWith('Player1 a abandonné la partie', [
-            jasmine.objectContaining({ name: 'Player1', hasAbandoned: true }),
+            jasmine.objectContaining({ name: PLAYER_1_NAME, hasAbandoned: true }),
         ]);
     });
 });
