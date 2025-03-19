@@ -1,7 +1,10 @@
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AttributeType, GameMode, GameSize } from '@app/enums/global.enums';
+/* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
+import { AttributeType, GameMode, GameModeLabel, GameModeType, GameSize, ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
+import { Lobby } from '@app/interfaces/lobby';
 export const BONUS_VALUE = 2;
+
+export const POPUP_DELAY = 2000;
 
 export const INITIAL_VALUES = {
     attributes: {
@@ -30,7 +33,7 @@ export const GRID_DIMENSIONS: Record<GameSize, number> = {
     [GameSize.None]: 0,
 };
 
-export const DEFAULT_GAME_IMAGE = 'assets/images/example.png';
+export const DEFAULT_GAME_IMAGE = GameModeType.Default;
 
 export const GAME_SIZES_LIST = [
     { key: GameSize.Small, label: 'Petit', info: 'Grille: 10x10, Joeurs: 2, Items: 2' },
@@ -41,15 +44,15 @@ export const GAME_SIZES_LIST = [
 export const GAME_MODES_LIST = [
     {
         key: GameMode.Classic,
-        label: 'Classique',
+        label: GameModeLabel.Classic,
         description: 'Un mode de jeu traditionnel où la stratégie est la clé.',
-        backgroundImage: "url('/assets/gamemodes/classic-game.png')",
+        backgroundImage: `url('${GameModeType.Classic}')`,
     },
     {
         key: GameMode.CTF,
-        label: 'Capture Le Drapeau',
+        label: GameModeLabel.CTF,
         description: 'Rivalisez pour sécuriser le drapeau de votre adversaire !',
-        backgroundImage: "url('/assets/gamemodes/CTF-game.png')",
+        backgroundImage: `url('${GameModeType.CTF}')`,
     },
 ];
 
@@ -63,14 +66,15 @@ export const ACCESS_CODE_MAX_VALUE = 9999;
 export const ACCESS_CODE_RANGE = 9000;
 export const ACCESS_CODE_LENGTH = 4;
 export const CODE_EDGE_CASES = [0, 0.999];
+export const MIN_PLAYERS = 2;
 
 export const MOCK_GAMES = [
     {
         id: '1',
         name: 'Game 1',
         isVisible: false,
-        size: 'medium',
-        mode: 'Classic',
+        size: GameSize.Medium,
+        mode: GameMode.Classic,
         lastModified: new Date(),
         previewImage: 'image1.jpg',
         description: 'Description 1',
@@ -88,3 +92,90 @@ export const MOCK_GAMES = [
         grid: [],
     },
 ];
+
+export const ESCAPE_CHANCE = 0.3;
+export const NO_ESCAPES_TIMER = 3;
+
+export const ITEM_BAR_ITEMS = [
+    {
+        id: '0',
+        name: ItemName.Lightning,
+        imageSrc: ItemType.Lightning,
+        imageSrcGrey: ItemType.LightningGray,
+        itemCounter: 1,
+        description: ItemDescription.Lightning,
+    },
+    {
+        id: '1',
+        name: ItemName.Potion,
+        imageSrc: ItemType.Potion,
+        imageSrcGrey: ItemType.PotionGray,
+        itemCounter: 1,
+        description: ItemDescription.Potion,
+    },
+    {
+        id: '2',
+        name: ItemName.Rubik,
+        imageSrc: ItemType.Rubik,
+        imageSrcGrey: ItemType.RubikGray,
+        itemCounter: 1,
+        description: ItemDescription.Rubik,
+    },
+    {
+        id: '3',
+        name: ItemName.Stop,
+        imageSrc: ItemType.Stop,
+        imageSrcGrey: ItemType.StopGray,
+        itemCounter: 1,
+        description: ItemDescription.Stop,
+    },
+    {
+        id: '4',
+        name: ItemName.Fire,
+        imageSrc: ItemType.Fire,
+        imageSrcGrey: ItemType.FireGray,
+        itemCounter: 1,
+        description: ItemDescription.Fire,
+    },
+    {
+        id: '5',
+        name: ItemName.Swap,
+        imageSrc: ItemType.Swap,
+        imageSrcGrey: ItemType.SwapGray,
+        itemCounter: 1,
+        description: ItemDescription.Swap,
+    },
+    {
+        id: '6',
+        name: ItemName.Home,
+        imageSrc: ItemType.Home,
+        imageSrcGrey: ItemType.HomeGray,
+        itemCounter: 2,
+        description: ItemDescription.Home,
+    },
+    {
+        id: '7',
+        name: ItemName.QuestionMark,
+        imageSrc: ItemType.QuestionMark,
+        imageSrcGrey: ItemType.QuestionMarkGray,
+        itemCounter: 2,
+        description: ItemDescription.QuestionMark,
+    },
+];
+
+export const ITEM_COUNTS: Record<GameSize, number> = {
+    [GameSize.Small]: 2,
+    [GameSize.Medium]: 4,
+    [GameSize.Large]: 6,
+    [GameSize.None]: 0,
+};
+
+export const ITEMS_TO_UPDATE = new Set(['home', 'question']);
+
+export const DEFAULT_LOBBY: Lobby = {
+    isLocked: false,
+    accessCode: '',
+    players: [],
+    game: null,
+    maxPlayers: 0,
+};

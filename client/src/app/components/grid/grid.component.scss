@@ -18,6 +18,15 @@
     height: fit-content;
 }
 
+.highlight-player {
+    border-color: red;
+    border: 2px solid red;
+}
+.highlight-door {
+    border-color: red;
+    border: 2px solid red;
+}
+
 app-tile {
     display: inline-block;
     box-sizing: border-box;
@@ -30,4 +39,36 @@ app-tile {
 
 app-tile:hover {
     border-color: #ffd700;
+}
+
+.available-path {
+    background-color: rgba(0, 255, 0, 0.3);
+    border: 2px dashed green;
+}
+
+.quickest-path {
+    position: relative;
+    &::after {
+        content: '';
+        width: 10px;
+        height: 10px;
+        background-color: blue;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}
+
+.tooltip-content {
+    text-align: center;
+    font-size: 14px;
+}
+
+.tooltip-image {
+    max-width: 100px;
+    max-height: 100px;
+    margin-top: 8px;
+    border-radius: 4px;
 }

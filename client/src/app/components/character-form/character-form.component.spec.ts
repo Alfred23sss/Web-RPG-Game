@@ -1,9 +1,14 @@
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AttributeType } from '@app/enums/global.enums';
+import { AttributeType, DiceType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { BehaviorSubject } from 'rxjs';
 import { CharacterFormComponent } from './character-form.component';
 
 describe('CharacterFormComponent', () => {
@@ -11,18 +16,32 @@ describe('CharacterFormComponent', () => {
     let fixture: ComponentFixture<CharacterFormComponent>;
     let mockCharacterService: jasmine.SpyObj<CharacterService>;
     let mockDialogRef: jasmine.SpyObj<MatDialogRef<CharacterFormComponent>>;
+    let mockSocketClientService: jasmine.SpyObj<SocketClientService>;
     let mockGame: Game;
+    let mockCdr: jasmine.SpyObj<ChangeDetectorRef>;
 
     beforeEach(async () => {
         mockCharacterService = jasmine.createSpyObj<CharacterService>(
             'CharacterService',
-            ['submitCharacter', 'resetAttributes', 'assignBonus', 'assignDice', 'checkCharacterNameLength'],
+            [
+                'initializePlayer',
+                'initializeLobby',
+                'assignBonus',
+                'assignDice',
+                'selectAvatar',
+                'deselectAvatar',
+                'checkCharacterNameLength',
+                'submitCharacter',
+                'resetAttributes',
+                'returnHome',
+            ],
             {
+                unavailableAvatars$: new BehaviorSubject<string[]>([]).asObservable(),
                 attributes: {
-                    [AttributeType.Vitality]: 5,
-                    [AttributeType.Speed]: 5,
-                    [AttributeType.Attack]: 5,
-                    [AttributeType.Defense]: 5,
+                    [AttributeType.Vitality]: 4,
+                    [AttributeType.Speed]: 4,
+                    [AttributeType.Attack]: 4, // Ajout des valeurs manquantes
+                    [AttributeType.Defense]: 4,
                 },
                 bonusAssigned: {
                     [AttributeType.Vitality]: false,
@@ -35,14 +54,36 @@ describe('CharacterFormComponent', () => {
             },
         );
 
-        mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+        mockCharacterService.initializePlayer.and.callFake((player: Player) => {
+            player.name = '';
+            player.avatar = '';
+            player.speed = 4;
+            player.attack = { value: 4, bonusDice: DiceType.Uninitialized };
+            player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
+            player.hp = { current: 4, max: 4 };
+            player.movementPoints = 4;
+            player.actionPoints = 1;
+            player.inventory = [null, null];
+            player.isAdmin = false;
+            player.hasAbandoned = false;
+            player.isActive = false;
+            player.combatWon = 0;
+        });
+
+        mockDialogRef = jasmine.createSpyObj<MatDialogRef<CharacterFormComponent>>('MatDialogRef', ['close']);
+        mockSocketClientService = jasmine.createSpyObj<SocketClientService>('SocketClientService', ['emit', 'on', 'createLobby', 'joinLobby']);
+        mockCdr = jasmine.createSpyObj<ChangeDetectorRef>('ChangeDetectorRef', ['detectChanges', 'markForCheck']);
+
         mockGame = { id: '1', name: 'Test Game' } as Game;
+
         await TestBed.configureTestingModule({
-            imports: [FormsModule, CharacterFormComponent],
+            imports: [FormsModule, CommonModule, CharacterFormComponent],
             providers: [
                 { provide: CharacterService, useValue: mockCharacterService },
                 { provide: MatDialogRef, useValue: mockDialogRef },
-                { provide: MAT_DIALOG_DATA, useValue: { game: mockGame } },
+                { provide: MAT_DIALOG_DATA, useValue: { game: mockGame, accessCode: '1234', isLobbyCreated: true } },
+                { provide: SocketClientService, useValue: mockSocketClientService },
+                { provide: ChangeDetectorRef, useValue: mockCdr },
             ],
         }).compileComponents();
 
@@ -55,40 +96,93 @@ describe('CharacterFormComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should call assignBonus from CharacterService with the correct attribute', () => {
-        const attribute: AttributeType = AttributeType.Vitality;
-        component.assignBonus(attribute);
-        expect(mockCharacterService.assignBonus).toHaveBeenCalledWith(attribute);
+    it('should call assignBonus on characterService', () => {
+        component.assignBonus(AttributeType.Speed);
+        expect(mockCharacterService.assignBonus).toHaveBeenCalledWith(component.createdPlayer, AttributeType.Speed);
     });
 
-    it('should call assignDice from CharacterService and update selected dice values', () => {
-        const attribute: AttributeType = AttributeType.Attack;
-        mockCharacterService.assignDice.and.returnValue({ attack: 'D6', defense: 'D4' });
-        component.assignDice(attribute);
-        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(attribute);
+    it('should call assignDice on characterService', () => {
+        component.assignDice(AttributeType.Attack);
+        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(component.createdPlayer, AttributeType.Attack);
     });
 
-    it('should call submitCharacter from CharacterService and closePopup when the callback is executed', () => {
-        spyOn(component, 'closePopup');
-
-        component.submitCharacter();
-        expect(mockCharacterService.submitCharacter).toHaveBeenCalled();
-
-        const dataPassed = mockCharacterService.submitCharacter.calls.mostRecent().args[0];
-        dataPassed.closePopup();
-
-        expect(component.closePopup).toHaveBeenCalled();
+    it('should call selectAvatar on characterService', () => {
+        component.selectAvatar('AvatarTest');
+        expect(mockCharacterService.selectAvatar).toHaveBeenCalledWith(component.createdPlayer, 'AvatarTest', component.currentAccessCode);
     });
 
-    it('should reset attributes and close dialog when closePopup() is called', () => {
-        component.closePopup();
+    it('should call deselectAvatar on characterService', () => {
+        component.deselectAvatar();
+        expect(mockCharacterService.deselectAvatar).toHaveBeenCalledWith(component.createdPlayer, component.currentAccessCode);
+    });
+
+    it('should call checkCharacterNameLength on characterService and trigger change detection', () => {
+        mockCdr.markForCheck.calls.reset();
+        mockCdr.detectChanges.calls.reset();
+        component.createdPlayer = {
+            name: 'TestPlayer',
+            avatar: '',
+            speed: 4,
+            attack: { value: 4, bonusDice: DiceType.Uninitialized },
+            defense: { value: 4, bonusDice: DiceType.Uninitialized },
+            hp: { current: 4, max: 4 },
+            movementPoints: 4,
+            actionPoints: 1,
+            inventory: [null, null],
+            isAdmin: false,
+            hasAbandoned: false,
+            isActive: false,
+            combatWon: 0,
+        } as Player;
+        component.checkCharacterNameLength();
+        expect(mockCharacterService.checkCharacterNameLength).toHaveBeenCalledWith('TestPlayer');
+    });
+
+    it('should call returnHome when game is undefined', async () => {
+        component.game = undefined;
+        await component.submitCharacter();
+        expect(mockCharacterService.returnHome).toHaveBeenCalled();
+    });
+
+    it('should call submitCharacter on characterService', async () => {
+        component.game = mockGame;
+
+        await component.submitCharacter();
+
+        expect(mockCharacterService.submitCharacter).toHaveBeenCalledWith(
+            component.createdPlayer,
+            component.currentAccessCode,
+            component.isLobbyCreated,
+            component.game as Game,
+            jasmine.any(Function),
+        );
+    });
+
+    it('should call resetPopup after submitCharacter completes successfully', async () => {
+        spyOn(component, 'resetPopup');
+        mockCharacterService.submitCharacter.and.callFake(async (player, accessCode, isLobbyCreated, game, closePopup) => {
+            closePopup();
+        });
+
+        await component.submitCharacter();
+
+        expect(component.resetPopup).toHaveBeenCalled();
+    });
+
+    it('should call resetAttributes and close the dialog on resetPopup', () => {
+        component.resetPopup();
         expect(mockCharacterService.resetAttributes).toHaveBeenCalled();
         expect(mockDialogRef.close).toHaveBeenCalled();
     });
 
-    it('should call checkCharacterNameLength from CharacterService when updateCharacterName is called', () => {
-        component.characterName = 'ValidName';
-        component.checkCharacterNameLength();
-        expect(mockCharacterService.checkCharacterNameLength).toHaveBeenCalledWith('ValidName');
+    it('should execute resetPopup when submitCharacter completes', async () => {
+        spyOn(component, 'resetPopup');
+        mockCharacterService.submitCharacter.and.callFake(async (player, accessCode, isLobbyCreated, game, closePopup) => {
+            closePopup();
+        });
+
+        await component.submitCharacter();
+
+        expect(component.resetPopup).toHaveBeenCalled();
     });
 });

@@ -3,17 +3,16 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
-import { GameService } from '@app/services/game/game.service';
-import { CreatePageComponent } from './create-page.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
+import { GameService } from '@app/services/game/game.service';
+import { of } from 'rxjs';
+import { CreatePageComponent } from './create-page.component';
 
 describe('CreatePageComponent', () => {
     let component: CreatePageComponent;
     let fixture: ComponentFixture<CreatePageComponent>;
-    let dialog: MatDialog;
     let mockGameService: jasmine.SpyObj<GameService>;
     let mockRouter: jasmine.SpyObj<Router>;
 
@@ -33,7 +32,6 @@ describe('CreatePageComponent', () => {
     beforeEach(() => {
         fixture = TestBed.createComponent(CreatePageComponent);
         component = fixture.componentInstance;
-        dialog = TestBed.inject(MatDialog);
 
         mockGameService.fetchGames.and.returnValue(of(MOCK_GAMES));
         fixture.detectChanges();
@@ -58,17 +56,6 @@ describe('CreatePageComponent', () => {
         expect(mockGameService.fetchGames).toHaveBeenCalled();
     });
 
-    it('should open character form dialog with correct data', () => {
-        const dialogSpy = spyOn(dialog, 'open');
-        const testGame = MOCK_GAMES[0];
-
-        component.openDialog(testGame);
-
-        expect(dialogSpy).toHaveBeenCalledWith(CharacterFormComponent, {
-            data: { game: testGame },
-        });
-    });
-
     it('should navigate to home page', () => {
         component.navigateToHome();
         expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
@@ -77,5 +64,18 @@ describe('CreatePageComponent', () => {
     it('should return empty array when no games are visible', () => {
         component.games = undefined as unknown as Game[];
         expect(component.visibleGames).toEqual([]);
+    });
+
+    it('should open character form dialog with correct data', () => {
+        const dialog = TestBed.inject(MatDialog);
+        const dialogSpy = spyOn(dialog, 'open');
+
+        component.openDialog(MOCK_GAMES[0]);
+
+        expect(dialogSpy).toHaveBeenCalledWith(CharacterFormComponent, {
+            data: {
+                game: MOCK_GAMES[0],
+            },
+        });
     });
 });

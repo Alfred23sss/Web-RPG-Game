@@ -1,80 +1,120 @@
-import { Component, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
 import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
-
+import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
+import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-character-form',
     templateUrl: './character-form.component.html',
     styleUrls: ['./character-form.component.scss'],
-    imports: [FormsModule],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    imports: [FormsModule, CommonModule],
 })
-export class CharacterFormComponent {
-    characterName: string = '';
-    selectedAvatar: string = '';
+export class CharacterFormComponent implements OnInit, OnDestroy {
     showForm: boolean = true;
-    selectedAttackDice: DiceType | null = null;
-    selectedDefenseDice: DiceType | null = null;
     xSword: string = GameDecorations.XSwords;
-    game: Game;
-
-    avatarTypes: string[] = Object.values(AvatarType).filter((value) => value !== AvatarType.Default);
-
+    isLobbyCreated: boolean;
+    currentAccessCode: string;
+    game?: Game;
+    createdPlayer: Player = {} as Player; //
+    avatarTypes: string[] = Object.values(AvatarType);
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
-
+    unavailableAvatars: string[] = []; //
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
+    private readonly subscriptions = new Subscription();
 
     constructor(
         private readonly dialogRef: MatDialogRef<CharacterFormComponent>,
         private readonly characterService: CharacterService,
-        @Inject(MAT_DIALOG_DATA) public data: { game: Game },
+        private readonly socketClientService: SocketClientService,
+        private readonly cdr: ChangeDetectorRef,
+        @Inject(MAT_DIALOG_DATA) public data: CharacterDialogData,
     ) {
         this.game = data.game;
+        this.isLobbyCreated = data.isLobbyCreated;
+        this.currentAccessCode = data.accessCode;
+        this.characterService.initializePlayer(this.createdPlayer);
     }
 
-    assignBonus(attribute: AttributeType) {
-        this.characterService.assignBonus(attribute);
+    ngOnInit(): void {
+        this.characterService.initializeLobby(this.currentAccessCode);
+        this.subscriptions.add(
+            this.characterService.unavailableAvatars$.subscribe((avatars) => {
+                this.unavailableAvatars = avatars;
+                this.cdr.detectChanges();
+            }),
+        );
+    }
+
+    assignBonus(attribute: AttributeType): void {
+        this.characterService.assignBonus(this.createdPlayer, attribute);
     }
 
     assignDice(attribute: AttributeType): void {
-        const { attack, defense } = this.characterService.assignDice(attribute);
-        this.selectedAttackDice = attack as DiceType;
-        this.selectedDefenseDice = defense as DiceType;
+        this.characterService.assignDice(this.createdPlayer, attribute);
     }
 
-    submitCharacter(): void {
-        this.characterService.submitCharacter({
-            characterName: this.characterName,
-            selectedAvatar: this.selectedAvatar,
-            game: this.game,
-            isBonusAssigned: this.isBonusAssigned(),
-            isDiceAssigned: this.isDiceAssigned(),
-            closePopup: () => this.closePopup(),
-        });
+    selectAvatar(avatar: string): void {
+        this.characterService.selectAvatar(this.createdPlayer, avatar, this.currentAccessCode);
+    }
+
+    deselectAvatar(): void {
+        this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
     }
 
     checkCharacterNameLength(): void {
-        this.characterService.checkCharacterNameLength(this.characterName);
+        if (this.createdPlayer) {
+            this.characterService.checkCharacterNameLength(this.createdPlayer.name);
+            this.cdr.markForCheck();
+            this.cdr.detectChanges();
+        }
+    }
+
+    async submitCharacter(): Promise<void> {
+        if (!this.game) {
+            this.returnHome();
+            return;
+        }
+        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game, () =>
+            this.resetPopup(),
+        );
     }
 
     closePopup(): void {
+        this.createdPlayer.name = '';
+        this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
+        this.socketClientService.emit('leaveLobby', {
+            accessCode: this.currentAccessCode,
+            playerName: this.createdPlayer.name,
+        });
         this.characterService.resetAttributes();
         this.dialogRef.close();
     }
 
-    private isBonusAssigned(): boolean {
-        return this.bonusAssigned[AttributeType.Vitality] || this.bonusAssigned[AttributeType.Speed];
+    resetPopup(): void {
+        this.characterService.resetAttributes();
+        this.dialogRef.close();
     }
 
-    private isDiceAssigned(): boolean {
-        return this.diceAssigned[AttributeType.Attack] || this.diceAssigned[AttributeType.Defense];
+    ngOnDestroy(): void {
+        this.subscriptions.unsubscribe();
+    }
+
+    private returnHome(): void {
+        this.closePopup();
+        this.characterService.returnHome();
     }
 }

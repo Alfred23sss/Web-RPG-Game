@@ -196,7 +196,7 @@ Cliquez sur le bouton `Lancer l'instance` pour finaliser la procédure.
 
 **Attention :** l'adresse DNS publique de votre instance n'est pas persistante. Elle changera à chaque fois que vous redémarrerez ou fermez/ouvrez votre instance. Prenez ceci en compte lors de la connexion à votre machine. 
 
-Retournez au [Tableau de bord EC2](https://ca-central-1.console.aws.amazon.com/ec2/v2/home?region=ca-central-1#Instances:) (`Services -> EC2 -> Instances`). Aussitôt que l'état de votre machine passera à `En cours d'exécution`, cela signifiera que votre machine est prête à être utilisée.
+Retournez au [Tableau de bord EC2](https://ca-central-1.console.aws.amazon.com/ec2/v2/home?region=ca-central-1#Instances:) (`Services -> EC2 -> Instances`). Aussitôt que l'état de votre machine passera à `En cours d'exécution`, cela signifiera que votre machine est prête à être utilisée. 
 Pour y avoir accès, nous allons utiliser une connexion `SSH`.
 
 1. Pour les utilisateurs Linux, exécutez, si nécessaire, cette commande pour vous assurer que votre clé n’est pas visible publiquement par les autres utilisateurs.
@@ -217,7 +217,7 @@ Si par la suite vous désirez quitter la connexion `SSH` et revenir à votre ter
 exit
 ```
 
-![Connection à la VM avec un Client SSH](static/connexion_ssh.png)
+![Connection à la VM avec un Client SSH](static/connexion_sshsh.png)
 
 **Attention : L'adresse DNS publique sur la capture d'écran sera complètement différente de la votre. Ne la recopiez pas. Utilisez celle qui a été assignée à votre machine virtuelle disponible dans les détails de l'instance.**
 
@@ -266,7 +266,7 @@ Vous pouvez vérifier si votre serveur est bien en ligne en accédant à l'adres
 
 Pour vérifier la communication du site-web au serveur, vous pouvez changer le fichier d'environnement local (`environment.ts`) pour qu'il pointe vers votre serveur distant, lancer le serveur statique local et vérifier que les requêtes de votre page web sont bien envoyées au serveur distant.
 
-Finalement, vous pouvez modifier le fichier d'environnement de production (`environment.prod.ts`) pour qu'il pointe vers votre serveur distant et déployer votre site web sur GitLab Pages. Vous devriez être en mesure de voir votre site web communiquer avec votre serveur distant, le tout, en mode _production_.
+Finalement, vous pouvez modifier le fichier d'environnement de  production (`environment.prod.ts`) pour qu'il pointe vers votre serveur distant et déployer votre site web sur GitLab Pages. Vous devriez être en mesure de voir votre site web communiquer avec votre serveur distant, le tout, en mode _production_.
 
 # Déploiement automatique du server
 
@@ -349,7 +349,7 @@ Le problème est souvent dû à un problème de cache. Réessayer de vider la ca
 
 ## Comment faire pour qu'on puisse accéder à mon site sans être connecté à GitLab
 
-Il faut modifier les accès au site web.
+Il faut modifier les accès au site web.p
 Pour le faire, sur GitLab, allez dans `Settings` → `General` → `Visibility, project features, permissions` → `Pages`. Modifiez la valeur `Only Project Members` pour `Everyone`.
 ⚠️ Attention : en modifiant cette configuration, le site de votre projet sera accessible par **n'importe quelle personne** ayant une connexion Internet.
 

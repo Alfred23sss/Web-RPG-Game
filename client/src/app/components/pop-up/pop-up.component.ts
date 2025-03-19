@@ -1,4 +1,4 @@
-/* eslint-disable max-params */
+/* eslint-disable max-params */ // each service handles distinct responsibilities with no unnecessary coupling,
 import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';

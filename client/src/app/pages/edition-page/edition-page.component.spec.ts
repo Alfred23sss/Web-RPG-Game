@@ -6,13 +6,14 @@ import { Router, RouterModule } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
+import { ImageType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
-import { TileType } from '@app/enums/global.enums';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { ToolService } from '@app/services/tool/tool.service';
 import { of } from 'rxjs';
 import { EditionPageComponent } from './edition-page.component';
 
@@ -20,7 +21,7 @@ function createBaseGrid(size: number): Tile[][] {
     return Array.from({ length: size }, (_, rowIndex) =>
         Array.from({ length: size }, (i, colIndex) => ({
             id: `${rowIndex}-${colIndex}`,
-            imageSrc: 'assets/tile-items/default.png',
+            imageSrc: './assets/tile-items/default.png',
             isOccupied: false,
             type: TileType.Default,
             isOpen: true,
@@ -53,14 +54,16 @@ describe('EditionPageComponent', () => {
 
     beforeEach(async () => {
         gameServiceMock = jasmine.createSpyObj('GameService', ['fetchGames', 'getCurrentGame', 'updateCurrentGame', 'saveGame', 'savePreviewImage']);
-
         gridServiceMock = jasmine.createSpyObj('GridService', ['setGrid']);
         gameValidationServiceMock = jasmine.createSpyObj('GameValidationService', ['validateGame']);
         snackbarServiceMock = jasmine.createSpyObj('SnackbarService', ['showConfirmation']);
         routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
-        routerMock.navigate.and.returnValue(Promise.resolve(true));
+        const toolServiceMock = jasmine.createSpyObj('ToolService', ['setSelectedTool', 'getSelectedTool'], {
+            selectedTool$: of({ tool: TileType.Default, image: ImageType.Default }),
+        });
 
+        routerMock.navigate.and.returnValue(Promise.resolve(true));
         gameServiceMock.fetchGames.and.returnValue(of([]));
         snackbarServiceMock.showConfirmation.and.returnValue(of(true));
         gameServiceMock.getCurrentGame.and.returnValue(defaultMockGame);
@@ -73,6 +76,7 @@ describe('EditionPageComponent', () => {
                 { provide: GameValidationService, useValue: gameValidationServiceMock },
                 { provide: SnackbarService, useValue: snackbarServiceMock },
                 { provide: Router, useValue: routerMock },
+                { provide: ToolService, useValue: toolServiceMock },
             ],
         }).compileComponents();
 

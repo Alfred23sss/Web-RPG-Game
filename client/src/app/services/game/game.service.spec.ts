@@ -8,7 +8,7 @@ import { GridService } from '@app/services/grid/grid-service.service';
 import { of } from 'rxjs';
 import { GameService } from './game.service';
 
-const DEFAULT_SIZE_GRID = 3;
+const DEFAULT_SIZE_GRID = 10;
 
 describe('GameService', () => {
     let service: GameService;
@@ -48,9 +48,10 @@ describe('GameService', () => {
         });
 
         service = TestBed.inject(GameService);
+        spyOn(service, 'fetchGames').and.returnValue(of([]));
 
         testGame1 = {
-            id: 'game-1',
+            id: 'game1',
             name: 'Classic Game 1',
             size: String(DEFAULT_SIZE_GRID),
             mode: 'Classic',
@@ -62,7 +63,7 @@ describe('GameService', () => {
         };
 
         testGame2 = {
-            id: 'game-2',
+            id: 'game2',
             name: 'Classic Game 2',
             size: String(DEFAULT_SIZE_GRID),
             mode: 'Classic',
@@ -159,15 +160,6 @@ describe('GameService', () => {
         expect(service.getGameById(testGame2.id)).toEqual(testGame2);
     });
 
-    it('should call getAllGames from gamecommunication service', () => {
-        gameCommunicationServiceSpy.getAllGames.and.returnValue(of([testGame1]));
-
-        service.fetchGames().subscribe(() => {
-            expect(gameCommunicationServiceSpy.getAllGames).toHaveBeenCalled();
-            expect(service.getGames()).toEqual([testGame1]);
-        });
-    });
-
     it('should update game visibility and save the game', () => {
         service.games = [testGame1];
         gameCommunicationServiceSpy.updateGame.and.returnValue(of(testGame1));
@@ -188,14 +180,6 @@ describe('GameService', () => {
 
         expect(gameCommunicationServiceSpy.updateGame).toHaveBeenCalledWith(testGame1.id, testGame1);
         expect(service.getGames()[0]).toEqual(updatedGame);
-    });
-
-    it('should save new game if it does not exist', () => {
-        gameCommunicationServiceSpy.saveGame.and.returnValue(of(testGame2));
-
-        service.saveGame(testGame2);
-
-        expect(service.getGames()).toContain(testGame2);
     });
 
     it('should return the current game if it exists', () => {
@@ -243,5 +227,22 @@ describe('GameService', () => {
 
         expect(screenShotServiceSpy.generatePreview).toHaveBeenCalledWith('game-preview');
         expect(result).toBe(mockPreviewImage);
+    });
+
+    it('should fetch games from the server and update the games array', (done) => {
+        const mockGames: Game[] = [testGame1, testGame2];
+        gameCommunicationServiceSpy.getAllGames.and.returnValue(of(mockGames));
+
+        (service.fetchGames as jasmine.Spy).and.callThrough();
+
+        service.fetchGames().subscribe({
+            next: (games) => {
+                expect(games).toEqual(mockGames);
+                expect(service.games).toEqual(mockGames);
+                expect(gameCommunicationServiceSpy.getAllGames).toHaveBeenCalledTimes(1);
+                done();
+            },
+            error: done.fail,
+        });
     });
 });

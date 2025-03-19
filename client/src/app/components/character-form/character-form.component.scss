@@ -179,3 +179,12 @@ button:disabled {
     transform: scale(1.05);
     transition: transform 0.2s ease;
 }
+
+.disabled {
+    opacity: 0.5; 
+    pointer-events: none; 
+    filter: grayscale(100%); 
+}
+
+
+

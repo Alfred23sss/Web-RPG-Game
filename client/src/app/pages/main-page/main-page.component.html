@@ -9,7 +9,7 @@
     <h1 class="header-item">{{ title }}</h1>
     <img [src]="gameDecorations.Logo" alt="Project Logo" class="logo-image" />
 
-    <button class="button" id="disabled-button" [disabled]="true"><i class="fa-solid fa-gamepad"></i>Rejoindre une partie</button>
+    <button class="button" (click)="openDialog()"><i class="fa-solid fa-gamepad"></i>Rejoindre une partie</button>
     <button class="button" routerLink="/create"><i class="fa-solid fa-plus"></i>Création de jeu</button>
     <button class="button" routerLink="/admin"><i class="fa-solid fa-user-tie"></i>Administrateur de jeux</button>
 

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ErrorMessages, GameMode, TileType } from '@app/enums/global.enums';
+import { ErrorMessages, GameMode, ItemName, ItemCount, TileType, GameSizeNumber } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
+import { GridPosition } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 
@@ -11,19 +12,6 @@ enum TitleLength {
 enum DescriptionLength {
     Min = 0,
     Max = 100,
-}
-enum GameSize {
-    Small = '10',
-    Medium = '15',
-    Large = '20',
-    SmallItemCount = 2,
-    MediumItemCount = 4,
-    LargeItemCount = 6,
-}
-enum ItemCount {
-    Small = 8,
-    Medium = 10,
-    Large = 12,
 }
 
 enum MaxDuration {
@@ -133,7 +121,7 @@ export class GameValidationService {
         if (game.mode !== GameMode.CTF) return null;
         for (const row of game.grid) {
             for (const tile of row) {
-                if (tile.item?.name === 'flag') {
+                if (tile.item?.name === ItemName.Flag) {
                     return null;
                 }
             }
@@ -144,15 +132,15 @@ export class GameValidationService {
     private validateHomeItemsPlaced(game: Game): string | null {
         if (!game.grid) return ErrorMessages.GridNotFound;
         const requiredHomeItems =
-            game.size === GameSize.Small
-                ? GameSize.SmallItemCount
-                : game.size === GameSize.Medium
-                ? GameSize.MediumItemCount
-                : GameSize.LargeItemCount;
+            game.size === GameSizeNumber.SmallSize
+                ? ItemCount.SmallItemCount
+                : game.size === GameSizeNumber.MediumSize
+                ? ItemCount.MediumItemCount
+                : ItemCount.LargeItemCount;
         let homeItemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
-                if (tile.item?.name === 'home') {
+                if (tile.item?.name === ItemName.Home) {
                     homeItemCount++;
                 }
             }
@@ -165,13 +153,18 @@ export class GameValidationService {
         let itemCount = 0;
         for (const row of game.grid) {
             for (const tile of row) {
-                if (tile.item && tile.item.name !== 'home' && tile.item.name !== 'flag') {
+                if (tile.item && tile.item.name !== ItemName.Home && tile.item.name !== ItemName.Flag) {
                     itemCount++;
                 }
             }
         }
-        const requiredItemCount = game.size === GameSize.Small ? ItemCount.Small : game.size === GameSize.Medium ? ItemCount.Medium : ItemCount.Large;
-        return itemCount !== requiredItemCount ? ErrorMessages.ItemsNotPlaced : null;
+        const requiredItemCount =
+            game.size === GameSizeNumber.SmallSize
+                ? ItemCount.SmallItemCount
+                : game.size === GameSizeNumber.MediumSize
+                ? ItemCount.MediumItemCount
+                : ItemCount.LargeItemCount;
+        return itemCount < requiredItemCount ? ErrorMessages.ItemsNotPlaced : itemCount > requiredItemCount ? ErrorMessages.TooManyItemsPlaced : null;
     }
 
     private validateAllTerrainAccessible(game: Game): ErrorMessages[] | string[] {
@@ -188,7 +181,7 @@ export class GameValidationService {
         return this.checkForInaccessible(game, visited);
     }
 
-    private findAccessibleStart(game: Game): { row: number; col: number } | null {
+    private findAccessibleStart(game: Game): GridPosition | null {
         if (!game.grid) return null;
 
         const numRows = game.grid.length;
@@ -205,14 +198,29 @@ export class GameValidationService {
     }
 
     private performBFS(game: Game, startRow: number, startCol: number): boolean[][] {
-        if (!game.grid) return [];
+        if (!game.grid || game.grid.length === 0 || game.grid[0].length === 0) return [];
 
         const numRows = game.grid.length;
         const numCols = game.grid[0].length;
-        const visited: boolean[][] = Array.from({ length: numRows }, () => Array(numCols).fill(false));
-        const queue: { row: number; col: number }[] = [];
+        const visited: boolean[][] = this.initializeVisited(numRows, numCols);
+        const queue: GridPosition[] = [{ row: startRow, col: startCol }];
         visited[startRow][startCol] = true;
-        queue.push({ row: startRow, col: startCol });
+
+        while (queue.length > 0) {
+            const next = queue.shift();
+            if (next) {
+                this.processNeighbors(next.row, next.col, game, visited, queue);
+            }
+        }
+        return visited;
+    }
+
+    private initializeVisited(rows: number, cols: number): boolean[][] {
+        return Array.from({ length: rows }, () => Array(cols).fill(false));
+    }
+
+    private processNeighbors(row: number, col: number, game: Game, visited: boolean[][], queue: { row: number; col: number }[]): void {
+        if (!game.grid) return;
 
         const directions = [
             { dr: -1, dc: 0 },
@@ -221,25 +229,26 @@ export class GameValidationService {
             { dr: 0, dc: 1 },
         ];
 
-        while (queue.length > 0) {
-            const next = queue.shift();
-            if (next) {
-                const { row, col } = next;
-                for (const { dr, dc } of directions) {
-                    const newRow = row + dr;
-                    const newCol = col + dc;
-                    if (newRow < 0 || newRow >= numRows || newCol < 0 || newCol >= numCols) {
-                        continue;
-                    }
-                    if (visited[newRow][newCol] || game.grid[newRow]?.[newCol]?.type === TileType.Wall) {
-                        continue;
-                    }
-                    visited[newRow][newCol] = true;
-                    queue.push({ row: newRow, col: newCol });
-                }
+        for (const { dr, dc } of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            if (this.isValidMove(newRow, newCol, game, visited)) {
+                visited[newRow][newCol] = true;
+                queue.push({ row: newRow, col: newCol });
             }
         }
-        return visited;
+    }
+
+    private isValidMove(row: number, col: number, game: Game, visited: boolean[][]): boolean {
+        return (
+            !!game.grid &&
+            row >= 0 &&
+            row < game.grid.length &&
+            col >= 0 &&
+            col < game.grid[0].length &&
+            !visited[row][col] &&
+            (game.grid[row]?.[col]?.type ?? TileType.Default) !== TileType.Wall
+        );
     }
 
     private checkForInaccessible(game: Game, visited: boolean[][]): string[] {
@@ -285,7 +294,8 @@ export class GameValidationService {
     private isTitleValid(title: string): boolean {
         const isLengthValid = title?.length > TitleLength.Min && title.length <= TitleLength.Max;
         const isUniqueTitle = !this.gameService.isGameNameUsed(title);
-        return isLengthValid && isUniqueTitle;
+        const regex = /^(?!\s)[a-zA-Z0-9]+(?:\s[a-zA-Z0-9]+)*$/;
+        return isLengthValid && isUniqueTitle && regex.test(title);
     }
 
     private isDescriptionValid(description: string): boolean {

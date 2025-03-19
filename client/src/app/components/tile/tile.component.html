@@ -1,6 +1,18 @@
 <div class="image-container">
     <img draggable="false" alt="{{ tile.type }}" [src]="tile.imageSrc" class="base-image" />
-    @if(tile.item) {
-    <img draggable="true" alt="Overlay" [src]="tile.item.imageSrc" class="overlay-image" [title]="tile.item.description" />
-    }
+
+    @if(tile.item && tile.player) {
+    <div class="split-overlay">
+        <div class="half-container">
+            <img draggable="true" alt="Item" [src]="tile.item.imageSrc" class="half-image" [title]="tile.item.description" />
+        </div>
+        <div class="half-container">
+            <img draggable="true" alt="Player" [src]="tile.player.avatar" class="half-image" [title]="tile.player.name" />
+        </div>
+    </div>
+    } @else { @if(tile.item) {
+    <img draggable="true" alt="Item" [src]="tile.item.imageSrc" class="overlay-image" [title]="tile.item.description" />
+    } @if(tile.player) {
+    <img draggable="true" alt="Player" [src]="tile.player.avatar" class="overlay-image" [title]="tile.player.name" />
+    } }
 </div>
