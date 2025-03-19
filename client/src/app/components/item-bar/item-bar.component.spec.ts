@@ -159,7 +159,7 @@ describe('ItemBarComponent', () => {
     });
 
     it('should exit early if dragged item name does not match the target item name', () => {
-        itemDragServiceMock.getSelectedItem.and.returnValue(DRAGGED_ITEM);
+        itemDragServiceMock.getSelectedItem.and.returnValue({ ...DRAGGED_ITEM, name: 'error' } as Item);
 
         const event = new DragEvent('drop');
         component.onContainerDrop(event, TARGET_ITEM);

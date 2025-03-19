@@ -4,7 +4,6 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GamePageComponent } from '@app/pages/game-page/game-page.component';
-import { LogBookService } from '@app/services/logbook/logbook.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
@@ -44,7 +43,6 @@ export class GameSocketService {
     constructor(
         private playerMovementService: PlayerMovementService,
         private socketClientService: SocketClientService,
-        private logbookService: LogBookService,
         private snackbarService: SnackbarService,
     ) {}
 
@@ -64,7 +62,6 @@ export class GameSocketService {
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
             component.lobby.players = component.lobby.players.filter((p) => p.name !== data.player.name);
-            this.logbookService.addEntry(`${data.player.name} a abandonné la partie`, [abandonedPlayer]);
         });
 
         this.socketClientService.on('gameDeleted', () => {
