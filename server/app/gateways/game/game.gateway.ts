@@ -26,12 +26,10 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.CreateGame)
     handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; grid: Tile[][] }) {
         this.logger.log(payload.accessCode);
-        // const lobby = this.lobbyService.getLobby(payload.accessCode);
         const gameSession = this.gameSessionService.createGameSession(payload.accessCode);
         this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers, updatedGame: gameSession.game });
         Logger.log('emitting gameStarted');
         this.logger.log('game created emitted');
-        // this.server.to(payload.accessCode).emit('turnStarted');
     }
 
     @SubscribeMessage(GameEvents.AbandonedGame)
@@ -77,12 +75,6 @@ export class GameGateway {
         this.logger.log(`Player ${payload.attackerName} is attacking in game ${payload.accessCode}`);
         this.gameCombatService.performAttack(payload.accessCode, payload.attackerName);
     }
-
-    // @SubscribeMessage(GameEvents.AttemptEscape)
-    // handleAttemptEscape(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; playerName: string }) {
-    //     this.logger.log(`Player ${payload.playerName} is attempting to escape in game ${payload.accessCode}`);
-    //     this.gameCombatService.attemptEscape(payload.accessCode, payload.playerName);
-    // }
 
     @SubscribeMessage(GameEvents.PlayerMovementUpdate)
     async handlePlayerMovementUpdate(
@@ -221,7 +213,7 @@ export class GameGateway {
     @OnEvent('update.player.list')
     handleUpdatePlayerList(payload: { players: Player[]; accessCode: string }) {
         this.server.to(payload.accessCode).emit('playerListUpdate', {
-            players: payload.players, // Fix: changed "player" to "players"
+            players: payload.players,
         });
     }
 
