@@ -288,6 +288,8 @@ describe('LobbyGateway', () => {
 
             gateway.handleJoinLobby({ accessCode: TEST_ACCESS_CODE, player: MOCK_PLAYER }, mockSocket as Socket);
 
+            expect(mockServer.emit).toHaveBeenCalledWith('updatePlayers', expect.anything());
+
             expect(mockServer.emit).toHaveBeenCalledWith('lobbyLocked', {
                 accessCode: TEST_ACCESS_CODE,
                 isLocked: true,
@@ -602,7 +604,10 @@ describe('LobbyGateway', () => {
         expect(lobbyService.isAdminLeaving).toHaveBeenCalledWith(accessCode, playerName);
         expect(lobbyService.leaveLobby).toHaveBeenCalledWith(accessCode, playerName);
         expect(mockServer.to).toHaveBeenCalledWith(accessCode);
-        expect(mockServer.emit).toHaveBeenCalledWith('adminLeft', { message: "L'admin a quitté la partie, le lobby est fermé." });
+        expect(mockServer.emit).toHaveBeenCalledWith('adminLeft', {
+            playerSocketId: client.id,
+            message: "L'admin a quitté la partie, le lobby est fermé.",
+        });
         expect(mockServer.emit).toHaveBeenCalledWith('lobbyDeleted');
         expect(mockServer.emit).toHaveBeenCalledWith('updateUnavailableOptions', { avatars: [] });
         expect(client.leave).toHaveBeenCalledWith(accessCode);
@@ -656,7 +661,6 @@ describe('LobbyGateway', () => {
         expect(mockServer.to).toHaveBeenCalledWith(accessCode);
         expect(mockServer.emit).toHaveBeenCalledWith('updateUnavailableOptions', { avatars: ['avatar1'] });
         expect(mockServer.emit).toHaveBeenCalledWith('updatePlayers', lobby.players);
-        expect(mockServer.emit).toHaveBeenCalledWith('lobbyUnlocked', { accessCode, isLocked: false });
 
         expect(client.leave).toHaveBeenCalledWith(accessCode);
     });
