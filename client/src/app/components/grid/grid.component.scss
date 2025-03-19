@@ -47,18 +47,17 @@ app-tile:hover {
 }
 
 .quickest-path {
-    position: relative; // Assure que le point est positionné par rapport à la tuile
-
+    position: relative;
     &::after {
         content: '';
-        width: 10px; // Taille du point
+        width: 10px;
         height: 10px;
         background-color: blue;
-        border-radius: 50%; // Rend le point circulaire
+        border-radius: 50%;
         position: absolute;
         top: 50%;
         left: 50%;
-        transform: translate(-50%, -50%); // Centre le point dans la tuile
+        transform: translate(-50%, -50%);
     }
 }
 
