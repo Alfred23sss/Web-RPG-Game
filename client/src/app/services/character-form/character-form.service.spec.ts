@@ -311,6 +311,17 @@ describe('CharacterService', () => {
     it('should handle errors if createLobby fails', async () => {
         const errorMessage = 'Failed to create lobby';
         mockSocketClientService.createLobby.and.returnValue(Promise.reject(new Error(errorMessage)));
+        game = {
+            id: '1',
+            name: 'Test Game',
+            size: '4',
+            mode: 'casual',
+            lastModified: new Date(),
+            isVisible: true,
+            previewImage: 'image_url',
+            description: 'This is a test game',
+            grid: undefined,
+        };
         await expectAsync(service.createAndJoinLobby(game, player)).toBeRejectedWithError(errorMessage);
         expect(mockAccessCodeService.setAccessCode).not.toHaveBeenCalled();
     });
@@ -393,7 +404,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
