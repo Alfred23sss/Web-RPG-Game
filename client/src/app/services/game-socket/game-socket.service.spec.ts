@@ -90,7 +90,7 @@ const MOCK_PLAYER_1: Player = {
 const MOCK_PLAYER_2: Player = {
     ...MOCK_PLAYER_1,
     name: PLAYER_2_NAME,
-}
+};
 
 describe('GameSocketService', () => {
     let service: GameSocketService;
