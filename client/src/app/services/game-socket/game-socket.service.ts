@@ -1,43 +1,23 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import { GameData } from '@app/classes/gameData';
-import { Routes } from '@app/enums/global.enums';
+import {
+    DEFAULT_ACTION_POINTS,
+    DEFAULT_ESCAPE_ATTEMPTS,
+    DELAY_BEFORE_ENDING_GAME,
+    DELAY_BEFORE_HOME,
+    DELAY_MESSAGE_AFTER_COMBAT_ENDED,
+    EVENTS,
+    NO_ACTION_POINTS,
+} from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject, Observable } from 'rxjs';
-
-const noActionPoints = 0;
-const defaultActionPoint = 1;
-const delayBeforeHome = 2000;
-const delayBeforeEndingGame = 5000;
-const defaultEscapeAttempts = 2;
-const delayMessageAfterCombatEnded = 3000;
-const events = [
-    'abandonGame',
-    'gameDeleted',
-    'gameEnded',
-    'transitionStarted',
-    'turnStarted',
-    'timerUpdate',
-    'alertGameStarted',
-    'playerMovement',
-    'gameCombatStarted',
-    'attackResult',
-    'playerUpdate',
-    'playerListUpdate',
-    'doorClickedUpdate',
-    'gameCombatTurnStarted',
-    'gameCombatTimerUpdate',
-    'gridUpdate',
-    'noMoreEscapesLeft',
-    'combatEnded',
-    'adminModeChangedServerSide',
-];
 
 @Injectable({
     providedIn: 'root',
@@ -50,7 +30,7 @@ export class GameSocketService {
         private playerMovementService: PlayerMovementService,
         private socketClientService: SocketClientService,
         private snackbarService: SnackbarService,
-        private router: Router,
+        private gameplayService: GameplayService,
     ) {}
 
     get gameData$(): Observable<GameData> {
@@ -81,15 +61,15 @@ export class GameSocketService {
         this.socketClientService.on('gameDeleted', () => {
             this.snackbarService.showMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
             setTimeout(() => {
-                this.backToHome();
-            }, delayBeforeHome);
+                this.gameplayService.backToHome();
+            }, DELAY_BEFORE_HOME);
         });
 
         this.socketClientService.on('gameEnded', (data: { winner: string }) => {
             this.snackbarService.showMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
             setTimeout(() => {
-                this.abandonGame();
-            }, delayBeforeEndingGame);
+                this.gameplayService.abandonGame(this.gameData);
+            }, DELAY_BEFORE_ENDING_GAME);
         });
 
         this.socketClientService.on('adminModeDisabled', () => {
@@ -114,11 +94,11 @@ export class GameSocketService {
             this.gameData.isCurrentlyMoving = false;
             this.gameData.isActionMode = false;
             this.gameData.isInCombatMode = false;
-            this.gameData.clientPlayer.actionPoints = defaultActionPoint;
+            this.gameData.clientPlayer.actionPoints = DEFAULT_ACTION_POINTS;
             this.gameData.clientPlayer.movementPoints = this.gameData.clientPlayer.speed;
             this.gameData.turnTimer = data.turnDuration;
             this.gameData.hasTurnEnded = this.gameData.clientPlayer.name !== this.gameData.currentPlayer.name;
-            this.updateAvailablePath();
+            this.gameplayService.updateAvailablePath(this.gameData);
             this.gameDataSubject.next(this.gameData);
         });
 
@@ -140,13 +120,16 @@ export class GameSocketService {
             if (this.gameData.clientPlayer.name === data.player.name) {
                 this.gameData.clientPlayer.movementPoints =
                     this.gameData.clientPlayer.movementPoints -
-                    this.playerMovementService.calculateRemainingMovementPoints(this.getClientPlayerPosition(), data.player);
+                    this.playerMovementService.calculateRemainingMovementPoints(
+                        this.gameplayService.getClientPlayerPosition(this.gameData),
+                        data.player,
+                    );
                 this.gameData.movementPointsRemaining = this.gameData.clientPlayer.movementPoints;
                 this.gameData.isCurrentlyMoving = data.isCurrentlyMoving;
-                this.updateAvailablePath();
+                this.gameplayService.updateAvailablePath(this.gameData);
             }
 
-            this.checkAvailableActions(this.gameData); // change function below
+            this.gameplayService.checkAvailableActions(this.gameData); // change function below
             this.gameDataSubject.next(this.gameData);
         });
 
@@ -161,7 +144,7 @@ export class GameSocketService {
         });
 
         this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: number; defenseScore: number }) => {
-            this.updateAttackResult(data);
+            this.gameplayService.updateAttackResult(this.gameData, data);
             this.gameData.evadeResult = null;
             this.gameDataSubject.next(this.gameData);
         });
@@ -183,10 +166,10 @@ export class GameSocketService {
                 return;
             }
             this.gameData.game.grid = data.grid;
-            this.gameData.clientPlayer.actionPoints = noActionPoints;
+            this.gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
             this.gameData.isActionMode = false;
-            this.updateAvailablePath();
-            this.checkAvailableActions(this.gameData); // change function below
+            this.gameplayService.updateAvailablePath(this.gameData);
+            this.gameplayService.checkAvailableActions(this.gameData); // change function below
             this.gameDataSubject.next(this.gameData);
         });
 
@@ -205,7 +188,7 @@ export class GameSocketService {
                 return;
             }
             this.gameData.game.grid = data.grid;
-            this.updateAvailablePath();
+            this.gameplayService.updateAvailablePath(this.gameData);
             this.gameDataSubject.next(this.gameData);
         });
 
@@ -218,22 +201,22 @@ export class GameSocketService {
 
         this.socketClientService.on('combatEnded', (data: { winner: Player; hasEvaded: boolean }) => {
             this.gameData.isInCombatMode = false;
-            this.gameData.escapeAttempts = defaultEscapeAttempts;
+            this.gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             this.gameData.isActionMode = false;
-            this.gameData.clientPlayer.actionPoints = noActionPoints;
+            this.gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
             this.gameData.evadeResult = null;
             this.gameData.attackResult = null;
-            this.gameData.escapeAttempts = defaultEscapeAttempts;
+            this.gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             if (data && data.winner && !data.hasEvaded) {
-                this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, delayMessageAfterCombatEnded);
+                this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             } else {
-                this.snackbarService.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, delayMessageAfterCombatEnded);
+                this.snackbarService.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             }
             if (this.gameData.clientPlayer.name === this.gameData.currentPlayer.name) {
                 this.gameData.clientPlayer.movementPoints = this.gameData.movementPointsRemaining;
             }
 
-            this.checkAvailableActions(this.gameData);
+            this.gameplayService.checkAvailableActions(this.gameData);
             this.gameDataSubject.next(this.gameData);
         });
 
@@ -245,77 +228,16 @@ export class GameSocketService {
     }
 
     unsubscribeSocketListeners(): void {
-        events.forEach((event) => {
+        EVENTS.forEach((event) => {
             this.socketClientService.socket.off(event);
         });
     }
 
-    endTurn(): void {
-        this.gameData.hasTurnEnded = true;
-        this.gameData.turnTimer = 0;
-        this.socketClientService.emit('endTurn', { accessCode: this.gameData.lobby.accessCode });
-    }
-
-    abandonGame(): void {
-        this.gameData.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', { player: this.gameData.clientPlayer, accessCode: this.gameData.lobby.accessCode });
-        this.backToHome();
-    }
-    getClientPlayerPosition(): Tile | undefined {
-        if (!this.gameData.game || !this.gameData.game.grid || !this.gameData.clientPlayer) {
-            return undefined;
-        }
-        for (const row of this.gameData.game.grid) {
-            for (const tile of row) {
-                if (tile.player && tile.player.name === this.gameData.clientPlayer.name) {
-                    return tile;
-                }
-            }
-        }
-        return undefined;
-    }
-
-    private updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
-        this.gameData.attackResult = data;
-    }
-
-    private backToHome(): void {
-        this.router.navigate([Routes.HomePage]);
-    }
-
-    private handlePageRefresh(): void {
+    handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
-            this.abandonGame();
+            this.gameplayService.abandonGame(this.gameData);
         } else {
             sessionStorage.setItem('refreshed', 'true');
-        }
-    }
-
-    private updateAvailablePath(): void {
-        if (this.gameData.currentPlayer.name === this.gameData.clientPlayer.name && this.gameData.game && this.gameData.game.grid) {
-            this.gameData.availablePath = this.playerMovementService.availablePath(
-                this.getClientPlayerPosition(),
-                this.gameData.clientPlayer.movementPoints,
-                this.gameData.game.grid,
-            );
-        } else {
-            this.gameData.availablePath = [];
-        }
-    }
-
-    private checkAvailableActions(gameData: GameData): void {
-        const clientPlayerPosition = this.getClientPlayerPosition();
-        if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
-        const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, gameData.game.grid);
-        const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, gameData.game.grid);
-        if (gameData.clientPlayer.actionPoints === 0 && gameData.clientPlayer.movementPoints === 0) {
-            if (!hasIce) {
-                this.endTurn();
-            }
-        } else if (gameData.clientPlayer.actionPoints === 1 && gameData.clientPlayer.movementPoints === 0) {
-            if (!hasIce && !hasActionAvailable) {
-                this.endTurn();
-            }
         }
     }
 }

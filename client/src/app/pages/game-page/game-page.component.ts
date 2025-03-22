@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GameData } from '@app/classes/gameData';
 import { GridComponent } from '@app/components/grid/grid.component';
+import { NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Tile } from '@app/interfaces/tile';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Subscription } from 'rxjs';
-
-const noActionPoints = 0;
 
 @Component({
     selector: 'app-game-page',
@@ -28,6 +28,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private playerMovementService: PlayerMovementService,
         private socketClientService: SocketClientService,
         private snackbarService: SnackbarService,
+        private gameplayService: GameplayService,
         private gameSocketService: GameSocketService,
     ) {}
 
@@ -42,8 +43,8 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleDoorClick(targetTile: Tile): void {
-        if (this.gameData.isInCombatMode || this.gameData.clientPlayer.actionPoints === noActionPoints || !this.gameData.isActionMode) return;
-        const currentTile = this.gameSocketService.getClientPlayerPosition();
+        if (this.gameData.isInCombatMode || this.gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !this.gameData.isActionMode) return;
+        const currentTile = this.gameplayService.getClientPlayerPosition(this.gameData);
         if (!currentTile || !this.gameData.game || !this.gameData.game.grid) {
             return;
         }
@@ -55,9 +56,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleAttackClick(targetTile: Tile): void {
-        if (!targetTile.player || targetTile.player === this.gameData.clientPlayer || this.gameData.clientPlayer.actionPoints === noActionPoints)
+        if (!targetTile.player || targetTile.player === this.gameData.clientPlayer || this.gameData.clientPlayer.actionPoints === NO_ACTION_POINTS)
             return;
-        const currentTile = this.gameSocketService.getClientPlayerPosition();
+        const currentTile = this.gameplayService.getClientPlayerPosition(this.gameData);
 
         if (this.gameData.isActionMode && currentTile && currentTile.player && this.gameData.game && this.gameData.game.grid) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.gameData.game.grid)) {
@@ -74,7 +75,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     handleTileClick(targetTile: Tile): void {
         if (this.gameData.isActionMode || this.gameData.isCurrentlyMoving) return;
-        const currentTile = this.gameSocketService.getClientPlayerPosition();
+        const currentTile = this.gameplayService.getClientPlayerPosition(this.gameData);
         if (!currentTile || !this.gameData.game || !this.gameData.game.grid) {
             return;
         }
@@ -96,12 +97,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.gameData.quickestPath = undefined;
         } else {
             this.gameData.quickestPath =
-                this.playerMovementService.quickestPath(this.gameSocketService.getClientPlayerPosition(), targetTile, this.gameData.game.grid) || [];
+                this.playerMovementService.quickestPath(
+                    this.gameplayService.getClientPlayerPosition(this.gameData),
+                    targetTile,
+                    this.gameData.game.grid,
+                ) || [];
         }
     }
 
     endTurn(): void {
-        this.gameSocketService.endTurn();
+        this.gameplayService.endTurn(this.gameData);
     }
 
     executeNextAction(): void {
@@ -111,7 +116,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     abandonGame(): void {
-        this.gameSocketService.abandonGame();
+        this.gameplayService.abandonGame(this.gameData);
     }
 
     ngOnDestroy(): void {
@@ -132,10 +137,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     evade(): void {
         this.socketClientService.emit('evade', { accessCode: this.gameData.lobby.accessCode, player: this.gameData.clientPlayer });
-    }
-
-    updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
-        this.gameData.attackResult = data;
     }
 
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
