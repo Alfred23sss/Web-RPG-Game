@@ -25,7 +25,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class GameSocketService {
     private gameData = new GameData();
     private gameDataSubject = new BehaviorSubject<GameData>(this.gameData);
-
+    //  REFACTOR : CHECK FOR LOGIC IN SOCKET THAT COULD BE PUT IN GAMEPLAYSERVICE (THERE IS 100% AT LEAST ONE OR TWO THAT CAN BE TRANSFERED)
     constructor(
         private playerMovementService: PlayerMovementService,
         private socketClientService: SocketClientService,
@@ -36,6 +36,7 @@ export class GameSocketService {
     get gameData$(): Observable<GameData> {
         return this.gameDataSubject.asObservable();
     }
+
     initializeSocketListeners(): void {
         this.handlePageRefresh();
         this.fetchGameData();
