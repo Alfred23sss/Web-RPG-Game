@@ -1,11 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { GameData } from '@app/classes/gameData';
 import { GridComponent } from '@app/components/grid/grid.component';
-import { Routes } from '@app/enums/global.enums';
-import { Game } from '@app/interfaces/game';
-import { Lobby } from '@app/interfaces/lobby';
-import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
@@ -23,68 +19,53 @@ const noActionPoints = 0;
     imports: [CommonModule, GridComponent],
 })
 export class GamePageComponent implements OnInit, OnDestroy {
-    game: Game | null;
-    wasRefreshed: boolean = false;
-    clientPlayer: Player;
-    currentPlayer: Player;
-    availablePath: Tile[] | undefined;
-    quickestPath: Tile[] | undefined;
-    playerTile: Tile | undefined;
-    lobby: Lobby;
-    playerList: Player[];
-    logEntries: string[] = [];
+    gameData: GameData = new GameData();
     activeTab: 'chat' | 'log' = 'chat';
-    logBookSubscription: Subscription;
-    turnTimer: number;
-    isInCombatMode: boolean = false;
-    hasTurnEnded = false;
-    isActionMode: boolean = false;
-    isCurrentlyMoving: boolean = false;
-    escapeAttempts: number = 2;
-    evadeResult: { attemptsLeft: number; isEscapeSuccessful: boolean } | null = null;
-    attackResult: { success: boolean; attackScore: number; defenseScore: number } | null = null;
-    movementPointsRemaining: number = 0;
-    isDebugMode: boolean = false;
     private keyPressHandler: (event: KeyboardEvent) => void;
+    private gameDataSubscription: Subscription;
 
     constructor(
         private playerMovementService: PlayerMovementService,
-        private router: Router,
         private socketClientService: SocketClientService,
         private snackbarService: SnackbarService,
         private gameSocketService: GameSocketService,
     ) {}
 
     ngOnInit(): void {
-        this.gameSocketService.initializeSocketListeners(this);
+        this.gameDataSubscription = this.gameSocketService.gameData$.subscribe((data) => {
+            this.gameData = data;
+        });
+
+        this.gameSocketService.initializeSocketListeners();
         this.keyPressHandler = this.handleKeyPress.bind(this);
         document.addEventListener('keydown', this.keyPressHandler);
     }
 
     handleDoorClick(targetTile: Tile): void {
-        if (this.isInCombatMode || this.clientPlayer.actionPoints === noActionPoints || !this.isActionMode) return;
-        const currentTile = this.getClientPlayerPosition();
-        if (!currentTile || !this.game || !this.game.grid) {
+        if (this.gameData.isInCombatMode || this.gameData.clientPlayer.actionPoints === noActionPoints || !this.gameData.isActionMode) return;
+        const currentTile = this.gameSocketService.getClientPlayerPosition();
+        if (!currentTile || !this.gameData.game || !this.gameData.game.grid) {
             return;
         }
         this.socketClientService.emit('doorUpdate', {
             currentTile,
             targetTile,
-            accessCode: this.lobby.accessCode,
+            accessCode: this.gameData.lobby.accessCode,
         });
     }
 
     handleAttackClick(targetTile: Tile): void {
-        if (!targetTile.player || targetTile.player === this.clientPlayer || this.clientPlayer.actionPoints === noActionPoints) return;
-        const currentTile = this.getClientPlayerPosition();
+        if (!targetTile.player || targetTile.player === this.gameData.clientPlayer || this.gameData.clientPlayer.actionPoints === noActionPoints)
+            return;
+        const currentTile = this.gameSocketService.getClientPlayerPosition();
 
-        if (this.isActionMode && currentTile && currentTile.player && this.game && this.game.grid) {
-            if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.game.grid)) {
+        if (this.gameData.isActionMode && currentTile && currentTile.player && this.gameData.game && this.gameData.game.grid) {
+            if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, this.gameData.game.grid)) {
                 this.socketClientService.emit('startCombat', {
                     attackerName: currentTile.player.name,
                     defenderName: targetTile.player.name,
-                    accessCode: this.lobby.accessCode,
-                    isDebugMode: this.isDebugMode,
+                    accessCode: this.gameData.lobby.accessCode,
+                    isDebugMode: this.gameData.isDebugMode,
                 });
                 return;
             }
@@ -92,54 +73,51 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     handleTileClick(targetTile: Tile): void {
-        if (this.isActionMode || this.isCurrentlyMoving) return;
-        const currentTile = this.getClientPlayerPosition();
-        if (!currentTile || !this.game || !this.game.grid) {
+        if (this.gameData.isActionMode || this.gameData.isCurrentlyMoving) return;
+        const currentTile = this.gameSocketService.getClientPlayerPosition();
+        if (!currentTile || !this.gameData.game || !this.gameData.game.grid) {
             return;
         }
-        this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.lobby.accessCode, this.game.grid);
+        this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, this.gameData.lobby.accessCode, this.gameData.game.grid);
     }
 
     handleTeleport(targetTile: Tile): void {
-        if (this.isInCombatMode) return;
-        if (this.clientPlayer.name === this.currentPlayer.name) {
+        if (this.gameData.isInCombatMode) return;
+        if (this.gameData.clientPlayer.name === this.gameData.currentPlayer.name) {
             this.socketClientService.emit('teleportPlayer', {
-                accessCode: this.lobby.accessCode,
-                player: this.clientPlayer,
+                accessCode: this.gameData.lobby.accessCode,
+                player: this.gameData.clientPlayer,
                 targetTile,
             });
         }
     }
     updateQuickestPath(targetTile: Tile): void {
-        if (!(this.game && this.game.grid) || !this.isAvailablePath(targetTile)) {
-            this.quickestPath = undefined;
+        if (!(this.gameData.game && this.gameData.game.grid) || !this.isAvailablePath(targetTile)) {
+            this.gameData.quickestPath = undefined;
         } else {
-            this.quickestPath = this.playerMovementService.quickestPath(this.getClientPlayerPosition(), targetTile, this.game.grid) || [];
+            this.gameData.quickestPath =
+                this.playerMovementService.quickestPath(this.gameSocketService.getClientPlayerPosition(), targetTile, this.gameData.game.grid) || [];
         }
     }
 
-    backToHome(): void {
-        this.router.navigate([Routes.HomePage]);
-    }
-
     endTurn(): void {
-        this.hasTurnEnded = true;
-        this.turnTimer = 0;
-        this.socketClientService.emit('endTurn', { accessCode: this.lobby.accessCode });
+        this.gameSocketService.endTurn();
     }
 
     executeNextAction(): void {
-        this.isActionMode = !this.isActionMode;
-        const message = this.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
+        this.gameData.isActionMode = !this.gameData.isActionMode;
+        const message = this.gameData.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
         this.snackbarService.showMessage(message);
     }
+
     abandonGame(): void {
-        this.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', { player: this.clientPlayer, accessCode: this.lobby.accessCode });
-        this.backToHome();
+        this.gameSocketService.abandonGame();
     }
 
     ngOnDestroy(): void {
+        if (this.gameDataSubscription) {
+            this.gameDataSubscription.unsubscribe();
+        }
         document.removeEventListener('keydown', this.keyPressHandler);
         this.gameSocketService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
@@ -147,51 +125,17 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     attack(): void {
         this.socketClientService.emit('performAttack', {
-            accessCode: this.lobby.accessCode,
-            attackerName: this.clientPlayer.name,
+            accessCode: this.gameData.lobby.accessCode,
+            attackerName: this.gameData.clientPlayer.name,
         });
     }
 
     evade(): void {
-        this.socketClientService.emit('evade', { accessCode: this.lobby.accessCode, player: this.clientPlayer });
-    }
-
-    getClientPlayerPosition(): Tile | undefined {
-        if (!this.game || !this.game.grid || !this.clientPlayer) {
-            return undefined;
-        }
-        for (const row of this.game.grid) {
-            for (const tile of row) {
-                if (tile.player && tile.player.name === this.clientPlayer.name) {
-                    return tile;
-                }
-            }
-        }
-        return undefined;
-    }
-
-    updateAvailablePath(): void {
-        if (this.currentPlayer.name === this.clientPlayer.name && this.game && this.game.grid) {
-            this.availablePath = this.playerMovementService.availablePath(
-                this.getClientPlayerPosition(),
-                this.clientPlayer.movementPoints,
-                this.game.grid,
-            );
-        } else {
-            this.availablePath = [];
-        }
-    }
-
-    handlePageRefresh(): void {
-        if (sessionStorage.getItem('refreshed') === 'true') {
-            this.abandonGame();
-        } else {
-            sessionStorage.setItem('refreshed', 'true');
-        }
+        this.socketClientService.emit('evade', { accessCode: this.gameData.lobby.accessCode, player: this.gameData.clientPlayer });
     }
 
     updateAttackResult(data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
-        this.attackResult = data;
+        this.gameData.attackResult = data;
     }
 
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
@@ -214,11 +158,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     private isAvailablePath(tile: Tile): boolean {
-        return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
+        return this.gameData.availablePath ? this.gameData.availablePath.some((t) => t.id === tile.id) : false;
     }
     private handleKeyPress(event: KeyboardEvent): void {
-        if (event.key.toLowerCase() === 'd' && this.clientPlayer.isAdmin) {
-            this.socketClientService.emit('adminModeUpdate', { accessCode: this.lobby.accessCode });
+        if (event.key.toLowerCase() === 'd' && this.gameData.clientPlayer.isAdmin) {
+            this.socketClientService.emit('adminModeUpdate', { accessCode: this.gameData.lobby.accessCode });
         }
     }
 }
