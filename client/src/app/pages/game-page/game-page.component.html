@@ -19,58 +19,10 @@
             <p>Joueur actif: {{ gameData.lobby.players.length }}</p>
             }
         </div>
-        <div class="player-info">
-            <h3>Informations du joueur</h3>
-            <div class="player-header">
-                <p class="player-name">{{ gameData.clientPlayer.name }}</p>
-                <img [src]="gameData.clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
-            </div>
-            <div class="player-stats">
-                <div class="health-bar">
-                    <span class="health-label">Points de vie: {{ gameData.clientPlayer.hp.current }} / {{ gameData.clientPlayer.hp.max }}</span>
-                    <div class="health-bar-outer">
-                        <div class="health-bar-inner" [style.width.%]="(gameData.clientPlayer.hp.current / gameData.clientPlayer.hp.max) * 100"></div>
-                    </div>
-                </div>
-                <div class="attributes-grid">
-                    <div class="attribute">
-                        <span class="attribute-label">Rapidité: </span>
-                        <span class="attribute-value">{{ gameData.clientPlayer.speed }}</span>
-                    </div>
-                    <div class="attribute">
-                        <span class="attribute-label">Attaque: </span>
-                        <span class="attribute-value">
-                            {{ gameData.clientPlayer.attack.value }} (Bonus: {{ gameData.clientPlayer.attack.bonusDice }})
-                        </span>
-                    </div>
-                    <div class="attribute">
-                        <span class="attribute-label">Défense: </span>
-                        <span class="attribute-value">
-                            {{ gameData.clientPlayer.defense.value }} (Bonus: {{ gameData.clientPlayer.defense.bonusDice }})
-                        </span>
-                    </div>
-                </div>
-                <div class="dice-type">
-                    <span class="dice-label">Dés assignés: </span>
-                    <span class="dice-value">{{ gameData.clientPlayer.attack.bonusDice }}</span>
-                </div>
-                <div class="resources">
-                    <div class="resource">
-                        <span class="resource-label">Mouvements restants: </span>
-                        <span class="resource-value">{{ gameData.clientPlayer.movementPoints }}</span>
-                    </div>
-                    <div class="resource">
-                        <span class="resource-label">Actions restantes: </span>
-                        <span class="resource-value">{{ gameData.clientPlayer.actionPoints }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="inventory">
-            <h3>Inventaire</h3>
-            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
-        </div>
+        <app-player-info></app-player-info>
     </div>
+
+    
 
     <div class="game-map-container" [ngClass]="{ 'combat-mode': gameData.isInCombatMode }">
         @if (gameData.isActionMode || gameData.isInCombatMode) {
@@ -167,21 +119,14 @@
             } }
         </div>
         }
-        <div class="game-messages">
-            <h3>Messages</h3>
-            <div class="message-toggle">
-                <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
-                <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
-            </div>
-            @if (activeTab === 'chat'){
-            <div class="messages-content">
-                <p>Panneau des messages (clavardage).</p>
-            </div>
-            } @if(activeTab === 'log'){
-            <div class="log-content">
-                <p>Panneau du journal de bord (journal de bord).</p>
-            </div>
-            }
+        <div class="message-toggle">
+            <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
+            <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
         </div>
+        @if (activeTab === 'chat'){
+        <app-chat></app-chat>
+        } @if(activeTab === 'log'){
+        <app-log-book></app-log-book>
+        }
     </div>
 </div>

@@ -1,18 +1,24 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GameData } from '@app/classes/gameData';
+import { ChatComponent } from '@app/components/chat/chat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
+import { LogBookComponent } from '@app/components/log-book/log-book.component';
+import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
 import { Tile } from '@app/interfaces/tile';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { Subscription } from 'rxjs';
 
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!REFACTOR HTML!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @Component({
     selector: 'app-game-page',
     standalone: true,
     templateUrl: './game-page.component.html',
     styleUrls: ['./game-page.component.scss'],
-    imports: [CommonModule, GridComponent],
+    imports: [CommonModule, GridComponent, ChatComponent, LogBookComponent, PlayerInfoComponent],
 })
 export class GamePageComponent implements OnInit, OnDestroy {
     gameData: GameData = new GameData();

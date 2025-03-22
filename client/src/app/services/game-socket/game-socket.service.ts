@@ -25,7 +25,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class GameSocketService {
     private gameData = new GameData();
     private gameDataSubject = new BehaviorSubject<GameData>(this.gameData);
-    //  REFACTOR : CHECK FOR LOGIC IN SOCKET THAT COULD BE PUT IN GAMEPLAYSERVICE (THERE IS 100% AT LEAST ONE OR TWO THAT CAN BE TRANSFERED)
+    //  REFACTOR : SPLIT INTO MULTIPLE SERVICES EACH FOR A SPECIFIC GROUP OF EVENTS (COMBAT, TURN, ETC) SINGLE RESPONSABILITY PRINCIPLE!!!!
     constructor(
         private playerMovementService: PlayerMovementService,
         private socketClientService: SocketClientService,
