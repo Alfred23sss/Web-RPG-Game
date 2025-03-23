@@ -1,0 +1,35 @@
+<!-- duel-dialog.component.html -->
+<div class="overlay"></div>
+<div class="combat-container">
+    <!-- Title Row -->
+    <div class="duel-title">
+        <h1>DUEL</h1>
+    </div>
+
+    <!-- Players Row -->
+    <div class="players-container">
+        <div class="player">
+            <h2>{{ player1.name }}</h2>
+            <!-- <div class="avatar-container">
+                <img [src]="player1.avatar" alt="Player 1 Avatar" />
+            </div> -->
+        </div>
+
+        <div class="vs-container">
+            <span>VS</span>
+        </div>
+
+        <div class="player">
+            <h2>{{ player2.name }}</h2>
+            <!-- <div class="avatar-container">
+                <img [src]="player2.avatar" alt="Player 2 Avatar" />
+            </div> -->
+        </div>
+    </div>
+
+    <!-- Buttons Row -->
+    <div class="actions-container">
+        <button class="button">Attaquer</button>
+        <button class="button">Évader</button>
+    </div>
+</div>

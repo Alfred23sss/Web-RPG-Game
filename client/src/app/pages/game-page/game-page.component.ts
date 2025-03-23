@@ -1,13 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { GameData } from '@app/classes/gameData';
 import { ChatComponent } from '@app/components/chat/chat.component';
+import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
 import { Tile } from '@app/interfaces/tile';
-import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
+import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
 import { Subscription } from 'rxjs';
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -27,16 +30,18 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private gameDataSubscription: Subscription;
 
     constructor(
+        private readonly dialog: MatDialog,
         private readonly gameplayService: GameplayService,
-        private readonly gameSocketService: GameSocketService,
+        private readonly gameStateSocketService: GameStateSocketService,
+        private readonly socketListenerService: SocketListenerService,
     ) {}
 
     ngOnInit(): void {
-        this.gameDataSubscription = this.gameSocketService.gameData$.subscribe((data) => {
+        this.gameDataSubscription = this.gameStateSocketService.gameData$.subscribe((data) => {
             this.gameData = data;
         });
 
-        this.gameSocketService.initializeSocketListeners();
+        this.socketListenerService.initializeAllSocketListeners();
         this.keyPressHandler = this.handleKeyPress.bind(this);
         document.addEventListener('keydown', this.keyPressHandler);
     }
@@ -78,7 +83,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
             this.gameDataSubscription.unsubscribe();
         }
         document.removeEventListener('keydown', this.keyPressHandler);
-        this.gameSocketService.unsubscribeSocketListeners();
+        this.socketListenerService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
     }
 
@@ -88,6 +93,13 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     evade(): void {
         this.gameplayService.evade(this.gameData);
+    }
+
+    openCombatPopup(): void {
+        this.dialog.open(GameCombatComponent, {
+            width: '650px',
+            disableClose: true,
+        });
     }
 
     private handleKeyPress(event: KeyboardEvent): void {

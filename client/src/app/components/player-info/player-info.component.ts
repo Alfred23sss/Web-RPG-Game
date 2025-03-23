@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
 import { GameData } from '@app/classes/gameData';
-import { GameSocketService } from '@app/services/game-socket/game-socket.service';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -13,8 +13,8 @@ export class PlayerInfoComponent implements OnDestroy {
     gameData: GameData = new GameData();
     private gameDataSubscription: Subscription;
 
-    constructor(private readonly gameSocketService: GameSocketService) {
-        this.gameDataSubscription = this.gameSocketService.gameData$.subscribe((data) => {
+    constructor(private readonly gameStateSocketService: GameStateSocketService) {
+        this.gameDataSubscription = this.gameStateSocketService.gameData$.subscribe((data) => {
             this.gameData = data;
         });
     }
