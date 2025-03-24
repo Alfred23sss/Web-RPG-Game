@@ -1,5 +1,17 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
-import { AttributeType, DiceType, GameMode, GameModeLabel, GameModeType, GameSize, ImageType, ItemDescription, ItemName, ItemType, TileType } from '@app/enums/global.enums';
+import {
+    AttributeType,
+    DiceType,
+    GameMode,
+    GameModeLabel,
+    GameModeType,
+    GameSize,
+    ImageType,
+    ItemDescription,
+    ItemName,
+    ItemType,
+    TileType,
+} from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
