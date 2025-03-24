@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
+import { BONUS_VALUE, INITIAL_VALUES, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
 import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
@@ -8,7 +8,7 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 export class CharacterService {
     unavailableAvatarsSubject = new BehaviorSubject<string[]>([]);
     unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
+    onCharacterSubmitted$ = new Subject<void>();
     attributes = { ...INITIAL_VALUES.attributes };
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
@@ -29,19 +30,7 @@ export class CharacterService {
     ) {}
 
     initializePlayer(player: Player): void {
-        player.name = '';
-        player.avatar = '';
-        player.speed = 4;
-        player.attack = { value: 4, bonusDice: DiceType.Uninitialized };
-        player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
-        player.hp = { current: 4, max: 4 };
-        player.movementPoints = 4;
-        player.actionPoints = 1;
-        player.inventory = [null, null];
-        player.isAdmin = false;
-        player.hasAbandoned = false;
-        player.isActive = false;
-        player.combatWon = 0;
+        Object.assign(player, { ...UNINITIALIZED_PLAYER }); // revoir la syntaxe
     }
 
     initializeLobby(accessCode: string): void {
@@ -103,7 +92,7 @@ export class CharacterService {
         }
     }
 
-    async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game, closePopup: () => void): Promise<void> {
+    async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game): Promise<void> {
         if (!this.isCharacterValid(player)) {
             this.showMissingDetailsError();
             return;
@@ -113,11 +102,11 @@ export class CharacterService {
 
         if (isLobbyCreated) {
             const joinResult = await this.joinExistingLobby(currentAccessCode, player);
-            this.handleLobbyJoining(joinResult, player, game, currentAccessCode, closePopup);
+            this.handleLobbyJoining(joinResult, player, game, currentAccessCode);
         } else {
             player.isAdmin = true;
             await this.createAndJoinLobby(game, player);
-            this.finalizeCharacterSubmission(player, closePopup);
+            this.finalizeCharacterSubmission(player);
         }
     }
 
@@ -198,19 +187,20 @@ export class CharacterService {
         }
     }
 
-    private finalizeCharacterSubmission(player: Player, closePopup: () => void): void {
+    private finalizeCharacterSubmission(player: Player): void {
         if (this.isCharacterValid(player)) {
             sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
+            this.proceedToWaitingView();
+            this.onCharacterSubmitted$.next();
         } else {
             this.showMissingDetailsError();
         }
     }
 
-    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, currentAccessCode: string, closePopup: () => void): void {
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, currentAccessCode: string): void {
         switch (joinStatus) {
             case JoinLobbyResult.JoinedLobby:
-                this.finalizeCharacterSubmission(player, closePopup);
+                this.finalizeCharacterSubmission(player);
                 break;
             case JoinLobbyResult.StayInLobby:
                 return;
@@ -220,17 +210,10 @@ export class CharacterService {
                     accessCode: currentAccessCode,
                     playerName: '',
                 });
-                closePopup();
+
                 return;
         }
-        this.validateGameAvailability(game, closePopup);
-
-        if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
-        } else {
-            this.showMissingDetailsError();
-        }
+        this.validateGameAvailability(game);
     }
 
     private hasBonusAssigned(player: Player): boolean {
@@ -241,20 +224,18 @@ export class CharacterService {
         return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
-    private validateGameAvailability(game: Game, closePopup: () => void): void {
+    private validateGameAvailability(game: Game): void {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
                 if (error.status === HttpStatus.InternalServerError || error.status === HttpStatus.Forbidden) {
                     this.snackbarService.showMessage(ErrorMessages.UnavailableGame);
                     this.router.navigate([Routes.CreateView]);
-                    closePopup();
                 }
             },
         });
     }
 
-    private proceedToWaitingView(closePopup: () => void): void {
+    private proceedToWaitingView(): void {
         this.router.navigate([Routes.WaitingView]);
-        closePopup();
     }
 }
