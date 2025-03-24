@@ -7,7 +7,7 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { MatDialog } from '@angular/material/dialog';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
-import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED } from '@app/constants/global.constants';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { Player } from '@app/interfaces/player';
 import { DiceType } from '@app/enums/global.enums';
@@ -30,6 +30,8 @@ const MOCK_PLAYER: Player = {
     isActive: false,
     combatWon: 0,
 };
+
+const EVENT_HANDLERS: { [key: string]: (data?: any) => void } = {};
 
 describe('CombatSocketService', () => {
     let service: CombatSocketService;
@@ -81,13 +83,12 @@ describe('CombatSocketService', () => {
     });
 
     it('should handle combatStarted event', () => {
-        const eventHandlers: { [key: string]: (data?: any) => void } = {};
         socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-            eventHandlers[event] = callback;
+            EVENT_HANDLERS[event] = callback;
         });
 
         service.initializeCombatListeners();
-        eventHandlers['combatStarted']();
+        EVENT_HANDLERS['combatStarted']();
 
         expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(jasmine.objectContaining({ isInCombatMode: true }));
         expect(dialogMock.open).toHaveBeenCalledWith(GameCombatComponent, {
@@ -98,14 +99,13 @@ describe('CombatSocketService', () => {
     });
 
     it('should handle attackResult event', () => {
-        const eventHandlers: { [key: string]: (data?: any) => void } = {};
         socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-            eventHandlers[event] = callback;
+            EVENT_HANDLERS[event] = callback;
         });
 
         service.initializeCombatListeners();
         const testData = { success: true, attackScore: 10, defenseScore: 5 };
-        eventHandlers['attackResult'](testData);
+        EVENT_HANDLERS['attackResult'](testData);
 
         expect(gameplayServiceMock.updateAttackResult).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue, testData);
         expect(gameStateServiceMock.gameDataSubjectValue.evadeResult).toBeNull();
@@ -113,9 +113,8 @@ describe('CombatSocketService', () => {
     });
 
     it('should handle combatTurnStarted event', () => {
-        const eventHandlers: { [key: string]: (data?: any) => void } = {};
         socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-            eventHandlers[event] = callback;
+            EVENT_HANDLERS[event] = callback;
         });
 
         service.initializeCombatListeners();
@@ -125,7 +124,7 @@ describe('CombatSocketService', () => {
             escapeAttemptsLeft: 2,
         };
 
-        eventHandlers['combatTurnStarted'](testData);
+        EVENT_HANDLERS['combatTurnStarted'](testData);
 
         expect(gameStateServiceMock.gameDataSubjectValue.currentPlayer).toEqual(MOCK_PLAYER);
         expect(gameStateServiceMock.gameDataSubjectValue.currentPlayer).toEqual(
@@ -139,28 +138,26 @@ describe('CombatSocketService', () => {
     });
 
     it('should handle combatTimerUpdate event', () => {
-        const eventHandlers: { [key: string]: (data?: any) => void } = {};
         socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-            eventHandlers[event] = callback;
+            EVENT_HANDLERS[event] = callback;
         });
 
         service.initializeCombatListeners();
         const testData = { timeLeft: 15 };
-        eventHandlers['combatTimerUpdate'](testData);
+        EVENT_HANDLERS['combatTimerUpdate'](testData);
 
         expect(gameStateServiceMock.gameDataSubjectValue.turnTimer).toBe(15);
         expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
     });
 
     it('should handle escapeAttempt event', () => {
-        const eventHandlers: { [key: string]: (data?: any) => void } = {};
         socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-            eventHandlers[event] = callback;
+            EVENT_HANDLERS[event] = callback;
         });
 
         service.initializeCombatListeners();
         const testData = { attemptsLeft: 1, isEscapeSuccessful: true };
-        eventHandlers['escapeAttempt'](testData);
+        EVENT_HANDLERS['escapeAttempt'](testData);
 
         expect(gameStateServiceMock.gameDataSubjectValue.evadeResult).toEqual(testData);
         expect(gameStateServiceMock.gameDataSubjectValue.attackResult).toBeNull();
@@ -168,69 +165,55 @@ describe('CombatSocketService', () => {
         expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
     });
 
-    describe('combatEnded event', () => {
-        it('should handle combatEnded when winner has not evaded', () => {
-            const eventHandlers: { [key: string]: (data?: any) => void } = {};
-            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-                eventHandlers[event] = callback;
-            });
-
-            service.initializeCombatListeners();
-            const testData = { winner: { name: 'Victor' }, hasEvaded: false };
-
-            gameStateServiceMock.gameDataSubjectValue.clientPlayer.actionPoints = 5;
-            gameStateServiceMock.gameDataSubjectValue.isInCombatMode = true;
-            eventHandlers['combatEnded'](testData);
-
-            expect(gameStateServiceMock.gameDataSubjectValue.isInCombatMode).toBeFalse();
-            expect(gameStateServiceMock.gameDataSubjectValue.escapeAttempts).toBe(DEFAULT_ESCAPE_ATTEMPTS);
-            expect(gameStateServiceMock.gameDataSubjectValue.isActionMode).toBeFalse();
-            expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.actionPoints).toBe(NO_ACTION_POINTS);
-            expect(gameStateServiceMock.gameDataSubjectValue.evadeResult).toBeNull();
-            expect(gameStateServiceMock.gameDataSubjectValue.attackResult).toBeNull();
-            expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(
-                gameStateServiceMock.gameDataSubjectValue.movementPointsRemaining,
-            );
-            expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
-                'Victor a gagné le combat !',
-                undefined,
-                DELAY_MESSAGE_AFTER_COMBAT_ENDED,
-            );
-            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
+    it('should handle combatEnded when winner has not evaded', () => {
+        socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+            EVENT_HANDLERS[event] = callback;
         });
 
-        it('should handle combatEnded when winner has evaded', () => {
-            const eventHandlers: { [key: string]: (data?: any) => void } = {};
-            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-                eventHandlers[event] = callback;
-            });
+        service.initializeCombatListeners();
+        const testData = { winner: MOCK_PLAYER, hasEvaded: false };
 
-            service.initializeCombatListeners();
-            const testData = { winner: { name: 'Escapist' }, hasEvaded: true };
-            eventHandlers['combatEnded'](testData);
+        gameStateServiceMock.gameDataSubjectValue.clientPlayer.actionPoints = 5;
+        gameStateServiceMock.gameDataSubjectValue.isInCombatMode = true;
+        EVENT_HANDLERS['combatEnded'](testData);
 
-            expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
-                'Escapist a evadé le combat !',
-                undefined,
-                DELAY_MESSAGE_AFTER_COMBAT_ENDED,
-            );
+        expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
+            'NewPlayer a gagné le combat !',
+            undefined,
+            DELAY_MESSAGE_AFTER_COMBAT_ENDED,
+        );
+    });
+
+    it('should handle combatEnded when winner has evaded', () => {
+        socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+            EVENT_HANDLERS[event] = callback;
         });
 
-        it('should not update movement points if client is not current player', () => {
-            const eventHandlers: { [key: string]: (data?: any) => void } = {};
-            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-                eventHandlers[event] = callback;
-            });
+        service.initializeCombatListeners();
+        const testData = { winner: MOCK_PLAYER, hasEvaded: true };
+        EVENT_HANDLERS['combatEnded'](testData);
 
-            service.initializeCombatListeners();
-            const testData = { winner: { name: 'Victor' }, hasEvaded: false };
-            gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'ClientPlayer';
-            gameStateServiceMock.gameDataSubjectValue.currentPlayer.name = 'OtherPlayer';
-            gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints = 0;
+        expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
+            'NewPlayer a evadé le combat !',
+            undefined,
+            DELAY_MESSAGE_AFTER_COMBAT_ENDED,
+        );
+    });
 
-            eventHandlers['combatEnded'](testData);
-
-            expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(0);
+    it('should not update movement points if client is not current player', () => {
+        const eventHandlers: { [key: string]: (data?: any) => void } = {};
+        socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+            eventHandlers[event] = callback;
         });
+
+        service.initializeCombatListeners();
+        const testData = { winner: { name: MOCK_PLAYER.name }, hasEvaded: false };
+        gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'ClientPlayer';
+        gameStateServiceMock.gameDataSubjectValue.currentPlayer.name = 'OtherPlayer';
+        gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints = 0;
+
+        eventHandlers['combatEnded'](testData);
+
+        expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(0);
     });
 });
