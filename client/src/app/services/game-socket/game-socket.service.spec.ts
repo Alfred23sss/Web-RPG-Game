@@ -60,7 +60,7 @@ const MOCK_GAME: Game = {
     grid: MOCK_GRID,
 };
 
-fdescribe('GameSocketService', () => {
+describe('GameSocketService', () => {
     let service: GameSocketService;
     let gameStateServiceSpy: jasmine.SpyObj<GameStateSocketService>;
     let gameplayServiceSpy: jasmine.SpyObj<GameplayService>;
