@@ -46,10 +46,6 @@ export class PlayerMovementService {
         return Array.from(reachableTiles);
     }
 
-    private getNeighborRemainingPoints(neighbor: Tile, cost: number): { tile: Tile; cost: number } {
-        return { tile: neighbor, cost: cost };
-    }
-
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
         if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
 
@@ -102,6 +98,10 @@ export class PlayerMovementService {
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
+    }
+
+    private getNeighborRemainingPoints(neighbor: Tile, cost: number): { tile: Tile; cost: number } {
+        return { tile: neighbor, cost: cost };
     }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
