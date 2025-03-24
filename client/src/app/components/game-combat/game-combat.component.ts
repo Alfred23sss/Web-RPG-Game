@@ -4,7 +4,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
     selector: 'app-game-combat',
     templateUrl: './game-combat.component.html',
-    styleUrls: ['./game-combat.component.css'],
+    styleUrls: ['./game-combat.component.scss'],
 })
 export class GameCombatComponent {
     // put data as input that then gifted in html when placing popup
