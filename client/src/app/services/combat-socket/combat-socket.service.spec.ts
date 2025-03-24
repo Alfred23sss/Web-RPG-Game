@@ -7,29 +7,8 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { MatDialog } from '@angular/material/dialog';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
-import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED } from '@app/constants/global.constants';
+import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, MOCK_PLAYER } from '@app/constants/global.constants';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
-import { Player } from '@app/interfaces/player';
-import { DiceType } from '@app/enums/global.enums';
-
-const MOCK_PLAYER: Player = {
-    name: 'NewPlayer',
-    avatar: 'default-avatar.png',
-    speed: 5,
-    attack: { value: 10, bonusDice: DiceType.D6 },
-    defense: { value: 8, bonusDice: DiceType.D4 },
-    inventory: [null, null],
-    actionPoints: 3,
-    movementPoints: 5,
-    hp: {
-        current: 0,
-        max: 0,
-    },
-    isAdmin: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
-};
 
 const EVENT_HANDLERS: { [key: string]: (data?: any) => void } = {};
 
@@ -67,8 +46,8 @@ describe('CombatSocketService', () => {
 
         (gameStateServiceMock.gameDataSubjectValue as any) = {
             isInCombatMode: false,
-            clientPlayer: { actionPoints: 0, name: 'TestPlayer', movementPoints: 0 },
-            currentPlayer: { name: 'TestPlayer' },
+            clientPlayer: MOCK_PLAYER,
+            currentPlayer: MOCK_PLAYER,
             movementPointsRemaining: 5,
             evadeResult: null,
             attackResult: null,
@@ -129,8 +108,8 @@ describe('CombatSocketService', () => {
         expect(gameStateServiceMock.gameDataSubjectValue.currentPlayer).toEqual(MOCK_PLAYER);
         expect(gameStateServiceMock.gameDataSubjectValue.currentPlayer).toEqual(
             jasmine.objectContaining({
-                name: 'NewPlayer',
-                actionPoints: 3,
+                name: MOCK_PLAYER.name,
+                actionPoints: MOCK_PLAYER.actionPoints,
             }),
         );
 
@@ -178,7 +157,7 @@ describe('CombatSocketService', () => {
         EVENT_HANDLERS['combatEnded'](testData);
 
         expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
-            'NewPlayer a gagné le combat !',
+            'testPlayer a gagné le combat !',
             undefined,
             DELAY_MESSAGE_AFTER_COMBAT_ENDED,
         );
@@ -194,7 +173,7 @@ describe('CombatSocketService', () => {
         EVENT_HANDLERS['combatEnded'](testData);
 
         expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
-            'NewPlayer a evadé le combat !',
+            'testPlayer a evadé le combat !',
             undefined,
             DELAY_MESSAGE_AFTER_COMBAT_ENDED,
         );
@@ -208,12 +187,12 @@ describe('CombatSocketService', () => {
 
         service.initializeCombatListeners();
         const testData = { winner: { name: MOCK_PLAYER.name }, hasEvaded: false };
-        gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'ClientPlayer';
-        gameStateServiceMock.gameDataSubjectValue.currentPlayer.name = 'OtherPlayer';
-        gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints = 0;
+        gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
+        gameStateServiceMock.gameDataSubjectValue.currentPlayer.name = MOCK_PLAYER.name;
+        gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints = MOCK_PLAYER.movementPoints;
 
         eventHandlers['combatEnded'](testData);
 
-        expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(0);
+        expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(MOCK_PLAYER.movementPoints);
     });
 });

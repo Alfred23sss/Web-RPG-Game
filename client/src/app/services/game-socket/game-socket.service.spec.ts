@@ -1,64 +1,14 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { DiceType, ImageType, TileType } from '@app/enums/global.enums';
+import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { GameSocketService } from './game-socket.service';
-
-const MOCK_PLAYER: Player = {
-    name: '',
-    avatar: '',
-    speed: 0,
-    attack: {
-        value: 0,
-        bonusDice: DiceType.D4,
-    },
-    defense: {
-        value: 0,
-        bonusDice: DiceType.D4,
-    },
-    hp: {
-        current: 0,
-        max: 0,
-    },
-    movementPoints: 0,
-    actionPoints: 0,
-    inventory: [null, null],
-    isAdmin: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
-};
-
-const MOCK_GRID: Tile[][] = [
-    [
-        { id: 'tile-0-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-        { id: 'tile-0-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-    ],
-    [
-        { id: 'tile-1-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-        { id: 'tile-1-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-    ],
-];
-
-const MOCK_GAME: Game = {
-    id: '',
-    name: '',
-    size: '',
-    mode: '',
-    lastModified: new Date(),
-    isVisible: false,
-    previewImage: '',
-    description: '',
-    grid: MOCK_GRID,
-};
 
 describe('GameSocketService', () => {
     let service: GameSocketService;
