@@ -2,11 +2,12 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AccessCodesCommunicationService } from './access-codes-communication.service';
+import { environment } from 'src/environments/environment';
 
 describe('AccessCodesCommunicationService', () => {
     let service: AccessCodesCommunicationService;
     let httpMock: HttpTestingController;
-    const apiUrl = 'http://localhost:3000/api/accessCodes';
+    const apiUrl = `${environment.serverUrl}/accessCodes`;
 
     beforeEach(() => {
         TestBed.configureTestingModule({

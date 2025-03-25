@@ -1,0 +1,190 @@
+import { Injectable } from '@angular/core';
+import { Router } from '@angular/router';
+import { GameData } from '@app/classes/gameData';
+import { NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { Routes } from '@app/enums/global.enums';
+import { Tile } from '@app/interfaces/tile';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
+
+@Injectable({
+    providedIn: 'root',
+})
+export class GameplayService {
+    constructor(
+        private readonly playerMovementService: PlayerMovementService,
+        private readonly socketClientService: SocketClientService,
+        private readonly snackBarService: SnackbarService,
+        private readonly router: Router,
+    ) {}
+
+    endTurn(gameData: GameData): void {
+        gameData.hasTurnEnded = true;
+        gameData.turnTimer = 0;
+        this.socketClientService.emit('endTurn', { accessCode: gameData.lobby.accessCode });
+    }
+
+    abandonGame(gameData: GameData): void {
+        gameData.clientPlayer.hasAbandoned = true;
+        this.socketClientService.emit('abandonedGame', { player: gameData.clientPlayer, accessCode: gameData.lobby.accessCode });
+        this.backToHome();
+    }
+    getClientPlayerPosition(gameData: GameData): Tile | undefined {
+        if (!gameData.game || !gameData.game.grid || !gameData.clientPlayer) {
+            return undefined;
+        }
+        for (const row of gameData.game.grid) {
+            for (const tile of row) {
+                if (tile.player && tile.player.name === gameData.clientPlayer.name) {
+                    return tile;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    backToHome(): void {
+        this.router.navigate([Routes.HomePage]);
+    }
+    updateAttackResult(gameData: GameData, data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
+        gameData.attackResult = data;
+    }
+
+    updateAvailablePath(gameData: GameData): void {
+        if (gameData.currentPlayer.name === gameData.clientPlayer.name && gameData.game && gameData.game.grid) {
+            gameData.availablePath = this.playerMovementService.availablePath(
+                this.getClientPlayerPosition(gameData),
+                gameData.clientPlayer.movementPoints,
+                gameData.game.grid,
+            );
+        } else {
+            gameData.availablePath = [];
+        }
+    }
+
+    checkAvailableActions(gameData: GameData): void {
+        const clientPlayerPosition = this.getClientPlayerPosition(gameData);
+        if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
+        const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, gameData.game.grid);
+        const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, gameData.game.grid);
+        if (gameData.clientPlayer.actionPoints === 0 && gameData.clientPlayer.movementPoints === 0) {
+            if (!hasIce) {
+                this.endTurn(gameData);
+            }
+        } else if (gameData.clientPlayer.actionPoints === 1 && gameData.clientPlayer.movementPoints === 0) {
+            if (!hasIce && !hasActionAvailable) {
+                this.endTurn(gameData);
+            }
+        }
+    }
+
+    handleDoorClick(gameData: GameData, targetTile: Tile): void {
+        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (!currentTile || !gameData.game || !gameData.game.grid) {
+            return;
+        }
+        this.socketClientService.emit('doorUpdate', {
+            currentTile,
+            targetTile,
+            accessCode: gameData.lobby.accessCode,
+        });
+    }
+
+    handleAttackClick(gameData: GameData, targetTile: Tile): void {
+        if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+
+        if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
+            if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
+                this.socketClientService.emit('startCombat', {
+                    attackerName: currentTile.player.name,
+                    defenderName: targetTile.player.name,
+                    accessCode: gameData.lobby.accessCode,
+                    isDebugMode: gameData.isDebugMode,
+                });
+                return;
+            }
+        }
+    }
+
+    handleTileClick(gameData: GameData, targetTile: Tile): void {
+        if (gameData.isActionMode || gameData.isCurrentlyMoving) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (!currentTile || !gameData.game || !gameData.game.grid) {
+            return;
+        }
+        this.socketClientService.sendPlayerMovementUpdate(currentTile, targetTile, gameData.lobby.accessCode, gameData.game.grid);
+    }
+
+    handleTeleport(gameData: GameData, targetTile: Tile): void {
+        if (gameData.isInCombatMode) return;
+        if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
+            this.socketClientService.emit('teleportPlayer', {
+                accessCode: gameData.lobby.accessCode,
+                player: gameData.clientPlayer,
+                targetTile,
+            });
+        }
+    }
+
+    updateQuickestPath(gameData: GameData, targetTile: Tile): void {
+        if (!(gameData.game && gameData.game.grid) || !this.isAvailablePath(gameData, targetTile)) {
+            gameData.quickestPath = undefined;
+        } else {
+            gameData.quickestPath =
+                this.playerMovementService.quickestPath(this.getClientPlayerPosition(gameData), targetTile, gameData.game.grid) || [];
+        }
+    }
+
+    executeNextAction(gameData: GameData): void {
+        gameData.isActionMode = !gameData.isActionMode;
+        const message = gameData.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
+        this.snackBarService.showMessage(message);
+    }
+
+    attack(gameData: GameData): void {
+        this.socketClientService.emit('performAttack', {
+            accessCode: gameData.lobby.accessCode,
+            attackerName: gameData.clientPlayer.name,
+        });
+    }
+
+    evade(gameData: GameData): void {
+        this.socketClientService.emit('evade', { accessCode: gameData.lobby.accessCode, player: gameData.clientPlayer });
+    }
+
+    handleKeyPress(gameData: GameData, event: KeyboardEvent): void {
+        if (event.key.toLowerCase() === 'd' && gameData.clientPlayer.isAdmin) {
+            this.socketClientService.emit('adminModeUpdate', { accessCode: gameData.lobby.accessCode });
+        }
+    }
+
+    emitAdminModeUpdate(gameData: GameData): void {
+        this.socketClientService.emit('adminModeUpdate', { accessCode: gameData.lobby.accessCode });
+    }
+
+    private isAvailablePath(gameData: GameData, tile: Tile): boolean {
+        return gameData.availablePath ? gameData.availablePath.some((t) => t.id === tile.id) : false;
+    }
+
+    private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
+        let tile1Pos: { row: number; col: number } | null = null;
+        let tile2Pos: { row: number; col: number } | null = null;
+        for (let row = 0; row < grid.length; row++) {
+            for (let col = 0; col < grid[row].length; col++) {
+                if (grid[row][col].id === tileId1) {
+                    tile1Pos = { row, col };
+                }
+                if (grid[row][col].id === tileId2) {
+                    tile2Pos = { row, col };
+                }
+                if (tile1Pos && tile2Pos) break;
+            }
+            if (tile1Pos && tile2Pos) break;
+        }
+        if (!tile1Pos || !tile2Pos) return false;
+        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+    }
+}
