@@ -165,7 +165,7 @@ describe('CharacterService', () => {
     it('should show error message if character is not valid', async () => {
         spyOn(service, 'isCharacterValid').and.returnValue(false);
         spyOn(service, 'showMissingDetailsError');
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+        await service.submitCharacter(player, currentAccessCode, true, mockGame);
         expect(service.showMissingDetailsError).toHaveBeenCalled();
         expect(mockAccessCodeService.setAccessCode).not.toHaveBeenCalled();
     });
@@ -195,7 +195,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
@@ -385,7 +385,7 @@ describe('CharacterService', () => {
         spyOn(service as any, 'showMissingDetailsError');
         mockCommunicationService.getGameById.and.returnValue(of({ id: '1', name: 'Test Game' } as Game));
 
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+        await service.submitCharacter(player, currentAccessCode, true, mockGame);
 
         expect((service as any).showMissingDetailsError).toHaveBeenCalled();
         expect(mockAccessCodeService.setAccessCode).not.toHaveBeenCalled();
@@ -395,8 +395,8 @@ describe('CharacterService', () => {
         spyOn(service as any, 'finalizeCharacterSubmission');
         mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
+        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
 
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
     });
@@ -414,10 +414,9 @@ describe('CharacterService', () => {
     it('should call returnHome when joinStatus is RedirectToHome', () => {
         spyOn(service as any, 'returnHome');
 
-        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode);
 
         expect((service as any).returnHome).toHaveBeenCalled();
-        expect(closePopupSpy).toHaveBeenCalled();
     });
 
     it('should call joinExistingLobby and handleLobbyJoining when isLobbyCreated is true', async () => {
@@ -425,7 +424,7 @@ describe('CharacterService', () => {
         spyOn(service, 'joinExistingLobby').and.resolveTo(JoinLobbyResult.JoinedLobby);
         spyOn(service as any, 'handleLobbyJoining');
 
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+        await service.submitCharacter(player, currentAccessCode, true, mockGame);
 
         expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
         expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(
@@ -443,7 +442,7 @@ describe('CharacterService', () => {
 
         (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
-        expect(service['validateGameAvailability']).toHaveBeenCalledWith(mockGame, closePopupSpy);
+        expect(service['validateGameAvailability']).toHaveBeenCalledWith(mockGame);
     });
 
     describe('validateGameAvailability', () => {
@@ -454,7 +453,7 @@ describe('CharacterService', () => {
         it('should do nothing when game is available', () => {
             mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-            service['validateGameAvailability'](mockGame, closePopupSpy);
+            service['validateGameAvailability'](mockGame);
 
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
             expect(closePopupSpy).not.toHaveBeenCalled();
@@ -463,7 +462,7 @@ describe('CharacterService', () => {
 
         it('should handle FORBIDDEN error and navigate to CREATE_VIEW', () => {
             mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HttpStatus.Forbidden })));
-            service['validateGameAvailability'](mockGame, closePopupSpy);
+            service['validateGameAvailability'](mockGame);
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.UnavailableGame);
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.CreateView]);
@@ -494,14 +493,14 @@ describe('CharacterService', () => {
     describe('proceedToWaitingView', () => {
         it('should navigate to WAITING_VIEW', () => {
             closePopupSpy = jasmine.createSpy();
-            service['proceedToWaitingView'](closePopupSpy);
+            service['proceedToWaitingView']();
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
             expect(closePopupSpy).toHaveBeenCalled();
         });
 
         it('should call closePopup', () => {
             closePopupSpy = jasmine.createSpy();
-            service['proceedToWaitingView'](closePopupSpy);
+            service['proceedToWaitingView']();
             expect(closePopupSpy).toHaveBeenCalled();
         });
     });
@@ -563,11 +562,11 @@ describe('CharacterService', () => {
         spyOn(sessionStorage, 'setItem');
         spyOn(service as any, 'proceedToWaitingView');
 
-        service['finalizeCharacterSubmission'](player, closePopupSpy);
+        service['finalizeCharacterSubmission'](player);
 
         expect(service.isCharacterValid).toHaveBeenCalledWith(player);
         expect(sessionStorage.setItem).toHaveBeenCalledWith('player', JSON.stringify(player));
-        expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
+        expect(service['proceedToWaitingView']).toHaveBeenCalled();
     });
 
     it('should do nothing if attribute is neither Vitality nor Speed', () => {
