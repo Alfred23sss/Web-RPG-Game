@@ -6,14 +6,17 @@ import {
     GameModeLabel,
     GameModeType,
     GameSize,
+    ImageType,
     ItemDescription,
     ItemName,
     ItemType,
+    TileType,
 } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 export const BONUS_VALUE = 2;
 
 export const POPUP_DELAY = 2000;
