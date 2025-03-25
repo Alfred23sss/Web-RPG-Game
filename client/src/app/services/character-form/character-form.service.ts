@@ -30,7 +30,7 @@ export class CharacterService {
     ) {}
 
     initializePlayer(player: Player): void {
-        Object.assign(player, { ...UNINITIALIZED_PLAYER }); // revoir la syntaxe
+        Object.assign(player, { ...UNINITIALIZED_PLAYER });
     }
 
     initializeLobby(accessCode: string): void {
