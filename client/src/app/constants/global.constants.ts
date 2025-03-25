@@ -6,17 +6,14 @@ import {
     GameModeLabel,
     GameModeType,
     GameSize,
-    ImageType,
     ItemDescription,
     ItemName,
     ItemType,
-    TileType,
 } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
 export const BONUS_VALUE = 2;
 
 export const POPUP_DELAY = 2000;
@@ -270,6 +267,22 @@ export const DEFAULT_LOBBY: Lobby = {
     players: [],
     game: MOCK_GAME,
     maxPlayers: 0,
+};
+
+export const UNINITIALIZED_PLAYER: Player = {
+    name: '',
+    avatar: '',
+    speed: 4,
+    attack: { value: 4, bonusDice: DiceType.Uninitialized },
+    defense: { value: 4, bonusDice: DiceType.Uninitialized },
+    hp: { current: 4, max: 4 },
+    movementPoints: 4,
+    actionPoints: 1,
+    inventory: [null, null],
+    isAdmin: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
 };
 
 export const MOCK_LOBBY = DEFAULT_LOBBY;

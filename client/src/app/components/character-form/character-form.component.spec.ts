@@ -37,10 +37,11 @@ describe('CharacterFormComponent', () => {
             ],
             {
                 unavailableAvatars$: new BehaviorSubject<string[]>([]).asObservable(),
+                onCharacterSubmitted$: new BehaviorSubject<void>(undefined),
                 attributes: {
                     [AttributeType.Vitality]: 4,
                     [AttributeType.Speed]: 4,
-                    [AttributeType.Attack]: 4, // Ajout des valeurs manquantes
+                    [AttributeType.Attack]: 4,
                     [AttributeType.Defense]: 4,
                 },
                 bonusAssigned: {
@@ -154,17 +155,15 @@ describe('CharacterFormComponent', () => {
             component.currentAccessCode,
             component.isLobbyCreated,
             component.game as Game,
-            jasmine.any(Function),
         );
     });
 
-    it('should call resetPopup after submitCharacter completes successfully', async () => {
+    it('should call resetPopup when onCharacterSubmitted$ emits after submitCharacter', async () => {
         spyOn(component, 'resetPopup');
-        mockCharacterService.submitCharacter.and.callFake(async (player, accessCode, isLobbyCreated, game, closePopup) => {
-            closePopup();
-        });
 
         await component.submitCharacter();
+
+        (mockCharacterService.onCharacterSubmitted$ as BehaviorSubject<void>).next();
 
         expect(component.resetPopup).toHaveBeenCalled();
     });
@@ -177,8 +176,8 @@ describe('CharacterFormComponent', () => {
 
     it('should execute resetPopup when submitCharacter completes', async () => {
         spyOn(component, 'resetPopup');
-        mockCharacterService.submitCharacter.and.callFake(async (player, accessCode, isLobbyCreated, game, closePopup) => {
-            closePopup();
+        mockCharacterService.submitCharacter.and.callFake(async () => {
+            (mockCharacterService.onCharacterSubmitted$ as BehaviorSubject<void>).next();
         });
 
         await component.submitCharacter();
