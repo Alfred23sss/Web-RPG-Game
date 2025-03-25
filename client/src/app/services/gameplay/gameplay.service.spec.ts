@@ -173,8 +173,21 @@ describe('GameplayService', () => {
             expect(playerTile?.player?.name).toBe('Player1');
         });
 
-        it('should return undefined if game data is incomplete', () => {
-            const gameData = {} as GameData;
+        it('should return undefined if game is undefined', () => {
+            const gameData = {
+                game: undefined,
+                clientPlayer: { name: 'Player1' },
+            } as unknown as GameData;
+
+            const playerTile = service.getClientPlayerPosition(gameData);
+
+            expect(playerTile).toBeUndefined();
+        });
+
+        it('should return undefined if client player is not found in grid', () => {
+            const gameData = createMockGameData();
+            gameData.clientPlayer.name = 'UnknownPlayer';
+
             const playerTile = service.getClientPlayerPosition(gameData);
 
             expect(playerTile).toBeUndefined();
@@ -243,6 +256,17 @@ describe('GameplayService', () => {
             service.executeNextAction(gameData);
             expect(gameData.isActionMode).toBe(false);
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Mode action désactivé');
+        });
+    });
+
+    describe('updateAttackResult', () => {
+        it('should update the attackResult in gameData', () => {
+            const gameData = {} as GameData;
+            const mockData = { success: true, attackScore: 5, defenseScore: 3 };
+
+            service.updateAttackResult(gameData, mockData);
+
+            expect(gameData.attackResult).toEqual(mockData);
         });
     });
 });
