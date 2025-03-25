@@ -10,6 +10,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class MessageService {
     private messagesSubject = new BehaviorSubject<string[]>([]);
     private accessCode: string | null = null;
+    private firstUse = true;
 
     constructor(
         private readonly socketClientService: SocketClientService,
@@ -29,16 +30,26 @@ export class MessageService {
     }
 
     updateAccessCode() {
-        this.accessCode = this.accessCodeService.getAccessCode();
+        const updateAccessCode = this.accessCodeService.getAccessCode();
+        console.log('updated accescode', updateAccessCode);
+        if (this.firstUse) {
+            this.firstUse = false;
+            this.accessCode = updateAccessCode;
+            return;
+        }
+        if (updateAccessCode !== this.accessCode) {
+            this.accessCode = updateAccessCode;
+            this.messagesSubject.next([]);
+        }
     }
 
     emitMessage(message: string, author: string) {
-        console.log('emiting after the return');
+        console.log(this.accessCode);
         if (!this.accessCode) {
-            console.log('accessCode undefinded');
+            console.log('exist pas');
             return;
         }
-        console.log('Sending message:', message, 'to room:', this.accessCode, author);
+        console.log('emitting ');
         this.socketClientService.emit(ChatEvents.RoomMessage, { message, author, room: this.accessCode });
     }
 

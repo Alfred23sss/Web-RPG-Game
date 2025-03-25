@@ -26,7 +26,6 @@ export class ChatComponent implements OnDestroy {
 
     sendMessage() {
         if (this.newMessage.trim()) {
-            console.log('emiting from client');
             this.messageService.emitMessage(this.newMessage, this.author);
             this.newMessage = '';
         }
