@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from '@app/services/message/message.service';
-import { Observable } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-chat',
@@ -11,19 +11,28 @@ import { Observable } from 'rxjs';
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
-export class ChatComponent {
+export class ChatComponent implements OnDestroy {
     newMessage: string = '';
-    messages$: Observable<string[]>;
+    messages: string[];
+    private messageSubscription: Subscription;
 
     constructor(private messageService: MessageService) {
-        this.messages$ = this.messageService.messages$;
+        this.messageSubscription = this.messageService.messages$.subscribe((messages) => {
+            this.messages = messages;
+        });
+        this.messageService.updateAccessCode();
     }
 
     sendMessage() {
         if (this.newMessage.trim()) {
-            this.messageService.addMessage(this.newMessage);
             this.messageService.emitMessage(this.newMessage);
             this.newMessage = '';
+        }
+    }
+
+    ngOnDestroy(): void {
+        if (this.messageSubscription) {
+            this.messageSubscription.unsubscribe();
         }
     }
 }

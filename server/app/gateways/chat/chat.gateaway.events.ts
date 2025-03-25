@@ -9,4 +9,5 @@ export enum ChatEvents {
     MassMessage = 'massMessage',
     Hello = 'hello',
     Clock = 'clock',
+    Error = 'error',
 }

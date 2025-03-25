@@ -2,7 +2,7 @@
     <h3>Messages</h3>
 
     <div class="messages-content">
-        @for (message of messages$ | async; track message) {
+        @for (message of messages; track message) {
         <p>{{ message }}</p>
         }
     </div>

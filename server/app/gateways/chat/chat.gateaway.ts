@@ -34,10 +34,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(socket: Socket, message: string) {
-        // Seulement un membre de la salle peut envoyer un message aux autres
-        if (socket.rooms.has(this.room)) {
-            this.server.to(this.room).emit(ChatEvents.RoomMessage, `${socket.id} : ${message}`);
+    roomMessage(socket: Socket, payload: { message: string; room: string }) {
+        const { message, room } = payload;
+
+        if (!room) {
+            socket.emit(ChatEvents.Error, 'Invalid room ID');
+            return;
+        }
+
+        if (socket.rooms.has(room)) {
+            this.server.to(room).emit(ChatEvents.RoomMessage, `${socket.id}: ${message}`);
+        } else {
+            socket.emit(ChatEvents.Error, 'You are not in the room');
         }
     }
 
