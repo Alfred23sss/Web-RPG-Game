@@ -3,31 +3,15 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
-import { DiceType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { BehaviorSubject } from 'rxjs';
 import { PlayerInfoService } from './player-info.service';
+import { MOCK_PLAYER } from '@app/constants/global.constants';
 
 const MAX_HP = 100;
 
 describe('PlayerInfoService', () => {
     let service: PlayerInfoService;
-
-    const MOCK_PLAYER: Player = {
-        name: 'TestPlayer',
-        avatar: 'avatar.png',
-        hp: { current: 6, max: 6 },
-        speed: 4,
-        attack: { value: 4, bonusDice: DiceType.D6 },
-        defense: { value: 4, bonusDice: DiceType.D4 },
-        movementPoints: 10,
-        actionPoints: 10,
-        inventory: [null, null],
-        isAdmin: false,
-        hasAbandoned: false,
-        isActive: false,
-        combatWon: 0,
-    };
 
     beforeEach(() => {
         TestBed.configureTestingModule({});
@@ -93,8 +77,6 @@ describe('PlayerInfoService', () => {
     });
 
     describe('updateHealth()', () => {
-        const MAX_HP = 100;
-
         it('should increase current HP when positive healthVariation is applied', () => {
             const initialHp = 50;
             const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
