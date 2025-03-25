@@ -2,86 +2,40 @@
     <div class="game-info">
         <div class="game-details">
             <h3>Informations de partie</h3>
-            <p>Taille de la carte: {{ game?.size }}x{{ game?.size }}</p>
+            <p>Taille de la carte: {{ gameData.game.size }}x{{ gameData.game.size }}</p>
             <p>Joueurs actuels:</p>
-            @for(player of playerList; track $index){
+            @for(player of gameData.lobby.players; track $index){
             <p
                 class="player-name"
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
                 [class.abandoned]="player.hasAbandoned"
-                [class.active]="currentPlayer && player.name === currentPlayer.name"
+                [class.active]="gameData.currentPlayer && player.name === gameData.currentPlayer.name"
             >
                 {{ player?.name }} <br />
                 Combats gagnés: {{ player.combatWon }}
             </p>
-            } @if(lobby.players){
-            <p>Joueur actif: {{ lobby.players.length }}</p>
+            } @if(gameData.lobby.players){
+            <p>Joueur actif: {{ gameData.lobby.players.length }}</p>
             }
         </div>
-        <div class="player-info">
-            <h3>Informations du joueur</h3>
-            <div class="player-header">
-                <p class="player-name">{{ clientPlayer.name }}</p>
-                <img [src]="clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
-            </div>
-            <div class="player-stats">
-                <div class="health-bar">
-                    <span class="health-label">Points de vie: {{ clientPlayer.hp.current }} / {{ clientPlayer.hp.max }}</span>
-                    <div class="health-bar-outer">
-                        <div class="health-bar-inner" [style.width.%]="(clientPlayer.hp.current / clientPlayer.hp.max) * 100"></div>
-                    </div>
-                </div>
-                <div class="attributes-grid">
-                    <div class="attribute">
-                        <span class="attribute-label">Rapidité: </span>
-                        <span class="attribute-value">{{ clientPlayer.speed }}</span>
-                    </div>
-                    <div class="attribute">
-                        <span class="attribute-label">Attaque: </span>
-                        <span class="attribute-value"> {{ clientPlayer.attack.value }} (Bonus: {{ clientPlayer.attack.bonusDice }}) </span>
-                    </div>
-                    <div class="attribute">
-                        <span class="attribute-label">Défense: </span>
-                        <span class="attribute-value"> {{ clientPlayer.defense.value }} (Bonus: {{ clientPlayer.defense.bonusDice }}) </span>
-                    </div>
-                </div>
-                <div class="dice-type">
-                    <span class="dice-label">Dés assignés: </span>
-                    <span class="dice-value">{{ clientPlayer.attack.bonusDice }}</span>
-                </div>
-                <div class="resources">
-                    <div class="resource">
-                        <span class="resource-label">Mouvements restants: </span>
-                        <span class="resource-value">{{ clientPlayer.movementPoints }}</span>
-                    </div>
-                    <div class="resource">
-                        <span class="resource-label">Actions restantes: </span>
-                        <span class="resource-value">{{ clientPlayer.actionPoints }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="inventory">
-            <h3>Inventaire</h3>
-            <div class="inventory-slot" *ngFor="let slot of [0, 1]">(Vide)</div>
-        </div>
+        <app-player-info></app-player-info>
     </div>
 
-    <div class="game-map-container" [ngClass]="{ 'combat-mode': isInCombatMode }">
-        @if (isActionMode || isInCombatMode) {
+    <div class="game-map-container" [ngClass]="{ 'combat-mode': gameData.isInCombatMode }">
+        @if (gameData.isActionMode || gameData.isInCombatMode) {
         <div class="mode-indicator">
-            {{ isInCombatMode ? 'Mode combat' : 'Faites une action' }}
+            {{ gameData.isInCombatMode ? 'Mode combat' : 'Faites une action' }}
         </div>
         }
         <div class="game-map">
             <app-grid
-                [grid]="game?.grid"
-                [isActionMode]="isActionMode"
-                [availablePath]="availablePath"
-                [quickestPath]="quickestPath"
+                [grid]="gameData.game.grid"
+                [isActionMode]="gameData.isActionMode"
+                [availablePath]="gameData.availablePath"
+                [quickestPath]="gameData.quickestPath"
                 [isEditionMode]="false"
-                [isDebugMode]="isDebugMode"
+                [isDebugMode]="gameData.isDebugMode"
                 (tileHovered)="updateQuickestPath($event)"
                 (tileClicked)="handleTileClick($event)"
                 (doorClicked)="handleDoorClick($event)"
@@ -92,85 +46,41 @@
     </div>
 
     <div class="timer-chat-container">
+        @if (!gameData.isInCombatMode) {
         <div class="timer">
-            @if (currentPlayer && clientPlayer.name){ @if (currentPlayer.name === clientPlayer.name) {
+            @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
             <p>C'est votre tour</p>
-            } @else { @if (currentPlayer) {
-            <p>C'est le tour à {{ currentPlayer.name }}</p>
+            } @else { @if (gameData.currentPlayer) {
+            <p>C'est le tour à {{ gameData.currentPlayer.name }}</p>
             } }
-            <p>Temps restant: {{ turnTimer }} secondes</p>
-            }
+            <p>Temps restant: {{ gameData.turnTimer }} secondes</p>
         </div>
+        }
 
         <div class="action-buttons">
-            @if(currentPlayer && clientPlayer) { @if(currentPlayer.name === clientPlayer.name){ @if(!isInCombatMode){
-            <button class="action-btn end-turn" (click)="endTurn()" [disabled]="hasTurnEnded">Terminer tour</button>
-            <button class="action-btn execute-action" (click)="executeNextAction()" [disabled]="clientPlayer.actionPoints === 0">
-                {{ clientPlayer.actionPoints === 0 ? 'Aucune action restante ' : isActionMode ? 'Canceler action' : 'Exécuter action' }}
+            @if(gameData.currentPlayer.name === gameData.clientPlayer.name){ @if(!gameData.isInCombatMode){
+            <button class="action-btn end-turn" (click)="endTurn()" [disabled]="gameData.hasTurnEnded">Terminer tour</button>
+            <button class="action-btn execute-action" (click)="executeNextAction()" [disabled]="gameData.clientPlayer.actionPoints === 0">
+                {{
+                    gameData.clientPlayer.actionPoints === 0
+                        ? 'Aucune action restante '
+                        : gameData.isActionMode
+                        ? 'Canceler action'
+                        : 'Exécuter action'
+                }}
             </button>
             } }
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
-            }
         </div>
-        @if(isInCombatMode){
-        <div class="dice-buttons">
-            <button
-                class="dice"
-                (click)="attack()"
-                [disabled]="clientPlayer.name !== currentPlayer.name"
-                [ngClass]="{ 'disabled-btn': clientPlayer.name !== currentPlayer.name }"
-            >
-                Attaquer
-            </button>
 
-            <button
-                class="dice"
-                (click)="evade()"
-                [disabled]="escapeAttempts === 0 || clientPlayer.name !== currentPlayer.name"
-                [ngClass]="{ 'disabled-btn': escapeAttempts === 0 || clientPlayer.name !== currentPlayer.name }"
-            >
-                {{ escapeAttempts > 0 ? "S'Évader (" + escapeAttempts + ')' : 'Aucune tentative' }}
-            </button>
+        <div class="message-toggle">
+            <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
+            <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
         </div>
-        <div class="combat-result">
-            @if (attackResult) {
-            <p>Résultat du combat :</p>
-            @if(attackResult.success){
-            <p>
-                ✅ Attaque réussi! <br />
-                Dé Attaque: {{ attackResult.attackScore - 4 }} <br />
-                Dé Défense: {{ attackResult.defenseScore - 4 }} <br />
-                Dégats infligés: {{ attackResult.attackScore - attackResult.defenseScore }}
-            </p>
-            } @else {
-            <p>
-                ❌ Attaque ratée! <br />
-                Dé Attaque: {{ attackResult.attackScore - 4 }} <br />
-                Dé Défense: {{ attackResult.defenseScore - 4 }} <br />
-                Dégats infligés: 0
-            </p>
-            } } @if (evadeResult) { @if (evadeResult.isEscapeSuccessful) {
-            <p>✅ Évasion réussie!</p>
-            } @else {
-            <p>❌ Évasion ratée!</p>
-            } }
-        </div>
+        @if (activeTab === 'chat'){
+        <app-chat></app-chat>
+        } @if(activeTab === 'log'){
+        <app-log-book></app-log-book>
         }
-        <div class="game-messages">
-            <h3>Messages</h3>
-            <div class="message-toggle">
-                <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
-                <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
-            </div>
-            @if (activeTab === 'chat'){
-            <div class="messages-content">
-                <p>Panneau des messages (clavardage).</p>
-            </div>
-            } @if(activeTab === 'log'){
-            <div class="log-content">
-                <p>Panneau du journal de bord (journal de bord).</p>
-            </div>
-            }
-        </div>
     </div>
 </div>

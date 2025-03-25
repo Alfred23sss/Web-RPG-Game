@@ -1,0 +1,52 @@
+<div class="player-info">
+    <h3>Informations du joueur</h3>
+    <div class="player-header">
+        <p class="player-name">{{ gameData.clientPlayer.name }}</p>
+        <img [src]="gameData.clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
+    </div>
+    <div class="player-stats">
+        <div class="health-bar">
+            <span class="health-label">Points de vie: {{ gameData.clientPlayer.hp.current }} / {{ gameData.clientPlayer.hp.max }}</span>
+            <div class="health-bar-outer">
+                <div class="health-bar-inner" [style.width.%]="(gameData.clientPlayer.hp.current / gameData.clientPlayer.hp.max) * 100"></div>
+            </div>
+        </div>
+        <div class="attributes-grid">
+            <div class="attribute">
+                <span class="attribute-label">Rapidité: </span>
+                <span class="attribute-value">{{ gameData.clientPlayer.speed }}</span>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Attaque: </span>
+                <span class="attribute-value"> {{ gameData.clientPlayer.attack.value }} (Bonus: {{ gameData.clientPlayer.attack.bonusDice }}) </span>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Défense: </span>
+                <span class="attribute-value">
+                    {{ gameData.clientPlayer.defense.value }} (Bonus: {{ gameData.clientPlayer.defense.bonusDice }})
+                </span>
+            </div>
+        </div>
+        <div class="dice-type">
+            <span class="dice-label">Dés assignés: </span>
+            <span class="dice-value">{{ gameData.clientPlayer.attack.bonusDice }}</span>
+        </div>
+        <div class="resources">
+            <div class="resource">
+                <span class="resource-label">Mouvements restants: </span>
+                <span class="resource-value">{{ gameData.clientPlayer.movementPoints }}</span>
+            </div>
+            <div class="resource">
+                <span class="resource-label">Actions restantes: </span>
+                <span class="resource-value">{{ gameData.clientPlayer.actionPoints }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="inventory">
+    <h3>Inventaire</h3>
+    @for(slot of [0, 1]; track slot){
+    <div class="inventory-slot">(Vide)</div>
+    <!-- *ngFor="let slot of [0, 1] -->
+    }
+</div>

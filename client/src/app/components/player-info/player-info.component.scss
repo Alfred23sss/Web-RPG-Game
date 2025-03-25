@@ -1,0 +1,82 @@
+body,
+html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.inventory,
+.player-info {
+    background-color: #3e4a65;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.inventory h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #f8f0a1;
+    border-bottom: 1px solid #5c6a85;
+    padding-bottom: 5px;
+}
+
+.inventory-slot {
+    background-color: #1f2a44;
+    border: 1px dashed #f8f0a1;
+    padding: 10px;
+    margin: 5px 0;
+    text-align: center;
+    border-radius: 4px;
+    color: #f8f0a1;
+}
+
+.player-name.active {
+    color: green !important;
+    font-weight: bold;
+}
+
+.player-name {
+    display: inline-block;
+    margin-right: 8px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.player-admin {
+    background-color: #d1af00;
+    color: #2c3b56;
+    border: 1px solid #b38a00;
+    font-weight: 700;
+}
+
+.player-admin::before {
+    content: '👑 ';
+}
+
+.player-regular {
+    background-color: #f8f0a1;
+    color: #2c3b56;
+    border: 1px solid #b38a00;
+}
+
+.player-name:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+.player-avatar {
+    width: 40px;
+}
+
+.inventory-slot {
+    background-color: #1f2a44;
+    border: 1px dashed #f8f0a1;
+    padding: 10px;
+    margin: 5px 0;
+    text-align: center;
+    border-radius: 4px;
+    color: #f8f0a1;
+}

@@ -6,16 +6,47 @@ import {
     GameModeLabel,
     GameModeType,
     GameSize,
+    ImageType,
     ItemDescription,
     ItemName,
     ItemType,
+    TileType,
 } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
+import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 export const BONUS_VALUE = 2;
 
 export const POPUP_DELAY = 2000;
+export const NO_ACTION_POINTS = 0;
+export const DEFAULT_ACTION_POINTS = 1;
+export const DELAY_BEFORE_HOME = 2000;
+export const DELAY_BEFORE_ENDING_GAME = 5000;
+export const DEFAULT_ESCAPE_ATTEMPTS = 2;
+export const DELAY_MESSAGE_AFTER_COMBAT_ENDED = 3000;
+export const EVENTS = [
+    'abandonGame',
+    'gameDeleted',
+    'gameEnded',
+    'transitionStarted',
+    'turnStarted',
+    'timerUpdate',
+    'alertGameStarted',
+    'playerMovement',
+    'gameCombatStarted',
+    'attackResult',
+    'playerUpdate',
+    'playerListUpdate',
+    'doorClickedUpdate',
+    'gameCombatTurnStarted',
+    'gameCombatTimerUpdate',
+    'gridUpdate',
+    'noMoreEscapesLeft',
+    'combatEnded',
+    'adminModeChangedServerSide',
+];
 
 export const INITIAL_VALUES = {
     attributes: {
@@ -183,11 +214,61 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 
 export const ITEMS_TO_UPDATE = new Set(['home', 'question']);
 
+export const MOCK_PLAYER: Player = {
+    name: 'testPlayer',
+    avatar: 'testAvatar',
+    speed: 4,
+    attack: {
+        value: 4,
+        bonusDice: DiceType.D6,
+    },
+    defense: {
+        value: 4,
+        bonusDice: DiceType.D4,
+    },
+    hp: {
+        current: 10,
+        max: 10,
+    },
+    movementPoints: 3,
+    actionPoints: 3,
+    inventory: [null, null],
+    isAdmin: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
+export const MOCK_GRID: Tile[][] = [
+    [
+        { id: 'tile-0-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+        { id: 'tile-0-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+    ],
+    [
+        { id: 'tile-1-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+        { id: 'tile-1-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+    ],
+];
+
+export const MOCK_GAME: Game = {
+    id: 'testGameId',
+    name: 'testGame',
+    size: '10',
+    mode: 'Classic',
+    lastModified: new Date(),
+    isVisible: false,
+    previewImage: '',
+    description: '',
+    grid: MOCK_GRID,
+};
+
+export const MOCK_ACCESS_CODE = 'testCode';
+
 export const DEFAULT_LOBBY: Lobby = {
     isLocked: false,
-    accessCode: '',
+    accessCode: MOCK_ACCESS_CODE,
     players: [],
-    game: null,
+    game: MOCK_GAME,
     maxPlayers: 0,
 };
 
@@ -206,3 +287,5 @@ export const UNINITIALIZED_PLAYER: Player = {
     isActive: false,
     combatWon: 0,
 };
+
+export const MOCK_LOBBY = DEFAULT_LOBBY;

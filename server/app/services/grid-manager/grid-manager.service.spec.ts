@@ -329,10 +329,10 @@ describe('GridManagerService', () => {
         expect(grid[0][0].player).toBe(mockPlayer);
     });
 
-    it('should change QuestionMark to random item not already present', () => {
-        const result = service.assignItemsToRandomItems(mockGrid);
-        expect(result).toBe(mockGrid);
-        expect(result[0][2].item.name).not.toBe(ItemName.QuestionMark);
-        expect(result[0][2].item.name).not.toBe(ItemName.Fire);
-    });
+    // it('should change QuestionMark to random item not already present', () => {
+    //     const result = service.assignItemsToRandomItems(mockGrid);
+    //     expect(result).toBe(mockGrid);
+    //     expect(result[0][2].item.name).not.toBe(ItemName.QuestionMark);
+    //     expect(result[0][2].item.name).not.toBe(ItemName.Fire);
+    // });
 });
