@@ -56,6 +56,8 @@ export enum ItemType {
     RubikGray = './assets/items/rubik-gray.png',
     Swap = './assets/items/swap.png',
     SwapGray = './assets/items/swap-gray.png',
+    Flag = './assets/items/flag.png',
+    FlagGray = './assets/items/flag-gray.png',
     Default = './assets/items/question-mark.png',
 }
 
@@ -184,6 +186,7 @@ export enum ItemDescription {
     Fire = 'inflige des brûlure',
     Rubik = 'bouge les colonnes ou les rangés',
     Swap = 'échange les personnages',
+    Flag = 'Drapeau à capturer',
     Default = 'rien',
 }
 
