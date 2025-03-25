@@ -18,6 +18,7 @@ import { Subscription } from 'rxjs';
 export class WaitingViewComponent implements OnInit, OnDestroy {
     accessCode: string;
     player: Player | null = null;
+    playerName: string;
     lobby: Lobby | null = null;
     isLoading: boolean = true;
     isGameStarting: boolean = false;
@@ -39,6 +40,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.subscriptions.add(
             this.lobbyService.player$.subscribe((player) => {
                 this.player = player;
+                if (player) {
+                    this.playerName = player.name;
+                }
             }),
         );
 

@@ -27,9 +27,10 @@ export class ChatGateway implements OnGatewayInit {
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(socket: Socket, payload: { message: string; room: string }) {
+    roomMessage(socket: Socket, payload: { message: string; author: string; room: string }) {
         this.logger.log('recu dans chat');
-        const { message, room } = payload;
+        const { message, room, author } = payload;
+
         if (!room) {
             socket.emit(ChatEvents.Error, 'Invalid room ID');
             return;
@@ -37,7 +38,8 @@ export class ChatGateway implements OnGatewayInit {
 
         if (this.server.sockets.adapter.rooms.has(room)) {
             this.logger.log('Message received, sending to the room');
-            this.server.to(room).emit(ChatEvents.RoomMessage, `${socket.id}: ${message}`);
+            const formattedMessage = this.formatMessage(author, message);
+            this.server.to(room).emit(ChatEvents.RoomMessage, formattedMessage);
         } else {
             this.logger.log('Message not received, not in the room');
         }
@@ -51,5 +53,11 @@ export class ChatGateway implements OnGatewayInit {
 
     private emitTime() {
         this.server.emit(ChatEvents.Clock, new Date().toLocaleTimeString());
+    }
+
+    private formatMessage(author: string, message: string): string {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('en-US', { hour12: false });
+        return `${author}: ${message} - ${timeString}`;
     }
 }

@@ -122,7 +122,7 @@
             <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
         </div>
         @if (activeTab === 'chat'){
-        <app-chat></app-chat>
+        <app-chat [author]="gameData.clientPlayer.name"></app-chat>
         } @if(activeTab === 'log'){
         <app-log-book></app-log-book>
         }

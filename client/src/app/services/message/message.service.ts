@@ -32,14 +32,14 @@ export class MessageService {
         this.accessCode = this.accessCodeService.getAccessCode();
     }
 
-    emitMessage(message: string) {
+    emitMessage(message: string, author: string) {
         console.log('emiting after the return');
         if (!this.accessCode) {
             console.log('accessCode undefinded');
             return;
         }
-        console.log('Sending message:', message, 'to room:', this.accessCode);
-        this.socketClientService.emit(ChatEvents.RoomMessage, { message, room: this.accessCode });
+        console.log('Sending message:', message, 'to room:', this.accessCode, author);
+        this.socketClientService.emit(ChatEvents.RoomMessage, { message, author, room: this.accessCode });
     }
 
     private addMessage(message: string) {

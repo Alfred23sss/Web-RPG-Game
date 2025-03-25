@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from '@app/services/message/message.service';
 import { Subscription } from 'rxjs';
@@ -12,6 +12,7 @@ import { Subscription } from 'rxjs';
     styleUrl: './chat.component.scss',
 })
 export class ChatComponent implements OnDestroy {
+    @Input() author: string = '';
     newMessage: string = '';
     messages: string[];
     private messageSubscription: Subscription;
@@ -26,7 +27,7 @@ export class ChatComponent implements OnDestroy {
     sendMessage() {
         if (this.newMessage.trim()) {
             console.log('emiting from client');
-            this.messageService.emitMessage(this.newMessage);
+            this.messageService.emitMessage(this.newMessage, this.author);
             this.newMessage = '';
         }
     }
