@@ -505,9 +505,9 @@ describe('CharacterService', () => {
         });
 
         it('should show a message if the name exceeds the maximum length', () => {
-            const longName = 'A'.repeat(maxLength + 1);
+            const longName = 'A'.repeat(maxLength);
             service.checkCharacterNameLength(longName);
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`La longueur maximale du nom est de ${maxLength} caractères`);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MaxNameLength);
         });
 
         it('should handle an empty name without showing a message', () => {

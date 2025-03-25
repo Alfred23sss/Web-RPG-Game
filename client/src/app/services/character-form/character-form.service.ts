@@ -115,17 +115,15 @@ export class CharacterService {
             this.socketClientService.getLobby(accessCode).subscribe({
                 next: (lobby) => {
                     if (lobby.isLocked) {
-                        this.snackbarService
-                            .showConfirmation("La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil")
-                            .subscribe({
-                                next: (result) => {
-                                    if (result) {
-                                        resolve(JoinLobbyResult.RedirectToHome);
-                                    } else {
-                                        resolve(JoinLobbyResult.StayInLobby);
-                                    }
-                                },
-                            });
+                        this.snackbarService.showConfirmation(ErrorMessages.LockedRoom).subscribe({
+                            next: (result) => {
+                                if (result) {
+                                    resolve(JoinLobbyResult.RedirectToHome);
+                                } else {
+                                    resolve(JoinLobbyResult.StayInLobby);
+                                }
+                            },
+                        });
                     } else {
                         this.socketClientService.joinLobby(accessCode, player);
                         resolve(JoinLobbyResult.JoinedLobby);
@@ -146,9 +144,9 @@ export class CharacterService {
     }
 
     checkCharacterNameLength(characterName: string): void {
-        const maxLength = 20;
-        if (characterName.length >= maxLength) {
-            this.snackbarService.showMessage(`La longueur maximale du nom est de ${maxLength} caractères`);
+        const maxLength = 19;
+        if (characterName.length > maxLength) {
+            this.snackbarService.showMessage(ErrorMessages.MaxNameLength);
         }
     }
 

@@ -9,7 +9,7 @@
         <h1 id="character-form_title">Créer un personnage</h1>
     </div>
 
-    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" maxlength="20" />
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="20" />
 
     <div class="character-form_body">
         <div class="character-form_avatars">
@@ -28,12 +28,9 @@
             @for (attribute of attributeKeys; track attribute) {
             <div>
                 <span>
-                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} 
-                    @if (attribute === attributeTypes.Attack && createdPlayer.attack.bonusDice) { 
-                        + {{ createdPlayer.attack.bonusDice }} 
-                    } 
-                    @if (attribute === attributeTypes.Defense && createdPlayer.defense.bonusDice) { 
-                        + {{ createdPlayer.defense.bonusDice }} 
+                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} @if (attribute ===
+                    attributeTypes.Attack && createdPlayer.attack.bonusDice) { + {{ createdPlayer.attack.bonusDice }} } @if (attribute ===
+                    attributeTypes.Defense && createdPlayer.defense.bonusDice) { + {{ createdPlayer.defense.bonusDice }}
                     }
                 </span>
 
