@@ -39,7 +39,7 @@ export class PlayerMovementService {
                 if (this.canMoveToTile(newRemainingPoints, neighborRemainingPoints)) {
                     visited.set(neighbor, newRemainingPoints);
                     reachableTiles.add(neighbor);
-                    queue.push(this.getNeighborRemainingPoints(neighbor, newRemainingPoints));
+                    queue.push(this.getNeighborAndCost(neighbor, newRemainingPoints));
                 }
             }
         }
@@ -74,7 +74,7 @@ export class PlayerMovementService {
                 if (!costs.has(neighbor) || newCost < this.getMoveCost(neighbor)) {
                     costs.set(neighbor, newCost);
                     previous.set(neighbor, currentTile);
-                    queue.push(this.getNeighborRemainingPoints(neighbor, newCost));
+                    queue.push(this.getNeighborAndCost(neighbor, newCost));
                 }
             }
         }
@@ -100,7 +100,7 @@ export class PlayerMovementService {
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
     }
 
-    private getNeighborRemainingPoints(neighbor: Tile, cost: number): { tile: Tile; cost: number } {
+    private getNeighborAndCost(neighbor: Tile, cost: number): { tile: Tile; cost: number } {
         return { tile: neighbor, cost: cost };
     }
 

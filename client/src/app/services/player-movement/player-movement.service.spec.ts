@@ -75,7 +75,7 @@ describe('PlayerMovementService', () => {
                 [createTile('tile-1-0', TileType.Water), createTile('tile-1-1', TileType.Default)],
             ];
             mockGridService.getGrid.and.returnValue(grid);
-            spyOn<any>(service, 'getNeighborRemainingPoints').and.returnValue(undefined);
+            spyOn<any>(service, 'getNeighborAndCost').and.returnValue(undefined);
 
             const result = service.availablePath(grid[0][0], 3, grid);
             expect(result.map((t) => t.id)).toEqual(jasmine.arrayWithExactContents(['tile-0-0', 'tile-0-1', 'tile-1-0']));
@@ -119,7 +119,7 @@ describe('PlayerMovementService', () => {
                 [createTile('tile-1-0', TileType.Ice), createTile('tile-1-1', TileType.Default)],
             ];
             mockGridService.getGrid.and.returnValue(grid);
-            spyOn<any>(service, 'getNeighborRemainingPoints').and.returnValue(undefined);
+            spyOn<any>(service, 'getNeighborAndCost').and.returnValue(undefined);
 
             const path = service.quickestPath(grid[0][0], grid[1][1], grid);
             expect(path?.map((t) => t.id)).toBe(undefined);
