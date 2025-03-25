@@ -3,10 +3,11 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
-import { TileType } from '@app/enums/global.enums';
+import { GameMode, TileType } from '@app/enums/global.enums';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
 import { ItemBarComponent } from './item-bar.component';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
 
 const TEST_ITEM = new Item({
     id: '1',
@@ -40,22 +41,32 @@ describe('ItemBarComponent', () => {
     let fixture: ComponentFixture<ItemBarComponent>;
     let itemDragServiceMock: jasmine.SpyObj<ItemDragService>;
     let itemServiceMock: jasmine.SpyObj<ItemService>;
+    let gameModeServiceMock: jasmine.SpyObj<GameModeService>;
+
     beforeEach(async () => {
         itemDragServiceMock = jasmine.createSpyObj('ItemDragService', ['setSelectedItem', 'getSelectedItem', 'getPreviousTile', 'clearSelection']);
         itemServiceMock = jasmine.createSpyObj('ItemService', ['setItems', 'setItemCount']);
+        gameModeServiceMock = jasmine.createSpyObj('GameModeService', ['getGameMode']);
 
         await TestBed.configureTestingModule({
             imports: [ItemBarComponent, CommonModule, DragDropModule],
             providers: [
                 { provide: ItemDragService, useValue: itemDragServiceMock },
                 { provide: ItemService, useValue: itemServiceMock },
+                { provide: GameModeService, useValue: gameModeServiceMock },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ItemBarComponent);
         component = fixture.componentInstance;
+
+        const mockItems = [
+            new Item({ id: '1', name: 'potion', itemCounter: 1, description: 'Potion' }),
+            new Item({ id: '2', name: 'flag', itemCounter: 1, description: 'Flag' }),
+        ];
+        component.items = mockItems;
+
         fixture.detectChanges();
-        TEST_ITEM.itemCounter = 1;
     });
 
     it('should create the component', () => {
@@ -167,5 +178,21 @@ describe('ItemBarComponent', () => {
 
         component.onContainerDrop(event, TARGET_ITEM);
         expect(itemDragServiceMock.clearSelection).not.toHaveBeenCalled();
+    });
+
+    it('should filter out "flag" item when game mode is Classique', () => {
+        gameModeServiceMock.getGameMode.and.returnValue(GameMode.Classic);
+
+        component.ngOnInit();
+
+        expect(component.items.some((item) => item.name === 'flag')).toBeFalse();
+    });
+
+    it('should not filter out "flag" item when game mode is not Classique', () => {
+        gameModeServiceMock.getGameMode.and.returnValue(GameMode.CTF);
+
+        component.ngOnInit();
+
+        expect(component.items.some((item) => item.name === 'flag')).toBeTrue();
     });
 });
