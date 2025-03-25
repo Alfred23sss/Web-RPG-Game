@@ -67,6 +67,7 @@ describe('ItemBarComponent', () => {
         component.items = mockItems;
 
         fixture.detectChanges();
+        TEST_ITEM.itemCounter = 1;
     });
 
     it('should create the component', () => {
@@ -151,7 +152,7 @@ describe('ItemBarComponent', () => {
         component.onContainerDrop(new DragEvent('drop'), TEST_ITEM);
 
         // eslint-disable-next-line @typescript-eslint/no-magic-numbers
-        expect(TEST_ITEM.itemCounter).toBe(3);
+        expect(TEST_ITEM.itemCounter).toBe(2);
         expect(itemDragServiceMock.clearSelection).toHaveBeenCalled();
     });
 
