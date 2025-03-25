@@ -28,7 +28,7 @@ export class GameSessionService {
     createGameSession(accessCode: string): GameSession {
         const lobby = this.lobbyService.getLobby(accessCode);
         const game = lobby.game;
-        const grid = game.grid;
+        const grid = this.gridManager.assignItemsToRandomItems(game.grid);
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
         const turn = this.turnService.initializeTurn(accessCode);
         turn.beginnerPlayer = turn.orderedPlayers[0];
