@@ -1,15 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { DELAY_BEFORE_EMITTING_TIME, PRIVATE_ROOM_ID, WORD_MIN_LENGTH } from './chat.gateaway.constants';
+import { DELAY_BEFORE_EMITTING_TIME, WORD_MIN_LENGTH } from './chat.gateaway.constants';
 import { ChatEvents } from './chat.gateaway.events';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+export class ChatGateway implements OnGatewayInit {
     @WebSocketServer() private server: Server;
-
-    private readonly room = PRIVATE_ROOM_ID;
 
     constructor(private readonly logger: Logger) {}
 
@@ -28,24 +26,20 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         this.server.emit(ChatEvents.MassMessage, `${socket.id} : ${message}`);
     }
 
-    @SubscribeMessage(ChatEvents.JoinRoom)
-    joinRoom(socket: Socket) {
-        socket.join(this.room);
-    }
-
     @SubscribeMessage(ChatEvents.RoomMessage)
     roomMessage(socket: Socket, payload: { message: string; room: string }) {
+        this.logger.log('recu dans chat');
         const { message, room } = payload;
-
         if (!room) {
             socket.emit(ChatEvents.Error, 'Invalid room ID');
             return;
         }
 
-        if (socket.rooms.has(room)) {
+        if (this.server.sockets.adapter.rooms.has(room)) {
+            this.logger.log('Message received, sending to the room');
             this.server.to(room).emit(ChatEvents.RoomMessage, `${socket.id}: ${message}`);
         } else {
-            socket.emit(ChatEvents.Error, 'You are not in the room');
+            this.logger.log('Message not received, not in the room');
         }
     }
 
@@ -53,16 +47,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
         setInterval(() => {
             this.emitTime();
         }, DELAY_BEFORE_EMITTING_TIME);
-    }
-
-    handleConnection(socket: Socket) {
-        this.logger.log(`Connexion par l'utilisateur avec id : ${socket.id}`);
-        // message initial
-        socket.emit(ChatEvents.Hello, 'Hello World!');
-    }
-
-    handleDisconnect(socket: Socket) {
-        this.logger.log(`Déconnexion par l'utilisateur avec id : ${socket.id}`);
     }
 
     private emitTime() {

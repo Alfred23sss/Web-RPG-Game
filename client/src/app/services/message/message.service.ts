@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ChatEvents } from '@app/enums/global.enums';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject, Observable } from 'rxjs';
 
@@ -15,14 +14,9 @@ export class MessageService {
     constructor(
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
-        private readonly snackbarService: SnackbarService,
     ) {
         this.socketClientService.on(ChatEvents.RoomMessage, (message: string) => {
             this.addMessage(message);
-        });
-
-        this.socketClientService.on(ChatEvents.Error, (message: string) => {
-            this.snackbarService.showMessage(message);
         });
     }
 
@@ -36,15 +30,16 @@ export class MessageService {
 
     updateAccessCode() {
         this.accessCode = this.accessCodeService.getAccessCode();
-        if (this.accessCode) {
-            this.socketClientService.emit(ChatEvents.JoinRoom, { room: this.accessCode });
-        }
     }
 
     emitMessage(message: string) {
-        if (!this.accessCode) return;
+        console.log('emiting after the return');
+        if (!this.accessCode) {
+            console.log('accessCode undefinded');
+            return;
+        }
+        console.log('Sending message:', message, 'to room:', this.accessCode);
         this.socketClientService.emit(ChatEvents.RoomMessage, { message, room: this.accessCode });
-        this.addMessage(`You: ${message}`);
     }
 
     private addMessage(message: string) {
