@@ -14,7 +14,6 @@ import { Subscription } from 'rxjs';
     imports: [CommonModule],
 })
 export class GameCombatComponent implements OnDestroy {
-    // put data as input that then gifted in html when placing popup
     gameData: GameData;
     attacker: Player;
     defender: Player;

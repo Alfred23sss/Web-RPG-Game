@@ -13,9 +13,6 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
 import { Subscription } from 'rxjs';
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!REFACTOR HTML!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 @Component({
     selector: 'app-game-page',
     standalone: true,
