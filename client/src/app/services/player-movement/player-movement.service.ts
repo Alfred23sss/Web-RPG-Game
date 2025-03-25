@@ -100,8 +100,8 @@ export class PlayerMovementService {
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
     }
 
-    private getNeighborAndCost(neighbor: Tile, cost: number): { tile: Tile; cost: number } {
-        return { tile: neighbor, cost: cost };
+    private getNeighborAndCost(neighbor: Tile, points: number): { tile: Tile; cost: number } {
+        return { tile: neighbor, cost: points };
     }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
