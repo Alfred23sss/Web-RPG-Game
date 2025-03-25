@@ -31,7 +31,6 @@ export class MessageService {
 
     updateAccessCode() {
         const updateAccessCode = this.accessCodeService.getAccessCode();
-        console.log('updated accescode', updateAccessCode);
         if (this.firstUse) {
             this.firstUse = false;
             this.accessCode = updateAccessCode;
@@ -44,12 +43,9 @@ export class MessageService {
     }
 
     emitMessage(message: string, author: string) {
-        console.log(this.accessCode);
         if (!this.accessCode) {
-            console.log('exist pas');
             return;
         }
-        console.log('emitting ');
         this.socketClientService.emit(ChatEvents.RoomMessage, { message, author, room: this.accessCode });
     }
 
