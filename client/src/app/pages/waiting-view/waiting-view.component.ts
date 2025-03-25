@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { ChatComponent } from '@app/components/chat/chat.component';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
 import { ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
@@ -12,6 +13,7 @@ import { Subscription } from 'rxjs';
     selector: 'app-waiting-view',
     templateUrl: './waiting-view.component.html',
     styleUrls: ['./waiting-view.component.scss'],
+    imports: [ChatComponent],
 })
 export class WaitingViewComponent implements OnInit, OnDestroy {
     accessCode: string;
