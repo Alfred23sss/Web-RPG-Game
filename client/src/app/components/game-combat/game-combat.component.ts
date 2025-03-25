@@ -1,35 +1,55 @@
-import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { CommonModule } from '@angular/common';
+import { Component, Inject, OnDestroy } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { GameData } from '@app/classes/gameData';
+import { Player } from '@app/interfaces/player';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
+import { GameplayService } from '@app/services/gameplay/gameplay.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-game-combat',
     templateUrl: './game-combat.component.html',
-    styleUrls: ['./game-combat.component.css'],
+    styleUrls: ['./game-combat.component.scss'],
+    imports: [CommonModule],
 })
-export class GameCombatComponent {
-    // put data as input that then gifted in html when placing popup
-    player1 = { name: 'Player 1', avatar: 'assets/avatars/avatar_archer.png' };
-    player2 = { name: 'Player 2', avatar: 'assets/avatars/avatar_ranger.png' };
+export class GameCombatComponent implements OnDestroy {
+    gameData: GameData;
+    attacker: Player;
+    defender: Player;
+    private gameDataSubscription: Subscription;
+    private closePopupSubscription: Subscription;
 
-    player1Message: string = '';
-    player2Message: string = '';
+    constructor(
+        public dialogRef: MatDialogRef<GameCombatComponent>,
+        private readonly gameStateService: GameStateSocketService,
+        private readonly gameplayService: GameplayService,
+        @Inject(MAT_DIALOG_DATA) public data: { gameData: GameData; attacker: Player; defender: Player },
+    ) {
+        this.gameData = data.gameData;
+        this.attacker = data.attacker;
+        this.defender = data.defender;
 
-    constructor(public dialogRef: MatDialogRef<GameCombatComponent>) {}
+        this.gameDataSubscription = this.gameStateService.gameData$.subscribe((gameData) => {
+            this.gameData = gameData;
+        });
 
-    onAttack(player: 'player1' | 'player2') {
-        if (player === 'player1') {
-            this.player1Message = 'Attack successful! Damage dealt: 10';
-        } else {
-            this.player2Message = 'Attack successful! Damage dealt: 10';
-        }
+        this.closePopupSubscription = this.gameStateService.closePopup$.subscribe(() => {
+            this.onClose();
+        });
     }
 
-    onEvade(player: 'player1' | 'player2') {
-        if (player === 'player1') {
-            this.player1Message = 'Evaded successfully!';
-        } else {
-            this.player2Message = 'Evaded successfully!';
-        }
+    ngOnDestroy(): void {
+        if (this.gameDataSubscription) this.gameDataSubscription.unsubscribe();
+        if (this.closePopupSubscription) this.closePopupSubscription.unsubscribe();
+    }
+
+    onAttack() {
+        this.gameplayService.attack(this.gameData);
+    }
+
+    onEvade() {
+        this.gameplayService.evade(this.gameData);
     }
 
     onClose() {

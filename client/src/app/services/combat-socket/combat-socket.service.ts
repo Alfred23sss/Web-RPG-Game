@@ -28,14 +28,16 @@ export class CombatSocketService {
         this.onCombatEnded();
     }
     private onCombatStarted(): void {
-        this.socketClientService.on('combatStarted', () => {
+        this.socketClientService.on('combatStarted', (data: { attacker: Player; defender: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
             this.gameStateService.updateGameData(gameData);
+
             this.dialog.open(GameCombatComponent, {
                 width: '800px',
                 height: '500px',
                 disableClose: true,
+                data: { gameData, attacker: data.attacker, defender: data.defender },
             });
         });
     }
@@ -94,6 +96,7 @@ export class CombatSocketService {
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
             this.gameStateService.updateGameData(gameData);
+            this.gameStateService.updateClosePopup();
         });
     }
 }

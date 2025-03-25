@@ -70,6 +70,8 @@ export enum ItemType {
     RubikGray = './assets/items/rubik-gray.png',
     Swap = './assets/items/swap.png',
     SwapGray = './assets/items/swap-gray.png',
+    Flag = './assets/items/flag.png',
+    FlagGray = './assets/items/flag-gray.png',
     Default = './assets/items/question-mark.png',
 }
 
@@ -177,6 +179,8 @@ export enum ErrorMessages {
     TooManyItemsPlaced = '❌ Trop d’items ont été placés',
     NotEnoughPlayers = '❌ Il n’y a pas assez de joueurs pour commencer la partie',
     LobbyNotLocked = '❌ Le lobby n’est pas verrouillé',
+    LockedRoom = "La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil",
+    MaxNameLength = 'La longueur maximale de 20 caractères est atteinte',
 }
 
 export enum TileType {
@@ -196,6 +200,7 @@ export enum ItemDescription {
     Fire = 'inflige des brûlure',
     Rubik = 'bouge les colonnes ou les rangés',
     Swap = 'échange les personnages',
+    Flag = 'Drapeau à capturer',
     Default = 'rien',
 }
 

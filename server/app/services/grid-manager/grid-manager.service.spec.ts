@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // needed to access actual function
 /* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
+import { ItemName } from '@app/enums/enums';
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
@@ -27,10 +28,12 @@ describe('GridManagerService', () => {
             [
                 { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: null } as Tile,
                 { id: 'tile-0-1', type: TileType.Default, isOpen: true, player: null } as Tile,
+                { id: 'tile-0-2', type: TileType.Default, isOpen: true, player: null, item: { name: ItemName.QuestionMark } as Item } as Tile,
             ],
             [
                 { id: 'tile-1-0', type: TileType.Default, isOpen: true, player: null } as Tile,
                 { id: 'tile-1-1', type: TileType.Wall, isOpen: false, player: null } as Tile,
+                { id: 'tile-1-2', type: TileType.Wall, isOpen: false, player: null, item: { name: ItemName.Fire } as Item } as Tile,
             ],
         ];
 
@@ -325,4 +328,11 @@ describe('GridManagerService', () => {
         expect(result).toBe(grid);
         expect(grid[0][0].player).toBe(mockPlayer);
     });
+
+    // it('should change QuestionMark to random item not already present', () => {
+    //     const result = service.assignItemsToRandomItems(mockGrid);
+    //     expect(result).toBe(mockGrid);
+    //     expect(result[0][2].item.name).not.toBe(ItemName.QuestionMark);
+    //     expect(result[0][2].item.name).not.toBe(ItemName.Fire);
+    // });
 });

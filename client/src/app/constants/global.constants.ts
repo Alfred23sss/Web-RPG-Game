@@ -1,7 +1,22 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
-import { AttributeType, GameMode, GameModeLabel, GameModeType, GameSize, ItemDescription, ItemName, ItemType } from '@app/enums/global.enums';
+import {
+    AttributeType,
+    DiceType,
+    GameMode,
+    GameModeLabel,
+    GameModeType,
+    GameSize,
+    ImageType,
+    ItemDescription,
+    ItemName,
+    ItemType,
+    TileType,
+} from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
+import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 export const BONUS_VALUE = 2;
 
 export const POPUP_DELAY = 2000;
@@ -188,6 +203,14 @@ export const ITEM_BAR_ITEMS = [
         itemCounter: 2,
         description: ItemDescription.QuestionMark,
     },
+    {
+        id: '8',
+        name: ItemName.Flag,
+        imageSrc: ItemType.Flag,
+        imageSrcGrey: ItemType.FlagGray,
+        itemCounter: 1,
+        description: ItemDescription.Flag,
+    },
 ];
 
 export const ITEM_COUNTS: Record<GameSize, number> = {
@@ -199,10 +222,78 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 
 export const ITEMS_TO_UPDATE = new Set(['home', 'question']);
 
+export const MOCK_PLAYER: Player = {
+    name: 'testPlayer',
+    avatar: 'testAvatar',
+    speed: 4,
+    attack: {
+        value: 4,
+        bonusDice: DiceType.D6,
+    },
+    defense: {
+        value: 4,
+        bonusDice: DiceType.D4,
+    },
+    hp: {
+        current: 10,
+        max: 10,
+    },
+    movementPoints: 3,
+    actionPoints: 3,
+    inventory: [null, null],
+    isAdmin: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
+export const MOCK_GRID: Tile[][] = [
+    [
+        { id: 'tile-0-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+        { id: 'tile-0-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+    ],
+    [
+        { id: 'tile-1-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+        { id: 'tile-1-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
+    ],
+];
+
+export const MOCK_GAME: Game = {
+    id: 'testGameId',
+    name: 'testGame',
+    size: '10',
+    mode: 'Classic',
+    lastModified: new Date(),
+    isVisible: false,
+    previewImage: '',
+    description: '',
+    grid: MOCK_GRID,
+};
+
+export const MOCK_ACCESS_CODE = 'testCode';
+
 export const DEFAULT_LOBBY: Lobby = {
     isLocked: false,
-    accessCode: '',
+    accessCode: MOCK_ACCESS_CODE,
     players: [],
-    game: null,
+    game: MOCK_GAME,
     maxPlayers: 0,
 };
+
+export const UNINITIALIZED_PLAYER: Player = {
+    name: '',
+    avatar: '',
+    speed: 4,
+    attack: { value: 4, bonusDice: DiceType.Uninitialized },
+    defense: { value: 4, bonusDice: DiceType.Uninitialized },
+    hp: { current: 4, max: 4 },
+    movementPoints: 4,
+    actionPoints: 1,
+    inventory: [null, null],
+    isAdmin: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
+export const MOCK_LOBBY = DEFAULT_LOBBY;

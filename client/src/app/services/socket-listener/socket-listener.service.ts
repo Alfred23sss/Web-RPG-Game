@@ -27,7 +27,7 @@ export class SocketListenerService {
 
     unsubscribeSocketListeners(): void {
         EVENTS.forEach((event) => {
-            this.socketClientService.socket.off(event);
+            this.socketClientService.off(event);
         });
     }
 }
