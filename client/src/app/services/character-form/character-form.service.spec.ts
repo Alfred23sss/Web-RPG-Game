@@ -191,15 +191,6 @@ describe('CharacterService', () => {
         expect(player.defense.bonusDice).toBe(DiceType.D6);
     });
 
-    it('should call finalizeCharacterSubmission when joinStatus is JoinedLobby', () => {
-        spyOn(service as any, 'finalizeCharacterSubmission');
-        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
-
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
-
-        expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player);
-    });
-
     describe('joinExistingLobby', () => {
         const accessCode = '1234';
 
@@ -401,16 +392,6 @@ describe('CharacterService', () => {
         expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player);
     });
 
-    it('should call finalizeCharacterSubmission when joinStatus is JoinedLobby', () => {
-        spyOn(service as any, 'finalizeCharacterSubmission');
-        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
-
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
-
-        expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player);
-    });
-
     it('should do nothing when joinStatus is StayInLobby', () => {
         spyOn(service as any, 'returnHome');
         spyOn(service as any, 'finalizeCharacterSubmission');
@@ -563,14 +544,6 @@ describe('CharacterService', () => {
         expect(service.isCharacterValid).toHaveBeenCalledWith(player);
         expect(sessionStorage.setItem).toHaveBeenCalledWith('player', JSON.stringify(player));
         expect(service['proceedToWaitingView']).toHaveBeenCalled();
-    });
-
-    it('should do nothing if attribute is neither Vitality nor Speed', () => {
-        spyOn(service, 'assignBonus');
-
-        service.assignBonus(player, AttributeType.Attack);
-
-        expect(service.assignBonus).toHaveBeenCalledWith(player, AttributeType.Attack);
     });
 
     it('should assign bonus when attribute is Vitality', () => {
