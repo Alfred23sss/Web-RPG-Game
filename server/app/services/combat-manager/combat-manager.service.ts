@@ -127,7 +127,6 @@ export class GameCombatService {
         const players = this.gameSessionService.getPlayers(accessCode);
         const attacker = players.find((p) => p.name === attackerId);
         const defender = players.find((p) => p.name === defenderId);
-        console.log('before if');
         if (!attacker || !defender) {
             return;
         }
@@ -136,9 +135,7 @@ export class GameCombatService {
         this.gameSessionService.setCombatState(accessCode, true);
         const orderedFighters = this.combatHelper.determineCombatOrder(attacker, defender);
         const currentPlayerName = orderedFighters[0].name;
-        console.log('after if');
-        console.log('manger att', attacker);
-        console.log('manger def', defender);
+
         this.emitEvent(EventEmit.GameCombatStarted, { accessCode, attacker, defender, currentPlayerName });
         this.startCombatTurn(accessCode, orderedFighters[0]);
     }

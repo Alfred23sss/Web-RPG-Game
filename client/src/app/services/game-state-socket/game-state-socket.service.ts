@@ -3,7 +3,7 @@ import { GameData } from '@app/classes/gameData';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -11,13 +11,21 @@ import { BehaviorSubject, Observable } from 'rxjs';
 export class GameStateSocketService {
     private gameData = new GameData();
     private gameDataSubject = new BehaviorSubject<GameData>(this.gameData);
+    private closePopupSubject = new Subject<void>();
 
+    get closePopup$(): Observable<void> {
+        return this.closePopupSubject.asObservable();
+    }
     get gameData$(): Observable<GameData> {
         return this.gameDataSubject.asObservable();
     }
 
     get gameDataSubjectValue(): GameData {
         return this.gameDataSubject.value;
+    }
+
+    updateClosePopup(): void {
+        this.closePopupSubject.next();
     }
 
     initializeListeners(): void {

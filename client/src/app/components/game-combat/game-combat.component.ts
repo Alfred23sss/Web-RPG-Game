@@ -18,7 +18,8 @@ export class GameCombatComponent implements OnDestroy {
     gameData: GameData;
     attacker: Player;
     defender: Player;
-    private gameDataSubsciption: Subscription;
+    private gameDataSubscription: Subscription;
+    private closePopupSubscription: Subscription;
 
     constructor(
         public dialogRef: MatDialogRef<GameCombatComponent>,
@@ -29,17 +30,19 @@ export class GameCombatComponent implements OnDestroy {
         this.gameData = data.gameData;
         this.attacker = data.attacker;
         this.defender = data.defender;
-        console.log('gamedata comp', this.gameData);
-        console.log('att', this.attacker);
-        console.log('def', this.defender);
 
-        this.gameDataSubsciption = this.gameStateService.gameData$.subscribe((gameData) => {
+        this.gameDataSubscription = this.gameStateService.gameData$.subscribe((gameData) => {
             this.gameData = gameData;
+        });
+
+        this.closePopupSubscription = this.gameStateService.closePopup$.subscribe(() => {
+            this.onClose();
         });
     }
 
     ngOnDestroy(): void {
-        if (this.gameDataSubsciption) this.gameDataSubsciption.unsubscribe();
+        if (this.gameDataSubscription) this.gameDataSubscription.unsubscribe();
+        if (this.closePopupSubscription) this.closePopupSubscription.unsubscribe();
     }
 
     onAttack() {

@@ -32,9 +32,7 @@ export class CombatSocketService {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
             this.gameStateService.updateGameData(gameData);
-            console.log('attacker', data.attacker);
-            console.log('defender', data.defender);
-            console.log('gamedata', gameData);
+
             this.dialog.open(GameCombatComponent, {
                 width: '800px',
                 height: '500px',
@@ -98,6 +96,7 @@ export class CombatSocketService {
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
             this.gameStateService.updateGameData(gameData);
+            this.gameStateService.updateClosePopup();
         });
     }
 }
