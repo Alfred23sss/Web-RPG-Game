@@ -5,6 +5,7 @@ import { Item } from '@app/classes/item';
 import { ITEM_BAR_ITEMS } from '@app/constants/global.constants';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
 
 @Component({
     selector: 'app-item-bar',
@@ -20,12 +21,16 @@ export class ItemBarComponent implements OnInit {
     constructor(
         private itemService: ItemService,
         private itemDragService: ItemDragService,
+        private gameModeService: GameModeService,
     ) {}
 
     ngOnInit(): void {
         this.items = ITEM_BAR_ITEMS.map((data) => Object.assign(new Item(), data));
+        if (this.gameModeService.getGameMode() === 'Classique') {
+            this.items = this.items.filter((item) => item.name !== 'flag');
+        }
 
-        this.itemService.setItems(this.items);
+        this.itemService.setItems(this.items, this.gameModeService.getGameMode());
         this.itemService.setItemCount();
     }
 

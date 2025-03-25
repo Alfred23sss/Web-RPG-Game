@@ -161,6 +161,14 @@ export const ITEM_BAR_ITEMS = [
         itemCounter: 2,
         description: ItemDescription.QuestionMark,
     },
+    {
+        id: '8',
+        name: ItemName.Flag,
+        imageSrc: ItemType.Flag,
+        imageSrcGrey: ItemType.FlagGray,
+        itemCounter: 1,
+        description: ItemDescription.Flag,
+    },
 ];
 
 export const ITEM_COUNTS: Record<GameSize, number> = {

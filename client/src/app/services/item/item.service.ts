@@ -13,8 +13,12 @@ export class ItemService {
 
     constructor(private gameService: GameService) {}
 
-    setItems(items: Item[]): void {
-        this.items = items;
+    setItems(items: Item[], gameMode: string | undefined): void {
+        if (gameMode === 'CTF') {
+            this.items = items;
+        } else {
+            this.items = items.filter((item) => item.name !== 'flag');
+        }
     }
 
     getItems(): Item[] {
