@@ -69,6 +69,18 @@ describe('PlayerMovementService', () => {
             expect(result.map((t) => t.id)).toEqual(jasmine.arrayWithExactContents(['tile-0-0', 'tile-0-1', 'tile-1-0', 'tile-1-1']));
         });
 
+        it('should handle undefined dequeued element gracefully', () => {
+            const grid = [
+                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Ice)],
+                [createTile('tile-1-0', TileType.Water), createTile('tile-1-1', TileType.Default)],
+            ];
+            mockGridService.getGrid.and.returnValue(grid);
+            spyOn<any>(service, 'getNeighborAndCost').and.returnValue(undefined);
+
+            const result = service.availablePath(grid[0][0], 3, grid);
+            expect(result.map((t) => t.id)).toEqual(jasmine.arrayWithExactContents(['tile-0-0', 'tile-0-1', 'tile-1-0']));
+        });
+
         it('should handle invalid tile ID in getNeighbors', () => {
             const grid = [[createTile('invalid_id', TileType.Default), createTile('tile-0-1', TileType.Default)]];
             mockGridService.getGrid.and.returnValue(grid);
@@ -99,6 +111,18 @@ describe('PlayerMovementService', () => {
             tests.forEach(({ start, target }) => {
                 expect(service.quickestPath(start as Tile, target as Tile, grid)).toBeUndefined();
             });
+        });
+
+        it('should handle undefined dequeued element gracefully', () => {
+            const grid = [
+                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Water)],
+                [createTile('tile-1-0', TileType.Ice), createTile('tile-1-1', TileType.Default)],
+            ];
+            mockGridService.getGrid.and.returnValue(grid);
+            spyOn<any>(service, 'getNeighborAndCost').and.returnValue(undefined);
+
+            const path = service.quickestPath(grid[0][0], grid[1][1], grid);
+            expect(path?.map((t) => t.id)).toBe(undefined);
         });
 
         it('should find shortest path considering movement costs', () => {
