@@ -94,10 +94,23 @@ export class GridManagerService {
     }
 
     assignItemsToRandomItems(grid: Tile[][]): Tile[][] {
+        const existingItems = new Set<string>();
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.item?.name && tile.item.name !== ItemName.QuestionMark && tile.item.name !== ItemName.Home) {
+                    existingItems.add(tile.item.name);
+                }
+            }
+        }
+
+        let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
+
         for (const row of grid) {
             for (const tile of row) {
                 if (tile.item?.name === ItemName.QuestionMark) {
-                    tile.item = RANDOM_ITEMS[Math.floor(Math.random() * RANDOM_ITEMS.length)];
+                    const randomItem = remainingItems[Math.floor(Math.random() * RANDOM_ITEMS.length)];
+                    tile.item = randomItem;
+                    remainingItems = remainingItems.filter((item) => item.name !== randomItem.name);
                 }
             }
         }
