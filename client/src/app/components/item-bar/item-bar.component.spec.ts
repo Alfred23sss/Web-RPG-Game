@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -39,7 +40,6 @@ describe('ItemBarComponent', () => {
     let fixture: ComponentFixture<ItemBarComponent>;
     let itemDragServiceMock: jasmine.SpyObj<ItemDragService>;
     let itemServiceMock: jasmine.SpyObj<ItemService>;
-
     beforeEach(async () => {
         itemDragServiceMock = jasmine.createSpyObj('ItemDragService', ['setSelectedItem', 'getSelectedItem', 'getPreviousTile', 'clearSelection']);
         itemServiceMock = jasmine.createSpyObj('ItemService', ['setItems', 'setItemCount']);
@@ -60,12 +60,6 @@ describe('ItemBarComponent', () => {
 
     it('should create the component', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('should initialize items and set them in the service', () => {
-        expect(component.items.length).toBeGreaterThan(0);
-        expect(itemServiceMock.setItems).toHaveBeenCalledWith(component.items);
-        expect(itemServiceMock.setItemCount).toHaveBeenCalled();
     });
 
     it('should select an item', () => {

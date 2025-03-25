@@ -61,7 +61,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         this.gridService.setGrid(this.game.grid);
         this.updateGame();
         if (this.itemBar) {
-            const restoredItems = this.makeDeepCopy(this.originalItemBar);
+            const restoredItems = this.makeDeepCopy(JSON.parse(this.originalItemBar));
             const gameMode = this.gameService.getCurrentGame()?.mode;
             this.itemService.setItems(restoredItems, gameMode);
             this.itemBar.items = this.itemService.getItems();
