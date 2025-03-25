@@ -1,3 +1,5 @@
+import { RANDOM_ITEMS } from '@app/constants/constants';
+import { ItemName } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
 import { Injectable, Logger } from '@nestjs/common';
@@ -89,6 +91,18 @@ export class GridManagerService {
         });
 
         return [players, grid];
+    }
+
+    assignItemsToRandomItems(grid: Tile[][]): Tile[][] {
+        for (const row of grid) {
+            for (const tile of row) {
+                if (tile.item?.name === ItemName.QuestionMark) {
+                    tile.item = RANDOM_ITEMS[Math.floor(Math.random() * RANDOM_ITEMS.length)];
+                }
+            }
+        }
+
+        return grid;
     }
 
     teleportPlayer(grid: Tile[][], player: Player, targetTile: Tile): Tile[][] {
