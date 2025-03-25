@@ -4,6 +4,8 @@ import { GameData } from '@app/classes/gameData';
 import { skip, filter } from 'rxjs/operators';
 import { MOCK_GAME, MOCK_LOBBY, MOCK_PLAYER } from '@app/constants/global.constants';
 
+const GAME_DATA = new GameData();
+
 describe('GameStateSocketService', () => {
     let service: GameStateSocketService;
     let sessionStorageSpy: jasmine.Spy;
@@ -21,15 +23,13 @@ describe('GameStateSocketService', () => {
     });
 
     it('should update game data and notify subscribers', () => {
-        const newData = new GameData();
-        newData.clientPlayer = MOCK_PLAYER;
         let receivedData: GameData | undefined;
 
         service.gameData$.subscribe((data) => (receivedData = data));
-        service.updateGameData(newData);
+        service.updateGameData(GAME_DATA);
 
-        expect(service.gameDataSubjectValue).toEqual(newData);
-        expect(receivedData).toEqual(newData);
+        expect(service.gameDataSubjectValue).toEqual(GAME_DATA);
+        expect(receivedData).toEqual(GAME_DATA);
     });
 
     it('should load complete data from sessionStorage', () => {
@@ -55,11 +55,10 @@ describe('GameStateSocketService', () => {
     });
 
     it('should handle missing sessionStorage items by keeping existing values', () => {
-        const initialData = new GameData();
-        initialData.lobby = MOCK_LOBBY;
-        initialData.clientPlayer = MOCK_PLAYER;
-        initialData.game = MOCK_GAME;
-        service.updateGameData(initialData);
+        GAME_DATA.lobby = MOCK_LOBBY;
+        GAME_DATA.clientPlayer = MOCK_PLAYER;
+        GAME_DATA.game = MOCK_GAME;
+        service.updateGameData(GAME_DATA);
 
         sessionStorageSpy.and.returnValue(null);
 

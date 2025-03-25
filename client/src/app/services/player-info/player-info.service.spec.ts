@@ -8,7 +8,7 @@ import { BehaviorSubject } from 'rxjs';
 import { PlayerInfoService } from './player-info.service';
 import { MOCK_PLAYER } from '@app/constants/global.constants';
 
-const MAX_HP = 100;
+const MAX_HP_TEST = 100;
 
 describe('PlayerInfoService', () => {
     let service: PlayerInfoService;
@@ -26,7 +26,7 @@ describe('PlayerInfoService', () => {
     it('should initialize player state with correct values', () => {
         const initialPlayer: Player = {
             ...MOCK_PLAYER,
-            hp: { current: MAX_HP, max: MAX_HP },
+            hp: { current: MAX_HP_TEST, max: MAX_HP_TEST },
         };
 
         service.initializePlayer(initialPlayer);
@@ -66,20 +66,20 @@ describe('PlayerInfoService', () => {
     it('should restore health to max when restoreHealth is called', () => {
         const injuredPlayer: Player = {
             ...MOCK_PLAYER,
-            hp: { current: 20, max: MAX_HP },
+            hp: { current: 20, max: MAX_HP_TEST },
         };
 
         service.initializePlayer(injuredPlayer);
         service.restoreHealth();
 
         const player = (service as any).playerState.value as Player;
-        expect(player.hp.current).toEqual(MAX_HP);
+        expect(player.hp.current).toEqual(MAX_HP_TEST);
     });
 
     describe('updateHealth()', () => {
         it('should increase current HP when positive healthVariation is applied', () => {
             const initialHp = 50;
-            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(30);
@@ -89,7 +89,7 @@ describe('PlayerInfoService', () => {
 
         it('should decrease current HP when negative healthVariation is applied', () => {
             const initialHp = 70;
-            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(-20);
@@ -99,17 +99,17 @@ describe('PlayerInfoService', () => {
 
         it('should clamp to max HP when health increase exceeds maximum', () => {
             const initialHp = 95;
-            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(10);
 
-            expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP);
+            expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP_TEST);
         });
 
         it('should clamp to 0 when health decrease exceeds current HP', () => {
             const initialHp = 25;
-            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(-30);
@@ -119,17 +119,17 @@ describe('PlayerInfoService', () => {
 
         it('should handle exact maximum boundary', () => {
             const initialHp = 90;
-            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(10);
 
-            expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP);
+            expect(service.getPlayerSnapshot().hp.current).toBe(MAX_HP_TEST);
         });
 
         it('should handle exact zero boundary', () => {
             const initialHp = 30;
-            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: initialHp, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(-30);
@@ -138,18 +138,18 @@ describe('PlayerInfoService', () => {
         });
 
         it('should not modify max HP value', () => {
-            const player = { ...MOCK_PLAYER, hp: { current: 50, max: MAX_HP } };
+            const player = { ...MOCK_PLAYER, hp: { current: 50, max: MAX_HP_TEST } };
             service.initializePlayer(player);
 
             service.updateHealth(20);
 
-            expect(service.getPlayerSnapshot().hp.max).toBe(MAX_HP);
+            expect(service.getPlayerSnapshot().hp.max).toBe(MAX_HP_TEST);
         });
 
         it('should preserve other player properties', () => {
             const player = {
                 ...MOCK_PLAYER,
-                hp: { current: 50, max: MAX_HP },
+                hp: { current: 50, max: MAX_HP_TEST },
                 inventory: [mockItem, null],
             } as Player;
             service.initializePlayer(player);
