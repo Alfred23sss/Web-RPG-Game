@@ -104,6 +104,8 @@ export class GameplayService {
                     accessCode: gameData.lobby.accessCode,
                     isDebugMode: gameData.isDebugMode,
                 });
+                console.log('aatackerNAme', currentTile.player.name);
+                console.log('defenderName', targetTile.player.name);
                 return;
             }
         }

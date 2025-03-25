@@ -28,14 +28,18 @@ export class CombatSocketService {
         this.onCombatEnded();
     }
     private onCombatStarted(): void {
-        this.socketClientService.on('combatStarted', () => {
+        this.socketClientService.on('combatStarted', (data: { attacker: Player; defender: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
             this.gameStateService.updateGameData(gameData);
+            console.log('attacker', data.attacker);
+            console.log('defender', data.defender);
+            console.log('gamedata', gameData);
             this.dialog.open(GameCombatComponent, {
                 width: '800px',
                 height: '500px',
                 disableClose: true,
+                data: { gameData, attacker: data.attacker, defender: data.defender },
             });
         });
     }

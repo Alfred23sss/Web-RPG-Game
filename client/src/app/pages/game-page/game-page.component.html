@@ -47,18 +47,16 @@
 
     <div class="timer-chat-container">
         <div class="timer">
-            @if (gameData.currentPlayer && gameData.clientPlayer.name){ @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
+            @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
             <p>C'est votre tour</p>
             } @else { @if (gameData.currentPlayer) {
             <p>C'est le tour à {{ gameData.currentPlayer.name }}</p>
             } }
             <p>Temps restant: {{ gameData.turnTimer }} secondes</p>
-            }
         </div>
 
         <div class="action-buttons">
-            @if(gameData.currentPlayer && gameData.clientPlayer) { @if(gameData.currentPlayer.name === gameData.clientPlayer.name){
-            @if(!gameData.isInCombatMode){
+            @if(gameData.currentPlayer.name === gameData.clientPlayer.name){ @if(!gameData.isInCombatMode){
             <button class="action-btn end-turn" (click)="endTurn()" [disabled]="gameData.hasTurnEnded">Terminer tour</button>
             <button class="action-btn execute-action" (click)="executeNextAction()" [disabled]="gameData.clientPlayer.actionPoints === 0">
                 {{
@@ -71,9 +69,8 @@
             </button>
             } }
             <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
-            }
         </div>
-        @if(gameData.isInCombatMode){
+        <!-- @if(gameData.isInCombatMode){
         <div class="dice-buttons">
             <button
                 class="dice"
@@ -106,8 +103,8 @@
             } @else {
             <p>
                 ❌ Attaque ratée! <br />
-                Dé Attaque: {{ gameData.attackResult.attackScore - 4 }} <br />
-                Dé Défense: {{ gameData.attackResult.defenseScore - 4 }} <br />
+                Dé Attaque: {{ gameData.attackResult.attackScore - 4 }} <br /> -->
+        <!-- Dé Défense: {{ gameData.attackResult.defenseScore - 4 }} <br />
                 Dégats infligés: 0
             </p>
             } } @if (gameData.evadeResult) { @if (gameData.evadeResult.isEscapeSuccessful) {
@@ -116,7 +113,7 @@
             <p>❌ Évasion ratée!</p>
             } }
         </div>
-        }
+        } -->
         <div class="message-toggle">
             <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
             <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>

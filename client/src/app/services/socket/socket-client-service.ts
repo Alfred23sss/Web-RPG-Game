@@ -7,7 +7,6 @@ import { AccessCodesCommunicationService } from '@app/services/access-codes-comm
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
@@ -23,10 +22,14 @@ export class SocketClientService {
     }
 
     connect() {
-        this.socket = io(environment.socketUrl, {
+        this.socket = io('ws://localhost:3000', {
             transports: ['websocket'],
             upgrade: false,
         });
+    }
+
+    off(event: string) {
+        this.socket.off(event);
     }
 
     async createLobby(game: Game, player: Player): Promise<string> {
