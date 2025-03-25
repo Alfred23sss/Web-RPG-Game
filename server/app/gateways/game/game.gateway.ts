@@ -90,6 +90,7 @@ export class GameGateway {
             this.logger.error('Error updating player position', err);
         }
     }
+
     @SubscribeMessage(GameEvents.DoorUpdate)
     handleDoorUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile }) {
         this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile);
@@ -226,12 +227,14 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.GameCombatStarted)
-    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; firstFighter: string }) {
+    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; currentPlayerName: string }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatStarted', {
-            firstFighter: payload.firstFighter,
+            // firstFighter: payload.firstFighter, // we never use firstFighter client side ???
+            attacker: payload.attacker,
+            defender: payload.defender,
         });
     }
 

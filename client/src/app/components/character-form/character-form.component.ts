@@ -25,12 +25,12 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     isLobbyCreated: boolean;
     currentAccessCode: string;
     game?: Game;
-    createdPlayer: Player = {} as Player; //
+    createdPlayer: Player = {} as Player;
     avatarTypes: string[] = Object.values(AvatarType);
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
-    unavailableAvatars: string[] = []; //
+    unavailableAvatars: string[] = [];
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
@@ -55,6 +55,11 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
             this.characterService.unavailableAvatars$.subscribe((avatars) => {
                 this.unavailableAvatars = avatars;
                 this.cdr.detectChanges();
+            }),
+        );
+        this.subscriptions.add(
+            this.characterService.onCharacterSubmitted$.subscribe(() => {
+                this.resetPopup();
             }),
         );
     }
@@ -88,9 +93,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
             this.returnHome();
             return;
         }
-        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game, () =>
-            this.resetPopup(),
-        );
+        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game);
     }
 
     closePopup(): void {

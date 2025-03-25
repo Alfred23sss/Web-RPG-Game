@@ -135,6 +135,7 @@ export class GameCombatService {
         this.gameSessionService.setCombatState(accessCode, true);
         const orderedFighters = this.combatHelper.determineCombatOrder(attacker, defender);
         const currentPlayerName = orderedFighters[0].name;
+
         this.emitEvent(EventEmit.GameCombatStarted, { accessCode, attacker, defender, currentPlayerName });
         this.startCombatTurn(accessCode, orderedFighters[0]);
     }

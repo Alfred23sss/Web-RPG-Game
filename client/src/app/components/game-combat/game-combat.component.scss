@@ -1,0 +1,212 @@
+:root {
+    --blue: #1e90ff;
+    --dark-blue: #0c4da2;
+    --dark-red: #8b0000;
+    --light-red: #ff3333;
+    --light-gray: #f0f0f0;
+    --dark-gray: #333333;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1;
+}
+
+.combat-container {
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    border: 3px solid var(--blue);
+    border-radius: 15px;
+    padding: 15px;
+    width: 90%;
+    max-width: 700px;
+    min-height: 400px;
+    box-shadow: 0 0 20px rgba(30, 144, 255, 0.5);
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.duel-title {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.duel-title h1 {
+    font-size: 42px;
+    font-weight: bold;
+    color: var(--dark-red);
+    text-shadow: 0 0 10px rgba(139, 0, 0, 0.7);
+    margin: 0;
+    letter-spacing: 5px;
+    border-bottom: 2px solid var(--blue);
+    padding-bottom: 8px;
+}
+
+.timer {
+    background-color: rgba(12, 77, 162, 0.3);
+    padding: 8px 15px;
+    border-radius: 10px;
+    margin: 8px 0;
+    text-align: center;
+    font-weight: bold;
+    border: 1px solid var(--blue);
+    width: 80%;
+    font-size: 14px;
+}
+
+.timer p {
+    margin: 3px 0;
+}
+
+.players-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 15px 0;
+}
+
+.player {
+    text-align: center;
+    width: 40%;
+}
+
+.player h2 {
+    color: var(--blue);
+    margin-bottom: 8px;
+    font-size: 20px;
+    text-shadow: 0 0 5px rgba(30, 144, 255, 0.5);
+}
+
+.avatar-container {
+    width: 80px; /* Smaller avatars */
+    height: 80px;
+    margin: 0 auto;
+    border: 3px solid var(--blue);
+    border-radius: 50%;
+    overflow: hidden;
+    background-color: #333;
+    box-shadow: 0 0 15px rgba(30, 144, 255, 0.7);
+}
+
+.avatar-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vs-container {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--dark-red);
+    background-color: rgba(139, 0, 0, 0.2);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid var(--dark-red);
+    box-shadow: 0 0 10px rgba(139, 0, 0, 0.6);
+}
+
+.combat-result {
+    background-color: rgba(12, 77, 162, 0.2);
+    border: 2px solid var(--blue);
+    border-radius: 10px;
+    padding: 12px;
+    margin: 15px 0;
+    width: 90%;
+    min-height: 80px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.combat-result p {
+    margin: 3px 0;
+}
+
+.actions-container {
+    display: flex;
+    justify-content: space-around;
+    width: 90%;
+    margin: 15px 0;
+    gap: 10px;
+}
+
+.dice {
+    background: linear-gradient(to bottom, var(--blue), var(--dark-blue));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    flex: 1;
+    min-width: 120px;
+}
+
+.dice:hover:not(.disabled-btn) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    background: linear-gradient(to bottom, var(--blue), #083b7e);
+}
+
+.dice:active:not(.disabled-btn) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dice:nth-child(2) {
+    background: linear-gradient(to bottom, var(--dark-red), #5c0000);
+}
+
+.dice:nth-child(2):hover:not(.disabled-btn) {
+    background: linear-gradient(to bottom, var(--dark-red), #4a0000);
+}
+
+.disabled-btn {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #555 !important;
+    color: #999 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    border: 1px solid #777 !important;
+}
+
+.success {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.failure {
+    color: var(--light-red);
+    font-weight: bold;
+}

@@ -526,7 +526,7 @@ describe('GameGateway', () => {
                 accessCode: ACCESS_CODE,
                 attacker: MOCK_PLAYER,
                 defender: MOCK_PLAYER,
-                firstFighter: ATTACKER_NAME,
+                currentPlayerName: ATTACKER_NAME,
             };
 
             const mockAttackerSocketId = 'socket_attacker';
@@ -540,7 +540,8 @@ describe('GameGateway', () => {
             expect(serverMock.to).toHaveBeenCalledWith([mockAttackerSocketId, mockDefenderSocketId]);
 
             expect(serverMock.emit).toHaveBeenCalledWith('combatStarted', {
-                firstFighter: payload.firstFighter,
+                attacker: payload.attacker,
+                defender: payload.defender,
             });
         });
     });

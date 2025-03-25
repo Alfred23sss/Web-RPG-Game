@@ -28,6 +28,10 @@ export class SocketClientService {
         });
     }
 
+    off(event: string) {
+        this.socket.off(event);
+    }
+
     async createLobby(game: Game, player: Player): Promise<string> {
         return new Promise((resolve, reject) => {
             this.socket.emit('createLobby', { game });

@@ -1,0 +1,84 @@
+<div class="overlay"></div>
+<div class="combat-container">
+    <!-- Title Row -->
+    <div class="duel-title">
+        <h1>DUEL</h1>
+    </div>
+
+    <div class="timer">
+        @if (gameData.currentPlayer && gameData.clientPlayer.name){ @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
+        <p>C'est votre tour</p>
+        } @else { @if (gameData.currentPlayer) {
+        <p>C'est le tour à {{ gameData.currentPlayer.name }}</p>
+        } }
+        <p>Temps restant: {{ gameData.turnTimer }} secondes</p>
+        }
+    </div>
+
+    <!-- Players Row -->
+    <!-- SPECIFIER AU DESSUS DU NOM ATTACKER ET DEFENDER A CHAQUE TOUR -->
+    <div class="players-container">
+        <div class="player">
+            <h2>{{ attacker.name }}</h2>
+            <div class="avatar-container">
+                <img [src]="attacker.avatar" alt="Player 1 Avatar" class="avatar-image" />
+            </div>
+        </div>
+
+        <div class="vs-container">
+            <span>VS</span>
+        </div>
+
+        <div class="player">
+            <h2>{{ defender.name }}</h2>
+            <div class="avatar-container">
+                <img [src]="defender.avatar" alt="Player 2 Avatar" class="avatar-image" />
+            </div>
+        </div>
+    </div>
+
+    <div class="combat-result">
+        @if (gameData.attackResult) {
+        <p>Résultat du combat :</p>
+        @if(gameData.attackResult.success){
+        <p>
+            ✅ Attaque réussi! <br />
+            Dé Attaque: {{ gameData.attackResult.attackScore - 4 }} <br />
+            Dé Défense: {{ gameData.attackResult.defenseScore - 4 }} <br />
+            Dégats infligés: {{ gameData.attackResult.attackScore - gameData.attackResult.defenseScore }}
+        </p>
+        } @else {
+        <p>
+            ❌ Attaque ratée! <br />
+            Dé Attaque: {{ gameData.attackResult.attackScore - 4 }} <br />
+            Dé Défense: {{ gameData.attackResult.defenseScore - 4 }} <br />
+            Dégats infligés: 0
+        </p>
+        } } @if (gameData.evadeResult) { @if (gameData.evadeResult.isEscapeSuccessful) {
+        <p>✅ Évasion réussie!</p>
+        } @else {
+        <p>❌ Évasion ratée!</p>
+        } }
+    </div>
+
+    <!-- Buttons Row -->
+    <div class="actions-container">
+        <button
+            class="dice"
+            (click)="onAttack()"
+            [disabled]="gameData.clientPlayer.name !== gameData.currentPlayer.name"
+            [ngClass]="{ 'disabled-btn': gameData.clientPlayer.name !== gameData.currentPlayer.name }"
+        >
+            Attaquer
+        </button>
+
+        <button
+            class="dice"
+            (click)="onEvade()"
+            [disabled]="gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name"
+            [ngClass]="{ 'disabled-btn': gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name }"
+        >
+            {{ gameData.escapeAttempts > 0 ? "S'Évader (" + gameData.escapeAttempts + ')' : 'Aucune tentative' }}
+        </button>
+    </div>
+</div>
