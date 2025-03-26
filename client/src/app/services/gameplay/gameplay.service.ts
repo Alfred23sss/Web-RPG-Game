@@ -73,6 +73,7 @@ export class GameplayService {
                 this.endTurn(gameData);
             }
         } else if (gameData.clientPlayer.actionPoints === 1 && gameData.clientPlayer.movementPoints === 0) {
+            // test here
             if (!hasIce && !hasActionAvailable) {
                 this.endTurn(gameData);
             }
@@ -107,7 +108,7 @@ export class GameplayService {
                 return;
             }
         }
-    }
+    } //to here
 
     handleTileClick(gameData: GameData, targetTile: Tile): void {
         if (gameData.isActionMode || gameData.isCurrentlyMoving) return;

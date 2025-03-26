@@ -170,7 +170,7 @@ describe('GameplayService', () => {
 
             expect(playerTile).toBeTruthy();
             expect(playerTile?.id).toBe('tile1');
-            expect(playerTile?.player?.name).toBe('Player1');
+            expect(playerTile?.player?.name).toBe('TestPlayer');
         });
 
         it('should return undefined if game is undefined', () => {
@@ -214,7 +214,6 @@ describe('GameplayService', () => {
         it('should send player movement update when not in action mode', () => {
             const gameData = createMockGameData();
 
-            // Ensure grid is defined and typed correctly
             const grid = gameData.game?.grid ?? [];
             const currentTile = grid[0][0] as Tile;
             const targetTile = grid[0][1] as Tile;
@@ -226,6 +225,7 @@ describe('GameplayService', () => {
 
         it('should not send movement update when game or grid is undefined', () => {
             const gameData: GameData = createMockGameData();
+            gameData.game.grid = undefined;
 
             service.handleTileClick(gameData, {} as Tile);
 
@@ -268,5 +268,32 @@ describe('GameplayService', () => {
 
             expect(gameData.attackResult).toEqual(mockData);
         });
+    });
+
+    it('should call playerMovementService.availablePath with correct parameters', () => {
+        const gameData = createMockGameData();
+        spyOn(service, 'getClientPlayerPosition');
+
+        service.updateAvailablePath(gameData);
+
+        expect(mockPlayerMovementService.availablePath).toHaveBeenCalled();
+    });
+
+    it('should set availablePath to an empty array when the current player is not the client', () => {
+        const gameData = createMockGameData({ currentPlayer: createMockPlayer({ name: 'OtherPlayer' }) });
+
+        service.updateAvailablePath(gameData);
+
+        expect(gameData.availablePath).toEqual([]);
+        expect(mockPlayerMovementService.availablePath).not.toHaveBeenCalled();
+    });
+
+    it('should set availablePath to an empty array when game or grid is undefined', () => {
+        const gameData = createMockGameData({ game: undefined });
+
+        service.updateAvailablePath(gameData);
+
+        expect(gameData.availablePath).toEqual([]);
+        expect(mockPlayerMovementService.availablePath).not.toHaveBeenCalled();
     });
 });
