@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { GameStateSocketService } from './game-state-socket.service';
 import { GameData } from '@app/classes/gameData';
-import { skip, filter } from 'rxjs/operators';
 import { MOCK_GAME, MOCK_LOBBY, MOCK_PLAYER } from '@app/constants/global.constants';
+import { filter, skip } from 'rxjs/operators';
+import { GameStateSocketService } from './game-state-socket.service';
 
 const GAME_DATA = new GameData();
 
@@ -95,5 +95,51 @@ describe('GameStateSocketService', () => {
             });
 
         service.updateGameData(testData);
+    });
+
+    describe('closePopup$', () => {
+        it('should return an observable for close popup events', (done) => {
+            service.closePopup$.subscribe(() => {
+                expect(true).toBeTrue();
+                done();
+            });
+
+            service.updateClosePopup();
+        });
+
+        it('should emit when updateClosePopup is called', () => {
+            let emissionCount = 0;
+
+            service.closePopup$.subscribe(() => {
+                emissionCount++;
+            });
+
+            expect(emissionCount).toBe(0);
+
+            service.updateClosePopup();
+            expect(emissionCount).toBe(1);
+
+            service.updateClosePopup();
+            expect(emissionCount).toBe(2);
+        });
+    });
+
+    describe('updateClosePopup', () => {
+        it('should notify all closePopup$ subscribers', () => {
+            const spy1 = jasmine.createSpy('subscriber1');
+            const spy2 = jasmine.createSpy('subscriber2');
+
+            service.closePopup$.subscribe(spy1);
+            service.closePopup$.subscribe(spy2);
+
+            service.updateClosePopup();
+
+            expect(spy1).toHaveBeenCalled();
+            expect(spy2).toHaveBeenCalled();
+        });
+
+        it('should not throw when there are no subscribers', () => {
+            expect(() => service.updateClosePopup()).not.toThrow();
+        });
     });
 });

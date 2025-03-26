@@ -32,6 +32,10 @@ class MockSocket {
         }
         this.events[event].push(callback);
     }
+
+    off(event: string) {
+        delete this.events[event];
+    }
     once(event: string, callback: (data?: any) => void) {
         this.on(event, callback);
     }
@@ -242,6 +246,46 @@ describe('SocketClientService', () => {
 
             expect(mockPlayerMovementService.quickestPath).toHaveBeenCalledWith(currentTile, targetTile, grid);
             expect(mockSocket.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('off', () => {
+        it('should remove all listeners for a specific event', () => {
+            const callback1 = jasmine.createSpy('callback1');
+            const callback2 = jasmine.createSpy('callback2');
+
+            service.on('testEvent', callback1);
+            service.on('testEvent', callback2);
+
+            mockSocket.trigger('testEvent', { data: 'initial' });
+            expect(callback1).toHaveBeenCalledWith({ data: 'initial' });
+            expect(callback2).toHaveBeenCalledWith({ data: 'initial' });
+
+            service.off('testEvent');
+
+            mockSocket.trigger('testEvent', { data: 'after off' });
+            expect(callback1).toHaveBeenCalledTimes(1);
+            expect(callback2).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not throw an error when removing a listener for an event that does not exist', () => {
+            expect(() => service.off('nonExistentEvent')).not.toThrow();
+        });
+
+        it('should only remove listeners for the specified event and keep others intact', () => {
+            const callback1 = jasmine.createSpy('callback1');
+            const callback2 = jasmine.createSpy('callback2');
+
+            service.on('event1', callback1);
+            service.on('event2', callback2);
+
+            service.off('event1');
+
+            mockSocket.trigger('event1', {});
+            mockSocket.trigger('event2', {});
+
+            expect(callback1).not.toHaveBeenCalled();
+            expect(callback2).toHaveBeenCalledTimes(1);
         });
     });
 });
