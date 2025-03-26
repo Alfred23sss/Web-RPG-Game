@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { GameData } from '@app/classes/gameData';
@@ -295,5 +297,251 @@ describe('GameplayService', () => {
 
         expect(gameData.availablePath).toEqual([]);
         expect(mockPlayerMovementService.availablePath).not.toHaveBeenCalled();
+    });
+
+    describe('getClientPlayerPosition', () => {
+        it('should return the tile with the client player', () => {
+            const gameData = createMockGameData();
+            const playerTile = service.getClientPlayerPosition(gameData);
+
+            expect(playerTile).toBeTruthy();
+            expect(playerTile?.id).toBe('tile1');
+            expect(playerTile?.player?.name).toBe('TestPlayer');
+        });
+
+        it('should return undefined if game is undefined', () => {
+            const gameData = {
+                game: undefined,
+                clientPlayer: { name: 'Player1' },
+            } as unknown as GameData;
+
+            const playerTile = service.getClientPlayerPosition(gameData);
+
+            expect(playerTile).toBeUndefined();
+        });
+
+        it('should return undefined if client player is not found in grid', () => {
+            const gameData = createMockGameData();
+            gameData.clientPlayer.name = 'UnknownPlayer';
+
+            const playerTile = service.getClientPlayerPosition(gameData);
+
+            expect(playerTile).toBeUndefined();
+        });
+    });
+
+    describe('checkAvailableActions', () => {
+        it('should end turn when no action points and no adjacent action', () => {
+            const gameData = createMockGameData();
+            gameData.clientPlayer.actionPoints = 0;
+            gameData.clientPlayer.movementPoints = 0;
+
+            mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
+
+            spyOn(service, 'endTurn');
+            service.checkAvailableActions(gameData);
+
+            expect(service.endTurn).toHaveBeenCalledWith(gameData);
+        });
+    });
+
+    it('should not handle door click when in combat mode', () => {
+        const gameData = createMockGameData({ isInCombatMode: true });
+        const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+        service.handleDoorClick(gameData, targetTile);
+
+        expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not handle door click when no action points', () => {
+        const gameData = createMockGameData({
+            clientPlayer: createMockPlayer({ actionPoints: 0 }),
+            isActionMode: true,
+        });
+        const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+        service.handleDoorClick(gameData, targetTile);
+
+        expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+    });
+
+    it('should emit door update when conditions are met', () => {
+        const gameData = createMockGameData({
+            isActionMode: true,
+            clientPlayer: createMockPlayer({ actionPoints: 1 }),
+        });
+        const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+        service.handleDoorClick(gameData, targetTile);
+
+        expect(mockSocketClientService.emit).toHaveBeenCalledWith('doorUpdate', {
+            currentTile: gameData.game?.grid?.[0][0],
+            targetTile,
+            accessCode: 'TEST123',
+        });
+    });
+
+    describe('handleAttackClick', () => {
+        it('should not handle attack on same player', () => {
+            const gameData = createMockGameData({
+                isActionMode: true,
+                clientPlayer: createMockPlayer(),
+            });
+            const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+            service.handleAttackClick(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+
+        it('should not handle attack when no action points', () => {
+            const gameData = createMockGameData({
+                isActionMode: true,
+                clientPlayer: createMockPlayer({ actionPoints: 0 }),
+            });
+            const targetTile = gameData.game?.grid?.[0][1] as Tile;
+
+            service.handleAttackClick(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('handleTeleport', () => {
+        it('should not teleport when in combat mode', () => {
+            const gameData = createMockGameData({ isInCombatMode: true });
+            const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+            service.handleTeleport(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+
+        it('should emit teleport when current player is client player', () => {
+            const gameData = createMockGameData();
+            const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+            service.handleTeleport(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('teleportPlayer', {
+                accessCode: 'TEST123',
+                player: gameData.clientPlayer,
+                targetTile,
+            });
+        });
+
+        it('should not teleport when current player is not client player', () => {
+            const gameData = createMockGameData({
+                currentPlayer: createMockPlayer({ name: 'OtherPlayer' }),
+            });
+            const targetTile = gameData.game?.grid?.[0][0] as Tile;
+
+            service.handleTeleport(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('updateQuickestPath', () => {
+        it('should clear quickest path when grid is undefined', () => {
+            const gameData = createMockGameData({ game: undefined });
+            const targetTile = { id: 'target' } as Tile;
+
+            service.updateQuickestPath(gameData, targetTile);
+
+            expect(gameData.quickestPath).toBeUndefined();
+        });
+
+        it('should clear quickest path when target tile is not in available path', () => {
+            const gameData = createMockGameData({
+                availablePath: [],
+            });
+            const targetTile = { id: 'target' } as Tile;
+
+            service.updateQuickestPath(gameData, targetTile);
+
+            expect(gameData.quickestPath).toBeUndefined();
+        });
+    });
+
+    describe('attack and evade', () => {
+        it('should emit performAttack with correct parameters', () => {
+            const gameData = createMockGameData();
+
+            service.attack(gameData);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('performAttack', {
+                accessCode: 'TEST123',
+                attackerName: 'TestPlayer',
+            });
+        });
+
+        it('should emit evade with correct parameters', () => {
+            const gameData = createMockGameData();
+
+            service.evade(gameData);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('evade', {
+                accessCode: 'TEST123',
+                player: gameData.clientPlayer,
+            });
+        });
+    });
+
+    it('should emit adminModeUpdate when admin player presses "d"', () => {
+        const gameData = createMockGameData({
+            clientPlayer: createMockPlayer({ isAdmin: true }),
+        });
+        const event = new KeyboardEvent('keydown', { key: 'd' });
+
+        service.handleKeyPress(gameData, event);
+
+        expect(mockSocketClientService.emit).toHaveBeenCalledWith('adminModeUpdate', {
+            accessCode: 'TEST123',
+        });
+    });
+
+    it('should not emit adminModeUpdate when non-admin player presses "d"', () => {
+        const gameData = createMockGameData({
+            clientPlayer: createMockPlayer({ isAdmin: false }),
+        });
+        const event = new KeyboardEvent('keydown', { key: 'd' });
+
+        service.handleKeyPress(gameData, event);
+
+        expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+    });
+
+    it('should not emit adminModeUpdate when admin player presses different key', () => {
+        const gameData = createMockGameData({
+            clientPlayer: createMockPlayer({ isAdmin: true }),
+        });
+        const event = new KeyboardEvent('keydown', { key: 'x' });
+
+        service.handleKeyPress(gameData, event);
+
+        expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+    });
+
+    describe('emitAdminModeUpdate', () => {
+        it('should emit adminModeUpdate with correct access code', () => {
+            const gameData = createMockGameData();
+
+            service.emitAdminModeUpdate(gameData);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('adminModeUpdate', {
+                accessCode: 'TEST123',
+            });
+        });
+    });
+
+    describe('backToHome', () => {
+        it('should navigate to HomePage', () => {
+            service.backToHome();
+
+            expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
+        });
     });
 });
