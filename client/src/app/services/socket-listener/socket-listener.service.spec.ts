@@ -20,7 +20,7 @@ describe('SocketListenerService', () => {
         mockCombatService = jasmine.createSpyObj('CombatSocketService', ['initializeCombatListeners']);
         mockTurnService = jasmine.createSpyObj('TurnSocketService', ['initializeTurnListeners']);
         mockGameSocketService = jasmine.createSpyObj('GameSocketService', ['initializeSocketListeners']);
-        mockSocketClientService = jasmine.createSpyObj('SocketClientService', [], {
+        mockSocketClientService = jasmine.createSpyObj('SocketClientService', ['off'], {
             socket: jasmine.createSpyObj('socket', ['off']),
         });
 
@@ -58,13 +58,12 @@ describe('SocketListenerService', () => {
 
     describe('unsubscribeSocketListeners', () => {
         it('should unsubscribe from all socket events', () => {
+            const offSpy = mockSocketClientService.off as jasmine.Spy;
             service.unsubscribeSocketListeners();
-
             EVENTS.forEach((event) => {
-                expect(mockSocketClientService.socket.off).toHaveBeenCalledWith(event);
+                expect(offSpy).toHaveBeenCalledWith(event);
             });
-
-            expect(mockSocketClientService.socket.off).toHaveBeenCalledTimes(EVENTS.length);
+            expect(offSpy).toHaveBeenCalledTimes(EVENTS.length);
         });
     });
 });
