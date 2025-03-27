@@ -56,11 +56,12 @@ body {
     display: block;
     height: 100%;
     margin: 0;
-    background-image: url('./assets/game-decorations/background.jpg');
+    background-image: url('./assets/gifs/background4gif.gif');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     font-family: Roboto, 'Helvetica Neue', sans-serif;
+    overflow: hidden;
 }
 
 * {
