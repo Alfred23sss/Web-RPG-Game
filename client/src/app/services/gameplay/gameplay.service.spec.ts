@@ -592,7 +592,6 @@ describe('GameplayService', () => {
         });
     });
     it('should return false when tiles not found', () => {
-        const service = new GameplayService({} as any, {} as any, {} as any, {} as any);
         const result = (service as any).findAndCheckAdjacentTiles('tile1', 'tile2', []);
         expect(result).toBeFalse();
     });
