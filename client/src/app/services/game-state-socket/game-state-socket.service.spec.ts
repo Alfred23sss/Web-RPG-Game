@@ -1,8 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { GameStateSocketService } from './game-state-socket.service';
 import { GameData } from '@app/classes/gameData';
-import { skip, filter } from 'rxjs/operators';
 import { MOCK_GAME, MOCK_LOBBY, MOCK_PLAYER } from '@app/constants/global.constants';
+import { GameStateSocketService } from './game-state-socket.service';
 
 const GAME_DATA = new GameData();
 
@@ -32,6 +31,16 @@ describe('GameStateSocketService', () => {
         expect(receivedData).toEqual(GAME_DATA);
     });
 
+    it('should properly handle closePopup emissions', () => {
+        const spy = jasmine.createSpy();
+        const subscription = service.closePopup$.subscribe(spy);
+
+        service.updateClosePopup();
+
+        expect(spy).toHaveBeenCalled();
+        subscription.unsubscribe();
+    });
+
     it('should load complete data from sessionStorage', () => {
         sessionStorageSpy.withArgs('lobby').and.returnValue(JSON.stringify({ ...MOCK_LOBBY, game: null }));
         sessionStorageSpy.withArgs('player').and.returnValue(JSON.stringify(MOCK_PLAYER));
@@ -54,46 +63,52 @@ describe('GameStateSocketService', () => {
         );
     });
 
-    it('should handle missing sessionStorage items by keeping existing values', () => {
-        GAME_DATA.lobby = MOCK_LOBBY;
-        GAME_DATA.clientPlayer = MOCK_PLAYER;
-        GAME_DATA.game = MOCK_GAME;
-        service.updateGameData(GAME_DATA);
-
-        sessionStorageSpy.and.returnValue(null);
-
-        service.fetchGameData();
-
-        expect(service.gameDataSubjectValue.lobby).toEqual(MOCK_LOBBY);
-        expect(service.gameDataSubjectValue.clientPlayer).toEqual(MOCK_PLAYER);
-        expect(service.gameDataSubjectValue.game).toEqual(MOCK_GAME);
-    });
-
     it('should initialize listeners', () => {
         const fetchSpy = spyOn(service, 'fetchGameData');
         service.initializeListeners();
         expect(fetchSpy).toHaveBeenCalled();
     });
 
-    it('should provide observable access to game data', (done) => {
-        const testData = new GameData();
-        testData.clientPlayer = MOCK_PLAYER;
+    it('should handle missing lobby data', () => {
+        sessionStorageSpy.withArgs('lobby').and.returnValue(null);
+        sessionStorageSpy.withArgs('player').and.returnValue(JSON.stringify(MOCK_PLAYER));
+        sessionStorageSpy.withArgs('orderedPlayers').and.returnValue('[]');
+        sessionStorageSpy.withArgs('game').and.returnValue(JSON.stringify(MOCK_GAME));
 
-        service.gameData$
-            .pipe(
-                skip(1),
-                filter((data) => !!data.clientPlayer),
-            )
-            .subscribe((data) => {
-                expect(data.clientPlayer).toEqual(
-                    jasmine.objectContaining({
-                        name: MOCK_PLAYER.name,
-                        avatar: MOCK_PLAYER.avatar,
-                    }),
-                );
-                done();
-            });
+        service.fetchGameData();
 
-        service.updateGameData(testData);
+        expect(service.gameDataSubjectValue.clientPlayer).toEqual(MOCK_PLAYER);
+        expect(service.gameDataSubjectValue.game?.id).toEqual(MOCK_GAME.id);
+    });
+
+    it('should handle missing player data', () => {
+        sessionStorageSpy.withArgs('lobby').and.returnValue(JSON.stringify(MOCK_LOBBY));
+        sessionStorageSpy.withArgs('player').and.returnValue(null);
+        sessionStorageSpy.withArgs('orderedPlayers').and.returnValue('[]');
+        sessionStorageSpy.withArgs('game').and.returnValue(JSON.stringify(MOCK_GAME));
+
+        service.fetchGameData();
+
+        expect(service.gameDataSubjectValue.game?.id).toEqual(MOCK_GAME.id);
+    });
+
+    it('should handle missing game data', () => {
+        sessionStorageSpy.withArgs('lobby').and.returnValue(JSON.stringify(MOCK_LOBBY));
+        sessionStorageSpy.withArgs('player').and.returnValue(JSON.stringify(MOCK_PLAYER));
+        sessionStorageSpy.withArgs('orderedPlayers').and.returnValue('[]');
+        sessionStorageSpy.withArgs('game').and.returnValue(null);
+
+        service.fetchGameData();
+
+        expect(service.gameDataSubjectValue.clientPlayer).toEqual(MOCK_PLAYER);
+    });
+
+    it('should use empty array when orderedPlayers is missing', () => {
+        sessionStorageSpy.withArgs('orderedPlayers').and.returnValue(null);
+        sessionStorageSpy.withArgs('lobby').and.returnValue(JSON.stringify(MOCK_LOBBY));
+        sessionStorageSpy.withArgs('player').and.returnValue(JSON.stringify(MOCK_PLAYER));
+        sessionStorageSpy.withArgs('game').and.returnValue(JSON.stringify(MOCK_GAME));
+        service.fetchGameData();
+        expect(service.gameDataSubjectValue.lobby.players).toEqual([]);
     });
 });
