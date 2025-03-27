@@ -1,39 +1,70 @@
-import { Tile } from '@app/interfaces/Tile';
-import { Item } from '@app/model/database/item';
-import { Player } from '@app/model/database/player';
 import { Injectable } from '@nestjs/common';
+import { GameSessionService } from '../game-session/game-session.service';
 import { GridManagerService } from '../grid-manager/grid-manager.service';
 
 @Injectable()
 export class InventoryManagerService {
-    constructor(private readonly gridManager: GridManagerService) {}
+    constructor(
+        private readonly gridManager: GridManagerService,
+        private readonly gameSession: GameSessionService,
+    ) {}
 
     //ajouter item a player
-    addItemToPlayer(grid: Tile[][], player: Player): void {
-        let tile = this.gridManager.findTileByPlayer(grid, player);
-        for (const item of player.inventory) {
-            if (item) {
-                // ajouter a l'inventaire
-                // emit success
-                tile.item = undefined;
-                return;
+    addItemToPlayer(accessCode: string, playerName: string): void {
+        const gameSession = this.gameSession.getGameSession(accessCode);
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        let tile = this.gridManager.findTileByPlayer(gameSession.game.grid, player);
+
+        if (tile.item) {
+            for (let i = 0; i < player.inventory.length; i++) {
+                if (!player.inventory[i]) {
+                    player.inventory[i] = tile.item;
+                    tile.item = undefined;
+                    this.gameSession.updatePlayer(player, { inventory: player.inventory });
+                    this.gameSession.emitGridUpdate(accessCode, gameSession.game.grid);
+                    return;
+                }
             }
         }
         // call items chose
-
-        //this.emitGridUpdate(accessCode, gameSession.game.grid);
     }
 
     // choisir item???
-    removeChosenItem(grid: Tile[][], player: Player, item: Item): void {
-        // déterminer item a jeter
-        // remplacer inventaire au besoin
-        // placer bon item sur la grid
+    removeChosenItem(accessCode: string, playerName: string, item: string): void {
+        const gameSession = this.gameSession.getGameSession(accessCode);
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        let tile = this.gridManager.findTileByPlayer(gameSession.game.grid, player);
+
+        if (tile.item?.name === item) {
+            return;
+        }
+
+        for (let i = 0; i < player.inventory.length; i++) {
+            if (player.inventory[i]?.name === item) {
+                tile.item = player.inventory[i];
+                player.inventory[i] = null;
+                this.gameSession.updatePlayer(player, { inventory: player.inventory });
+                this.gameSession.emitGridUpdate(accessCode, gameSession.game.grid);
+            }
+        }
+        return;
     }
 
     // dropper toute les items
-    dropAllItems(grid: Tile[][], player: Player): void {
-        //pour i item de inventaire pas null
+    dropAllItems(accessCode: string, playerName: string): void {
+        const gameSession = this.gameSession.getGameSession(accessCode);
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        let tile = this.gridManager.findTileByPlayer(gameSession.game.grid, player);
+
+        for (let i = 0; i < player.inventory.length; i++) {
+            if (player.inventory[i]) {
+                //tile.item = player.inventory[i];
+                player.inventory[i] = null;
+            }
+        }
+        this.gameSession.updatePlayer(player, { inventory: player.inventory });
+        this.gameSession.emitGridUpdate(accessCode, gameSession.game.grid);
+        return;
         //trouver tile la plus proche incluant ou il se trouve et placer un objet dessus
     }
 }
