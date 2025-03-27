@@ -62,6 +62,8 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
                 this.resetPopup();
             }),
         );
+
+        document.addEventListener('keydown', this.handleKeyDown);
     }
 
     assignBonus(attribute: AttributeType): void {
@@ -114,7 +116,14 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
+        document.removeEventListener('keydown', this.handleKeyDown);
     }
+
+    private handleKeyDown = (event: KeyboardEvent): void => {
+        if (event.key === 'Escape') {
+            this.closePopup();
+        }
+    };
 
     private returnHome(): void {
         this.closePopup();

@@ -1,4 +1,5 @@
-import { ItemDescription, ItemName, ItemType } from '@app/enums/enums';
+import { Behavior, DiceType, ItemDescription, ItemName, ItemType } from '@app/enums/enums';
+import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 
 export const RANDOM_ITEMS = [
     {
@@ -49,4 +50,36 @@ export const RANDOM_ITEMS = [
         itemCounter: 1,
         description: ItemDescription.Swap,
     },
+];
+
+export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
+    name: '',
+    avatar: '',
+    speed: 4,
+    vitality: 4, // Add the missing "vitality" field from Player
+    attack: { value: 4, bonusDice: DiceType.Uninitialized },
+    defense: { value: 4, bonusDice: DiceType.Uninitialized },
+    hp: { current: 4, max: 4 },
+    movementPoints: 4,
+    actionPoints: 1,
+    inventory: [null, null],
+    isAdmin: false, // Always false for virtual players
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+    isVirtual: true, // Always true for virtual players
+    behavior: Behavior.Null,
+};
+
+export const VIRTUAL_PLAYER_NAMES: string[] = [
+    'BaguetteMan',
+    'FromageNinja',
+    'CroissantFurtif',
+    'Escargodzilla',
+    'Jean-Michel Bot',
+    'Tartiflex',
+    'RacletteOP',
+    'PoutinePower',
+    'MacaronFou',
+    'OmeletteDuRisk',
 ];

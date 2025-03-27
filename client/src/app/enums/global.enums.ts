@@ -167,6 +167,7 @@ export enum ErrorMessages {
     LobbyNotLocked = '❌ Le lobby n’est pas verrouillé',
     LockedRoom = "La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil",
     MaxNameLength = 'La longueur maximale de 20 caractères est atteinte',
+    MaxPlayersReached = '❌ Le nombre maximal de joueurs est atteint pour cette partie',
 }
 
 export enum TileType {
@@ -204,4 +205,10 @@ export enum ItemCount {
     SmallItemCount = 2,
     MediumItemCount = 4,
     LargeItemCount = 6,
+}
+
+export enum Behavior {
+    Aggressive = 'aggressive',
+    Defensive = 'defensive',
+    Null = '',
 }

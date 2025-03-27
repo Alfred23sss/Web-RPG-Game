@@ -12,6 +12,7 @@ export interface Player {
     actionPoints: number;
     inventory: [Item | null, Item | null];
     isAdmin: boolean;
+    isVirtual: boolean;
     hasAbandoned: boolean;
     isActive: boolean;
     combatWon: number;

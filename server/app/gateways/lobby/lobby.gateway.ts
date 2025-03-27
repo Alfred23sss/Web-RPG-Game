@@ -14,7 +14,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { LobbyEvents } from './lobby.gateway.events';
-
+// Add to events all the emit as well !!!
 @WebSocketGateway({ cors: true })
 export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
     @WebSocketServer()
@@ -24,7 +24,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         private readonly lobbyService: LobbyService,
         private readonly logger: Logger,
     ) {}
-
     @SubscribeMessage('requestUnavailableOptions')
     handleRequestUnavailableOptions(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);

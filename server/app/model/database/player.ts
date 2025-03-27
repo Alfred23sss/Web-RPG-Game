@@ -1,7 +1,7 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Item } from './item';
 import { DiceType } from '@app/interfaces/Dice';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Item } from './item';
 
 const spawnPointSchema = new MongooseSchema({
     x: { type: Number, required: true },
@@ -44,6 +44,9 @@ export class Player {
 
     @Prop({ required: true })
     isAdmin: boolean;
+
+    @Prop({ required: true })
+    isVirtual: boolean;
 
     @Prop({ required: true })
     hasAbandoned: boolean;

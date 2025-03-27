@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { Behavior, ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -20,6 +20,9 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     isLoading: boolean = true;
     isGameStarting: boolean = false;
     isGameStartedEmitted: boolean = false;
+    isDialogOpen: boolean = false;
+    selectedBehavior: Behavior;
+    behaviors = Object.values(Behavior).filter((b) => b !== Behavior.Null);
 
     private subscriptions: Subscription = new Subscription();
 
@@ -112,5 +115,18 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         this.lobbyService.setIsGameStarting(true);
         sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
+    }
+
+    createVirtualPlayer(): void {
+        this.isDialogOpen = true;
+    }
+
+    setBehavior(behavior: Behavior): void {
+        this.socketClientService.emit('createVirtualPlayer', { behavior, accessCode: this.accessCode });
+        this.isDialogOpen = false;
+    }
+
+    cancelVirtualPlayer(): void {
+        this.isDialogOpen = false;
     }
 }

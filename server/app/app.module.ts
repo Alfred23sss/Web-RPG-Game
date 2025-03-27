@@ -7,6 +7,7 @@ import { AccessCodesController } from './controllers/access-code/access-code.con
 import { GameController } from './controllers/game/game.controller';
 import { GameGateway } from './gateways/game/game.gateway';
 import { LobbyGateway } from './gateways/lobby/lobby.gateway';
+import { VirtualPlayerGateway } from './gateways/virtual-player/virtualPlayer.gateway';
 import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
 import { CombatHelperService } from './services/combat-helper/combat-helper.service';
@@ -16,6 +17,7 @@ import { GameSessionService } from './services/game-session/game-session.service
 import { GameService } from './services/game/game.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
 import { LobbyService } from './services/lobby/lobby.service';
+import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -34,6 +36,8 @@ import { LobbyService } from './services/lobby/lobby.service';
     ],
     controllers: [GameController, AccessCodesController],
     providers: [
+        VirtualPlayerGateway,
+        VirtualPlayerService,
         LobbyGateway,
         LobbyService,
         GameGateway,

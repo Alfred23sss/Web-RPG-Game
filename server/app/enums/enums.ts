@@ -201,3 +201,9 @@ export enum EventEmit {
     GameTurnTimer = 'game.turn.timer',
     GameTurnResumed = 'game.turn.resumed',
 }
+
+export enum Behavior {
+    Aggressive = 'aggressive',
+    Defensive = 'defensive',
+    Null = '',
+}
