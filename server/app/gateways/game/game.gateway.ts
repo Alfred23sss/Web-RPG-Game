@@ -232,7 +232,6 @@ export class GameGateway {
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatStarted', {
-            // firstFighter: payload.firstFighter, // we never use firstFighter client side ???
             attacker: payload.attacker,
             defender: payload.defender,
         });

@@ -15,6 +15,20 @@ export enum GameModeType {
     Default = './assets/gamemodes/classic-game.png',
 }
 
+export enum ChatEvents {
+    Validate = 'validate',
+    ValidateACK = 'validateWithAck',
+    BroadcastAll = 'broadcastAll',
+    JoinRoom = 'joinRoom',
+    RoomMessage = 'roomMessage',
+
+    WordValidated = 'wordValidated',
+    MassMessage = 'massMessage',
+    Hello = 'hello',
+    Clock = 'clock',
+    Error = 'error',
+}
+
 export enum AvatarType {
     Alchemist = './assets/avatars/avatar_alchemist.png',
     Archer = './assets/avatars/avatar_archer.png',
