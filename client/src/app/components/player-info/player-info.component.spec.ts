@@ -19,7 +19,8 @@ describe('PlayerInfoComponent', () => {
         });
 
         await TestBed.configureTestingModule({
-            declarations: [PlayerInfoComponent],
+            // declarations: [PlayerInfoComponent],
+            imports: [PlayerInfoComponent],
             providers: [
                 {
                     provide: GameStateSocketService,
