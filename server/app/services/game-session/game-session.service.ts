@@ -1,4 +1,4 @@
-import { EventEmit, ImageType } from '@app/enums/enums';
+import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
@@ -156,12 +156,18 @@ export class GameSessionService {
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
+            if (movement[i].item !== undefined && movement[i].item.name !== ItemName.Home) {
+                isCurrentlyMoving = false;
+            }
             this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                 accessCode,
                 grid: gameSession.game.grid,
                 player,
                 isCurrentlyMoving,
             });
+            if (!isCurrentlyMoving) {
+                break;
+            }
         }
     }
 
