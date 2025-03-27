@@ -16,20 +16,19 @@ export enum GameModeType {
 }
 
 export enum AvatarType {
-    Alchemist = 'assets/avatars/avatar_alchemist.png',
-    Archer = 'assets/avatars/avatar_archer.png',
-    Assassin = 'assets/avatars/avatar_assassin.png',
-    Barbarian = 'assets/avatars/avatar_barbarian.png',
-    Bard = 'assets/avatars/avatar_bard.png',
-    Druid = 'assets/avatars/avatar_druid.png',
-    Goblin = 'assets/avatars/avatar_goblin.png',
-    Paladin = 'assets/avatars/avatar_paladin.png',
-    Ranger = 'assets/avatars/avatar_ranger.png',
-    Valkyrie = 'assets/avatars/avatar_valkyrie.png',
-    Vampire = 'assets/avatars/avatar_vampire.png',
-    Wizard = 'assets/avatars/avatar_wizard.png',
+    Alchemist = './assets/avatars/avatar_alchemist.png',
+    Archer = './assets/avatars/avatar_archer.png',
+    Assassin = './assets/avatars/avatar_assassin.png',
+    Barbarian = './assets/avatars/avatar_barbarian.png',
+    Bard = './assets/avatars/avatar_bard.png',
+    Druid = './assets/avatars/avatar_druid.png',
+    Goblin = './assets/avatars/avatar_goblin.png',
+    Paladin = './assets/avatars/avatar_paladin.png',
+    Ranger = './assets/avatars/avatar_ranger.png',
+    Valkyrie = './assets/avatars/avatar_valkyrie.png',
+    Vampire = './assets/avatars/avatar_vampire.png',
+    Wizard = './assets/avatars/avatar_wizard.png',
 }
-
 export enum ImageType {
     Water = 'assets/tile-items/water.png',
     Wall = 'assets/tile-items/wall.png',

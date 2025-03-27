@@ -83,12 +83,20 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     kickPlayer(player: Player): void {
+        // if est it vrm necessaire ???
         if (this.accessCode) {
             this.socketClientService.emit('kickPlayer', {
                 accessCode: this.accessCode,
                 playerName: player.name,
             });
         }
+    }
+
+    kickVirtualPlayer(player: Player): void {
+        this.socketClientService.emit('kickVirtualPlayer', {
+            accessCode: this.accessCode,
+            player,
+        });
     }
 
     navigateToHome(): void {

@@ -11,7 +11,7 @@ export class VirtualPlayerService {
     constructor(private readonly lobbyService: LobbyService) {}
 
     createVirtualPlayer(behavior: Behavior, lobby: Lobby): void {
-        const vPlayer = DEFAULT_VIRTUAL_PLAYER;
+        const vPlayer = { ...DEFAULT_VIRTUAL_PLAYER };
         vPlayer.behavior = behavior;
         vPlayer.name = this.findValidName(lobby, vPlayer);
         vPlayer.avatar = this.findValidAvatar(lobby);
@@ -20,6 +20,14 @@ export class VirtualPlayerService {
         // call this.updateVirtualPlayerStats(vPlayer);
 
         this.addVPlayerToLobby(lobby, vPlayer);
+    }
+
+    kickVirtualPlayer(lobby: Lobby, player: Player): void {
+        lobby.players = lobby.players.filter((p) => p.name !== player.name);
+    }
+
+    getUsedAvatars(lobby: Lobby): string[] {
+        return [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
     }
 
     private addVPlayerToLobby(lobby: Lobby, vPlayer: Player): void {

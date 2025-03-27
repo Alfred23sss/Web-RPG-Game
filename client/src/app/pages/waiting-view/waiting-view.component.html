@@ -30,7 +30,7 @@
                     } @if (player.isVirtual) {
                     <span class="virtual-badge">Virtuel</span>
                     } @if (player && this.player?.isAdmin && !player.isAdmin) {
-                    <button class="kick-button" (click)="kickPlayer(player)">Expulser</button>
+                    <button class="kick-button" (click)="player.isVirtual ? kickVirtualPlayer(player) : kickPlayer(player)">Expulser</button>
                     }
                 </div>
             </li>
