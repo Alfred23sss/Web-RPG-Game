@@ -27,7 +27,10 @@ export class TurnSocketService {
         this.socketClientService.on('turnStarted', (data: { player: Player; turnDuration: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
-            gameData.currentPlayer = data.player;
+            console.log(gameData.clientPlayer.inventory);
+            console.log(gameData.currentPlayer.inventory);
+            gameData.currentPlayer = data.player; // tout est a null ici?
+            console.log(gameData.currentPlayer.inventory);
             gameData.isCurrentlyMoving = false;
             gameData.isActionMode = false;
             gameData.isInCombatMode = false;

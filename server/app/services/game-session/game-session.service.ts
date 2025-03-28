@@ -220,7 +220,7 @@ export class GameSessionService {
                 }
             }
         }
-        // call items chose
+        // call items choice
     }
     private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
         const gameSession = this.getGameSession(accessCode);
