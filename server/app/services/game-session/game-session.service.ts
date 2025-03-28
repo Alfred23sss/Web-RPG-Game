@@ -5,8 +5,10 @@ import { Tile } from '@app/model/database/tile';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+// import { InventoryManagerService } from '@app/services/inventory-manager/inventory-manager.service';
+import { Item } from '@app/interfaces/Item';
 
 const PLAYER_MOVE_DELAY = 150;
 
@@ -15,6 +17,7 @@ export class GameSessionService {
     private gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
 
     constructor(
+        // private readonly inventoryManager: InventoryManagerService,
         private readonly lobbyService: LobbyService,
         private readonly eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
@@ -165,8 +168,11 @@ export class GameSessionService {
                 player,
                 isCurrentlyMoving,
             });
-            if (!isCurrentlyMoving) {
-                break;
+            if (!isCurrentlyMoving && movement[i].item !== undefined) {
+                if (movement[i].item.name !== ItemName.Home) {
+                    this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
+                    break;
+                }
             }
         }
     }
@@ -194,6 +200,28 @@ export class GameSessionService {
         });
     }
 
+    addItemToPlayer(accessCode: string, player: Player, item: Item, gameSession: GameSession): void {
+        const tile = this.gridManager.findTileByPlayer(gameSession.game.grid, player);
+        if (tile.item) {
+            for (let i = 0; i < player.inventory.length; i++) {
+                if (!player.inventory[i]) {
+                    player.inventory[i] = tile.item;
+                    Logger.log(player.inventory);
+                    tile.item = undefined;
+                    this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+                    this.emitGridUpdate(accessCode, gameSession.game.grid);
+                    this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+                        accessCode,
+                        grid: gameSession.game.grid,
+                        player,
+                        isCurrentlyMoving: false,
+                    });
+                    return;
+                }
+            }
+        }
+        // call items choice
+    }
     private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
         const gameSession = this.getGameSession(accessCode);
         for (const playerUpdated of players) {

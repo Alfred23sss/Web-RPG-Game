@@ -162,6 +162,7 @@ export class GameSocketService {
                         this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
                         data.player,
                     );
+                this.gameStateService.gameDataSubjectValue.clientPlayer.inventory = data.player.inventory;
                 this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
                 this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
