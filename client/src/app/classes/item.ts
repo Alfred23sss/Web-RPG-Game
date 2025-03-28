@@ -7,7 +7,8 @@ export class Item {
     name: string = '';
     itemCounter: number = 0;
     description: string = '';
-    originalReference?: Item;
+    modifiers?: ItemModifier[];
+    isActive?: boolean;
 
     constructor(init?: Partial<Item>) {
         if (init) {

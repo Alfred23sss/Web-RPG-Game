@@ -9,6 +9,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 // import { InventoryManagerService } from '@app/services/inventory-manager/inventory-manager.service';
 import { Item } from '@app/interfaces/Item';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 
 const PLAYER_MOVE_DELAY = 150;
 
@@ -22,6 +23,7 @@ export class GameSessionService {
         private readonly eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
         private readonly turnService: GameSessionTurnService,
+        private readonly itemEffectsService: ItemEffectsService,
     ) {
         this.eventEmitter.on(EventEmit.GameTurnTimeout, ({ accessCode }) => {
             this.endTurn(accessCode);
@@ -206,9 +208,16 @@ export class GameSessionService {
             for (let i = 0; i < player.inventory.length; i++) {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
+                    this.itemEffectsService.addEffect(player, tile.item, tile);
                     Logger.log(player.inventory);
                     tile.item = undefined;
-                    this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+                    this.updateGameSessionPlayerList(accessCode, player.name, {
+                        inventory: player.inventory,
+                        attack: { ...player.attack },
+                        defense: { ...player.defense },
+                        hp: { ...player.hp },
+                        speed: player.speed,
+                    });
                     this.emitGridUpdate(accessCode, gameSession.game.grid);
                     this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                         accessCode,

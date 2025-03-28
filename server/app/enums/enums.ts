@@ -100,7 +100,7 @@ export enum GameSizePlayerCount {
 }
 
 export enum AttributeType {
-    Vitality = 'Vitalité',
+    Hp = 'hp',
     Speed = 'Vitesse',
     Attack = 'Attaque',
     Defense = 'Défense',
