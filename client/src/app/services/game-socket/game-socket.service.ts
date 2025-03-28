@@ -3,10 +3,10 @@ import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Injectable({
@@ -16,9 +16,9 @@ export class GameSocketService {
     constructor(
         private gameStateService: GameStateSocketService,
         private gameplayService: GameplayService,
-        private snackbarService: SnackbarService,
         private socketClientService: SocketClientService,
         private playerMovementService: PlayerMovementService,
+        private readonly clientNotifier: ClientNotifierServices,
     ) {}
     initializeSocketListeners(): void {
         this.handlePageRefresh();
@@ -52,12 +52,13 @@ export class GameSocketService {
                 (p) => p.name !== data.player.name,
             );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+            this.clientNotifier.addLogbookEntry('Un joeur a abandonne la partie', [data.player]);
         });
     }
 
     private onGameDeleted(): void {
         this.socketClientService.on('gameDeleted', () => {
-            this.snackbarService.showMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
+            this.clientNotifier.displayMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
             setTimeout(() => {
                 this.gameplayService.backToHome();
             }, DELAY_BEFORE_HOME);
@@ -66,7 +67,8 @@ export class GameSocketService {
 
     private onGameEnded(): void {
         this.socketClientService.on('gameEnded', (data: { winner: string }) => {
-            this.snackbarService.showMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+            this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+            // afficher  Fin de partie (affichage des noms des joueurs encore actifs seulement)
             setTimeout(() => {
                 this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
             }, DELAY_BEFORE_ENDING_GAME);
@@ -76,7 +78,7 @@ export class GameSocketService {
     private onAdminModeDisabled(): void {
         this.socketClientService.on('adminModeDisabled', () => {
             if (this.gameStateService.gameDataSubjectValue.isDebugMode) {
-                this.snackbarService.showMessage("Mode debug 'désactivé'");
+                this.clientNotifier.displayMessage("Mode debug 'désactivé'");
             }
             this.gameStateService.gameDataSubjectValue.isDebugMode = false;
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
@@ -141,6 +143,7 @@ export class GameSocketService {
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+            this.clientNotifier.addLogbookEntry('Un joeur a effectue une action sur une porte!', []); // ajouter joeur qui a clique
         });
     }
 
@@ -158,7 +161,8 @@ export class GameSocketService {
     private onAdminModeChangedServerSide(): void {
         this.socketClientService.on('adminModeChangedServerSide', () => {
             this.gameStateService.gameDataSubjectValue.isDebugMode = !this.gameStateService.gameDataSubjectValue.isDebugMode;
-            this.snackbarService.showMessage(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`);
+            this.clientNotifier.displayMessage(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`);
+            this.clientNotifier.addLogbookEntry(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`, []); // ajoute player admin ici
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }

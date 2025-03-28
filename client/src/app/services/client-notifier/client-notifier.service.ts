@@ -1,15 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Player } from '@app/interfaces/player';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
 })
-export class LogBookService {
+export class ClientNotifierServices {
     logBook: string[] = [];
     logBookUpdated = new Subject<string[]>();
+    constructor(private readonly snackbarService: SnackbarService) {}
 
-    addEntry(entry: string, players?: Player[]): void {
+    addLogbookEntry(entry: string, players?: Player[]): void {
         const formattedTime = this.formatTime(new Date());
         let playerNames = '';
         if (players && players.length > 0) {
@@ -20,6 +22,10 @@ export class LogBookService {
         this.logBook.unshift(formattedEntry);
 
         this.logBookUpdated.next(this.logBook);
+    }
+
+    displayMessage(message: string) {
+        this.snackbarService.showMessage(message);
     }
 
     private formatTime(date: Date): string {
