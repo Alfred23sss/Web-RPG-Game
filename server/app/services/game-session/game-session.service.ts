@@ -208,7 +208,7 @@ export class GameSessionService {
                     player.inventory[i] = tile.item;
                     Logger.log(player.inventory);
                     tile.item = undefined;
-                    this.updatePlayer(player, { inventory: player.inventory });
+                    this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
                     this.emitGridUpdate(accessCode, gameSession.game.grid);
                     this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                         accessCode,
