@@ -114,3 +114,14 @@ body {
     margin-right: 10px;
     font-size: 1rem; /* Default icon size */
 }
+
+@font-face {
+    font-family: 'Pixel';
+    src: url('/assets/fonts/SoulOfHolitter.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Pixel', sans-serif;
+}

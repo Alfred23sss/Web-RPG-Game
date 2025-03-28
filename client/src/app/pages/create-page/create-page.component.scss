@@ -24,21 +24,14 @@
     padding: 20px;
 }
 
-.game-item {
-    display: flex;
-    align-items: center;
-    padding: 0.75rem;
-    flex-direction: column;
-    background: linear-gradient(135deg, #3c70de98, #7b2eff9e);
-    cursor: pointer;
-}
-
-.game-preview img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border: 2px solid;
-}
+// .game-item {
+//     display: flex;
+//     align-items: center;
+//     padding: 0.75rem;
+//     flex-direction: column;
+//     background: linear-gradient(135deg, #3c70de98, #7b2eff9e);
+//     cursor: pointer;
+// }
 
 .game-info {
     display: flex;

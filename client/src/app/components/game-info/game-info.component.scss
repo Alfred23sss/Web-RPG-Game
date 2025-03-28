@@ -1,12 +1,65 @@
-.game-info {
+.game-preview-container {
     display: flex;
     flex-direction: column;
-    text-align: center;
-    color: #ffd700;
-    font-family: 'Comic Sans MS';
-    font-size: 14px;
+    align-items: center;
+    padding: 0.5rem;
+    background: linear-gradient(145deg, #e0e5ec, #c2cad6);
+    border-radius: 12px;
+    box-shadow:
+        6px 6px 0 #aeb4be,
+        6px 6px 12px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    user-select: none;
+    width: auto;
+    max-width: 350px;
+    transition:
+        box-shadow 0.3s,
+        transform 0.2s;
 }
 
-.game-info > * {
-    margin: 0.3rem;
+.game-preview-container:hover {
+    transform: scale(1.03);
+    box-shadow:
+        4px 4px 0 #aeb4be,
+        4px 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.game-preview {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-preview img {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 10px;
+    border: 2px solid #aeb4be;
+}
+
+.game-info {
+    text-align: center;
+    color: #2f486f;
+    font-family: 'Pixel', sans-serif;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+.game-overlay {
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 16px;
+    padding: 4px 10px;
+    border-radius: 5px;
+    font-weight: bold;
 }

@@ -52,13 +52,6 @@
     margin-bottom: 0.5rem;
 }
 
-.game-preview img {
-    width: 200px;
-    height: 200px;
-    object-fit: cover;
-    border: 2px solid;
-}
-
 .game-info {
     display: flex;
     flex-direction: column;
@@ -81,17 +74,6 @@
     justify-content: center;
     max-height: 60vh;
     overflow-y: auto;
-}
-
-.game-preview {
-    position: relative;
-    width: 100%;
-    height: auto;
-    overflow: visible;
-    border: 1px solid #ccc;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .game-list::-webkit-scrollbar {

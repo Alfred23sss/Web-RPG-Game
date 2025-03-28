@@ -5,9 +5,6 @@
     <ul class="game-list">
         @for (game of visibleGames; let index = $index; track $index) {
         <li class="game-item" (click)="openDialog(game)">
-            <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
-            </div>
             <div class="game-info">
                 <app-game-info [game]="game"></app-game-info>
             </div>

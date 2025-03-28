@@ -1,0 +1,10 @@
+<div class="game-preview-container">
+    <div class="game-preview">
+        <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
+        <div class="game-overlay">{{ game.size }}x{{ game.size }} • {{ game.mode }}</div>
+    </div>
+    <div class="game-info">
+        <h3>{{ game.name }}</h3>
+        <p>{{ game.lastModified | date: 'short' }}</p>
+    </div>
+</div>

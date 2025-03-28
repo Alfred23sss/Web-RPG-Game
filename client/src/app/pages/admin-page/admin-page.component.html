@@ -4,9 +4,6 @@
     <ul class="game-list">
         @for(game of games; let index = $index; track $index) {
         <li class="game-item">
-            <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
-            </div>
             <div class="game-info">
                 <app-game-info [game]="game"></app-game-info>
 
