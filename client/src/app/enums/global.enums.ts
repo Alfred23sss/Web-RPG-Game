@@ -1,8 +1,7 @@
 export enum GameDecorations {
-    Background = '../../../assets/game-decorations/background.png',
-    Door = './assets/game-decorations/door.png',
+    Background = '../../../assets/gifs/background4gif.gif',
     ExampleGame = './assets/game-decorations/example.png',
-    Logo = './assets/game-decorations/logo.png',
+    Logo = './assets/game-decorations/logoC.png',
     Forge = './assets/game-decorations/medieval-forge.png',
     XSwords = './assets/game-decorations/X-sword.png',
     X = './assets/game-decorations/X.png',
