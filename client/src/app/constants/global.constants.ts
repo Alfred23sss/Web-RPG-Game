@@ -18,7 +18,7 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 export const BONUS_VALUE = 2;
-
+export const MAX_GAMES_SHOWN = 3;
 export const POPUP_DELAY = 2000;
 export const NO_ACTION_POINTS = 0;
 export const DEFAULT_ACTION_POINTS = 1;
