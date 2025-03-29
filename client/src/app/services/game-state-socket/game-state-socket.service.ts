@@ -13,7 +13,7 @@ export class GameStateSocketService {
     private gameDataSubject = new BehaviorSubject<GameData>(this.gameData);
     private closePopupSubject = new Subject<void>();
 
-    get closePopup$(): Observable<void> {
+    get closePopup$updateAttackResult(): Observable<void> {
         return this.closePopupSubject.asObservable();
     }
     get gameData$(): Observable<GameData> {

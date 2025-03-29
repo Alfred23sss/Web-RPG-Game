@@ -117,6 +117,12 @@ export class GameGateway {
         this.logger.log('player teleported');
     }
 
+    @SubscribeMessage(GameEvents.ItemDrop)
+    handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
+        this.logger.log('handleItemDropped');
+        this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
+    }
+
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean }): void {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
@@ -161,9 +167,18 @@ export class GameGateway {
 
     @OnEvent(EventEmit.ItemChoice)
     handleItemChoiceEvent(payload: { player: Player; items: [Item, Item, Item] }) {
+        Logger.log('handleItemChoice');
         const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
         this.server.to(socketId).emit('itemChoice', {
             items: payload.items,
+        });
+    }
+
+    @OnEvent(EventEmit.PlayerUpdate)
+    handlePlayerClientUpdate(payload: { accessCode: string; player: Player }) {
+        Logger.log('playerUpdateEventCalled');
+        this.server.to(payload.accessCode).emit('playerClientUpdate', {
+            player: payload.player,
         });
     }
 

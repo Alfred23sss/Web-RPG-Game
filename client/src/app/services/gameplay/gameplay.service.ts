@@ -24,6 +24,7 @@ export class GameplayService {
     ) {}
 
     createItemPopUp(items: [Item, Item, Item]): void {
+        console.log('createItemPopUP');
         this.dialog.open(ItemPopUpComponent, {
             data: { items },
             panelClass: 'item-pop-up-dialog',
@@ -139,6 +140,15 @@ export class GameplayService {
                 targetTile,
             });
         }
+    }
+
+    handleItemDropped(gameData: GameData, item: Item) {
+        console.log('handleItemDroppedCalled');
+        this.socketClientService.emit('itemDropped', {
+            accessCode: gameData.lobby.accessCode,
+            player: gameData.clientPlayer,
+            itemDropped: item,
+        });
     }
 
     updateQuickestPath(gameData: GameData, targetTile: Tile): void {

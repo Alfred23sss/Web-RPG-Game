@@ -206,7 +206,6 @@ export class GameSessionService {
             for (let i = 0; i < player.inventory.length; i++) {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
-                    Logger.log(player.inventory);
                     tile.item = undefined;
                     this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
                     this.emitGridUpdate(accessCode, gameSession.game.grid);
@@ -221,11 +220,33 @@ export class GameSessionService {
             }
         }
         const items = [player.inventory[0], player.inventory[1], item];
+        Logger.log('on emit ItemChoice au Gateway');
         this.eventEmitter.emit(EventEmit.ItemChoice, {
             player,
             items,
         });
     }
+
+    handleItemDropped(accessCode: string, player: Player, item: Item): void {
+        Logger.log('on entre dans handleItemDropped');
+        const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
+        const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
+        if (index === -1) {
+            tile.item = undefined;
+        } else {
+            player.inventory.splice(index, 1);
+            player.inventory.push(tile.item);
+            tile.item = item;
+        }
+        this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
+        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+        Logger.log('on sort de handleItemDropped');
+    }
+
     private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
         const gameSession = this.getGameSession(accessCode);
         for (const playerUpdated of players) {
