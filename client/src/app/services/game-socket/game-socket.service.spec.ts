@@ -3,6 +3,7 @@ import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
@@ -16,6 +17,7 @@ describe('GameSocketService', () => {
     let gameplayServiceSpy: jasmine.SpyObj<GameplayService>;
     let snackbarServiceSpy: jasmine.SpyObj<SnackbarService>;
     let playerMovementServiceSpy: jasmine.SpyObj<PlayerMovementService>;
+    let clientNotifierSpy: jasmine.SpyObj<ClientNotifierServices>;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const socketEvents: { [event: string]: any } = {};
@@ -37,7 +39,7 @@ describe('GameSocketService', () => {
             'checkAvailableActions',
             'getClientPlayerPosition',
         ]);
-        const snackbarSpy = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+        clientNotifierSpy = jasmine.createSpyObj('ClientNotifierServices', ['displayMessage', 'addLogbookEntry']);
         const socketSpy = jasmine.createSpyObj('SocketClientService', ['on']);
         socketSpy.socket = {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,7 +58,7 @@ describe('GameSocketService', () => {
                 GameSocketService,
                 { provide: GameStateSocketService, useValue: gameStateSpy },
                 { provide: GameplayService, useValue: gameplaySpy },
-                { provide: SnackbarService, useValue: snackbarSpy },
+                { provide: ClientNotifierServices, useValue: clientNotifierSpy },
                 { provide: SocketClientService, useValue: socketSpy },
                 { provide: PlayerMovementService, useValue: playerMoveSpy },
             ],
@@ -248,5 +250,16 @@ describe('GameSocketService', () => {
 
         expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players.length).toEqual(initialPlayerCount);
         expect(gameStateServiceSpy.updateGameData).not.toHaveBeenCalled();
+    });
+
+    it('should handle adminModeChangedServerSide event and update debug mode', () => {
+        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = true;
+
+        socketEvents['adminModeChangedServerSide']();
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeFalse();
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug désactivé');
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalled();
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 });

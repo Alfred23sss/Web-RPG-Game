@@ -3,17 +3,25 @@ import { TestBed } from '@angular/core/testing';
 import { DiceType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
+import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { take } from 'rxjs';
 
-describe('LogBookService', () => {
+describe('ClientNotifierServices', () => {
     let service: ClientNotifierServices;
     let mockPlayer: Player;
+    let snackbarServiceSpy: jasmine.SpyObj<SnackbarService>;
 
     beforeEach(() => {
-        TestBed.configureTestingModule({});
+        snackbarServiceSpy = jasmine.createSpyObj('SnackbarService', ['showMessage', 'showMultipleMessages']);
+
+        TestBed.configureTestingModule({
+            providers: [{ provide: SnackbarService, useValue: snackbarServiceSpy }],
+        });
+
         service = TestBed.inject(ClientNotifierServices);
 
         mockPlayer = {
-            name: '',
+            name: 'Test Player',
             avatar: '',
             speed: 4,
             attack: { value: 4, bonusDice: DiceType.Uninitialized },
@@ -33,46 +41,40 @@ describe('LogBookService', () => {
         expect(service).toBeTruthy();
     });
 
-    // it('should add an entry to the logBook without players', () => {
-    //     const entry = 'Nouvelle entrée sans joueurs';
-    //     service.addEntry(entry);
+    it('should add a log entry and notify subscribers', (done) => {
+        const entry = 'New log entry';
 
-    //     expect(service.logBook.length).toBe(1);
-    //     expect(service.logBook[0]).toContain(entry);
-    //     expect(service.logBook[0]).toMatch(/\[\d{2}:\d{2}:\d{2}\] - Nouvelle entrée sans joueurs/);
-    // });
+        service.logBookUpdated.pipe(take(1)).subscribe((logs) => {
+            expect(logs.length).toBe(1);
+            expect(logs[0]).toContain(entry);
+            done();
+        });
 
-    // it('should add an entry to the logBook with players', () => {
-    //     const entry = 'Nouvelle entrée avec joueurs';
-    //     mockPlayer.name = 'Joueur1';
-    //     const players: Player[] = [mockPlayer];
+        service.addLogbookEntry(entry);
+    });
 
-    //     service.addEntry(entry, players);
+    it('should format log entries correctly with a timestamp', () => {
+        const entry = 'Log entry test';
+        const formattedTime = service['formatTime'](new Date());
+        service.addLogbookEntry(entry);
+        expect(service.logBook[0]).toContain(`[${formattedTime}] - ${entry}`);
+    });
 
-    //     expect(service.logBook.length).toBe(1);
-    //     expect(service.logBook[0]).toContain(entry);
-    //     expect(service.logBook[0]).toContain('Joueur1');
-    // });
+    it('should include player names in log entries', () => {
+        const entry = 'Player action';
+        service.addLogbookEntry(entry, [mockPlayer]);
+        expect(service.logBook[0]).toContain(`(Joueurs impliqués : ${mockPlayer.name})`);
+    });
 
-    // it('should format time correctly', () => {
-    //     const date = new Date(2023, 9, 15, 14, 30, 45);
-    //     const formattedTime = service['formatTime'](date);
+    it('should call snackbarService.showMessage when displaying a message', () => {
+        const message = 'Snackbar test message';
+        service.displayMessage(message);
+        expect(snackbarServiceSpy.showMessage).toHaveBeenCalledWith(message);
+    });
 
-    //     expect(formattedTime).toBe('14:30:45');
-    // });
-
-    // it('should emit logBookUpdated when an entry is added', () => {
-    //     const entry = 'Nouvelle entrée';
-    //     let emittedLogBook: string[] | undefined;
-
-    //     service.logBookUpdated.subscribe((logBook: string[]) => {
-    //         emittedLogBook = logBook;
-    //     });
-
-    //     service.addEntry(entry);
-
-    //     expect(emittedLogBook).toBeDefined();
-    //     expect(emittedLogBook?.length).toBe(1);
-    //     expect(emittedLogBook?.[0]).toContain(entry);
-    // });
+    it('should call snackbarService.showMultipleMessages when showing multiple messages', () => {
+        const message = 'Multiple messages';
+        service.showMultipleMessages(message);
+        expect(snackbarServiceSpy.showMultipleMessages).toHaveBeenCalledWith(message, jasmine.any(String), jasmine.any(Number));
+    });
 });
