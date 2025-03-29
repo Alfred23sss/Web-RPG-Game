@@ -18,8 +18,6 @@ export class VirtualPlayerService {
         vPlayer.avatar = this.findValidAvatar(lobby);
 
         this.updateVirtualPlayerStats(vPlayer);
-        console.log(vPlayer);
-
         this.addVPlayerToLobby(lobby, vPlayer);
     }
 
