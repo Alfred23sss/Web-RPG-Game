@@ -52,14 +52,17 @@ export const RANDOM_ITEMS = [
     },
 ];
 
+export const BASE_STAT = 4;
+export const BONUS_STAT = 6;
+
 export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',
     avatar: '',
-    speed: 4,
-    vitality: 4, // Add the missing "vitality" field from Player
-    attack: { value: 4, bonusDice: DiceType.Uninitialized },
-    defense: { value: 4, bonusDice: DiceType.Uninitialized },
-    hp: { current: 4, max: 4 },
+    speed: BASE_STAT,
+    vitality: BASE_STAT, // Add the missing "vitality" field from Player
+    attack: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
+    defense: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
+    hp: { current: BASE_STAT, max: BASE_STAT },
     movementPoints: 4,
     actionPoints: 1,
     inventory: [null, null],

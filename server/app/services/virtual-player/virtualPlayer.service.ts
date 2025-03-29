@@ -1,4 +1,4 @@
-import { DEFAULT_VIRTUAL_PLAYER, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
+import { BASE_STAT, BONUS_STAT, DEFAULT_VIRTUAL_PLAYER, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
 import { AvatarType, Behavior } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -20,7 +20,6 @@ export class VirtualPlayerService {
         // TODO : Salma : ajouter le resultat de assignBonusStatsRandomly au stats touche
         // call this.updateVirtualPlayerStats(vPlayer);
         this.updateVirtualPlayerStats(vPlayer);
-        console.log(vPlayer);
 
         this.addVPlayerToLobby(lobby, vPlayer);
     }
@@ -44,7 +43,7 @@ export class VirtualPlayerService {
     // TODO : Salma : Assigner de facon aléatoire les bonus de vitalité, vie, etc, et les dés.
 
     private randomizeSpeedAndVitality(): { speed: number; vitality: number; hp: { current: number; max: number } } {
-        const values = [4, 6];
+        const values = [BASE_STAT, BONUS_STAT];
         const speedIndex = Math.floor(Math.random() * 2);
         const vitalityIndex = 1 - speedIndex;
         const vitality = values[vitalityIndex];
@@ -59,11 +58,11 @@ export class VirtualPlayerService {
         const [attackDice, defenseDice] = dicePairs[Math.floor(Math.random() * 2)];
         return {
             attack: {
-                value: 4,
+                value: BASE_STAT,
                 bonusDice: attackDice,
             },
             defense: {
-                value: 4,
+                value: BASE_STAT,
                 bonusDice: defenseDice,
             },
         };
