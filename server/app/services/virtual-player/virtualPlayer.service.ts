@@ -1,5 +1,6 @@
 import { DEFAULT_VIRTUAL_PLAYER, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
 import { AvatarType, Behavior } from '@app/enums/enums';
+import { DiceType } from '@app/interfaces/Dice';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/model/database/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -18,6 +19,8 @@ export class VirtualPlayerService {
 
         // TODO : Salma : ajouter le resultat de assignBonusStatsRandomly au stats touche
         // call this.updateVirtualPlayerStats(vPlayer);
+        this.updateVirtualPlayerStats(vPlayer);
+        console.log(vPlayer);
 
         this.addVPlayerToLobby(lobby, vPlayer);
     }
@@ -39,12 +42,43 @@ export class VirtualPlayerService {
     }
 
     // TODO : Salma : Assigner de facon aléatoire les bonus de vitalité, vie, etc, et les dés.
-    private randomizeBonusStats(): void {
-        return;
+
+    private randomizeSpeedAndVitality(): { speed: number; vitality: number; hp: { current: number; max: number } } {
+        const values = [4, 6];
+        const speedIndex = Math.floor(Math.random() * 2);
+        const vitalityIndex = 1 - speedIndex;
+        const vitality = values[vitalityIndex];
+        return { speed: values[speedIndex], vitality, hp: { current: vitality, max: vitality } };
+    }
+
+    private randomizeAttackAndDefense(): { attack: { value: number; bonusDice: DiceType }; defense: { value: number; bonusDice: DiceType } } {
+        const dicePairs: [DiceType, DiceType][] = [
+            [DiceType.D4, DiceType.D6],
+            [DiceType.D6, DiceType.D4],
+        ];
+        const [attackDice, defenseDice] = dicePairs[Math.floor(Math.random() * 2)];
+        return {
+            attack: {
+                value: 4,
+                bonusDice: attackDice,
+            },
+            defense: {
+                value: 4,
+                bonusDice: defenseDice,
+            },
+        };
     }
 
     // TODO : Salma : fonction qui update les attributs necessaire selon les Bonus stats choisi de randomizeBonusStats
-    // private updateVirtualPlayerStats(vPlayer: Player): void {}
+    private updateVirtualPlayerStats(vPlayer: Player): void {
+        const { speed, vitality, hp } = this.randomizeSpeedAndVitality();
+        const { attack, defense } = this.randomizeAttackAndDefense();
+        vPlayer.speed = speed;
+        vPlayer.vitality = vitality;
+        vPlayer.hp = hp;
+        vPlayer.attack = attack;
+        vPlayer.defense = defense;
+    }
 
     private findValidAvatar(lobby: Lobby) {
         const usedAvatars = new Set([...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)]);
