@@ -24,7 +24,6 @@ export class GameplayService {
     ) {}
 
     createItemPopUp(items: [Item, Item, Item]): void {
-        console.log('createItemPopUP');
         this.dialog.open(ItemPopUpComponent, {
             data: { items },
             panelClass: 'item-pop-up-dialog',
@@ -143,11 +142,10 @@ export class GameplayService {
     }
 
     handleItemDropped(gameData: GameData, item: Item) {
-        console.log('handleItemDroppedCalled');
-        this.socketClientService.emit('itemDropped', {
+        this.socketClientService.emit('itemDrop', {
             accessCode: gameData.lobby.accessCode,
             player: gameData.clientPlayer,
-            itemDropped: item,
+            item,
         });
     }
 

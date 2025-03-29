@@ -228,15 +228,13 @@ export class GameSessionService {
     }
 
     handleItemDropped(accessCode: string, player: Player, item: Item): void {
-        Logger.log('on entre dans handleItemDropped');
         const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
         const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
-        if (index === -1) {
-            tile.item = undefined;
-        } else {
+        if (index !== -1) {
             player.inventory.splice(index, 1);
             player.inventory.push(tile.item);
             tile.item = item;
+            tile.player = player;
         }
         this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
         this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
@@ -244,7 +242,6 @@ export class GameSessionService {
             accessCode,
             player,
         });
-        Logger.log('on sort de handleItemDropped');
     }
 
     private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {

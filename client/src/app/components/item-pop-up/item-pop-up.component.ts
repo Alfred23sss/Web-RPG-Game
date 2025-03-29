@@ -1,6 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Item } from '@app/classes/item';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 
 @Component({
@@ -11,13 +12,13 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
 export class ItemPopUpComponent {
     constructor(
         public dialogRef: MatDialogRef<ItemPopUpComponent>,
-        private gamePlayService: GameplayService,
+        private gameStateSocketService: GameStateSocketService,
+        private gameplayService: GameplayService,
         @Inject(MAT_DIALOG_DATA) public data: { items: [Item, Item, Item] },
     ) {}
 
     selectItem(item: Item): void {
-        console.log('on close le popup');
-        this.gamePlayService.handleItemDropped(this.gameData, item);
+        this.gameplayService.handleItemDropped(this.gameStateSocketService.gameDataSubjectValue, item);
         this.dialogRef.close();
     }
 }

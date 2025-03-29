@@ -119,7 +119,6 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
-        this.logger.log('handleItemDropped');
         this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
     }
 
@@ -167,7 +166,6 @@ export class GameGateway {
 
     @OnEvent(EventEmit.ItemChoice)
     handleItemChoiceEvent(payload: { player: Player; items: [Item, Item, Item] }) {
-        Logger.log('handleItemChoice');
         const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
         this.server.to(socketId).emit('itemChoice', {
             items: payload.items,

@@ -86,23 +86,22 @@ export class GameSocketService {
     }
 
     private onItemChoice(): void {
-        console.log('on call onItemChoice');
         this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
             this.gameplayService.createItemPopUp(data.items);
         });
     }
 
     private onItemDropped(): void {
-        console.log('on call onItemDropped');
         this.socketClientService.on('itemDropped', (data: { accessCode: string; player: Player; item: Item }) => {
             this.socketClientService.emit('itemDrop', data);
         });
     }
 
     private onPlayerClientUpdate(): void {
-        console.log('on rentre dans onPlayerClientUpdate');
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
-            this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
+            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name){
+                this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
+            }
         });
     }
 
