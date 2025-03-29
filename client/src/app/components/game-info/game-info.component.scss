@@ -12,6 +12,7 @@
     user-select: none;
     width: auto;
     max-width: 350px;
+    max-height: 530px;
     transition:
         box-shadow 0.3s,
         transform 0.2s;
@@ -45,11 +46,14 @@
 }
 
 .game-info {
-    text-align: center;
-    color: #2f486f;
     font-family: 'Pixel', sans-serif;
+
     font-size: 16px;
     margin-top: 8px;
+    font-weight: bold;
+    text-align: center;
+    color: #004080;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 1);
 }
 
 .game-overlay {
