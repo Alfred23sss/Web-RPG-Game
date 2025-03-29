@@ -200,4 +200,5 @@ export enum EventEmit {
     GameTurnStarted = 'game.turn.started',
     GameTurnTimer = 'game.turn.timer',
     GameTurnResumed = 'game.turn.resumed',
+    ItemChoice = 'item.choice',
 }

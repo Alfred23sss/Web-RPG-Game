@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Item } from '@app/classes/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
@@ -41,6 +42,7 @@ export class GameSocketService {
         this.onDoorClicked();
         this.onGridUpdate();
         this.onAdminModeChangedServerSide();
+        this.onItemChoice();
     }
 
     // unsubscribeSocketListeners(): void {
@@ -78,6 +80,12 @@ export class GameSocketService {
                 (p) => p.name !== data.player.name,
             );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+        });
+    }
+
+    private onItemChoice(): void {
+        this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
+            this.gameplayService.createItemPopUp(data.items);
         });
     }
 

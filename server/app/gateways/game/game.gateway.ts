@@ -1,5 +1,6 @@
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
+import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
@@ -155,6 +156,14 @@ export class GameGateway {
     handleGridUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
         this.server.to(payload.accessCode).emit('gridUpdate', {
             grid: payload.grid,
+        });
+    }
+
+    @OnEvent(EventEmit.ItemChoice)
+    handleItemChoiceEvent(payload: { player: Player; items: [Item, Item, Item] }) {
+        const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        this.server.to(socketId).emit('itemChoice', {
+            items: payload.items,
         });
     }
 

@@ -220,7 +220,11 @@ export class GameSessionService {
                 }
             }
         }
-        // call items choice
+        const items = [player.inventory[0], player.inventory[1], item];
+        this.eventEmitter.emit(EventEmit.ItemChoice, {
+            player,
+            items,
+        });
     }
     private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
         const gameSession = this.getGameSession(accessCode);
