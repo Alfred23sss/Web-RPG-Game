@@ -5,11 +5,16 @@
         @for(game of games; let index = $index; track $index) {
         <li class="game-item">
             <div class="game-info">
-                <app-game-info [game]="game"></app-game-info>
+                <app-game-info [game]="game">
+                    <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu </label>
 
-                <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">Modifier le jeu</button>
-                <button class="button" (click)="deleteGame(game.id)">Supprimer</button>
-                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu </label>
+                    <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">
+                        <img src="../../../assets/game-decorations/pencil-iconA.png" alt="Edit Game" class="icon" />
+                    </button>
+                    <button class="button" (click)="deleteGame(game.id)">
+                        <img src="../../../assets/game-decorations/trashCanA.png" alt="Delete Game" class="icon" />
+                    </button>
+                </app-game-info>
             </div>
         </li>
         }
