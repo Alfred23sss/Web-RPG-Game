@@ -43,11 +43,10 @@ body {
     font-family: 'Pixel', sans-serif;
     margin-top: 0.25em;
     margin-bottom: 0.25em;
-    // color: #004080;
-    color: #99ccff;
     font-size: 3rem;
     font-weight: bold;
-    text-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
     text-align: center;
 }
 
@@ -66,13 +65,13 @@ body {
 }
 
 .footer-item p span:nth-child(odd) {
-    // color: #66ccff;
-    color: #99ccff;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
 }
 
 .footer-item p span:nth-child(even) {
-    // color: #004080;
-    color: #2f486f;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
 }
 
 .footer-item p span {
@@ -97,12 +96,12 @@ body {
 
 a {
     font-family: 'Pixel', sans-serif;
-    // color: #66ccff;
-    color: #99ccff;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
     text-decoration: none;
 }
 
 a:hover {
-    // color: #004080;
-    color: #66aaff;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
 }
