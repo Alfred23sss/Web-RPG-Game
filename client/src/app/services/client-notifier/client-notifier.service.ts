@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { SNACKBAR_CONFIG } from '@app/constants/global.constants';
 import { Player } from '@app/interfaces/player';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { Subject } from 'rxjs';
@@ -26,6 +27,10 @@ export class ClientNotifierServices {
 
     displayMessage(message: string) {
         this.snackbarService.showMessage(message);
+    }
+
+    showMultipleMessages(message: string, action: string = SNACKBAR_CONFIG.action, duration: number = SNACKBAR_CONFIG.duration) {
+        this.snackbarService.showMultipleMessages(message, action, duration);
     }
 
     private formatTime(date: Date): string {

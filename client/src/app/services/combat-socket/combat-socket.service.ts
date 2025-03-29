@@ -3,18 +3,19 @@ import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Player } from '@app/interfaces/player';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 @Injectable({
     providedIn: 'root',
 })
 export class CombatSocketService {
+    playersInFight: Player[] = [];
     constructor(
         private socketClientService: SocketClientService,
         private gameStateService: GameStateSocketService,
-        private snackbarService: SnackbarService,
+        private clientNotifier: ClientNotifierServices,
         private dialog: MatDialog,
         private gameplayService: GameplayService,
     ) {}
@@ -31,7 +32,8 @@ export class CombatSocketService {
         this.socketClientService.on('combatStarted', (data: { attacker: Player; defender: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
-            this.gameStateService.updateGameData(gameData);
+            this.playersInFight = gameData.lobby.players.filter((p) => p.name === data.attacker.name || p.name === data.defender.name);
+            this.clientNotifier.addLogbookEntry('Combat commencé!', [data.attacker, data.defender]);
 
             this.dialog.open(GameCombatComponent, {
                 width: '800px',
@@ -88,9 +90,11 @@ export class CombatSocketService {
             gameData.attackResult = null;
             gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             if (data && data.winner && !data.hasEvaded) {
-                this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
+                this.clientNotifier.addLogbookEntry(`Combat terminé, ${data.winner.name} gagne le combat!`, this.playersInFight);
+                this.clientNotifier.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             } else {
-                this.snackbarService.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
+                this.clientNotifier.addLogbookEntry(`Combat terminé, ${data.winner.name} a evadé le combat !`, this.playersInFight);
+                this.clientNotifier.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             }
             if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;

@@ -67,8 +67,10 @@ export class GameSocketService {
 
     private onGameEnded(): void {
         this.socketClientService.on('gameEnded', (data: { winner: string }) => {
+            const players = this.gameStateService.gameDataSubjectValue.lobby.players;
+            players.filter((p) => p.hasAbandoned === false); // pt pas update a voir
             this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
-            // afficher  Fin de partie (affichage des noms des joueurs encore actifs seulement)
+            this.clientNotifier.addLogbookEntry('Fin de la partie', players);
             setTimeout(() => {
                 this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
             }, DELAY_BEFORE_ENDING_GAME);
@@ -143,7 +145,9 @@ export class GameSocketService {
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joeur a effectue une action sur une porte!', []); // ajouter joeur qui a clique
+            this.clientNotifier.addLogbookEntry('Un joeur a effectue une action sur une porte!', [
+                this.gameStateService.gameDataSubjectValue.clientPlayer,
+            ]);
         });
     }
 
@@ -161,8 +165,12 @@ export class GameSocketService {
     private onAdminModeChangedServerSide(): void {
         this.socketClientService.on('adminModeChangedServerSide', () => {
             this.gameStateService.gameDataSubjectValue.isDebugMode = !this.gameStateService.gameDataSubjectValue.isDebugMode;
+            const playerAdmin = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.isAdmin === true);
+            if (!playerAdmin) return;
             this.clientNotifier.displayMessage(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`);
-            this.clientNotifier.addLogbookEntry(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`, []); // ajoute player admin ici
+            this.clientNotifier.addLogbookEntry(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`, [
+                playerAdmin,
+            ]);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }
