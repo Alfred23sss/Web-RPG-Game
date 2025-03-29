@@ -29,18 +29,18 @@ export enum ChatEvents {
 }
 
 export enum AvatarType {
-    Alchemist = './assets/avatars/avatar_alchemist.png',
-    Archer = './assets/avatars/avatar_archer.png',
-    Assassin = './assets/avatars/avatar_assassin.png',
-    Barbarian = './assets/avatars/avatar_barbarian.png',
-    Bard = './assets/avatars/avatar_bard.png',
-    Druid = './assets/avatars/avatar_druid.png',
-    Goblin = './assets/avatars/avatar_goblin.png',
-    Paladin = './assets/avatars/avatar_paladin.png',
-    Ranger = './assets/avatars/avatar_ranger.png',
-    Valkyrie = './assets/avatars/avatar_valkyrie.png',
-    Vampire = './assets/avatars/avatar_vampire.png',
-    Wizard = './assets/avatars/avatar_wizard.png',
+    SkeletonA = './assets/avatars/skeletonA_Idle.gif',
+    SkeletonB = './assets/avatars/skeletonB_Idle.gif',
+    SkeletonC = './assets/avatars/skeletonC_Idle.gif',
+    FangelA = './assets/avatars/fangelA_Idle.gif',
+    FangelB = './assets/avatars/fangelB_Idle.gif',
+    FangelC = './assets/avatars/fangelC_Idle.gif',
+    ReaperA = './assets/avatars/reaperA_Idle.gif',
+    ReaperB = './assets/avatars/reaperB_Idle.gif',
+    ReaperC = './assets/avatars/reaperC_Idle.gif',
+    ValkyrieA = './assets/avatars/valkyrieA_Idle.gif',
+    ValkyrieB = './assets/avatars/valkyrieB_Idle.gif',
+    ValkyrieC = './assets/avatars/valkyrieC_Idle.gif',
 }
 
 export enum ImageType {
