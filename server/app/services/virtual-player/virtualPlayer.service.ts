@@ -17,8 +17,6 @@ export class VirtualPlayerService {
         vPlayer.name = this.findValidName(lobby, vPlayer);
         vPlayer.avatar = this.findValidAvatar(lobby);
 
-        // TODO : Salma : ajouter le resultat de assignBonusStatsRandomly au stats touche
-        // call this.updateVirtualPlayerStats(vPlayer);
         this.updateVirtualPlayerStats(vPlayer);
 
         this.addVPlayerToLobby(lobby, vPlayer);
@@ -39,8 +37,6 @@ export class VirtualPlayerService {
             lobby.isLocked = true;
         }
     }
-
-    // TODO : Salma : Assigner de facon aléatoire les bonus de vitalité, vie, etc, et les dés.
 
     private randomizeSpeedAndVitality(): { speed: number; vitality: number; hp: { current: number; max: number } } {
         const values = [BASE_STAT, BONUS_STAT];
@@ -68,7 +64,6 @@ export class VirtualPlayerService {
         };
     }
 
-    // TODO : Salma : fonction qui update les attributs necessaire selon les Bonus stats choisi de randomizeBonusStats
     private updateVirtualPlayerStats(vPlayer: Player): void {
         const { speed, vitality, hp } = this.randomizeSpeedAndVitality();
         const { attack, defense } = this.randomizeAttackAndDefense();
