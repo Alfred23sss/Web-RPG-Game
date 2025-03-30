@@ -11,6 +11,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Item } from '@app/interfaces/Item';
 
 const PLAYER_MOVE_DELAY = 150;
+const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GameSessionService {
@@ -242,6 +243,33 @@ export class GameSessionService {
         }
         this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
         this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+    }
+
+    handlePlayerItemReset(accessCode: string, player: Player): void {
+        const gameSession = this.getGameSession(accessCode);
+        const grid = gameSession.game.grid;
+        const playerTile = this.gridManager.findTileByPlayer(grid, player);
+
+        const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
+
+        if (shuffledInventory.length > 0 && !playerTile.item) {
+            playerTile.item = shuffledInventory.shift();
+        }
+        shuffledInventory.forEach((item) => {
+            const availableTile = this.gridManager.findClosestAvailableTile(grid, playerTile);
+            if (availableTile) {
+                availableTile.item = item;
+            }
+        });
+        player.inventory = [null, null];
+
+        this.emitGridUpdate(accessCode, grid);
+        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+
         this.eventEmitter.emit(EventEmit.PlayerUpdate, {
             accessCode,
             player,

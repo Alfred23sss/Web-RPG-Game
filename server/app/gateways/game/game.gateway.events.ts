@@ -10,4 +10,5 @@ export enum GameEvents {
     AdminModeUpdate = 'adminModeUpdate',
     TeleportPlayer = 'teleportPlayer',
     ItemDrop = 'itemDrop',
+    PlayerItemReset = 'playerItemReset',
 }

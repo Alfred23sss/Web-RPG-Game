@@ -38,6 +38,7 @@ export class GameGateway {
     handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
         this.logger.log(`Player ${payload.player.name} has abandoned game`);
         if (!this.gameSessionService.getGameSession(payload.accessCode)) return;
+        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
         this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
         const lobby = this.lobbyService.getLobby(payload.accessCode);
@@ -120,6 +121,11 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
         this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
+    }
+
+    @SubscribeMessage(GameEvents.PlayerItemReset)
+    handlePlayerItemReset(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player }) {
+        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
     }
 
     @OnEvent(EventEmit.GameCombatEnded)
