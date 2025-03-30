@@ -31,6 +31,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
     unavailableAvatars: string[] = [];
+
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
@@ -117,6 +118,24 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
         document.removeEventListener('keydown', this.handleKeyDown);
+    }
+
+    getSegmentCount(attribute: AttributeType): number {
+        if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
+            return Math.floor(this.attributes[attribute] / 2);
+        }
+        return this.attributes[attribute];
+    }
+
+    getDisplayValue(attribute: AttributeType): string {
+        const value = this.attributes[attribute];
+        if (attribute === AttributeType.Attack && this.createdPlayer.attack.bonusDice) {
+            return `${value} + ${this.createdPlayer.attack.bonusDice}`;
+        }
+        if (attribute === AttributeType.Defense && this.createdPlayer.defense.bonusDice) {
+            return `${value} + ${this.createdPlayer.defense.bonusDice}`;
+        }
+        return value.toString();
     }
 
     private handleKeyDown = (event: KeyboardEvent): void => {
