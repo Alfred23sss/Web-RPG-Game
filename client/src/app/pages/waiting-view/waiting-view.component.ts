@@ -106,7 +106,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             this.isGameStartedEmitted = true;
-            this.socketClientService.emit('createGame', { accessCode: this.accessCode, gameMode: GameModeType.CTF }); // mettre ici le actual game Mode que le client a choisi
+            this.socketClientService.emit('createGame', { accessCode: this.accessCode, gameMode: GameModeType.Classic }); // mettre ici le actual game Mode que le client a choisi
         }
 
         this.lobbyService.setIsGameStarting(true);

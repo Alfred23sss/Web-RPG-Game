@@ -23,28 +23,7 @@ export abstract class BaseGameSessionService {
         protected readonly turnService: GameSessionTurnService,
     ) {}
 
-    protected startTransitionPhase(accessCode: string): void {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return;
-
-        this.turnService.startTransitionPhase(accessCode, gameSession.turn);
-    }
-
-    protected pauseGameTurn(accessCode: string): number {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return 0;
-
-        return this.turnService.pauseTurn(gameSession.turn);
-    }
-
-    protected resumeGameTurn(accessCode: string, remainingTime: number): void {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return;
-
-        this.turnService.resumeTurn(accessCode, gameSession.turn, remainingTime);
-    }
-
-    protected endTurn(accessCode: string): void {
+    endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
         gameSession.turn.beginnerPlayer = this.turnService.getNextPlayer(accessCode, gameSession.turn);
@@ -52,70 +31,7 @@ export abstract class BaseGameSessionService {
         this.startTransitionPhase(accessCode);
     }
 
-    protected updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
-        const players = this.getPlayers(accessCode);
-        const player = players.find((p) => p.name === playername);
-        this.updatePlayer(player, updates);
-    }
-
-    protected getPlayers(accessCode: string): Player[] {
-        const gameSession = this.gameSessions.get(accessCode);
-        return gameSession ? gameSession.turn.orderedPlayers : [];
-    }
-
-    protected updatePlayer(player: Player, updates: Partial<Player>): void {
-        this.turnService.updatePlayer(player, updates);
-    }
-
-    protected updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
-        const grid = this.gameSessions.get(accessCode).game.grid;
-        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
-        if (!isAdjacent) return;
-        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
-
-        if (targetTile.isOpen) {
-            targetTile.imageSrc = ImageType.ClosedDoor;
-        } else {
-            targetTile.imageSrc = ImageType.OpenDoor;
-        }
-        targetTile.isOpen = !targetTile.isOpen;
-        this.gameSessions.get(accessCode).game.grid = grid;
-        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
-    }
-
-    protected updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
-        const gameSession = this.getGameSession(accessCode);
-        for (const playerUpdated of players) {
-            if (playerUpdated.spawnPoint) {
-                const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerUpdated.name);
-                if (player) {
-                    this.updatePlayer(player, playerUpdated);
-                }
-            }
-        }
-    }
-
-    protected getGameSession(accessCode: string): GameSession {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession) return;
-        return gameSession;
-    }
-
-    protected setCombatState(accessCode: string, isInCombat: boolean): void {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (gameSession) {
-            gameSession.turn.isInCombat = isInCombat;
-        }
-    }
-
-    protected isCurrentPlayer(accessCode: string, playerName: string): boolean {
-        const gameSession = this.gameSessions.get(accessCode);
-        if (!gameSession || !gameSession.turn.currentPlayer) return false;
-        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
-        return gameSession.turn.currentPlayer.name === playerName && !player?.hasAbandoned;
-    }
-
-    protected async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
+    async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
         for (let i = 1; i < movement.length; i++) {
@@ -147,21 +63,149 @@ export abstract class BaseGameSessionService {
         }
     }
 
-    protected endGameSession(accessCode: string, winner: string) {
-        this.emitEvent(EventEmit.GameEnded, { accessCode, winner });
+    updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
+        const grid = this.gameSessions.get(accessCode).game.grid;
+        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        if (!isAdjacent) return;
+        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+
+        if (targetTile.isOpen) {
+            targetTile.imageSrc = ImageType.ClosedDoor;
+        } else {
+            targetTile.imageSrc = ImageType.OpenDoor;
+        }
+        targetTile.isOpen = !targetTile.isOpen;
+        this.gameSessions.get(accessCode).game.grid = grid;
+        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
     }
 
-    protected callTeleport(accessCode: string, player: Player, targetTile: Tile): void {
+    callTeleport(accessCode: string, player: Player, targetTile: Tile): void {
         const updatedGrid = this.gridManager.teleportPlayer(this.getGameSession(accessCode).game.grid, player, targetTile);
         this.getGameSession(accessCode).game.grid = updatedGrid;
         this.emitGridUpdate(accessCode, updatedGrid);
     }
 
-    protected emitGridUpdate(accessCode: string, grid: Tile[][]): void {
+    handleItemDropped(accessCode: string, player: Player, item: Item): void {
+        const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
+        const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
+        if (index !== -1) {
+            player.inventory.splice(index, 1);
+            player.inventory.push(tile.item);
+            tile.item = item;
+            tile.player = player;
+        }
+        this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
+        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+    }
+
+    updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
+        const players = this.getPlayers(accessCode);
+        const player = players.find((p) => p.name === playername);
+        this.updatePlayer(player, updates);
+    }
+
+    getPlayers(accessCode: string): Player[] {
+        const gameSession = this.gameSessions.get(accessCode);
+        return gameSession ? gameSession.turn.orderedPlayers : [];
+    }
+
+    endGameSession(accessCode: string, winner: string) {
+        this.emitEvent(EventEmit.GameEnded, { accessCode, winner });
+    }
+
+    resumeGameTurn(accessCode: string, remainingTime: number): void {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return;
+
+        this.turnService.resumeTurn(accessCode, gameSession.turn, remainingTime);
+    }
+
+    getGameSession(accessCode: string): GameSession {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return;
+        return gameSession;
+    }
+
+    setCombatState(accessCode: string, isInCombat: boolean): void {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (gameSession) {
+            gameSession.turn.isInCombat = isInCombat;
+        }
+    }
+
+    isCurrentPlayer(accessCode: string, playerName: string): boolean {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession || !gameSession.turn.currentPlayer) return false;
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        return gameSession.turn.currentPlayer.name === playerName && !player?.hasAbandoned;
+    }
+
+    pauseGameTurn(accessCode: string): number {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return 0;
+
+        return this.turnService.pauseTurn(gameSession.turn);
+    }
+
+    handlePlayerItemReset(accessCode: string, player: Player): void {
+        const gameSession = this.getGameSession(accessCode);
+        const grid = gameSession.game.grid;
+        const playerTile = this.gridManager.findTileByPlayer(grid, player);
+
+        const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
+
+        if (shuffledInventory.length > 0 && !playerTile.item) {
+            playerTile.item = shuffledInventory.shift();
+        }
+        shuffledInventory.forEach((item) => {
+            const availableTile = this.gridManager.findClosestAvailableTile(grid, playerTile);
+            if (availableTile) {
+                availableTile.item = item;
+            }
+        });
+        player.inventory = [null, null];
+
+        this.emitGridUpdate(accessCode, grid);
+        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+    }
+
+    emitGridUpdate(accessCode: string, grid: Tile[][]): void {
         this.eventEmitter.emit(EventEmit.GameGridUpdate, {
             accessCode,
             grid,
         });
+    }
+
+    protected startTransitionPhase(accessCode: string): void {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return;
+
+        this.turnService.startTransitionPhase(accessCode, gameSession.turn);
+    }
+
+    protected updatePlayer(player: Player, updates: Partial<Player>): void {
+        this.turnService.updatePlayer(player, updates);
+    }
+
+    protected updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
+        const gameSession = this.getGameSession(accessCode);
+        for (const playerUpdated of players) {
+            if (playerUpdated.spawnPoint) {
+                const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerUpdated.name);
+                if (player) {
+                    this.updatePlayer(player, playerUpdated);
+                }
+            }
+        }
     }
 
     protected addItemToPlayer(accessCode: string, player: Player, item: Item, gameSession: GameSession): void {
@@ -187,50 +231,6 @@ export abstract class BaseGameSessionService {
         this.eventEmitter.emit(EventEmit.ItemChoice, {
             player,
             items,
-        });
-    }
-
-    protected handleItemDropped(accessCode: string, player: Player, item: Item): void {
-        const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
-        const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
-        if (index !== -1) {
-            player.inventory.splice(index, 1);
-            player.inventory.push(tile.item);
-            tile.item = item;
-            tile.player = player;
-        }
-        this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
-        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
-            accessCode,
-            player,
-        });
-    }
-
-    protected handlePlayerItemReset(accessCode: string, player: Player): void {
-        const gameSession = this.getGameSession(accessCode);
-        const grid = gameSession.game.grid;
-        const playerTile = this.gridManager.findTileByPlayer(grid, player);
-
-        const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
-
-        if (shuffledInventory.length > 0 && !playerTile.item) {
-            playerTile.item = shuffledInventory.shift();
-        }
-        shuffledInventory.forEach((item) => {
-            const availableTile = this.gridManager.findClosestAvailableTile(grid, playerTile);
-            if (availableTile) {
-                availableTile.item = item;
-            }
-        });
-        player.inventory = [null, null];
-
-        this.emitGridUpdate(accessCode, grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
-
-        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
-            accessCode,
-            player,
         });
     }
 
