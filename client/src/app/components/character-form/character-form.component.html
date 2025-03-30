@@ -1,10 +1,9 @@
 <div [class.gray-background]="showForm" class="character-form-container">
     @if (showForm) {
     <div class="character-form_header">
-        <div class="character-form_cancel">
             <button class="button cancel-button" (click)="closePopup()">Quitter</button>
-        </div>
         <h1 id="character-form_title">Créer un personnage</h1>
+            <button class="button custom-button" (click)="submitCharacter()">Confirmer</button>
     </div>
 
     <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="20" />
@@ -67,6 +66,5 @@
         </div>
     </div>
 
-    <button class="button custom-button" (click)="submitCharacter()">Confirmer</button>
     }
 </div>
