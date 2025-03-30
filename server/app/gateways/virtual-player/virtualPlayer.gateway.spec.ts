@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Behavior } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { LobbyService } from '@app/services/lobby/lobby.service';

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { BASE_STAT, BONUS_STAT, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
 import { AvatarType, Behavior } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
