@@ -14,6 +14,7 @@ export class LogBookComponent implements OnInit, OnDestroy {
     constructor(private clientNotifier: ClientNotifierServices) {}
 
     ngOnInit(): void {
+        this.logs = this.clientNotifier.logBook;
         this.logSubscription = this.clientNotifier.logBookUpdated.subscribe((logs: string[]) => {
             this.logs = logs;
         });

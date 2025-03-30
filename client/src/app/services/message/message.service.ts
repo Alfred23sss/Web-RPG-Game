@@ -11,7 +11,6 @@ export class MessageService {
     private messagesSubject = new BehaviorSubject<string[]>([]);
     private accessCode: string | null = null;
     private firstUse = true;
-
     constructor(
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,

@@ -4,9 +4,9 @@ import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, MOCK_PLAYER } from '@app/constants/global.constants';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { CombatSocketService } from './combat-socket.service';
 
@@ -16,13 +16,13 @@ describe('CombatSocketService', () => {
     let service: CombatSocketService;
     let socketClientServiceMock: jasmine.SpyObj<SocketClientService>;
     let gameStateServiceMock: jasmine.SpyObj<GameStateSocketService>;
-    let snackbarServiceMock: jasmine.SpyObj<SnackbarService>;
+    let clientNotifierMock: jasmine.SpyObj<ClientNotifierServices>;
     let dialogMock: jasmine.SpyObj<MatDialog>;
     let gameplayServiceMock: jasmine.SpyObj<GameplayService>;
 
     beforeEach(() => {
         const socketSpy = jasmine.createSpyObj('SocketClientService', ['on']);
-        const snackbarSpy = jasmine.createSpyObj('SnackbarService', ['showMultipleMessages']);
+        const clientNotifierSpy = jasmine.createSpyObj('ClientNotifierServices', ['showMultipleMessages', 'addLogbookEntry']);
         const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
         const gameplaySpy = jasmine.createSpyObj('GameplayService', ['updateAttackResult']);
         const gameStateSpy = jasmine.createSpyObj('GameStateSocketService', ['updateGameData', 'updateClosePopup']);
@@ -31,7 +31,7 @@ describe('CombatSocketService', () => {
             providers: [
                 { provide: SocketClientService, useValue: socketSpy },
                 { provide: GameStateSocketService, useValue: gameStateSpy },
-                { provide: SnackbarService, useValue: snackbarSpy },
+                { provide: ClientNotifierServices, useValue: clientNotifierSpy },
                 { provide: MatDialog, useValue: dialogSpy },
                 { provide: GameplayService, useValue: gameplaySpy },
             ],
@@ -40,7 +40,7 @@ describe('CombatSocketService', () => {
         service = TestBed.inject(CombatSocketService);
         socketClientServiceMock = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
         gameStateServiceMock = TestBed.inject(GameStateSocketService) as jasmine.SpyObj<GameStateSocketService>;
-        snackbarServiceMock = TestBed.inject(SnackbarService) as jasmine.SpyObj<SnackbarService>;
+        clientNotifierMock = TestBed.inject(ClientNotifierServices) as jasmine.SpyObj<ClientNotifierServices>;
         dialogMock = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
         gameplayServiceMock = TestBed.inject(GameplayService) as jasmine.SpyObj<GameplayService>;
 
@@ -54,6 +54,12 @@ describe('CombatSocketService', () => {
             escapeAttempts: DEFAULT_ESCAPE_ATTEMPTS,
             isActionMode: false,
             turnTimer: 0,
+            lobby: {
+                players: [
+                    { ...MOCK_PLAYER, name: 'Attacker' },
+                    { ...MOCK_PLAYER, name: 'Defender' },
+                ],
+            },
         };
     });
 
@@ -166,7 +172,7 @@ describe('CombatSocketService', () => {
         gameStateServiceMock.gameDataSubjectValue.isInCombatMode = true;
         EVENT_HANDLERS['combatEnded'](testData);
 
-        expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
+        expect(clientNotifierMock.showMultipleMessages).toHaveBeenCalledWith(
             'testPlayer a gagné le combat !',
             undefined,
             DELAY_MESSAGE_AFTER_COMBAT_ENDED,
@@ -182,7 +188,7 @@ describe('CombatSocketService', () => {
         const testData = { winner: MOCK_PLAYER, hasEvaded: true };
         EVENT_HANDLERS['combatEnded'](testData);
 
-        expect(snackbarServiceMock.showMultipleMessages).toHaveBeenCalledWith(
+        expect(clientNotifierMock.showMultipleMessages).toHaveBeenCalledWith(
             'testPlayer a evadé le combat !',
             undefined,
             DELAY_MESSAGE_AFTER_COMBAT_ENDED,
