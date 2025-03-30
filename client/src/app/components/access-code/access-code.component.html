@@ -1,5 +1,13 @@
 <h2>Entrer le code d'accès du jeu</h2>
-<input type="text" [(ngModel)]="accessCode" maxlength="4" placeholder="Code à 4 chiffres" (keyup.enter)="submitCode()" />
+<input
+    type="text"
+    [(ngModel)]="accessCode"
+    maxlength="4"
+    placeholder="Code à 4 chiffres"
+    pattern="[0-9]*"
+    (keypress)="validateNumericInput($event)"
+    (keyup.enter)="submitCode()"
+/>
 <div class="actions">
     <button class="button custum-button" (click)="closeDialog()">Annuler</button>
     <button class="button custum-button" (click)="submitCode()" [disabled]="accessCode.length !== 4">Valider</button>

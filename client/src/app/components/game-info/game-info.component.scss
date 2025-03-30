@@ -11,15 +11,14 @@
     cursor: pointer;
     user-select: none;
     width: auto;
-    max-width: 350px;
-    max-height: 530px;
+    max-width: 300px;
+    max-height: 480px;
     transition:
         box-shadow 0.3s,
         transform 0.2s;
 }
 
 .game-preview-container:hover {
-    transform: scale(1.03);
     box-shadow:
         4px 4px 0 #aeb4be,
         4px 4px 12px rgba(0, 0, 0, 0.3);
@@ -39,7 +38,7 @@
 .game-preview img {
     width: 100%;
     height: auto;
-    max-height: 300px;
+    max-height: 250px;
     object-fit: contain;
     border-radius: 10px;
     border: 2px solid #aeb4be;
@@ -47,7 +46,6 @@
 
 .game-info {
     font-family: 'Pixel', sans-serif;
-
     font-size: 16px;
     margin-top: 8px;
     font-weight: bold;

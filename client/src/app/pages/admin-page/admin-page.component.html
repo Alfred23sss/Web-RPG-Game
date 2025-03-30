@@ -6,14 +6,19 @@
         <li class="game-item">
             <div class="game-info">
                 <app-game-info [game]="game">
-                    <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu </label>
-
-                    <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">
-                        <img src="../../../assets/game-decorations/pencil-iconA.png" alt="Edit Game" class="icon" />
-                    </button>
-                    <button class="button" (click)="deleteGame(game.id)">
-                        <img src="../../../assets/game-decorations/trashCanA.png" alt="Delete Game" class="icon" />
-                    </button>
+                    <div>
+                        <label>
+                            <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu
+                        </label>
+                    </div>
+                    <div class="info-button-container">
+                        <button class="button info-button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">
+                            <img src="../../../assets/game-decorations/pencil-iconA.png" alt="Edit Game" class="icon" />
+                        </button>
+                        <button class="button info-button" (click)="deleteGame(game.id)">
+                            <img src="../../../assets/game-decorations/trashCanB.png" alt="Delete Game" class="icon" />
+                        </button>
+                    </div>
                 </app-game-info>
             </div>
         </li>
