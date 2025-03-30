@@ -2,8 +2,8 @@ import { EventEmit } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
+import { GameSessionService } from '@app/services/classic-game-session/classic-game-session.service';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
-import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 

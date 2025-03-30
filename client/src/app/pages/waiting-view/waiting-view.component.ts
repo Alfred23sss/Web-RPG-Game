@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages, GameModeType, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -106,7 +106,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         }
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             this.isGameStartedEmitted = true;
-            this.socketClientService.emit('createGame', { accessCode: this.accessCode });
+            this.socketClientService.emit('createGame', { accessCode: this.accessCode, gameMode: GameModeType.CTF }); // mettre ici le actual game Mode que le client a choisi
         }
 
         this.lobbyService.setIsGameStarting(true);

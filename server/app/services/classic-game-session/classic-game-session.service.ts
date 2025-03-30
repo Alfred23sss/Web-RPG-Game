@@ -2,6 +2,7 @@ import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
+import { BaseGameSessionService } from '@app/services/base-game-session/base-game-session.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -13,16 +14,17 @@ import { Item } from '@app/interfaces/Item';
 const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
-export class GameSessionService {
-    private gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
+export class ClassicGameSessionService extends BaseGameSessionService {
+    protected gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
 
     constructor(
         // private readonly inventoryManager: InventoryManagerService,
         private readonly lobbyService: LobbyService,
-        private readonly eventEmitter: EventEmitter2,
+        eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
         private readonly turnService: GameSessionTurnService,
     ) {
+        super(eventEmitter);
         this.eventEmitter.on(EventEmit.GameTurnTimeout, ({ accessCode }) => {
             this.endTurn(accessCode);
         });
@@ -265,9 +267,5 @@ export class GameSessionService {
         if (!gameSession) return;
 
         this.turnService.startTransitionPhase(accessCode, gameSession.turn);
-    }
-
-    private emitEvent<T>(eventName: string, payload: T): void {
-        this.eventEmitter.emit(eventName, payload);
     }
 }
