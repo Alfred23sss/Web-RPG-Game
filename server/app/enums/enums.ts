@@ -10,9 +10,9 @@ export enum GameDecorations {
 }
 
 export enum GameModeType {
-    Classic = 'assets/gamemodes/classic-game.png',
-    CTF = 'assets/gamemodes/CTF-game.png',
-    Default = 'assets/gamemodes/classic-game.png',
+    Classic = './assets/gamemodes/classic.png',
+    CTF = './assets/gamemodes/CTF.png',
+    Default = './assets/gamemodes/classic.png',
 }
 
 export enum AvatarType {
