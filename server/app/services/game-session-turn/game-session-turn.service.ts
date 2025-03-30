@@ -30,6 +30,15 @@ export class GameSessionTurnService {
         };
     }
 
+    initializeTurnCTF(accessCode: string) {
+        const turn = this.initializeTurn(accessCode);
+        const shuffledPlayers = [...turn.orderedPlayers].sort(() => Math.random() - RANDOMIZER);
+        const teamSize = Math.ceil(shuffledPlayers.length / 2);
+        const redTeam = shuffledPlayers.slice(0, teamSize);
+        const blueTeam = shuffledPlayers.slice(teamSize);
+        return { turn, redTeam, blueTeam };
+    }
+
     startTransitionPhase(accessCode: string, turn: Turn): Turn {
         turn.isTransitionPhase = true;
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
