@@ -9,7 +9,7 @@ describe('AccessCodesCommunicationService', () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpClientTestingModule], // Changed from providers to imports
+            imports: [HttpClientTestingModule],
             providers: [AccessCodesCommunicationService],
         });
 
