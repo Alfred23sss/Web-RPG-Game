@@ -159,8 +159,11 @@ export class GameSessionService {
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
-            if (movement[i].item !== undefined && movement[i].item.name !== ItemName.Home) {
-                isCurrentlyMoving = false;
+            if (movement[i].item && movement[i].item !== undefined) {
+                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
+                if (movement[i].item.name !== ItemName.Home) {
+                    isCurrentlyMoving = false;
+                }
             }
             this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                 accessCode,
@@ -168,7 +171,8 @@ export class GameSessionService {
                 player,
                 isCurrentlyMoving,
             });
-            if (!isCurrentlyMoving && movement[i].item !== undefined) {
+            if (!isCurrentlyMoving && movement[i].item && movement[i].item !== undefined) {
+                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
                 if (movement[i].item.name !== ItemName.Home) {
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
                     break;
