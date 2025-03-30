@@ -45,7 +45,7 @@ export class GridComponent {
     onTileClick(tile: Tile): void {
         if (tile.player) {
             this.playerAttacked.emit(tile);
-        } else if (tile.type === TileType.Door) {
+        } else if (tile.type === TileType.Door && !tile.item) {
             this.doorClicked.emit(tile);
         }
         if (this.isAvailablePath(tile)) {

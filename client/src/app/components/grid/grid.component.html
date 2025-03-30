@@ -22,7 +22,7 @@
                 'available-path': isAvailablePath(tile),
                 'quickest-path': isInQuickestPath(tile) && isAvailablePath(tile),
                 'highlight-player': isActionMode && tile.player,
-                'highlight-door': isActionMode && tile.type === tileType.Door
+                'highlight-door': isActionMode && tile.type === tileType.Door && !tile.item
             }"
             [isEditionMode]="isEditionMode"
         ></app-tile>
