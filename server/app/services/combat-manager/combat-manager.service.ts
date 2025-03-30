@@ -231,6 +231,7 @@ export class GameCombatService {
     private handleCombatEnd(combatState: CombatState, defenderPlayer: Player, accessCode: string): void {
         combatState.currentFighter.combatWon++;
         this.resetHealth([combatState.currentFighter, defenderPlayer], accessCode);
+        this.gameSessionService.handlePlayerItemReset(accessCode, defenderPlayer);
         const updatedGridAfterTeleportation = this.combatHelper.resetLoserPlayerPosition(
             defenderPlayer,
             this.gameSessionService.getGameSession(accessCode).game.grid,
