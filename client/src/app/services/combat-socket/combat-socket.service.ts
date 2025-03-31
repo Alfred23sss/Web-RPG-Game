@@ -54,6 +54,7 @@ export class CombatSocketService {
     private onCombatTurnStarted(): void {
         this.socketClientService.on('combatTurnStarted', (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
+            console.log(`current player: ${data.fighter.name}`);
             gameData.currentPlayer = data.fighter;
             this.gameStateService.updateGameData(gameData);
         });

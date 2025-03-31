@@ -73,7 +73,7 @@ export class GameGateway {
         @ConnectedSocket() client: Socket,
         @MessageBody() payload: { accessCode: string; attackerName: string; defenderName: string; isDebugMode: boolean },
     ) {
-        this.logger.log(`Starting combat for game ${payload.accessCode}`);
+        this.logger.log(`Starting combat for game ${payload.accessCode}, ${payload.attackerName} and ${payload.defenderName}`);
         this.gameCombatService.startCombat(payload.accessCode, payload.attackerName, payload.defenderName, payload.isDebugMode);
     }
 
@@ -144,6 +144,7 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameTurnResumed)
     handleGameTurnResumed(payload: { accessCode: string; player: Player }): void {
+        this.logger.log(`resuming turn for ${payload.player.name}`);
         this.server.to(payload.accessCode).emit('gameTurnResumed', {
             player: payload.player,
         });
@@ -183,7 +184,7 @@ export class GameGateway {
 
     @OnEvent(EventEmit.PlayerUpdate)
     handlePlayerClientUpdate(payload: { accessCode: string; player: Player }) {
-        Logger.log('playerUpdateEventCalled');
+        this.logger.log(`playerUpdateClientEventCalled ${payload.player.name}`);
         this.server.to(payload.accessCode).emit('playerClientUpdate', {
             player: payload.player,
         });
@@ -209,7 +210,7 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameTurnStarted)
     handleTurnStarted(payload: { accessCode: string; player: Player }) {
-        this.logger.log(`Received turn started event for game ${payload.accessCode}`);
+        this.logger.log(`Received turn started event for game ${payload.accessCode}  and player ${payload.player.name}`);
         this.server.to(payload.accessCode).emit('turnStarted', {
             player: payload.player,
             turnDuration: 30,
@@ -236,6 +237,7 @@ export class GameGateway {
 
     @OnEvent(EventEmit.UpdatePlayer)
     handleDefenderHealthUpdate(payload: { player: Player }) {
+        this.logger.log(`playerUpdateEventCalled ${payload.player.name}`);
         const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
         this.server.to(socketId).emit('playerUpdate', {
             player: payload.player,
@@ -292,7 +294,6 @@ export class GameGateway {
     handleCombatTimerUpdate(payload: { accessCode: string; attacker: Player; defender: Player; timeLeft: number }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
-        this.logger.log(`attacker socket id ${attackerSocketId}, defender socket it ${defenderSocketId}`);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatTimerUpdate', {
             timeLeft: payload.timeLeft,
@@ -308,7 +309,7 @@ export class GameGateway {
     handleCombatTurnStarted(payload: { accessCode: string; player: Player; defender: Player }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
-        this.logger.log(`attacker socket id ${attackerSocketId}, defender socket it ${defenderSocketId}`);
+        this.logger.log(`attacker ${payload.player.name}, defender  ${payload.defender.name}`);
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatTurnStarted', {
             fighter: payload.player,
