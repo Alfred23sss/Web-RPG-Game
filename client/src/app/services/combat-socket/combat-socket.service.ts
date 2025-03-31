@@ -3,18 +3,19 @@ import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Player } from '@app/interfaces/player';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 @Injectable({
     providedIn: 'root',
 })
 export class CombatSocketService {
+    playersInFight: Player[] = [];
     constructor(
         private socketClientService: SocketClientService,
         private gameStateService: GameStateSocketService,
-        private snackbarService: SnackbarService,
+        private clientNotifier: ClientNotifierServices,
         private dialog: MatDialog,
         private gameplayService: GameplayService,
     ) {}
@@ -26,12 +27,15 @@ export class CombatSocketService {
         this.onCombatTimerUpdate();
         this.onEscapeAttempt();
         this.onCombatEnded();
+        this.onCombatEndedLog();
+        this.onCombatStartedLog();
     }
     private onCombatStarted(): void {
         this.socketClientService.on('combatStarted', (data: { attacker: Player; defender: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
-            this.gameStateService.updateGameData(gameData);
+            this.playersInFight = gameData.lobby.players.filter((p) => p.name === data.attacker.name || p.name === data.defender.name);
+            this.clientNotifier.addLogbookEntry('Combat commencé!', [data.attacker, data.defender]);
 
             this.dialog.open(GameCombatComponent, {
                 width: '800px',
@@ -46,6 +50,10 @@ export class CombatSocketService {
         this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: number; defenseScore: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             this.gameplayService.updateAttackResult(gameData, data);
+
+            const attackOutcome = data.success ? 'réussie' : 'échouée';
+            this.clientNotifier.addLogbookEntry(`Attaque ${attackOutcome} (Attaque: ${data.attackScore}, Défense: ${data.defenseScore})`);
+
             gameData.evadeResult = null;
             this.gameStateService.updateGameData(gameData);
         });
@@ -74,6 +82,8 @@ export class CombatSocketService {
             gameData.evadeResult = data;
             gameData.attackResult = null;
             gameData.escapeAttempts = data.attemptsLeft;
+            const hasEvaded = data.isEscapeSuccessful ? 'réussi' : 'raté';
+            this.clientNotifier.addLogbookEntry(`Tentative d'évasion ${hasEvaded}`, []); // pt rajoute nom joueur ici
             this.gameStateService.updateGameData(gameData);
         });
     }
@@ -89,15 +99,31 @@ export class CombatSocketService {
             gameData.attackResult = null;
             gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             if (data && data.winner && !data.hasEvaded) {
-                this.snackbarService.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
+                this.clientNotifier.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             } else {
-                this.snackbarService.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
+                this.clientNotifier.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             }
             if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
             this.gameStateService.updateGameData(gameData);
             this.gameStateService.updateClosePopup();
+        });
+    }
+
+    private onCombatEndedLog(): void {
+        this.socketClientService.on('combatEndedLog', (data: { winner: Player; attacker: Player; defender: Player; hasEvaded: boolean }) => {
+            if (!data.hasEvaded) {
+                this.clientNotifier.addLogbookEntry(`Combat gagné par ${data.winner.name}`, [data.attacker, data.defender]);
+            } else {
+                this.clientNotifier.addLogbookEntry(`Combat évadé par ${data.winner.name}`, [data.attacker, data.defender]);
+            }
+        });
+    }
+
+    private onCombatStartedLog(): void {
+        this.socketClientService.on('combatStartedLog', (data: { attacker: Player; defender: Player }) => {
+            this.clientNotifier.addLogbookEntry('Combat commencé', [data.attacker, data.defender]);
         });
     }
 }

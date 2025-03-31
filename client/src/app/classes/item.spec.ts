@@ -1,3 +1,4 @@
+import { GameData } from './gameData';
 import { Item } from './item';
 
 describe('Item', () => {
@@ -38,5 +39,11 @@ describe('Item', () => {
 
         expect(clonedItem1.id).not.toBe(item.id);
         expect(clonedItem2.id).not.toBe(clonedItem1.id);
+    });
+
+    it('should update properties with update()', () => {
+        const gameData = new GameData();
+        gameData.update({ isInCombatMode: true });
+        expect(gameData.isInCombatMode).toBeTrue();
     });
 });

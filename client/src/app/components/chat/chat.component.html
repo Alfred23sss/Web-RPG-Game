@@ -1,7 +1,12 @@
 <div class="game-messages">
-    <h3>Messages</h3>
+    <h3>Messages - {{ author }}</h3>
 
     <div class="messages-content">
-        <p>Panneau des messages (clavardage).</p>
+        @for (message of messages; track message) {
+        <p>{{ message }}</p>
+        }
     </div>
+
+    <input type="text" [(ngModel)]="newMessage" placeholder="Écrire un message..." />
+    <button (click)="sendMessage()">Envoyer</button>
 </div>

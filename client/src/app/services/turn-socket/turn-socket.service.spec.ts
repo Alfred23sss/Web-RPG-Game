@@ -113,7 +113,7 @@ describe('TurnSocketService', () => {
 
         socketEvents['transitionStarted'](TRANSITION_DATA);
 
-        expect(snackbarServiceSpy.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${MOCK_PLAYER.name} commence dans 5 secondes`);
+        expect(snackbarServiceSpy.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${MOCK_PLAYER.name} commence dans 5 secondes`, 'Close', 3000);
         expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(MOCK_PLAYER);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
@@ -123,11 +123,10 @@ describe('TurnSocketService', () => {
 
         socketEvents['transitionStarted'](TRANSITION_DATA);
 
-        expect(snackbarServiceSpy.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${MOCK_PLAYER.name} commence dans 5 secondes`);
+        expect(snackbarServiceSpy.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${MOCK_PLAYER.name} commence dans 5 secondes`, 'Close', 3000);
         expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name).not.toBe(MOCK_PLAYER.name);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
-
     it('should handle gameTurnResumed event', () => {
         const resumeData = { player: MOCK_PLAYER };
 

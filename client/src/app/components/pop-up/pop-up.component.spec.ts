@@ -78,11 +78,9 @@ describe('PopUpComponent', () => {
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GameMode.Classic);
         });
 
-        it('should reset the mode and show an error if CTF is selected', () => {
+        it('should set CTF when CTF is selected', () => {
             component.setGameType(GameMode.CTF);
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GameMode.CTF);
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.UnavailableGameMode);
-            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('' as GameMode);
         });
 
         it('should set the mode even if it is invalid', () => {
