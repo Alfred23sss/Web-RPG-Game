@@ -1,23 +1,18 @@
-import { AttributeType, ItemName, TileType } from '@app/enums/enums';
+import { AttributeType, ItemName } from '@app/enums/enums';
 import { Item, ItemModifier } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
 import { Injectable } from '@nestjs/common';
 
 const HEALTH_CONDITION_THRESHOLD = 0.5;
 
 @Injectable()
 export class ItemEffectsService {
-    addEffect(player: Player, item: Item, tile: Tile) {
+    addEffect(player: Player, item: Item) {
         if (item === null) return;
         console.log(`Picked up: ${item.name}`);
         this.applyItemModifiers(item);
 
-        if (
-            item.isActive ||
-            (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
-            (item.name === ItemName.Stop && !this.isIceConditionValid(tile, item))
-        ) {
+        if (item.isActive || (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item))) {
             console.log('conditions failed');
             return;
         }
@@ -29,8 +24,12 @@ export class ItemEffectsService {
 
     removeEffects(player: Player, index: number): void {
         const item = player.inventory[index];
+        console.log('removeEffects');
 
-        if (!item || !item.isActive) return;
+        if (!item || !item.isActive || (item.name === ItemName.Fire && this.isHealthConditionValid(player, item))) {
+            console.log('conditions failed');
+            return;
+        }
 
         if (item.modifiers) {
             item.modifiers.forEach((mod) => this.applyModifier(player, mod, -1));
@@ -60,7 +59,13 @@ export class ItemEffectsService {
         }
     }
 
+    isHealthConditionValid(player: Player, item: Item): boolean {
+        return item.name !== ItemName.Fire || player.hp.current <= player.hp.max * HEALTH_CONDITION_THRESHOLD;
+    }
+
     private applyModifier(player: Player, modifier: ItemModifier, multiplier: number) {
+        console.log('Applying Modifiers');
+        console.log(`Multiplier: ${multiplier}`);
         const adjustedValue = modifier.value * multiplier;
         switch (modifier.attribute) {
             case AttributeType.Attack:
@@ -82,11 +87,7 @@ export class ItemEffectsService {
         }
     }
 
-    private isHealthConditionValid(player: Player, item: Item): boolean {
-        return item.name !== ItemName.Fire || player.hp.current <= player.hp.max * HEALTH_CONDITION_THRESHOLD;
-    }
-
-    private isIceConditionValid(tile: Tile, item: Item): boolean {
-        return item.name !== ItemName.Stop || tile.type === TileType.Ice;
-    }
+    // private isIceConditionValid(tile: Tile, item: Item): boolean {
+    //     return item.name !== ItemName.Stop || tile.type === TileType.Ice;
+    // }
 }

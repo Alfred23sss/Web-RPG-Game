@@ -213,7 +213,7 @@ export class GameSessionService {
             for (let i = 0; i < player.inventory.length; i++) {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
-                    this.itemEffectsService.addEffect(player, tile.item, tile);
+                    this.itemEffectsService.addEffect(player, tile.item);
                     tile.item = undefined;
                     player = {
                         ...player,
@@ -253,7 +253,7 @@ export class GameSessionService {
             player.inventory.push(tile.item);
             tile.item = item;
             tile.player = player;
-            this.itemEffectsService.addEffect(player, newItem, tile);
+            this.itemEffectsService.addEffect(player, newItem);
         }
         player = {
             ...player,

@@ -175,8 +175,17 @@ export class GameCombatService {
     private resetHealth(players: Player[], accessCode): void {
         players.forEach((player) => {
             player.hp.current = player.hp.max;
+            this.resetStats(player);
             this.emitEvent(EventEmit.UpdatePlayer, { player });
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
+        });
+    }
+
+    private resetStats(player: Player): void {
+        player.inventory.forEach((item, index) => {
+            if (!(item === null) && !this.itemEffectsService.isHealthConditionValid(player, item)) {
+                this.itemEffectsService.removeEffects(player, index);
+            }
         });
     }
 
@@ -224,7 +233,7 @@ export class GameCombatService {
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
 
         defenderPlayer.inventory.forEach((item) => {
-            this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
+            this.itemEffectsService.addEffect(defenderPlayer, item);
         });
 
         this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
