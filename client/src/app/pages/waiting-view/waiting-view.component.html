@@ -1,68 +1,89 @@
-<div class="waiting-view">
-    @if (isLoading) {
-    <p>Chargement en cours...</p>
-    } @else {
-    <p>En attente de participants...</p>
+<div class="waiting-container">
+    <div class="waiting-view">
+        @if (isLoading) {
+        <div class="loading-screen">
+            <p class="pixel-text">Chargement en cours...</p>
+            <div class="pixel-loader"></div>
+        </div>
+        } @else {
+        <div class="waiting-header">
+            <h1 class="pixel-title">Salle d'attente</h1>
 
-    @if (lobby) {
-    <p>
-        Votre code d'accès: <strong>{{ lobby.accessCode }}</strong>
-    </p>
-
-    <div class="waiting-line">
-        <h2>Liste des joueurs en attente</h2>
-        <ul>
-            @for (player of lobby.players; track $index) {
-            <li>
-                <div class="player-info">
-                    <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
-                    @if (player.isVirtual) {
-                    <span class="virtual-player-name player-name">{{ player.name }}</span>
-                    } @else if (player.name === this.player?.name) {
-                    <span class="yellow-tag player-name">{{ player.name }}</span>
-                    } @else {
-                    <span class="player-name">{{ player.name }}</span>
-                    }
-                </div>
-                <div class="player-actions">
-                    @if (player.isAdmin) {
-                    <span class="admin-badge">Admin</span>
-                    } @if (player.isVirtual) {
-                    <span class="virtual-badge">Virtuel</span>
-                    } @if (player && this.player?.isAdmin && !player.isAdmin) {
-                    <button class="kick-button" (click)="player.isVirtual ? kickVirtualPlayer(player) : kickPlayer(player)">Expulser</button>
-                    }
-                </div>
-            </li>
+            @if (lobby) {
+            <div class="access-code-box">
+                <p class="pixel-text">Code d'accès:</p>
+                <p class="pixel-code">{{ lobby.accessCode }}</p>
+            </div>
             }
-        </ul>
+        </div>
+
+        <div class="player-list-container">
+            <h2 class="pixel-subtitle">Joueurs connectés</h2>
+            <div class="player-list">
+                @for (player of lobby?.players; track $index) {
+                <div class="player-card" [class.admin-card]="player.isAdmin" [class.your-card]="player.name === this.player?.name">
+                    <div class="player-avatar-container">
+                        <img [src]="player.avatar" alt="Avatar" class="player-avatar" />
+                        @if (player.isAdmin) {
+                        <span class="admin-badge">ADMIN</span>
+                        }
+                    </div>
+
+                    <div class="player-info">
+                        @if (player.isVirtual) {
+                        <span class="virtual-tag">VIRTUEL</span>
+                        }
+                        <span class="player-name pixel-text">{{ player.name }}</span>
+                    </div>
+                    @if (player && this.player?.isAdmin && !player.isAdmin) {
+                    <button class="pixel-button kick-button" (click)="player.isVirtual ? kickVirtualPlayer(player) : kickPlayer(player)">
+                        <span class="pixel-text">EXPULSER</span>
+                    </button>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="button leave-button" (click)="navigateToHome()">
+                <span class="pixel-text">QUITTER</span>
+            </button>
+
+            @if (player?.isAdmin) {
+            <button class="button start-button" (click)="navigateToGame()">
+                <span class="pixel-text">COMMENCER</span>
+            </button>
+
+            <button class="button lock-button" (click)="changeLobbyLockStatus()">
+                <span class="pixel-text">{{ lobby?.isLocked ? 'DÉVERROUILLER' : 'VERROUILLER' }}</span>
+            </button>
+
+            <button class="button virtual-button" (click)="createVirtualPlayer()" [disabled]="lobby?.isLocked">
+                <span class="pixel-text">🤖 JOUEUR VIRTUEL</span>
+            </button>
+            }
+        </div>
+
+        @if (isDialogOpen) {
+        <div class="pixel-modal-backdrop"></div>
+        <div class="pixel-modal">
+            <h3 class="pixel-modal-title">COMPORTEMENT DU JOUEUR</h3>
+
+            <div class="behavior-options">
+                @for (behavior of behaviors; track $index) {
+                <button class="button behavior-option" (click)="setBehavior(behavior)">
+                    <span class="pixel-text">{{ behavior }}</span>
+                </button>
+                }
+            </div>
+
+            <button class="button cancel-button" (click)="cancelVirtualPlayer()">
+                <span class="pixel-text">ANNULER</span>
+            </button>
+        </div>
+        } }
     </div>
 
-    <button class="button" (click)="navigateToHome()">Quitter</button>
-
-    @if (player?.isAdmin) {
-    <button class="button" (click)="navigateToGame()">Commencer la partie</button>
-    <button class="button" (click)="changeLobbyLockStatus()">
-        {{ lobby.isLocked ? 'Déverrouiller' : 'Verrouiller' }}
-    </button>
-
-    <button class="button create-virtual-button" (click)="createVirtualPlayer()" [disabled]="lobby.isLocked" [class.disabled]="lobby.isLocked">
-        Create Virtual Player
-    </button>
-
-    @if (isDialogOpen) {
-    <div class="backdrop"></div>
-    <div class="behavior-dialog">
-        <h3>Choisi le comportement du joueur virtuel</h3>
-
-        @for (behavior of behaviors; track $index) {
-        <button class="button-behavior" (click)="setBehavior(behavior)">
-            {{ behavior }}
-        </button>
-        }
-        <button class="button-behavior" (click)="cancelVirtualPlayer()">Annuler</button>
-    </div>
-    }} } }
+    <app-chat [author]="playerName"></app-chat>
 </div>
-
-<app-chat [author]="playerName"></app-chat>
