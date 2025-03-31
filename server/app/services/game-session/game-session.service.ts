@@ -215,13 +215,15 @@ export class GameSessionService {
                     player.inventory[i] = tile.item;
                     this.itemEffectsService.addEffect(player, tile.item, tile);
                     tile.item = undefined;
-                    this.updateGameSessionPlayerList(accessCode, player.name, {
-                        inventory: player.inventory,
+                    player = {
+                        ...player,
                         attack: { ...player.attack },
                         defense: { ...player.defense },
                         hp: { ...player.hp },
                         speed: player.speed,
-                    });
+                        inventory: player.inventory,
+                    };
+                    this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
                     this.emitGridUpdate(accessCode, gameSession.game.grid);
                     this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                         accessCode,
@@ -245,13 +247,24 @@ export class GameSessionService {
         const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
         const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
         if (index !== -1) {
+            this.itemEffectsService.removeEffects(player, index);
+            const newItem = tile.item;
             player.inventory.splice(index, 1);
             player.inventory.push(tile.item);
             tile.item = item;
             tile.player = player;
+            this.itemEffectsService.addEffect(player, newItem, tile);
         }
+        player = {
+            ...player,
+            attack: { ...player.attack },
+            defense: { ...player.defense },
+            hp: { ...player.hp },
+            speed: player.speed,
+            inventory: player.inventory,
+        };
         this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
         this.eventEmitter.emit(EventEmit.PlayerUpdate, {
             accessCode,
             player,
@@ -262,6 +275,12 @@ export class GameSessionService {
         const gameSession = this.getGameSession(accessCode);
         const grid = gameSession.game.grid;
         const playerTile = this.gridManager.findTileByPlayer(grid, player);
+
+        player.inventory.forEach((item, index) => {
+            if (item !== null) {
+                this.itemEffectsService.removeEffects(player, index);
+            }
+        });
 
         const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
 
@@ -274,10 +293,16 @@ export class GameSessionService {
                 availableTile.item = item;
             }
         });
-        player.inventory = [null, null];
-
+        player = {
+            ...player,
+            attack: { ...player.attack },
+            defense: { ...player.defense },
+            hp: { ...player.hp },
+            speed: player.speed,
+            inventory: [null, null],
+        };
         this.emitGridUpdate(accessCode, grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
 
         this.eventEmitter.emit(EventEmit.PlayerUpdate, {
             accessCode,

@@ -74,7 +74,7 @@ export class GameSocketService {
 
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name){
+            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
         });
@@ -124,6 +124,7 @@ export class GameSocketService {
             if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
                 this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
             }
+
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
@@ -131,9 +132,16 @@ export class GameSocketService {
                         this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
                         data.player,
                     );
-                this.gameStateService.gameDataSubjectValue.clientPlayer.inventory = data.player.inventory;
+                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
+                player.inventory = data.player.inventory;
+                player.hp = data.player.hp;
+                player.attack.value = data.player.attack.value;
+                player.defense.value = data.player.defense.value;
+                player.speed = data.player.speed;
+
                 this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
+
                 this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
                 this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             }

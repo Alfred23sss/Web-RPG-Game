@@ -9,15 +9,9 @@ const HEALTH_CONDITION_THRESHOLD = 0.5;
 @Injectable()
 export class ItemEffectsService {
     addEffect(player: Player, item: Item, tile: Tile) {
+        if (item === null) return;
         console.log(`Picked up: ${item.name}`);
-
-        if (item.name === ItemName.Potion) {
-            item.modifiers = [
-                { attribute: AttributeType.Attack, value: 2 },
-                { attribute: AttributeType.Defense, value: -1 },
-            ];
-            item.isActive = false;
-        }
+        this.applyItemModifiers(item);
 
         if (
             item.isActive ||
@@ -27,17 +21,43 @@ export class ItemEffectsService {
             console.log('conditions failed');
             return;
         }
-
-        item.modifiers.forEach((mod) => this.applyModifier(player, mod, 1));
+        if (item.modifiers) {
+            item.modifiers.forEach((mod) => this.applyModifier(player, mod, 1));
+        }
         item.isActive = true;
     }
 
-    removeEffect(player: Player, item: Item) {
-        if (!item.isActive) return;
+    removeEffects(player: Player, index: number): void {
+        const item = player.inventory[index];
 
-        item.modifiers.forEach((mod) => this.applyModifier(player, mod, -1));
+        if (!item || !item.isActive) return;
+
+        if (item.modifiers) {
+            item.modifiers.forEach((mod) => this.applyModifier(player, mod, -1));
+        }
 
         item.isActive = false;
+    }
+
+    applyItemModifiers(item: Item) {
+        if (item.name === ItemName.Potion) {
+            item.modifiers = [
+                { attribute: AttributeType.Attack, value: 2 },
+                { attribute: AttributeType.Defense, value: -1 },
+            ];
+            item.isActive = false;
+        }
+        if (item.name === ItemName.Rubik) {
+            item.modifiers = [
+                { attribute: AttributeType.Speed, value: 2 },
+                { attribute: AttributeType.Defense, value: -1 },
+            ];
+            item.isActive = false;
+        }
+        if (item.name === ItemName.Fire) {
+            item.modifiers = [{ attribute: AttributeType.Attack, value: 2 }];
+            item.isActive = false;
+        }
     }
 
     private applyModifier(player: Player, modifier: ItemModifier, multiplier: number) {

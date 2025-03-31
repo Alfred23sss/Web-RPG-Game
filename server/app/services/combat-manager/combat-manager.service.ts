@@ -6,6 +6,7 @@ import { CombatHelperService } from '@app/services/combat-helper/combat-helper.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ItemEffectsService } from '../item-effects/item-effects.service';
 
 const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
@@ -22,6 +23,7 @@ export class GameCombatService {
         private readonly gameSessionService: GameSessionService,
         private readonly eventEmitter: EventEmitter2,
         private readonly combatHelper: CombatHelperService,
+        private readonly itemEffectsService: ItemEffectsService,
     ) {}
 
     handleCombatSessionAbandon(accessCode: string, playerName: string): void {
@@ -220,6 +222,11 @@ export class GameCombatService {
     ): void {
         const attackDamage = attackerScore - defenseScore;
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
+
+        defenderPlayer.inventory.forEach((item) => {
+            this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
+        });
+
         this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
         if (defenderPlayer.hp.current === 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);
