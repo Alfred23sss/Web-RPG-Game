@@ -102,7 +102,7 @@ export class GameCombatService {
         if (!combatState) return;
         this.resetCombatTimers(accessCode);
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
-        this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded });
+        this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
         this.gameSessionService.setCombatState(accessCode, false);

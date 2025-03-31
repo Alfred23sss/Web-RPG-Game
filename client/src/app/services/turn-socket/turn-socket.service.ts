@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { DEFAULT_ACTION_POINTS } from '@app/constants/global.constants';
 import { Player } from '@app/interfaces/player';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 @Injectable({
     providedIn: 'root',
@@ -12,7 +12,7 @@ export class TurnSocketService {
     constructor(
         private socketClientService: SocketClientService,
         private gameStateService: GameStateSocketService,
-        private snackbarService: SnackbarService,
+        private clientNotifier: ClientNotifierServices,
         private gameplayService: GameplayService,
     ) {}
 
@@ -26,7 +26,8 @@ export class TurnSocketService {
     private onTurnStarted(): void {
         this.socketClientService.on('turnStarted', (data: { player: Player; turnDuration: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
-            this.snackbarService.showMessage(`C'est à ${data.player.name} de jouer`);
+            this.clientNotifier.displayMessage(`C'est à ${data.player.name} de jouer`);
+            this.clientNotifier.addLogbookEntry(`C'est à ${data.player.name} de jouer`, [data.player]);
             gameData.currentPlayer = data.player;
             gameData.isCurrentlyMoving = false;
             gameData.isActionMode = false;
@@ -51,7 +52,7 @@ export class TurnSocketService {
     private onTransitionStarted(): void {
         this.socketClientService.on('transitionStarted', (data: { nextPlayer: Player; transitionDuration: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
-            this.snackbarService.showMultipleMessages(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
+            this.clientNotifier.showMultipleMessages(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
             if (data.nextPlayer.name === gameData.clientPlayer.name) {
                 gameData.clientPlayer = data.nextPlayer;
             }
