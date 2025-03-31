@@ -106,7 +106,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
             return;
         }
-        if (this.lobby.players.length < MIN_PLAYERS) {
+        if (this.lobby.players.length < MIN_PLAYERS || (this.lobby.game?.mode === 'CTF' && this.lobby.players.length % 2 !== 0)) {
             this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
             return;
         }
