@@ -7,8 +7,6 @@ export class Item {
     name: string = '';
     itemCounter: number = 0;
     description: string = '';
-    modifiers?: ItemModifier[];
-    isActive?: boolean;
 
     constructor(init?: Partial<Item>) {
         if (init) {
