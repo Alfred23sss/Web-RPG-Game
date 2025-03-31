@@ -1,37 +1,59 @@
-<div class="info-title">
-    <label>Mode de jeu:</label>
-    <p>{{ game.mode }}</p>
-</div>
-<div class="page" cdkDropListGroup>
-    <div class="sidebar">
-        <div class="toolbar-section">
-            <app-toolbar id="toolbar"></app-toolbar>
-        </div>
-        <div class="itembar-section">
-            <app-item-bar id="itembar"></app-item-bar>
-        </div>
-    </div>
+<div class="editor-container">
+    <div class="editor-layout">
+        <div class="editor-sidebar">
+            <div class="game-mode-header">
+                <p class="pixel-accent">{{ game.mode }}</p>
+            </div>
+            <div class="toolbar-section">
+                <app-toolbar id="toolbar"></app-toolbar>
+            </div>
 
-    <div class="main-content">
-        <div id="game-preview">
-            <app-grid [grid]="game.grid" [isEditionMode]="true"></app-grid>
+            <div class="itembar-section">
+                <app-item-bar id="itembar"></app-item-bar>
+            </div>
         </div>
-    </div>
 
-    <div class="game-info">
-        <h3>Éditeur de jeux</h3>
-        <div class="info-title">
-            <label for="game-name">Nom du jeu</label>
-            <input id="game-name" type="text" [(ngModel)]="gameName" maxlength="30" placeholder="Entrer le nom du jeu" required />
+        <div class="editor-main pixel-panel">
+            <div id="game-preview">
+                <app-grid [grid]="game.grid" [isEditionMode]="true"></app-grid>
+            </div>
         </div>
-        <div class="info-title">
-            <label for="game-description">Description du jeu</label>
-            <textarea id="game-description" [(ngModel)]="gameDescription" maxlength="100" placeholder="Entrer le nom de la description" required></textarea>
-        </div>
-        <div class="button-grid">
-            <button class="button" (click)="save()" [disabled]="isSaving">{{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}</button>
-            <button class="button" (click)="reset()">Réinitialiser</button>
-            <button class="button" (click)="backToAdmin()">Retour à l'acceuil</button>
+
+        <div class="editor-controls pixel-panel">
+            <h3 class="pixel-title">Éditeur de jeux</h3>
+
+            <div class="info-title pixel-text">
+                <label for="game-name">Nom du jeu</label>
+                <input
+                    id="game-name"
+                    type="text"
+                    class="pixel-input"
+                    [(ngModel)]="gameName"
+                    maxlength="30"
+                    placeholder="Entrer le nom du jeu"
+                    required
+                />
+            </div>
+
+            <div class="info-title pixel-text">
+                <label for="game-description">Description</label>
+                <textarea
+                    id="game-description"
+                    class="pixel-textarea"
+                    [(ngModel)]="gameDescription"
+                    maxlength="100"
+                    placeholder="Description du jeu"
+                    required
+                ></textarea>
+            </div>
+
+            <div class="button-grid">
+                <button class="pixel-button save-button" (click)="save()" [disabled]="isSaving">
+                    {{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}
+                </button>
+                <button class="pixel-button reset-button" (click)="reset()">Réinitialiser</button>
+                <button class="pixel-button home-button" (click)="backToAdmin()">Retour</button>
+            </div>
         </div>
     </div>
 </div>
