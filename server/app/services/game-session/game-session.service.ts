@@ -166,18 +166,19 @@ export class GameSessionService {
                     isCurrentlyMoving = false;
                 }
             }
-            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
-                accessCode,
-                grid: gameSession.game.grid,
-                player,
-                isCurrentlyMoving,
-            });
             if (!isCurrentlyMoving && movement[i].item && movement[i].item !== undefined) {
                 // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
                 if (movement[i].item.name !== ItemName.Home) {
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
                     break;
                 }
+            } else {
+                this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+                    accessCode,
+                    grid: gameSession.game.grid,
+                    player,
+                    isCurrentlyMoving,
+                });
             }
         }
     }
