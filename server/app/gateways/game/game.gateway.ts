@@ -31,9 +31,10 @@ export class GameGateway {
         this.logger.log(payload.accessCode);
         this.gameModeSelector.registerGameMode(payload.accessCode, payload.gameMode);
         const gameService = this.gameModeSelector.getService(payload.gameMode);
-        this.logger.log(`type du service cree ${typeof gameService}`);
+        this.logger.log(`type du service cree ${payload.gameMode}`);
         const gameSession = gameService.createGameSession(payload.accessCode);
         this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers, updatedGame: gameSession.game });
+
         Logger.log('emitting gameStarted');
         this.logger.log('game created emitted');
     }
@@ -326,6 +327,21 @@ export class GameGateway {
 
         this.server.to([attackerSocketId, defenderSocketId]).emit('combatTurnStarted', {
             fighter: payload.player,
+        });
+    }
+
+    @OnEvent(EventEmit.TeamCreated)
+    handleTeamCreated(payload: { redTeam: Player[]; blueTeam: Player[]; accessCode: string }) {
+        for (const player of payload.redTeam) {
+            this.logger.log(player.name);
+        }
+        for (const player of payload.blueTeam) {
+            this.logger.log(player.name);
+        }
+        this.logger.log(`teamCreated ${payload.blueTeam} and ${payload.redTeam}`);
+        this.server.to(payload.accessCode).emit('teamCreated', {
+            redTeam: payload.redTeam,
+            blueTeam: payload.blueTeam,
         });
     }
 }

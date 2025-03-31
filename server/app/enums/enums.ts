@@ -10,9 +10,13 @@ export enum GameDecorations {
 }
 
 export enum GameModeType {
-    Classic = 'assets/gamemodes/classic-game.png',
-    CTF = 'assets/gamemodes/CTF-game.png',
-    Default = 'assets/gamemodes/classic-game.png',
+    Classic = 'Classic',
+    CTF = 'CTF',
+}
+
+export enum TeamType {
+    RED = 'red',
+    BLUE = 'blue',
 }
 
 export enum AvatarType {
@@ -202,4 +206,5 @@ export enum EventEmit {
     GameTurnResumed = 'game.turn.resumed',
     ItemChoice = 'item.choice',
     PlayerUpdate = 'player.client.update',
+    TeamCreated = 'team.created',
 }

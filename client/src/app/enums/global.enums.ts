@@ -29,6 +29,11 @@ export enum ChatEvents {
     Error = 'error',
 }
 
+export enum TeamType {
+    RED = 'red',
+    BLUE = 'blue',
+}
+
 export enum AvatarType {
     Alchemist = './assets/avatars/avatar_alchemist.png',
     Archer = './assets/avatars/avatar_archer.png',

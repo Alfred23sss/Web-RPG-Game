@@ -7,6 +7,7 @@ import { GameCombatComponent } from '@app/components/game-combat/game-combat.com
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
+import { TeamType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -22,6 +23,7 @@ import { Subscription } from 'rxjs';
 })
 export class GamePageComponent implements OnInit, OnDestroy {
     gameData: GameData = new GameData();
+    teamType = TeamType;
     activeTab: 'chat' | 'log' = 'chat';
     private keyPressHandler: (event: KeyboardEvent) => void;
     private gameDataSubscription: Subscription;

@@ -74,11 +74,6 @@ export class GameSocketService {
 
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
-            console.log(`This is a client player update ${data.player.name}`);
-            console.log(this.gameStateService.gameDataSubjectValue.clientPlayer.name);
-            console.log(this.gameStateService.gameDataSubjectValue.currentPlayer.name);
-
-            // probleme ici
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }

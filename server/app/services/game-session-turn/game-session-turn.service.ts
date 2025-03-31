@@ -1,4 +1,4 @@
-import { EventEmit } from '@app/enums/enums';
+import { EventEmit, TeamType } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -34,9 +34,12 @@ export class GameSessionTurnService {
         const turn = this.initializeTurn(accessCode);
         const shuffledPlayers = [...turn.orderedPlayers].sort(() => Math.random() - RANDOMIZER);
         const teamSize = Math.ceil(shuffledPlayers.length / 2);
-        const redTeam = shuffledPlayers.slice(0, teamSize);
-        const blueTeam = shuffledPlayers.slice(teamSize);
-        return { turn, redTeam, blueTeam };
+
+        shuffledPlayers.forEach((player, index) => {
+            player.team = index < teamSize ? TeamType.RED : TeamType.BLUE;
+        });
+
+        return turn;
     }
 
     startTransitionPhase(accessCode: string, turn: Turn): Turn {

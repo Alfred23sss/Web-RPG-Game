@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */ // juste pour live pour montrer la structure sans implementer enlever apres
 import { EventEmit } from '@app/enums/enums';
-import { GameSession, Teams } from '@app/interfaces/GameSession';
+import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/model/database/player';
 import { BaseGameSessionService } from '@app/services/base-game-session/base-game-session.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
@@ -15,7 +15,6 @@ const RANDOMIZER = 0.5;
 @Injectable()
 export class CTFGameSessionService extends BaseGameSessionService {
     protected gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
-    private teams: Map<string, Teams> = new Map<string, Teams>();
 
     constructor(
         // private readonly inventoryManager: InventoryManagerService,
@@ -35,11 +34,7 @@ export class CTFGameSessionService extends BaseGameSessionService {
         const game = lobby.game;
         const grid = this.gridManager.assignItemsToRandomItems(game.grid);
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
-        const { turn, redTeam, blueTeam } = this.turnService.initializeTurnCTF(accessCode);
-        this.teams.set(accessCode, {
-            redTeam,
-            blueTeam,
-        });
+        const turn = this.turnService.initializeTurnCTF(accessCode);
         turn.beginnerPlayer = turn.orderedPlayers[0];
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
@@ -60,7 +55,6 @@ export class CTFGameSessionService extends BaseGameSessionService {
                 clearInterval(gameSession.turn.countdownInterval);
             }
             this.gameSessions.delete(accessCode);
-            this.teams.delete(accessCode);
         }
     }
 

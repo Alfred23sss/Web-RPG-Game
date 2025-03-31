@@ -14,6 +14,9 @@
             >
                 {{ player?.name }} <br />
                 Combats gagnés: {{ player.combatWon }}
+                @if(player.team !== undefined){
+                <span [class.red-flashy]="player.team === teamType.RED" [class.blue-flashy]="player.team === teamType.BLUE" class="flashy"> </span>
+                }
             </p>
             } @if(gameData.lobby.players){
             <p>Joueur actif: {{ gameData.lobby.players.length }}</p>

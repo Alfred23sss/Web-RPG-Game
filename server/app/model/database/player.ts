@@ -1,7 +1,8 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Item } from './item';
+import { TeamType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Item } from './item';
 
 const spawnPointSchema = new MongooseSchema({
     x: { type: Number, required: true },
@@ -63,6 +64,9 @@ export class Player {
         y: number;
         tileId: string;
     };
+
+    @Prop({ required: false, enum: TeamType })
+    team?: TeamType;
 }
 
 export const playerSchema = SchemaFactory.createForClass(Player);

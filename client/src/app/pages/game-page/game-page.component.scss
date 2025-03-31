@@ -12,6 +12,32 @@ html {
     width: 100%;
 }
 
+.flashy {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-left: 8px;
+    border-radius: 50%;
+    animation: flash 1s infinite alternate;
+}
+
+.red-flashy {
+    background-color: red;
+}
+
+.blue-flashy {
+    background-color: blue;
+}
+
+@keyframes flash {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0.5;
+    }
+}
+
 .game-container {
     display: flex;
     min-height: 100vh;

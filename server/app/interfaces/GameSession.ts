@@ -11,3 +11,8 @@ export interface Teams {
     redTeam: Player[];
     blueTeam: Player[];
 }
+
+export interface CTFGameSession extends GameSession {
+    redTeam: Player[];
+    blueTeam: Player[];
+}

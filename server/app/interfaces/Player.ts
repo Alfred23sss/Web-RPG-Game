@@ -1,3 +1,4 @@
+import { TeamType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Item } from '@app/interfaces/Item';
 
@@ -17,4 +18,5 @@ export interface Player {
     isActive: boolean;
     combatWon: number;
     spawnPoint?: { x: number; y: number; tileId: string } | undefined;
+    team?: TeamType;
 }
