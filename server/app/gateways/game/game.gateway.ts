@@ -31,6 +31,7 @@ export class GameGateway {
         this.logger.log(payload.accessCode);
         this.gameModeSelector.registerGameMode(payload.accessCode, payload.gameMode);
         const gameService = this.gameModeSelector.getService(payload.gameMode);
+        this.logger.log(`type du service cree ${typeof gameService}`);
         const gameSession = gameService.createGameSession(payload.accessCode);
         this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers, updatedGame: gameSession.game });
         Logger.log('emitting gameStarted');
@@ -167,6 +168,7 @@ export class GameGateway {
         this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
+
     @OnEvent(EventEmit.GameGridUpdate)
     handleGridUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
         this.server.to(payload.accessCode).emit('gridUpdate', {
