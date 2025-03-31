@@ -4,9 +4,9 @@ import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { ItemEffectsService } from '../item-effects/item-effects.service';
 
 const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
