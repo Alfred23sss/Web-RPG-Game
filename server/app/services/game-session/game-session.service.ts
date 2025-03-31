@@ -12,6 +12,7 @@ import { Item } from '@app/interfaces/Item';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 
 const PLAYER_MOVE_DELAY = 150;
+const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GameSessionService {
@@ -161,8 +162,11 @@ export class GameSessionService {
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
-            if (movement[i].item !== undefined && movement[i].item.name !== ItemName.Home) {
-                isCurrentlyMoving = false;
+            if (movement[i].item && movement[i].item !== undefined) {
+                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
+                if (movement[i].item.name !== ItemName.Home) {
+                    isCurrentlyMoving = false;
+                }
             }
             this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                 accessCode,
@@ -170,7 +174,8 @@ export class GameSessionService {
                 player,
                 isCurrentlyMoving,
             });
-            if (!isCurrentlyMoving && movement[i].item !== undefined) {
+            if (!isCurrentlyMoving && movement[i].item && movement[i].item !== undefined) {
+                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
                 if (movement[i].item.name !== ItemName.Home) {
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
                     break;
@@ -209,7 +214,6 @@ export class GameSessionService {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
                     this.itemEffectsService.addEffect(player, tile.item, tile);
-                    Logger.log(player.inventory);
                     tile.item = undefined;
                     this.updateGameSessionPlayerList(accessCode, player.name, {
                         inventory: player.inventory,
@@ -229,8 +233,58 @@ export class GameSessionService {
                 }
             }
         }
-        // call items choice
+        const items = [player.inventory[0], player.inventory[1], item];
+        Logger.log('on emit ItemChoice au Gateway');
+        this.eventEmitter.emit(EventEmit.ItemChoice, {
+            player,
+            items,
+        });
     }
+
+    handleItemDropped(accessCode: string, player: Player, item: Item): void {
+        const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
+        const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
+        if (index !== -1) {
+            player.inventory.splice(index, 1);
+            player.inventory.push(tile.item);
+            tile.item = item;
+            tile.player = player;
+        }
+        this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
+        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+    }
+
+    handlePlayerItemReset(accessCode: string, player: Player): void {
+        const gameSession = this.getGameSession(accessCode);
+        const grid = gameSession.game.grid;
+        const playerTile = this.gridManager.findTileByPlayer(grid, player);
+
+        const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
+
+        if (shuffledInventory.length > 0 && !playerTile.item) {
+            playerTile.item = shuffledInventory.shift();
+        }
+        shuffledInventory.forEach((item) => {
+            const availableTile = this.gridManager.findClosestAvailableTile(grid, playerTile);
+            if (availableTile) {
+                availableTile.item = item;
+            }
+        });
+        player.inventory = [null, null];
+
+        this.emitGridUpdate(accessCode, grid);
+        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+    }
+
     private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
         const gameSession = this.getGameSession(accessCode);
         for (const playerUpdated of players) {

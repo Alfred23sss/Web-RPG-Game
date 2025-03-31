@@ -32,6 +32,14 @@ class MockSocket {
         }
         this.events[event].push(callback);
     }
+    off(event: string, callback?: (data?: any) => void) {
+        if (callback) {
+            this.events[event] = this.events[event]?.filter((cb) => cb !== callback) || [];
+        } else {
+            delete this.events[event];
+        }
+    }
+
     once(event: string, callback: (data?: any) => void) {
         this.on(event, callback);
     }
@@ -242,6 +250,15 @@ describe('SocketClientService', () => {
 
             expect(mockPlayerMovementService.quickestPath).toHaveBeenCalledWith(currentTile, targetTile, grid);
             expect(mockSocket.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('off', () => {
+        it('should call socket.off with the given event', () => {
+            const offSpy = spyOn(mockSocket, 'off').and.callThrough();
+            const eventName = 'testEvent';
+            service.off(eventName);
+            expect(offSpy).toHaveBeenCalledWith(eventName);
         });
     });
 });

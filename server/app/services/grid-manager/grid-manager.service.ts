@@ -153,7 +153,7 @@ export class GridManagerService {
         return grid;
     }
 
-    private findClosestAvailableTile(grid: Tile[][], startTile: Tile): Tile | undefined {
+    findClosestAvailableTile(grid: Tile[][], startTile: Tile): Tile | undefined {
         const queue: Tile[] = [startTile];
         const visited = new Set<string>();
         visited.add(startTile.id);

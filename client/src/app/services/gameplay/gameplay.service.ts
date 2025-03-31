@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { GameData } from '@app/classes/gameData';
+import { Item } from '@app/classes/item';
+import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Routes } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
@@ -17,7 +20,16 @@ export class GameplayService {
         private readonly socketClientService: SocketClientService,
         private readonly snackBarService: SnackbarService,
         private readonly router: Router,
+        private dialog: MatDialog,
     ) {}
+
+    createItemPopUp(items: [Item, Item, Item]): void {
+        this.dialog.open(ItemPopUpComponent, {
+            data: { items },
+            panelClass: 'item-pop-up-dialog',
+            hasBackdrop: false,
+        });
+    }
 
     endTurn(gameData: GameData): void {
         gameData.hasTurnEnded = true;
@@ -127,6 +139,14 @@ export class GameplayService {
                 targetTile,
             });
         }
+    }
+
+    handleItemDropped(gameData: GameData, item: Item) {
+        this.socketClientService.emit('itemDrop', {
+            accessCode: gameData.lobby.accessCode,
+            player: gameData.clientPlayer,
+            item,
+        });
     }
 
     updateQuickestPath(gameData: GameData, targetTile: Tile): void {

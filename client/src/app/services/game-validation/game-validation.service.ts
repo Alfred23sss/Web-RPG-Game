@@ -220,8 +220,6 @@ export class GameValidationService {
     }
 
     private processNeighbors(row: number, col: number, game: Game, visited: boolean[][], queue: { row: number; col: number }[]): void {
-        if (!game.grid) return;
-
         const directions = [
             { dr: -1, dc: 0 },
             { dr: 1, dc: 0 },
@@ -247,7 +245,7 @@ export class GameValidationService {
             col >= 0 &&
             col < game.grid[0].length &&
             !visited[row][col] &&
-            (game.grid[row]?.[col]?.type ?? TileType.Default) !== TileType.Wall
+            game.grid[row][col].type !== TileType.Wall
         );
     }
 

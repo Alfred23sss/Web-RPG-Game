@@ -5,6 +5,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AccessCodesController } from './controllers/access-code/access-code.controller';
 import { GameController } from './controllers/game/game.controller';
+import { ChatGateway } from './gateways/chat/chat.gateaway';
 import { GameGateway } from './gateways/game/game.gateway';
 import { LobbyGateway } from './gateways/lobby/lobby.gateway';
 import { Item, itemSchema } from './model/database/item';
@@ -37,6 +38,7 @@ import { LobbyService } from './services/lobby/lobby.service';
     providers: [
         LobbyGateway,
         LobbyService,
+        ChatGateway,
         GameGateway,
         Logger,
         GameService,
