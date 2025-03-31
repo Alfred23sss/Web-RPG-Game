@@ -104,8 +104,31 @@ export class GameplayService {
         });
     }
 
+    handleAttackCTF(gameData: GameData, targetTile: Tile) {
+        if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
+            if (this.isTeamate(targetTile.player.name, currentTile.player.name, gameData)) {
+                this.snackBarService.showMessage("TRAITRE!!! C'EST MOI TON AMI");
+                return;
+            } else if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
+                this.socketClientService.emit('startCombat', {
+                    attackerName: currentTile.player.name,
+                    defenderName: targetTile.player.name,
+                    accessCode: gameData.lobby.accessCode,
+                    isDebugMode: gameData.isDebugMode,
+                });
+                return;
+            }
+        }
+    }
+
     handleAttackClick(gameData: GameData, targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        if (gameData.game.mode === 'CTF') {
+            this.handleAttackCTF(gameData, targetTile);
+            return;
+        }
         const currentTile = this.getClientPlayerPosition(gameData);
 
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
@@ -206,5 +229,12 @@ export class GameplayService {
         }
         if (!tile1Pos || !tile2Pos) return false;
         return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+    }
+
+    private isTeamate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
+        const players = gameData.lobby.players;
+        const defender = players.find((p) => p.name === defenderPlayer);
+        const attacker = players.find((p) => p.name === attackerPlayer);
+        return attacker?.team === defender?.team;
     }
 }
