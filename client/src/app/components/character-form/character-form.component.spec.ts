@@ -184,4 +184,103 @@ describe('CharacterFormComponent', () => {
 
         expect(component.resetPopup).toHaveBeenCalled();
     });
+
+    describe('getSegmentCount', () => {
+        it('should return half value for Vitality (rounded down)', () => {
+            mockCharacterService.attributes[AttributeType.Vitality] = 5;
+            const result = component.getSegmentCount(AttributeType.Vitality);
+            expect(result).toBe(2);
+        });
+
+        it('should return half value for Speed (rounded down)', () => {
+            mockCharacterService.attributes[AttributeType.Speed] = 7;
+            const result = component.getSegmentCount(AttributeType.Speed);
+            expect(result).toBe(3);
+        });
+
+        it('should return full value for Attack', () => {
+            mockCharacterService.attributes[AttributeType.Attack] = 4;
+            const result = component.getSegmentCount(AttributeType.Attack);
+            expect(result).toBe(4);
+        });
+
+        it('should return full value for Defense', () => {
+            mockCharacterService.attributes[AttributeType.Defense] = 6;
+            const result = component.getSegmentCount(AttributeType.Defense);
+            expect(result).toBe(6);
+        });
+    });
+
+    describe('getDisplayValue', () => {
+        beforeEach(() => {
+            component.createdPlayer = {
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+            } as Player;
+        });
+
+        it('should return value + dice for Attack', () => {
+            mockCharacterService.attributes[AttributeType.Attack] = 4;
+            const result = component.getDisplayValue(AttributeType.Attack);
+            expect(result).toBe('4 + D6');
+        });
+
+        it('should return value + dice for Defense', () => {
+            mockCharacterService.attributes[AttributeType.Defense] = 5;
+            const result = component.getDisplayValue(AttributeType.Defense);
+            expect(result).toBe('5 + D4');
+        });
+
+        it('should return simple value for Vitality', () => {
+            mockCharacterService.attributes[AttributeType.Vitality] = 6;
+            const result = component.getDisplayValue(AttributeType.Vitality);
+            expect(result).toBe('6');
+        });
+
+        it('should return simple value for Speed', () => {
+            mockCharacterService.attributes[AttributeType.Speed] = 7;
+            const result = component.getDisplayValue(AttributeType.Speed);
+            expect(result).toBe('7');
+        });
+    });
+
+    describe('getDiceValue', () => {
+        beforeEach(() => {
+            component.createdPlayer = {
+                attack: { bonusDice: DiceType.D6 },
+                defense: { bonusDice: DiceType.D4 },
+            } as Player;
+        });
+
+        it('should return attack bonus dice when attribute is Attack', () => {
+            const result = component.getDiceValue(AttributeType.Attack);
+            expect(result).toBe(DiceType.D6);
+        });
+
+        it('should return defense bonus dice when attribute is Defense', () => {
+            const result = component.getDiceValue(AttributeType.Defense);
+            expect(result).toBe(DiceType.D4);
+        });
+
+        it('should return D4 as default for other attributes', () => {
+            const result = component.getDiceValue(AttributeType.Vitality);
+            expect(result).toBe(DiceType.D4);
+        });
+    });
+
+    describe('handleKeyDown', () => {
+        it('should call closePopup when Escape key is pressed', () => {
+            spyOn(component, 'closePopup');
+            const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+            component['handleKeyDown'](escapeEvent);
+            expect(component.closePopup).toHaveBeenCalled();
+        });
+
+        it('should not call closePopup when other keys are pressed', () => {
+            spyOn(component, 'closePopup');
+            const otherKeyEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+            component['handleKeyDown'](otherKeyEvent);
+            expect(component.closePopup).not.toHaveBeenCalled();
+        });
+    });
 });
