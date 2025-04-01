@@ -1,4 +1,4 @@
-import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
+import { EventEmit, ImageType, ItemName, TileType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
@@ -159,6 +159,17 @@ export class GameSessionService {
             await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, player.name);
             this.gridManager.setPlayerOnTile(gameSession.game.grid, movement[i], player);
+
+            player.inventory.forEach((item, index) => {
+                if (item?.name === ItemName.Swap) {
+                    if (movement[i].type === TileType.Ice) {
+                        this.itemEffectsService.addEffect(player, item, movement[i]);
+                    } else {
+                        this.itemEffectsService.removeEffects(player, index);
+                    }
+                }
+            });
+
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
@@ -213,7 +224,7 @@ export class GameSessionService {
             for (let i = 0; i < player.inventory.length; i++) {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
-                    this.itemEffectsService.addEffect(player, tile.item);
+                    this.itemEffectsService.addEffect(player, tile.item, tile);
                     tile.item = undefined;
                     player = {
                         ...player,
@@ -253,7 +264,7 @@ export class GameSessionService {
             player.inventory.push(tile.item);
             tile.item = item;
             tile.player = player;
-            this.itemEffectsService.addEffect(player, newItem);
+            this.itemEffectsService.addEffect(player, newItem, tile);
         }
         player = {
             ...player,

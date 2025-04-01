@@ -233,7 +233,7 @@ export class GameCombatService {
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
 
         defenderPlayer.inventory.forEach((item) => {
-            this.itemEffectsService.addEffect(defenderPlayer, item);
+            this.itemEffectsService.addEffect(defenderPlayer, item, null);
         });
 
         this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });

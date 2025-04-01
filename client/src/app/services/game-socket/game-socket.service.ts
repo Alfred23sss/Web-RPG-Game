@@ -74,7 +74,7 @@ export class GameSocketService {
 
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
+            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
         });
