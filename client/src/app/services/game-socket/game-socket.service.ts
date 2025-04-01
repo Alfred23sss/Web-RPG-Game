@@ -42,7 +42,7 @@ export class GameSocketService {
 
     private handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
-            this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
+            this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue, this.gameStateService.gameDataSubjectValue.isGameEnding);
         } else {
             sessionStorage.setItem('refreshed', 'true');
         }
@@ -102,8 +102,9 @@ export class GameSocketService {
             }
 
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
+            this.gameStateService.gameDataSubjectValue.isGameEnding = true;
             setTimeout(() => {
-                this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
+                this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue, this.gameStateService.gameDataSubjectValue.isGameEnding);
             }, DELAY_BEFORE_ENDING_GAME);
         });
     }
