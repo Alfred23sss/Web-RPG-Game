@@ -188,6 +188,12 @@ describe('CharacterService', () => {
         expect(player.defense.bonusDice).toBe(DiceType.D4);
     });
 
+    it('should assign D6 to defense and D4 to attack when defense is selected with D6', () => {
+        service.assignDice(player, AttributeType.Defense, DiceType.D6);
+        expect(player.defense.bonusDice).toBe(DiceType.D6);
+        expect(player.attack.bonusDice).toBe(DiceType.D4);
+    });
+
     describe('joinExistingLobby', () => {
         const accessCode = '1234';
 
