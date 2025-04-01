@@ -23,6 +23,7 @@ describe('LogBookService', () => {
             actionPoints: 3,
             inventory: [null, null],
             isAdmin: false,
+            isVirtual: false,
             hasAbandoned: false,
             combatWon: 0,
             isActive: true,

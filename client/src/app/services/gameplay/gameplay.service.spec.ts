@@ -100,6 +100,7 @@ describe('GameplayService', () => {
         actionPoints: 2,
         inventory: [null, null],
         isAdmin: false,
+        isVirtual: false,
         hasAbandoned: false,
         isActive: true,
         combatWon: 0,
