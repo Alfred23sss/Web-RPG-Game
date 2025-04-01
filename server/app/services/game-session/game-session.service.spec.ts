@@ -43,6 +43,7 @@ const createValidPlayer = (name: string, speed: number, isAdmin: boolean): Playe
     isActive: false,
     combatWon: 0,
     vitality: 0,
+    isVirtual: false,
 });
 
 const createMockTurn = (): Turn => ({

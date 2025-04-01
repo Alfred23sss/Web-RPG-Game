@@ -32,6 +32,7 @@ describe('GameCombatService', () => {
         isActive: false,
         combatWon: 0,
         vitality: 0,
+        isVirtual: false,
     });
 
     const mockCombatState = () => ({
