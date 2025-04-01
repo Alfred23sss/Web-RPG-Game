@@ -1,4 +1,4 @@
-import { ItemType, TileType } from '@app/enums/enums';
+import { ItemName, ItemType, TileType } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/model/database/player';
@@ -60,6 +60,6 @@ export class CombatHelperService {
     }
 
     private hasStopItem(player: Player): boolean {
-        return player.inventory.some((item) => item && item.name === ItemType.Stop);
+        return player.inventory.some((item) => item && item.name === ItemName.Stop);
     }
 }
