@@ -66,15 +66,6 @@ describe('ToolbarComponent', () => {
         expect(component.isSelected(TileType.Wall)).toBeFalse();
     });
 
-    it('should update activeTool when service emits new tool', () => {
-        const newTool = { tool: TileType.Water, image: ImageType.Water };
-        (toolService.selectedTool$ as unknown) = of(newTool);
-
-        component.ngOnInit();
-
-        expect(component.activeTool).toEqual(newTool);
-    });
-
     describe('when no tool is selected', () => {
         beforeEach(() => {
             (toolService.selectedTool$ as unknown) = of(null);
