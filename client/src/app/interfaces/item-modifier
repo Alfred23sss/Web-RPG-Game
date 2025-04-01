@@ -1,4 +1,0 @@
-export interface ItemModifier {
-    attribute: AttributeType;
-    value: number;
-}

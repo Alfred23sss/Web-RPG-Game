@@ -200,6 +200,7 @@ export enum EventEmit {
     GameTurnStarted = 'game.turn.started',
     GameTurnTimer = 'game.turn.timer',
     GameTurnResumed = 'game.turn.resumed',
+    GameWallUpdate = 'game.wall.update',
     ItemChoice = 'item.choice',
     PlayerUpdate = 'player.client.update',
 }

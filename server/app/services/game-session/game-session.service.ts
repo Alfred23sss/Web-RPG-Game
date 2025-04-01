@@ -142,6 +142,21 @@ export class GameSessionService {
         this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
     }
 
+    updateWallTile(accessCode: string, previousTile: Tile, newTile: Tile, player: Player): void {
+        const grid = this.gameSessions.get(accessCode).game.grid;
+        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        if (!isAdjacent) return;
+        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+        targetTile.type = TileType.Default;
+        player.actionPoints--;
+        this.gameSessions.get(accessCode).game.grid = grid;
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+        this.eventEmitter.emit(EventEmit.GameWallUpdate, { accessCode, grid });
+    }
+
     updatePlayer(player: Player, updates: Partial<Player>): void {
         this.turnService.updatePlayer(player, updates);
     }
