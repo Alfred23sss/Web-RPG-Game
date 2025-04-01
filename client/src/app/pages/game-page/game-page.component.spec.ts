@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function, @angular-eslint/no-empty-lifecycle-method */
+/* eslint-disable max-classes-per-file */
+/* eslint-disable @angular-eslint/use-lifecycle-interface */
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, Input } from '@angular/core';

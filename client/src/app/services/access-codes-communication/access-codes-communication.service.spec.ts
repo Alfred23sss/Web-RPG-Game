@@ -1,6 +1,6 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AccessCodesCommunicationService } from './access-codes-communication.service';
+import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
 
 describe('AccessCodesCommunicationService', () => {
     let service: AccessCodesCommunicationService;
@@ -28,7 +28,7 @@ describe('AccessCodesCommunicationService', () => {
     it('should generate an access code', () => {
         const mockAccessCode = 'ABC123';
 
-        service.generateAccessCode().subscribe((code) => {
+        service.generateAccessCode().subscribe((code: unknown) => {
             expect(code).toEqual(mockAccessCode);
         });
 
@@ -41,7 +41,7 @@ describe('AccessCodesCommunicationService', () => {
         const code = 'ABC123';
         const mockResponse = { isValid: true };
 
-        service.validateAccessCode(code).subscribe((response) => {
+        service.validateAccessCode(code).subscribe((response: unknown) => {
             expect(response).toEqual(mockResponse);
         });
 
@@ -53,7 +53,7 @@ describe('AccessCodesCommunicationService', () => {
     it('should remove an access code', () => {
         const code = 'ABC123';
 
-        service.removeAccessCode(code).subscribe((response) => {
+        service.removeAccessCode(code).subscribe((response: unknown) => {
             expect(response).toBeNull();
         });
 

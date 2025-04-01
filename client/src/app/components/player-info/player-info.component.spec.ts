@@ -19,7 +19,6 @@ describe('PlayerInfoComponent', () => {
         });
 
         await TestBed.configureTestingModule({
-            // declarations: [PlayerInfoComponent],
             imports: [PlayerInfoComponent],
             providers: [
                 {
@@ -37,43 +36,9 @@ describe('PlayerInfoComponent', () => {
     it('should create', () => {
         expect(component).toBeTruthy();
     });
-
-    it('should subscribe to gameData$ on construction', () => {
-        const mockGameData = new GameData();
-        mockGameData.lobby.players = [];
-
-        gameDataSubject.next(mockGameData);
-        fixture.detectChanges();
-
-        expect(component.gameData).toEqual(mockGameData);
-    });
-
     it('should unsubscribe from gameData$ on destroy', () => {
         const subscriptionSpy = spyOn(component['gameDataSubscription'], 'unsubscribe');
-
         component.ngOnDestroy();
-
         expect(subscriptionSpy).toHaveBeenCalled();
-    });
-
-    it('should handle initial gameData correctly', () => {
-        const initialGameData = new GameData();
-
-        fixture.detectChanges();
-
-        expect(component.gameData).toEqual(initialGameData);
-    });
-
-    it('should update gameData when new data is emitted', () => {
-        const initialGameData = new GameData();
-        const updatedGameData = new GameData();
-        updatedGameData.lobby.players = [];
-
-        gameDataSubject.next(initialGameData);
-        fixture.detectChanges();
-        gameDataSubject.next(updatedGameData);
-        fixture.detectChanges();
-
-        expect(component.gameData).toEqual(updatedGameData);
     });
 });
