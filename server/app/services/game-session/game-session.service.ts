@@ -148,6 +148,7 @@ export class GameSessionService {
         if (!isAdjacent) return;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
         targetTile.type = TileType.Default;
+        targetTile.imageSrc = ImageType.Default;
         player.actionPoints--;
         this.gameSessions.get(accessCode).game.grid = grid;
         this.eventEmitter.emit(EventEmit.PlayerUpdate, {
