@@ -40,6 +40,7 @@ describe('WaitingViewComponent', () => {
         movementPoints: 0,
         actionPoints: 0,
         inventory: [null, null],
+        isVirtual: false,
         hasAbandoned: false,
         isActive: false,
         combatWon: 0,
@@ -54,7 +55,6 @@ describe('WaitingViewComponent', () => {
     };
 
     beforeEach(async () => {
-        // Create more comprehensive mock services
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
         mockLobbyService = jasmine.createSpyObj(
@@ -73,14 +73,12 @@ describe('WaitingViewComponent', () => {
 
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
             'emit',
-            'on', // Add this to address potential 'on' method error
+            'on',
             'unlockLobby',
             'lockLobby',
             'kickPlayer',
             'alertGameStarted',
         ]);
-
-        // Configure the testing module with all necessary providers
         await TestBed.configureTestingModule({
             imports: [WaitingViewComponent],
             providers: [
@@ -90,12 +88,8 @@ describe('WaitingViewComponent', () => {
                 { provide: SocketClientService, useValue: mockSocketClientService },
             ],
         }).compileComponents();
-
-        // Create the component
         fixture = TestBed.createComponent(WaitingViewComponent);
         component = fixture.componentInstance;
-
-        // Detect changes to resolve any initial bindings
         fixture.detectChanges();
     });
 

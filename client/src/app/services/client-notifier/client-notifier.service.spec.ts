@@ -34,6 +34,7 @@ describe('ClientNotifierServices', () => {
             hasAbandoned: false,
             combatWon: 0,
             isActive: true,
+            isVirtual: false,
         };
     });
 

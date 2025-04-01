@@ -1,3 +1,4 @@
+/* eslint-disable import/no-deprecated */
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';

@@ -30,6 +30,7 @@ describe('GameSessionTurnService', () => {
         hasAbandoned: false,
         isActive,
         combatWon: 0,
+        isVirtual: false,
     });
 
     const createTurn = (players: Player[], currentPlayer: Player | null = null): Turn => ({

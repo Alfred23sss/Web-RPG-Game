@@ -3,7 +3,7 @@
 *::after {
     box-sizing: border-box;
 }
-
+// CLEAN UP CSS
 body,
 html {
     margin: 0;
@@ -218,6 +218,17 @@ app-grid {
 
 .player-admin::before {
     content: '👑 ';
+}
+
+.virtual-player {
+    background-color: #3498db;
+    color: white;
+    border: 1px solid #1f618d;
+    font-weight: 700;
+}
+
+.virtual-player::before {
+    content: '🤖 ';
 }
 
 .player-regular {

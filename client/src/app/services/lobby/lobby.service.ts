@@ -16,6 +16,7 @@ import { BehaviorSubject } from 'rxjs';
     providedIn: 'root',
 })
 export class LobbyService {
+    // Refactor les sockets ....!!!!!!!!!
     accessCode: string;
     private lobbySubject = new BehaviorSubject<Lobby | null>(null);
     private isLoadingSubject = new BehaviorSubject<boolean>(true);

@@ -1,7 +1,19 @@
+@font-face {
+    font-family: 'Pixel';
+    src: url('../../../assets/fonts/SoulOfHolitter.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'Pixel', sans-serif;
+}
+
 .container {
     min-height: 100vh;
     height: auto;
-    color: black;
+    color: white;
+    font-family: 'Pixel', sans-serif;
 }
 
 .justified {
@@ -11,78 +23,68 @@
     align-items: center;
 }
 
-.button {
-    margin-top: 10px;
-    text-align: center;
-    padding: 10px 20px;
-    font-size: 1rem;
-    background: linear-gradient(135deg, #ffd700, #ffa500);
-    color: black;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition:
-        transform 0.2s ease,
-        background-color 0.2s ease;
+.button-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    width: 100%;
 }
 
-.button:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, #ffc700, #ff8c00);
+.custom-button {
+    padding: 20px 40px;
+    font-size: 1.8rem;
+}
+
+.custom-button i {
+    font-size: 1.8rem;
 }
 
 .team-name {
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-family: 'Pixel', sans-serif;
     margin-top: 0.25em;
     margin-bottom: 0.25em;
-    color: #ffa500;
-    font-size: 1.5rem;
+    font-size: 3rem;
     font-weight: bold;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
     text-align: center;
 }
 
-.header-item {
-    justify-content: center;
-    text-align: center;
-    color: #ffd700;
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
-    font-size: 60px;
-    text-shadow: 2px 2px 4px #ff8c00;
-    margin: 20px 0;
+.logo-image {
+    width: 500px;
+    height: auto;
+    max-width: 100%;
+    display: block;
+    object-fit: contain;
+    background-color: none;
 }
 
 .footer-item {
     text-align: center;
+    color: white;
 }
 
 .footer-item p span:nth-child(odd) {
-    color: #ffa500;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
 }
 
 .footer-item p span:nth-child(even) {
-    color: #ffd700;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
 }
 
 .footer-item p span {
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
+    font-family: 'Pixel', sans-serif;
     font-weight: bold;
-    font-size: 1.1rem;
-    text-shadow: 1px 1px 2px #000;
+    font-size: 1.2rem;
+    text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
 }
+
 .server-message {
     justify-content: center;
     width: 20%;
     min-width: min-content;
-}
-
-.logo-image {
-    width: 300px;
-    height: auto;
-    max-width: 100%;
-    border-radius: 50%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 #bottom-left-image {
@@ -90,4 +92,16 @@
     bottom: 5px;
     left: 5px;
     width: 200px;
+}
+
+a {
+    font-family: 'Pixel', sans-serif;
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
+    text-decoration: none;
+}
+
+a:hover {
+    color: #d4f1ff;
+    text-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
 }

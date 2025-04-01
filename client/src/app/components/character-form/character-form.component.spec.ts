@@ -103,8 +103,8 @@ describe('CharacterFormComponent', () => {
     });
 
     it('should call assignDice on characterService', () => {
-        component.assignDice(AttributeType.Attack);
-        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(component.createdPlayer, AttributeType.Attack);
+        component.assignDice(AttributeType.Attack, DiceType.D4);
+        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(component.createdPlayer, AttributeType.Attack, DiceType.D4);
     });
 
     it('should call selectAvatar on characterService', () => {
