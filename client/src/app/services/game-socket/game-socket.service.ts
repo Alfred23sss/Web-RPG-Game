@@ -91,10 +91,16 @@ export class GameSocketService {
     }
 
     private onGameEnded(): void {
-        this.socketClientService.on('gameEnded', (data: { winner: string }) => {
+        this.socketClientService.on('gameEnded', (data: { winner: string[] }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players;
             players.filter((p) => p.hasAbandoned === false); // pt pas update a voir
-            this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+            if (data.winner.length <= 1) {
+                this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+            } else {
+                const winnerNames = data.winner.join(', ');
+                this.clientNotifier.displayMessage(`👑 ${winnerNames} ont remporté la partie ! Redirection vers l'accueil sous peu`);
+            }
+
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
             setTimeout(() => {
                 this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);

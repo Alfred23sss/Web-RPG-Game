@@ -304,7 +304,7 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.GameEnded)
-    handleGameEnded(payload: { accessCode: string; winner: string }) {
+    handleGameEnded(payload: { accessCode: string; winner: string[] }) {
         this.logger.log('emitting game ended to client');
 
         const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);

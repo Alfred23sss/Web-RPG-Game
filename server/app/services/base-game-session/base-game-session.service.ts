@@ -67,13 +67,24 @@ export abstract class BaseGameSessionService {
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
                     break;
                 }
-            } else {
-                this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
-                    accessCode,
-                    grid: gameSession.game.grid,
-                    player,
-                    isCurrentlyMoving,
-                });
+            }
+            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+                accessCode,
+                grid: gameSession.game.grid,
+                player,
+                isCurrentlyMoving,
+            });
+
+            if (this.gridManager.isFlagOnSpawnPoint(gameSession.game.grid, player, movement[i])) {
+                const sameTeamPlayers: string[] = [];
+
+                for (const playerOfList of gameSession.turn.orderedPlayers) {
+                    if (playerOfList.team === player.team) {
+                        sameTeamPlayers.push(playerOfList.name);
+                    }
+                }
+
+                this.endGameSession(accessCode, sameTeamPlayers);
             }
         }
     }
@@ -111,7 +122,7 @@ export abstract class BaseGameSessionService {
         return gameSession ? gameSession.turn.orderedPlayers : [];
     }
 
-    endGameSession(accessCode: string, winner: string) {
+    endGameSession(accessCode: string, winner: string[]) {
         this.emitEvent(EventEmit.GameEnded, { accessCode, winner });
     }
 

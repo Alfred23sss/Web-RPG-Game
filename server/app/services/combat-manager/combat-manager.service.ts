@@ -96,7 +96,7 @@ export class GameCombatService {
             const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
             gameService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
             this.emitEvent(EventEmit.UpdatePlayerList, { players: gameService.getPlayers(accessCode), accessCode });
-            gameService.endGameSession(accessCode, player.name);
+            gameService.endGameSession(accessCode, [player.name]);
             return true;
         }
         return false;
@@ -171,7 +171,7 @@ export class GameCombatService {
         player.hp.current = player.hp.max;
         player.combatWon++;
         if (this.checkPlayerWon(accessCode, player)) {
-            gameService.endGameSession(accessCode, player.name);
+            gameService.endGameSession(accessCode, [player.name]);
         }
         gameService.updateGameSessionPlayerList(accessCode, player.name, player);
         this.emitEvent(EventEmit.UpdatePlayer, { player });
