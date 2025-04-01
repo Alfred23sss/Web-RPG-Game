@@ -67,6 +67,13 @@ export abstract class BaseGameSessionService {
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
                     break;
                 }
+            } else {
+                this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+                    accessCode,
+                    grid: gameSession.game.grid,
+                    player,
+                    isCurrentlyMoving,
+                });
             }
         }
     }
