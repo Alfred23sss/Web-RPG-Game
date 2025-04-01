@@ -177,6 +177,20 @@ export class GridManagerService {
 
         return undefined;
     }
+
+    isFlagOnSpawnPoint(grid: Tile[][], player: Player, movement: Tile): boolean {
+        const playerTile = this.findTileByPlayer(grid, player);
+        const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
+        if (playerTile.id === playerSpawnPoint.id) {
+            for (const item of player.inventory) {
+                if (item && item.name === ItemName.Flag) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private getAdjacentTiles(grid: Tile[][], tile: Tile): Tile[] {
         const coords = this.parseTileCoordinates(tile.id);
         if (!coords) return [];
