@@ -242,6 +242,17 @@ describe('GameSocketService', () => {
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug activé');
     });
 
+    it('should not notify when no admin player exists', () => {
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
+        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = false;
+
+        socketEvents['adminModeChangedServerSide']();
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeTrue();
+        expect(clientNotifierSpy.displayMessage).not.toHaveBeenCalled();
+        expect(clientNotifierSpy.addLogbookEntry).not.toHaveBeenCalled();
+    });
+
     it('should handle missing player in onGameAbandoned', () => {
         gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
         const initialPlayerCount = gameStateServiceSpy.gameDataSubjectValue.lobby.players.length;
