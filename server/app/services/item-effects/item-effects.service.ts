@@ -11,7 +11,9 @@ export class ItemEffectsService {
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
         Logger.log(`Picked up: ${item.name}`);
-        this.applyItemModifiers(item);
+        if (!item.modifiers) {
+            this.applyItemModifiers(item);
+        }
 
         if (
             item.isActive ||
@@ -25,6 +27,7 @@ export class ItemEffectsService {
             item.modifiers.forEach((mod) => this.applyModifier(player, mod, 1));
         }
         item.isActive = true;
+        Logger.log('isActive = true');
     }
 
     removeEffects(player: Player, index: number): void {
@@ -41,6 +44,7 @@ export class ItemEffectsService {
         }
 
         item.isActive = false;
+        Logger.log('isActive = false');
     }
 
     applyItemModifiers(item: Item) {
@@ -73,6 +77,7 @@ export class ItemEffectsService {
     }
 
     isIceConditionValid(tile: Tile, item: Item): boolean {
+        if (tile === undefined) return false;
         return item.name !== ItemName.Swap || tile.type === TileType.Ice;
     }
 
