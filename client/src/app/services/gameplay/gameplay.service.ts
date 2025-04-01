@@ -5,7 +5,7 @@ import { GameData } from '@app/classes/gameData';
 import { Item } from '@app/classes/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { ItemName, Routes } from '@app/enums/global.enums';
+import { ItemName, Routes, TileType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
@@ -87,14 +87,16 @@ export class GameplayService {
     checkAvailableActions(gameData: GameData): void {
         const clientPlayerPosition = this.getClientPlayerPosition(gameData);
         if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
-        const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, gameData.game.grid);
+        const hasIce = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Ice);
+        const hasWall = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Wall);
+        const hasLightning = clientPlayerPosition.player?.inventory.some((item) => item?.name === ItemName.Lightning);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, gameData.game.grid);
         if (gameData.clientPlayer.actionPoints === 0 && gameData.clientPlayer.movementPoints === 0) {
             if (!hasIce) {
                 this.endTurn(gameData);
             }
         } else if (gameData.clientPlayer.actionPoints === 1 && gameData.clientPlayer.movementPoints === 0) {
-            if (!hasIce && !hasActionAvailable) {
+            if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) {
                 this.endTurn(gameData);
             }
         }
