@@ -1,14 +1,17 @@
 <div class="editor-container">
     <div class="editor-layout">
         <div class="editor-sidebar">
-            <div class="game-mode-header">
-                <p class="pixel-accent">{{ game.mode }}</p>
+            <div class="sidebar-section">
+                <div class="game-mode-header">
+                    <p class="pixel-accent">{{ game.mode }}</p>
+                </div>
             </div>
-            <div class="toolbar-section">
+
+            <div class="sidebar-section toolbar-section">
                 <app-toolbar id="toolbar"></app-toolbar>
             </div>
 
-            <div class="itembar-section">
+            <div class="sidebar-section itembar-section">
                 <app-item-bar id="itembar"></app-item-bar>
             </div>
         </div>
@@ -48,11 +51,11 @@
             </div>
 
             <div class="button-grid">
-                <button class="pixel-button save-button" (click)="save()" [disabled]="isSaving">
+                <button class="button save-button" (click)="save()" [disabled]="isSaving">
                     {{ isSaving ? 'Sauvegarde...' : 'Sauvegarder' }}
                 </button>
-                <button class="pixel-button reset-button" (click)="reset()">Réinitialiser</button>
-                <button class="pixel-button home-button" (click)="backToAdmin()">Retour</button>
+                <button class="button reset-button" (click)="reset()">Réinitialiser</button>
+                <button class="button home-button" (click)="backToAdmin()">Quitter</button>
             </div>
         </div>
     </div>
