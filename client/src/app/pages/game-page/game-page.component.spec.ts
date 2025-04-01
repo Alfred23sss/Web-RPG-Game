@@ -76,6 +76,7 @@ describe('GamePageComponent', () => {
         actionPoints: 1,
         inventory: [null, null],
         isAdmin: false,
+        isVirtual: false,
         hasAbandoned: false,
         isActive: true,
         combatWon: 0,

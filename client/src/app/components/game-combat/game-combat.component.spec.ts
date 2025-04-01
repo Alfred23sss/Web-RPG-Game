@@ -44,6 +44,7 @@ describe('GameCombatComponent', () => {
         actionPoints: 2,
         inventory: [createMockItem(), null],
         isAdmin: false,
+        isVirtual: false,
         hasAbandoned: false,
         isActive: true,
         combatWon: 0,

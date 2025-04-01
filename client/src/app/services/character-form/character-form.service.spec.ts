@@ -87,6 +87,7 @@ describe('CharacterService', () => {
             actionPoints: UNINITIALIZED_ATTRIBUTE_VALUE,
             inventory: [null, null],
             isAdmin: false,
+            isVirtual:false,
             hasAbandoned: false,
             isActive: false,
             combatWon: 0,
@@ -176,7 +177,7 @@ describe('CharacterService', () => {
     });
 
     it('should assign D6 to attack and D4 to defense when attack is selected', () => {
-        service.assignDice(player, AttributeType.Attack);
+        service.assignDice(player, AttributeType.Attack, DiceType.D6);
         expect(service.diceAssigned[AttributeType.Attack]).toBeTrue();
         expect(service.diceAssigned[AttributeType.Defense]).toBeFalse();
         expect(player.attack.bonusDice).toBe(DiceType.D6);
@@ -184,7 +185,7 @@ describe('CharacterService', () => {
     });
 
     it('should assign D6 to defense and D4 to attack when defense is selected', () => {
-        service.assignDice(player, AttributeType.Defense);
+        service.assignDice(player, AttributeType.Defense, DiceType.D4);
         expect(service.diceAssigned[AttributeType.Defense]).toBeTrue();
         expect(service.diceAssigned[AttributeType.Attack]).toBeFalse();
         expect(player.attack.bonusDice).toBe(DiceType.D4);
@@ -457,7 +458,7 @@ describe('CharacterService', () => {
     describe('isCharacterValid', () => {
         it('should return true when all parameters are valid', () => {
             service.assignBonus(player, AttributeType.Vitality);
-            service.assignDice(player, AttributeType.Attack);
+            service.assignDice(player, AttributeType.Attack, DiceType.D4);
 
             expect(service.isCharacterValid(player)).toBeTrue();
         });
