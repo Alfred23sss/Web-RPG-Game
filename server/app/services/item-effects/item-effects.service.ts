@@ -2,7 +2,7 @@ import { AttributeType, ItemName, TileType } from '@app/enums/enums';
 import { Item, ItemModifier } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 const HEALTH_CONDITION_THRESHOLD = 0.5;
 
@@ -10,7 +10,7 @@ const HEALTH_CONDITION_THRESHOLD = 0.5;
 export class ItemEffectsService {
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
-        console.log(`Picked up: ${item.name}`);
+        Logger.log(`Picked up: ${item.name}`);
         this.applyItemModifiers(item);
 
         if (
@@ -18,7 +18,7 @@ export class ItemEffectsService {
             (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
             (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item))
         ) {
-            console.log('conditions failed');
+            Logger.log('conditions failed');
             return;
         }
         if (item.modifiers) {
@@ -29,10 +29,10 @@ export class ItemEffectsService {
 
     removeEffects(player: Player, index: number): void {
         const item = player.inventory[index];
-        console.log('removeEffects');
+        Logger.log('removeEffects');
 
         if (!item || !item.isActive) {
-            console.log('conditions failed');
+            Logger.log('conditions failed');
             return;
         }
 
@@ -77,8 +77,8 @@ export class ItemEffectsService {
     }
 
     private applyModifier(player: Player, modifier: ItemModifier, multiplier: number) {
-        console.log('Applying Modifiers');
-        console.log(`Multiplier: ${multiplier}`);
+        Logger.log('Applying Modifiers');
+        Logger.log(`Multiplier: ${multiplier}`);
         const adjustedValue = modifier.value * multiplier;
         switch (modifier.attribute) {
             case AttributeType.Attack:
@@ -95,7 +95,7 @@ export class ItemEffectsService {
                 player.hp.max += adjustedValue;
                 break;
             default:
-                console.log(`Unknown attribute type: ${modifier.attribute}`);
+                Logger.log(`Unknown attribute type: ${modifier.attribute}`);
                 break;
         }
     }
