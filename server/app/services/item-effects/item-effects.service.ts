@@ -5,6 +5,9 @@ import { Tile } from '@app/interfaces/Tile';
 import { Injectable, Logger } from '@nestjs/common';
 
 const HEALTH_CONDITION_THRESHOLD = 0.5;
+const BONUS_VALUE = 2;
+const PENALTY_VALUE = -1;
+const MULTIPLIER = 1;
 
 @Injectable()
 export class ItemEffectsService {
@@ -24,7 +27,7 @@ export class ItemEffectsService {
             return;
         }
         if (item.modifiers) {
-            item.modifiers.forEach((mod) => this.applyModifier(player, mod, 1));
+            item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER));
         }
         item.isActive = true;
         Logger.log('isActive = true');
@@ -40,7 +43,7 @@ export class ItemEffectsService {
         }
 
         if (item.modifiers) {
-            item.modifiers.forEach((mod) => this.applyModifier(player, mod, -1));
+            item.modifiers.forEach((mod) => this.applyModifier(player, mod, -MULTIPLIER));
         }
 
         item.isActive = false;
@@ -50,24 +53,24 @@ export class ItemEffectsService {
     applyItemModifiers(item: Item) {
         if (item.name === ItemName.Potion) {
             item.modifiers = [
-                { attribute: AttributeType.Attack, value: 2 },
-                { attribute: AttributeType.Defense, value: -1 },
+                { attribute: AttributeType.Attack, value: BONUS_VALUE },
+                { attribute: AttributeType.Defense, value: PENALTY_VALUE },
             ];
             item.isActive = false;
         }
         if (item.name === ItemName.Rubik) {
             item.modifiers = [
-                { attribute: AttributeType.Speed, value: 2 },
-                { attribute: AttributeType.Defense, value: -1 },
+                { attribute: AttributeType.Speed, value: BONUS_VALUE },
+                { attribute: AttributeType.Hp, value: PENALTY_VALUE },
             ];
             item.isActive = false;
         }
         if (item.name === ItemName.Fire) {
-            item.modifiers = [{ attribute: AttributeType.Attack, value: 2 }];
+            item.modifiers = [{ attribute: AttributeType.Attack, value: BONUS_VALUE }];
             item.isActive = false;
         }
         if (item.name === ItemName.Swap) {
-            item.modifiers = [{ attribute: AttributeType.Defense, value: 2 }];
+            item.modifiers = [{ attribute: AttributeType.Defense, value: BONUS_VALUE }];
             item.isActive = false;
         }
     }
