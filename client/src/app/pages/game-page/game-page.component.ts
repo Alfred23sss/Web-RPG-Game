@@ -49,6 +49,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         this.gameplayService.handleDoorClick(this.gameData, targetTile);
     }
 
+    handleWallClick(targetTile: Tile): void {
+        this.gameplayService.handleWallClick(this.gameData, targetTile, this.gameData.clientPlayer);
+    }
+
     handleAttackClick(targetTile: Tile): void {
         this.gameplayService.handleAttackClick(this.gameData, targetTile);
     }

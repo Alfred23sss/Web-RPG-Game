@@ -5,7 +5,8 @@ import { GameData } from '@app/classes/gameData';
 import { Item } from '@app/classes/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { Routes } from '@app/enums/global.enums';
+import { ItemName, Routes } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -102,6 +103,21 @@ export class GameplayService {
             targetTile,
             accessCode: gameData.lobby.accessCode,
         });
+    }
+    // duplication de code ici entre la fonction ci-dessus et ci-dessous, à refaire
+    handleWallClick(gameData: GameData, targetTile: Tile, player: Player): void {
+        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (!currentTile || !gameData.game || !gameData.game.grid) {
+            return;
+        }
+        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning))
+            this.socketClientService.emit('wallUpdate', {
+                currentTile,
+                targetTile,
+                accessCode: gameData.lobby.accessCode,
+                player,
+            });
     }
 
     handleAttackCTF(gameData: GameData, targetTile: Tile) {

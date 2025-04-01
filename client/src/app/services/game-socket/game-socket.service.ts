@@ -32,6 +32,7 @@ export class GameSocketService {
         this.onPlayerUpdate();
         this.onPlayerListUpdate();
         this.onDoorClicked();
+        this.onWallClicked();
         this.onGridUpdate();
         this.onAdminModeChangedServerSide();
         this.onItemChoice();
@@ -124,6 +125,7 @@ export class GameSocketService {
             if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
                 this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
             }
+
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
@@ -131,9 +133,16 @@ export class GameSocketService {
                         this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
                         data.player,
                     );
-                this.gameStateService.gameDataSubjectValue.clientPlayer.inventory = data.player.inventory;
+                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
+                player.inventory = data.player.inventory;
+                player.hp = data.player.hp;
+                player.attack.value = data.player.attack.value;
+                player.defense.value = data.player.defense.value;
+                player.speed = data.player.speed;
+
                 this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
+
                 this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
                 this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             }
@@ -170,7 +179,24 @@ export class GameSocketService {
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joeur a effectue une action sur une porte!', [
+            this.clientNotifier.addLogbookEntry('Un joueur a effectue une action sur une porte!', [
+                this.gameStateService.gameDataSubjectValue.clientPlayer,
+            ]);
+        });
+    }
+
+    private onWallClicked(): void {
+        this.socketClientService.on('wallClicked', (data: { grid: Tile[][] }) => {
+            if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
+                return;
+            }
+            this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
+            this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            this.gameStateService.gameDataSubjectValue.isActionMode = false;
+            this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
+            this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
+            this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+            this.clientNotifier.addLogbookEntry('Un joueur a effectue une action sur un mur!', [
                 this.gameStateService.gameDataSubjectValue.clientPlayer,
             ]);
         });

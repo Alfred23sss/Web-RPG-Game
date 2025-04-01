@@ -1,4 +1,4 @@
-import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
+import { EventEmit, ImageType, ItemName, TileType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
@@ -8,6 +8,8 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+// import { InventoryManagerService } from '@app/services/inventory-manager/inventory-manager.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 
 const PLAYER_MOVE_DELAY = 150;
 const RANDOMIZER = 0.5;
@@ -21,6 +23,7 @@ export abstract class BaseGameSessionService {
         protected readonly lobbyService: LobbyService,
         protected readonly gridManager: GridManagerService,
         protected readonly turnService: GameSessionTurnService,
+        private readonly itemEffectsService: ItemEffectsService,
     ) {}
 
     endTurn(accessCode: string): void {
@@ -38,6 +41,17 @@ export abstract class BaseGameSessionService {
             await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, player.name);
             this.gridManager.setPlayerOnTile(gameSession.game.grid, movement[i], player);
+
+            player.inventory.forEach((item, index) => {
+                if (item?.name === ItemName.Swap) {
+                    if (movement[i].type === TileType.Ice) {
+                        this.itemEffectsService.addEffect(player, item, movement[i]);
+                    } else {
+                        this.itemEffectsService.removeEffects(player, index);
+                    }
+                }
+            });
+
             if (i === movement.length - 1) {
                 isCurrentlyMoving = false;
             }
@@ -47,12 +61,6 @@ export abstract class BaseGameSessionService {
                     isCurrentlyMoving = false;
                 }
             }
-            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
-                accessCode,
-                grid: gameSession.game.grid,
-                player,
-                isCurrentlyMoving,
-            });
             if (!isCurrentlyMoving && movement[i].item && movement[i].item !== undefined) {
                 // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
                 if (movement[i].item.name !== ItemName.Home) {
@@ -89,13 +97,24 @@ export abstract class BaseGameSessionService {
         const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
         const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
         if (index !== -1) {
+            this.itemEffectsService.removeEffects(player, index);
+            const newItem = tile.item;
             player.inventory.splice(index, 1);
             player.inventory.push(tile.item);
             tile.item = item;
             tile.player = player;
+            this.itemEffectsService.addEffect(player, newItem, tile);
         }
+        player = {
+            ...player,
+            attack: { ...player.attack },
+            defense: { ...player.defense },
+            hp: { ...player.hp },
+            speed: player.speed,
+            inventory: player.inventory,
+        };
         this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
         this.eventEmitter.emit(EventEmit.PlayerUpdate, {
             accessCode,
             player,
@@ -151,10 +170,32 @@ export abstract class BaseGameSessionService {
         return this.turnService.pauseTurn(gameSession.turn);
     }
 
+    updateWallTile(accessCode: string, previousTile: Tile, newTile: Tile, player: Player): void {
+        const grid = this.gameSessions.get(accessCode).game.grid;
+        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        if (!isAdjacent) return;
+        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+        targetTile.type = TileType.Default;
+        targetTile.imageSrc = ImageType.Default;
+        player.actionPoints--;
+        this.gameSessions.get(accessCode).game.grid = grid;
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player,
+        });
+        this.eventEmitter.emit(EventEmit.GameWallUpdate, { accessCode, grid });
+    }
+
     handlePlayerItemReset(accessCode: string, player: Player): void {
         const gameSession = this.getGameSession(accessCode);
         const grid = gameSession.game.grid;
         const playerTile = this.gridManager.findTileByPlayer(grid, player);
+
+        player.inventory.forEach((item, index) => {
+            if (item !== null) {
+                this.itemEffectsService.removeEffects(player, index);
+            }
+        });
 
         const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
 
@@ -167,10 +208,16 @@ export abstract class BaseGameSessionService {
                 availableTile.item = item;
             }
         });
-        player.inventory = [null, null];
-
+        player = {
+            ...player,
+            attack: { ...player.attack },
+            defense: { ...player.defense },
+            hp: { ...player.hp },
+            speed: player.speed,
+            inventory: [null, null],
+        };
         this.emitGridUpdate(accessCode, grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
+        this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
 
         this.eventEmitter.emit(EventEmit.PlayerUpdate, {
             accessCode,

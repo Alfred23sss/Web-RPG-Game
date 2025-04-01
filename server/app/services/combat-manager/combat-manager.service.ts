@@ -3,7 +3,9 @@ import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
+
 import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -22,6 +24,7 @@ export class GameCombatService {
         private readonly gameModeSelector: GameModeSelectorService,
         private readonly eventEmitter: EventEmitter2,
         private readonly combatHelper: CombatHelperService,
+        private readonly itemEffectsService: ItemEffectsService,
     ) {}
 
     handleCombatSessionAbandon(accessCode: string, playerName: string): void {
@@ -179,8 +182,17 @@ export class GameCombatService {
         const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         players.forEach((player) => {
             player.hp.current = player.hp.max;
+            this.resetStats(player);
             this.emitEvent(EventEmit.UpdatePlayer, { player });
             gameService.updateGameSessionPlayerList(accessCode, player.name, player);
+        });
+    }
+
+    private resetStats(player: Player): void {
+        player.inventory.forEach((item, index) => {
+            if (!(item === null) && !this.itemEffectsService.isHealthConditionValid(player, item)) {
+                this.itemEffectsService.removeEffects(player, index);
+            }
         });
     }
 
@@ -219,6 +231,11 @@ export class GameCombatService {
     ): void {
         const attackDamage = attackerScore - defenseScore;
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
+
+        defenderPlayer.inventory.forEach((item) => {
+            this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
+        });
+
         this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
         if (defenderPlayer.hp.current === 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);

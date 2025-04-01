@@ -18,6 +18,7 @@ import { GameCombatService } from './services/combat-manager/combat-manager.serv
 import { GameSessionTurnService } from './services/game-session-turn/game-session-turn.service';
 import { GameService } from './services/game/game.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
 @Module({
     imports: [
@@ -51,6 +52,7 @@ import { LobbyService } from './services/lobby/lobby.service';
         GridManagerService,
         GameSessionTurnService,
         CombatHelperService,
+        ItemEffectsService,
     ],
     exports: [AccessCodesService],
 })

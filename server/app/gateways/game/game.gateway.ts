@@ -107,6 +107,16 @@ export class GameGateway {
         this.logger.log('Door update emitted');
     }
 
+    @SubscribeMessage(GameEvents.WallUpdate)
+    handleWallUpdate(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile; player: Player },
+    ) {
+        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
+        gameService.updateWallTile(payload.accessCode, payload.currentTile, payload.targetTile, payload.player);
+        this.logger.log('Door update emitted');
+    }
+
     @SubscribeMessage(GameEvents.Evade)
     handleEvade(@MessageBody() payload: { accessCode: string; player: Player }) {
         this.gameCombatService.attemptEscape(payload.accessCode, payload.player);
@@ -175,6 +185,14 @@ export class GameGateway {
         });
         this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
+    }
+
+    @OnEvent(EventEmit.GameWallUpdate)
+    handleWallUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
+        this.server.to(payload.accessCode).emit('wallClicked', {
+            grid: payload.grid,
+        });
+        this.logger.log('Wall update event emitted');
     }
 
     @OnEvent(EventEmit.GameGridUpdate)
