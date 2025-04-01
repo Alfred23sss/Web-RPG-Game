@@ -41,6 +41,7 @@ const MOCK_PLAYER: Player = {
     isActive: false,
     combatWon: 0,
     vitality: 0,
+    isVirtual: false,
 };
 const MOCK_WAITING_PLAYER = { socketId: 'socket2', avatar: 'avatar2' };
 const MOCK_LOBBY_LOCKED: Lobby = {
@@ -586,6 +587,7 @@ describe('LobbyGateway', () => {
                     hasAbandoned: false,
                     isActive: false,
                     combatWon: 0,
+                    isVirtual: false,
                 },
             ],
             isLocked: false,
@@ -640,6 +642,7 @@ describe('LobbyGateway', () => {
                     hasAbandoned: false,
                     isActive: false,
                     combatWon: 0,
+                    isVirtual: false,
                 },
             ],
             isLocked: false,
