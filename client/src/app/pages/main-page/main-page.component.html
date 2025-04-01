@@ -6,12 +6,15 @@
         crossorigin="anonymous"
         referrerpolicy="no-referrer"
     />
-    <h1 class="header-item">{{ title }}</h1>
+    <link href="https://fonts.googleapis.com/css2?family=Minecraft&display=swap" rel="stylesheet" />
+
     <img [src]="gameDecorations.Logo" alt="Project Logo" class="logo-image" />
 
-    <button class="button" (click)="openDialog()"><i class="fa-solid fa-gamepad"></i>Rejoindre une partie</button>
-    <button class="button" routerLink="/create"><i class="fa-solid fa-plus"></i>Création de jeu</button>
-    <button class="button" routerLink="/admin"><i class="fa-solid fa-user-tie"></i>Administrateur de jeux</button>
+    <div class="button-container">
+        <button class="button custom-button" (click)="openDialog()"><i class="fa-solid fa-gamepad"></i> Rejoindre une partie</button>
+        <button class="button custom-button" routerLink="/create"><i class="fa-solid fa-plus"></i> Création de jeu</button>
+        <button class="button custom-button" routerLink="/admin"><i class="fa-solid fa-user-tie"></i> Administrateur de jeux</button>
+    </div>
 
     <footer class="footer-item">
         <h4 class="team-name">Équipe 309</h4>

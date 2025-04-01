@@ -2,12 +2,9 @@
     <div class="popup" id="popup">
         <div class="popup-grid">
             <div class="header">
-                <div class="popup-cancel">
-                    <button class="cancel-button" (click)="closePopup()">
-                        <img [src]="xSword" alt="xSword" class="cancel-swords" />
-                    </button>
-                </div>
+                <button class="button cancel-button" (click)="closePopup()">Quitter</button>
                 <h2>Création De Jeu</h2>
+                <button class="button confirm-button" (click)="confirm()">Confirmer</button>
             </div>
             <div class="map-size-select">
                 @for (size of gameSizes; track size.key) {
@@ -30,11 +27,6 @@
                     </div>
                 </button>
                 }
-            </div>
-            <div class="popup-confirm">
-                <button class="confirm-button" (click)="confirm()">
-                    <h3>Confirmer</h3>
-                </button>
             </div>
         </div>
     </div>

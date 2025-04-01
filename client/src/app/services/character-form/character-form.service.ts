@@ -53,17 +53,14 @@ export class CharacterService {
         this.updatePlayerStats(player, attribute);
     }
 
-    assignDice(player: Player, attribute: AttributeType): void {
+    assignDice(player: Player, attribute: AttributeType, diceType: DiceType): void {
         if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
-            this.diceAssigned[attribute] = true;
-            this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
             if (attribute === AttributeType.Attack) {
-                player.attack.bonusDice = DiceType.D6;
-                player.defense.bonusDice = DiceType.D4;
-            }
-            if (attribute === AttributeType.Defense) {
-                player.attack.bonusDice = DiceType.D4;
-                player.defense.bonusDice = DiceType.D6;
+                player.attack.bonusDice = diceType;
+                player.defense.bonusDice = diceType === DiceType.D6 ? DiceType.D4 : DiceType.D6;
+            } else {
+                player.defense.bonusDice = diceType;
+                player.attack.bonusDice = diceType === DiceType.D6 ? DiceType.D4 : DiceType.D6;
             }
         }
     }

@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { GameDecorations } from '@app/enums/global.enums';
 import { MatDialog } from '@angular/material/dialog';
+import { RouterLink } from '@angular/router';
 import { AccessCodeComponent } from '@app/components/access-code/access-code.component';
+import { GameDecorations } from '@app/enums/global.enums';
 
 @Component({
     selector: 'app-main-page',

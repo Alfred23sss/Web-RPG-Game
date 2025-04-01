@@ -4,15 +4,22 @@
     <ul class="game-list">
         @for(game of games; let index = $index; track $index) {
         <li class="game-item">
-            <div class="game-preview">
-                <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
-            </div>
             <div class="game-info">
-                <app-game-info [game]="game"></app-game-info>
-
-                <button class="button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">Modifier le jeu</button>
-                <button class="button" (click)="deleteGame(game.id)">Supprimer</button>
-                <label> <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu </label>
+                <app-game-info [game]="game">
+                    <div>
+                        <label>
+                            <input type="checkbox" [checked]="game.isVisible" (change)="toggleVisibility(game.id, $event)" /> Afficher le jeu
+                        </label>
+                    </div>
+                    <div class="info-button-container">
+                        <button class="button info-button" routerLink="/edition" [state]="{ game: game }" (click)="updateCurrentGame(game.id)">
+                            <img src="../../../assets/game-decorations/pencil-iconA.png" alt="Edit Game" class="icon" />
+                        </button>
+                        <button class="button info-button" (click)="deleteGame(game.id)">
+                            <img src="../../../assets/game-decorations/trashCanB.png" alt="Delete Game" class="icon" />
+                        </button>
+                    </div>
+                </app-game-info>
             </div>
         </li>
         }
@@ -23,7 +30,7 @@
     </h2>
     }
     <div class="button-container">
-        <button class="create-button" (click)="navigateToHome()">Retour Acceuil</button>
-        <button class="create-button" (click)="openDialog()">Créer Un Jeu</button>
+        <button class="button custom-button" (click)="navigateToHome()">Retour Acceuil</button>
+        <button class="button custom-button" (click)="openDialog()">Créer Un Jeu</button>
     </div>
 </div>

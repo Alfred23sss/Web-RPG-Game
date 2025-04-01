@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { MIN_PLAYERS } from '@app/constants/global.constants';
 import { DiceType, ErrorMessages, Routes } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -10,6 +9,8 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
 import { WaitingViewComponent } from './waiting-view.component';
+
+const MIN_PLAYERS = 2;
 
 describe('WaitingViewComponent', () => {
     let component: WaitingViewComponent;
@@ -39,10 +40,12 @@ describe('WaitingViewComponent', () => {
         movementPoints: 0,
         actionPoints: 0,
         inventory: [null, null],
+        isVirtual: false,
         hasAbandoned: false,
         isActive: false,
         combatWon: 0,
     };
+
     const mockLobby: Lobby = {
         accessCode: '1234',
         players: [MOCK_PLAYER],
@@ -53,26 +56,29 @@ describe('WaitingViewComponent', () => {
 
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
         mockLobbyService = jasmine.createSpyObj(
             'LobbyService',
             ['initializeLobby', 'removePlayerAndCleanup', 'removeSocketListeners', 'setIsGameStarting'],
             {
-                player$: new BehaviorSubject<Player | null>(MOCK_PLAYER),
-                lobby$: new BehaviorSubject<Lobby | null>(mockLobby),
-                isLoading$: new BehaviorSubject<boolean>(false),
-                isGameStarting$: new BehaviorSubject<boolean>(false),
+                player$: new BehaviorSubject(MOCK_PLAYER),
+                lobby$: new BehaviorSubject(mockLobby),
+                isLoading$: new BehaviorSubject(false),
+                isGameStarting$: new BehaviorSubject(false),
                 accessCode: '1234',
             },
         );
+
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
+            'emit',
+            'on',
             'unlockLobby',
             'lockLobby',
             'kickPlayer',
             'alertGameStarted',
-            'emit', // Add the emit method to the mock
         ]);
-
         await TestBed.configureTestingModule({
             imports: [WaitingViewComponent],
             providers: [
@@ -82,23 +88,21 @@ describe('WaitingViewComponent', () => {
                 { provide: SocketClientService, useValue: mockSocketClientService },
             ],
         }).compileComponents();
-
         fixture = TestBed.createComponent(WaitingViewComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('ngOnInit', () => {
-        it('should initialize lobby and set up subscriptions', () => {
-            expect(mockLobbyService.initializeLobby).toHaveBeenCalled();
-            expect(component.accessCode).toBe('1234');
-            expect(component.player).toEqual(MOCK_PLAYER);
-            expect(component.lobby).toEqual(mockLobby);
-        });
+    it('should initialize with correct default values', () => {
+        expect(component.accessCode).toBe('1234');
+        expect(component.player).toEqual(MOCK_PLAYER);
+        expect(component.lobby).toEqual(mockLobby);
+        expect(component.isLoading).toBeFalse();
+        expect(component.isGameStarting).toBeFalse();
     });
 
     describe('ngOnDestroy', () => {

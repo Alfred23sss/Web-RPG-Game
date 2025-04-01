@@ -1,7 +1,10 @@
 <div class="game-messages">
     <h3>Journal de Bord</h3>
-
     <div class="log-content">
-        <p>Panneau du journal de bord (journal de bord).</p>
+        @if (logs.length === 0){
+        <p>Aucun message pour le moment.</p>
+        } @else{ @for(log of logs; track $index){
+        <li>{{ log }}</li>
+        } }
     </div>
 </div>

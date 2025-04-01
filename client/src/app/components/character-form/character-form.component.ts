@@ -31,6 +31,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
     unavailableAvatars: string[] = [];
+
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
@@ -70,8 +71,8 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
         this.characterService.assignBonus(this.createdPlayer, attribute);
     }
 
-    assignDice(attribute: AttributeType): void {
-        this.characterService.assignDice(this.createdPlayer, attribute);
+    assignDice(attribute: AttributeType, diceType: DiceType): void {
+        this.characterService.assignDice(this.createdPlayer, attribute, diceType);
     }
 
     selectAvatar(avatar: string): void {
@@ -117,6 +118,30 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
         document.removeEventListener('keydown', this.handleKeyDown);
+    }
+
+    getSegmentCount(attribute: AttributeType): number {
+        if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
+            return Math.floor(this.attributes[attribute] / 2);
+        }
+        return this.attributes[attribute];
+    }
+
+    getDisplayValue(attribute: AttributeType): string {
+        const value = this.attributes[attribute];
+        if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
+            return `${value} + ${this.getDiceValue(attribute)}`;
+        }
+        return value.toString();
+    }
+
+    getDiceValue(attribute: AttributeType): DiceType {
+        if (attribute === AttributeType.Attack) {
+            return this.createdPlayer.attack.bonusDice;
+        } else if (attribute === AttributeType.Defense) {
+            return this.createdPlayer.defense.bonusDice;
+        }
+        return DiceType.D4;
     }
 
     private handleKeyDown = (event: KeyboardEvent): void => {

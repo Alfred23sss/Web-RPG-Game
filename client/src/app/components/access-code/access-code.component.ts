@@ -44,6 +44,12 @@ export class AccessCodeComponent {
             });
     }
 
+    validateNumericInput(event: KeyboardEvent): void {
+        if (!/^[0-9]$/.test(event.key)) {
+            event.preventDefault();
+        }
+    }
+
     private async validateAccessCode(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.accessCodeCommunicationService.validateAccessCode(this.accessCode).subscribe({
