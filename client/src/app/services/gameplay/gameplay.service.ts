@@ -32,6 +32,10 @@ export class GameplayService {
         });
     }
 
+    closePopUp(): void {
+        this.dialog.closeAll();
+    }
+
     endTurn(gameData: GameData): void {
         gameData.hasTurnEnded = true;
         gameData.turnTimer = 0;
