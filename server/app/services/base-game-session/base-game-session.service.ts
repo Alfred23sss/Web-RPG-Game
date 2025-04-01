@@ -1,4 +1,4 @@
-import { EventEmit, ImageType, ItemName, TileType } from '@app/enums/enums';
+import { EventEmit, ItemName, TileType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
@@ -12,7 +12,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 
 const PLAYER_MOVE_DELAY = 150;
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export abstract class BaseGameSessionService {
@@ -34,6 +33,7 @@ export abstract class BaseGameSessionService {
         this.startTransitionPhase(accessCode);
     }
 
+    // bouge ca
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
@@ -79,19 +79,9 @@ export abstract class BaseGameSessionService {
     }
 
     updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
-        const grid = this.gameSessions.get(accessCode).game.grid;
-        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
-        if (!isAdjacent) return;
-        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
-
-        if (targetTile.isOpen) {
-            targetTile.imageSrc = ImageType.ClosedDoor;
-        } else {
-            targetTile.imageSrc = ImageType.OpenDoor;
-        }
-        targetTile.isOpen = !targetTile.isOpen;
-        this.gameSessions.get(accessCode).game.grid = grid;
-        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return;
+        gameSession.game.grid = this.gridManager.updateDoorTile(gameSession.game.grid, accessCode, previousTile, newTile);
     }
 
     callTeleport(accessCode: string, player: Player, targetTile: Tile): void {
@@ -101,31 +91,13 @@ export abstract class BaseGameSessionService {
     }
 
     handleItemDropped(accessCode: string, player: Player, item: Item): void {
-        const index = player.inventory.findIndex((invItem) => invItem.id === item.id);
-        const tile = this.gridManager.findTileByPlayer(this.getGameSession(accessCode).game.grid, player);
-        if (index !== -1) {
-            this.itemEffectsService.removeEffects(player, index);
-            const newItem = tile.item;
-            player.inventory.splice(index, 1);
-            player.inventory.push(tile.item);
-            tile.item = item;
-            tile.player = player;
-            this.itemEffectsService.addEffect(player, newItem, tile);
-        }
-        player = {
-            ...player,
-            attack: { ...player.attack },
-            defense: { ...player.defense },
-            hp: { ...player.hp },
-            speed: player.speed,
-            inventory: player.inventory,
-        };
-        this.emitGridUpdate(accessCode, this.getGameSession(accessCode).game.grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
-        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
-            accessCode,
+        const { name, player: updatedPlayer } = this.itemEffectsService.handleItemDropped(
             player,
-        });
+            item,
+            this.getGameSession(accessCode).game.grid,
+            accessCode,
+        );
+        this.updateGameSessionPlayerList(accessCode, name, updatedPlayer);
     }
 
     updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
@@ -178,58 +150,18 @@ export abstract class BaseGameSessionService {
     }
 
     updateWallTile(accessCode: string, previousTile: Tile, newTile: Tile, player: Player): void {
-        const grid = this.gameSessions.get(accessCode).game.grid;
-        const isAdjacent = this.gridManager.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
-        if (!isAdjacent) return;
-        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
-        targetTile.type = TileType.Default;
-        targetTile.imageSrc = ImageType.Default;
-        player.actionPoints--;
-        this.gameSessions.get(accessCode).game.grid = grid;
-        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
-            accessCode,
-            player,
-        });
-        this.eventEmitter.emit(EventEmit.GameWallUpdate, { accessCode, grid });
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return;
+        const [updatedGrid, updatedPlayer] = this.gridManager.updateWallTile(gameSession.game.grid, accessCode, previousTile, newTile, player);
+        gameSession.game.grid = updatedGrid;
+        this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, updatedPlayer);
     }
 
     handlePlayerItemReset(accessCode: string, player: Player): void {
         const gameSession = this.getGameSession(accessCode);
         const grid = gameSession.game.grid;
-        const playerTile = this.gridManager.findTileByPlayer(grid, player);
-
-        player.inventory.forEach((item, index) => {
-            if (item !== null) {
-                this.itemEffectsService.removeEffects(player, index);
-            }
-        });
-
-        const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
-
-        if (shuffledInventory.length > 0 && !playerTile.item) {
-            playerTile.item = shuffledInventory.shift();
-        }
-        shuffledInventory.forEach((item) => {
-            const availableTile = this.gridManager.findClosestAvailableTile(grid, playerTile);
-            if (availableTile) {
-                availableTile.item = item;
-            }
-        });
-        player = {
-            ...player,
-            attack: { ...player.attack },
-            defense: { ...player.defense },
-            hp: { ...player.hp },
-            speed: player.speed,
-            inventory: [null, null],
-        };
-        this.emitGridUpdate(accessCode, grid);
-        this.updateGameSessionPlayerList(accessCode, player.name, { ...player });
-
-        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
-            accessCode,
-            player,
-        });
+        const { name, player: updatedPlayer } = this.itemEffectsService.handlePlayerItemReset(player, grid, accessCode);
+        this.updateGameSessionPlayerList(accessCode, name, updatedPlayer);
     }
 
     emitGridUpdate(accessCode: string, grid: Tile[][]): void {
@@ -263,38 +195,18 @@ export abstract class BaseGameSessionService {
     }
 
     protected addItemToPlayer(accessCode: string, player: Player, item: Item, gameSession: GameSession): void {
-        const tile = this.gridManager.findTileByPlayer(gameSession.game.grid, player);
-        if (tile.item) {
-            for (let i = 0; i < player.inventory.length; i++) {
-                if (!player.inventory[i]) {
-                    player.inventory[i] = tile.item;
-                    tile.item = undefined;
-                    this.updateGameSessionPlayerList(accessCode, player.name, { inventory: player.inventory });
-                    this.emitGridUpdate(accessCode, gameSession.game.grid);
-                    this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
-                        accessCode,
-                        grid: gameSession.game.grid,
-                        player,
-                        isCurrentlyMoving: false,
-                    });
-                    return;
-                }
-            }
+        const grid = gameSession.game.grid;
+        const { player: updatedPlayer, items } = this.itemEffectsService.addItemToPlayer(player, item, grid, accessCode);
+        if (!items) {
+            this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { inventory: updatedPlayer.inventory });
         }
-        const items = [player.inventory[0], player.inventory[1], item];
-        this.eventEmitter.emit(EventEmit.ItemChoice, {
-            player,
-            items,
-        });
     }
 
     protected emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
 
-    // ajouter ici toutes les methodes communes
     abstract createGameSession(accessCode: string): GameSession;
     abstract handlePlayerAbandoned(accessCode: string, playerName: string): Player | null;
     abstract deleteGameSession(accessCode: string);
-    // ajouter ici toutes les methodes differentes
 }
