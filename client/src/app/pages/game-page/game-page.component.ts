@@ -7,6 +7,8 @@ import { GameCombatComponent } from '@app/components/game-combat/game-combat.com
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
+import { ItemName, ItemType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -101,6 +103,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
             width: '650px',
             disableClose: true,
         });
+    }
+
+    hasFlag(player: Player): boolean {
+        return player.inventory.some((item) => item?.name.toLowerCase() === ItemName.Flag);
+    }
+
+    getFlagImage(player: Player): string {
+        const flagItem = player.inventory.find((item) => item !== null && item.name === ItemName.Flag);
+
+        return flagItem?.imageSrc || ItemType.Flag;
     }
 
     private handleKeyPress(event: KeyboardEvent): void {
