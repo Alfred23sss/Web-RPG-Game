@@ -40,7 +40,8 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.AbandonedGame)
-    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
+    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string; isGameEnding: boolean }) {
+        if (payload.isGameEnding) return;
         this.logger.log(`Player ${payload.player.name} has abandoned game`);
         const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
         if (!gameService) return;

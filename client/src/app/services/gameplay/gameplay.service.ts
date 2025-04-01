@@ -38,9 +38,13 @@ export class GameplayService {
         this.socketClientService.emit('endTurn', { accessCode: gameData.lobby.accessCode });
     }
 
-    abandonGame(gameData: GameData): void {
+    abandonGame(gameData: GameData, isGameEnding: boolean): void {
         gameData.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', { player: gameData.clientPlayer, accessCode: gameData.lobby.accessCode });
+        this.socketClientService.emit('abandonedGame', {
+            player: gameData.clientPlayer,
+            accessCode: gameData.lobby.accessCode,
+            isGameEnding,
+        });
         this.backToHome();
     }
     getClientPlayerPosition(gameData: GameData): Tile | undefined {

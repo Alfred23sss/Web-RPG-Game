@@ -21,6 +21,7 @@ export class GameData {
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
+    isGameEnding: boolean = false;
 
     constructor() {
         this.game = {} as Game;
