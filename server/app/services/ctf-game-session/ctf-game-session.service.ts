@@ -5,6 +5,7 @@ import { Player } from '@app/model/database/player';
 import { BaseGameSessionService } from '@app/services/base-game-session/base-game-session.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -22,8 +23,9 @@ export class CTFGameSessionService extends BaseGameSessionService {
         eventEmitter: EventEmitter2,
         gridManager: GridManagerService,
         turnService: GameSessionTurnService,
+        itemEffectsService: ItemEffectsService,
     ) {
-        super(eventEmitter, lobbyService, gridManager, turnService);
+        super(eventEmitter, lobbyService, gridManager, turnService, itemEffectsService);
         this.eventEmitter.on(EventEmit.GameTurnTimeout, ({ accessCode }) => {
             this.endTurn(accessCode);
         });
