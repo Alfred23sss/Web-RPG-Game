@@ -12,7 +12,11 @@
                 [class.abandoned]="player.hasAbandoned"
                 [class.active]="gameData.currentPlayer && player.name === gameData.currentPlayer.name"
             >
-                {{ player?.name }} <br />
+                {{ player?.name }}
+                @if(hasFlag(player)) {
+                    <img draggable="false" alt="Flag" [src]="getFlagImage(player)" class="flag-overlay" />
+                }
+                <br />
                 Combats gagnés: {{ player.combatWon }}
             </p>
             } @if(gameData.lobby.players){
