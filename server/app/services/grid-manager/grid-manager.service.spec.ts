@@ -329,10 +329,29 @@ describe('GridManagerService', () => {
         expect(grid[0][0].player).toBe(mockPlayer);
     });
 
-    // it('should change QuestionMark to random item not already present', () => {
-    //     const result = service.assignItemsToRandomItems(mockGrid);
-    //     expect(result).toBe(mockGrid);
-    //     expect(result[0][2].item.name).not.toBe(ItemName.QuestionMark);
-    //     expect(result[0][2].item.name).not.toBe(ItemName.Fire);
-    // });
+    describe('assignItemsToRandomItems', () => {
+        it('should ignore QuestionMark and Home items when collecting existing items', () => {
+            const grid: Tile[][] = [
+                [
+                    { id: 'tile-0-0', item: { name: ItemName.QuestionMark } } as Tile,
+                    { id: 'tile-0-1', item: { name: ItemName.Home } } as Tile,
+                    { id: 'tile-0-2', item: { name: ItemName.Fire } } as Tile,
+                ],
+            ];
+
+            const result = service.assignItemsToRandomItems(grid);
+
+            expect(result[0][0].item?.name).not.toBe(ItemName.QuestionMark);
+            expect(result[0][1].item?.name).toBe(ItemName.Home);
+        });
+
+        it('should not modify tiles without items', () => {
+            const grid: Tile[][] = [[{ id: 'tile-0-0', item: null } as Tile, { id: 'tile-0-1', item: { name: ItemName.QuestionMark } } as Tile]];
+
+            const result = service.assignItemsToRandomItems(grid);
+
+            expect(result[0][0].item).toBeNull();
+            expect(result[0][1].item?.name).not.toBe(ItemName.QuestionMark);
+        });
+    });
 });
