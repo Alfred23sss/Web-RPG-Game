@@ -1,4 +1,7 @@
 import { Game, gameSchema } from '@app/model/database/game';
+import { ClassicGameSessionService } from '@app/services/classic-game-session/classic-game-session.service';
+import { CTFGameSessionService } from '@app/services/ctf-game-session/ctf-game-session.service';
+import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -14,9 +17,9 @@ import { AccessCodesService } from './services/access-codes/access-codes.service
 import { CombatHelperService } from './services/combat-helper/combat-helper.service';
 import { GameCombatService } from './services/combat-manager/combat-manager.service';
 import { GameSessionTurnService } from './services/game-session-turn/game-session-turn.service';
-import { GameSessionService } from './services/game-session/game-session.service';
 import { GameService } from './services/game/game.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
 import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
 @Module({
@@ -46,11 +49,14 @@ import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.se
         Logger,
         GameService,
         AccessCodesService,
-        GameSessionService,
+        ClassicGameSessionService,
+        CTFGameSessionService,
+        GameModeSelectorService,
         GameCombatService,
         GridManagerService,
         GameSessionTurnService,
         CombatHelperService,
+        ItemEffectsService,
     ],
     exports: [AccessCodesService],
 })

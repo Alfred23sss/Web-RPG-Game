@@ -1,14 +1,18 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
-import { ItemName } from '@app/enums/enums';
+import { EventEmit, ImageType, ItemName, TileType } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/model/database/tile';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from 'eventemitter2';
 
 const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GridManagerService {
-    constructor(private readonly logger: Logger) {}
+    constructor(
+        private readonly logger: Logger,
+        private readonly eventEmitter: EventEmitter2,
+    ) {}
 
     findTileById(grid: Tile[][], tileId: string): Tile | undefined {
         return grid.flat().find((tile) => tile.id === tileId);
@@ -25,7 +29,6 @@ export class GridManagerService {
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;
         let tile2Pos: { row: number; col: number } | null = null;
-
         for (let row = 0; row < grid.length; row++) {
             for (let col = 0; col < grid[row].length; col++) {
                 if (grid[row][col].id === tileId1) {
@@ -38,7 +41,6 @@ export class GridManagerService {
             }
             if (tile1Pos && tile2Pos) break;
         }
-
         if (!tile1Pos || !tile2Pos) return false;
         return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
     }
@@ -51,6 +53,40 @@ export class GridManagerService {
                 }
             }
         }
+    }
+
+    updateDoorTile(grid: Tile[][], accessCode: string, previousTile: Tile, newTile: Tile): Tile[][] {
+        const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        if (!isAdjacent) return grid;
+        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+        if (!targetTile) return grid;
+        if (targetTile.isOpen) {
+            targetTile.imageSrc = ImageType.ClosedDoor;
+        } else {
+            targetTile.imageSrc = ImageType.OpenDoor;
+        }
+        targetTile.isOpen = !targetTile.isOpen;
+        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
+        return grid;
+    }
+
+    updateWallTile(grid: Tile[][], accessCode: string, previousTile: Tile, newTile: Tile, player: Player): [Tile[][], Player] {
+        const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
+        if (!isAdjacent) return [grid, player];
+        const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
+        if (!targetTile) return [grid, player];
+        targetTile.type = TileType.Default;
+        targetTile.imageSrc = ImageType.Default;
+        const updatedPlayer = { ...player, actionPoints: player.actionPoints - 1 };
+        this.eventEmitter.emit(EventEmit.PlayerUpdate, {
+            accessCode,
+            player: updatedPlayer,
+        });
+        this.eventEmitter.emit(EventEmit.GameWallUpdate, {
+            accessCode,
+            grid,
+        });
+        return [grid, updatedPlayer];
     }
 
     setPlayerOnTile(grid: Tile[][], targetTile: Tile, player: Player): void {
@@ -70,7 +106,6 @@ export class GridManagerService {
 
     assignPlayersToSpawnPoints(players: Player[], spawnPoints: Tile[], grid: Tile[][]): [Player[], Tile[][]] {
         const shuffledSpawns = [...spawnPoints].sort(() => Math.random() - RANDOMIZER);
-
         players.forEach((player, index) => {
             if (index < shuffledSpawns.length) {
                 const spawnTile = shuffledSpawns[index];
@@ -89,7 +124,6 @@ export class GridManagerService {
         shuffledSpawns.slice(players.length).forEach((spawnPoint) => {
             spawnPoint.item = null;
         });
-
         return [players, grid];
     }
 
@@ -102,9 +136,7 @@ export class GridManagerService {
                 }
             }
         }
-
         let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
-
         for (const row of grid) {
             for (const tile of row) {
                 if (tile.item?.name === ItemName.QuestionMark) {
@@ -114,7 +146,6 @@ export class GridManagerService {
                 }
             }
         }
-
         return grid;
     }
 
@@ -127,10 +158,8 @@ export class GridManagerService {
         if (currentPlayerTile === targetTile) {
             return grid;
         }
-
         let destinationTile = targetTile;
         const isPlayerSpawnPoint = player.spawnPoint.tileId === targetTile.id;
-
         if (
             targetTile.player ||
             targetTile.type === 'mur' ||
@@ -149,15 +178,13 @@ export class GridManagerService {
 
         currentPlayerTile.player = undefined;
         this.setPlayerOnTile(grid, destinationTile, player);
-
         return grid;
     }
 
-    private findClosestAvailableTile(grid: Tile[][], startTile: Tile): Tile | undefined {
+    findClosestAvailableTile(grid: Tile[][], startTile: Tile): Tile | undefined {
         const queue: Tile[] = [startTile];
         const visited = new Set<string>();
         visited.add(startTile.id);
-
         while (queue.length > 0) {
             const tile = queue.shift();
             if (!tile) continue;
@@ -165,7 +192,6 @@ export class GridManagerService {
             if (!tile.player && (!tile.type || tile.type !== 'mur') && (!tile.type || tile.type !== 'porte' || tile.isOpen) && !tile.item) {
                 return tile;
             }
-
             const neighbors = this.getAdjacentTiles(grid, tile);
             for (const neighbor of neighbors) {
                 if (!visited.has(neighbor.id)) {
@@ -174,21 +200,31 @@ export class GridManagerService {
                 }
             }
         }
-
         return undefined;
     }
+
+    isFlagOnSpawnPoint(grid: Tile[][], player: Player, movement: Tile): boolean {
+        const playerTile = this.findTileByPlayer(grid, player);
+        const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
+        if (playerTile.id === playerSpawnPoint.id) {
+            for (const item of player.inventory) {
+                if (item && item.name === ItemName.Flag) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private getAdjacentTiles(grid: Tile[][], tile: Tile): Tile[] {
         const coords = this.parseTileCoordinates(tile.id);
         if (!coords) return [];
-
         const { row, col } = coords;
         const adjacentTiles: Tile[] = [];
-
         if (row > 0) adjacentTiles.push(grid[row - 1][col]);
         if (row < grid.length - 1) adjacentTiles.push(grid[row + 1][col]);
         if (col > 0) adjacentTiles.push(grid[row][col - 1]);
         if (col < grid[row].length - 1) adjacentTiles.push(grid[row][col + 1]);
-
         return adjacentTiles;
     }
 

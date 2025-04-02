@@ -28,6 +28,11 @@ export enum ChatEvents {
     Error = 'error',
 }
 
+export enum TeamType {
+    RED = 'red',
+    BLUE = 'blue',
+}
+
 export enum AvatarType {
     SkeletonA = './assets/avatars/skeletonA_Idle.gif',
     SkeletonB = './assets/avatars/skeletonB_Idle.gif',

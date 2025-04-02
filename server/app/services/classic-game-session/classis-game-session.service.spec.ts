@@ -17,7 +17,7 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameSessionService } from './game-session.service';
+import { GameSessionService } from './classic-game-session.service';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;

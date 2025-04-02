@@ -6,7 +6,10 @@ export enum GameEvents {
     PerformAttack = 'performAttack',
     PlayerMovementUpdate = 'playerMovementUpdate',
     DoorUpdate = 'doorUpdate',
+    WallUpdate = 'wallUpdate',
     Evade = 'evade',
     AdminModeUpdate = 'adminModeUpdate',
     TeleportPlayer = 'teleportPlayer',
+    ItemDrop = 'itemDrop',
+    PlayerItemReset = 'playerItemReset',
 }

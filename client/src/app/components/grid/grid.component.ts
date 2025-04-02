@@ -27,6 +27,7 @@ export class GridComponent {
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
     @Output() doorClicked = new EventEmitter<Tile>();
+    @Output() wallClicked = new EventEmitter<Tile>();
     @Output() tileRightClicked = new EventEmitter<{ tile: Tile; event: MouseEvent }>();
     @Output() teleportClicked = new EventEmitter<Tile>();
 
@@ -45,8 +46,10 @@ export class GridComponent {
     onTileClick(tile: Tile): void {
         if (tile.player) {
             this.playerAttacked.emit(tile);
-        } else if (tile.type === TileType.Door) {
+        } else if (tile.type === TileType.Door && !tile.item) {
             this.doorClicked.emit(tile);
+        } else if (tile.type === TileType.Wall) {
+            this.wallClicked.emit(tile);
         }
         if (this.isAvailablePath(tile)) {
             this.tileClicked.emit(tile);

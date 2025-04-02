@@ -1,4 +1,4 @@
-import { TileType } from '@app/enums/enums';
+import { ItemName, ItemType, TileType } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/model/database/player';
@@ -25,7 +25,8 @@ export class CombatHelperService {
         if (tile && tile.type === TileType.Ice) {
             iceDisadvantage = ICE_PENALTY;
         }
-        const defenseBonus = isDebugMode ? 1 : Math.floor(Math.random() * this.extractDiceValue(defender.defense.bonusDice)) + 1;
+        const diceValue = this.hasStopItem(defender) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(defender.defense.bonusDice);
+        const defenseBonus = isDebugMode ? diceValue : Math.floor(Math.random() * diceValue) + 1;
         return defender.defense.value + defenseBonus + iceDisadvantage;
     }
 
@@ -35,7 +36,7 @@ export class CombatHelperService {
         if (tile && tile.type === TileType.Ice) {
             iceDisadvantage = ICE_PENALTY;
         }
-        const diceValue = this.extractDiceValue(attacker.attack.bonusDice);
+        const diceValue = this.hasStopItem(attacker) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(attacker.attack.bonusDice);
         const attackBonus = isDebugMode ? diceValue : Math.floor(Math.random() * diceValue) + 1;
         return attacker.attack.value + attackBonus + iceDisadvantage;
     }
@@ -56,5 +57,9 @@ export class CombatHelperService {
 
     private extractDiceValue(dice: DiceType): number {
         return parseInt(dice.replace(/\D/g, ''), 10) || 1;
+    }
+
+    private hasStopItem(player: Player): boolean {
+        return player.inventory.some((item) => item && item.name === ItemName.Stop);
     }
 }

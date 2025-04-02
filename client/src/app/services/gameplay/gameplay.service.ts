@@ -1,8 +1,12 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { GameData } from '@app/classes/gameData';
+import { Item } from '@app/classes/item';
+import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { Routes } from '@app/enums/global.enums';
+import { ItemName, Routes, TileType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
@@ -17,7 +21,20 @@ export class GameplayService {
         private readonly socketClientService: SocketClientService,
         private readonly snackBarService: SnackbarService,
         private readonly router: Router,
+        private dialog: MatDialog,
     ) {}
+
+    createItemPopUp(items: [Item, Item, Item]): void {
+        this.dialog.open(ItemPopUpComponent, {
+            data: { items },
+            panelClass: 'item-pop-up-dialog',
+            hasBackdrop: false,
+        });
+    }
+
+    closePopUp(): void {
+        this.dialog.closeAll();
+    }
 
     endTurn(gameData: GameData): void {
         gameData.hasTurnEnded = true;
@@ -25,9 +42,13 @@ export class GameplayService {
         this.socketClientService.emit('endTurn', { accessCode: gameData.lobby.accessCode });
     }
 
-    abandonGame(gameData: GameData): void {
+    abandonGame(gameData: GameData, isGameEnding: boolean): void {
         gameData.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', { player: gameData.clientPlayer, accessCode: gameData.lobby.accessCode });
+        this.socketClientService.emit('abandonedGame', {
+            player: gameData.clientPlayer,
+            accessCode: gameData.lobby.accessCode,
+            isGameEnding,
+        });
         this.backToHome();
     }
     getClientPlayerPosition(gameData: GameData): Tile | undefined {
@@ -66,14 +87,16 @@ export class GameplayService {
     checkAvailableActions(gameData: GameData): void {
         const clientPlayerPosition = this.getClientPlayerPosition(gameData);
         if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
-        const hasIce = this.playerMovementService.hasAdjacentIce(clientPlayerPosition, gameData.game.grid);
+        const hasIce = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Ice);
+        const hasWall = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Wall);
+        const hasLightning = clientPlayerPosition.player?.inventory.some((item) => item?.name === ItemName.Lightning);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, gameData.game.grid);
         if (gameData.clientPlayer.actionPoints === 0 && gameData.clientPlayer.movementPoints === 0) {
             if (!hasIce) {
                 this.endTurn(gameData);
             }
         } else if (gameData.clientPlayer.actionPoints === 1 && gameData.clientPlayer.movementPoints === 0) {
-            if (!hasIce && !hasActionAvailable) {
+            if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) {
                 this.endTurn(gameData);
             }
         }
@@ -91,9 +114,47 @@ export class GameplayService {
             accessCode: gameData.lobby.accessCode,
         });
     }
+    // duplication de code ici entre la fonction ci-dessus et ci-dessous, à refaire
+    handleWallClick(gameData: GameData, targetTile: Tile, player: Player): void {
+        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (!currentTile || !gameData.game || !gameData.game.grid) {
+            return;
+        }
+        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning))
+            this.socketClientService.emit('wallUpdate', {
+                currentTile,
+                targetTile,
+                accessCode: gameData.lobby.accessCode,
+                player,
+            });
+    }
+
+    handleAttackCTF(gameData: GameData, targetTile: Tile) {
+        if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
+            if (this.isTeamate(targetTile.player.name, currentTile.player.name, gameData)) {
+                this.snackBarService.showMessage("TRAITRE!!! C'EST MOI TON AMI");
+                return;
+            } else if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
+                this.socketClientService.emit('startCombat', {
+                    attackerName: currentTile.player.name,
+                    defenderName: targetTile.player.name,
+                    accessCode: gameData.lobby.accessCode,
+                    isDebugMode: gameData.isDebugMode,
+                });
+                return;
+            }
+        }
+    }
 
     handleAttackClick(gameData: GameData, targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        if (gameData.game.mode === 'CTF') {
+            this.handleAttackCTF(gameData, targetTile);
+            return;
+        }
         const currentTile = this.getClientPlayerPosition(gameData);
 
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
@@ -127,6 +188,14 @@ export class GameplayService {
                 targetTile,
             });
         }
+    }
+
+    handleItemDropped(gameData: GameData, item: Item) {
+        this.socketClientService.emit('itemDrop', {
+            accessCode: gameData.lobby.accessCode,
+            player: gameData.clientPlayer,
+            item,
+        });
     }
 
     updateQuickestPath(gameData: GameData, targetTile: Tile): void {
@@ -186,5 +255,12 @@ export class GameplayService {
         }
         if (!tile1Pos || !tile2Pos) return false;
         return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+    }
+
+    private isTeamate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
+        const players = gameData.lobby.players;
+        const defender = players.find((p) => p.name === defenderPlayer);
+        const attacker = players.find((p) => p.name === attackerPlayer);
+        return attacker?.team === defender?.team;
     }
 }
