@@ -21,7 +21,7 @@ export class ItemEffectsService {
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
         Logger.log(`Picked up: ${item.name}`);
-        if (!item.modifiers) {
+        if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
             this.applyItemModifiers(item);
         }
 
@@ -42,7 +42,7 @@ export class ItemEffectsService {
 
     removeEffects(player: Player, index: number): void {
         const item = player.inventory[index];
-        Logger.log('removeEffects');
+        Logger.log(`Lost effects : ${item.name}`);
 
         if (!item || !item.isActive) {
             Logger.log('conditions failed');
@@ -164,7 +164,16 @@ export class ItemEffectsService {
             for (let i = 0; i < player.inventory.length; i++) {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
+                    this.addEffect(player, tile.item, tile);
                     tile.item = undefined;
+                    player = {
+                        ...player,
+                        attack: { ...player.attack },
+                        defense: { ...player.defense },
+                        hp: { ...player.hp },
+                        speed: player.speed,
+                        inventory: player.inventory,
+                    };
 
                     this.eventEmitter.emit(EventEmit.GameGridUpdate, { accessCode, grid });
                     this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
