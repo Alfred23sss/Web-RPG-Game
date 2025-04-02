@@ -210,6 +210,8 @@ export abstract class BaseGameSessionService {
         const { player: updatedPlayer, items } = this.itemEffectsService.addItemToPlayer(player, item, grid, accessCode);
         if (!items) {
             this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { inventory: updatedPlayer.inventory });
+            const players = gameSession.turn.orderedPlayers;
+            this.eventEmitter.emit(EventEmit.UpdatePlayerList, { players, accessCode });
         }
     }
 
