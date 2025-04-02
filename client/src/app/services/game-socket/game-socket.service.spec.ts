@@ -277,4 +277,16 @@ describe('GameSocketService', () => {
         ]);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
+
+    it('should filter out abandoned players when game ends', () => {
+        const activePlayer = { ...MOCK_PLAYER, name: 'Active', hasAbandoned: false };
+        const abandonedPlayer = { ...MOCK_PLAYER, name: 'Abandoned', hasAbandoned: true };
+
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [activePlayer, abandonedPlayer];
+        const data = { winner: 'WinnerPlayer' };
+        socketEvents['gameEnded'](data);
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Fin de la partie', [activePlayer, abandonedPlayer]);
+    });
 });

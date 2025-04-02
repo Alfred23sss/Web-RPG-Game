@@ -596,4 +596,46 @@ describe('GameplayService', () => {
         const result = (service as any).findAndCheckAdjacentTiles('tile1', 'tile2', []);
         expect(result).toBeFalse();
     });
+
+    describe('isAvailablePath', () => {
+        it('should return true when tile is in availablePath', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile1' } as Tile;
+            gameData.availablePath = [targetTile];
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeTrue();
+        });
+
+        it('should return false when tile is not in availablePath', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile3' } as Tile;
+            gameData.availablePath = [{ id: 'tile1' } as Tile, { id: 'tile2' } as Tile];
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeFalse();
+        });
+
+        it('should return false when availablePath is empty', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile1' } as Tile;
+            gameData.availablePath = [];
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeFalse();
+        });
+
+        it('should return false when availablePath is undefined', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile1' } as Tile;
+            gameData.availablePath = undefined;
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeFalse();
+        });
+    });
 });
