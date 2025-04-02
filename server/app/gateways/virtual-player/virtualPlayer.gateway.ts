@@ -1,7 +1,7 @@
 import { Behavior } from '@app/enums/enums';
 import { Player } from '@app/model/database/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
+import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
 import { Logger } from '@nestjs/common';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
@@ -15,7 +15,7 @@ export class VirtualPlayerGateway {
     constructor(
         private readonly lobbyService: LobbyService,
         private readonly logger: Logger,
-        private readonly virtualPlayerService: VirtualPlayerService,
+        private readonly virtualPlayerService: VirtualPlayerCreationService,
     ) {}
 
     @SubscribeMessage(VirtualPlayerEvents.CreateVirtualPlayer)

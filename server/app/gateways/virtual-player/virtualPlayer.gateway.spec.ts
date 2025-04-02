@@ -2,7 +2,7 @@
 import { Behavior } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
+import { VirtualPlayerService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerGateway } from './virtualPlayer.gateway';
