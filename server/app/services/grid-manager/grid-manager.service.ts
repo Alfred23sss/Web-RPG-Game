@@ -140,7 +140,7 @@ export class GridManagerService {
         for (const row of grid) {
             for (const tile of row) {
                 if (tile.item?.name === ItemName.QuestionMark) {
-                    const randomItem = remainingItems[Math.floor(Math.random() * RANDOM_ITEMS.length)];
+                    const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)];
                     tile.item = randomItem;
                     remainingItems = remainingItems.filter((item) => item.name !== randomItem.name);
                 }
