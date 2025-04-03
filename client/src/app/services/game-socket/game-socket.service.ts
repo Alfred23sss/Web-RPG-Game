@@ -53,9 +53,9 @@ export class GameSocketService {
             const abandonedPlayer = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
-            this.gameStateService.gameDataSubjectValue.lobby.players = this.gameStateService.gameDataSubjectValue.lobby.players.filter(
-                (p) => p.name !== data.player.name,
-            );
+            // this.gameStateService.gameDataSubjectValue.lobby.players = this.gameStateService.gameDataSubjectValue.lobby.players.filter(
+            //     (p) => p.name !== data.player.name,
+            // );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
             this.clientNotifier.addLogbookEntry('Un joeur a abandonne la partie', [data.player]);
         });
