@@ -115,6 +115,7 @@ export abstract class BaseGameSessionService {
         const players = this.getPlayers(accessCode);
         const player = players.find((p) => p.name === playername);
         this.updatePlayer(player, updates);
+        this.emitEvent(EventEmit.UpdatePlayerList, { players: this.getPlayers(accessCode), accessCode });
     }
 
     getPlayers(accessCode: string): Player[] {
@@ -210,8 +211,6 @@ export abstract class BaseGameSessionService {
         const { player: updatedPlayer, items } = this.itemEffectsService.addItemToPlayer(player, item, grid, accessCode);
         if (!items) {
             this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { inventory: updatedPlayer.inventory });
-            const players = gameSession.turn.orderedPlayers;
-            this.eventEmitter.emit(EventEmit.UpdatePlayerList, { players, accessCode });
         }
     }
 
