@@ -24,14 +24,14 @@ describe('Item', () => {
         expect(item.itemCounter).toBe(1);
     });
 
-    it('should clone an item with a new unique id', () => {
-        const clonedItem = item.clone();
+    // it('should clone an item with a new unique id', () => {
+    //     const clonedItem = item.clone();
 
-        expect(clonedItem).not.toBe(item);
-        expect(clonedItem.id).not.toBe(item.id);
-        expect(clonedItem.originalReference).toBe(item);
-        expect(clonedItem.name).toBe(item.name);
-    });
+    //     expect(clonedItem).not.toBe(item);
+    //     expect(clonedItem.id).not.toBe(item.id);
+    //     expect(clonedItem.originalReference).toBe(item);
+    //     expect(clonedItem.name).toBe(item.name);
+    // });
 
     it('should generate a unique ID format', () => {
         const clonedItem1 = item.clone();

@@ -224,7 +224,7 @@ describe('GamePageComponent', () => {
 
     it('should abandon game by calling gameplay service', () => {
         component.abandonGame();
-        expect(mockGameplayService.abandonGame).toHaveBeenCalledWith(mockGameData);
+        expect(mockGameplayService.abandonGame).toHaveBeenCalledWith(mockGameData, false);
     });
 
     it('should handle tile interactions', () => {

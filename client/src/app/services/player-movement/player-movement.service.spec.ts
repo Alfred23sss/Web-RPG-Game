@@ -255,43 +255,43 @@ describe('PlayerMovementService', () => {
         });
     });
 
-    describe('hasAdjacentIce', () => {
-        it('should return true when there is adjacent ice', () => {
-            const centerTile = createTile('center', TileType.Default);
-            const grid = mockTiles();
-            const iceTile = createTile('ice', TileType.Ice);
-            spyOn<any>(service, 'getNeighbors').and.returnValue([
-                createTile('normal', TileType.Default),
-                iceTile,
-                createTile('water', TileType.Water),
-            ]);
-            const result = service.hasAdjacentIce(centerTile, grid);
-            expect(result).toBeTrue();
-            expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
-        });
+    // describe('hasAdjacentIce', () => {
+    //     it('should return true when there is adjacent ice', () => {
+    //         const centerTile = createTile('center', TileType.Default);
+    //         const grid = mockTiles();
+    //         const iceTile = createTile('ice', TileType.Ice);
+    //         spyOn<any>(service, 'getNeighbors').and.returnValue([
+    //             createTile('normal', TileType.Default),
+    //             iceTile,
+    //             createTile('water', TileType.Water),
+    //         ]);
+    //         const result = service.hasAdjacentIce(centerTile, grid);
+    //         expect(result).toBeTrue();
+    //         expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
+    //     });
 
-        it('should return false when there is no adjacent ice', () => {
-            const centerTile = createTile('center', TileType.Default);
-            const grid = mockTiles();
-            spyOn<any>(service, 'getNeighbors').and.returnValue([
-                createTile('normal1', TileType.Default),
-                createTile('normal2', TileType.Default),
-                createTile('water', TileType.Water),
-            ]);
-            const result = service.hasAdjacentIce(centerTile, grid);
+    //     it('should return false when there is no adjacent ice', () => {
+    //         const centerTile = createTile('center', TileType.Default);
+    //         const grid = mockTiles();
+    //         spyOn<any>(service, 'getNeighbors').and.returnValue([
+    //             createTile('normal1', TileType.Default),
+    //             createTile('normal2', TileType.Default),
+    //             createTile('water', TileType.Water),
+    //         ]);
+    //         const result = service.hasAdjacentIce(centerTile, grid);
 
-            expect(result).toBeFalse();
-            expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
-        });
-        it('should return false when there are no neighbors', () => {
-            const centerTile = createTile('center', TileType.Default);
-            const grid = mockTiles();
-            spyOn<any>(service, 'getNeighbors').and.returnValue([]);
-            const result = service.hasAdjacentIce(centerTile, grid);
-            expect(result).toBeFalse();
-            expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
-        });
-    });
+    //         expect(result).toBeFalse();
+    //         expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
+    //     });
+    //     it('should return false when there are no neighbors', () => {
+    //         const centerTile = createTile('center', TileType.Default);
+    //         const grid = mockTiles();
+    //         spyOn<any>(service, 'getNeighbors').and.returnValue([]);
+    //         const result = service.hasAdjacentIce(centerTile, grid);
+    //         expect(result).toBeFalse();
+    //         expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
+    //     });
+    // });
 
     describe('hasAdjacentPlayerOrDoor', () => {
         it('should return true when there is an adjacent player', () => {

@@ -105,7 +105,7 @@ describe('GameSocketService', () => {
         socketEvents['gameEnded'](data);
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
         tick(DELAY_BEFORE_ENDING_GAME);
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, true);
     }));
 
     it('should handle adminModeDisabled event', () => {
@@ -229,7 +229,7 @@ describe('GameSocketService', () => {
     it('should abandon game when refresh flag exists in handlePageRefresh', () => {
         sessionStorage.setItem('refreshed', 'true');
         service['handlePageRefresh']();
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, false);
         expect(sessionStorage.getItem('refreshed')).toBe('true');
     });
 
