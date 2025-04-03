@@ -1,4 +1,4 @@
-import { EventEmit, ItemName, TileType } from '@app/enums/enums';
+import { EventEmit, GameMode, ItemName, TileType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
@@ -14,16 +14,20 @@ import { ItemEffectsService } from '@app/services/item-effects/item-effects.serv
 const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
-export abstract class BaseGameSessionService {
-    protected gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
+export class GameSessionService {
+    private gameSessions: Map<string, GameSession> = new Map<string, GameSession>();
 
     constructor(
-        protected readonly eventEmitter: EventEmitter2,
-        protected readonly lobbyService: LobbyService,
-        protected readonly gridManager: GridManagerService,
-        protected readonly turnService: GameSessionTurnService,
+        private readonly eventEmitter: EventEmitter2,
+        private readonly lobbyService: LobbyService,
+        private readonly gridManager: GridManagerService,
+        private readonly turnService: GameSessionTurnService,
         private readonly itemEffectsService: ItemEffectsService,
-    ) {}
+    ) {
+        this.eventEmitter.on(EventEmit.GameTurnTimeout, ({ accessCode }) => {
+            this.endTurn(accessCode);
+        });
+    }
 
     endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
@@ -183,18 +187,77 @@ export abstract class BaseGameSessionService {
         });
     }
 
-    protected startTransitionPhase(accessCode: string): void {
+    createGameSession(accessCode: string, gameMode: string): GameSession {
+        const lobby = this.lobbyService.getLobby(accessCode);
+        const game = lobby.game;
+        const grid = this.gridManager.assignItemsToRandomItems(game.grid);
+        const spawnPoints = this.gridManager.findSpawnPoints(grid);
+        let turn;
+        if (gameMode === GameMode.CTF) {
+            turn = this.turnService.initializeTurnCTF(accessCode);
+        } else {
+            turn = this.turnService.initializeTurn(accessCode);
+        }
+        turn.beginnerPlayer = turn.orderedPlayers[0];
+        const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
+        game.grid = updatedGrid;
+        const gameSession: GameSession = { game, turn };
+        this.gameSessions.set(accessCode, gameSession);
+        this.updatePlayerListSpawnPoint(players, accessCode);
+        this.startTransitionPhase(accessCode);
+        return gameSession;
+    }
+
+    deleteGameSession(accessCode: string): void {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (gameSession) {
+            if (gameSession.turn.turnTimers) {
+                clearTimeout(gameSession.turn.turnTimers);
+            }
+            if (gameSession.turn.countdownInterval) {
+                clearInterval(gameSession.turn.countdownInterval);
+            }
+            this.gameSessions.delete(accessCode);
+        }
+    }
+
+    handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
+        const gameSession = this.gameSessions.get(accessCode);
+        if (!gameSession) return null;
+        const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
+        if (player) {
+            const spawnTileId = player.spawnPoint?.tileId;
+            this.updatePlayer(player, { hasAbandoned: true });
+            if (spawnTileId) {
+                const spawnTile = this.gridManager.findTileById(gameSession.game.grid, spawnTileId);
+                if (spawnTile) {
+                    spawnTile.item = undefined;
+                }
+            }
+            this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
+            this.emitGridUpdate(accessCode, gameSession.game.grid);
+        }
+        if (gameSession.turn.currentPlayer.name === playerName) {
+            this.endTurn(accessCode);
+        }
+        if (player.isAdmin) {
+            this.eventEmitter.emit(EventEmit.AdminModeDisabled, { accessCode });
+        }
+        return player;
+    }
+
+    private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
 
         this.turnService.startTransitionPhase(accessCode, gameSession.turn);
     }
 
-    protected updatePlayer(player: Player, updates: Partial<Player>): void {
+    private updatePlayer(player: Player, updates: Partial<Player>): void {
         this.turnService.updatePlayer(player, updates);
     }
 
-    protected updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
+    private updatePlayerListSpawnPoint(players: Player[], accessCode: string): void {
         const gameSession = this.getGameSession(accessCode);
         for (const playerUpdated of players) {
             if (playerUpdated.spawnPoint) {
@@ -206,7 +269,7 @@ export abstract class BaseGameSessionService {
         }
     }
 
-    protected addItemToPlayer(accessCode: string, player: Player, item: Item, gameSession: GameSession): void {
+    private addItemToPlayer(accessCode: string, player: Player, item: Item, gameSession: GameSession): void {
         const grid = gameSession.game.grid;
         const { player: updatedPlayer, items } = this.itemEffectsService.addItemToPlayer(player, item, grid, accessCode);
         if (!items) {
@@ -214,11 +277,7 @@ export abstract class BaseGameSessionService {
         }
     }
 
-    protected emitEvent<T>(eventName: string, payload: T): void {
+    private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
-
-    abstract createGameSession(accessCode: string): GameSession;
-    abstract handlePlayerAbandoned(accessCode: string, playerName: string): Player | null;
-    abstract deleteGameSession(accessCode: string);
 }

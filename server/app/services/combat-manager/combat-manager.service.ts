@@ -3,8 +3,7 @@ import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
-
-import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -21,7 +20,7 @@ export class GameCombatService {
     private combatStates: GameCombatMap = {};
 
     constructor(
-        private readonly gameModeSelector: GameModeSelectorService,
+        private readonly gameSessionService: GameSessionService,
         private readonly eventEmitter: EventEmitter2,
         private readonly combatHelper: CombatHelperService,
         private readonly itemEffectsService: ItemEffectsService,
@@ -33,8 +32,7 @@ export class GameCombatService {
         if (combatState.attacker.name === playerName || combatState.defender.name === playerName) {
             const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
             this.updateWinningPlayerAfterCombat(playerToUpdate, accessCode);
-            const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
-            this.emitEvent(EventEmit.UpdatePlayerList, { players: gameService.getPlayers(accessCode), accessCode });
+            this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.endCombat(accessCode);
         }
     }
@@ -93,10 +91,9 @@ export class GameCombatService {
 
     checkPlayerWon(accessCode: string, player: Player): boolean {
         if (player.combatWon === WIN_CONDITION) {
-            const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
-            gameService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
-            this.emitEvent(EventEmit.UpdatePlayerList, { players: gameService.getPlayers(accessCode), accessCode });
-            gameService.endGameSession(accessCode, [player.name]);
+            this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
+            this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
+            this.gameSessionService.endGameSession(accessCode, [player.name]);
             return true;
         }
         return false;
@@ -109,15 +106,14 @@ export class GameCombatService {
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
         this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
         delete this.combatStates[accessCode];
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
-        if (!gameService.getGameSession(accessCode)) return;
-        gameService.setCombatState(accessCode, false);
-        if (!isEscape && currentFighter && gameService.isCurrentPlayer(accessCode, currentFighter.name)) {
-            gameService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
+        if (!this.gameSessionService.getGameSession(accessCode)) return;
+        this.gameSessionService.setCombatState(accessCode, false);
+        if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
+            this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
         } else if (!isEscape && currentFighter) {
-            gameService.endTurn(accessCode);
+            this.gameSessionService.endTurn(accessCode);
         } else {
-            gameService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
+            this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
         }
     }
 
@@ -130,16 +126,15 @@ export class GameCombatService {
     }
 
     startCombat(accessCode: string, attackerId: string, defenderId: string, isDebugMode: boolean = false): void {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
-        const players = gameService.getPlayers(accessCode);
+        const players = this.gameSessionService.getPlayers(accessCode);
         const attacker = players.find((p) => p.name === attackerId);
         const defender = players.find((p) => p.name === defenderId);
         if (!attacker || !defender) {
             return;
         }
-        const pausedTimeRemaining = gameService.pauseGameTurn(accessCode);
+        const pausedTimeRemaining = this.gameSessionService.pauseGameTurn(accessCode);
         this.initialiseCombatState(accessCode, attacker, defender, pausedTimeRemaining, isDebugMode);
-        gameService.setCombatState(accessCode, true);
+        this.gameSessionService.setCombatState(accessCode, true);
         const orderedFighters = this.combatHelper.determineCombatOrder(attacker, defender);
         const currentPlayerName = orderedFighters[0].name;
 
@@ -167,24 +162,22 @@ export class GameCombatService {
     }
 
     private updateWinningPlayerAfterCombat(player: Player, accessCode: string): void {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         player.hp.current = player.hp.max;
         player.combatWon++;
         if (this.checkPlayerWon(accessCode, player)) {
-            gameService.endGameSession(accessCode, [player.name]);
+            this.gameSessionService.endGameSession(accessCode, [player.name]);
         }
-        gameService.updateGameSessionPlayerList(accessCode, player.name, player);
+        this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         this.emitEvent(EventEmit.UpdatePlayer, { player });
-        this.emitEvent(EventEmit.UpdatePlayerList, { players: gameService.getPlayers(accessCode), accessCode });
+        this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
     }
 
     private resetHealth(players: Player[], accessCode): void {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         players.forEach((player) => {
             player.hp.current = player.hp.max;
             this.resetStats(player);
             this.emitEvent(EventEmit.UpdatePlayer, { player });
-            gameService.updateGameSessionPlayerList(accessCode, player.name, player);
+            this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         });
     }
 
@@ -209,11 +202,18 @@ export class GameCombatService {
     }
 
     private calculateAttackResult(combatState: CombatState, accessCode: string) {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         const { attacker, defender, currentFighter, isDebugMode } = combatState;
-        const attackerScore = this.combatHelper.getRandomAttackScore(currentFighter, isDebugMode, gameService.getGameSession(accessCode).game.grid);
+        const attackerScore = this.combatHelper.getRandomAttackScore(
+            currentFighter,
+            isDebugMode,
+            this.gameSessionService.getGameSession(accessCode).game.grid,
+        );
         const defenderPlayer = currentFighter === attacker ? defender : attacker;
-        const defenseScore = this.combatHelper.getRandomDefenseScore(defenderPlayer, isDebugMode, gameService.getGameSession(accessCode).game.grid);
+        const defenseScore = this.combatHelper.getRandomDefenseScore(
+            defenderPlayer,
+            isDebugMode,
+            this.gameSessionService.getGameSession(accessCode).game.grid,
+        );
         return {
             attackSuccessful: attackerScore > defenseScore,
             attackerScore,
@@ -245,23 +245,22 @@ export class GameCombatService {
     }
 
     private handleCombatEnd(combatState: CombatState, defenderPlayer: Player, accessCode: string): void {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         combatState.currentFighter.combatWon++;
         this.resetHealth([combatState.currentFighter, defenderPlayer], accessCode);
-        gameService.handlePlayerItemReset(accessCode, defenderPlayer);
+        this.gameSessionService.handlePlayerItemReset(accessCode, defenderPlayer);
         const updatedGridAfterTeleportation = this.combatHelper.resetLoserPlayerPosition(
             defenderPlayer,
-            gameService.getGameSession(accessCode).game.grid,
+            this.gameSessionService.getGameSession(accessCode).game.grid,
         );
         this.endCombat(accessCode, false);
-        gameService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
+        this.gameSessionService.emitGridUpdate(accessCode, updatedGridAfterTeleportation);
         if (this.checkPlayerWon(accessCode, combatState.currentFighter)) {
             this.endCombat(accessCode);
             return;
         }
-        this.emitEvent(EventEmit.UpdatePlayerList, { players: gameService.getPlayers(accessCode), accessCode });
+        this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
         if (combatState.attacker === defenderPlayer) {
-            gameService.endTurn(accessCode);
+            this.gameSessionService.endTurn(accessCode);
         }
     }
 
