@@ -203,7 +203,7 @@ export class GridManagerService {
         return undefined;
     }
 
-    isFlagOnSpawnPoint(grid: Tile[][], player: Player, movement: Tile): boolean {
+    isFlagOnSpawnPoint(grid: Tile[][], player: Player): boolean {
         const playerTile = this.findTileByPlayer(grid, player);
         const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
         if (playerTile.id === playerSpawnPoint.id) {
