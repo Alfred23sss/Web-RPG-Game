@@ -242,6 +242,17 @@ describe('GameSocketService', () => {
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug activé');
     });
 
+    it('should not notify when no admin player exists', () => {
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
+        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = false;
+
+        socketEvents['adminModeChangedServerSide']();
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeTrue();
+        expect(clientNotifierSpy.displayMessage).not.toHaveBeenCalled();
+        expect(clientNotifierSpy.addLogbookEntry).not.toHaveBeenCalled();
+    });
+
     it('should handle missing player in onGameAbandoned', () => {
         gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
         const initialPlayerCount = gameStateServiceSpy.gameDataSubjectValue.lobby.players.length;
@@ -265,5 +276,17 @@ describe('GameSocketService', () => {
             gameStateServiceSpy.gameDataSubjectValue.lobby.players[0],
         ]);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should filter out abandoned players when game ends', () => {
+        const activePlayer = { ...MOCK_PLAYER, name: 'Active', hasAbandoned: false };
+        const abandonedPlayer = { ...MOCK_PLAYER, name: 'Abandoned', hasAbandoned: true };
+
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [activePlayer, abandonedPlayer];
+        const data = { winner: 'WinnerPlayer' };
+        socketEvents['gameEnded'](data);
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Fin de la partie', [activePlayer, abandonedPlayer]);
     });
 });

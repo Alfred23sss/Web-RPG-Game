@@ -102,6 +102,48 @@ describe('AccessCodeComponent', () => {
         });
     });
 
+    describe('validateNumericInput', () => {
+        it('should prevent default for non-numeric input', () => {
+            const event = {
+                key: 'a',
+                preventDefault: jasmine.createSpy('preventDefault'),
+            } as unknown as KeyboardEvent;
+
+            component.validateNumericInput(event);
+            expect(event.preventDefault).toHaveBeenCalled();
+        });
+
+        it('should not prevent default for numeric input (0-9)', () => {
+            const event = {
+                key: '5',
+                preventDefault: jasmine.createSpy('preventDefault'),
+            } as unknown as KeyboardEvent;
+
+            component.validateNumericInput(event);
+            expect(event.preventDefault).not.toHaveBeenCalled();
+        });
+
+        it('should prevent default for special keys', () => {
+            const event = {
+                key: 'Enter',
+                preventDefault: jasmine.createSpy('preventDefault'),
+            } as unknown as KeyboardEvent;
+
+            component.validateNumericInput(event);
+            expect(event.preventDefault).toHaveBeenCalled();
+        });
+
+        it('should prevent default for empty key', () => {
+            const event = {
+                key: '',
+                preventDefault: jasmine.createSpy('preventDefault'),
+            } as unknown as KeyboardEvent;
+
+            component.validateNumericInput(event);
+            expect(event.preventDefault).toHaveBeenCalled();
+        });
+    });
+
     describe('isLobbyLocked', () => {
         it('doit retourner true si le lobby est verrouillé', () => {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */ // for partial object mocking

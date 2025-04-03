@@ -237,4 +237,38 @@ describe('WaitingViewComponent', () => {
 
         expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
     });
+
+    describe('kickVirtualPlayer', () => {
+        it('should emit kickVirtualPlayer event with correct parameters', () => {
+            const testPlayer = { name: 'TestVirtual', isVirtual: true } as Player;
+            component.kickVirtualPlayer(testPlayer);
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('kickVirtualPlayer', {
+                accessCode: '1234',
+                player: testPlayer,
+            });
+        });
+    });
+
+    describe('Virtual Player Dialog', () => {
+        it('should open dialog when createVirtualPlayer is called', () => {
+            component.createVirtualPlayer();
+            expect(component.isDialogOpen).toBeTrue();
+        });
+
+        it('should set behavior and close dialog when setBehavior is called', () => {
+            const testBehavior = 'Aggressive' as any;
+            component.setBehavior(testBehavior);
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createVirtualPlayer', {
+                behavior: testBehavior,
+                accessCode: '1234',
+            });
+            expect(component.isDialogOpen).toBeFalse();
+        });
+
+        it('should close dialog when cancelVirtualPlayer is called', () => {
+            component.isDialogOpen = true;
+            component.cancelVirtualPlayer();
+            expect(component.isDialogOpen).toBeFalse();
+        });
+    });
 });
