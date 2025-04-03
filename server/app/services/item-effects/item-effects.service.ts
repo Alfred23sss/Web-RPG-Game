@@ -180,7 +180,6 @@ export class ItemEffectsService {
                         speed: player.speed,
                         inventory: player.inventory,
                     };
-
                     this.eventEmitter.emit(EventEmit.GameGridUpdate, { accessCode, grid });
                     this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                         accessCode,
@@ -194,6 +193,12 @@ export class ItemEffectsService {
         }
         const items = [player.inventory[0], player.inventory[1], item];
         this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
+        this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+            accessCode,
+            grid,
+            player,
+            isCurrentlyMoving: false,
+        });
         return { player, items };
     }
 

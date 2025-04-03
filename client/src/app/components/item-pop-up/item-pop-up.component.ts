@@ -19,6 +19,9 @@ export class ItemPopUpComponent {
 
     selectItem(item: Item): void {
         this.gameplayService.handleItemDropped(this.gameStateSocketService.gameDataSubjectValue, item);
+        this.dialogRef.afterClosed().subscribe(() => {
+            this.gameplayService.checkAvailableActions(this.gameStateSocketService.gameDataSubjectValue);
+        });
         this.dialogRef.close();
     }
 }
