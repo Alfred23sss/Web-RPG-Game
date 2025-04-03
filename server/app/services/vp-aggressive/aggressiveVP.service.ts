@@ -3,6 +3,7 @@ import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.
 import { Lobby } from '@app/interfaces/Lobby';
 import { Tile } from '@app/interfaces/Tile';
 import { Player } from '@app/model/database/player';
+import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
@@ -16,17 +17,27 @@ export class AggressiveVPService {
         private readonly playerMovementService: PlayerMovementService,
         private readonly gridManagerService: GridManagerService,
         private readonly eventEmitter: EventEmitter2,
+        private readonly gameCombatService: GameCombatService,
     ) {}
 
-    executeAggressiveBehavior(playerTiles: Tile[], virtualPlayer: Player, lobby: Lobby): void {
-        const newVPTile = this.executeMovement(playerTiles, virtualPlayer, lobby);
+    executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby): void {
+        // const playerTiles = this.findPlayers(lobby.game.grid);
+        // const newVPTile = this.executeMovement(playerTiles, virtualPlayer, lobby);
+        // const nextActionTile = this.playerMovementService.getAvailableActionTile(newVPTile, lobby.game.grid);
+        // this.executeAction(lobby.accessCode, newVPTile, nextActionTile);
         // wait 2 seconds
         // chek pr action possible durant son parcours,
+        // chek si dn parcous ya item et gere si c'est le cas.
         // chek aussi pendant quil cherche le plus petit parcours de prendre en compte les portes et quil peut les ouvrir =>
-        // (split move en 2 , premier move ensuite action si available ouvre porte et ensuite 2e move)
-        setTimeout(() => {
-            // do a action
-        }, VP_ACTION_WAIT_TIME_MS);
+        // (split move en 2 , premier move ensuite action(item aussi) si available ouvre porte et ensuite 2e move)
+    }
+
+    private executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): void {
+        if (actionTile) {
+            setTimeout(() => {
+                this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
+            }, VP_ACTION_WAIT_TIME_MS);
+        }
     }
 
     private executeMovement(playerTiles: Tile[], virtualPlayer: Player, lobby: Lobby): Tile {

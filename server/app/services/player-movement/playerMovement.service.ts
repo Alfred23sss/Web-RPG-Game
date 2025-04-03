@@ -98,6 +98,17 @@ export class PlayerMovementService {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
     }
+
+    getAvailableActionTile(currentTile: Tile, grid: Tile[][]): Tile | undefined {
+        const neighbors = this.getNeighbors(currentTile, grid);
+        const playerTile = neighbors.find((neighbor) => neighbor.player !== undefined);
+        if (playerTile) {
+            return playerTile;
+        }
+        const doorTile = neighbors.find((neighbor) => neighbor.type === TileType.Door && !this.isNeighborBlocked(neighbor));
+        return doorTile;
+    }
+
     findClosestReachableTile(playerTiles: Tile[], virtualPlayerTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const bestMoveTile = this.findBestMoveTile(playerTiles, virtualPlayerTile, grid);
         if (!bestMoveTile) return undefined;
