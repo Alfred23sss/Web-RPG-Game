@@ -85,6 +85,9 @@ export class GameplayService {
     }
 
     checkAvailableActions(gameData: GameData): void {
+        if (this.dialog.openDialogs.length > 0) {
+            return;
+        }
         const clientPlayerPosition = this.getClientPlayerPosition(gameData);
         if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
         const hasIce = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Ice);
