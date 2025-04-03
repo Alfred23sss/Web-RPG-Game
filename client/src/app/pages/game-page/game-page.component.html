@@ -23,7 +23,7 @@
                 }
             </p>
             } @if(gameData.lobby.players){
-            <p>Joueur actif: {{ gameData.lobby.players.length }}</p>
+            <p>Joueur actif: {{ activePlayerCount }}</p>
             }
         </div>
         <app-player-info></app-player-info>

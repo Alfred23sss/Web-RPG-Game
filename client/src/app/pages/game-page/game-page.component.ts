@@ -36,6 +36,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private readonly socketListenerService: SocketListenerService,
     ) {}
 
+    get activePlayerCount(): number {
+        return this.gameData.lobby.players.filter((player) => player.hasAbandoned !== true).length;
+    }
+
     ngOnInit(): void {
         this.gameDataSubscription = this.gameStateSocketService.gameData$.subscribe((data) => {
             this.gameData = data;
