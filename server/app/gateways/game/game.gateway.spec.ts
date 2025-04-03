@@ -26,6 +26,7 @@ const MOCK_PLAYER: Player = {
     isActive: false,
     combatWon: 0,
     vitality: 0,
+    isVirtual: false,
 };
 const ACCESS_CODE = 'test123';
 const ATTACKER_NAME = 'attacker';

@@ -25,4 +25,8 @@ export class ToolbarComponent implements OnInit {
     selectTool(tool: TileType, image: ImageType): void {
         this.toolService.setSelectedTool({ tool, image });
     }
+
+    isSelected(tool: TileType): boolean {
+        return this.activeTool?.tool === tool;
+    }
 }

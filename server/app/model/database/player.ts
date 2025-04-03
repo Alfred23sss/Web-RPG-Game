@@ -47,6 +47,9 @@ export class Player {
     isAdmin: boolean;
 
     @Prop({ required: true })
+    isVirtual: boolean;
+
+    @Prop({ required: true })
     hasAbandoned: boolean;
 
     @Prop({ required: true })

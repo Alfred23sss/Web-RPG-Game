@@ -1,8 +1,7 @@
 export enum GameDecorations {
-    Background = '../../../assets/game-decorations/background.png',
-    Door = './assets/game-decorations/door.png',
+    Background = '../../../assets/gifs/background4gif.gif',
     ExampleGame = './assets/game-decorations/example.png',
-    Logo = './assets/game-decorations/logo.png',
+    Logo = './assets/game-decorations/logoC.png',
     Forge = './assets/game-decorations/medieval-forge.png',
     XSwords = './assets/game-decorations/X-sword.png',
     X = './assets/game-decorations/X.png',
@@ -10,9 +9,9 @@ export enum GameDecorations {
 }
 
 export enum GameModeType {
-    Classic = './assets/gamemodes/classic-game.png',
-    CTF = './assets/gamemodes/CTF-game.png',
-    Default = './assets/gamemodes/classic-game.png',
+    Classic = './assets/gamemodes/classic.png',
+    CTF = './assets/gamemodes/CTF.png',
+    Default = './assets/gamemodes/classic.png',
 }
 
 export enum ChatEvents {
@@ -35,27 +34,27 @@ export enum TeamType {
 }
 
 export enum AvatarType {
-    Alchemist = './assets/avatars/avatar_alchemist.png',
-    Archer = './assets/avatars/avatar_archer.png',
-    Assassin = './assets/avatars/avatar_assassin.png',
-    Barbarian = './assets/avatars/avatar_barbarian.png',
-    Bard = './assets/avatars/avatar_bard.png',
-    Druid = './assets/avatars/avatar_druid.png',
-    Goblin = './assets/avatars/avatar_goblin.png',
-    Paladin = './assets/avatars/avatar_paladin.png',
-    Ranger = './assets/avatars/avatar_ranger.png',
-    Valkyrie = './assets/avatars/avatar_valkyrie.png',
-    Vampire = './assets/avatars/avatar_vampire.png',
-    Wizard = './assets/avatars/avatar_wizard.png',
+    SkeletonA = './assets/avatars/skeletonA_Idle.gif',
+    SkeletonB = './assets/avatars/skeletonB_Idle.gif',
+    SkeletonC = './assets/avatars/skeletonC_Idle.gif',
+    FangelA = './assets/avatars/fangelA_Idle.gif',
+    FangelB = './assets/avatars/fangelB_Idle.gif',
+    FangelC = './assets/avatars/fangelC_Idle.gif',
+    ReaperA = './assets/avatars/reaperA_Idle.gif',
+    ReaperB = './assets/avatars/reaperB_Idle.gif',
+    ReaperC = './assets/avatars/reaperC_Idle.gif',
+    ValkyrieA = './assets/avatars/valkyrieA_Idle.gif',
+    ValkyrieB = './assets/avatars/valkyrieB_Idle.gif',
+    ValkyrieC = './assets/avatars/valkyrieC_Idle.gif',
 }
 
 export enum ImageType {
-    Water = './assets/tile-items/water.png',
-    Wall = './assets/tile-items/wall.png',
-    OpenDoor = './assets/tile-items/opened-door.png',
-    ClosedDoor = './assets/tile-items/closed-door.png',
-    Ice = './assets/tile-items/ice.png',
-    Default = './assets/tile-items/clay.png',
+    Water = './assets/tile-items/waterGif.gif',
+    Wall = './assets/tile-items/tileset-9-tiles-example.png',
+    OpenDoor = './assets/tile-items/door-openedA.png',
+    ClosedDoor = './assets/tile-items/door-closedA.png',
+    Ice = './assets/tile-items/iceA.PNG',
+    Default = './assets/tile-items/floorB.PNG',
 }
 
 export enum ItemType {
@@ -186,6 +185,7 @@ export enum ErrorMessages {
     LobbyNotLocked = '❌ Le lobby n’est pas verrouillé',
     LockedRoom = "La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil",
     MaxNameLength = 'La longueur maximale de 20 caractères est atteinte',
+    MaxPlayersReached = '❌ Le nombre maximal de joueurs est atteint pour cette partie',
 }
 
 export enum TileType {
@@ -223,4 +223,10 @@ export enum ItemCount {
     SmallItemCount = 2,
     MediumItemCount = 4,
     LargeItemCount = 6,
+}
+
+export enum Behavior {
+    Aggressive = 'aggressive',
+    Defensive = 'defensive',
+    Null = '',
 }

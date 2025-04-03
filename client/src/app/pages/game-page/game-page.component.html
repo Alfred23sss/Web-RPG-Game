@@ -9,6 +9,7 @@
                 class="player-name"
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
+                 [class.virtual-player]="player.isVirtual"
                 [class.abandoned]="player.hasAbandoned"
                 [class.active]="gameData.currentPlayer && player.name === gameData.currentPlayer.name"
             >

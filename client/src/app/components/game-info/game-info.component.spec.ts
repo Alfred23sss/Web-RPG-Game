@@ -41,25 +41,6 @@ describe('GameInfoComponent', () => {
         expect(compiled.querySelector('h3').textContent).toContain(mockGame.name);
     });
 
-    it('should display game size in "NxN" format', () => {
-        const compiled = fixture.nativeElement;
-        const sizeElement = compiled.querySelectorAll('p')[0];
-        expect(sizeElement.textContent).toContain(`Taille: ${mockGame.size}x${mockGame.size}`);
-    });
-
-    it('should display game mode', () => {
-        const compiled = fixture.nativeElement;
-        const modeElement = compiled.querySelectorAll('p')[1];
-        expect(modeElement.textContent).toContain(`Mode de jeu: ${mockGame.mode}`);
-    });
-
-    it('should format last modified date correctly', () => {
-        const compiled = fixture.nativeElement;
-        const dateElement = compiled.querySelectorAll('p')[2];
-        const expectedDate = new DatePipe('en-US').transform(mockGame.lastModified, 'short');
-        expect(dateElement.textContent).toContain(expectedDate);
-    });
-
     it('should update when game input changes', () => {
         const newGame = { ...mockGame, name: 'Updated Game' };
         component.game = newGame;

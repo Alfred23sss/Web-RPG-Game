@@ -28,6 +28,7 @@ const MOCK_PLAYER: Player = {
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
+    isVirtual: false,
 };
 
 describe('LobbyService', () => {

@@ -17,6 +17,7 @@ import { GameService } from '@app/services/game/game.service';
 })
 export class CreatePageComponent implements OnInit {
     games: Game[] = this.gameService.games;
+
     constructor(
         private readonly dialog: MatDialog,
         private readonly gameService: GameService,

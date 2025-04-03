@@ -1,22 +1,25 @@
-<div class="Object-container">
-    <h1 class="section-title">Items</h1>
-    @for (item of items; track item.id) {
-    <div
-        class="item"
-        (mousedown)="selectObject(item)"
-        (mouseup)="removeObject()"
-        (drop)="onContainerDrop($event, item)"
-        (dragover)="onDragOver($event)"
-        [title]="item.description"
-    >
-        <div class="item-content">
-            @if(item.itemCounter > 0) {
-            <img draggable="true" [src]="item.imageSrc" [alt]="item.name || 'Item'" />
-            } @else {
-            <img draggable="false" [src]="item.imageSrcGrey" [alt]="item.name || 'Item'" />
-            }
-            <span class="counter">{{ item.itemCounter }}</span>
+<div class="object-container pixel-panel">
+    <h2 class="pixel-title">Items</h2>
+
+    <div class="item-grid">
+        @for (item of items; track item.id) {
+        <div
+            class="item pixel-item"
+            (mousedown)="selectObject(item)"
+            (mouseup)="removeObject()"
+            (drop)="onContainerDrop($event, item)"
+            (dragover)="onDragOver($event)"
+            [title]="item.description"
+        >
+            <div class="item-content">
+                @if(item.itemCounter > 0) {
+                <img draggable="true" [src]="item.imageSrc" [alt]="item.name || 'Item'" />
+                } @else {
+                <img draggable="false" [src]="item.imageSrcGrey" [alt]="item.name || 'Item'" />
+                }
+                <span class="counter">{{ item.itemCounter }}</span>
+            </div>
         </div>
+        }
     </div>
-    }
 </div>
