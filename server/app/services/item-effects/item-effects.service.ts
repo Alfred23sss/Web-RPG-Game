@@ -20,9 +20,15 @@ export class ItemEffectsService {
     ) {}
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
-        Logger.log(`Picked up: ${item.name}`);
+        Logger.log(`Add effects: ${item.name}`);
         if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
             this.applyItemModifiers(item);
+        }
+        if (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) {
+            Logger.log('Health conditions failed');
+        }
+        if (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item)) {
+            Logger.log('Ice conditions failed');
         }
 
         if (
@@ -30,7 +36,7 @@ export class ItemEffectsService {
             (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
             (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item))
         ) {
-            Logger.log('conditions failed');
+            Logger.log('Add conditions failed');
             return;
         }
         if (item.modifiers) {
@@ -45,7 +51,7 @@ export class ItemEffectsService {
         Logger.log(`Lost effects : ${item.name}`);
 
         if (!item || !item.isActive) {
-            Logger.log('conditions failed');
+            Logger.log('Remove conditions failed');
             return;
         }
 
@@ -98,7 +104,7 @@ export class ItemEffectsService {
             this.removeEffects(player, index);
             const newItem = tile.item;
             player.inventory.splice(index, 1);
-            player.inventory.push(tile.item);
+            player.inventory.push(newItem);
             tile.item = item;
             tile.player = player;
             this.addEffect(player, newItem, tile);
@@ -208,6 +214,7 @@ export class ItemEffectsService {
             case AttributeType.Hp:
                 player.hp.current += adjustedValue;
                 player.hp.max += adjustedValue;
+                Logger.log(`Adjusted HP to: ${player.hp.max}`);
                 break;
             default:
                 Logger.log(`Unknown attribute type: ${modifier.attribute}`);
