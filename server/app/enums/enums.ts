@@ -216,6 +216,7 @@ export enum EventEmit {
     GameFlagPossessed = 'game.flag.possessed',
     InitializeGameStatistics = 'initialize.game.statistics',
     ShowGlobalStats = 'show.global.stats',
+    UpdateDoorStats = 'update.door.stats',
 }
 
 export enum Behavior {

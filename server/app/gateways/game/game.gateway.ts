@@ -181,7 +181,6 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
         });
-        this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
 

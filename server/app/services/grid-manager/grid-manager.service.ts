@@ -66,6 +66,8 @@ export class GridManagerService {
             targetTile.imageSrc = ImageType.OpenDoor;
         }
         targetTile.isOpen = !targetTile.isOpen;
+        this.logger.log('emitting door update');
+        this.eventEmitter.emit(EventEmit.UpdateDoorStats, { accessCode, tile: previousTile });
         this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
         return grid;
     }

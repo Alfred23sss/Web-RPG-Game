@@ -24,8 +24,6 @@ export class GameEndComponent implements OnInit {
     ngOnInit(): void {
         this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
         this.sortedStats = Object.values(this.gameStats.playerStats);
-        console.log('gameStats:', this.gameStats);
-        console.log('playerStats:', this.gameStats?.playerStats);
         this.sortedStats.sort((a, b) => a.playerName.localeCompare(b.playerName));
     }
 

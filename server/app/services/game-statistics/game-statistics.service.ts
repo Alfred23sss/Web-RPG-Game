@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { EventEmit, GameMode } from '@app/enums/enums';
-import { GameEvents } from '@app/gateways/game/game.gateway.events';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/Statistic';
@@ -31,6 +30,14 @@ export class GameStatisticsService {
         private readonly gridManager: GridManagerService,
         private readonly logger: Logger,
     ) {}
+
+    @OnEvent(EventEmit.GameTurnStarted)
+    handleTurnStarted(payload: { accessCode: string; player: Player }) {
+        const { accessCode } = payload;
+        const gameStats = this.gameStatistics.get(accessCode);
+        if (!gameStats) return;
+        gameStats.globalStats.totalTurns++;
+    }
 
     @OnEvent(EventEmit.GameCombatStarted)
     handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; currentPlayerName: string }) {
@@ -119,14 +126,8 @@ export class GameStatisticsService {
             });
         });
 
-        const gridSize =
-            gameSession.game.size === 'small'
-                ? SMALL * SMALL
-                : gameSession.game.size === 'medium'
-                ? MEDIUM * MEDIUM
-                : gameSession.game.size === 'large'
-                ? LARGE * LARGE
-                : 0;
+        this.logger.log(gameSession.game.size);
+        const gridSize = gameSession.game.size as unknown as number;
 
         const gameStats: GameStatistics = {
             accessCode,
@@ -152,11 +153,12 @@ export class GameStatisticsService {
         return;
     }
 
-    @OnEvent(GameEvents.DoorUpdate)
-    handleDoorManipulated(payload: { accessCode: string; currentTile: Tile; targetTile: Tile }): void {
-        const { accessCode, targetTile } = payload;
-        if (!targetTile) return;
-        this.manipulatedDoors.get(accessCode).add(targetTile.id);
+    @OnEvent(EventEmit.UpdateDoorStats)
+    handleDoorManipulated(payload: { accessCode: string; tile: Tile }): void {
+        const { accessCode, tile } = payload;
+        this.logger.log(`Door manipulated in statisticss: ${tile.id}`);
+        if (!tile) return;
+        this.manipulatedDoors.get(accessCode).add(tile.id);
     }
 
     // a split dans plusieurs fonctions
@@ -171,7 +173,6 @@ export class GameStatisticsService {
             .padStart(2, '0');
         const seconds = (durationInSeconds % SECOND_IN_MINUTE).toString().padStart(2, '0');
         gameStats.globalStats.formattedDuration = `${minutes}:${seconds}`;
-        gameStats.globalStats.totalTurns = this.turnCounts.get(accessCode) || 0;
         const globalVisitedTiles = this.visitedTiles.get(accessCode)?.size || 0;
         gameStats.globalStats.tilesVisitedPercentage =
             gameStats.gridSize > 0 ? Math.round((globalVisitedTiles / gameStats.gridSize) * MULTIPLIER) : 0;
@@ -183,8 +184,8 @@ export class GameStatisticsService {
             const playerTileKey = `${accessCode}:${playerName}`;
             const visited = this.visitedTiles.get(playerTileKey)?.size || 0;
             playerStat.tilesVisitedPercentage = gameStats.gridSize > 0 ? Math.round((visited / gameStats.gridSize) * MULTIPLIER) : 0;
+            gameStats.globalStats.tilesVisitedPercentage = playerStat.tilesVisitedPercentage;
         }
-        this.logStatistics(accessCode, gameStats); // use this instead of console.log
         return gameStats;
     }
 

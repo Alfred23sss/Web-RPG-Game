@@ -1,4 +1,14 @@
 <div class="player-stats">
+    <div class="global-stats">
+        <h2>Statistiques globales</h2>
+        <ul>
+            <li><strong>Durée :</strong> {{ gameStats.globalStats.formattedDuration || 'N/A' }}</li>
+            <li><strong>Total de tours :</strong> {{ gameStats.globalStats.totalTurns }}</li>
+            <li><strong>% Record de tuiles visitées :</strong> {{ gameStats.globalStats.tilesVisitedPercentage }}%</li>
+            <li><strong>% Portes manipulées :</strong> {{ gameStats.globalStats.doorsManipulatedPercentage }}%</li>
+            <li><strong>Nombre de porteurs du drapeau :</strong> {{ gameStats.globalStats.uniqueFlagHolders || 0 }}</li>
+        </ul>
+    </div>
     <h2>Statistiques des joueurs</h2>
     <div class="legend">
         <p>
