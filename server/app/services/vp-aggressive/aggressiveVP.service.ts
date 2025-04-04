@@ -22,23 +22,31 @@ export class AggressiveVPService {
     ) {}
 
     async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: VPMoveType, movesInRange: VPMoveType): Promise<void> {
-        if (movesInRange) {
-            this.getNextMoveType(movesInRange, lobby, virtualPlayer);
+        if (this.isMoveInRange(movesInRange)) {
+            await this.getNextMoveType(movesInRange, lobby, virtualPlayer); // Add await
         } else {
-            this.getNextMoveType(possibleMoves, lobby, virtualPlayer);
+            await this.getNextMoveType(possibleMoves, lobby, virtualPlayer); // Add await
         }
-        // filter moves only within move and action points!!!!
     }
 
-    getNextMoveType(moves: VPMoveType, lobby: Lobby, virtualPlayer: Player): void {
-        if (moves.playerTiles) this.moveToNextAction(moves.playerTiles, lobby, virtualPlayer);
+    private async getNextMoveType(moves: VPMoveType, lobby: Lobby, virtualPlayer: Player): Promise<void> {
+        if (moves.playerTiles) {
+            await this.moveToNextAction(moves.playerTiles, lobby, virtualPlayer); // Add await
+            return;
+        }
 
-        if (moves.itemTiles) this.moveToNextAction(moves.itemTiles, lobby, virtualPlayer); // item attaque a prioriser (cheker si juste un item en range et c pas att est ce quil le prend)
-
-        // si aucun alors regarder les moves hors de range et aller vers le joueur le plus proche
+        if (moves.itemTiles) {
+            await this.moveToNextAction(moves.itemTiles, lobby, virtualPlayer); // Add await
+            return;
+        }
     }
 
-    private moveToNextAction(availableTiles: Tile[], lobby: Lobby, virtualPlayer: Player): Tile {
+    private isMoveInRange(movesInRange: VPMoveType): boolean {
+        if (movesInRange.playerTiles.length > 0 || movesInRange.itemTiles.length > 0) return true;
+        return false;
+    }
+
+    private async moveToNextAction(availableTiles: Tile[], lobby: Lobby, virtualPlayer: Player): Promise<Tile> {
         const virtualPlayerTile = this.gridManagerService.findTileByPlayer(lobby.game.grid, virtualPlayer);
         const closestReachableTile = this.playerMovementService.findClosestReachableTile(
             availableTiles,
@@ -53,16 +61,21 @@ export class AggressiveVPService {
             movement,
             accessCode: lobby.accessCode,
         };
+
         this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
+
+        // Wrap setTimeout in a Promise
+        await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
+        await this.executeAction(lobby.accessCode, virtualPlayerTile, closestReachableTile);
 
         return closestReachableTile;
     }
 
-    private executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): void {
+    private async executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
         if (actionTile) {
-            setTimeout(() => {
-                this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
-            }, VP_ACTION_WAIT_TIME_MS);
+            // Wrap setTimeout in a Promise
+            await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
+            await this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
         }
     }
 

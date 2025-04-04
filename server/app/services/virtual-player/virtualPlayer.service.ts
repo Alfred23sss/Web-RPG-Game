@@ -1,4 +1,5 @@
-import { Behavior, EventEmit } from '@app/enums/enums';
+import { Behavior, EventEmit, ItemName } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
@@ -35,18 +36,17 @@ export class VirtualPlayerService implements OnModuleInit {
     private async executeVirtualPlayerTurn(accessCode: string): Promise<void> {
         const lobby = this.lobbyService.getLobby(accessCode);
 
-        while (this.hasRemainingActions()) {
-            const possibleMoves = this.findAllMoves(lobby.game.grid);
-            const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
-            if (this.virtualPlayer.behavior === Behavior.Aggressive) {
-                await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, possibleMoves, movesInRange);
-            } else if (this.virtualPlayer.behavior === Behavior.Defensive) {
-                // await this.defensiveVPService.executeDefensiveBehavior(playerTiles, this.virtualPlayer, lobby);
-            }
+        // while (this.hasRemainingActions()) {
+        const possibleMoves = this.findAllMoves(lobby.game.grid);
+        const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
+        if (this.virtualPlayer.behavior === Behavior.Aggressive) {
+            await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, possibleMoves, movesInRange);
+        } else if (this.virtualPlayer.behavior === Behavior.Defensive) {
+            // add defense behavior function(s)
         }
+        // }
 
-        // When all points are exhausted, end the turn
-        // this.eventEmitter.emit(EventEmit.GameTurnEnded, { accessCode });
+        this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
     }
 
     private findAllMoves(grid: Tile[][]): VPMoveType {
@@ -76,14 +76,14 @@ export class VirtualPlayerService implements OnModuleInit {
 
     private filterTilesByMovementRange(tiles: Tile[], startTile: Tile, grid: Tile[][], maxMovement: number): Tile[] {
         return tiles.filter((targetTile) => {
-            // First check if tile is in available path (more efficient for large grids)
             const reachableTiles = this.playerMovementService.availablePath(startTile, maxMovement, grid);
+            if (targetTile.player !== undefined) {
+                const adjacentTiles = this.playerMovementService.getNeighbors(targetTile, grid);
+                return adjacentTiles.some((adjacentTile) => reachableTiles.includes(adjacentTile) && adjacentTile.player === undefined);
+            }
             if (reachableTiles.includes(targetTile)) return true;
-
-            // Fallback to path calculation for edge cases
             const path = this.playerMovementService.quickestPath(startTile, targetTile, grid);
             if (!path) return false;
-
             const totalCost = path.reduce((sum, tile) => sum + this.playerMovementService.getMoveCost(tile), 0);
             return totalCost <= maxMovement;
         });
@@ -93,9 +93,8 @@ export class VirtualPlayerService implements OnModuleInit {
         return grid.flatMap((row) => row.filter((tile) => tile.player && tile.player.name !== this.virtualPlayer.name));
     }
 
-    // tous les items incluant home ... faire attention. home utile seulement pour defensive en mode ctf
     private findItems(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.item));
+        return grid.flatMap((row) => row.filter((tile) => tile.item && tile.item.name !== ItemName.Home));
     }
 
     private findDoors(grid: Tile[][]): Tile[] {

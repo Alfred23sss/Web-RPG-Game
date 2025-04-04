@@ -63,4 +63,18 @@ export class VirtualPlayerGateway {
             this.logger.error('Error updating virtual player position', error);
         }
     }
+
+    @OnEvent(VirtualPlayerEvents.EndVirtualPlayerTurn)
+    handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
+        this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
+        const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
+        gameService.endTurn(data.accessCode);
+    }
+
+    // @SubscribeMessage(GameEvents.EndTurn)
+    //     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+    //         this.logger.log(`Ending turn for game ${payload.accessCode}`);
+    //         const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
+    //         gameService.endTurn(payload.accessCode);
+    //     }
 }

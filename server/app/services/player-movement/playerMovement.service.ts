@@ -121,59 +121,7 @@ export class PlayerMovementService {
         return this.getFarthestReachableTile(virtualPlayerTile, bestMoveTile, grid, movementPoints);
     }
 
-    private findBestMoveTile(playerTiles: Tile[], virtualPlayerTile: Tile, grid: Tile[][]): Tile | undefined {
-        let bestMoveTile: Tile | undefined;
-        let minCost = Infinity;
-
-        for (const playerTile of playerTiles) {
-            for (const adjacentTile of this.getNeighbors(playerTile, grid)) {
-                if (this.isValidNeighbor(adjacentTile)) {
-                    const path = this.quickestPath(virtualPlayerTile, adjacentTile, grid);
-                    if (path) {
-                        const cost = path.reduce((total, tile) => total + this.getMoveCost(tile), 0);
-                        if (cost < minCost) {
-                            minCost = cost;
-                            bestMoveTile = adjacentTile;
-                        }
-                    }
-                }
-            }
-        }
-
-        return bestMoveTile;
-    }
-
-    private getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
-        const path = this.quickestPath(virtualPlayerTile, targetTile, grid);
-        if (!path) return undefined;
-
-        let movementCost = 0;
-        for (const tile of path) {
-            movementCost += this.getMoveCost(tile);
-            if (movementCost > movementPoints) break;
-            targetTile = tile;
-        }
-
-        return targetTile;
-    }
-    private getNeighborAndCost(neighbor: Tile, points: number): { tile: Tile; cost: number } {
-        return { tile: neighbor, cost: points };
-    }
-
-    private isNeighborBlocked(neighbor: Tile): boolean {
-        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
-    }
-
-    private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
-        return newRemaining >= 0 && newRemaining > neighborRemaining;
-    }
-
-    private isValidNeighbor(neighbor: Tile): boolean {
-        if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
-        return this.movementCosts.has(neighbor.type);
-    }
-
-    private getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
+    getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
         const neighbors: Tile[] = [];
 
         const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
@@ -201,6 +149,63 @@ export class PlayerMovementService {
         return neighbors;
     }
 
+    // only for players since we are checking adjacent tiles.
+    private findBestMoveTile(playerTiles: Tile[], virtualPlayerTile: Tile, grid: Tile[][]): Tile | undefined {
+        let bestMoveTile: Tile | undefined;
+        let minCost = Infinity;
+
+        for (const playerTile of playerTiles) {
+            for (const adjacentTile of this.getNeighbors(playerTile, grid)) {
+                if (this.isValidNeighbor(adjacentTile)) {
+                    const path = this.quickestPath(virtualPlayerTile, adjacentTile, grid);
+                    if (path) {
+                        const cost = path.reduce((total, tile) => total + this.getMoveCost(tile), 0);
+                        if (cost < minCost) {
+                            minCost = cost;
+                            bestMoveTile = adjacentTile;
+                        }
+                    }
+                }
+            }
+        }
+
+        return bestMoveTile;
+    }
+
+    private getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
+        const path = this.quickestPath(virtualPlayerTile, targetTile, grid);
+        if (!path || path.length === 0) return undefined;
+        let movementCost = 0;
+        let farthestReachableTile = virtualPlayerTile;
+
+        for (let i = 1; i < path.length; i++) {
+            const tile = path[i];
+            const tileCost = this.getMoveCost(tile);
+            if (movementCost + tileCost > movementPoints) {
+                break;
+            }
+            movementCost += tileCost;
+            farthestReachableTile = tile;
+        }
+        return farthestReachableTile;
+    }
+
+    private getNeighborAndCost(neighbor: Tile, points: number): { tile: Tile; cost: number } {
+        return { tile: neighbor, cost: points };
+    }
+
+    private isNeighborBlocked(neighbor: Tile): boolean {
+        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
+    }
+
+    private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
+        return newRemaining >= 0 && newRemaining > neighborRemaining;
+    }
+
+    private isValidNeighbor(neighbor: Tile): boolean {
+        if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
+        return this.movementCosts.has(neighbor.type);
+    }
     private reconstructPath(previous: Map<Tile, Tile | null>, target: Tile | null): Tile[] {
         const path: Tile[] = [];
         let current: Tile | null = target;
