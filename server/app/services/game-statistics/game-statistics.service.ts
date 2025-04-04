@@ -7,7 +7,7 @@ import { GameStatistics, PlayerStatistics } from '@app/interfaces/Statistic';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -29,6 +29,7 @@ export class GameStatisticsService {
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
+        private readonly logger: Logger,
     ) {}
 
     @OnEvent(EventEmit.GameCombatStarted)
@@ -78,6 +79,10 @@ export class GameStatisticsService {
             // si ya deja on ajoute pas!
             return;
         }
+        if (item.name === 'flag') {
+            const flagHolderSet = this.flagHolders.get(accessCode);
+            flagHolderSet.add(player.name);
+        }
         gameStats.playerStats.get(player.name).uniqueItemsCollected.add(item.name);
     }
 
@@ -98,6 +103,7 @@ export class GameStatisticsService {
 
         players.forEach((player) => {
             const playerKeyTile = `${accessCode}:${player.name}`;
+
             playerStats.set(player.name, {
                 playerName: player.name,
                 combats: 0,
@@ -178,6 +184,7 @@ export class GameStatisticsService {
             const visited = this.visitedTiles.get(playerTileKey)?.size || 0;
             playerStat.tilesVisitedPercentage = gameStats.gridSize > 0 ? Math.round((visited / gameStats.gridSize) * MULTIPLIER) : 0;
         }
+        this.logStatistics(accessCode, gameStats); // use this instead of console.log
         return gameStats;
     }
 
@@ -188,5 +195,39 @@ export class GameStatisticsService {
     cleanUp(accessCode: string): void {
         // TODO
         return;
+    }
+
+    private logStatistics(accessCode: string, gameStats: GameStatistics): void {
+        this.logger.log('=== Game Statistics ===');
+        this.logger.log(`Game Access Code: ${accessCode}`);
+        this.logger.log(`Game Mode: ${gameStats.gameMode}`);
+        this.logger.log(`Grid Size: ${gameStats.gridSize}`);
+        this.logger.log(`Number of Doors: ${gameStats.numberOfDoors}`);
+        this.logger.log(`Duration: ${gameStats.globalStats.formattedDuration}`);
+        this.logger.log(`Total Turns: ${gameStats.globalStats.totalTurns}`);
+        this.logger.log(`Global Visited Tiles: ${gameStats.globalStats.tilesVisitedPercentage}%`);
+        this.logger.log(`Doors Manipulated: ${gameStats.globalStats.doorsManipulatedPercentage}%`);
+        this.logger.log(`Unique Flag Holders: ${gameStats.globalStats.uniqueFlagHolders}`);
+
+        this.logger.log('\n=== Player Statistics ===');
+        gameStats.playerStats.forEach((playerStat, playerName) => {
+            this.logger.log(`\nPlayer: ${playerName}`);
+            this.logger.log(`- Combats: ${playerStat.combats}`);
+            this.logger.log(`- Escapes: ${playerStat.escapes}`);
+            this.logger.log(`- Victories: ${playerStat.victories}`);
+            this.logger.log(`- Defeats: ${playerStat.defeats}`);
+            this.logger.log(`- Health Lost: ${playerStat.healthLost}`);
+            this.logger.log(`- Damage Caused: ${playerStat.damageCaused}`);
+            this.logger.log(`- Unique Items Collected: ${playerStat.uniqueItemsCollected.size}`);
+            this.logger.log(`- Tiles Visited: ${playerStat.tilesVisitedPercentage}%`);
+            this.logger.log(`- Has Abandoned: ${playerStat.hasAbandoned}`);
+        });
+
+        // Log raw map data for debugging
+        this.logger.log('\n=== Raw Map Data ===');
+        this.logger.log(`Visited Tiles: ${JSON.stringify([...(this.visitedTiles.get(accessCode) || [])])}`);
+        this.logger.log(`Manipulated Doors: ${JSON.stringify([...(this.manipulatedDoors.get(accessCode) || [])])}`);
+        this.logger.log(`Flag Holders: ${JSON.stringify([...(this.flagHolders.get(accessCode) || [])])}`);
+        this.logger.log(`Turn Count: ${this.turnCounts.get(accessCode)}`);
     }
 }

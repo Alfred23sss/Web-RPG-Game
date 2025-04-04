@@ -1,28 +1,86 @@
-<div class="global-stats">
-    <h2>Statistiques globales</h2>
-    <ul>
-        <li><strong>Durée :</strong> {{ gameStats.globalStats.formattedDuration || 'N/A' }}</li>
-        <li><strong>Total de tours :</strong> {{ gameStats.globalStats.totalTurns }}</li>
-        <li><strong>% Tuiles visitées :</strong> {{ gameStats.globalStats.tilesVisitedPercentage }}%</li>
-        <li><strong>% Portes manipulées :</strong> {{ gameStats.globalStats.doorsManipulatedPercentage }}%</li>
-        <li><strong>Nombre de porteurs du drapeau :</strong> {{ gameStats.globalStats.uniqueFlagHolders || 0 }}</li>
-    </ul>
-</div>
-
 <div class="player-stats">
     <h2>Statistiques des joueurs</h2>
+    <div class="legend">
+        <p>
+            <strong>Légende:</strong> . La flèche vers le haut (↑) indique un ordre ascendant, et la flèche vers le bas (↓) indique un ordre
+            descendant.
+        </p>
+    </div>
     <table>
         <thead>
             <tr>
-                <th (click)="sortBy('playerName')">Nom</th>
-                <th (click)="sortBy('combats')">Combats</th>
-                <th (click)="sortBy('escapes')">Évasions</th>
-                <th (click)="sortBy('victories')">Victoires</th>
-                <th (click)="sortBy('defeats')">Défaites</th>
-                <th (click)="sortBy('healthLost')">PV perdus</th>
-                <th (click)="sortBy('damageCaused')">PV infligés</th>
-                <th (click)="sortBy('uniqueItemsCollected')">Objets ramassés</th>
-                <th (click)="sortBy('tilesVisitedPercentage')">Tuiles visitées %</th>
+                <th (click)="sortBy('playerName')">
+                    Nom
+                    <span *ngIf="sortKey === 'playerName'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'playerName'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('combats')">
+                    Combats
+                    <span *ngIf="sortKey === 'combats'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'combats'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('escapes')">
+                    Évasions
+                    <span *ngIf="sortKey === 'escapes'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'escapes'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('victories')">
+                    Victoires
+                    <span *ngIf="sortKey === 'victories'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'victories'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('defeats')">
+                    Défaites
+                    <span *ngIf="sortKey === 'defeats'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'defeats'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('healthLost')">
+                    PV perdus
+                    <span *ngIf="sortKey === 'healthLost'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'healthLost'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('damageCaused')">
+                    PV infligés
+                    <span *ngIf="sortKey === 'damageCaused'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'damageCaused'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('uniqueItemsCollected')">
+                    Objets ramassés
+                    <span *ngIf="sortKey === 'uniqueItemsCollected'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'uniqueItemsCollected'">&#8597;</span>
+                </th>
+                <th (click)="sortBy('tilesVisitedPercentage')">
+                    Tuiles visitées %
+                    <span *ngIf="sortKey === 'tilesVisitedPercentage'">
+                        <span *ngIf="sortAsc">&#8593;</span>
+                        <span *ngIf="!sortAsc">&#8595;</span>
+                    </span>
+                    <span *ngIf="sortKey !== 'tilesVisitedPercentage'">&#8597;</span>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -40,6 +98,3 @@
         </tbody>
     </table>
 </div>
-
-<!-- Back to Home Button -->
-<button (click)="goHome()">Retour à l'accueil</button>

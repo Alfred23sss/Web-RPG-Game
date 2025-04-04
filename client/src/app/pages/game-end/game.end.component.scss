@@ -1,29 +1,154 @@
+:root {
+    --blue: #1e90ff;
+    --dark-blue: #0c4da2;
+    --dark-red: #8b0000;
+    --light-red: #ff3333;
+    --light-gray: #f0f0f0;
+    --dark-gray: #333333;
+}
+
+.stats-container {
+    background-color: #121212;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(30, 144, 255, 0.3);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 900px;
+    margin: 20px auto;
+}
+
 .global-stats,
 .player-stats {
-    margin: 20px;
+    background-color: #1a1a1a;
+    border-radius: 10px;
     padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    margin: 20px 0;
+    width: 100%;
+    box-shadow: 0 0 10px rgba(30, 144, 255, 0.3);
+}
+
+.global-stats h2,
+.player-stats h2 {
+    color: var(--dark-red);
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(139, 0, 0, 0.6);
+    letter-spacing: 3px;
+}
+
+.global-stats ul {
+    list-style-type: none;
+    padding: 0;
+    color: white;
+    font-size: 16px;
+}
+
+.global-stats li {
+    margin-bottom: 10px;
+}
+
+.table-container {
+    width: 100%;
+    overflow-x: auto;
 }
 
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 10px;
+    background-color: #2a2a2a;
+    border-radius: 8px;
+    margin-top: 15px;
 }
 
 th {
     cursor: pointer;
-    background-color: #f0f0f0;
+    background-color: #333333;
+    color: var(--blue);
+    padding: 12px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
 }
-
 th,
 td {
-    padding: 8px;
+    padding: 10px;
+    border: 1px solid var(--dark-gray);
+}
+
+td {
+    color: white;
     text-align: center;
-    border: 1px solid #ccc;
+}
+
+tr:nth-child(even) {
+    background-color: #1a1a1a;
+}
+
+tr:nth-child(odd) {
+    background-color: #2a2a2a;
+}
+
+button {
+    background-color: var(--blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s;
+}
+
+button:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-2px);
+}
+
+button:active {
+    background-color: var(--blue);
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.back-home {
+    margin-top: 20px;
+    text-align: center;
+}
+
+th span {
+    margin-left: 8px;
+    font-size: 1.2rem;
+}
+
+th span:hover {
+    cursor: pointer;
+}
+
+.legend {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+th span {
+    margin-left: 8px;
+    font-size: 1.2rem;
+}
+
+th span[ngIf='sortKey !== columnName'] {
+    visibility: hidden;
 }
 
 th:hover {
-    background-color: #ddd;
+    cursor: pointer;
+}
+
+.legend p {
+    cursor: default;
 }

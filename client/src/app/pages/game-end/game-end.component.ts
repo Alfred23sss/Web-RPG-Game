@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 
 @Component({
     selector: 'app-game-end',
     templateUrl: './game-end.component.html',
-    styleUrls: ['./game-end.component.css'],
+    styleUrls: ['./game.end.component.scss'],
     imports: [CommonModule],
 })
 export class GameEndComponent implements OnInit {
@@ -16,18 +17,16 @@ export class GameEndComponent implements OnInit {
     sortAsc = true;
 
     constructor(
-        private route: ActivatedRoute,
         private router: Router,
+        private gameStateSocketService: GameStateSocketService,
     ) {}
 
     ngOnInit(): void {
-        this.route.queryParams.subscribe((params) => {
-            const stats = JSON.parse(params['gameStats']);
-            this.gameStats = stats;
-
-            // Convert playerStats Map to an array for sorting and displaying
-            this.sortedStats = Array.from(stats.playerStats.values());
-        });
+        this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
+        this.sortedStats = Object.values(this.gameStats.playerStats);
+        console.log('gameStats:', this.gameStats);
+        console.log('playerStats:', this.gameStats?.playerStats);
+        this.sortedStats.sort((a, b) => a.playerName.localeCompare(b.playerName));
     }
 
     sortBy(column: keyof PlayerStatistics): void {
@@ -39,8 +38,13 @@ export class GameEndComponent implements OnInit {
         }
 
         this.sortedStats.sort((a, b) => {
-            const valA = a[column];
-            const valB = b[column];
+            let valA = a[column];
+            let valB = b[column];
+
+            if (valA instanceof Set) valA = valA.size;
+            if (valB instanceof Set) valB = valB.size;
+
+            if (valA === valB) return 0;
             return this.sortAsc ? (valA > valB ? 1 : -1) : valA < valB ? 1 : -1;
         });
     }

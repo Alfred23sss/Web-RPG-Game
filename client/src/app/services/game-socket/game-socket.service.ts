@@ -103,8 +103,9 @@ export class GameSocketService {
 
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
             this.gameStateService.gameDataSubjectValue.isGameEnding = true;
+            this.gameStateService.gameDataSubjectValue.gameStats = data.stats; // data.stats.plaersStats is empty
             setTimeout(() => {
-                this.gameplayService.navigateToFinalPage(data.stats);
+                this.gameplayService.navigateToFinalPage();
             }, DELAY_BEFORE_ENDING_GAME);
         });
     }

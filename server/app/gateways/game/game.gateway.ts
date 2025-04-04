@@ -306,8 +306,13 @@ export class GameGateway {
     handleGameEnded(payload: { accessCode: string; winner: string[] }) {
         this.logger.log('emitting game ended to client');
         const stats = this.statisticsService.calculateStats(payload.accessCode);
+        const statsObject = {
+            ...stats,
+            playerStats: Object.fromEntries(stats.playerStats),
+        };
         this.gameSessionService.deleteGameSession(payload.accessCode);
-        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats });
+        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats: statsObject });
+        this.logger.log(stats.playerStats); // logs map
         this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
         const lobbyPlayers = this.lobbyService.getLobbyPlayers(payload.accessCode);
         this.lobbyService.clearLobby(payload.accessCode);
