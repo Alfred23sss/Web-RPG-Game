@@ -24,11 +24,18 @@ export class GameplayService {
         private dialog: MatDialog,
     ) {}
 
-    createItemPopUp(items: [Item, Item, Item]): void {
-        this.dialog.open(ItemPopUpComponent, {
+    createItemPopUp(items: [Item, Item, Item], gameData: GameData): void {
+        const dialogRef = this.dialog.open(ItemPopUpComponent, {
             data: { items },
             panelClass: 'item-pop-up-dialog',
             hasBackdrop: false,
+        });
+
+        dialogRef.afterClosed().subscribe((selectedItem: Item | undefined) => {
+            if (selectedItem) {
+                this.handleItemDropped(gameData, selectedItem);
+                this.checkAvailableActions(gameData);
+            }
         });
     }
 
