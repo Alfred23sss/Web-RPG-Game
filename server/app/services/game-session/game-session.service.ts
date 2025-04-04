@@ -79,7 +79,7 @@ export class GameSessionService {
                 isCurrentlyMoving,
             });
 
-            if (this.gridManager.isFlagOnSpawnPoint(gameSession.game.grid, player, movement[i])) {
+            if (this.gridManager.isFlagOnSpawnPoint(gameSession.game.grid, player)) {
                 const sameTeamPlayers: string[] = [];
 
                 for (const playerOfList of gameSession.turn.orderedPlayers) {

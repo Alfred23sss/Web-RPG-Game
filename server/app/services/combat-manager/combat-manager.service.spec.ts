@@ -94,6 +94,7 @@ describe('GameCombatService', () => {
                         endGameSession: jest.fn(),
                         updateGameSessionPlayerList: jest.fn(),
                         emitGridUpdate: jest.fn(),
+                        handlePlayerItemReset: jest.fn(),
                     },
                 },
                 {
@@ -114,7 +115,10 @@ describe('GameCombatService', () => {
                 },
                 {
                     provide: ItemEffectsService,
-                    useValue: { emit: jest.fn() },
+                    useValue: {
+                        emit: jest.fn(),
+                        addEffect: jest.fn(),
+                    },
                 },
             ],
         }).compile();
@@ -443,7 +447,7 @@ describe('GameCombatService', () => {
             const result = service['checkPlayerWon'](accessCode, player);
 
             expect(result).toBe(true);
-            expect(endGameSessionSpy).toHaveBeenCalledWith(accessCode, player.name);
+            expect(endGameSessionSpy).toHaveBeenCalledWith(accessCode, [player.name]);
         });
 
         it('should return false when player has not reached win condition', () => {
@@ -795,7 +799,7 @@ describe('GameCombatService', () => {
             service['updateWinningPlayerAfterCombat'](player, accessCode);
 
             expect(checkPlayerWonSpy).toHaveBeenCalledWith(accessCode, player);
-            expect(gameSessionService.endGameSession).toHaveBeenCalledWith(accessCode, player.name);
+            expect(gameSessionService.endGameSession).toHaveBeenCalledWith(accessCode, [player.name]);
         });
 
         it('should not end game session when player has not won', () => {

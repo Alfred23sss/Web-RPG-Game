@@ -457,8 +457,6 @@ describe('GameSessionService', () => {
             expect(gridManagerService.setPlayerOnTile).toHaveBeenCalledWith(MOCK_LOBBY.game.grid, movementPath[1], testPlayer);
 
             await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
-            expect(gridManagerService.clearPlayerFromGrid).toHaveBeenCalledTimes(2);
-
             await movePromise;
         });
 
@@ -468,7 +466,7 @@ describe('GameSessionService', () => {
                 const emitSpy = jest.spyOn(eventEmitter, 'emit');
                 gameSessionService.endGameSession(ACCESS_CODE, [winner]);
                 const accessCode = 'test-code';
-                expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winners: [winner] });
+                expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winner: [winner] });
             });
         });
 

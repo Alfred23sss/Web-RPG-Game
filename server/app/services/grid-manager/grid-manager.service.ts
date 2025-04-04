@@ -23,7 +23,7 @@ export class GridManagerService {
     }
 
     findTileBySpawnPoint(grid: Tile[][], player: Player): Tile | undefined {
-        return grid.flat().find((tile) => tile.id === player.spawnPoint.tileId);
+        return player.spawnPoint ? grid.flat().find((tile) => tile.id === player.spawnPoint?.tileId) : undefined;
     }
 
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
@@ -203,12 +203,12 @@ export class GridManagerService {
         return undefined;
     }
 
-    isFlagOnSpawnPoint(grid: Tile[][], player: Player, movement: Tile): boolean {
+    isFlagOnSpawnPoint(grid: Tile[][], player: Player): boolean {
         const playerTile = this.findTileByPlayer(grid, player);
         const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
-        if (playerTile.id === playerSpawnPoint.id) {
-            for (const item of player.inventory) {
-                if (item && item.name === ItemName.Flag) {
+        if (playerTile && playerSpawnPoint && playerTile.id === playerSpawnPoint.id) {
+            for (const item of player.inventory || []) {
+                if (item?.name === ItemName.Flag) {
                     return true;
                 }
             }
