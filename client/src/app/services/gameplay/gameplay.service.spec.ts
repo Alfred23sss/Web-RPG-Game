@@ -5,6 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { GameData } from '@app/classes/gameData';
 import { DiceType, ImageType, Routes, TileType } from '@app/enums/global.enums';
+import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
@@ -74,6 +75,7 @@ describe('GameplayService', () => {
             isDebugMode: false,
             escapeAttempts: 0,
             evadeResult: null,
+            isGameEnding: false,
             movementPointsRemaining: 2,
             ...overrides,
         });
@@ -155,14 +157,26 @@ describe('GameplayService', () => {
 
     describe('abandonGame', () => {
         it('should mark player as abandoned and navigate to home', () => {
-            const gameData = createMockGameData();
-            service.abandonGame(gameData, false);
-
-            expect(gameData.clientPlayer.hasAbandoned).toBe(true);
-            expect(mockSocketClientService.emit).toHaveBeenCalledWith('abandonedGame', {
-                player: gameData.clientPlayer,
-                accessCode: '1234',
+            const mockPlayer = createMockPlayer();
+            const mockGameData = createMockGameData({
+                clientPlayer: mockPlayer,
+                lobby: { accessCode: '1234' } as unknown as Lobby,
             });
+            (service as any)['gameData'] = mockGameData;
+
+            service.abandonGame(mockGameData, false);
+
+            expect(mockPlayer.hasAbandoned).toBeTrue();
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith(
+                'abandonedGame',
+                jasmine.objectContaining({
+                    player: jasmine.objectContaining({
+                        name: 'TestPlayer',
+                        hasAbandoned: true,
+                    }),
+                    accessCode: '1234',
+                }),
+            );
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
         });
     });

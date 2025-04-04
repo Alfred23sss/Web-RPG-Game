@@ -39,6 +39,7 @@ fdescribe('ItemEffectsService', () => {
         isActive: false,
         combatWon: 0,
         isVirtual: false,
+        isVirtual: false,
     };
 
     const MOCK_ITEM: Item = {

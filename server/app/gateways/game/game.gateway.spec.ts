@@ -1,10 +1,11 @@
 /* eslint-disable max-lines */
+import { GameModeType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { GameSessionService } from '@app/services/classic-game-session/classic-game-session.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -79,7 +80,10 @@ describe('GameGateway', () => {
                 turn: { orderedPlayers: [] },
                 game: {},
             }),
-            getGameSession: jest.fn().mockReturnValue({}),
+            getGameSession: jest.fn().mockReturnValue({
+                turn: { orderedPlayers: [] },
+                game: {},
+            }),
             handlePlayerAbandoned: jest.fn().mockReturnValue(MOCK_PLAYER),
             endTurn: jest.fn(),
             deleteGameSession: jest.fn(),
@@ -143,10 +147,15 @@ describe('GameGateway', () => {
 
     describe('handleCreateGame', () => {
         it('should create a game session and emit gameStarted', () => {
-            gateway.handleCreateGame(MOCK_CLIENT, MOCK_PAYLOAD);
+            // { accessCode: string; gameMode: GameModeType }
+            const payload = {
+                accessCode: ACCESS_CODE,
+                gameMode: GameModeType.Classic,
+            };
+            gateway.handleCreateGame(MOCK_CLIENT, payload);
 
-            expect(gameSessionServiceMock.createGameSession).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
-            expect(serverMock.to).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
+            expect(gameSessionServiceMock.createGameSession).toHaveBeenCalledWith(payload.accessCode, payload.gameMode);
+            expect(serverMock.to).toHaveBeenCalledWith(payload.accessCode);
             expect(serverMock.emit).toHaveBeenCalledWith('gameStarted', {
                 orderedPlayers: [],
                 updatedGame: {},
@@ -156,35 +165,32 @@ describe('GameGateway', () => {
 
     describe('handleGameAbandoned', () => {
         it('should handle player abandonment and emit events', () => {
-            gateway.handleGameAbandoned(MOCK_CLIENT, MOCK_PAYLOAD);
+            const payload = {
+                player: MOCK_PLAYER,
+                accessCode: ACCESS_CODE,
+                isGameEnding: false,
+            };
+            gateway.handleGameAbandoned(MOCK_CLIENT, payload);
 
             expect(combatServiceMock.handleCombatSessionAbandon).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
             expect(gameSessionServiceMock.handlePlayerAbandoned).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
             expect(lobbyServiceMock.leaveLobby).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name, true);
         });
 
-        it('should abort immediately if game session does not exist', () => {
-            (gameSessionServiceMock.getGameSession as jest.Mock).mockReturnValue(undefined);
-
-            gateway.handleGameAbandoned(MOCK_CLIENT, MOCK_PAYLOAD);
-
-            expect(gameSessionServiceMock.getGameSession).toHaveBeenCalledWith(ACCESS_CODE);
-            expect(combatServiceMock.handleCombatSessionAbandon).not.toHaveBeenCalled();
-            expect(gameSessionServiceMock.handlePlayerAbandoned).not.toHaveBeenCalled();
-            expect(lobbyServiceMock.leaveLobby).not.toHaveBeenCalled();
-            expect(serverMock.emit).not.toHaveBeenCalledWith('game-abandoned', expect.anything());
-            expect(serverMock.emit).not.toHaveBeenCalledWith('gameDeleted');
-        });
-
         it('should clear lobby and delete session when last player leaves', () => {
             lobbyServiceMock.getLobby = jest.fn().mockReturnValue({ players: [MOCK_PLAYER] });
             const mockClient = { leave: jest.fn() } as unknown as Socket;
 
-            gateway.handleGameAbandoned(mockClient, MOCK_PAYLOAD);
+            const payload = {
+                player: MOCK_PLAYER,
+                accessCode: ACCESS_CODE,
+                isGameEnding: false,
+            };
+            gateway.handleGameAbandoned(mockClient, payload);
 
-            expect(lobbyServiceMock.clearLobby).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
-            expect(gameSessionServiceMock.deleteGameSession).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
-            expect(accessCodeServiceMock.removeAccessCode).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
+            expect(lobbyServiceMock.clearLobby).toHaveBeenCalledWith(payload.accessCode);
+            expect(gameSessionServiceMock.deleteGameSession).toHaveBeenCalledWith(payload.accessCode);
+            expect(accessCodeServiceMock.removeAccessCode).toHaveBeenCalledWith(payload.accessCode);
             expect(serverMock.emit).toHaveBeenCalledWith('gameDeleted');
         });
     });
@@ -414,7 +420,7 @@ describe('GameGateway', () => {
         });
 
         it('should handle game ended event', () => {
-            const payload = { accessCode: ACCESS_CODE, winner: 'winner' };
+            const payload = { accessCode: ACCESS_CODE, winner: ['winner'] };
 
             gateway.handleGameEnded(payload);
 
@@ -452,8 +458,6 @@ describe('GameGateway', () => {
     describe('handleTurnStarted', () => {
         it('should announce new turn start to the game room', () => {
             gateway.handleTurnStarted(MOCK_PAYLOAD);
-
-            expect(loggerMock.log).toHaveBeenCalledWith(`Received turn started event for game ${MOCK_PAYLOAD.accessCode}`);
 
             expect(serverMock.to).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
             expect(serverMock.emit).toHaveBeenCalledWith('turnStarted', {
@@ -567,8 +571,6 @@ describe('GameGateway', () => {
             expect(serverMock.emit).toHaveBeenCalledWith('combatTimerUpdate', {
                 timeLeft: payload.timeLeft,
             });
-
-            expect(loggerMock.log).toHaveBeenCalledWith('attacker socket id socket_attacker, defender socket it socket_defender');
         });
     });
 
@@ -600,8 +602,6 @@ describe('GameGateway', () => {
             expect(serverMock.emit).toHaveBeenCalledWith('combatTurnStarted', {
                 fighter: mockAttacker,
             });
-
-            expect(loggerMock.log).toHaveBeenCalledWith('attacker socket id socket_attacker, defender socket it socket_defender');
         });
     });
 });

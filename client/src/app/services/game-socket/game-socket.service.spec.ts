@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { DiceType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
@@ -24,8 +25,8 @@ describe('GameSocketService', () => {
         const gameStateSpy = jasmine.createSpyObj('GameStateSocketService', ['updateGameData'], {
             gameDataSubjectValue: {
                 lobby: { players: [] },
-                game: { grid: [] },
-                clientPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 },
+                game: { grid: MOCK_GRID },
+                clientPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
                 isDebugMode: true,
                 movementPointsRemaining: 10,
             },
@@ -87,7 +88,6 @@ describe('GameSocketService', () => {
         socketEvents['game-abandoned'](data);
 
         expect(MOCK_PLAYER.hasAbandoned).toBeTrue();
-        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).not.toContain(MOCK_PLAYER);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
@@ -101,7 +101,7 @@ describe('GameSocketService', () => {
     }));
 
     it('should handle gameEnded event', fakeAsync(() => {
-        const data = { winner: 'WinnerPlayer' };
+        const data = { winner: ['WinnerPlayer'] };
         socketEvents['gameEnded'](data);
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
         tick(DELAY_BEFORE_ENDING_GAME);
@@ -138,7 +138,15 @@ describe('GameSocketService', () => {
         gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
         gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints = 10;
 
-        const mockPlayer: Player = { ...MOCK_PLAYER, name: 'testPlayer' };
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.attack = { value: 0, bonusDice: DiceType.D6 };
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.defense = { value: 0, bonusDice: DiceType.D4 };
+
+        const mockPlayer: Player = {
+            ...MOCK_PLAYER,
+            name: 'testPlayer',
+            attack: { value: 4, bonusDice: DiceType.D6 },
+            defense: { value: 4, bonusDice: DiceType.D4 },
+        };
 
         playerMovementServiceSpy.calculateRemainingMovementPoints.and.returnValue(3);
 

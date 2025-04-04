@@ -63,7 +63,7 @@ export class GameSocketService {
 
     private onItemChoice(): void {
         this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
-            this.gameplayService.createItemPopUp(data.items);
+            this.gameplayService.createItemPopUp(data.items, this.gameStateService.gameDataSubjectValue);
         });
     }
 
@@ -93,7 +93,6 @@ export class GameSocketService {
     private onGameEnded(): void {
         this.socketClientService.on('gameEnded', (data: { winner: string[] }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players;
-            players.filter((p) => p.hasAbandoned === false); // pt pas update a voir
             if (data.winner.length <= 1) {
                 this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
             } else {
