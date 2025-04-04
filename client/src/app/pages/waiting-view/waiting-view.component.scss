@@ -37,7 +37,7 @@ app-chat {
     box-shadow: 0 5px 30px rgba(0, 20, 40, 0.7);
     border: 2px solid rgba(100, 200, 255, 0.3);
     padding: 15px;
-    overflow-y: auto;
+    overflow-y: hidden;
     box-sizing: border-box;
 }
 
@@ -270,17 +270,6 @@ app-chat {
 .start-button:hover {
     background: linear-gradient(135deg, #00dc98, #00ba76);
     box-shadow: 0px 0px 15px rgba(0, 255, 170, 0.7);
-}
-
-.lock-button {
-    background: linear-gradient(135deg, #ffd700, #ffaa00);
-    box-shadow: 0px 4px 10px rgba(255, 215, 0, 0.3);
-    border-color: #b38a00;
-}
-
-.lock-button:hover {
-    background: linear-gradient(135deg, #ffe700, #ffba00);
-    box-shadow: 0px 0px 15px rgba(255, 215, 0, 0.7);
 }
 
 .virtual-button:disabled {

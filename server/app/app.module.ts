@@ -19,7 +19,11 @@ import { GameService } from './services/game/game.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
+import { PlayerMovementService } from './services/player-movement/playerMovement.service';
+import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtualPlayerCreation.service';
 import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
+import { AggressiveVPService } from './services/vp-aggressive/aggressiveVP.service';
+import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -38,8 +42,12 @@ import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.se
     ],
     controllers: [GameController, AccessCodesController],
     providers: [
+        PlayerMovementService,
         VirtualPlayerGateway,
         VirtualPlayerService,
+        VirtualPlayerCreationService,
+        AggressiveVPService,
+        DefensiveVPService,
         LobbyGateway,
         LobbyService,
         ChatGateway,
