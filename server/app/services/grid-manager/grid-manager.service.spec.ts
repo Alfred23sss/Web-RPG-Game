@@ -6,6 +6,7 @@ import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { EventEmitter2 } from 'eventemitter2';
 import { GridManagerService } from './grid-manager.service';
 
 describe('GridManagerService', () => {
@@ -16,7 +17,7 @@ describe('GridManagerService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [GridManagerService, Logger],
+            providers: [GridManagerService, Logger, EventEmitter2],
         }).compile();
 
         service = module.get<GridManagerService>(GridManagerService);

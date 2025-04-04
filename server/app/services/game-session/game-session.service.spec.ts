@@ -14,6 +14,7 @@ import { Turn } from '@app/interfaces/Turn';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -138,6 +139,7 @@ const createMockGameSession = (grid: Tile[][], turnConfig: Partial<Turn>) => ({
 describe('GameSessionService', () => {
     let gameSessionService: GameSessionService;
     let lobbyService: LobbyService;
+    let itemService: ItemEffectsService;
     let accessCodesService: AccessCodesService;
     let eventEmitter: EventEmitter2;
     let logger: Logger;
@@ -151,17 +153,17 @@ describe('GameSessionService', () => {
         accessCodesService = new AccessCodesService();
         lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
-        gridManagerService = new GridManagerService(logger);
+        gridManagerService = new GridManagerService(logger, eventEmitter);
         turnService = new GameSessionTurnService(lobbyService, eventEmitter);
 
-        gameSessionService = new GameSessionService(lobbyService, eventEmitter, gridManagerService, turnService);
+        gameSessionService = new GameSessionService(eventEmitter, lobbyService, gridManagerService, turnService, itemService);
 
         jest.spyOn(lobbyService, 'getLobby').mockReturnValue(MOCK_LOBBY);
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(MOCK_LOBBY.players);
         jest.spyOn(gridManagerService, 'clearPlayerFromGrid');
         jest.spyOn(gridManagerService, 'setPlayerOnTile');
 
-        gameSessionService.createGameSession(ACCESS_CODE);
+        gameSessionService.createGameSession(ACCESS_CODE, 'Classic');
 
         jest.spyOn(eventEmitter, 'emit');
         (eventEmitter.emit as jest.Mock).mockClear();
@@ -175,7 +177,7 @@ describe('GameSessionService', () => {
     });
 
     it('should clear timers and delete session', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
         const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
         const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
@@ -190,7 +192,7 @@ describe('GameSessionService', () => {
         const players = [createValidPlayer(PLAYER_1_NAME, FAST_SPEED, true), createValidPlayer(PLAYER_2_NAME, SLOW_SPEED, false)];
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
 
         gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode).turn.currentPlayer = players[0];
 
@@ -213,7 +215,7 @@ describe('GameSessionService', () => {
     });
 
     it('should maintain correct timer sequence after resume', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
 
         gameSessionService.endTurn(MOCK_LOBBY.accessCode);
         jest.advanceTimersByTime(DEFAULT_TIME);
@@ -237,7 +239,7 @@ describe('GameSessionService', () => {
     });
 
     it('should update combat state in game session if it exists', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
 
         gameSessionService.setCombatState(MOCK_LOBBY.accessCode, true);
@@ -253,7 +255,7 @@ describe('GameSessionService', () => {
     });
 
     it('should return true if the given player is the current player', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
         const player = createValidPlayer('CurrentPlayer', FAST_SPEED, true);
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
         session.turn.currentPlayer = player;
@@ -411,7 +413,7 @@ describe('GameSessionService', () => {
 
     describe('callTeleport', () => {
         it('should teleport player and update grid', () => {
-            const gameSession = gameSessionService.createGameSession(ACCESS_CODE);
+            const gameSession = gameSessionService.createGameSession(ACCESS_CODE, 'Classic');
             const originalGrid = gameSession.game.grid;
             const player = MOCK_LOBBY.players[0];
 
@@ -464,9 +466,9 @@ describe('GameSessionService', () => {
             it('should emit the game.ended event with the winner', () => {
                 const winner = PLAYER_1_NAME;
                 const emitSpy = jest.spyOn(eventEmitter, 'emit');
-                gameSessionService.endGameSession(ACCESS_CODE, winner);
+                gameSessionService.endGameSession(ACCESS_CODE, [winner]);
                 const accessCode = 'test-code';
-                expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winner });
+                expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winners: [winner] });
             });
         });
 

@@ -5,9 +5,10 @@
 import { CombatState } from '@app/interfaces/CombatState';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
-import { GameSessionService } from '@app/services/classic-game-session/classic-game-session.service';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 
@@ -109,6 +110,10 @@ describe('GameCombatService', () => {
                 },
                 {
                     provide: EventEmitter2,
+                    useValue: { emit: jest.fn() },
+                },
+                {
+                    provide: ItemEffectsService,
                     useValue: { emit: jest.fn() },
                 },
             ],
