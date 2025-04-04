@@ -135,6 +135,7 @@ export enum Routes {
     CreatePage = '/create',
     CreateView = '/create',
     Game = '/game',
+    GameEndPage = '/game-end',
 }
 
 export enum ItemName {

@@ -1,0 +1,45 @@
+<div class="global-stats">
+    <h2>Statistiques globales</h2>
+    <ul>
+        <li><strong>Durée :</strong> {{ gameStats.globalStats.formattedDuration || 'N/A' }}</li>
+        <li><strong>Total de tours :</strong> {{ gameStats.globalStats.totalTurns }}</li>
+        <li><strong>% Tuiles visitées :</strong> {{ gameStats.globalStats.tilesVisitedPercentage }}%</li>
+        <li><strong>% Portes manipulées :</strong> {{ gameStats.globalStats.doorsManipulatedPercentage }}%</li>
+        <li><strong>Nombre de porteurs du drapeau :</strong> {{ gameStats.globalStats.uniqueFlagHolders || 0 }}</li>
+    </ul>
+</div>
+
+<div class="player-stats">
+    <h2>Statistiques des joueurs</h2>
+    <table>
+        <thead>
+            <tr>
+                <th (click)="sortBy('playerName')">Nom</th>
+                <th (click)="sortBy('combats')">Combats</th>
+                <th (click)="sortBy('escapes')">Évasions</th>
+                <th (click)="sortBy('victories')">Victoires</th>
+                <th (click)="sortBy('defeats')">Défaites</th>
+                <th (click)="sortBy('healthLost')">PV perdus</th>
+                <th (click)="sortBy('damageCaused')">PV infligés</th>
+                <th (click)="sortBy('uniqueItemsCollected')">Objets ramassés</th>
+                <th (click)="sortBy('tilesVisitedPercentage')">Tuiles visitées %</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let player of sortedStats">
+                <td>{{ player.playerName }}</td>
+                <td>{{ player.combats }}</td>
+                <td>{{ player.escapes }}</td>
+                <td>{{ player.victories }}</td>
+                <td>{{ player.defeats }}</td>
+                <td>{{ player.healthLost }}</td>
+                <td>{{ player.damageCaused }}</td>
+                <td>{{ player.uniqueItemsCollected.size }}</td>
+                <td>{{ player.tilesVisitedPercentage }}%</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Back to Home Button -->
+<button (click)="goHome()">Retour à l'accueil</button>

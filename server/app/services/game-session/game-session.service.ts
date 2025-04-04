@@ -46,6 +46,12 @@ export class GameSessionService {
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, player.name);
             this.gridManager.setPlayerOnTile(gameSession.game.grid, movement[i], player);
 
+            this.eventEmitter.emit(EventEmit.GameTileVisited, {
+                accessCode,
+                player,
+                tile: movement[i],
+            });
+
             player.inventory.forEach((item, index) => {
                 if (item?.name === ItemName.Swap) {
                     if (movement[i].type === TileType.Ice) {
@@ -69,6 +75,11 @@ export class GameSessionService {
                 // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
                 if (movement[i].item.name !== ItemName.Home) {
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
+                    this.emitEvent(EventEmit.GameItemCollected, {
+                        accessCode,
+                        item: movement[i].item,
+                        player,
+                    });
                     break;
                 }
             }
@@ -201,9 +212,11 @@ export class GameSessionService {
         turn.beginnerPlayer = turn.orderedPlayers[0];
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
+        game.mode = gameMode;
         const gameSession: GameSession = { game, turn };
         this.gameSessions.set(accessCode, gameSession);
         this.updatePlayerListSpawnPoint(players, accessCode);
+        this.emitEvent(EventEmit.InitializeGameStatistics, { accessCode, players: gameSession.turn.orderedPlayers, gameSession });
         this.startTransitionPhase(accessCode);
         return gameSession;
     }

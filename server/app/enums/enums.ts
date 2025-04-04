@@ -190,15 +190,18 @@ export enum EventEmit {
     UpdatePlayerList = 'update.player.list',
     UpdatePlayer = 'update.player',
     GameCombatStarted = 'game.combat.started',
+    // stat
     GameCombatAttackResult = 'game.combat.attack.result',
     GameCombatEscape = 'game.combat.escape',
     GameCombatEnded = 'game.combat.ended',
     AdminModeDisabled = 'admin.mode.disabled',
+    // stat
     GameDoorUpdate = 'game.door.update',
     GameTurnTimeout = 'game.turn.timeout',
     GamePlayerMovement = 'game.player.movement',
     GameEnded = 'game.ended',
     GameGridUpdate = 'game.grid.update',
+    // stat
     GameTransitionStarted = 'game.transition.started',
     GameTransitionCountdown = 'game.transition.countdown',
     GameTurnStarted = 'game.turn.started',
@@ -208,6 +211,11 @@ export enum EventEmit {
     ItemChoice = 'item.choice',
     PlayerUpdate = 'player.client.update',
     TeamCreated = 'team.created',
+    GameItemCollected = 'game.item.collected',
+    GameTileVisited = 'game.tile.visited',
+    GameFlagPossessed = 'game.flag.possessed',
+    InitializeGameStatistics = 'initialize.game.statistics',
+    ShowGlobalStats = 'show.global.stats',
 }
 
 export enum Behavior {

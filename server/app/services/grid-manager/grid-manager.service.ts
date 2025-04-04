@@ -100,6 +100,10 @@ export class GridManagerService {
         }
     }
 
+    countDoors(grid: Tile[][]): number {
+        return grid.flat().filter((tile) => tile.type === TileType.Door).length;
+    }
+
     findSpawnPoints(grid: Tile[][]): Tile[] {
         return grid.flat().filter((tile) => tile.item?.name === 'home');
     }

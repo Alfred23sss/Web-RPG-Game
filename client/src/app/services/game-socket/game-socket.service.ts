@@ -3,6 +3,7 @@ import { Item } from '@app/classes/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
+import { GameStatistics } from '@app/interfaces/statistics';
 import { Tile } from '@app/interfaces/tile';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
@@ -91,7 +92,7 @@ export class GameSocketService {
     }
 
     private onGameEnded(): void {
-        this.socketClientService.on('gameEnded', (data: { winner: string[] }) => {
+        this.socketClientService.on('gameEnded', (data: { winner: string[]; stats: GameStatistics }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players;
             if (data.winner.length <= 1) {
                 this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
@@ -103,7 +104,7 @@ export class GameSocketService {
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
             this.gameStateService.gameDataSubjectValue.isGameEnding = true;
             setTimeout(() => {
-                this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue, this.gameStateService.gameDataSubjectValue.isGameEnding);
+                this.gameplayService.navigateToFinalPage(data.stats);
             }, DELAY_BEFORE_ENDING_GAME);
         });
     }

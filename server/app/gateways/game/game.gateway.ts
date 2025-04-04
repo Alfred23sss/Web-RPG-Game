@@ -5,6 +5,7 @@ import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -17,12 +18,15 @@ export class GameGateway {
     @WebSocketServer()
     server: Server;
 
+    // faudra split ce gateway en plusieurs fichiers anyways!
+    // eslint-disable-next-line max-params
     constructor(
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
         private readonly gameSessionService: GameSessionService,
         private readonly gameCombatService: GameCombatService,
         private readonly accessCodesService: AccessCodesService,
+        private readonly statisticsService: GameStatisticsService,
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)
@@ -246,6 +250,7 @@ export class GameGateway {
         attackSuccessful: boolean;
         attackerScore: number;
         defenseScore: number;
+        accessCode: string;
     }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.currentFighter.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defenderPlayer.name);
@@ -300,9 +305,9 @@ export class GameGateway {
     @OnEvent(EventEmit.GameEnded)
     handleGameEnded(payload: { accessCode: string; winner: string[] }) {
         this.logger.log('emitting game ended to client');
-
+        const stats = this.statisticsService.calculateStats(payload.accessCode);
         this.gameSessionService.deleteGameSession(payload.accessCode);
-        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner });
+        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats });
         this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
         const lobbyPlayers = this.lobbyService.getLobbyPlayers(payload.accessCode);
         this.lobbyService.clearLobby(payload.accessCode);

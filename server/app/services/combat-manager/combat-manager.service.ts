@@ -57,6 +57,7 @@ export class GameCombatService {
             attackSuccessful,
             attackerScore,
             defenseScore,
+            accessCode,
         });
         if (attackSuccessful) {
             this.handleSuccessfulAttack(combatState, attackerScore, defenseScore, defenderPlayer, accessCode);

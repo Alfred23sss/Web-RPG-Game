@@ -1,5 +1,6 @@
 import { Game, gameSchema } from '@app/model/database/game';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -48,6 +49,7 @@ import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service'
         VirtualPlayerCreationService,
         AggressiveVPService,
         DefensiveVPService,
+        GameStatisticsService,
         LobbyGateway,
         LobbyService,
         ChatGateway,

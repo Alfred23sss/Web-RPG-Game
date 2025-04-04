@@ -1,7 +1,7 @@
 import { Behavior } from '@app/enums/enums';
 import { Tile } from '@app/interfaces/Tile';
 import { Player } from '@app/model/database/player';
-import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
 import { Logger } from '@nestjs/common';
@@ -19,7 +19,7 @@ export class VirtualPlayerGateway {
         private readonly lobbyService: LobbyService,
         private readonly logger: Logger,
         private readonly virtualPlayerService: VirtualPlayerCreationService,
-        private readonly gameModeSelector: GameModeSelectorService,
+        private readonly gameSessionService: GameSessionService,
     ) {}
 
     @SubscribeMessage(VirtualPlayerEvents.CreateVirtualPlayer)
@@ -57,8 +57,7 @@ export class VirtualPlayerGateway {
     ): Promise<void> {
         const virtualPlayer = data.virtualPlayerTile.player;
         try {
-            const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
-            await gameService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
+            await this.gameSessionService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
         } catch (error) {
             this.logger.error('Error updating virtual player position', error);
         }
