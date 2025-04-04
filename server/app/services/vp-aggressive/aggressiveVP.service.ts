@@ -1,8 +1,9 @@
 import { VP_ACTION_WAIT_TIME_MS } from '@app/constants/constants';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
+import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
-import { Player } from '@app/model/database/player';
+import { VPMoveType } from '@app/interfaces/VPMoveTypes';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -20,16 +21,41 @@ export class AggressiveVPService {
         private readonly gameCombatService: GameCombatService,
     ) {}
 
-    executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby): void {
-        // const playerTiles = this.findPlayers(lobby.game.grid);
-        // const newVPTile = this.executeMovement(playerTiles, virtualPlayer, lobby);
-        // const nextActionTile = this.playerMovementService.getAvailableActionTile(newVPTile, lobby.game.grid);
-        // this.executeAction(lobby.accessCode, newVPTile, nextActionTile);
-        // wait 2 seconds
-        // chek pr action possible durant son parcours,
-        // chek si dn parcous ya item et gere si c'est le cas.
-        // chek aussi pendant quil cherche le plus petit parcours de prendre en compte les portes et quil peut les ouvrir =>
-        // (split move en 2 , premier move ensuite action(item aussi) si available ouvre porte et ensuite 2e move)
+    async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: VPMoveType, movesInRange: VPMoveType): Promise<void> {
+        if (movesInRange) {
+            this.getNextMoveType(movesInRange, lobby, virtualPlayer);
+        } else {
+            this.getNextMoveType(possibleMoves, lobby, virtualPlayer);
+        }
+        // filter moves only within move and action points!!!!
+    }
+
+    getNextMoveType(moves: VPMoveType, lobby: Lobby, virtualPlayer: Player): void {
+        if (moves.playerTiles) this.moveToNextAction(moves.playerTiles, lobby, virtualPlayer);
+
+        if (moves.itemTiles) this.moveToNextAction(moves.itemTiles, lobby, virtualPlayer); // item attaque a prioriser (cheker si juste un item en range et c pas att est ce quil le prend)
+
+        // si aucun alors regarder les moves hors de range et aller vers le joueur le plus proche
+    }
+
+    private moveToNextAction(availableTiles: Tile[], lobby: Lobby, virtualPlayer: Player): Tile {
+        const virtualPlayerTile = this.gridManagerService.findTileByPlayer(lobby.game.grid, virtualPlayer);
+        const closestReachableTile = this.playerMovementService.findClosestReachableTile(
+            availableTiles,
+            virtualPlayerTile,
+            lobby.game.grid,
+            virtualPlayer.movementPoints,
+        );
+        const movement = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, lobby.game.grid);
+        const payload = {
+            virtualPlayerTile,
+            closestReachableTile,
+            movement,
+            accessCode: lobby.accessCode,
+        };
+        this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
+
+        return closestReachableTile;
     }
 
     private executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): void {
@@ -38,27 +64,6 @@ export class AggressiveVPService {
                 this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
             }, VP_ACTION_WAIT_TIME_MS);
         }
-    }
-
-    private executeMovement(playerTiles: Tile[], virtualPlayer: Player, lobby: Lobby): Tile {
-        const grid = lobby.game.grid;
-        const virtualPlayerTile = this.gridManagerService.findTileByPlayer(grid, virtualPlayer);
-        const closestPlayerTile = this.playerMovementService.findClosestReachableTile(
-            playerTiles,
-            virtualPlayerTile,
-            grid,
-            virtualPlayer.movementPoints,
-        );
-        const movement = this.playerMovementService.quickestPath(virtualPlayerTile, closestPlayerTile, grid);
-        const payload = {
-            virtualPlayerTile,
-            closestPlayerTile,
-            movement,
-            accessCode: lobby.accessCode,
-        };
-        this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
-
-        return closestPlayerTile;
     }
 
     private emitEvent<T>(eventName: string, payload: T): void {

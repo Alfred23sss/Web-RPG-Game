@@ -109,6 +109,11 @@ export class PlayerMovementService {
         return doorTile;
     }
 
+    // chek pr action possible durant son parcours,
+    // chek si dn parcous ya item et gere si c'est le cas.
+    // chek aussi pendant quil cherche le plus petit parcours de prendre en compte les portes et quil peut les ouvrir =>
+    // (split move en 2 , premier move ensuite action(item aussi) si available ouvre porte et ensuite 2e move)
+
     findClosestReachableTile(playerTiles: Tile[], virtualPlayerTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const bestMoveTile = this.findBestMoveTile(playerTiles, virtualPlayerTile, grid);
         if (!bestMoveTile) return undefined;
