@@ -171,7 +171,7 @@ export class ItemEffectsService {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
                     this.addEffect(player, tile.item, tile);
-                    tile.item = undefined;
+                    tile.item = null;
                     player = {
                         ...player,
                         attack: { ...player.attack },
