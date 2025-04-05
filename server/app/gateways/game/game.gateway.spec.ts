@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable max-lines */
 import { GameModeType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
@@ -11,6 +12,7 @@ import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { GameGateway } from './game.gateway';
+import { Item } from '@app/interfaces/Item';
 
 const MOCK_PLAYER: Player = {
     name: 'test-player',
@@ -61,14 +63,6 @@ describe('GameGateway', () => {
         type: TileType.Water,
     };
 
-    // const mockTile: Tile = {
-    //     id: 'test-tile',
-    //     player: mockPlayer,
-    //     isOccupied: true,
-    // } as Tile;
-
-    // const mockGrid: Tile[][] = [[mockTile]];
-
     beforeEach(async () => {
         serverMock = {
             to: jest.fn().mockReturnThis(),
@@ -90,8 +84,9 @@ describe('GameGateway', () => {
             updatePlayerPosition: jest.fn().mockResolvedValue(undefined),
             updateDoorTile: jest.fn(),
             callTeleport: jest.fn(),
+            handleItemDropped: jest.fn(),
+            updateWallTile: jest.fn(),
         };
-
         serverMock = {
             to: jest.fn().mockReturnThis(),
             emit: jest.fn(),
@@ -603,5 +598,172 @@ describe('GameGateway', () => {
                 fighter: mockAttacker,
             });
         });
+    });
+    it('should log player names and emit teamCreated event with correct data', () => {
+        const redTeam = [
+            { ...MOCK_PLAYER, name: 'RedPlayer1' },
+            { ...MOCK_PLAYER, name: 'RedPlayer2' },
+        ];
+        const blueTeam = [
+            { ...MOCK_PLAYER, name: 'BluePlayer1' },
+            { ...MOCK_PLAYER, name: 'BluePlayer2' },
+        ];
+        const accessCode = 'test-access-code';
+
+        gateway.handleTeamCreated({
+            redTeam,
+            blueTeam,
+            accessCode,
+        });
+
+        expect(loggerMock.log).toHaveBeenCalledWith('RedPlayer1');
+        expect(loggerMock.log).toHaveBeenCalledWith('RedPlayer2');
+        expect(loggerMock.log).toHaveBeenCalledWith('BluePlayer1');
+        expect(loggerMock.log).toHaveBeenCalledWith('BluePlayer2');
+
+        expect(loggerMock.log).toHaveBeenCalledWith(expect.stringContaining('teamCreated'));
+        expect(serverMock.to).toHaveBeenCalledWith(accessCode);
+        expect(serverMock.emit).toHaveBeenCalledWith('teamCreated', {
+            redTeam,
+            blueTeam,
+        });
+    });
+    it('should log player update and emit playerClientUpdate event with correct player data', () => {
+        const mockPlayer = { ...MOCK_PLAYER, name: 'UpdatedPlayer' };
+        const accessCode = 'update-access-code';
+
+        gateway.handlePlayerClientUpdate({
+            accessCode,
+            player: mockPlayer,
+        });
+
+        expect(loggerMock.log).toHaveBeenCalledWith(`playerUpdateClientEventCalled ${mockPlayer.name}`);
+
+        expect(serverMock.to).toHaveBeenCalledWith(accessCode);
+        expect(serverMock.emit).toHaveBeenCalledWith('playerClientUpdate', {
+            player: mockPlayer,
+        });
+    });
+    it('should emit itemChoice event with 3 items to the correct player socket', () => {
+        const mockItems = [
+            { id: 'item1', name: 'Sword', description: '', effect: () => {} },
+            { id: 'item2', name: 'Shield', description: '', effect: () => {} },
+            { id: 'item3', name: 'Potion', description: '', effect: () => {} },
+        ] as unknown as [Item, Item, Item];
+
+        const mockPlayer = { ...MOCK_PLAYER, name: 'ItemPlayer' };
+        const mockSocketId = 'socket_ItemPlayer';
+
+        (lobbyServiceMock.getPlayerSocket as jest.Mock).mockReturnValue(mockSocketId);
+
+        gateway.handleItemChoiceEvent({
+            player: mockPlayer,
+            items: mockItems,
+        });
+
+        expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith(mockPlayer.name);
+        expect(serverMock.to).toHaveBeenCalledWith(mockSocketId);
+        expect(serverMock.emit).toHaveBeenCalledWith('itemChoice', {
+            items: mockItems,
+        });
+    });
+    it('should emit wallClicked event with grid and log the event', () => {
+        const mockGrid: Tile[][] = [
+            [
+                {
+                    id: 'tile1',
+                    imageSrc: '',
+                    isOccupied: false,
+                    isOpen: true,
+                    player: MOCK_PLAYER,
+                    type: TileType.Default,
+                },
+            ],
+        ];
+        const accessCode = 'wall-room';
+
+        gateway.handleWallUpdateEvent({
+            accessCode,
+            grid: mockGrid,
+        });
+
+        expect(serverMock.to).toHaveBeenCalledWith(accessCode);
+        expect(serverMock.emit).toHaveBeenCalledWith('wallClicked', {
+            grid: mockGrid,
+        });
+        expect(loggerMock.log).toHaveBeenCalledWith('Wall update event emitted');
+    });
+    it('should call gameSessionService.handleItemDropped with correct payload', () => {
+        const mockItem: Item = {
+            id: 'item1',
+            name: 'Magic Wand',
+            description: 'Casts spells',
+            imageSrc: '',
+            imageSrcGrey: '',
+            itemCounter: 0,
+        };
+
+        const payload = {
+            accessCode: ACCESS_CODE,
+            player: MOCK_PLAYER,
+            item: mockItem,
+        };
+
+        gateway.handleItemDrop(MOCK_CLIENT, payload);
+
+        expect(gameSessionServiceMock.handleItemDropped).toHaveBeenCalledWith(payload.accessCode, payload.player, payload.item);
+    });
+
+    it('should call gameSessionService.updateWallTile with correct data and log it', () => {
+        const currentTile: Tile = {
+            id: 'tileA',
+            imageSrc: '',
+            isOccupied: false,
+            isOpen: false,
+            player: MOCK_PLAYER,
+            type: TileType.Door,
+        };
+
+        const targetTile: Tile = {
+            id: 'tileB',
+            imageSrc: '',
+            isOccupied: false,
+            isOpen: true,
+            player: null,
+            type: TileType.Door,
+        };
+
+        const payload = {
+            accessCode: ACCESS_CODE,
+            currentTile,
+            targetTile,
+            player: MOCK_PLAYER,
+        };
+
+        gateway.handleWallUpdate(MOCK_CLIENT, payload);
+
+        expect(gameSessionServiceMock.updateWallTile).toHaveBeenCalledWith(
+            payload.accessCode,
+            payload.currentTile,
+            payload.targetTile,
+            payload.player,
+        );
+
+        expect(loggerMock.log).toHaveBeenCalledWith('Door update emitted');
+    });
+    it('should not handle anything if the game is ending', () => {
+        const payload = {
+            player: MOCK_PLAYER,
+            accessCode: ACCESS_CODE,
+            isGameEnding: true,
+        };
+
+        gateway.handleGameAbandoned(MOCK_CLIENT, payload);
+
+        expect(loggerMock.log).not.toHaveBeenCalled();
+        expect(gameSessionServiceMock.handlePlayerAbandoned).not.toHaveBeenCalled();
+        expect(gameSessionServiceMock.deleteGameSession).not.toHaveBeenCalled();
+        expect(lobbyServiceMock.leaveLobby).not.toHaveBeenCalled();
+        expect(serverMock.emit).not.toHaveBeenCalled();
     });
 });
