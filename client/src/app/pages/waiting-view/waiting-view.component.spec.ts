@@ -200,7 +200,7 @@ describe('WaitingViewComponent', () => {
             component.navigateToGame();
             tick();
 
-            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234' });
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234', gameMode: undefined });
             expect(mockLobbyService.setIsGameStarting).toHaveBeenCalledWith(true);
             expect(sessionStorage.getItem('lobby')).toBe(JSON.stringify(component.lobby));
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.Game]);

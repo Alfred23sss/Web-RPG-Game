@@ -237,7 +237,10 @@ describe('GameSocketService', () => {
     it('should abandon game when refresh flag exists in handlePageRefresh', () => {
         sessionStorage.setItem('refreshed', 'true');
         service['handlePageRefresh']();
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, false);
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(
+            gameStateServiceSpy.gameDataSubjectValue,
+            gameStateServiceSpy.gameDataSubjectValue.isGameEnding,
+        );
         expect(sessionStorage.getItem('refreshed')).toBe('true');
     });
 
@@ -291,7 +294,7 @@ describe('GameSocketService', () => {
         const abandonedPlayer = { ...MOCK_PLAYER, name: 'Abandoned', hasAbandoned: true };
 
         gameStateServiceSpy.gameDataSubjectValue.lobby.players = [activePlayer, abandonedPlayer];
-        const data = { winner: 'WinnerPlayer' };
+        const data = { winner: ['WinnerPlayer'] };
         socketEvents['gameEnded'](data);
         expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
         expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);

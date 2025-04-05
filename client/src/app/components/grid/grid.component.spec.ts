@@ -13,6 +13,7 @@ describe('GridComponent', () => {
 
     const playerTile: Tile = { id: '2', type: TileType.Default, player: {} } as Tile;
     const doorTile: Tile = { id: '3', type: TileType.Door } as Tile;
+    const wallTile: Tile = { id: '3', type: TileType.Wall } as Tile;
 
     const mockTile1: Tile = { id: '1', type: TileType.Default } as Tile;
     const mockTile2: Tile = { id: '2', type: TileType.Default } as Tile;
@@ -84,6 +85,12 @@ describe('GridComponent', () => {
             spyOn(component.doorClicked, 'emit');
             component.onTileClick(doorTile);
             expect(component.doorClicked.emit).toHaveBeenCalledWith(doorTile);
+        });
+
+        it('should emit wallClicked if the tile is a wall', () => {
+            spyOn(component.wallClicked, 'emit');
+            component.onTileClick(wallTile);
+            expect(component.wallClicked.emit).toHaveBeenCalledWith(wallTile);
         });
 
         it('should emit tileClicked if the tile is in availablePath', () => {
