@@ -54,28 +54,28 @@ export class AggressiveVPService {
             lobby.game.grid,
             virtualPlayer.movementPoints,
         );
-        const movement = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, lobby.game.grid);
+        const movement = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile[0], lobby.game.grid);
         const payload = {
             virtualPlayerTile,
-            closestReachableTile,
+            closestReachableTile: closestReachableTile[0],
             movement,
             accessCode: lobby.accessCode,
         };
 
         this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
-
+        console.log(virtualPlayerTile);
         // Wrap setTimeout in a Promise
         await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
-        await this.executeAction(lobby.accessCode, virtualPlayerTile, closestReachableTile);
+        // await this.executeAction(lobby.accessCode, closestReachableTile[0], closestReachableTile[1]); // hard coded for testing end game...
 
-        return closestReachableTile;
+        return closestReachableTile[0];
     }
 
     private async executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
         if (actionTile) {
             // Wrap setTimeout in a Promise
             await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
-            await this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
+            this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
         }
     }
 
