@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { Item } from '@app/classes/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { DiceType } from '@app/enums/global.enums';
+import { DiceType, ItemName, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -18,6 +20,7 @@ describe('GameSocketService', () => {
     let gameplayServiceSpy: jasmine.SpyObj<GameplayService>;
     let playerMovementServiceSpy: jasmine.SpyObj<PlayerMovementService>;
     let clientNotifierSpy: jasmine.SpyObj<ClientNotifierServices>;
+    let socketClientServiceSpy: jasmine.SpyObj<SocketClientService>;
 
     const socketEvents: { [event: string]: any } = {};
 
@@ -37,9 +40,10 @@ describe('GameSocketService', () => {
             'updateAvailablePath',
             'checkAvailableActions',
             'getClientPlayerPosition',
+            'createItemPopUp',
         ]);
         clientNotifierSpy = jasmine.createSpyObj('ClientNotifierServices', ['displayMessage', 'addLogbookEntry']);
-        const socketSpy = jasmine.createSpyObj('SocketClientService', ['on']);
+        const socketSpy = jasmine.createSpyObj('SocketClientService', ['on', 'emit']);
         socketSpy.socket = {
             on: (event: string, callback: any): void => {
                 socketEvents[event] = callback;
@@ -65,6 +69,7 @@ describe('GameSocketService', () => {
         gameStateServiceSpy = TestBed.inject(GameStateSocketService) as jasmine.SpyObj<GameStateSocketService>;
         gameplayServiceSpy = TestBed.inject(GameplayService) as jasmine.SpyObj<GameplayService>;
         playerMovementServiceSpy = TestBed.inject(PlayerMovementService) as jasmine.SpyObj<PlayerMovementService>;
+        socketClientServiceSpy = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
 
         service.initializeSocketListeners();
 
@@ -104,6 +109,16 @@ describe('GameSocketService', () => {
         const data = { winner: ['WinnerPlayer'] };
         socketEvents['gameEnded'](data);
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+        tick(DELAY_BEFORE_ENDING_GAME);
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, true);
+    }));
+
+    it('should handle gameEnded event with multiple winnners', fakeAsync(() => {
+        const data = { winner: ['WinnerPlayer1', 'WinnerPlayer2'] };
+        socketEvents['gameEnded'](data);
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
+            `👑 ${data.winner.join(', ')} ont remporté la partie ! Redirection vers l'accueil sous peu`,
+        );
         tick(DELAY_BEFORE_ENDING_GAME);
         expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, true);
     }));
@@ -299,5 +314,83 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
         expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);
         expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Fin de la partie', [activePlayer, abandonedPlayer]);
+    });
+
+    it('should call gameplayService when itemChoice', () => {
+        const mockItem = { name: ItemName.Default } as Item;
+
+        const data = { items: [mockItem, mockItem, mockItem] as [Item, Item, Item] };
+        socketEvents['itemChoice'](data);
+        expect(gameplayServiceSpy.createItemPopUp).toHaveBeenCalledWith(data.items, gameStateServiceSpy.gameDataSubjectValue);
+    });
+
+    it('should emit itemDrop event with received data when itemDropped is triggered', () => {
+        const mockData = {
+            accessCode: 'ABCD',
+            player: MOCK_PLAYER,
+            item: new Item({
+                id: '1',
+                name: ItemName.Flag,
+                imageSrc: 'flag.png',
+                itemCounter: 1,
+                description: 'Test flag',
+            }),
+        };
+
+        socketEvents['itemDropped'](mockData);
+
+        expect(socketClientServiceSpy.emit).toHaveBeenCalledWith('itemDrop', mockData);
+    });
+
+    describe('onPlayerClientUpdate', () => {
+        const initialClientPlayer = { name: 'testPlayer', actionPoints: 3 } as Player;
+        it('should update clientPlayer when names match', () => {
+            gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
+            const updatedPlayer = { name: 'testPlayer', actionPoints: 0 } as Player;
+
+            socketEvents['playerClientUpdate']({ player: updatedPlayer });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
+        });
+
+        it('should NOT update clientPlayer when names differ', () => {
+            gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
+            const otherPlayer = { name: 'otherPlayer', actionPoints: 0 } as Player;
+
+            socketEvents['playerClientUpdate']({ player: otherPlayer });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(initialClientPlayer);
+        });
+    });
+
+    describe('onWallClicked', () => {
+        it('should update grid and client state when game data is valid', () => {
+            const mockGrid = [[{ id: 'tile1', type: TileType.Wall } as Tile]];
+            gameStateServiceSpy.gameDataSubjectValue.game = { grid: MOCK_GRID } as Game;
+            gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints = 3;
+            gameStateServiceSpy.gameDataSubjectValue.isActionMode = true;
+
+            socketEvents['wallClicked']({ grid: mockGrid });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(mockGrid);
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(NO_ACTION_POINTS);
+            expect(gameStateServiceSpy.gameDataSubjectValue.isActionMode).toBeFalse();
+            expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+            expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+            expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Un joueur a effectue une action sur un mur!', [
+                gameStateServiceSpy.gameDataSubjectValue.clientPlayer,
+            ]);
+        });
+
+        it('should do nothing when grid is missing', () => {
+            gameStateServiceSpy.gameDataSubjectValue.game = { ...MOCK_GAME, grid: undefined! };
+            const initialActionPoints = gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints;
+
+            socketEvents['wallClicked']({ grid: MOCK_GRID });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(initialActionPoints);
+            expect(gameplayServiceSpy.updateAvailablePath).not.toHaveBeenCalled();
+        });
     });
 });
