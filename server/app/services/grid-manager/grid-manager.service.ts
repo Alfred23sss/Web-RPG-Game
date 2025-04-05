@@ -23,7 +23,7 @@ export class GridManagerService {
     }
 
     findTileBySpawnPoint(grid: Tile[][], player: Player): Tile | undefined {
-        return player.spawnPoint ? grid.flat().find((tile) => tile.id === player.spawnPoint?.tileId) : undefined;
+        return player.spawnPoint ? grid.flat().find((tile) => tile.id === player.spawnPoint.tileId) : undefined;
     }
 
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
