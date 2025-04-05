@@ -305,6 +305,7 @@ export class GameGateway {
     handleGameEnded(payload: { accessCode: string; winner: string[] }) {
         this.logger.log('emitting game ended to client');
         const stats = this.statisticsService.calculateStats(payload.accessCode);
+        this.statisticsService.cleanUp(payload.accessCode);
         const statsObject = {
             ...stats,
             playerStats: Object.fromEntries(stats.playerStats),

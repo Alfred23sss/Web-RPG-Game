@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { EventEmit, GameMode } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
@@ -8,11 +7,8 @@ import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { EventEmitter2 } from 'eventemitter2';
 
-const SMALL = 10;
-const MEDIUM = 15;
-const LARGE = 20;
+// bouge ca dans constant global et trouver meilleur nom
 const TIME_DIVIDER = 1000;
 const MULTIPLIER = 100;
 const SECOND_IN_MINUTE = 60;
@@ -26,13 +22,12 @@ export class GameStatisticsService {
     private turnCounts: Map<string, number> = new Map<string, number>();
 
     constructor(
-        private readonly eventEmitter: EventEmitter2,
         private readonly gridManager: GridManagerService,
         private readonly logger: Logger,
     ) {}
 
     @OnEvent(EventEmit.GameTurnStarted)
-    handleTurnStarted(payload: { accessCode: string; player: Player }) {
+    handleTurnStarted(payload: { accessCode: string; player: Player }): void {
         const { accessCode } = payload;
         const gameStats = this.gameStatistics.get(accessCode);
         if (!gameStats) return;
@@ -40,9 +35,11 @@ export class GameStatisticsService {
     }
 
     @OnEvent(EventEmit.GameCombatStarted)
-    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; currentPlayerName: string }) {
+    handleCombatStarted(payload: { accessCode: string; attacker: Player; defender: Player; currentPlayerName: string }): void {
         const { accessCode, attacker, defender } = payload;
         const gameStats = this.gameStatistics.get(accessCode);
+        if (!gameStats) return;
+
         gameStats.playerStats.get(attacker.name).combats++;
         gameStats.playerStats.get(defender.name).combats++;
     }
@@ -51,6 +48,8 @@ export class GameStatisticsService {
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
         const { attacker, defender, currentFighter, hasEvaded, accessCode } = payload;
         const gameStats = this.gameStatistics.get(accessCode);
+        if (!gameStats) return;
+
         if (hasEvaded) {
             gameStats.playerStats.get(currentFighter.name).escapes++;
         } else {
@@ -68,66 +67,56 @@ export class GameStatisticsService {
         attackerScore: number;
         defenseScore: number;
         accessCode: string;
-    }) {
-        const { currentFighter, defenderPlayer, attackSuccessful, attackerScore, defenseScore } = payload;
-        const gameStats = this.gameStatistics.get(payload.accessCode);
-        if (attackSuccessful) {
-            const finalAttack = attackerScore - defenseScore > 0 ? attackerScore - defenseScore : 0; // double verification jsute pour etre sur que c'est pas negatif
-            gameStats.playerStats.get(defenderPlayer.name).healthLost += finalAttack;
-            gameStats.playerStats.get(currentFighter.name).damageCaused += finalAttack;
-        }
+    }): void {
+        const { currentFighter, defenderPlayer, attackSuccessful, attackerScore, defenseScore, accessCode } = payload;
+        const gameStats = this.gameStatistics.get(accessCode);
+        if (!gameStats || !attackSuccessful) return;
+
+        const finalAttack = Math.max(0, attackerScore - defenseScore);
+        gameStats.playerStats.get(defenderPlayer.name).healthLost += finalAttack;
+        gameStats.playerStats.get(currentFighter.name).damageCaused += finalAttack;
     }
 
     @OnEvent(EventEmit.GameItemCollected)
-    handleItemCollected(payload: { accessCode: string; item: Item; player: Player }) {
+    handleItemCollected(payload: { accessCode: string; item: Item; player: Player }): void {
         const { accessCode, item, player } = payload;
         const gameStats = this.gameStatistics.get(accessCode);
-        if (gameStats.playerStats.get(player.name).uniqueItemsCollected.has(item.name)) {
-            // si ya deja on ajoute pas!
+        if (!gameStats) return;
+
+        const playerStats = gameStats.playerStats.get(player.name);
+        if (playerStats.uniqueItemsCollected.has(item.name)) {
             return;
         }
+
+        playerStats.uniqueItemsCollected.add(item.name);
+
         if (item.name === 'flag') {
             const flagHolderSet = this.flagHolders.get(accessCode);
-            flagHolderSet.add(player.name);
+            if (flagHolderSet) {
+                flagHolderSet.add(player.name);
+            }
         }
-        gameStats.playerStats.get(player.name).uniqueItemsCollected.add(item.name);
     }
 
     @OnEvent(EventEmit.GameTileVisited)
     handleTrackTileVisited(payload: { accessCode: string; player: Player; tile: Tile }): void {
         const { accessCode, tile, player } = payload;
         if (!tile) return;
-        const playerKey = `${accessCode}:${player.name}`;
+
+        const playerKey = this.getPlayerKey(accessCode, player.name);
         const visitedTilesSet = this.visitedTiles.get(playerKey);
-        visitedTilesSet.add(tile.id);
-        // pourcentage update a la fin de la partie pour eviter de toujours le faire a chaque fois.
+        if (visitedTilesSet) {
+            visitedTilesSet.add(tile.id);
+        }
     }
 
     @OnEvent(EventEmit.InitializeGameStatistics)
     handleGameStarted(payload: { accessCode: string; players: Player[]; gameSession: GameSession }): void {
         const { accessCode, players, gameSession } = payload;
-        const playerStats = new Map<string, PlayerStatistics>();
 
-        players.forEach((player) => {
-            const playerKeyTile = `${accessCode}:${player.name}`;
-
-            playerStats.set(player.name, {
-                playerName: player.name,
-                combats: 0,
-                escapes: 0,
-                victories: 0,
-                defeats: 0,
-                healthLost: 0,
-                damageCaused: 0,
-                uniqueItemsCollected: new Set<string>(),
-                tilesVisitedPercentage: 0,
-                visitedTileSet: this.visitedTiles.set(playerKeyTile, new Set<string>()),
-                hasAbandoned: player.hasAbandoned || false,
-            });
-        });
-
-        this.logger.log(gameSession.game.size);
+        const playerStats = this.initializePlayerStats(accessCode, players);
         const gridSize = gameSession.game.size as unknown as number;
+        const totalGridSize = gridSize * gridSize;
 
         const gameStats: GameStatistics = {
             accessCode,
@@ -141,7 +130,7 @@ export class GameStatisticsService {
             },
             startTime: new Date(),
             gameMode: gameSession.game.mode as GameMode,
-            gridSize: gridSize * gridSize,
+            gridSize: totalGridSize,
             numberOfDoors: this.gridManager.countDoors(gameSession.game.grid),
         };
 
@@ -150,54 +139,126 @@ export class GameStatisticsService {
         this.manipulatedDoors.set(accessCode, new Set<string>());
         this.flagHolders.set(accessCode, new Set<string>());
         this.turnCounts.set(accessCode, 0);
-        return;
     }
 
     @OnEvent(EventEmit.UpdateDoorStats)
     handleDoorManipulated(payload: { accessCode: string; tile: Tile }): void {
         const { accessCode, tile } = payload;
-        this.logger.log(`Door manipulated in statisticss: ${tile.id}`);
         if (!tile) return;
-        this.manipulatedDoors.get(accessCode).add(tile.id);
+
+        const doorSet = this.manipulatedDoors.get(accessCode);
+        if (doorSet) {
+            this.logger.log(`Door manipulated in statistics: ${tile.id}`);
+            doorSet.add(tile.id);
+        }
     }
 
-    // a split dans plusieurs fonctions
-    calculateStats(accessCode: string): GameStatistics {
+    calculateStats(accessCode: string): GameStatistics | undefined {
         const gameStats = this.gameStatistics.get(accessCode);
-        if (!gameStats) return;
+        if (!gameStats) return undefined;
+
         gameStats.endTime = new Date();
+
+        this.calculateGameDuration(gameStats);
+        this.calculateGlobalTileVisitedPercentage(accessCode, gameStats);
+        this.calculateDoorsManipulatedPercentage(accessCode, gameStats);
+        this.calculateFlagHolders(accessCode, gameStats);
+        this.calculatePlayerTileVisitedPercentages(accessCode, gameStats);
+
+        this.logStatistics(accessCode, gameStats);
+        return gameStats;
+    }
+
+    getGameStatistics(accessCode: string): GameStatistics | undefined {
+        return this.gameStatistics.get(accessCode);
+    }
+
+    cleanUp(accessCode: string): void {
+        this.gameStatistics.delete(accessCode);
+        this.visitedTiles.forEach((_, key) => {
+            if (key.startsWith(`${accessCode}:`)) {
+                this.visitedTiles.delete(key);
+            }
+        });
+        this.manipulatedDoors.delete(accessCode);
+        this.flagHolders.delete(accessCode);
+        this.turnCounts.delete(accessCode);
+
+        this.logger.log(`Cleaned up statistics for game: ${accessCode}`);
+    }
+
+    private getPlayerKey(accessCode: string, playerName: string): string {
+        return `${accessCode}:${playerName}`;
+    }
+
+    private initializePlayerStats(accessCode: string, players: Player[]): Map<string, PlayerStatistics> {
+        const playerStats = new Map<string, PlayerStatistics>();
+
+        players.forEach((player) => {
+            const playerKey = this.getPlayerKey(accessCode, player.name);
+            const visitedTileSet = new Set<string>();
+            this.visitedTiles.set(playerKey, visitedTileSet);
+            const visitedTileMap = new Map<string, Set<string>>();
+            visitedTileMap.set(playerKey, visitedTileSet);
+            playerStats.set(player.name, {
+                playerName: player.name,
+                combats: 0,
+                escapes: 0,
+                victories: 0,
+                defeats: 0,
+                healthLost: 0,
+                damageCaused: 0,
+                uniqueItemsCollected: new Set<string>(),
+                tilesVisitedPercentage: 0,
+                visitedTileSet: visitedTileMap,
+                hasAbandoned: player.hasAbandoned || false,
+            });
+        });
+        return playerStats;
+    }
+
+    private calculateGameDuration(gameStats: GameStatistics): void {
         const durationInSeconds = Math.floor((gameStats.endTime.getTime() - gameStats.startTime.getTime()) / TIME_DIVIDER);
         gameStats.globalStats.gameDuration = durationInSeconds;
+
         const minutes = Math.floor(durationInSeconds / SECOND_IN_MINUTE)
             .toString()
             .padStart(2, '0');
         const seconds = (durationInSeconds % SECOND_IN_MINUTE).toString().padStart(2, '0');
         gameStats.globalStats.formattedDuration = `${minutes}:${seconds}`;
+    }
+
+    private calculateGlobalTileVisitedPercentage(accessCode: string, gameStats: GameStatistics): void {
         const globalVisitedTiles = this.visitedTiles.get(accessCode)?.size || 0;
-        gameStats.globalStats.tilesVisitedPercentage =
-            gameStats.gridSize > 0 ? Math.round((globalVisitedTiles / gameStats.gridSize) * MULTIPLIER) : 0;
+        gameStats.globalStats.tilesVisitedPercentage = this.calculatePercentage(globalVisitedTiles, gameStats.gridSize);
+    }
+
+    private calculateDoorsManipulatedPercentage(accessCode: string, gameStats: GameStatistics): void {
         const manipulatedDoors = this.manipulatedDoors.get(accessCode)?.size || 0;
-        const numberOfDoors = gameStats.numberOfDoors;
-        gameStats.globalStats.doorsManipulatedPercentage = numberOfDoors > 0 ? Math.round((manipulatedDoors / numberOfDoors) * MULTIPLIER) : 0;
+        gameStats.globalStats.doorsManipulatedPercentage = this.calculatePercentage(manipulatedDoors, gameStats.numberOfDoors);
+    }
+
+    private calculateFlagHolders(accessCode: string, gameStats: GameStatistics): void {
         gameStats.globalStats.uniqueFlagHolders = this.flagHolders.get(accessCode)?.size || 0;
+    }
+
+    private calculatePlayerTileVisitedPercentages(accessCode: string, gameStats: GameStatistics): void {
+        let maxTileVisitedPercentage = 0;
         for (const [playerName, playerStat] of gameStats.playerStats.entries()) {
-            const playerTileKey = `${accessCode}:${playerName}`;
-            const visited = this.visitedTiles.get(playerTileKey)?.size || 0;
-            playerStat.tilesVisitedPercentage = gameStats.gridSize > 0 ? Math.round((visited / gameStats.gridSize) * MULTIPLIER) : 0;
-            gameStats.globalStats.tilesVisitedPercentage = playerStat.tilesVisitedPercentage;
+            const playerKey = this.getPlayerKey(accessCode, playerName);
+            const visitedTiles = this.visitedTiles.get(playerKey)?.size || 0;
+            const percentage = this.calculatePercentage(visitedTiles, gameStats.gridSize);
+            playerStat.tilesVisitedPercentage = percentage;
+            maxTileVisitedPercentage = Math.max(maxTileVisitedPercentage, percentage);
         }
-        return gameStats;
+        gameStats.globalStats.tilesVisitedPercentage = maxTileVisitedPercentage;
     }
 
-    getGameStatistics(accessCode: string): GameStatistics {
-        return this.gameStatistics.get(accessCode);
+    private calculatePercentage(value: number, total: number): number {
+        return total > 0 ? Math.round((value / total) * MULTIPLIER) : 0;
     }
 
-    cleanUp(accessCode: string): void {
-        // TODO
-        return;
-    }
-
+    // to remove after no need to test, only useful for debugging
     private logStatistics(accessCode: string, gameStats: GameStatistics): void {
         this.logger.log('=== Game Statistics ===');
         this.logger.log(`Game Access Code: ${accessCode}`);
@@ -224,7 +285,6 @@ export class GameStatisticsService {
             this.logger.log(`- Has Abandoned: ${playerStat.hasAbandoned}`);
         });
 
-        // Log raw map data for debugging
         this.logger.log('\n=== Raw Map Data ===');
         this.logger.log(`Visited Tiles: ${JSON.stringify([...(this.visitedTiles.get(accessCode) || [])])}`);
         this.logger.log(`Manipulated Doors: ${JSON.stringify([...(this.manipulatedDoors.get(accessCode) || [])])}`);
