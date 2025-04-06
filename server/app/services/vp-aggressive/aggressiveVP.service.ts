@@ -45,12 +45,12 @@ export class AggressiveVPService {
     }
 
     private moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby): void {
-        const currentPosition = this.executeMove(move, virtualPlayerTile, lobby);
-        this.executeAction(lobby.accessCode, currentPosition, move.tile);
+        this.executeMove(move, virtualPlayerTile, lobby);
+        // this.executeAction(lobby.accessCode, currentPosition, move.tile);
     }
 
-    private executeMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Tile {
-        const movement = this.playerMovementService.quickestPath(virtualPlayerTile, move.tile, lobby.game.grid);
+    private executeMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): void {
+        const movement = this.getMovement(move, virtualPlayerTile, lobby.game.grid);
         const payload = {
             virtualPlayerTile,
             closestReachableTile: move.tile,
@@ -58,8 +58,19 @@ export class AggressiveVPService {
             accessCode: lobby.accessCode,
         };
         this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
+    }
 
-        return movement[movement.length]; // bug !!!
+    private getMovement(move: Move, virtualPlayerTile: Tile, grid: Tile[][]): Tile[] {
+        let closestReachableTile: Tile;
+        if (move.type === MoveType.Attack && move.tile.player) {
+            const movePoints = virtualPlayerTile.player.movementPoints;
+            closestReachableTile = this.playerMovementService.findClosestReachableTile(move.tile, virtualPlayerTile, grid, movePoints);
+        } else {
+            closestReachableTile = move.tile;
+        }
+        if (closestReachableTile) {
+            return this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, grid);
+        }
     }
 
     private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move {
@@ -98,21 +109,14 @@ export class AggressiveVPService {
     }
 
     private calculateTotalMovementCost(path: Tile[]): number {
-        return path.reduce((total, tile) => total + this.playerMovementService.getMoveCost(tile), 0) - 1;
+        return path.slice(1).reduce((total, tile) => total + this.playerMovementService.getMoveCost(tile), 0);
     }
 
     private getPathForMove(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): Tile[] | undefined {
         if (move.type === MoveType.Attack && move.tile.player) {
-            const closestPath = this.playerMovementService.findClosestReachableTile(
-                [move.tile],
-                virtualPlayerTile,
-                lobby.game.grid,
-                virtualPlayer.movementPoints,
-            );
-
-            if (closestPath) {
-                const targetTile = closestPath[1];
-                return this.playerMovementService.quickestPath(virtualPlayerTile, targetTile, lobby.game.grid);
+            const adjacentTileToPlayer = this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, lobby.game.grid);
+            if (adjacentTileToPlayer) {
+                return this.playerMovementService.quickestPath(virtualPlayerTile, adjacentTileToPlayer, lobby.game.grid);
             }
         } else {
             return this.playerMovementService.quickestPath(virtualPlayerTile, move.tile, lobby.game.grid);

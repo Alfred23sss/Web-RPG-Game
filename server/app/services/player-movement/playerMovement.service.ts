@@ -115,8 +115,8 @@ export class PlayerMovementService {
     // chek aussi pendant quil cherche le plus petit parcours de prendre en compte les portes et quil peut les ouvrir =>
     // (split move en 2 , premier move ensuite action(item aussi) si available ouvre porte et ensuite 2e move)
 
-    findClosestReachableTile(playerTiles: Tile[], virtualPlayerTile: Tile, grid: Tile[][], movementPoints: number): Tile[] | undefined {
-        const bestMoveTile = this.findBestMoveTile(playerTiles, virtualPlayerTile, grid);
+    findClosestReachableTile(moveTile: Tile, virtualPlayerTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
+        const bestMoveTile = this.findBestMoveTile(moveTile, virtualPlayerTile, grid);
         if (!bestMoveTile) return undefined;
 
         return this.getFarthestReachableTile(virtualPlayerTile, bestMoveTile, grid, movementPoints);
@@ -151,20 +151,18 @@ export class PlayerMovementService {
     }
 
     // only for players since we are checking adjacent tiles.
-    private findBestMoveTile(playerTiles: Tile[], virtualPlayerTile: Tile, grid: Tile[][]): Tile | undefined {
+    findBestMoveTile(moveTile: Tile, virtualPlayerTile: Tile, grid: Tile[][]): Tile | undefined {
         let bestMoveTile: Tile | undefined;
         let minCost = Infinity;
 
-        for (const playerTile of playerTiles) {
-            for (const adjacentTile of this.getNeighbors(playerTile, grid)) {
-                if (this.isValidNeighbor(adjacentTile)) {
-                    const path = this.quickestPath(virtualPlayerTile, adjacentTile, grid);
-                    if (path) {
-                        const cost = path.reduce((total, tile) => total + this.getMoveCost(tile), 0);
-                        if (cost < minCost) {
-                            minCost = cost;
-                            bestMoveTile = adjacentTile;
-                        }
+        for (const adjacentTile of this.getNeighbors(moveTile, grid)) {
+            if (this.isValidNeighbor(adjacentTile)) {
+                const path = this.quickestPath(virtualPlayerTile, adjacentTile, grid);
+                if (path) {
+                    const cost = path.reduce((total, tile) => total + this.getMoveCost(tile), 0);
+                    if (cost < minCost) {
+                        minCost = cost;
+                        bestMoveTile = adjacentTile;
                     }
                 }
             }
@@ -173,14 +171,14 @@ export class PlayerMovementService {
         return bestMoveTile;
     }
 
-    private getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile[] | undefined {
+    private getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const path = this.quickestPath(virtualPlayerTile, targetTile, grid);
         if (!path || path.length === 0) return undefined;
         let movementCost = 0;
         let farthestReachableTile = virtualPlayerTile;
-        movementCost += this.getMoveCost(virtualPlayerTile);
 
-        for (const tile of path) {
+        for (let i = 1; i < path.length; i++) {
+            const tile = path[i];
             const tileCost = this.getMoveCost(tile);
             if (movementCost + tileCost > movementPoints) {
                 break;
@@ -188,7 +186,7 @@ export class PlayerMovementService {
             movementCost += tileCost;
             farthestReachableTile = tile;
         }
-        return [farthestReachableTile, targetTile];
+        return farthestReachableTile;
     }
 
     private getNeighborAndCost(neighbor: Tile, points: number): { tile: Tile; cost: number } {
