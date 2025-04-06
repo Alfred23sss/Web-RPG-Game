@@ -17,7 +17,6 @@ export class VirtualPlayerCreationService {
         vPlayer.avatar = this.findValidAvatar(lobby);
 
         this.updateVirtualPlayerStats(vPlayer);
-
         this.addVPlayerToLobby(lobby, vPlayer);
     }
 
@@ -37,6 +36,7 @@ export class VirtualPlayerCreationService {
         }
     }
 
+    // type de retour trop long faudrait mettre en interface ou qqch
     private randomizeSpeedAndVitality(): { speed: number; vitality: number; hp: { current: number; max: number } } {
         const values = [BASE_STAT, BONUS_STAT];
         const speedIndex = Math.floor(Math.random() * 2);
@@ -45,6 +45,7 @@ export class VirtualPlayerCreationService {
         return { speed: values[speedIndex], vitality, hp: { current: vitality, max: vitality } };
     }
 
+    // type de retour trop long faudrait mettre en interface ou qqch
     private randomizeAttackAndDefense(): { attack: { value: number; bonusDice: DiceType }; defense: { value: number; bonusDice: DiceType } } {
         const dicePairs: [DiceType, DiceType][] = [
             [DiceType.D4, DiceType.D6],
@@ -67,6 +68,7 @@ export class VirtualPlayerCreationService {
         const { speed, vitality, hp } = this.randomizeSpeedAndVitality();
         const { attack, defense } = this.randomizeAttackAndDefense();
         vPlayer.speed = speed;
+        vPlayer.movementPoints = speed;
         vPlayer.vitality = vitality;
         vPlayer.hp = hp;
         vPlayer.attack = attack;

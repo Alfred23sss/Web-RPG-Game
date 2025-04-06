@@ -24,6 +24,7 @@ import { LobbyService } from './services/lobby/lobby.service';
 import { PlayerMovementService } from './services/player-movement/playerMovement.service';
 import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtualPlayerCreation.service';
 import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
+import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/virtualPlayerActions.service';
 import { AggressiveVPService } from './services/vp-aggressive/aggressiveVP.service';
 import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service';
 @Module({
@@ -44,6 +45,7 @@ import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service'
     ],
     controllers: [GameController, AccessCodesController],
     providers: [
+        VirtualPlayerActionsService,
         PlayerMovementService,
         VirtualPlayerGateway,
         VirtualPlayerService,
