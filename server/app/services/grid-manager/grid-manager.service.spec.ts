@@ -1,6 +1,7 @@
+/* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */ // needed to access actual function
 /* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
-import { ItemName } from '@app/enums/enums';
+import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
@@ -353,6 +354,307 @@ describe('GridManagerService', () => {
 
             expect(result[0][0].item).toBeNull();
             expect(result[0][1].item?.name).not.toBe(ItemName.QuestionMark);
+        });
+    });
+    describe('updateWallTile', () => {
+        const mockAccessCode = 'test-access-code';
+        let spyOnFindAndCheckAdjacentTiles: jest.SpyInstance;
+        let mockEventEmitter: EventEmitter2;
+
+        beforeEach(() => {
+            spyOnFindAndCheckAdjacentTiles = jest.spyOn(service, 'findAndCheckAdjacentTiles');
+            mockEventEmitter = (service as any).eventEmitter;
+            jest.spyOn(mockEventEmitter, 'emit');
+        });
+
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should update a wall tile to default and reduce player action points when valid', () => {
+            const previousTile = mockGrid[0][0];
+            const newTile = mockGrid[1][1];
+            newTile.type = TileType.Wall;
+            newTile.imageSrc = ImageType.Wall;
+            mockPlayer.actionPoints = 3;
+
+            spyOnFindAndCheckAdjacentTiles.mockReturnValue(true);
+
+            const [updatedGrid, updatedPlayer] = service.updateWallTile(mockGrid, mockAccessCode, previousTile, newTile, mockPlayer);
+
+            expect(spyOnFindAndCheckAdjacentTiles).toHaveBeenCalledWith(previousTile.id, newTile.id, mockGrid);
+            expect(updatedGrid[1][1].type).toBe(TileType.Default);
+            expect(updatedGrid[1][1].imageSrc).toBe(ImageType.Default);
+            expect(updatedPlayer.actionPoints).toBe(2);
+            expect(mockEventEmitter.emit).toHaveBeenCalledTimes(2);
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(EventEmit.PlayerUpdate, {
+                accessCode: mockAccessCode,
+                player: updatedPlayer,
+            });
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(EventEmit.GameWallUpdate, {
+                accessCode: mockAccessCode,
+                grid: updatedGrid,
+            });
+        });
+
+        it('should not update tile if tiles are not adjacent', () => {
+            const previousTile = mockGrid[0][0];
+            const newTile = mockGrid[1][1];
+            mockPlayer.actionPoints = 3;
+
+            spyOnFindAndCheckAdjacentTiles.mockReturnValue(false);
+
+            const [updatedGrid, updatedPlayer] = service.updateWallTile(mockGrid, mockAccessCode, previousTile, newTile, mockPlayer);
+
+            expect(spyOnFindAndCheckAdjacentTiles).toHaveBeenCalledWith(previousTile.id, newTile.id, mockGrid);
+            expect(updatedGrid).toBe(mockGrid);
+            expect(updatedPlayer).toBe(mockPlayer);
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should not update if target tile not found', () => {
+            const previousTile = mockGrid[0][0];
+            const newTile = { id: 'non-existent-tile' } as Tile;
+            mockPlayer.actionPoints = 3;
+
+            spyOnFindAndCheckAdjacentTiles.mockReturnValue(true);
+
+            const [updatedGrid, updatedPlayer] = service.updateWallTile(mockGrid, mockAccessCode, previousTile, newTile, mockPlayer);
+
+            expect(updatedGrid).toBe(mockGrid);
+            expect(updatedPlayer).toBe(mockPlayer);
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+    });
+    describe('isFlagOnSpawnPoint', () => {
+        let findTileByPlayerSpy: jest.SpyInstance;
+        let findTileBySpawnPointSpy: jest.SpyInstance;
+        const flagItem = { name: ItemName.Flag } as Item;
+        const emptyItem = { name: undefined } as Item;
+
+        beforeEach(() => {
+            findTileByPlayerSpy = jest.spyOn(service, 'findTileByPlayer');
+            findTileBySpawnPointSpy = jest.spyOn(service, 'findTileBySpawnPoint');
+        });
+
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should return true when player with flag is on spawn point', () => {
+            const playerTile = { id: 'tile-0-0' } as Tile;
+            const playerWithFlag = {
+                ...mockPlayer,
+                inventory: [flagItem, emptyItem] as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(playerTile);
+
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithFlag);
+
+            expect(findTileByPlayerSpy).toHaveBeenCalledWith(mockGrid, playerWithFlag);
+            expect(findTileBySpawnPointSpy).toHaveBeenCalledWith(mockGrid, playerWithFlag);
+            expect(result).toBe(true);
+        });
+
+        it('should return false when player without flag is on spawn point', () => {
+            const playerTile = { id: 'tile-0-0' } as Tile;
+            const keyItem = { name: ItemName.Default } as Item;
+            const playerWithoutFlag = {
+                ...mockPlayer,
+                inventory: [keyItem, emptyItem] as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(playerTile);
+
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithoutFlag);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when player with flag is not on spawn point', () => {
+            const playerTile = { id: 'tile-0-1' } as Tile;
+            const spawnPointTile = { id: 'tile-0-0' } as Tile;
+            const playerWithFlag = {
+                ...mockPlayer,
+                inventory: [flagItem, emptyItem] as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(spawnPointTile);
+
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithFlag);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when player tile is not found', () => {
+            const spawnPointTile = { id: 'tile-0-0' } as Tile;
+            const playerWithFlag = {
+                ...mockPlayer,
+                inventory: [flagItem, emptyItem] as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(null);
+            findTileBySpawnPointSpy.mockReturnValue(spawnPointTile);
+
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithFlag);
+
+            expect(result).toBe(false);
+        });
+
+        it('should return false when spawn point tile is not found', () => {
+            const playerTile = { id: 'tile-0-0' } as Tile;
+            const playerWithFlag = {
+                ...mockPlayer,
+                inventory: [flagItem, emptyItem] as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(null);
+
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithFlag);
+            expect(result).toBe(false);
+        });
+
+        it('should return false when player has no flag in inventory', () => {
+            const playerTile = { id: 'tile-0-0' } as Tile;
+            const playerWithNoFlag = {
+                ...mockPlayer,
+                inventory: [emptyItem, emptyItem] as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(playerTile);
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithNoFlag);
+            expect(result).toBe(false);
+        });
+
+        it('should return false when player has undefined inventory', () => {
+            const playerTile = { id: 'tile-0-0' } as Tile;
+            const playerWithUndefinedInventory = {
+                ...mockPlayer,
+                inventory: undefined as unknown as [Item, Item],
+            };
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(playerTile);
+            const result = service.isFlagOnSpawnPoint(mockGrid, playerWithUndefinedInventory);
+            expect(result).toBe(false);
+        });
+        it('should handle different item conditions in inventory when checking for flag', () => {
+            const playerTile = { id: 'tile-0-0' } as Tile;
+
+            findTileByPlayerSpy.mockReturnValue(playerTile);
+            findTileBySpawnPointSpy.mockReturnValue(playerTile);
+
+            const playerWithNullItem = {
+                ...mockPlayer,
+                inventory: [null as unknown as Item, emptyItem] as [Item, Item],
+            };
+            const resultWithNullItem = service.isFlagOnSpawnPoint(mockGrid, playerWithNullItem);
+            expect(resultWithNullItem).toBe(false);
+
+            const playerWithUndefinedItem = {
+                ...mockPlayer,
+                inventory: [undefined as unknown as Item, emptyItem] as [Item, Item],
+            };
+            const resultWithUndefinedItem = service.isFlagOnSpawnPoint(mockGrid, playerWithUndefinedItem);
+            expect(resultWithUndefinedItem).toBe(false);
+
+            const noNameItem = {} as Item;
+            const playerWithNoNameItem = {
+                ...mockPlayer,
+                inventory: [noNameItem, emptyItem] as [Item, Item],
+            };
+            const resultWithNoNameItem = service.isFlagOnSpawnPoint(mockGrid, playerWithNoNameItem);
+            expect(resultWithNoNameItem).toBe(false);
+
+            const differentNameItem = { name: ItemName.Swap } as Item;
+            const playerWithDifferentNameItem = {
+                ...mockPlayer,
+                inventory: [differentNameItem, emptyItem] as [Item, Item],
+            };
+            const resultWithDifferentNameItem = service.isFlagOnSpawnPoint(mockGrid, playerWithDifferentNameItem);
+            expect(resultWithDifferentNameItem).toBe(false);
+            const playerWithFlagItem = {
+                ...mockPlayer,
+                inventory: [flagItem, emptyItem] as [Item, Item],
+            };
+            const resultWithFlagItem = service.isFlagOnSpawnPoint(mockGrid, playerWithFlagItem);
+            expect(resultWithFlagItem).toBe(true);
+        });
+    });
+    describe('updateDoorTile', () => {
+        const mockAccessCode = 'test-access-code';
+        let mockEventEmitter: EventEmitter2;
+
+        beforeEach(() => {
+            mockEventEmitter = (service as any).eventEmitter;
+            jest.spyOn(mockEventEmitter, 'emit');
+            jest.spyOn(service, 'findAndCheckAdjacentTiles');
+        });
+
+        afterEach(() => {
+            jest.clearAllMocks();
+        });
+
+        it('should return original grid when target tile is not found', () => {
+            const previousTile = mockGrid[0][0];
+            const nonExistentTile = { id: 'non-existent-tile-id' } as Tile;
+            (service.findAndCheckAdjacentTiles as jest.Mock).mockReturnValue(true);
+
+            const result = service.updateDoorTile(mockGrid, mockAccessCode, previousTile, nonExistentTile);
+            expect(service.findAndCheckAdjacentTiles).toHaveBeenCalledWith(previousTile.id, nonExistentTile.id, mockGrid);
+
+            expect(result).toBe(mockGrid);
+            expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+    });
+    describe('findTileBySpawnPoint', () => {
+        it('should handle undefined spawnPoint property', () => {
+            const playerWithoutSpawnPoint = {
+                ...mockPlayer,
+                spawnPoint: undefined,
+            };
+
+            const result = service.findTileBySpawnPoint(mockGrid, playerWithoutSpawnPoint);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should handle null spawnPoint property', () => {
+            const playerWithNullSpawnPoint = {
+                ...mockPlayer,
+                spawnPoint: null as any,
+            };
+
+            const result = service.findTileBySpawnPoint(mockGrid, playerWithNullSpawnPoint);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should handle spawnPoint with undefined tileId', () => {
+            const playerWithUndefinedTileId = {
+                ...mockPlayer,
+                spawnPoint: { x: 0, y: 0, tileId: undefined as any },
+            };
+
+            const result = service.findTileBySpawnPoint(mockGrid, playerWithUndefinedTileId);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should handle spawnPoint with non-existent tileId', () => {
+            const playerWithNonExistentTileId = {
+                ...mockPlayer,
+                spawnPoint: { x: 0, y: 0, tileId: 'non-existent-tile-id' },
+            };
+
+            const result = service.findTileBySpawnPoint(mockGrid, playerWithNonExistentTileId);
+            expect(result).toBeUndefined();
         });
     });
 });
