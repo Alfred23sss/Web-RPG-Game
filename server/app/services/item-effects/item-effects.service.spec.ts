@@ -16,6 +16,7 @@ const PENALTY_VALUE = -1;
 describe('ItemEffectsService', () => {
     let service: ItemEffectsService;
     let eventEmitter: EventEmitter2;
+    let gridManager: GridManagerService;
 
     const MOCK_PLAYER: Player = {
         name: '',
@@ -88,6 +89,7 @@ describe('ItemEffectsService', () => {
 
         service = module.get<ItemEffectsService>(ItemEffectsService);
         eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+        gridManager = module.get<GridManagerService>(GridManagerService);
     });
 
     afterEach(() => {
