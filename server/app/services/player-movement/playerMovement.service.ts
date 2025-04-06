@@ -14,6 +14,7 @@ export class PlayerMovementService {
     ]);
 
     // not needed ??? also remove all unused functions here !!!!!
+    // update the farthest reachable/ besdt tile all of them to the new score system, no more list of best moves to input only singular move.
     availablePath(startTile: Tile | undefined, maxMovement: number, grid: Tile[][]): Tile[] {
         if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return [];
 
@@ -177,9 +178,9 @@ export class PlayerMovementService {
         if (!path || path.length === 0) return undefined;
         let movementCost = 0;
         let farthestReachableTile = virtualPlayerTile;
+        movementCost += this.getMoveCost(virtualPlayerTile);
 
-        for (let i = 1; i < path.length; i++) {
-            const tile = path[i];
+        for (const tile of path) {
             const tileCost = this.getMoveCost(tile);
             if (movementCost + tileCost > movementPoints) {
                 break;

@@ -184,6 +184,11 @@ export enum ItemDescription {
     Default = 'rien',
 }
 
+export enum MoveType {
+    Attack = 'attack',
+    Item = 'item',
+}
+
 export enum EventEmit {
     GameCombatTimer = 'game.combat.timer',
     GameCombatTurnStarted = 'game.combat.turn.started',

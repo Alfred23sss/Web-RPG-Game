@@ -1,10 +1,8 @@
-import { Behavior, EventEmit, ItemName } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
+import { Behavior, EventEmit, ItemName, MoveType } from '@app/enums/enums';
+import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
-import { VPMoveType } from '@app/interfaces/VPMoveTypes';
-import { TileType } from '@app/model/database/tile';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
 import { AggressiveVPService } from '@app/services/vp-aggressive/aggressiveVP.service';
@@ -28,6 +26,7 @@ export class VirtualPlayerService implements OnModuleInit {
         this.eventEmitter.on(EventEmit.GameTurnStarted, ({ accessCode, player }) => {
             if (player.isVirtual) {
                 this.virtualPlayer = player;
+                console.log(this.virtualPlayer.movementPoints);
                 this.executeVirtualPlayerTurn(accessCode);
             }
         });
@@ -35,70 +34,58 @@ export class VirtualPlayerService implements OnModuleInit {
 
     private async executeVirtualPlayerTurn(accessCode: string): Promise<void> {
         const lobby = this.lobbyService.getLobby(accessCode);
-
-        // while (this.hasRemainingActions()) {
-        const possibleMoves = this.findAllMoves(lobby.game.grid);
-        const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
-        if (this.virtualPlayer.behavior === Behavior.Aggressive) {
-            await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, possibleMoves, movesInRange);
-        } else if (this.virtualPlayer.behavior === Behavior.Defensive) {
-            // add defense behavior function(s)
+        const moves = this.findAllMoves(lobby.game.grid);
+        // const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
+        switch (this.virtualPlayer.behavior) {
+            case Behavior.Aggressive:
+                await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
+                break;
+            case Behavior.Defensive:
+                // await this.defensiveVPService.execute(this.virtualPlayer, lobby, possibleMoves, movesInRange);
+                break;
         }
-        // }
 
-        this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
+        // this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
     }
 
-    private findAllMoves(grid: Tile[][]): VPMoveType {
-        const playerTiles = this.findPlayers(grid);
-        const itemTiles = this.findItems(grid);
-        const doors = this.findDoors(grid);
+    private findAllMoves(grid: Tile[][]): Move[] {
+        const playerMoves = this.findPlayers(grid);
+        const itemMoves = this.findItems(grid);
 
-        return {
-            playerTiles,
-            itemTiles,
-            doors,
-        };
+        return [...playerMoves, ...itemMoves];
     }
 
-    private getMovesInRange(allMoves: VPMoveType, virtualPlayer: Player, grid: Tile[][]): VPMoveType {
-        if (!virtualPlayer || !grid) return { playerTiles: [], itemTiles: [], doors: [] };
-
-        const virtualPlayerTile = this.findTileByPlayer(grid, virtualPlayer);
-        if (!virtualPlayerTile) return { playerTiles: [], itemTiles: [], doors: [] };
-
-        return {
-            playerTiles: this.filterTilesByMovementRange(allMoves.playerTiles, virtualPlayerTile, grid, virtualPlayer.movementPoints),
-            itemTiles: this.filterTilesByMovementRange(allMoves.itemTiles, virtualPlayerTile, grid, virtualPlayer.movementPoints),
-            doors: this.filterTilesByMovementRange(allMoves.doors, virtualPlayerTile, grid, virtualPlayer.movementPoints),
-        };
+    private isMoveInRange(targetTile: Tile, startTile: Tile, grid: Tile[][], maxMovement: number): boolean {
+        const reachableTiles = this.playerMovementService.availablePath(startTile, maxMovement, grid);
+        if (targetTile.player) {
+            const adjacentTiles = this.playerMovementService.getNeighbors(targetTile, grid);
+            return adjacentTiles.some((adjTile) => reachableTiles.includes(adjTile) && adjTile.player === undefined);
+        }
+        return reachableTiles.includes(targetTile);
     }
 
-    private filterTilesByMovementRange(tiles: Tile[], startTile: Tile, grid: Tile[][], maxMovement: number): Tile[] {
-        return tiles.filter((targetTile) => {
-            const reachableTiles = this.playerMovementService.availablePath(startTile, maxMovement, grid);
-            if (targetTile.player !== undefined) {
-                const adjacentTiles = this.playerMovementService.getNeighbors(targetTile, grid);
-                return adjacentTiles.some((adjacentTile) => reachableTiles.includes(adjacentTile) && adjacentTile.player === undefined);
-            }
-            if (reachableTiles.includes(targetTile)) return true;
-            const path = this.playerMovementService.quickestPath(startTile, targetTile, grid);
-            if (!path) return false;
-            const totalCost = path.reduce((sum, tile) => sum + this.playerMovementService.getMoveCost(tile), 0);
-            return totalCost <= maxMovement;
-        });
+    private findPlayers(grid: Tile[][]): Move[] {
+        return grid.flatMap((row) =>
+            row
+                .filter((tile) => tile.player && tile.player.name !== this.virtualPlayer.name)
+                .map((tile) => ({
+                    tile,
+                    type: MoveType.Attack,
+                    inRange: false,
+                })),
+        );
     }
 
-    private findPlayers(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.player && tile.player.name !== this.virtualPlayer.name));
-    }
-
-    private findItems(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.item && tile.item.name !== ItemName.Home));
-    }
-
-    private findDoors(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.type === TileType.Door));
+    private findItems(grid: Tile[][]): Move[] {
+        return grid.flatMap((row) =>
+            row
+                .filter((tile) => tile.item && tile.item.name !== ItemName.Home)
+                .map((tile) => ({
+                    tile,
+                    type: MoveType.Item,
+                    inRange: false,
+                })),
+        );
     }
 
     private hasRemainingActions(): boolean {
@@ -108,4 +95,31 @@ export class VirtualPlayerService implements OnModuleInit {
     private findTileByPlayer(grid: Tile[][], player: Player): Tile | undefined {
         return grid.flat().find((tile) => tile.player?.name === player.name);
     }
+
+    // private getMovesInRange(allMoves: Move[], virtualPlayer: Player, grid: Tile[][]): Move[] {
+    //     if (!virtualPlayer || !grid) return [];
+
+    //     const virtualPlayerTile = this.findTileByPlayer(grid, virtualPlayer);
+    //     if (!virtualPlayerTile) return [];
+
+    //     return allMoves.map((move) => ({
+    //         ...move,
+    //         inRange: this.isMoveInRange(move.tile, virtualPlayerTile, grid, virtualPlayer.movementPoints),
+    //     }));
+    // }
+
+    // private filterTilesByMovementRange(tiles: Tile[], startTile: Tile, grid: Tile[][], maxMovement: number): Tile[] {
+    //     return tiles.filter((targetTile) => {
+    //         const reachableTiles = this.playerMovementService.availablePath(startTile, maxMovement, grid);
+    //         if (targetTile.player !== undefined) {
+    //             const adjacentTiles = this.playerMovementService.getNeighbors(targetTile, grid);
+    //             return adjacentTiles.some((adjacentTile) => reachableTiles.includes(adjacentTile) && adjacentTile.player === undefined);
+    //         }
+    //         if (reachableTiles.includes(targetTile)) return true;
+    //         const path = this.playerMovementService.quickestPath(startTile, targetTile, grid);
+    //         if (!path) return false;
+    //         const totalCost = path.reduce((sum, tile) => sum + this.playerMovementService.getMoveCost(tile), 0);
+    //         return totalCost <= maxMovement;
+    //     });
+    // }
 }
