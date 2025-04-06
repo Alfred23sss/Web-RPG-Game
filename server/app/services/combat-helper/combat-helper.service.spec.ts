@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // approved by education team, disabling magic numbers and any in test are allowed
 /* eslint-disable @typescript-eslint/no-explicit-any */ // To test private methods
-import { TileType } from '@app/enums/enums';
+import { ItemName, TileType } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatHelperService } from './combat-helper.service';
+import { DiceType } from '@app/interfaces/Dice';
 
 describe('CombatHelperService', () => {
     let service: CombatHelperService;
@@ -149,5 +150,79 @@ describe('CombatHelperService', () => {
             defender: { name: 'Defender' } as Player,
         };
         expect(service.getDefender(combatState as unknown as CombatState)).toBe(combatState.attacker);
+    });
+    describe('hasStopItem', () => {
+        it('should return false when player inventory is undefined', () => {
+            const player: Player = {} as Player;
+
+            const result = service['hasStopItem'](player);
+            expect(result).toBe(false);
+        });
+
+        it('should handle null item in inventory array', () => {
+            const player: Player = {
+                inventory: [null, { name: ItemName.Stop }, null],
+            } as unknown as Player;
+            const result = service['hasStopItem'](player);
+
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('getRandomAttackScore', () => {
+        it('should use D6 dice when player has Stop item', () => {
+            const attacker: Player = {
+                attack: {
+                    value: 10,
+                    bonusDice: DiceType.D4,
+                },
+                inventory: [{ name: ItemName.Stop }],
+            } as unknown as Player;
+
+            const grid: Tile[][] = [[]];
+            const isDebugMode = true;
+
+            jest.spyOn(service as any, 'extractDiceValue')
+                .mockReturnValueOnce(6)
+                .mockReturnValueOnce(4);
+
+            jest.spyOn(service as any, 'hasStopItem').mockReturnValue(true);
+            jest.spyOn(gridManagerService, 'findTileByPlayer').mockReturnValue(null);
+            const result = service.getRandomAttackScore(attacker, isDebugMode, grid);
+
+            expect(result).toBe(16);
+            expect(service['extractDiceValue']).toHaveBeenCalledWith(DiceType.D6);
+            expect(service['extractDiceValue']).not.toHaveBeenCalledWith(DiceType.D4);
+            expect(service['hasStopItem']).toHaveBeenCalledWith(attacker);
+        });
+    });
+    describe('getRandomDefenseScore', () => {
+        it('should use D6 dice when player has Stop item', () => {
+            // Arrange
+            const defender: Player = {
+                defense: {
+                    value: 8,
+                    bonusDice: DiceType.D4,
+                },
+                inventory: [{ name: ItemName.Stop }],
+            } as unknown as Player;
+
+            const grid: Tile[][] = [[]];
+            const isDebugMode = true;
+
+            jest.spyOn(service as any, 'extractDiceValue')
+                .mockReturnValueOnce(6)
+                .mockReturnValueOnce(4);
+
+            jest.spyOn(service as any, 'hasStopItem').mockReturnValue(true);
+            jest.spyOn(gridManagerService, 'findTileByPlayer').mockReturnValue(null);
+
+            const result = service.getRandomDefenseScore(defender, isDebugMode, grid);
+
+            expect(result).toBe(14);
+            expect(service['extractDiceValue']).toHaveBeenCalledWith(DiceType.D6);
+            expect(service['extractDiceValue']).not.toHaveBeenCalledWith(DiceType.D4);
+            expect(service['hasStopItem']).toHaveBeenCalledWith(defender);
+        });
     });
 });

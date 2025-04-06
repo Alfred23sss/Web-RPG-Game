@@ -2,6 +2,7 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { DiceType, ErrorMessages, Routes } from '@app/enums/global.enums';
+import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -189,6 +190,17 @@ describe('WaitingViewComponent', () => {
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.NotEnoughPlayers);
         });
 
+        it('should show error if CTF and player count not even', () => {
+            component.lobby = {
+                ...mockLobby,
+                isLocked: true,
+                players: new Array(MIN_PLAYERS + 1).fill(MOCK_PLAYER),
+                game: { mode: 'CTF' } as Game,
+            };
+            component.navigateToGame();
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.NotEnoughPlayers);
+        });
+
         it('should emit createGame event and navigate if conditions met', fakeAsync(() => {
             component.lobby = {
                 ...mockLobby,
@@ -200,7 +212,7 @@ describe('WaitingViewComponent', () => {
             component.navigateToGame();
             tick();
 
-            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234' });
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234', gameMode: undefined });
             expect(mockLobbyService.setIsGameStarting).toHaveBeenCalledWith(true);
             expect(sessionStorage.getItem('lobby')).toBe(JSON.stringify(component.lobby));
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.Game]);

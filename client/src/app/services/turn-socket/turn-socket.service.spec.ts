@@ -39,7 +39,7 @@ describe('TurnSocketService', () => {
             },
         });
 
-        const gameplaySpy = jasmine.createSpyObj('GameplayService', ['updateAvailablePath']);
+        const gameplaySpy = jasmine.createSpyObj('GameplayService', ['updateAvailablePath', 'closePopUp']);
         const snackbarSpy = jasmine.createSpyObj('SnackbarService', ['showMessage', 'showMultipleMessages']);
         const socketSpy = jasmine.createSpyObj('SocketClientService', ['on']);
 
