@@ -83,7 +83,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     abandonGame(): void {
-        this.gameplayService.abandonGame(this.gameData, this.gameData.isGameEnding);
+        this.gameplayService.abandonGame(this.gameData);
     }
 
     ngOnDestroy(): void {

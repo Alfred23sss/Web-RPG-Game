@@ -49,12 +49,11 @@ export class GameplayService {
         this.socketClientService.emit('endTurn', { accessCode: gameData.lobby.accessCode });
     }
 
-    abandonGame(gameData: GameData, isGameEnding: boolean): void {
+    abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
         this.socketClientService.emit('abandonedGame', {
             player: gameData.clientPlayer,
             accessCode: gameData.lobby.accessCode,
-            isGameEnding,
         });
         this.backToHome();
     }

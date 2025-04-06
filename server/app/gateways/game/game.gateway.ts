@@ -45,8 +45,7 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.AbandonedGame)
-    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string; isGameEnding: boolean }) {
-        if (payload.isGameEnding) return;
+    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
         this.logger.log(`Player ${payload.player.name} has abandoned game`);
         this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
@@ -306,23 +305,13 @@ export class GameGateway {
         this.logger.log('emitting game ended to client');
         const stats = this.statisticsService.calculateStats(payload.accessCode);
         this.statisticsService.cleanUp(payload.accessCode);
+        this.gameSessionService.deleteGameSession(payload.accessCode);
+        this.accessCodesService.removeAccessCode(payload.accessCode);
         const statsObject = {
             ...stats,
             playerStats: Object.fromEntries(stats.playerStats),
         };
-        this.gameSessionService.deleteGameSession(payload.accessCode);
         this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats: statsObject });
-        this.logger.log(stats.playerStats); // logs map
-        this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
-        const lobbyPlayers = this.lobbyService.getLobbyPlayers(payload.accessCode);
-        this.lobbyService.clearLobby(payload.accessCode);
-        for (const player of lobbyPlayers) {
-            const playerSocketId = this.lobbyService.getPlayerSocket(player.name);
-            const playerClient = this.server.sockets.sockets.get(playerSocketId);
-            if (playerClient) {
-                playerClient.leave(payload.accessCode);
-            }
-        }
     }
 
     @OnEvent(EventEmit.GameCombatTimer)

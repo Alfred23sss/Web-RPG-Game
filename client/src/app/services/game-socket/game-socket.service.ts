@@ -43,7 +43,7 @@ export class GameSocketService {
 
     private handlePageRefresh(): void {
         if (sessionStorage.getItem('refreshed') === 'true') {
-            this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue, this.gameStateService.gameDataSubjectValue.isGameEnding);
+            this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
         } else {
             sessionStorage.setItem('refreshed', 'true');
         }
@@ -95,15 +95,14 @@ export class GameSocketService {
         this.socketClientService.on('gameEnded', (data: { winner: string[]; stats: GameStatistics }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players;
             if (data.winner.length <= 1) {
-                this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+                this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`);
             } else {
                 const winnerNames = data.winner.join(', ');
-                this.clientNotifier.displayMessage(`👑 ${winnerNames} ont remporté la partie ! Redirection vers l'accueil sous peu`);
+                this.clientNotifier.displayMessage(`👑 ${winnerNames} ont remporté la partie ! Redirection vers la page de fin sous peu`);
             }
 
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
-            this.gameStateService.gameDataSubjectValue.isGameEnding = true;
-            this.gameStateService.gameDataSubjectValue.gameStats = data.stats; // data.stats.plaersStats is empty
+            this.gameStateService.gameDataSubjectValue.gameStats = data.stats;
             setTimeout(() => {
                 this.gameplayService.navigateToFinalPage();
             }, DELAY_BEFORE_ENDING_GAME);
