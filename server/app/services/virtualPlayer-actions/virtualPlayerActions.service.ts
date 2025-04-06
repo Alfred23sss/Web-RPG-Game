@@ -3,7 +3,6 @@ import { MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
-import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
@@ -39,7 +38,8 @@ export class VirtualPlayerActionsService {
         this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
         return movement;
     }
-    getPathForMove(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): Tile[] | undefined {
+
+    getPathForMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Tile[] | undefined {
         if (move.type === MoveType.Attack && move.tile.player) {
             const adjacentTileToPlayer = this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, lobby.game.grid);
             if (adjacentTileToPlayer) {
@@ -67,9 +67,9 @@ export class VirtualPlayerActionsService {
         }
     }
 
-    private async executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
+    private executeAction(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): void {
         if (actionTile) {
-            await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
+            new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
             this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
         }
     }

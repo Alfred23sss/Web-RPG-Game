@@ -20,7 +20,7 @@ export class AggressiveVPService {
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
 
-    async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
+    executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): void {
         const nextMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         this.executeNextMove(nextMove, virtualPlayerTile, lobby);
@@ -29,10 +29,12 @@ export class AggressiveVPService {
     executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): void {
         switch (move.type) {
             case MoveType.Attack:
+                console.log('att');
                 this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
                 break;
 
             case MoveType.Item:
+                console.log('item');
                 this.virtualPlayerActions.executeMove(move, virtualPlayerTile, lobby);
                 break;
         }
@@ -57,7 +59,7 @@ export class AggressiveVPService {
 
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
-        const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, virtualPlayer, lobby);
+        const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
             console.log(move.tile.id, movementCost);

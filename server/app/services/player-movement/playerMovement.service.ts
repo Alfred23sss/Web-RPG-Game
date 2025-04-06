@@ -14,7 +14,6 @@ export class PlayerMovementService {
     ]);
 
     // not needed ??? also remove all unused functions here !!!!!
-    // update the farthest reachable/ besdt tile all of them to the new score system, no more list of best moves to input only singular move.
     availablePath(startTile: Tile | undefined, maxMovement: number, grid: Tile[][]): Tile[] {
         if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return [];
 
