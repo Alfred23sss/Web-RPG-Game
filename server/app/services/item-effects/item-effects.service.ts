@@ -20,35 +20,24 @@ export class ItemEffectsService {
     ) {}
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
-        Logger.log(`Add effects: ${item.name}`);
         if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
             this.applyItemModifiers(item);
         }
-        if (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) {
-            Logger.log('Health conditions failed');
-        }
-        if (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item)) {
-            Logger.log('Ice conditions failed');
-        }
-
         if (
             item.isActive ||
             (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
             (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item))
         ) {
-            Logger.log('Add conditions failed');
             return;
         }
         if (item.modifiers) {
             item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER));
         }
         item.isActive = true;
-        Logger.log('isActive = true');
     }
 
     removeEffects(player: Player, index: number): void {
         const item = player.inventory[index];
-        Logger.log(`Lost effects : ${item.name}`);
 
         if (!item || !item.isActive) {
             Logger.log('Remove conditions failed');
@@ -60,7 +49,6 @@ export class ItemEffectsService {
         }
 
         item.isActive = false;
-        Logger.log('isActive = false');
     }
 
     applyItemModifiers(item: Item) {
@@ -87,6 +75,7 @@ export class ItemEffectsService {
             item.isActive = false;
         }
     }
+    S;
 
     isHealthConditionValid(player: Player, item: Item): boolean {
         return item.name !== ItemName.Fire || player.hp.current <= player.hp.max * HEALTH_CONDITION_THRESHOLD;
@@ -203,8 +192,6 @@ export class ItemEffectsService {
     }
 
     private applyModifier(player: Player, modifier: ItemModifier, multiplier: number) {
-        Logger.log('Applying Modifiers');
-        Logger.log(`Multiplier: ${multiplier}`);
         const adjustedValue = modifier.value * multiplier;
         switch (modifier.attribute) {
             case AttributeType.Attack:
@@ -219,10 +206,8 @@ export class ItemEffectsService {
             case AttributeType.Hp:
                 player.hp.current += adjustedValue;
                 player.hp.max += adjustedValue;
-                Logger.log(`Adjusted HP to: ${player.hp.max}`);
                 break;
             default:
-                Logger.log(`Unknown attribute type: ${modifier.attribute}`);
                 break;
         }
     }

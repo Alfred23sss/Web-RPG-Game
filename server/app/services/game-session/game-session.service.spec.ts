@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
-import { ImageType, TileType } from '@app/enums/enums';
+import { GameMode, ImageType, TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
 import { GameSession } from '@app/interfaces/GameSession';
@@ -525,6 +525,215 @@ describe('GameSessionService', () => {
 
                 const sessionPlayer = gameSessionService.getGameSession(ACCESS_CODE)?.turn.orderedPlayers.find((p) => p.name === PLAYER_1_NAME);
                 expect(sessionPlayer?.spawnPoint).toEqual(updatedPlayer.spawnPoint);
+            });
+        });
+
+        describe('addItemToPlayer', () => {
+            beforeEach(() => {
+                itemService = {
+                    addItemToPlayer: jest.fn(),
+                } as unknown as ItemEffectsService;
+
+                gameSessionService = new GameSessionService(eventEmitter, lobbyService, gridManagerService, turnService, itemService);
+            });
+
+            it('should update player inventory when adding an item without special effects', () => {
+                const item = {
+                    id: 'test-item-1',
+                    name: 'Test Item',
+                    description: 'An item for testing',
+                    imageSrc: 'test-item.png',
+                    imageSrcGrey: 'test-item-grey.png',
+                    itemCounter: 0,
+                };
+
+                const updatedInventory: [typeof item, typeof item | null] = [item, null];
+
+                const updatedPlayer = {
+                    ...testPlayer,
+                    inventory: updatedInventory,
+                };
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+
+                (itemService.addItemToPlayer as jest.Mock).mockReturnValue({
+                    player: updatedPlayer as Player,
+                    items: null,
+                });
+
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                (gameSessionService as any).addItemToPlayer(ACCESS_CODE, testPlayer, item, mockGameSession);
+
+                expect(itemService.addItemToPlayer).toHaveBeenCalledWith(testPlayer, item, mockGameSession.game.grid, ACCESS_CODE);
+                expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, testPlayer.name, {
+                    inventory: updatedInventory,
+                });
+            });
+
+            it('should not update player inventory when adding an item with special effects', () => {
+                const item = {
+                    id: 'test-item-1',
+                    name: 'Test Item',
+                    description: 'An item for testing',
+                    imageSrc: 'test-item.png',
+                    imageSrcGrey: 'test-item-grey.png',
+                    itemCounter: 0,
+                };
+
+                const updatedInventory: [typeof item, typeof item | null] = [item, null];
+
+                const updatedPlayer = {
+                    ...testPlayer,
+                    inventory: updatedInventory,
+                };
+
+                const specialEffectItems = [
+                    {
+                        id: 'effect-item',
+                        name: 'Effect Item',
+                        description: 'Special effect item',
+                        imageSrc: 'effect-item.png',
+                        imageSrcGrey: 'effect-item-grey.png',
+                        itemCounter: 0,
+                    },
+                ];
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+
+                (itemService.addItemToPlayer as jest.Mock).mockReturnValue({
+                    player: updatedPlayer as Player,
+                    items: specialEffectItems,
+                });
+
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                (gameSessionService as any).addItemToPlayer(ACCESS_CODE, testPlayer, item, mockGameSession);
+
+                expect(itemService.addItemToPlayer).toHaveBeenCalledWith(testPlayer, item, mockGameSession.game.grid, ACCESS_CODE);
+                expect((gameSessionService as any).updateGameSessionPlayerList).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('createGameSession', () => {
+            it('should initialize turn with CTF mode when gameMode is CTF', () => {
+                turnService.initializeTurnCTF = jest.fn().mockReturnValue(createMockTurn());
+                turnService.initializeTurn = jest.fn().mockReturnValue(createMockTurn());
+
+                gridManagerService.assignItemsToRandomItems = jest.fn().mockReturnValue(MOCK_LOBBY.game.grid);
+                gridManagerService.findSpawnPoints = jest.fn().mockReturnValue([]);
+                gridManagerService.assignPlayersToSpawnPoints = jest.fn().mockReturnValue([MOCK_LOBBY.players, MOCK_LOBBY.game.grid]);
+
+                gameSessionService['updatePlayerListSpawnPoint'] = jest.fn();
+                gameSessionService['startTransitionPhase'] = jest.fn();
+                gameSessionService['gameSessions'] = new Map();
+
+                gameSessionService.createGameSession(ACCESS_CODE, GameMode.CTF);
+
+                expect(turnService.initializeTurnCTF).toHaveBeenCalledWith(ACCESS_CODE);
+                expect(turnService.initializeTurn).not.toHaveBeenCalled();
+            });
+
+            it('should initialize turn with regular mode when gameMode is not CTF', () => {
+                turnService.initializeTurnCTF = jest.fn().mockReturnValue(createMockTurn());
+                turnService.initializeTurn = jest.fn().mockReturnValue(createMockTurn());
+
+                gridManagerService.assignItemsToRandomItems = jest.fn().mockReturnValue(MOCK_LOBBY.game.grid);
+                gridManagerService.findSpawnPoints = jest.fn().mockReturnValue([]);
+                gridManagerService.assignPlayersToSpawnPoints = jest.fn().mockReturnValue([MOCK_LOBBY.players, MOCK_LOBBY.game.grid]);
+
+                gameSessionService['updatePlayerListSpawnPoint'] = jest.fn();
+                gameSessionService['startTransitionPhase'] = jest.fn();
+                gameSessionService['gameSessions'] = new Map();
+
+                gameSessionService.createGameSession(ACCESS_CODE, GameMode.Classic);
+
+                expect(turnService.initializeTurn).toHaveBeenCalledWith(ACCESS_CODE);
+                expect(turnService.initializeTurnCTF).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('updateWallTile', () => {
+            it('should update the grid and player when game session exists', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+                const updatedPlayer = { ...testPlayer, actionPoints: testPlayer.actionPoints - 1 };
+                const updatedGrid = [...MOCK_LOBBY.game.grid];
+
+                jest.spyOn(gridManagerService, 'updateWallTile').mockReturnValue([updatedGrid, updatedPlayer]);
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService['gameSessions'].set(ACCESS_CODE, mockGameSession);
+
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).toHaveBeenCalledWith(
+                    mockGameSession.game.grid,
+                    ACCESS_CODE,
+                    previousTile,
+                    newTile,
+                    testPlayer,
+                );
+                expect(mockGameSession.game.grid).toBe(updatedGrid);
+                expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, updatedPlayer.name, updatedPlayer);
+            });
+
+            it('should return early if game session does not exist', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+
+                jest.spyOn(gridManagerService, 'updateWallTile');
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).not.toHaveBeenCalled();
+                expect((gameSessionService as any).updateGameSessionPlayerList).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('updateWallTile', () => {
+            it('should update the grid and player when game session exists', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+                const updatedPlayer = { ...testPlayer, actionPoints: testPlayer.actionPoints - 1 };
+                const updatedGrid = [...MOCK_LOBBY.game.grid];
+
+                jest.spyOn(gridManagerService, 'updateWallTile').mockReturnValue([updatedGrid, updatedPlayer]);
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService['gameSessions'].set(ACCESS_CODE, mockGameSession);
+
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).toHaveBeenCalledWith(
+                    mockGameSession.game.grid,
+                    ACCESS_CODE,
+                    previousTile,
+                    newTile,
+                    testPlayer,
+                );
+                expect(mockGameSession.game.grid).toBe(updatedGrid);
+                expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, updatedPlayer.name, updatedPlayer);
+            });
+
+            it('should return early if game session does not exist', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+
+                jest.spyOn(gridManagerService, 'updateWallTile');
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).not.toHaveBeenCalled();
+                expect((gameSessionService as any).updateGameSessionPlayerList).not.toHaveBeenCalled();
             });
         });
     });

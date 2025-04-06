@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, DiceType, EventEmit, ItemName } from '@app/enums/enums';
 import { Item } from '@app/interfaces/Item';
@@ -9,7 +10,10 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ItemEffectsService } from './item-effects.service';
 
-fdescribe('ItemEffectsService', () => {
+const BONUS_VALUE = 2;
+const PENALTY_VALUE = -1;
+
+describe('ItemEffectsService', () => {
     let service: ItemEffectsService;
     let eventEmitter: EventEmitter2;
     let gridManager: GridManagerService;
@@ -93,44 +97,50 @@ fdescribe('ItemEffectsService', () => {
     });
 
     describe('addEffect', () => {
-        it('should apply modifiers and activate item', () => {
+        it('should apply attack and defense modifiers and activate item', () => {
             service.addEffect(MOCK_PLAYER, MOCK_ITEM, mockTile);
             expect(MOCK_PLAYER.attack.value).toBe(6);
             expect(MOCK_PLAYER.defense.value).toBe(3);
             expect(MOCK_ITEM.isActive).toBe(true);
         });
 
-        it('should apply modifiers and activate item', () => {
+        it('should apply speed and hp modifiers and activate item', () => {
+            const playerCopy = { ...MOCK_PLAYER };
+
             const mockItem = {
                 ...MOCK_ITEM,
-                name: ItemName.Potion,
+                name: ItemName.Rubik,
                 modifiers: [
                     { attribute: AttributeType.Speed, value: 2 },
                     { attribute: AttributeType.Hp, value: -1 },
                 ],
+                isActive: false,
             };
-            service.addEffect(MOCK_PLAYER, mockItem, mockTile);
-            expect(MOCK_PLAYER.attack.value).toBe(6);
-            expect(MOCK_PLAYER.defense.value).toBe(3);
-            expect(MOCK_ITEM.isActive).toBe(true);
+
+            service.addEffect(playerCopy, mockItem, mockTile);
+
+            expect(playerCopy.speed).toBe(6);
+            expect(playerCopy.hp.max).toBe(3);
+            expect(mockItem.isActive).toBe(true);
         });
 
-        it('should apply modifiers and activate item', () => {
+        it('should handle unknown attribute types', () => {
+            const unknownAttributeValue = 999;
             const mockItem = {
                 ...MOCK_ITEM,
-                modifiers: [],
+                name: ItemName.Rubik,
+                modifiers: [{ attribute: unknownAttributeValue as unknown as AttributeType, value: 5 }],
             };
-            service.addEffect(MOCK_PLAYER, mockItem, mockTile);
-            expect(MOCK_PLAYER.attack.value).toBe(6);
-            expect(MOCK_PLAYER.defense.value).toBe(3);
-            expect(MOCK_ITEM.isActive).toBe(true);
-        });
+            const originalPlayer = JSON.parse(JSON.stringify(MOCK_PLAYER));
 
-        it('should apply modifiers and activate item', () => {
-            service.addEffect(MOCK_PLAYER, MOCK_ITEM, mockTile);
-            expect(MOCK_PLAYER.attack.value).toBe(6);
-            expect(MOCK_PLAYER.defense.value).toBe(3);
-            expect(MOCK_ITEM.isActive).toBe(true);
+            service.addEffect(MOCK_PLAYER, mockItem, mockTile);
+
+            expect(MOCK_PLAYER.speed).toBe(originalPlayer.speed);
+            expect(MOCK_PLAYER.attack.value).toBe(originalPlayer.attack.value);
+            expect(MOCK_PLAYER.defense.value).toBe(originalPlayer.defense.value);
+            expect(MOCK_PLAYER.hp.current).toBe(originalPlayer.hp.current);
+            expect(MOCK_PLAYER.hp.max).toBe(originalPlayer.hp.max);
+            expect(mockItem.isActive).toBe(true);
         });
 
         it('should not activate item if conditions fail', () => {
@@ -145,6 +155,71 @@ fdescribe('ItemEffectsService', () => {
 
             service.addEffect(MOCK_PLAYER, fireItem, mockTile);
             expect(fireItem.isActive).toBe(false);
+        });
+
+        it('should exit early when item is null', () => {
+            const originalAttack = MOCK_PLAYER.attack.value;
+            const originalDefense = MOCK_PLAYER.defense.value;
+            const originalSpeed = MOCK_PLAYER.speed;
+            const originalHp = MOCK_PLAYER.hp.current;
+
+            service.addEffect(MOCK_PLAYER, null, mockTile);
+
+            expect(MOCK_PLAYER.attack.value).toBe(originalAttack);
+            expect(MOCK_PLAYER.defense.value).toBe(originalDefense);
+            expect(MOCK_PLAYER.speed).toBe(originalSpeed);
+            expect(MOCK_PLAYER.hp.current).toBe(originalHp);
+        });
+
+        const mockPlayer: Player = {
+            ...MOCK_PLAYER,
+            hp: { current: 3, max: 6 },
+        };
+        const mockWaterTile: Tile = { ...mockTile, type: TileType.Water };
+
+        it('should exit if item is already active', () => {
+            const activeItem: Item = {
+                ...MOCK_ITEM,
+                isActive: true,
+                modifiers: [{ attribute: AttributeType.Attack, value: 2 }],
+            };
+
+            const originalAttack = mockPlayer.attack.value;
+
+            service.addEffect(mockPlayer, activeItem, mockTile);
+
+            expect(mockPlayer.attack.value).toBe(originalAttack);
+            expect(activeItem.isActive).toBe(true);
+        });
+
+        it('should exit for Fire item when health above threshold', () => {
+            const fireItem: Item = {
+                ...MOCK_ITEM,
+                name: ItemName.Fire,
+                modifiers: null,
+            };
+            const highHealthPlayer = {
+                ...mockPlayer,
+                hp: { current: 4, max: 6 },
+            };
+
+            service.addEffect(highHealthPlayer, fireItem, mockTile);
+
+            expect(fireItem.isActive).toBe(false);
+            expect(highHealthPlayer.attack.value).toBe(MOCK_PLAYER.attack.value);
+        });
+
+        it('should exit for Swap item on non-ice tile', () => {
+            const swapItem: Item = {
+                ...MOCK_ITEM,
+                name: ItemName.Swap,
+                modifiers: null,
+            };
+
+            service.addEffect(mockPlayer, swapItem, mockWaterTile);
+
+            expect(swapItem.isActive).toBe(false);
+            expect(mockPlayer.defense.value).toBe(MOCK_PLAYER.defense.value);
         });
     });
 
@@ -197,6 +272,18 @@ fdescribe('ItemEffectsService', () => {
             expect(mockTile.item).toBeDefined();
             expect(eventEmitter.emit).toHaveBeenCalledTimes(2);
         });
+
+        it('should place first item from shuffled inventory on player tile when empty', () => {
+            const player = { ...MOCK_PLAYER, inventory: [MOCK_ITEM, MOCK_ITEM] as [Item, Item] };
+            const grid = [[mockTile]];
+            mockTile.item = null;
+
+            service.handlePlayerItemReset(player, grid, 'test-code');
+
+            expect(mockTile.item).toBe(MOCK_ITEM);
+            expect(gridManager.findClosestAvailableTile).toHaveBeenCalled();
+            expect(eventEmitter.emit).toHaveBeenCalledTimes(2);
+        });
     });
 
     describe('addItemToPlayer', () => {
@@ -220,6 +307,16 @@ fdescribe('ItemEffectsService', () => {
             expect(result.items).toHaveLength(3);
             expect(eventEmitter.emit).toHaveBeenCalledWith(EventEmit.ItemChoice, expect.anything());
         });
+
+        it('should not place items on occupied player tile', () => {
+            const occupiedTile = { ...mockTile, item: MOCK_ITEM };
+            (gridManager.findTileByPlayer as jest.Mock).mockReturnValue(occupiedTile);
+
+            const player = { ...MOCK_PLAYER, inventory: [MOCK_ITEM, MOCK_ITEM] as [Item, Item] };
+            service.handlePlayerItemReset(player, [[occupiedTile]], 'test-code');
+
+            expect(occupiedTile.item).toBe(MOCK_ITEM);
+        });
     });
 
     describe('applyItemModifiers', () => {
@@ -233,6 +330,73 @@ fdescribe('ItemEffectsService', () => {
             const swap: Item = { id: 'swap', name: ItemName.Swap } as Item;
             service.applyItemModifiers(swap);
             expect(swap.modifiers[0].attribute).toBe(AttributeType.Defense);
+        });
+
+        it('should handle unknown attribute types in default case', () => {
+            const playerCopy = JSON.parse(JSON.stringify(MOCK_PLAYER));
+            const invalidModifier = {
+                attribute: 999 as unknown as AttributeType,
+                value: 0,
+            };
+
+            service['applyModifier'](playerCopy, invalidModifier, 1);
+
+            expect(playerCopy.attack.value).toBe(MOCK_PLAYER.attack.value);
+            expect(playerCopy.defense.value).toBe(MOCK_PLAYER.defense.value);
+            expect(playerCopy.speed).toBe(MOCK_PLAYER.speed);
+            expect(playerCopy.hp.current).toBe(MOCK_PLAYER.hp.current);
+            expect(playerCopy.hp.max).toBe(MOCK_PLAYER.hp.max);
+        });
+
+        const BASE_ITEM: Partial<Item> = {
+            modifiers: undefined,
+            isActive: true,
+            imageSrc: '',
+            imageSrcGrey: '',
+            itemCounter: 0,
+            description: '',
+        };
+
+        it('should configure Rubik cube modifiers correctly', () => {
+            const rubikItem: Item = {
+                ...BASE_ITEM,
+                id: 'rubik',
+                name: ItemName.Rubik,
+            } as Item;
+
+            service.applyItemModifiers(rubikItem);
+
+            expect(rubikItem.modifiers).toEqual([
+                { attribute: AttributeType.Speed, value: BONUS_VALUE },
+                { attribute: AttributeType.Hp, value: PENALTY_VALUE },
+            ]);
+            expect(rubikItem.isActive).toBe(false);
+        });
+
+        it('should configure Fire modifiers correctly', () => {
+            const fireItem: Item = {
+                ...BASE_ITEM,
+                id: 'fire',
+                name: ItemName.Fire,
+            } as Item;
+
+            service.applyItemModifiers(fireItem);
+
+            expect(fireItem.modifiers).toEqual([{ attribute: AttributeType.Attack, value: BONUS_VALUE }]);
+            expect(fireItem.isActive).toBe(false);
+        });
+
+        it('should configure Swap modifiers correctly', () => {
+            const swapItem: Item = {
+                ...BASE_ITEM,
+                id: 'swap',
+                name: ItemName.Swap,
+            } as Item;
+
+            service.applyItemModifiers(swapItem);
+
+            expect(swapItem.modifiers).toEqual([{ attribute: AttributeType.Defense, value: BONUS_VALUE }]);
+            expect(swapItem.isActive).toBe(false);
         });
     });
 
@@ -265,6 +429,15 @@ fdescribe('ItemEffectsService', () => {
             const nonIceTile: Tile = { ...mockTile, type: TileType.Water };
             const invalid = service.isIceConditionValid(nonIceTile, swapItem);
             expect(invalid).toBe(false);
+        });
+
+        it('should return false when tile is undefined', () => {
+            const swapItem: Item = {
+                ...MOCK_ITEM,
+                name: ItemName.Swap,
+            };
+            const result = service['isIceConditionValid'](undefined, swapItem);
+            expect(result).toBe(false);
         });
     });
 });
