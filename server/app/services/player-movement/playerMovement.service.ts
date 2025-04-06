@@ -156,7 +156,7 @@ export class PlayerMovementService {
         let minCost = Infinity;
 
         for (const adjacentTile of this.getNeighbors(moveTile, grid)) {
-            if (this.isValidNeighbor(adjacentTile)) {
+            if (this.isValidNeighborForVirtualPlayer(adjacentTile, virtualPlayerTile.player)) {
                 const path = this.quickestPath(virtualPlayerTile, adjacentTile, grid);
                 if (path) {
                     const cost = path.reduce((total, tile) => total + this.getMoveCost(tile), 0);
@@ -204,6 +204,14 @@ export class PlayerMovementService {
     private isValidNeighbor(neighbor: Tile): boolean {
         if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
         return this.movementCosts.has(neighbor.type);
+    }
+
+    private isValidNeighborForVirtualPlayer(tile: Tile, virtualPlayer: Player): boolean {
+        if (tile.type === TileType.Door && !tile.isOpen) return false;
+
+        if (tile.player !== undefined && tile.player.name !== virtualPlayer.name) return false;
+
+        return this.movementCosts.has(tile.type);
     }
     private reconstructPath(previous: Map<Tile, Tile | null>, target: Tile | null): Tile[] {
         const path: Tile[] = [];
