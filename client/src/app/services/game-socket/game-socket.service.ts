@@ -79,6 +79,7 @@ export class GameSocketService {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
+            console.log('Player updated:', data.player.spawnPoint);
         });
     }
 
@@ -122,6 +123,9 @@ export class GameSocketService {
     private onGameStarted(): void {
         this.socketClientService.socket.on('gameStarted', (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
             this.gameStateService.gameDataSubjectValue.lobby.players = data.orderedPlayers;
+            this.gameStateService.gameDataSubjectValue.clientPlayer =
+                data.orderedPlayers.find((p) => p.name === this.gameStateService.gameDataSubjectValue.clientPlayer.name) ||
+                this.gameStateService.gameDataSubjectValue.clientPlayer;
             this.gameStateService.gameDataSubjectValue.game = data.updatedGame;
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });

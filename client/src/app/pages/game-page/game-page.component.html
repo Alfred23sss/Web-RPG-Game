@@ -9,7 +9,7 @@
                 class="player-name"
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
-                 [class.virtual-player]="player.isVirtual"
+                [class.virtual-player]="player.isVirtual"
                 [class.abandoned]="player.hasAbandoned"
                 [class.active]="gameData.currentPlayer && player.name === gameData.currentPlayer.name"
             >
@@ -44,6 +44,7 @@
                 [quickestPath]="gameData.quickestPath"
                 [isEditionMode]="false"
                 [isDebugMode]="gameData.isDebugMode"
+                [clientPlayer]="gameData.clientPlayer"
                 (tileHovered)="updateQuickestPath($event)"
                 (tileClicked)="handleTileClick($event)"
                 (doorClicked)="handleDoorClick($event)"
