@@ -147,6 +147,10 @@ export class GameCombatService {
         this.startCombatTurn(accessCode, orderedFighters[0]);
     }
 
+    emitEvent<T>(eventName: string, payload: T): void {
+        this.eventEmitter.emit(eventName, payload);
+    }
+
     private initialiseCombatState(accessCode: string, attacker: Player, defender: Player, pausedTimeRemaining: number, isDebugMode: boolean) {
         this.combatStates[accessCode] = {
             attacker,
@@ -324,9 +328,5 @@ export class GameCombatService {
                 this.performAttack(accessCode, combatState.currentFighter.name);
             }
         }, turnDuration);
-    }
-
-    private emitEvent<T>(eventName: string, payload: T): void {
-        this.eventEmitter.emit(eventName, payload);
     }
 }

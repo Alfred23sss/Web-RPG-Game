@@ -146,6 +146,9 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
+        if (payload.attacker.isVirtual || payload.defender.isVirtual) {
+            this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
+        }
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 

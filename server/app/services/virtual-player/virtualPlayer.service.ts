@@ -1,9 +1,12 @@
 import { Behavior, EventEmit, ItemName, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
+import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
+import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { AggressiveVPService } from '@app/services/vp-aggressive/aggressiveVP.service';
 import { DefensiveVPService } from '@app/services/vp-defensive/defensiveVP.service';
 import { Injectable, OnModuleInit } from '@nestjs/common';
@@ -12,12 +15,15 @@ import { EventEmitter2 } from 'eventemitter2';
 @Injectable()
 export class VirtualPlayerService implements OnModuleInit {
     private virtualPlayer: VirtualPlayer;
+    movementPoints: number;
+    actionsPoints: number;
 
     constructor(
         private readonly eventEmitter: EventEmitter2,
         private readonly aggressiveVPService: AggressiveVPService,
         private readonly defensiveVPService: DefensiveVPService,
         private readonly lobbyService: LobbyService,
+        private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
 
     onModuleInit() {
@@ -25,18 +31,27 @@ export class VirtualPlayerService implements OnModuleInit {
             if (player.isVirtual) {
                 this.virtualPlayer = player;
                 console.log(this.virtualPlayer.movementPoints);
+                this.movementPoints = this.virtualPlayer.movementPoints;
+                this.actionsPoints = this.virtualPlayer.actionPoints;
                 this.executeVirtualPlayerTurn(accessCode);
             }
         });
+        this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
+            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), 1000);
+            console.log('starting another turn beahvior');
+        });
     }
 
+    resetStats(): void {
+        this.virtualPlayer.movementPoints = this.movementPoints;
+        this.virtualPlayer.actionPoints = this.actionsPoints;
+    }
     private executeVirtualPlayerTurn(accessCode: string): void {
         const lobby = this.lobbyService.getLobby(accessCode);
 
-        if (this.virtualPlayer.movementPoints === 0 && this.virtualPlayer.actionPoints === 0) {
-            this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
-            return;
-        }
+        console.log(this.virtualPlayer.movementPoints, 'actionpoints', this.virtualPlayer.actionPoints);
+        if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
+
         const moves = this.findAllMoves(lobby.game.grid);
         switch (this.virtualPlayer.behavior) {
             case Behavior.Aggressive:
@@ -48,6 +63,14 @@ export class VirtualPlayerService implements OnModuleInit {
         }
     }
 
+    // complete behavior for all cases just like for normal player
+    private hasAvailableActions(accessCode: string, virtualPlayer: Player, lobby: Lobby): boolean {
+        if (!this.virtualPlayerActions.checkAvailableActions(virtualPlayer, lobby)) {
+            this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
+            return false;
+        }
+        return true;
+    }
     private findAllMoves(grid: Tile[][]): Move[] {
         const playerMoves = this.findPlayers(grid);
         const itemMoves = this.findItems(grid);

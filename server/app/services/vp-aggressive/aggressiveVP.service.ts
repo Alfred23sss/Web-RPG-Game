@@ -20,22 +20,22 @@ export class AggressiveVPService {
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
 
-    executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): void {
+    async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
         const nextMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
-        this.executeNextMove(nextMove, virtualPlayerTile, lobby);
+        await this.executeNextMove(nextMove, virtualPlayerTile, lobby);
     }
 
-    executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): void {
+    async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         switch (move.type) {
             case MoveType.Attack:
                 console.log('att');
-                this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
+                await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
                 break;
 
             case MoveType.Item:
                 console.log('item');
-                this.virtualPlayerActions.executeMove(move, virtualPlayerTile, lobby);
+                await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby);
                 break;
         }
     }

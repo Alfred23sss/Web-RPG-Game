@@ -99,6 +99,11 @@ export class PlayerMovementService {
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
     }
 
+    hasAdjacentPlayer(vPTile: Tile, grid: Tile[][]): boolean {
+        const adjacentTiles = this.getNeighbors(vPTile, grid);
+        return adjacentTiles.some((tile) => tile.player !== undefined);
+    }
+
     getAvailableActionTile(currentTile: Tile, grid: Tile[][]): Tile | undefined {
         const neighbors = this.getNeighbors(currentTile, grid);
         const playerTile = neighbors.find((neighbor) => neighbor.player !== undefined);

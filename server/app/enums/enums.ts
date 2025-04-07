@@ -213,6 +213,7 @@ export enum EventEmit {
     ItemChoice = 'item.choice',
     PlayerUpdate = 'player.client.update',
     TeamCreated = 'team.created',
+    VPActionDone = 'vp.action.done',
 }
 
 export enum Behavior {
