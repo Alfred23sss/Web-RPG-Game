@@ -657,4 +657,63 @@ describe('GridManagerService', () => {
             expect(result).toBeUndefined();
         });
     });
+    describe('countDoors', () => {
+        it('should return 0 if there are no doors in the grid', () => {
+            const result = service.countDoors(mockGrid);
+            expect(result).toBe(0);
+        });
+
+        it('should count the correct number of doors in the grid', () => {
+            mockGrid[0][1].type = TileType.Door;
+            mockGrid[1][2].type = TileType.Door;
+
+            const result = service.countDoors(mockGrid);
+            expect(result).toBe(2);
+        });
+
+        it('should return total number of tiles if all are doors', () => {
+            mockGrid = mockGrid.map((row) => row.map((tile) => ({ ...tile, type: TileType.Door })));
+
+            const result = service.countDoors(mockGrid);
+            expect(result).toBe(mockGrid.length * mockGrid[0].length);
+        });
+    });
+
+    describe('updateDoorTile (tile found and adjacent)', () => {
+        it('should toggle door state, update image, emit events, and return grid', () => {
+            // Arrange
+            const spyEmit = jest.spyOn(service['eventEmitter'], 'emit');
+            const spyLog = jest.spyOn(service['logger'], 'log').mockImplementation(() => {});
+
+            const previousTile = { id: 'tile-0-0' } as Tile;
+            const doorTile = {
+                id: 'tile-0-1',
+                type: TileType.Door,
+                isOpen: true,
+                imageSrc: ImageType.OpenDoor,
+            } as Tile;
+
+            mockGrid[0][1] = doorTile;
+
+            // Mock adjacency function to return true
+            jest.spyOn<any, any>(service, 'findAndCheckAdjacentTiles').mockReturnValue(true);
+
+            // Act
+            const result = service.updateDoorTile(mockGrid, 'abc123', previousTile, doorTile);
+
+            // Assert
+            expect(doorTile.imageSrc).toBe(ImageType.ClosedDoor);
+            expect(doorTile.isOpen).toBe(false);
+            expect(spyLog).toHaveBeenCalledWith('emitting door update');
+            expect(spyEmit).toHaveBeenCalledWith(EventEmit.UpdateDoorStats, {
+                accessCode: 'abc123',
+                tile: previousTile,
+            });
+            expect(spyEmit).toHaveBeenCalledWith(EventEmit.GameDoorUpdate, {
+                accessCode: 'abc123',
+                grid: mockGrid,
+            });
+            expect(result).toBe(mockGrid);
+        });
+    });
 });
