@@ -29,12 +29,10 @@ export class AggressiveVPService {
     async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         switch (move.type) {
             case MoveType.Attack:
-                console.log('att');
                 await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
                 break;
 
             case MoveType.Item:
-                console.log('item');
                 await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby);
                 break;
         }

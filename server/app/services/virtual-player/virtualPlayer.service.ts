@@ -15,8 +15,8 @@ import { EventEmitter2 } from 'eventemitter2';
 @Injectable()
 export class VirtualPlayerService implements OnModuleInit {
     private virtualPlayer: VirtualPlayer;
-    movementPoints: number;
-    actionsPoints: number;
+    private movementPoints: number;
+    private actionsPoints: number;
 
     constructor(
         private readonly eventEmitter: EventEmitter2,
@@ -30,7 +30,6 @@ export class VirtualPlayerService implements OnModuleInit {
         this.eventEmitter.on(EventEmit.GameTurnStarted, ({ accessCode, player }) => {
             if (player.isVirtual) {
                 this.virtualPlayer = player;
-                console.log(this.virtualPlayer.movementPoints);
                 this.movementPoints = this.virtualPlayer.movementPoints;
                 this.actionsPoints = this.virtualPlayer.actionPoints;
                 this.executeVirtualPlayerTurn(accessCode);
@@ -38,7 +37,7 @@ export class VirtualPlayerService implements OnModuleInit {
         });
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
             setTimeout(() => this.executeVirtualPlayerTurn(accessCode), 1000);
-            console.log('starting another turn beahvior');
+            console.log('starting another turn behavior');
         });
     }
 
@@ -63,7 +62,6 @@ export class VirtualPlayerService implements OnModuleInit {
         }
     }
 
-    // complete behavior for all cases just like for normal player
     private hasAvailableActions(accessCode: string, virtualPlayer: Player, lobby: Lobby): boolean {
         if (!this.virtualPlayerActions.checkAvailableActions(virtualPlayer, lobby)) {
             this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
