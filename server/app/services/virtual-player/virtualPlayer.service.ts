@@ -43,16 +43,12 @@ export class VirtualPlayerService implements OnModuleInit {
         const lobby = this.lobbyService.getLobby(accessCode);
         const moves = this.findAllMoves(lobby.game.grid);
         // const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
-        if (this.virtualPlayer.behavior === Behavior.Defensive) {
-            const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(this.virtualPlayer, accessCode);
-            if (hasEscaped) return; 
-        }
         switch (this.virtualPlayer.behavior) {
             case Behavior.Aggressive:
                 await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
             case Behavior.Defensive:
-                // await this.defensiveVPService.execute(this.virtualPlayer, lobby, possibleMoves, movesInRange);
+                await this.defensiveVPService.executeDefensiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
         }
 
