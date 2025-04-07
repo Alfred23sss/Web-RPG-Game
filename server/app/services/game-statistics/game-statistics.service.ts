@@ -11,7 +11,8 @@ import { OnEvent } from '@nestjs/event-emitter';
 // bouge ca dans constant global et trouver meilleur nom
 const TIME_DIVIDER = 1000;
 const MULTIPLIER = 100;
-const SECOND_IN_MINUTE = 60;
+const SECOND_IN_HOURS = 3600;
+const SECOND_IN_MINUTES = 60;
 
 @Injectable()
 export class GameStatisticsService {
@@ -222,11 +223,14 @@ export class GameStatisticsService {
         const durationInSeconds = Math.floor((gameStats.endTime.getTime() - gameStats.startTime.getTime()) / TIME_DIVIDER);
         gameStats.globalStats.gameDuration = durationInSeconds;
 
-        const minutes = Math.floor(durationInSeconds / SECOND_IN_MINUTE)
+        const hours = Math.floor(durationInSeconds / SECOND_IN_HOURS)
             .toString()
             .padStart(2, '0');
-        const seconds = (durationInSeconds % SECOND_IN_MINUTE).toString().padStart(2, '0');
-        gameStats.globalStats.formattedDuration = `${minutes}:${seconds}`;
+        const minutes = Math.floor((durationInSeconds % SECOND_IN_HOURS) / SECOND_IN_MINUTES)
+            .toString()
+            .padStart(2, '0');
+
+        gameStats.globalStats.formattedDuration = `${hours}:${minutes}`;
     }
 
     private calculateGlobalTileVisitedPercentage(accessCode: string, gameStats: GameStatistics): void {

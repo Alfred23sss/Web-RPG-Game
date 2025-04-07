@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { EventEmit, GameMode, TileType } from '@app/enums/enums';
+import { GameMode, TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
 import { GameSession } from '@app/interfaces/GameSession';
@@ -111,6 +112,7 @@ describe('GameStatisticsService', () => {
     };
 
     beforeEach(async () => {
+        jest.spyOn(global.Date, 'now').mockImplementation(() => 1672531200000);
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GameStatisticsService,
@@ -125,7 +127,7 @@ describe('GameStatisticsService', () => {
                 {
                     provide: GridManagerService,
                     useValue: {
-                        countDoors: jest.fn().mockReturnValue(0),
+                        countDoors: jest.fn().mockReturnValue(5),
                     },
                 },
                 {
@@ -142,29 +144,224 @@ describe('GameStatisticsService', () => {
         gridManager = module.get<GridManagerService>(GridManagerService);
         logger = module.get<Logger>(Logger);
 
-        // Initialize game statistics
-        eventEmitter.emit(EventEmit.InitializeGameStatistics, {
+        service.handleGameStarted({
             accessCode: mockAccessCode,
             players: [mockPlayer1, mockPlayer2],
             gameSession: mockGameSession,
         });
     });
 
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it('should be defined', () => {
         expect(service).toBeDefined();
     });
 
+    describe('event handlers', () => {
+        it('should handle turn started events', () => {
+            service.handleTurnStarted({
+                accessCode: mockAccessCode,
+                player: mockPlayer1,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.globalStats.totalTurns).toBe(1);
+        });
+
+        it('should handle combat started events', () => {
+            service.handleCombatStarted({
+                accessCode: mockAccessCode,
+                attacker: mockPlayer1,
+                defender: mockPlayer2,
+                currentPlayerName: mockPlayer1.name,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer1.name).combats).toBe(1);
+            expect(stats?.playerStats.get(mockPlayer2.name).combats).toBe(1);
+        });
+
+        it('should handle combat ended events with evasion', () => {
+            service.handleCombatEnded({
+                accessCode: mockAccessCode,
+                attacker: mockPlayer1,
+                defender: mockPlayer2,
+                currentFighter: mockPlayer2,
+                hasEvaded: true,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer2.name).escapes).toBe(1);
+        });
+
+        it('should handle combat ended events with victory', () => {
+            service.handleCombatEnded({
+                accessCode: mockAccessCode,
+                attacker: mockPlayer1,
+                defender: mockPlayer2,
+                currentFighter: mockPlayer1,
+                hasEvaded: false,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer1.name).victories).toBe(1);
+            expect(stats?.playerStats.get(mockPlayer2.name).defeats).toBe(1);
+        });
+
+        it('should handle combat attack result events', () => {
+            service.handleCombatResult({
+                accessCode: mockAccessCode,
+                currentFighter: mockPlayer1,
+                defenderPlayer: mockPlayer2,
+                attackSuccessful: true,
+                attackerScore: 8,
+                defenseScore: 3,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer2.name).healthLost).toBe(5); // 8 - 3 = 5
+            expect(stats?.playerStats.get(mockPlayer1.name).damageCaused).toBe(5);
+        });
+
+        it('should not update health stats when attack is unsuccessful', () => {
+            service.handleCombatResult({
+                accessCode: mockAccessCode,
+                currentFighter: mockPlayer1,
+                defenderPlayer: mockPlayer2,
+                attackSuccessful: false,
+                attackerScore: 2,
+                defenseScore: 5,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer2.name).healthLost).toBe(0);
+            expect(stats?.playerStats.get(mockPlayer1.name).damageCaused).toBe(0);
+        });
+
+        it('should handle item collection events', () => {
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: mockItem,
+                player: mockPlayer1,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer1.name).uniqueItemsCollected.has(mockItem.name)).toBeTruthy();
+        });
+
+        it('should handle flag collection events', () => {
+            const flagItem = { ...mockItem, name: 'flag' };
+
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: flagItem,
+                player: mockPlayer1,
+            });
+
+            const stats = service.calculateStats(mockAccessCode);
+            expect(stats?.globalStats.uniqueFlagHolders).toBe(1);
+        });
+
+        it('should handle door manipulated events', () => {
+            service.handleDoorManipulated({
+                accessCode: mockAccessCode,
+                tile: mockTile,
+            });
+
+            const stats = service.calculateStats(mockAccessCode);
+            expect(stats?.globalStats.doorsManipulatedPercentage).toBeGreaterThan(0);
+        });
+    });
+
     describe('calculation methods', () => {
+        it('should calculate game statistics correctly', () => {
+            service.handleTurnStarted({ accessCode: mockAccessCode, player: mockPlayer1 });
+            service.handleTrackTileVisited({ accessCode: mockAccessCode, player: mockPlayer1, tile: mockTile });
+
+            const startTime = new Date();
+            const endTime = new Date(startTime.getTime() + 65000);
+
+            jest.spyOn(global, 'Date')
+                .mockImplementationOnce(() => startTime as any)
+                .mockImplementationOnce(() => endTime as any);
+
+            const stats = service.calculateStats(mockAccessCode);
+
+            expect(stats).toBeDefined();
+            expect(stats?.globalStats.gameDuration).toBeGreaterThanOrEqual(0);
+            expect(stats?.globalStats.formattedDuration).toMatch(/^\d{2}:\d{2}$/);
+            expect(stats?.globalStats.totalTurns).toBe(1);
+        });
+
+        it('should handle calculating percentages when totals are zero', () => {
+            jest.spyOn(gridManager, 'countDoors').mockReturnValueOnce(0);
+
+            service.handleGameStarted({
+                accessCode: 'zeroDoors',
+                players: [mockPlayer1, mockPlayer2],
+                gameSession: mockGameSession,
+            });
+
+            const stats = service.calculateStats('zeroDoors');
+
+            expect(stats?.globalStats.doorsManipulatedPercentage).toBe(0);
+        });
+
         it('should clean up statistics when requested', () => {
             service.cleanUp(mockAccessCode);
             expect(service.getGameStatistics(mockAccessCode)).toBeUndefined();
+        });
+
+        it('should return undefined when calculating stats for non-existent game', () => {
+            const stats = service.calculateStats('nonexistent');
+            expect(stats).toBeUndefined();
+        });
+    });
+
+    describe('data structures', () => {
+        it('should not collect duplicate items', () => {
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: mockItem,
+                player: mockPlayer1,
+            });
+
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: mockItem,
+                player: mockPlayer1,
+            });
+
+            const stats = service.getGameStatistics(mockAccessCode);
+            expect(stats?.playerStats.get(mockPlayer1.name).uniqueItemsCollected.size).toBe(1);
+        });
+
+        it('should track flag holders correctly', () => {
+            const flagItem = { ...mockItem, name: 'flag' };
+
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: flagItem,
+                player: mockPlayer1,
+            });
+
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: flagItem,
+                player: mockPlayer2,
+            });
+
+            const stats = service.calculateStats(mockAccessCode);
+            expect(stats?.globalStats.uniqueFlagHolders).toBe(2);
         });
     });
 
     describe('edge cases', () => {
         it('should handle events for non-existent game sessions gracefully', () => {
             expect(() => {
-                eventEmitter.emit(EventEmit.GameTurnStarted, {
+                service.handleTurnStarted({
                     accessCode: 'nonexistent',
                     player: mockPlayer1,
                 });
@@ -173,12 +370,89 @@ describe('GameStatisticsService', () => {
 
         it('should handle null tile in tile visited event', () => {
             expect(() => {
-                eventEmitter.emit(EventEmit.GameTileVisited, {
+                service.handleTrackTileVisited({
                     accessCode: mockAccessCode,
                     player: mockPlayer1,
                     tile: null as unknown as Tile,
                 });
             }).not.toThrow();
         });
+    });
+
+    it('should handle tile visited events', () => {
+        const gameStats = service.getGameStatistics(mockAccessCode);
+        if (gameStats) {
+            gameStats.gridSize = 1;
+        }
+
+        service.handleTrackTileVisited({
+            accessCode: mockAccessCode,
+            player: mockPlayer1,
+            tile: mockTile,
+        });
+
+        const stats = service.calculateStats(mockAccessCode);
+        expect(stats?.playerStats.get(mockPlayer1.name).tilesVisitedPercentage).toBeGreaterThan(0);
+    });
+
+    it('should calculate game statistics correctly', () => {
+        service.handleTurnStarted({ accessCode: mockAccessCode, player: mockPlayer1 });
+        service.handleTrackTileVisited({ accessCode: mockAccessCode, player: mockPlayer1, tile: mockTile });
+
+        const gameStats = service.getGameStatistics(mockAccessCode);
+        if (gameStats) {
+            const now = Date.now();
+            gameStats.startTime = new Date(now - 65000);
+            gameStats.endTime = new Date(now);
+        }
+
+        const stats = service.calculateStats(mockAccessCode);
+
+        expect(stats).toBeDefined();
+        expect(stats?.globalStats.gameDuration).toBeGreaterThanOrEqual(0);
+        expect(stats?.globalStats.totalTurns).toBe(1);
+    });
+
+    it('should handle calculating percentages when totals are zero', () => {
+        jest.spyOn(gridManager, 'countDoors').mockReturnValueOnce(0);
+
+        service.handleGameStarted({
+            accessCode: 'zeroDoors',
+            players: [mockPlayer1, mockPlayer2],
+            gameSession: mockGameSession,
+        });
+
+        const zeroDoorsStats = service.getGameStatistics('zeroDoors');
+        if (zeroDoorsStats) {
+            zeroDoorsStats.startTime = new Date();
+        }
+
+        const stats = service.calculateStats('zeroDoors');
+
+        expect(stats?.globalStats.doorsManipulatedPercentage).toBe(0);
+    });
+
+    it('should track flag holders correctly', () => {
+        const flagItem = { ...mockItem, name: 'flag' };
+
+        const gameStats = service.getGameStatistics(mockAccessCode);
+        if (gameStats) {
+            gameStats.startTime = new Date();
+        }
+
+        service.handleItemCollected({
+            accessCode: mockAccessCode,
+            item: flagItem,
+            player: mockPlayer1,
+        });
+
+        service.handleItemCollected({
+            accessCode: mockAccessCode,
+            item: flagItem,
+            player: mockPlayer2,
+        });
+
+        const stats = service.calculateStats(mockAccessCode);
+        expect(stats?.globalStats.uniqueFlagHolders).toBe(2);
     });
 });
