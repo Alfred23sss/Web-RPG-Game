@@ -455,4 +455,116 @@ describe('GameStatisticsService', () => {
         const stats = service.calculateStats(mockAccessCode);
         expect(stats?.globalStats.uniqueFlagHolders).toBe(2);
     });
+    it('should increment combat count for both players when combat starts', () => {
+        const attacker = mockPlayer1;
+        const defender = mockPlayer2;
+
+        const initialAttackerCombats = service['gameStatistics'].get(mockAccessCode).playerStats.get(attacker.name).combats;
+        const initialDefenderCombats = service['gameStatistics'].get(mockAccessCode).playerStats.get(defender.name).combats;
+
+        service.handleCombatStarted({
+            accessCode: mockAccessCode,
+            attacker,
+            defender,
+            currentPlayerName: attacker.name,
+        });
+
+        const updatedStats = service['gameStatistics'].get(mockAccessCode).playerStats;
+        expect(updatedStats.get(attacker.name).combats).toBe(initialAttackerCombats + 1);
+        expect(updatedStats.get(defender.name).combats).toBe(initialDefenderCombats + 1);
+    });
+
+    it('should return early if no gameStats exist (combat started)', () => {
+        const spy = jest.spyOn<any, any>(service['gameStatistics'], 'get').mockReturnValue(undefined);
+        service.handleCombatStarted({
+            accessCode: 'invalid-access',
+            attacker: mockPlayer1,
+            defender: mockPlayer2,
+            currentPlayerName: mockPlayer1.name,
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+    it('should increment escapes for current fighter if they have evaded', () => {
+        const currentFighter = mockPlayer1;
+
+        const initialEscapes = service['gameStatistics'].get(mockAccessCode).playerStats.get(currentFighter.name).escapes;
+
+        service.handleCombatEnded({
+            accessCode: mockAccessCode,
+            attacker: mockPlayer1,
+            defender: mockPlayer2,
+            currentFighter,
+            hasEvaded: true,
+        });
+
+        const updatedEscapes = service['gameStatistics'].get(mockAccessCode).playerStats.get(currentFighter.name).escapes;
+        expect(updatedEscapes).toBe(initialEscapes + 1);
+    });
+
+    it('should increment victories and defeats correctly when not evaded', () => {
+        const attacker = mockPlayer1;
+        const defender = mockPlayer2;
+        const currentFighter = attacker;
+
+        const stats = service['gameStatistics'].get(mockAccessCode).playerStats;
+        const initialVictories = stats.get(currentFighter.name).victories;
+        const initialDefeats = stats.get(defender.name).defeats;
+
+        service.handleCombatEnded({
+            accessCode: mockAccessCode,
+            attacker,
+            defender,
+            currentFighter,
+            hasEvaded: false,
+        });
+
+        expect(stats.get(currentFighter.name).victories).toBe(initialVictories + 1);
+        expect(stats.get(defender.name).defeats).toBe(initialDefeats + 1);
+    });
+
+    it('should return early if no gameStats exist (combat ended)', () => {
+        const spy = jest.spyOn<any, any>(service['gameStatistics'], 'get').mockReturnValue(undefined);
+        service.handleCombatEnded({
+            accessCode: 'invalid-access',
+            attacker: mockPlayer1,
+            defender: mockPlayer2,
+            currentFighter: mockPlayer1,
+            hasEvaded: false,
+        });
+
+        expect(spy).toHaveBeenCalled();
+    });
+    it('should correctly assign attacker as loser when defender is the current fighter', () => {
+        const attacker = mockPlayer1;
+        const defender = mockPlayer2;
+        const currentFighter = defender; // NOT equal to attacker
+
+        const stats = service['gameStatistics'].get(mockAccessCode).playerStats;
+        const initialVictories = stats.get(currentFighter.name).victories;
+        const initialDefeats = stats.get(attacker.name).defeats;
+
+        service.handleCombatEnded({
+            accessCode: mockAccessCode,
+            attacker,
+            defender,
+            currentFighter,
+            hasEvaded: false,
+        });
+
+        expect(stats.get(currentFighter.name).victories).toBe(initialVictories + 1);
+        expect(stats.get(attacker.name).defeats).toBe(initialDefeats + 1);
+    });
+    it('should return early if no game stats exist for accessCode (handleItemCollected)', () => {
+        const spy = jest.spyOn(service['gameStatistics'], 'get');
+        const accessCodeWithoutStats = 'noStats123';
+
+        service.handleItemCollected({
+            accessCode: accessCodeWithoutStats,
+            item: mockItem,
+            player: mockPlayer1,
+        });
+
+        expect(spy).toHaveBeenCalledWith(accessCodeWithoutStats);
+    });
 });
