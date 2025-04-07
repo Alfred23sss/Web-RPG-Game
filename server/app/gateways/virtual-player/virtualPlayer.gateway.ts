@@ -4,6 +4,7 @@ import { Player } from '@app/model/database/player';
 import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -18,7 +19,8 @@ export class VirtualPlayerGateway {
     constructor(
         private readonly lobbyService: LobbyService,
         private readonly logger: Logger,
-        private readonly virtualPlayerService: VirtualPlayerCreationService,
+        private readonly virtualPlayerCreationService: VirtualPlayerCreationService,
+        private readonly virtualPlayerService: VirtualPlayerService,
         private readonly gameModeSelector: GameModeSelectorService,
     ) {}
 
@@ -28,8 +30,8 @@ export class VirtualPlayerGateway {
 
         this.logger.log('Received request to create Virtual Player with behavior', data.behavior);
 
-        this.virtualPlayerService.createVirtualPlayer(data.behavior, lobby);
-        const avatars = this.virtualPlayerService.getUsedAvatars(lobby);
+        this.virtualPlayerCreationService.createVirtualPlayer(data.behavior, lobby);
+        const avatars = this.virtualPlayerCreationService.getUsedAvatars(lobby);
 
         this.server.to(data.accessCode).emit('updatePlayers', lobby.players);
         this.server.to(data.accessCode).emit('updateUnavailableOptions', { avatars });
@@ -42,8 +44,8 @@ export class VirtualPlayerGateway {
     @SubscribeMessage(VirtualPlayerEvents.KickVirtualPlayer)
     handleKickVirtualPlayer(@MessageBody() data: { accessCode: string; player: Player }): void {
         const lobby = this.lobbyService.getLobby(data.accessCode);
-        this.virtualPlayerService.kickVirtualPlayer(lobby, data.player);
-        const avatars = this.virtualPlayerService.getUsedAvatars(lobby);
+        this.virtualPlayerCreationService.kickVirtualPlayer(lobby, data.player);
+        const avatars = this.virtualPlayerCreationService.getUsedAvatars(lobby);
 
         this.logger.log(avatars);
 
@@ -66,7 +68,9 @@ export class VirtualPlayerGateway {
 
     @OnEvent(VirtualPlayerEvents.EndVirtualPlayerTurn)
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
+        // reset points here
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
+        this.virtualPlayerService.resetStats();
         const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
         gameService.endTurn(data.accessCode);
     }

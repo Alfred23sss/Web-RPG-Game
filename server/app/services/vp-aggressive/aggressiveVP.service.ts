@@ -23,17 +23,19 @@ export class AggressiveVPService {
     async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
         const nextMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
-        this.executeNextMove(nextMove, virtualPlayerTile, lobby);
+        await this.executeNextMove(nextMove, virtualPlayerTile, lobby);
     }
 
-    executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): void {
+    async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         switch (move.type) {
             case MoveType.Attack:
-                this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
+                console.log('att');
+                await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
                 break;
 
             case MoveType.Item:
-                this.virtualPlayerActions.executeMove(move, virtualPlayerTile, lobby);
+                console.log('item');
+                await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby);
                 break;
         }
     }
@@ -57,7 +59,7 @@ export class AggressiveVPService {
 
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
-        const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, virtualPlayer, lobby);
+        const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
             console.log(move.tile.id, movementCost);
