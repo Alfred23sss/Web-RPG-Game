@@ -29,7 +29,7 @@ export class DefensiveVPService {
 
         switch (bestMove.type) {
             case MoveType.Item:
-                this.virtualPlayerActions.executeMove(bestMove, virtualPlayerTile, lobby);
+                this.virtualPlayerActions.pickUpItem(bestMove, virtualPlayerTile, lobby);
                 break;
             case MoveType.Attack:
                 this.virtualPlayerActions.moveToAttack(bestMove, virtualPlayerTile, lobby);
@@ -59,7 +59,7 @@ export class DefensiveVPService {
 
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
-        const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, virtualPlayer, lobby);
+        const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
 
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
