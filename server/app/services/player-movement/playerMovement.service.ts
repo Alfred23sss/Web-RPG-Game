@@ -30,7 +30,7 @@ export class PlayerMovementService {
             const { tile, cost: remainingPoints } = dequeued;
 
             for (const neighbor of this.getNeighbors(tile, grid)) {
-                if (this.isNeighborBlocked(neighbor)) continue;
+                if (this.isNeighborBlocked(neighbor, startTile.player)) continue;
 
                 const moveCost = this.getMoveCost(neighbor);
                 const newRemainingPoints = remainingPoints - moveCost;
@@ -64,7 +64,7 @@ export class PlayerMovementService {
             if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);
 
             for (const neighbor of this.getNeighbors(currentTile, grid)) {
-                if (!this.isValidNeighbor(neighbor)) continue;
+                if (!this.isValidNeighbor(neighbor)) continue; // possiblement pas inclure dn quickestpath la porte pcq
 
                 const moveCost = this.getMoveCost(neighbor);
                 if (moveCost === Infinity) continue;
@@ -104,15 +104,15 @@ export class PlayerMovementService {
         return adjacentTiles.some((tile) => tile.player !== undefined);
     }
 
-    getAvailableActionTile(currentTile: Tile, grid: Tile[][]): Tile | undefined {
-        const neighbors = this.getNeighbors(currentTile, grid);
-        const playerTile = neighbors.find((neighbor) => neighbor.player !== undefined);
-        if (playerTile) {
-            return playerTile;
-        }
-        const doorTile = neighbors.find((neighbor) => neighbor.type === TileType.Door && !this.isNeighborBlocked(neighbor));
-        return doorTile;
-    }
+    // getAvailableActionTile(currentTile: Tile, grid: Tile[][]): Tile | undefined {
+    //     const neighbors = this.getNeighbors(currentTile, grid);
+    //     const playerTile = neighbors.find((neighbor) => neighbor.player !== undefined);
+    //     if (playerTile) {
+    //         return playerTile;
+    //     }
+    //     const doorTile = neighbors.find((neighbor) => neighbor.type === TileType.Door && !this.isNeighborBlocked(neighbor));
+    //     return doorTile;
+    // }
 
     // chek pr action possible durant son parcours,
     // chek si dn parcous ya item et gere si c'est le cas.
@@ -197,14 +197,24 @@ export class PlayerMovementService {
         return { tile: neighbor, cost: points };
     }
 
-    private isNeighborBlocked(neighbor: Tile): boolean {
-        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
+    private isNeighborBlocked(neighbor: Tile, player: Player): boolean {
+        const isDoorClosed = neighbor.type === TileType.Door && !neighbor.isOpen;
+        const canOpenDoor = isDoorClosed && player.actionPoints > 0;
+        return neighbor.type === TileType.Wall || !canOpenDoor || neighbor.player !== undefined;
     }
 
     private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
         return newRemaining >= 0 && newRemaining > neighborRemaining;
     }
 
+    // private isValidNeighbor(neighbor: Tile, player: Player): boolean {
+    //     const isDoorClosed = neighbor.type === TileType.Door && !neighbor.isOpen;
+    //     const canOpenDoor = isDoorClosed && player.actionPoints > 0;
+    //     if (neighbor.type === TileType.Wall) return false;
+    //     if (!canOpenDoor) return false;
+    //     if (neighbor.player !== undefined) return false;
+    //     return this.movementCosts.has(neighbor.type);
+    // }
     private isValidNeighbor(neighbor: Tile): boolean {
         if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
         return this.movementCosts.has(neighbor.type);

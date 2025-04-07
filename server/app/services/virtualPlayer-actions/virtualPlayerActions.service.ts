@@ -49,6 +49,7 @@ export class VirtualPlayerActionsService {
     }
 
     calculateTotalMovementCost(path: Tile[]): number {
+        if (!path) return;
         return path.slice(1).reduce((total, tile) => total + this.playerMovementService.getMoveCost(tile), 0);
     }
 
