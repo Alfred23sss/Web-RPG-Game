@@ -30,12 +30,23 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.executeVirtualPlayerTurn(accessCode);
             }
         });
+        this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
+            if (player.isVirtual) {
+                this.virtualPlayer = player;
+                const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(player, accessCode);
+                if (hasEscaped) return;
+            }
+        });
     }
 
     private async executeVirtualPlayerTurn(accessCode: string): Promise<void> {
         const lobby = this.lobbyService.getLobby(accessCode);
         const moves = this.findAllMoves(lobby.game.grid);
         // const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
+        if (this.virtualPlayer.behavior === Behavior.Defensive) {
+            const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(this.virtualPlayer, accessCode);
+            if (hasEscaped) return; 
+        }
         switch (this.virtualPlayer.behavior) {
             case Behavior.Aggressive:
                 await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
