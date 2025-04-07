@@ -164,7 +164,7 @@ describe('GameplayService', () => {
             });
             (service as any)['gameData'] = mockGameData;
 
-            service.abandonGame(mockGameData, false);
+            service.abandonGame(mockGameData);
 
             expect(mockPlayer.hasAbandoned).toBeTrue();
             expect(mockSocketClientService.emit).toHaveBeenCalledWith(

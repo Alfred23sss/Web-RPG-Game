@@ -19,6 +19,7 @@ export class GameStatisticsService {
     private visitedTiles: Map<string, Set<string>> = new Map<string, Set<string>>();
     private manipulatedDoors: Map<string, Set<string>> = new Map<string, Set<string>>();
     private flagHolders: Map<string, Set<string>> = new Map<string, Set<string>>();
+    // surement a enlever (a voir)
     private turnCounts: Map<string, number> = new Map<string, number>();
 
     constructor(

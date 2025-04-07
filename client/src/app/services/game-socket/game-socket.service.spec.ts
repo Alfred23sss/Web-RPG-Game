@@ -41,6 +41,7 @@ describe('GameSocketService', () => {
             'checkAvailableActions',
             'getClientPlayerPosition',
             'createItemPopUp',
+            'navigateToFinalPage',
         ]);
         clientNotifierSpy = jasmine.createSpyObj('ClientNotifierServices', ['displayMessage', 'addLogbookEntry']);
         const socketSpy = jasmine.createSpyObj('SocketClientService', ['on', 'emit']);
@@ -108,19 +109,21 @@ describe('GameSocketService', () => {
     it('should handle gameEnded event', fakeAsync(() => {
         const data = { winner: ['WinnerPlayer'] };
         socketEvents['gameEnded'](data);
-        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
+            `👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`,
+        );
         tick(DELAY_BEFORE_ENDING_GAME);
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, true);
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
     }));
 
     it('should handle gameEnded event with multiple winnners', fakeAsync(() => {
         const data = { winner: ['WinnerPlayer1', 'WinnerPlayer2'] };
         socketEvents['gameEnded'](data);
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
-            `👑 ${data.winner.join(', ')} ont remporté la partie ! Redirection vers l'accueil sous peu`,
+            `👑 ${data.winner.join(', ')} ont remporté la partie ! Redirection vers la page de fin sous peu`,
         );
         tick(DELAY_BEFORE_ENDING_GAME);
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue, true);
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
     }));
 
     it('should handle adminModeDisabled event', () => {
@@ -252,10 +255,7 @@ describe('GameSocketService', () => {
     it('should abandon game when refresh flag exists in handlePageRefresh', () => {
         sessionStorage.setItem('refreshed', 'true');
         service['handlePageRefresh']();
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(
-            gameStateServiceSpy.gameDataSubjectValue,
-            gameStateServiceSpy.gameDataSubjectValue.isGameEnding,
-        );
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
         expect(sessionStorage.getItem('refreshed')).toBe('true');
     });
 
