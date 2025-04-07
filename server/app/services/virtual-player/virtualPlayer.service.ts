@@ -35,6 +35,13 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.executeVirtualPlayerTurn(accessCode);
             }
         });
+        this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
+            if (player.isVirtual) {
+                this.virtualPlayer = player;
+                const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(player, accessCode);
+                if (hasEscaped) return;
+            }
+        });
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
             setTimeout(() => this.executeVirtualPlayerTurn(accessCode), 1000);
             console.log('starting another turn behavior');
@@ -57,7 +64,7 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
             case Behavior.Defensive:
-                // await this.defensiveVPService.execute(this.virtualPlayer, lobby, possibleMoves, movesInRange);
+                this.defensiveVPService.executeDefensiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
         }
     }
