@@ -10,6 +10,7 @@ import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { VirtualPlayerEvents } from '../virtual-player/virtualPlayer.gateway.events';
 import { GameEvents } from './game.gateway.events';
 
 @WebSocketGateway({ cors: true })
@@ -146,11 +147,13 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
-        // if (payload.attacker.isVirtual || payload.defender.isVirtual) {
-        //     this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
-        // } this will not work if the player starting the combat is an actual client
-        // mettre code au dessus dn une fonction dn gameCombatService... rajouter qui a commencer le combat ???,
-        // important de savoir qd differente logique si c'est virtuel ou normal qui commence le combat
+        if (payload.attacker.name === payload.currentFighter.name && payload.attacker.isVirtual) {
+            this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
+        }
+        if (payload.attacker.isVirtual && payload.attacker.name !== payload.currentFighter.name) {
+            this.gameCombatService.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, payload.accessCode);
+        }
+
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 

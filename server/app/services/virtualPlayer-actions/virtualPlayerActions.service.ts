@@ -128,8 +128,8 @@ export class VirtualPlayerActionsService {
     }
 
     private async executeAttack(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
-        if (!actionTile) return;
         await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
+        if (!actionTile.player || !currentTile.player) return;
         this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
         this.updateActionPoints(currentTile.player);
     }
