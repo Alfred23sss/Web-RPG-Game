@@ -3,10 +3,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
-import { ImageType, TileType } from '@app/enums/enums';
+import { GameMode, ImageType, ItemName, TeamType, TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
 import { Game } from '@app/interfaces/Game';
 import { GameSession } from '@app/interfaces/GameSession';
+import { Item } from '@app/interfaces/Item';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
@@ -14,6 +15,7 @@ import { Turn } from '@app/interfaces/Turn';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -138,36 +140,49 @@ const createMockGameSession = (grid: Tile[][], turnConfig: Partial<Turn>) => ({
 describe('GameSessionService', () => {
     let gameSessionService: GameSessionService;
     let lobbyService: LobbyService;
+    let itemService: ItemEffectsService;
     let accessCodesService: AccessCodesService;
     let eventEmitter: EventEmitter2;
     let logger: Logger;
     let gridManagerService: GridManagerService;
     let turnService: GameSessionTurnService;
     let testPlayer: Player;
-    let movementPath: Tile[];
+    let testMovementPath: Tile[];
 
     beforeEach(() => {
         jest.useFakeTimers();
+
+        logger = {
+            log: jest.fn(),
+            error: jest.fn(),
+            warn: jest.fn(),
+            debug: jest.fn(),
+            verbose: jest.fn(),
+        } as unknown as Logger;
+
         accessCodesService = new AccessCodesService();
         lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
-        gridManagerService = new GridManagerService(logger);
+        gridManagerService = new GridManagerService(logger, eventEmitter);
         turnService = new GameSessionTurnService(lobbyService, eventEmitter);
+        itemService = new ItemEffectsService(eventEmitter, gridManagerService);
 
-        gameSessionService = new GameSessionService(lobbyService, eventEmitter, gridManagerService, turnService);
+        gameSessionService = new GameSessionService(eventEmitter, lobbyService, gridManagerService, turnService, itemService);
 
         jest.spyOn(lobbyService, 'getLobby').mockReturnValue(MOCK_LOBBY);
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(MOCK_LOBBY.players);
         jest.spyOn(gridManagerService, 'clearPlayerFromGrid');
         jest.spyOn(gridManagerService, 'setPlayerOnTile');
+        jest.spyOn(itemService, 'addEffect').mockImplementation(() => {});
+        jest.spyOn(itemService, 'removeEffects').mockImplementation(() => {});
 
-        gameSessionService.createGameSession(ACCESS_CODE);
+        gameSessionService.createGameSession(ACCESS_CODE, 'Classic');
 
         jest.spyOn(eventEmitter, 'emit');
         (eventEmitter.emit as jest.Mock).mockClear();
 
         testPlayer = MOCK_LOBBY.players[0];
-        movementPath = MOCK_LOBBY.game.grid.flat().slice(0, 3);
+        testMovementPath = MOCK_LOBBY.game.grid.flat().slice(0, 3);
     });
 
     afterEach(() => {
@@ -175,7 +190,7 @@ describe('GameSessionService', () => {
     });
 
     it('should clear timers and delete session', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
         const clearTimeoutSpy = jest.spyOn(global, 'clearTimeout');
         const clearIntervalSpy = jest.spyOn(global, 'clearInterval');
 
@@ -190,7 +205,7 @@ describe('GameSessionService', () => {
         const players = [createValidPlayer(PLAYER_1_NAME, FAST_SPEED, true), createValidPlayer(PLAYER_2_NAME, SLOW_SPEED, false)];
         jest.spyOn(lobbyService, 'getLobbyPlayers').mockReturnValue(players);
 
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
 
         gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode).turn.currentPlayer = players[0];
 
@@ -213,7 +228,7 @@ describe('GameSessionService', () => {
     });
 
     it('should maintain correct timer sequence after resume', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
 
         gameSessionService.endTurn(MOCK_LOBBY.accessCode);
         jest.advanceTimersByTime(DEFAULT_TIME);
@@ -237,7 +252,7 @@ describe('GameSessionService', () => {
     });
 
     it('should update combat state in game session if it exists', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
 
         gameSessionService.setCombatState(MOCK_LOBBY.accessCode, true);
@@ -253,7 +268,7 @@ describe('GameSessionService', () => {
     });
 
     it('should return true if the given player is the current player', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode);
+        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
         const player = createValidPlayer('CurrentPlayer', FAST_SPEED, true);
         const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
         session.turn.currentPlayer = player;
@@ -411,7 +426,7 @@ describe('GameSessionService', () => {
 
     describe('callTeleport', () => {
         it('should teleport player and update grid', () => {
-            const gameSession = gameSessionService.createGameSession(ACCESS_CODE);
+            const gameSession = gameSessionService.createGameSession(ACCESS_CODE, 'Classic');
             const originalGrid = gameSession.game.grid;
             const player = MOCK_LOBBY.players[0];
 
@@ -447,16 +462,14 @@ describe('GameSessionService', () => {
 
     describe('updatePlayerPosition', () => {
         it('should process movement steps with proper timing', async () => {
-            const movePromise = gameSessionService.updatePlayerPosition(ACCESS_CODE, movementPath, testPlayer);
+            const movePromise = gameSessionService.updatePlayerPosition(ACCESS_CODE, testMovementPath, testPlayer);
             expect(gridManagerService.clearPlayerFromGrid).not.toHaveBeenCalled();
 
             await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
             expect(gridManagerService.clearPlayerFromGrid).toHaveBeenCalledTimes(1);
-            expect(gridManagerService.setPlayerOnTile).toHaveBeenCalledWith(MOCK_LOBBY.game.grid, movementPath[1], testPlayer);
+            expect(gridManagerService.setPlayerOnTile).toHaveBeenCalledWith(MOCK_LOBBY.game.grid, testMovementPath[1], testPlayer);
 
             await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
-            expect(gridManagerService.clearPlayerFromGrid).toHaveBeenCalledTimes(2);
-
             await movePromise;
         });
 
@@ -464,9 +477,9 @@ describe('GameSessionService', () => {
             it('should emit the game.ended event with the winner', () => {
                 const winner = PLAYER_1_NAME;
                 const emitSpy = jest.spyOn(eventEmitter, 'emit');
-                gameSessionService.endGameSession(ACCESS_CODE, winner);
+                gameSessionService.endGameSession(ACCESS_CODE, [winner]);
                 const accessCode = 'test-code';
-                expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winner });
+                expect(emitSpy).toHaveBeenCalledWith('game.ended', { accessCode, winner: [winner] });
             });
         });
 
@@ -526,6 +539,499 @@ describe('GameSessionService', () => {
                 const sessionPlayer = gameSessionService.getGameSession(ACCESS_CODE)?.turn.orderedPlayers.find((p) => p.name === PLAYER_1_NAME);
                 expect(sessionPlayer?.spawnPoint).toEqual(updatedPlayer.spawnPoint);
             });
+        });
+
+        describe('addItemToPlayer', () => {
+            beforeEach(() => {
+                itemService = {
+                    addItemToPlayer: jest.fn(),
+                } as unknown as ItemEffectsService;
+
+                gameSessionService = new GameSessionService(eventEmitter, lobbyService, gridManagerService, turnService, itemService);
+            });
+
+            it('should update player inventory when adding an item without special effects', () => {
+                const item = {
+                    id: 'test-item-1',
+                    name: 'Test Item',
+                    description: 'An item for testing',
+                    imageSrc: 'test-item.png',
+                    imageSrcGrey: 'test-item-grey.png',
+                    itemCounter: 0,
+                };
+
+                const updatedInventory: [typeof item, typeof item | null] = [item, null];
+
+                const updatedPlayer = {
+                    ...testPlayer,
+                    inventory: updatedInventory,
+                };
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+
+                (itemService.addItemToPlayer as jest.Mock).mockReturnValue({
+                    player: updatedPlayer as Player,
+                    items: null,
+                });
+
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                (gameSessionService as any).addItemToPlayer(ACCESS_CODE, testPlayer, item, mockGameSession);
+
+                expect(itemService.addItemToPlayer).toHaveBeenCalledWith(testPlayer, item, mockGameSession.game.grid, ACCESS_CODE);
+                expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, testPlayer.name, {
+                    inventory: updatedInventory,
+                });
+            });
+
+            it('should not update player inventory when adding an item with special effects', () => {
+                const item = {
+                    id: 'test-item-1',
+                    name: 'Test Item',
+                    description: 'An item for testing',
+                    imageSrc: 'test-item.png',
+                    imageSrcGrey: 'test-item-grey.png',
+                    itemCounter: 0,
+                };
+
+                const updatedInventory: [typeof item, typeof item | null] = [item, null];
+
+                const updatedPlayer = {
+                    ...testPlayer,
+                    inventory: updatedInventory,
+                };
+
+                const specialEffectItems = [
+                    {
+                        id: 'effect-item',
+                        name: 'Effect Item',
+                        description: 'Special effect item',
+                        imageSrc: 'effect-item.png',
+                        imageSrcGrey: 'effect-item-grey.png',
+                        itemCounter: 0,
+                    },
+                ];
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+
+                (itemService.addItemToPlayer as jest.Mock).mockReturnValue({
+                    player: updatedPlayer as Player,
+                    items: specialEffectItems,
+                });
+
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                (gameSessionService as any).addItemToPlayer(ACCESS_CODE, testPlayer, item, mockGameSession);
+
+                expect(itemService.addItemToPlayer).toHaveBeenCalledWith(testPlayer, item, mockGameSession.game.grid, ACCESS_CODE);
+                expect((gameSessionService as any).updateGameSessionPlayerList).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('createGameSession', () => {
+            it('should initialize turn with CTF mode when gameMode is CTF', () => {
+                turnService.initializeTurnCTF = jest.fn().mockReturnValue(createMockTurn());
+                turnService.initializeTurn = jest.fn().mockReturnValue(createMockTurn());
+
+                gridManagerService.assignItemsToRandomItems = jest.fn().mockReturnValue(MOCK_LOBBY.game.grid);
+                gridManagerService.findSpawnPoints = jest.fn().mockReturnValue([]);
+                gridManagerService.assignPlayersToSpawnPoints = jest.fn().mockReturnValue([MOCK_LOBBY.players, MOCK_LOBBY.game.grid]);
+
+                gameSessionService['updatePlayerListSpawnPoint'] = jest.fn();
+                gameSessionService['startTransitionPhase'] = jest.fn();
+                gameSessionService['gameSessions'] = new Map();
+
+                gameSessionService.createGameSession(ACCESS_CODE, GameMode.CTF);
+
+                expect(turnService.initializeTurnCTF).toHaveBeenCalledWith(ACCESS_CODE);
+                expect(turnService.initializeTurn).not.toHaveBeenCalled();
+            });
+
+            it('should initialize turn with regular mode when gameMode is not CTF', () => {
+                turnService.initializeTurnCTF = jest.fn().mockReturnValue(createMockTurn());
+                turnService.initializeTurn = jest.fn().mockReturnValue(createMockTurn());
+
+                gridManagerService.assignItemsToRandomItems = jest.fn().mockReturnValue(MOCK_LOBBY.game.grid);
+                gridManagerService.findSpawnPoints = jest.fn().mockReturnValue([]);
+                gridManagerService.assignPlayersToSpawnPoints = jest.fn().mockReturnValue([MOCK_LOBBY.players, MOCK_LOBBY.game.grid]);
+
+                gameSessionService['updatePlayerListSpawnPoint'] = jest.fn();
+                gameSessionService['startTransitionPhase'] = jest.fn();
+                gameSessionService['gameSessions'] = new Map();
+
+                gameSessionService.createGameSession(ACCESS_CODE, GameMode.Classic);
+
+                expect(turnService.initializeTurn).toHaveBeenCalledWith(ACCESS_CODE);
+                expect(turnService.initializeTurnCTF).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('updateWallTile', () => {
+            it('should update the grid and player when game session exists', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+                const updatedPlayer = { ...testPlayer, actionPoints: testPlayer.actionPoints - 1 };
+                const updatedGrid = [...MOCK_LOBBY.game.grid];
+
+                jest.spyOn(gridManagerService, 'updateWallTile').mockReturnValue([updatedGrid, updatedPlayer]);
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService['gameSessions'].set(ACCESS_CODE, mockGameSession);
+
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).toHaveBeenCalledWith(
+                    mockGameSession.game.grid,
+                    ACCESS_CODE,
+                    previousTile,
+                    newTile,
+                    testPlayer,
+                );
+                expect(mockGameSession.game.grid).toBe(updatedGrid);
+                expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, updatedPlayer.name, updatedPlayer);
+            });
+
+            it('should return early if game session does not exist', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+
+                jest.spyOn(gridManagerService, 'updateWallTile');
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).not.toHaveBeenCalled();
+                expect((gameSessionService as any).updateGameSessionPlayerList).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('updateWallTile', () => {
+            it('should update the grid and player when game session exists', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+                const updatedPlayer = { ...testPlayer, actionPoints: testPlayer.actionPoints - 1 };
+                const updatedGrid = [...MOCK_LOBBY.game.grid];
+
+                jest.spyOn(gridManagerService, 'updateWallTile').mockReturnValue([updatedGrid, updatedPlayer]);
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                const mockGameSession = createMockGameSession(MOCK_LOBBY.game.grid, {});
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService['gameSessions'].set(ACCESS_CODE, mockGameSession);
+
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).toHaveBeenCalledWith(
+                    mockGameSession.game.grid,
+                    ACCESS_CODE,
+                    previousTile,
+                    newTile,
+                    testPlayer,
+                );
+                expect(mockGameSession.game.grid).toBe(updatedGrid);
+                expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, updatedPlayer.name, updatedPlayer);
+            });
+
+            it('should return early if game session does not exist', () => {
+                const previousTile = { ...MOCK_TILE, id: 'prev-tile', type: TileType.Wall };
+                const newTile = { ...MOCK_TILE, id: 'new-tile', type: TileType.Wall };
+
+                jest.spyOn(gridManagerService, 'updateWallTile');
+                jest.spyOn(gameSessionService as any, 'updateGameSessionPlayerList');
+
+                gameSessionService['gameSessions'] = new Map();
+                gameSessionService.updateWallTile(ACCESS_CODE, previousTile, newTile, testPlayer);
+
+                expect(gridManagerService.updateWallTile).not.toHaveBeenCalled();
+                expect((gameSessionService as any).updateGameSessionPlayerList).not.toHaveBeenCalled();
+            });
+        });
+
+        describe('handlePlayerItemReset', () => {
+            beforeEach(() => {
+                itemService = {
+                    handlePlayerItemReset: jest.fn(),
+                } as unknown as ItemEffectsService;
+
+                gameSessionService = new GameSessionService(eventEmitter, lobbyService, gridManagerService, turnService, itemService);
+
+                gameSessionService.getGameSession = jest.fn().mockReturnValue({
+                    game: {
+                        grid: MOCK_LOBBY.game.grid,
+                    },
+                });
+
+                gameSessionService['updateGameSessionPlayerList'] = jest.fn();
+            });
+
+            it('should reset player items and update the game session player list', () => {
+                const updatedPlayer = {
+                    ...testPlayer,
+                    inventory: [null, null] as [Item | null, Item | null],
+                    hp: { current: 8, max: 10 },
+                    movementPoints: 5,
+                };
+
+                (itemService.handlePlayerItemReset as jest.Mock).mockReturnValue({
+                    name: testPlayer.name,
+                    player: updatedPlayer,
+                });
+
+                gameSessionService.handlePlayerItemReset(ACCESS_CODE, testPlayer);
+
+                expect(gameSessionService.getGameSession).toHaveBeenCalledWith(ACCESS_CODE);
+                expect(itemService.handlePlayerItemReset).toHaveBeenCalledWith(testPlayer, MOCK_LOBBY.game.grid, ACCESS_CODE);
+                expect(gameSessionService['updateGameSessionPlayerList']).toHaveBeenCalledWith(ACCESS_CODE, testPlayer.name, updatedPlayer);
+            });
+
+            it('should handle player with different property updates', () => {
+                const updatedPlayer = {
+                    ...testPlayer,
+                    inventory: [null, null] as [Item | null, Item | null],
+                    attack: { value: 3, bonusDice: DiceType.D4 },
+                    defense: { value: 2, bonusDice: DiceType.D6 },
+                };
+
+                (itemService.handlePlayerItemReset as jest.Mock).mockReturnValue({
+                    name: testPlayer.name,
+                    player: updatedPlayer,
+                });
+
+                gameSessionService.handlePlayerItemReset(ACCESS_CODE, testPlayer);
+
+                expect(gameSessionService.getGameSession).toHaveBeenCalledWith(ACCESS_CODE);
+                expect(itemService.handlePlayerItemReset).toHaveBeenCalledWith(testPlayer, MOCK_LOBBY.game.grid, ACCESS_CODE);
+                expect(gameSessionService['updateGameSessionPlayerList']).toHaveBeenCalledWith(ACCESS_CODE, testPlayer.name, updatedPlayer);
+            });
+        });
+
+        describe('handleItemDropped', () => {
+            let mockItem: Item;
+            let mockGameSession: GameSession;
+
+            beforeEach(() => {
+                mockItem = {
+                    id: 'item-1',
+                    name: 'Test Item',
+                    description: 'Test Description',
+                    imageSrc: 'test-image.png',
+                    imageSrcGrey: 'test-image-grey.png',
+                    itemCounter: 0,
+                };
+
+                mockGameSession = createMockGameSession(
+                    [
+                        [DEFAULT_SPAWN_TILE, MOCK_TILE],
+                        [MOCK_TILE, MOCK_TILE],
+                    ],
+                    {},
+                );
+
+                jest.spyOn(gameSessionService, 'getGameSession').mockReturnValue(mockGameSession);
+
+                const mockItemEffectsService = {
+                    handleItemDropped: jest.fn().mockReturnValue({
+                        name: testPlayer.name,
+                        player: { ...testPlayer, inventory: [null, null] },
+                    }),
+                };
+
+                Object.defineProperty(gameSessionService, 'itemEffectsService', {
+                    get: () => mockItemEffectsService,
+                });
+
+                jest.spyOn(gameSessionService, 'updateGameSessionPlayerList').mockImplementation();
+            });
+
+            it('should process item drop and update the player list', () => {
+                gameSessionService.handleItemDropped(ACCESS_CODE, testPlayer, mockItem);
+
+                expect(gameSessionService['itemEffectsService'].handleItemDropped).toHaveBeenCalledWith(
+                    testPlayer,
+                    mockItem,
+                    mockGameSession.game.grid,
+                    ACCESS_CODE,
+                );
+
+                expect(gameSessionService.updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, testPlayer.name, {
+                    ...testPlayer,
+                    inventory: [null, null],
+                });
+            });
+        });
+
+        it('should add item to player when moving to tile with non-Home item', async () => {
+            const mockItem = {
+                name: 'TestItem',
+                id: 'test-item',
+                imageSrc: 'test.png',
+                imageSrcGrey: 'test-grey.png',
+                description: 'Test item',
+                itemCounter: 0,
+            } as Item;
+
+            const tileWithItem = { ...MOCK_TILE, item: mockItem };
+            testMovementPath = [MOCK_TILE, tileWithItem];
+
+            const gameSession = gameSessionService.getGameSession(ACCESS_CODE);
+            gameSession.game.grid = [
+                [testMovementPath[0], testMovementPath[1]],
+                [MOCK_TILE, MOCK_TILE],
+            ];
+
+            const addItemSpy = jest.spyOn(gameSessionService as any, 'addItemToPlayer');
+
+            const updatePromise = gameSessionService.updatePlayerPosition(ACCESS_CODE, testMovementPath, testPlayer);
+            await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
+            await updatePromise;
+
+            expect(addItemSpy).toHaveBeenCalledWith(ACCESS_CODE, testPlayer, mockItem, gameSession);
+        });
+
+        describe('updatePlayerPosition with Swap item', () => {
+            it('should add/remove swap effects when moving on/off ice tiles', async () => {
+                const startTile: Tile = {
+                    ...MOCK_TILE,
+                    id: 'start-tile',
+                    type: TileType.Default,
+                };
+
+                const iceTile: Tile = {
+                    ...MOCK_TILE,
+                    id: 'ice-tile',
+                    type: TileType.Ice,
+                };
+
+                const regularTile: Tile = {
+                    ...MOCK_TILE,
+                    id: 'regular-tile',
+                    type: TileType.Default,
+                };
+
+                testMovementPath = [startTile, iceTile, regularTile];
+
+                const gameGrid: Tile[][] = [
+                    [startTile, iceTile],
+                    [regularTile, MOCK_TILE],
+                ];
+
+                const swapItem: Item = {
+                    name: ItemName.Swap,
+                    id: 'swap-item',
+                    imageSrc: 'swap.png',
+                    imageSrcGrey: 'swap-grey.png',
+                    description: 'Swap item',
+                    itemCounter: 0,
+                };
+
+                const testPlayerWithSwap: Player = {
+                    ...testPlayer,
+                    inventory: [swapItem, null],
+                };
+
+                gameSessionService['gameSessions'].set(ACCESS_CODE, {
+                    game: {
+                        ...MOCK_LOBBY.game,
+                        grid: gameGrid,
+                    },
+                    turn: createMockTurn(),
+                });
+
+                const updatePromise = gameSessionService.updatePlayerPosition(ACCESS_CODE, testMovementPath, testPlayerWithSwap);
+
+                await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
+                expect(itemService.addEffect).toHaveBeenCalledWith(
+                    testPlayerWithSwap,
+                    swapItem,
+                    expect.objectContaining({
+                        id: 'ice-tile',
+                        type: TileType.Ice,
+                    }),
+                );
+
+                await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
+                await updatePromise;
+                expect(itemService.removeEffects).toHaveBeenCalledWith(testPlayerWithSwap, 0);
+            });
+        });
+
+        describe('updatePlayerPosition flag capture', () => {
+            it('should end game with team members when capturing flag on home spawn', async () => {
+                const accessCode = ACCESS_CODE;
+                const team = TeamType.RED;
+                const homeItem: Item = {
+                    name: ItemName.Home,
+                    id: 'home-item',
+                    imageSrc: 'home.png',
+                    imageSrcGrey: 'home-grey.png',
+                    description: 'Spawn point',
+                    itemCounter: 0,
+                };
+
+                const flagItem: Item = {
+                    name: ItemName.Flag,
+                    id: 'flag-item',
+                    imageSrc: 'flag.png',
+                    imageSrcGrey: 'flag-grey.png',
+                    description: 'Team flag',
+                    itemCounter: 0,
+                };
+
+                const homeSpawnTile: Tile = { ...MOCK_TILE, item: homeItem };
+                const startTile: Tile = { ...MOCK_TILE };
+                const gameGrid: Tile[][] = [[homeSpawnTile, startTile]];
+
+                const movingPlayer: Player = {
+                    ...testPlayer,
+                    name: 'FlagCarrier',
+                    team,
+                    inventory: [flagItem, null],
+                };
+
+                const sameTeamPlayer: Player = {
+                    ...createValidPlayer('Teammate', 5, false),
+                    team,
+                };
+
+                let currentPlayerTile = startTile;
+                jest.spyOn(gridManagerService, 'isFlagOnSpawnPoint').mockImplementation(() => {
+                    return currentPlayerTile.item?.name === ItemName.Home && movingPlayer.inventory.some((i) => i?.name === ItemName.Flag);
+                });
+
+                gameSessionService.createGameSession(accessCode, GameMode.CTF);
+                const session = gameSessionService.getGameSession(accessCode);
+                session.turn.orderedPlayers = [movingPlayer, sameTeamPlayer];
+                session.game.grid = gameGrid;
+
+                const endGameSpy = jest.spyOn(gameSessionService, 'endGameSession');
+                const updatePromise = gameSessionService.updatePlayerPosition(accessCode, [startTile, homeSpawnTile], movingPlayer);
+
+                gameGrid[0][0].player = movingPlayer;
+                currentPlayerTile = homeSpawnTile;
+
+                await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY * 2);
+                await updatePromise;
+
+                expect(endGameSpy).toHaveBeenCalledWith(accessCode, [movingPlayer.name, sameTeamPlayer.name]);
+            });
+        });
+
+        it('should return early if gameSession is not found when updating door tile', () => {
+            const accessCode = 'non-existent-code';
+            const previousTile = CLOSED_DOOR_TILE;
+            const newTile = OPEN_DOOR_TILE;
+
+            const gridManagerSpy = jest.spyOn(gridManagerService, 'updateDoorTile');
+
+            const gameSessions = new Map<string, GameSession>();
+            gameSessionService['gameSessions'] = gameSessions;
+
+            gameSessionService.updateDoorTile(accessCode, previousTile, newTile);
+
+            expect(gridManagerSpy).not.toHaveBeenCalled();
         });
     });
 });

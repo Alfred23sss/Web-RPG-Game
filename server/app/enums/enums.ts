@@ -10,9 +10,13 @@ export enum GameDecorations {
 }
 
 export enum GameModeType {
-    Classic = './assets/gamemodes/classic.png',
-    CTF = './assets/gamemodes/CTF.png',
-    Default = './assets/gamemodes/classic.png',
+    Classic = 'Classic',
+    CTF = 'CTF',
+}
+
+export enum TeamType {
+    RED = 'red',
+    BLUE = 'blue',
 }
 
 export enum AvatarType {
@@ -100,7 +104,7 @@ export enum GameSizePlayerCount {
 }
 
 export enum AttributeType {
-    Vitality = 'Vitalité',
+    Hp = 'hp',
     Speed = 'Vitesse',
     Attack = 'Attaque',
     Defense = 'Défense',
@@ -186,20 +190,33 @@ export enum EventEmit {
     UpdatePlayerList = 'update.player.list',
     UpdatePlayer = 'update.player',
     GameCombatStarted = 'game.combat.started',
+    // stat
     GameCombatAttackResult = 'game.combat.attack.result',
     GameCombatEscape = 'game.combat.escape',
     GameCombatEnded = 'game.combat.ended',
     AdminModeDisabled = 'admin.mode.disabled',
+    // stat
     GameDoorUpdate = 'game.door.update',
     GameTurnTimeout = 'game.turn.timeout',
     GamePlayerMovement = 'game.player.movement',
     GameEnded = 'game.ended',
     GameGridUpdate = 'game.grid.update',
+    // stat
     GameTransitionStarted = 'game.transition.started',
     GameTransitionCountdown = 'game.transition.countdown',
     GameTurnStarted = 'game.turn.started',
     GameTurnTimer = 'game.turn.timer',
     GameTurnResumed = 'game.turn.resumed',
+    GameWallUpdate = 'game.wall.update',
+    ItemChoice = 'item.choice',
+    PlayerUpdate = 'player.client.update',
+    TeamCreated = 'team.created',
+    GameItemCollected = 'game.item.collected',
+    GameTileVisited = 'game.tile.visited',
+    GameFlagPossessed = 'game.flag.possessed',
+    InitializeGameStatistics = 'initialize.game.statistics',
+    ShowGlobalStats = 'show.global.stats',
+    UpdateDoorStats = 'update.door.stats',
 }
 
 export enum Behavior {

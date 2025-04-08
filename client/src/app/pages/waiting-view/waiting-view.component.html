@@ -56,7 +56,7 @@
             </button>
 
             <button class="button lock-button" (click)="changeLobbyLockStatus()">
-                <span class="pixel-text">{{ lobby?.isLocked ? 'DÉVERROUILLER' : 'VERROUILLER' }}</span>
+                <span class="pixel-text">{{ lobby?.isLocked ? '🔒DÉVERROUILLER' : '🔓VERROUILLER' }}</span>
             </button>
 
             <button class="button virtual-button" (click)="createVirtualPlayer()" [disabled]="lobby?.isLocked">

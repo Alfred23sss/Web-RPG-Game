@@ -4,6 +4,7 @@ import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -22,6 +23,7 @@ export class GameCombatService {
         private readonly gameSessionService: GameSessionService,
         private readonly eventEmitter: EventEmitter2,
         private readonly combatHelper: CombatHelperService,
+        private readonly itemEffectsService: ItemEffectsService,
     ) {}
 
     handleCombatSessionAbandon(accessCode: string, playerName: string): void {
@@ -55,6 +57,7 @@ export class GameCombatService {
             attackSuccessful,
             attackerScore,
             defenseScore,
+            accessCode,
         });
         if (attackSuccessful) {
             this.handleSuccessfulAttack(combatState, attackerScore, defenseScore, defenderPlayer, accessCode);
@@ -91,7 +94,7 @@ export class GameCombatService {
         if (player.combatWon === WIN_CONDITION) {
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
             this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
-            this.gameSessionService.endGameSession(accessCode, player.name);
+            this.gameSessionService.endGameSession(accessCode, [player.name]);
             return true;
         }
         return false;
@@ -163,7 +166,7 @@ export class GameCombatService {
         player.hp.current = player.hp.max;
         player.combatWon++;
         if (this.checkPlayerWon(accessCode, player)) {
-            this.gameSessionService.endGameSession(accessCode, player.name);
+            this.gameSessionService.endGameSession(accessCode, [player.name]);
         }
         this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
         this.emitEvent(EventEmit.UpdatePlayer, { player });
@@ -173,8 +176,17 @@ export class GameCombatService {
     private resetHealth(players: Player[], accessCode): void {
         players.forEach((player) => {
             player.hp.current = player.hp.max;
+            this.resetStats(player);
             this.emitEvent(EventEmit.UpdatePlayer, { player });
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
+        });
+    }
+
+    private resetStats(player: Player): void {
+        player.inventory.forEach((item, index) => {
+            if (!(item === null) && !this.itemEffectsService.isHealthConditionValid(player, item)) {
+                this.itemEffectsService.removeEffects(player, index);
+            }
         });
     }
 
@@ -220,6 +232,11 @@ export class GameCombatService {
     ): void {
         const attackDamage = attackerScore - defenseScore;
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
+
+        defenderPlayer.inventory.forEach((item) => {
+            this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
+        });
+
         this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
         if (defenderPlayer.hp.current === 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);
@@ -231,6 +248,7 @@ export class GameCombatService {
     private handleCombatEnd(combatState: CombatState, defenderPlayer: Player, accessCode: string): void {
         combatState.currentFighter.combatWon++;
         this.resetHealth([combatState.currentFighter, defenderPlayer], accessCode);
+        this.gameSessionService.handlePlayerItemReset(accessCode, defenderPlayer);
         const updatedGridAfterTeleportation = this.combatHelper.resetLoserPlayerPosition(
             defenderPlayer,
             this.gameSessionService.getGameSession(accessCode).game.grid,

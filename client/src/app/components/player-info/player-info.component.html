@@ -45,8 +45,13 @@
 </div>
 <div class="inventory">
     <h3>Inventaire</h3>
-    @for(slot of [0, 1]; track slot){
-    <div class="inventory-slot">(Vide)</div>
-    <!-- *ngFor="let slot of [0, 1] -->
+    @for (slot of [0, 1]; track slot) {
+        @if (gameData.clientPlayer.inventory[slot]) {
+            <div class="inventory-slot">
+                <img [src]="gameData.clientPlayer.inventory[slot].imageSrc" alt="Item Image" class="item-image" />
+            </div>
+        }   @else {
+            <div class="inventory-slot">(Vide)</div>
+        }
     }
 </div>

@@ -55,4 +55,39 @@ describe('ChatComponent', () => {
 
         expect(messageService.emitMessage).not.toHaveBeenCalled();
     });
+
+    describe('handleKeyDown', () => {
+        let yourInstance: ChatComponent;
+
+        beforeEach(() => {
+            yourInstance = new ChatComponent(messageService);
+        });
+
+        it('should call sendMessage when "Enter" is pressed and shiftKey is not pressed', () => {
+            const sendMessageSpy = spyOn(yourInstance, 'sendMessage');
+            const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: false });
+
+            yourInstance.handleKeyDown(event);
+
+            expect(sendMessageSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it('should not call sendMessage when "Enter" is pressed with shiftKey', () => {
+            const sendMessageSpy = spyOn(yourInstance, 'sendMessage');
+            const event = new KeyboardEvent('keydown', { key: 'Enter', shiftKey: true });
+
+            yourInstance.handleKeyDown(event);
+
+            expect(sendMessageSpy).not.toHaveBeenCalled();
+        });
+
+        it('should not call sendMessage when a key other than "Enter" is pressed', () => {
+            const sendMessageSpy = spyOn(yourInstance, 'sendMessage');
+            const event = new KeyboardEvent('keydown', { key: 'a', shiftKey: false });
+
+            yourInstance.handleKeyDown(event);
+
+            expect(sendMessageSpy).not.toHaveBeenCalled();
+        });
+    });
 });

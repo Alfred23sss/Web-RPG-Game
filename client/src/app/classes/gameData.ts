@@ -1,6 +1,7 @@
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
+import { GameStatistics } from '@app/interfaces/statistics';
 import { Tile } from '@app/interfaces/tile';
 
 export class GameData {
@@ -21,6 +22,9 @@ export class GameData {
     attackResult: { success: boolean; attackScore: number; defenseScore: number } | null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
+    isGameEnding: boolean = false;
+    gameStats: GameStatistics;
+    playersStats: { [key: string]: GameStatistics } = {};
 
     constructor() {
         this.game = {} as Game;

@@ -1,11 +1,12 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { POPUP_DELAY } from '@app/constants/global.constants';
 import { TileType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 
 @Component({
@@ -15,24 +16,29 @@ import { Tile } from '@app/interfaces/tile';
     templateUrl: './grid.component.html',
     styleUrls: ['./grid.component.scss'],
 })
-export class GridComponent {
+export class GridComponent implements OnChanges {
     @Input() grid: Tile[][] | undefined = [];
     @Input() availablePath: Tile[] | undefined = [];
     @Input() quickestPath: Tile[] | undefined = [];
     @Input() isEditionMode: boolean = false;
     @Input() isActionMode: boolean = false;
     @Input() isDebugMode: boolean = false;
+    @Input() clientPlayer: Player;
 
     @Output() tileHovered = new EventEmitter<Tile>();
     @Output() tileClicked = new EventEmitter<Tile>();
     @Output() playerAttacked = new EventEmitter<Tile>();
     @Output() doorClicked = new EventEmitter<Tile>();
+    @Output() wallClicked = new EventEmitter<Tile>();
     @Output() tileRightClicked = new EventEmitter<{ tile: Tile; event: MouseEvent }>();
     @Output() teleportClicked = new EventEmitter<Tile>();
 
     tileType = TileType;
 
-    constructor(private dialog: MatDialog) {}
+    constructor(
+        private dialog: MatDialog,
+        private cdr: ChangeDetectorRef,
+    ) {}
 
     isInQuickestPath(tile: Tile): boolean {
         return this.quickestPath ? this.quickestPath.some((t) => t.id === tile.id) : false;
@@ -45,8 +51,10 @@ export class GridComponent {
     onTileClick(tile: Tile): void {
         if (tile.player) {
             this.playerAttacked.emit(tile);
-        } else if (tile.type === TileType.Door) {
+        } else if (tile.type === TileType.Door && !tile.item) {
             this.doorClicked.emit(tile);
+        } else if (tile.type === TileType.Wall) {
+            this.wallClicked.emit(tile);
         }
         if (this.isAvailablePath(tile)) {
             this.tileClicked.emit(tile);
@@ -71,6 +79,12 @@ export class GridComponent {
             setTimeout(() => {
                 dialogRef.close();
             }, POPUP_DELAY);
+        }
+    }
+
+    ngOnChanges(): void {
+        if (this.clientPlayer) {
+            this.cdr.detectChanges(); // Manually trigger change detection
         }
     }
 }

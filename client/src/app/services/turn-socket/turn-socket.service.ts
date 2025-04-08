@@ -52,6 +52,7 @@ export class TurnSocketService {
     private onTransitionStarted(): void {
         this.socketClientService.on('transitionStarted', (data: { nextPlayer: Player; transitionDuration: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
+            this.gameplayService.closePopUp();
             this.clientNotifier.showMultipleMessages(`Le tour à ${data.nextPlayer.name} commence dans ${data.transitionDuration} secondes`);
             if (data.nextPlayer.name === gameData.clientPlayer.name) {
                 gameData.clientPlayer = data.nextPlayer;

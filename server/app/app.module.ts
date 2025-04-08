@@ -1,4 +1,6 @@
 import { Game, gameSchema } from '@app/model/database/game';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -14,11 +16,15 @@ import { AccessCodesService } from './services/access-codes/access-codes.service
 import { CombatHelperService } from './services/combat-helper/combat-helper.service';
 import { GameCombatService } from './services/combat-manager/combat-manager.service';
 import { GameSessionTurnService } from './services/game-session-turn/game-session-turn.service';
-import { GameSessionService } from './services/game-session/game-session.service';
 import { GameService } from './services/game/game.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
+import { PlayerMovementService } from './services/player-movement/playerMovement.service';
+import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtualPlayerCreation.service';
 import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
+import { AggressiveVPService } from './services/vp-aggressive/aggressiveVP.service';
+import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -37,8 +43,13 @@ import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.se
     ],
     controllers: [GameController, AccessCodesController],
     providers: [
+        PlayerMovementService,
         VirtualPlayerGateway,
         VirtualPlayerService,
+        VirtualPlayerCreationService,
+        AggressiveVPService,
+        DefensiveVPService,
+        GameStatisticsService,
         LobbyGateway,
         LobbyService,
         ChatGateway,
@@ -51,6 +62,7 @@ import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.se
         GridManagerService,
         GameSessionTurnService,
         CombatHelperService,
+        ItemEffectsService,
     ],
     exports: [AccessCodesService],
 })

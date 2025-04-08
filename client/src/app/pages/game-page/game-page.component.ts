@@ -7,6 +7,8 @@ import { GameCombatComponent } from '@app/components/game-combat/game-combat.com
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
+import { ItemName, ItemType, TeamType } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -22,6 +24,7 @@ import { Subscription } from 'rxjs';
 })
 export class GamePageComponent implements OnInit, OnDestroy {
     gameData: GameData = new GameData();
+    teamType = TeamType;
     activeTab: 'chat' | 'log' = 'chat';
     private keyPressHandler: (event: KeyboardEvent) => void;
     private gameDataSubscription: Subscription;
@@ -32,6 +35,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private readonly gameStateSocketService: GameStateSocketService,
         private readonly socketListenerService: SocketListenerService,
     ) {}
+
+    get activePlayerCount(): number {
+        return this.gameData.lobby.players.filter((player) => player.hasAbandoned !== true).length;
+    }
 
     ngOnInit(): void {
         this.gameDataSubscription = this.gameStateSocketService.gameData$.subscribe((data) => {
@@ -45,6 +52,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
     handleDoorClick(targetTile: Tile): void {
         this.gameplayService.handleDoorClick(this.gameData, targetTile);
+    }
+
+    handleWallClick(targetTile: Tile): void {
+        this.gameplayService.handleWallClick(this.gameData, targetTile, this.gameData.clientPlayer);
     }
 
     handleAttackClick(targetTile: Tile): void {
@@ -97,6 +108,16 @@ export class GamePageComponent implements OnInit, OnDestroy {
             width: '650px',
             disableClose: true,
         });
+    }
+
+    hasFlag(player: Player): boolean {
+        return player.inventory.some((item) => item?.name.toLowerCase() === ItemName.Flag);
+    }
+
+    getFlagImage(player: Player): string {
+        const flagItem = player.inventory.find((item) => item !== null && item.name === ItemName.Flag);
+
+        return flagItem?.imageSrc || ItemType.Flag;
     }
 
     private handleKeyPress(event: KeyboardEvent): void {
