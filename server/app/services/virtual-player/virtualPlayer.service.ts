@@ -1,5 +1,5 @@
-import { VP_TURN_DONE_MS } from '@app/constants/constants';
-import { Behavior, EventEmit, ItemName, MoveType } from '@app/enums/enums';
+import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
+import { Behavior, EventEmit, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -44,8 +44,9 @@ export class VirtualPlayerService implements OnModuleInit {
             }
         }); 
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
-            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), VP_TURN_DONE_MS);
-            console.log('starting another turn behavior');
+            const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
+            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
+            console.log('starting another turn behavior', randomDelay);
         });
     }
 
@@ -101,7 +102,7 @@ export class VirtualPlayerService implements OnModuleInit {
     private findItems(grid: Tile[][]): Move[] {
         return grid.flatMap((row) =>
             row
-                .filter((tile) => tile.item && tile.item.name !== ItemName.Home)
+                .filter((tile) => tile.item)
                 .map((tile) => ({
                     tile,
                     type: MoveType.Item,

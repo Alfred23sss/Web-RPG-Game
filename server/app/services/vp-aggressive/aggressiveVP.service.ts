@@ -1,4 +1,4 @@
-import { AGGRESSIVE_ITEM_SCORE, ATTACK_SCORE, IN_RANGE_BONUS, INVALID_ITEM_PENALTY, NO_SCORE } from '@app/constants/constants';
+import { AGGRESSIVE_ITEM_SCORE, ATTACK_SCORE, FLAG_SCORE, IN_RANGE_BONUS, INVALID_ITEM_PENALTY, NO_SCORE } from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -45,7 +45,8 @@ export class AggressiveVPService {
             move.score = NO_SCORE;
             this.calculateMovementScore(move, virtualPlayerTile, virtualPlayer, lobby);
             this.calculateAttackScore(move);
-            this.calculateItemScore(move);
+            this.calculateItemScore(move, virtualPlayer);
+            console.log('tile', move.tile.id, 'score', move.score);
             return move;
         });
     }
@@ -53,6 +54,7 @@ export class AggressiveVPService {
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
         const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
+
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
             console.log(move.tile.id, movementCost);
@@ -72,19 +74,41 @@ export class AggressiveVPService {
         if (move.type === MoveType.Attack) {
             move.score += ATTACK_SCORE;
         }
+        if (this.isFlagInInventory(move.tile.player)) {
+            move.score += FLAG_SCORE;
+        }
     }
 
-    private calculateItemScore(move: Move): void {
+    private calculateItemScore(move: Move, virtualPlayer: Player): void {
         if (move.type === MoveType.Item) {
-            if (move.tile.item.name === ItemName.Potion || move.tile.item.name === ItemName.Fire) {
-                move.score += AGGRESSIVE_ITEM_SCORE;
-            } else {
-                move.score += INVALID_ITEM_PENALTY; // (fait en sorte quil ignore les autres items jsp si c good??)
+            switch (move.tile.item.name) {
+                case ItemName.Fire:
+                case ItemName.Potion:
+                    move.score += AGGRESSIVE_ITEM_SCORE;
+                    break;
+                case ItemName.Flag:
+                    move.score += FLAG_SCORE;
+                    break;
+                case ItemName.Home:
+                    if ((virtualPlayer.spawnPoint.tileId = move.tile.id)) {
+                        move.score += this.isFlagInInventory(virtualPlayer) ? FLAG_SCORE : INVALID_ITEM_PENALTY;
+                    } else {
+                        move.score += INVALID_ITEM_PENALTY;
+                    }
+                    break;
+                default:
+                    move.score += INVALID_ITEM_PENALTY;
+                    break;
             }
         }
     }
 
     private getVirtualPlayerTile(virtualPlayer: Player, grid: Tile[][]): Tile {
         return this.gridManagerService.findTileByPlayer(grid, virtualPlayer);
+    }
+
+    private isFlagInInventory(player: Player): boolean {
+        if (!player || !player.inventory) return false;
+        return player.inventory.some((item) => item && item.name === ItemName.Flag);
     }
 }
