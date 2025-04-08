@@ -168,7 +168,7 @@ export class PlayerMovementService {
     }
 
     private isValidNeighbor(neighbor: Tile): boolean {
-        return neighbor.player === undefined || neighbor.type !== TileType.Wall;
+        return neighbor.player === undefined && neighbor.type !== TileType.Wall;
     }
 
     private isValidNeighborForVirtualPlayer(tile: Tile, virtualPlayer: Player): boolean {
