@@ -135,6 +135,7 @@ export class GameGateway {
         this.logger.log('player teleported');
     }
 
+    // no need to receive it here
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
         this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
