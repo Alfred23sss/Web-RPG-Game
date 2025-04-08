@@ -975,5 +975,29 @@ describe('GameplayService', () => {
 
             expect(service.endTurn).not.toHaveBeenCalled();
         });
+        it('should return early if gameData.game is null', () => {
+            mockGameData.game = undefined as any;
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should return early if gameData.game.grid is null', () => {
+            mockGameData.game!.grid = null as any;
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+        it('should return early if gameData.game.grid is undefined', () => {
+            mockGameData.game!.grid = undefined as any;
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
     });
 });
