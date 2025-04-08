@@ -343,8 +343,8 @@ describe('ItemEffectsService', () => {
             service.applyItemModifiers(rubikItem);
 
             expect(rubikItem.modifiers).toEqual([
-                { attribute: AttributeType.Speed, value: BONUS_VALUE },
-                { attribute: AttributeType.Hp, value: PENALTY_VALUE },
+                { attribute: AttributeType.Hp, value: BONUS_VALUE },
+                { attribute: AttributeType.Speed, value: PENALTY_VALUE },
             ]);
             expect(rubikItem.isActive).toBe(false);
         });
