@@ -146,7 +146,7 @@ export class GameStatisticsService {
     @OnEvent(EventEmit.UpdateDoorStats)
     handleDoorManipulated(payload: { accessCode: string; tile: Tile }): void {
         const { accessCode, tile } = payload;
-        if (!tile) return;
+        if (!tile) return; //miss the test for this line
 
         const doorSet = this.manipulatedDoors.get(accessCode);
         if (doorSet) {

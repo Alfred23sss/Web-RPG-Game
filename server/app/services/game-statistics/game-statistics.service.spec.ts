@@ -356,6 +356,26 @@ describe('GameStatisticsService', () => {
             const stats = service.calculateStats(mockAccessCode);
             expect(stats?.globalStats.uniqueFlagHolders).toBe(2);
         });
+
+        it('should return 0 if uniqueFlagHolders doesnt exist', () => {
+            const flagItem = { ...mockItem, name: 'flag' };
+            (service as any).flagHolders.set(mockAccessCode, undefined);
+
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: flagItem,
+                player: mockPlayer1,
+            });
+
+            service.handleItemCollected({
+                accessCode: mockAccessCode,
+                item: flagItem,
+                player: mockPlayer2,
+            });
+
+            const stats = service.calculateStats(mockAccessCode);
+            expect(stats?.globalStats.uniqueFlagHolders).toBe(0);
+        });
     });
 
     describe('edge cases', () => {
@@ -538,7 +558,7 @@ describe('GameStatisticsService', () => {
     it('should correctly assign attacker as loser when defender is the current fighter', () => {
         const attacker = mockPlayer1;
         const defender = mockPlayer2;
-        const currentFighter = defender; // NOT equal to attacker
+        const currentFighter = defender;
 
         const stats = service['gameStatistics'].get(mockAccessCode).playerStats;
         const initialVictories = stats.get(currentFighter.name).victories;
@@ -566,5 +586,107 @@ describe('GameStatisticsService', () => {
         });
 
         expect(spy).toHaveBeenCalledWith(accessCodeWithoutStats);
+    });
+
+    it('should handle item already collected by player', () => {
+        service.handleItemCollected({
+            accessCode: mockAccessCode,
+            item: mockItem,
+            player: mockPlayer1,
+        });
+
+        service.handleItemCollected({
+            accessCode: mockAccessCode,
+            item: mockItem,
+            player: mockPlayer1,
+        });
+
+        const stats = service.getGameStatistics(mockAccessCode);
+        expect(stats?.playerStats.get(mockPlayer1.name).uniqueItemsCollected.size).toBe(1);
+        expect(stats?.playerStats.get(mockPlayer1.name).uniqueItemsCollected.has(mockItem.name)).toBeTruthy();
+    });
+
+    describe('calculation methods with undefined sets', () => {
+        it('should handle undefined visitedTiles set when calculating global tile percentage', () => {
+            const accessCode = 'undefinedTilesTest';
+            service.handleGameStarted({
+                accessCode,
+                players: [mockPlayer1, mockPlayer2],
+                gameSession: mockGameSession,
+            });
+
+            const stats = service.getGameStatistics(accessCode);
+            if (stats) {
+                stats.gridSize = 100;
+
+                (service as any).visitedTiles.delete(accessCode);
+            }
+
+            const calculatedStats = service.calculateStats(accessCode);
+            expect(calculatedStats?.globalStats.tilesVisitedPercentage).toBe(0);
+        });
+        it('should handle undefined manipulatedDoors set when calculating doors percentage', () => {
+            const accessCode = 'undefinedDoorsTest';
+            service.handleGameStarted({
+                accessCode,
+                players: [mockPlayer1, mockPlayer2],
+                gameSession: mockGameSession,
+            });
+
+            const stats = service.getGameStatistics(accessCode);
+            if (stats) {
+                stats.numberOfDoors = 20;
+
+                (service as any).manipulatedDoors.delete(accessCode);
+            }
+
+            const calculatedStats = service.calculateStats(accessCode);
+            expect(calculatedStats?.globalStats.doorsManipulatedPercentage).toBe(0);
+        });
+
+        it('should handle all undefined sets when calculating statistics', () => {
+            const accessCode = 'allUndefinedTest';
+            service.handleGameStarted({
+                accessCode,
+                players: [mockPlayer1, mockPlayer2],
+                gameSession: mockGameSession,
+            });
+
+            const stats = service.getGameStatistics(accessCode);
+            if (stats) {
+                stats.gridSize = 50;
+                stats.numberOfDoors = 10;
+
+                (service as any).visitedTiles.delete(accessCode);
+                (service as any).manipulatedDoors.delete(accessCode);
+                (service as any).flagHolders.delete(accessCode);
+
+                const player1Key = `${accessCode}:${mockPlayer1.name}`;
+                const player2Key = `${accessCode}:${mockPlayer2.name}`;
+                (service as any).visitedTiles.delete(player1Key);
+                (service as any).visitedTiles.delete(player2Key);
+            }
+
+            const calculatedStats = service.calculateStats(accessCode);
+
+            expect(calculatedStats?.globalStats.tilesVisitedPercentage).toBe(0);
+            expect(calculatedStats?.globalStats.doorsManipulatedPercentage).toBe(0);
+            expect(calculatedStats?.globalStats.uniqueFlagHolders).toBe(0);
+            expect(calculatedStats?.playerStats.get(mockPlayer1.name).tilesVisitedPercentage).toBe(0);
+            expect(calculatedStats?.playerStats.get(mockPlayer2.name).tilesVisitedPercentage).toBe(0);
+        });
+    });
+
+    it('should return early and not log or add when tile is undefined', () => {
+        const logSpy = jest.spyOn(logger, 'log');
+        const accessCode = mockAccessCode;
+
+        const mockSet = new Set<string>();
+        (service as any).manipulatedDoors.set(accessCode, mockSet);
+
+        service.handleDoorManipulated({ accessCode, tile: undefined as any });
+
+        expect(logSpy).not.toHaveBeenCalled();
+        expect(mockSet.size).toBe(0);
     });
 });
