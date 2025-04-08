@@ -1,3 +1,4 @@
+import { FLAG_SCORE } from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -69,7 +70,7 @@ export class DefensiveVPService {
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         return moves.map((move) => {
             move.score = 0;
-            this.calculateItemScore(move);
+            this.calculateItemScore(move, virtualPlayer);
             this.calculateMovementScore(move, virtualPlayerTile, virtualPlayer, lobby);
 
             this.calculateAttackScore(move);
@@ -100,7 +101,7 @@ export class DefensiveVPService {
         }
     }
 
-    private calculateItemScore(move: Move): void {
+    private calculateItemScore(move: Move, virtualPlayer: Player): void {
         if (move.type !== MoveType.Item || !move.tile.item) return;
 
         const item = move.tile.item;
@@ -117,9 +118,21 @@ export class DefensiveVPService {
             case ItemName.Rubik:
                 move.score += 100;
                 break;
+            case ItemName.Home:
+                if ((virtualPlayer.spawnPoint.tileId = move.tile.id)) {
+                    move.score += this.isFlagInInventory(virtualPlayer) ? FLAG_SCORE : INVALID_ITEM_PENALTY;
+                } else {
+                    move.score += INVALID_ITEM_PENALTY;
+                }
+                break;
             default:
                 move.score += INVALID_ITEM_PENALTY;
         }
+    }
+
+    private isFlagInInventory(player: Player): boolean {
+        if (!player || !player.inventory) return false;
+        return player.inventory.some((item) => item && item.name === ItemName.Flag);
     }
 
     private calculateAttackScore(move: Move): void {
