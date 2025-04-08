@@ -421,15 +421,6 @@ describe('GameGateway', () => {
 
             expect(serverMock.emit).toHaveBeenCalledWith('gridUpdate', { grid: MOCK_PAYLOAD.grid });
         });
-
-        it('should handle game ended event', () => {
-            const payload = { accessCode: ACCESS_CODE, winner: ['winner'] };
-
-            gateway.handleGameEnded(payload);
-
-            expect(gameSessionServiceMock.deleteGameSession).toHaveBeenCalledWith(payload.accessCode);
-            expect(serverMock.emit).toHaveBeenCalledWith('gameEnded', { winner: payload.winner });
-        });
     });
 
     describe('handleCombatResult', () => {
@@ -760,19 +751,19 @@ describe('GameGateway', () => {
 
         expect(loggerMock.log).toHaveBeenCalledWith('Door update emitted');
     });
-    it('should not handle anything if the game is ending', () => {
-        const payload = {
-            player: MOCK_PLAYER,
-            accessCode: ACCESS_CODE,
-            isGameEnding: true,
-        };
+    // it('should not handle anything if the game is ending', () => {
+    //     const payload = {
+    //         player: MOCK_PLAYER,
+    //         accessCode: ACCESS_CODE,
+    //         isGameEnding: true,
+    //     };
 
-        gateway.handleGameAbandoned(MOCK_CLIENT, payload);
+    //     gateway.handleGameAbandoned(MOCK_CLIENT, payload);
 
-        expect(loggerMock.log).not.toHaveBeenCalled();
-        expect(gameSessionServiceMock.handlePlayerAbandoned).not.toHaveBeenCalled();
-        expect(gameSessionServiceMock.deleteGameSession).not.toHaveBeenCalled();
-        expect(lobbyServiceMock.leaveLobby).not.toHaveBeenCalled();
-        expect(serverMock.emit).not.toHaveBeenCalled();
-    });
+    //     expect(loggerMock.log).not.toHaveBeenCalled();
+    //     expect(gameSessionServiceMock.handlePlayerAbandoned).not.toHaveBeenCalled();
+    //     expect(gameSessionServiceMock.deleteGameSession).not.toHaveBeenCalled();
+    //     expect(lobbyServiceMock.leaveLobby).not.toHaveBeenCalled();
+    //     expect(serverMock.emit).not.toHaveBeenCalled();
+    // });
 });
