@@ -91,6 +91,10 @@ export class VirtualPlayerActionsService {
         return delayMinMS + Math.random() * (delayLimitMS - delayMinMS);
     }
 
+    getMoveCost(tile: Tile): number {
+        return this.playerMovementService.getMoveCost(tile);
+    }
+
     private async executeMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<Tile[]> {
         const movement = this.getMovement(move, virtualPlayerTile, lobby.game.grid);
         if (!movement) return;
@@ -150,11 +154,6 @@ export class VirtualPlayerActionsService {
         this.updateActionPoints(currentTile.player);
         this.emitEvent(EventEmit.VPActionDone, accessCode);
     }
-
-    getMoveCost(tile: Tile): number {
-        return this.playerMovementService.getMoveCost(tile);
-    }
-
 
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);

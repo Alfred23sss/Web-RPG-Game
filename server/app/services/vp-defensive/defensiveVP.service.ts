@@ -43,6 +43,20 @@ export class DefensiveVPService {
 
         this.moveAlongPath(partialPath, virtualPlayerTile, lobby);
     }
+ 
+    async tryToEscapeIfWounded(virtualPlayer: Player, accessCode: string): Promise<boolean> {
+        const isInCombat = this.gameCombatService.isCombatActive(accessCode);
+        if (!isInCombat) return false;
+        const combatState = this.gameCombatService.getCombatState(accessCode);
+        if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return false;
+        const healthRatio = virtualPlayer.hp.current / virtualPlayer.hp.max;
+        if (healthRatio < 1) {
+            console.log('🚨 Trying to escape...');
+            this.gameCombatService.attemptEscape(accessCode, virtualPlayer);
+            return true;
+        }
+        return false;
+    }
 
     private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move | undefined {
         const itemMoves = moves.filter((move) => move.type === MoveType.Item);
@@ -131,21 +145,6 @@ export class DefensiveVPService {
     private getVirtualPlayerTile(virtualPlayer: Player, grid: Tile[][]): Tile {
         return this.gridManagerService.findTileByPlayer(grid, virtualPlayer);
     }
-
-    async tryToEscapeIfWounded(virtualPlayer: Player, accessCode: string): Promise<boolean> {
-        const isInCombat = this.gameCombatService.isCombatActive(accessCode);
-        if (!isInCombat) return false;
-        const combatState = this.gameCombatService.getCombatState(accessCode);
-        if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return false;
-        const healthRatio = virtualPlayer.hp.current / virtualPlayer.hp.max;
-        if (healthRatio < 1) {
-            console.log('🚨 Trying to escape...');
-            this.gameCombatService.attemptEscape(accessCode, virtualPlayer);
-            return true;
-        }
-        return false;
-    }
-
     private getPathWithLimitedCost(path: Tile[], maxCost: number): Tile[] {
         const limitedPath: Tile[] = [path[0]];
         let totalCost = 0;
