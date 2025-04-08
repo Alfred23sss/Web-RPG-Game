@@ -29,7 +29,6 @@ const MOCK_PLAYER: Player = {
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
-    vitality: 0,
     isVirtual: false,
 };
 const ACCESS_CODE = 'test123';

@@ -44,7 +44,6 @@ const createValidPlayer = (name: string, speed: number, isAdmin: boolean): Playe
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
-    vitality: 0,
     isVirtual: false,
 });
 

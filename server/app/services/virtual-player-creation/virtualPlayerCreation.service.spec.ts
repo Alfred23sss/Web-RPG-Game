@@ -7,10 +7,10 @@ import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { VirtualPlayerCreationService } from './virtualPlayerCreation.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
 
 describe('VirtualPlayerService', () => {
-    let service: VirtualPlayerCreationService;
+    let service: VirtualPlayerService;
 
     const mockLobbyService = {
         isNameTaken: jest.fn().mockReturnValue(false),
@@ -18,21 +18,20 @@ describe('VirtualPlayerService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [VirtualPlayerCreationService, { provide: LobbyService, useValue: mockLobbyService }],
+            providers: [VirtualPlayerService, { provide: LobbyService, useValue: mockLobbyService }],
         }).compile();
 
-        service = module.get<VirtualPlayerCreationService>(VirtualPlayerCreationService);
+        service = module.get<VirtualPlayerService>(VirtualPlayerService);
     });
 
     describe('randomizeSpeedAndVitality', () => {
-        it('should return speed and vitality with different values (4 or 6)', () => {
+        it('should return speed and hp with different values (4 or 6)', () => {
             for (let i = 0; i < 20; i++) {
                 const result = (service as any).randomizeSpeedAndVitality();
                 expect([BASE_STAT, BONUS_STAT]).toContain(result.speed);
-                expect([BASE_STAT, BONUS_STAT]).toContain(result.vitality);
-                expect(result.speed).not.toBe(result.vitality);
-                expect(result.hp.current).toBe(result.vitality);
-                expect(result.hp.max).toBe(result.vitality);
+                expect([BASE_STAT, BONUS_STAT]).toContain(result.hp.max);
+                expect(result.speed).not.toBe(result.hp.max);
+                expect(result.hp.current).toBe(result.hp.max);
             }
         });
     });
@@ -72,9 +71,8 @@ describe('VirtualPlayerService', () => {
             expect(createdPlayer.attack.value).toBe(BASE_STAT);
             expect(createdPlayer.defense.value).toBe(BASE_STAT);
             expect(createdPlayer.attack.bonusDice).not.toBe(createdPlayer.defense.bonusDice);
-            expect(createdPlayer.hp.current).toBe(createdPlayer.vitality);
-            expect(createdPlayer.hp.max).toBe(createdPlayer.vitality);
-            expect(createdPlayer.speed).not.toBe(createdPlayer.vitality);
+            expect(createdPlayer.hp.current).toBe(createdPlayer.hp.max);
+            expect(createdPlayer.speed).not.toBe(createdPlayer.hp.max);
         });
     });
 
@@ -208,7 +206,7 @@ describe('VirtualPlayerService', () => {
 
         (service as any).addVPlayerToLobby(lobby, vPlayer);
 
-        expect(lobby.players.length).toBe(1); // n'a pas été ajouté
+        expect(lobby.players.length).toBe(1);
         expect(lobby.players.find((p) => p.name === 'ShouldNotBeAdded')).toBeUndefined();
     });
 
@@ -218,19 +216,17 @@ describe('VirtualPlayerService', () => {
                 attack: { value: 0, bonusDice: DiceType.Uninitialized },
                 defense: { value: 0, bonusDice: DiceType.Uninitialized },
                 speed: 0,
-                vitality: 0,
                 hp: { current: 0, max: 0 },
             } as Player;
 
             (service as any).updateVirtualPlayerStats(player);
 
             expect([BASE_STAT, BONUS_STAT]).toContain(player.speed);
-            expect([BASE_STAT, BONUS_STAT]).toContain(player.vitality);
+            expect([BASE_STAT, BONUS_STAT]).toContain(player.hp.max);
             expect(player.attack.value).toBe(BASE_STAT);
             expect(player.defense.value).toBe(BASE_STAT);
             expect(player.attack.bonusDice).not.toBe(player.defense.bonusDice);
-            expect(player.hp.current).toBe(player.vitality);
-            expect(player.hp.max).toBe(player.vitality);
+            expect(player.hp.current).toBe(player.hp.max);
         });
     });
 });

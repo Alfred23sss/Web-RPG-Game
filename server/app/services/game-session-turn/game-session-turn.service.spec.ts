@@ -20,7 +20,6 @@ describe('GameSessionTurnService', () => {
         name,
         avatar: `avatar${name}`,
         speed,
-        vitality: 100,
         attack: { value: 5, bonusDice: DiceType.D6 },
         defense: { value: 3, bonusDice: DiceType.D4 },
         hp: { current: 100, max: 100 },

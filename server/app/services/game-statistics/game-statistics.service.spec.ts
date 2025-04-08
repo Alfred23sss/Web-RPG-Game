@@ -41,7 +41,6 @@ describe('GameStatisticsService', () => {
         hasAbandoned: false,
         isActive: false,
         combatWon: 0,
-        vitality: 0,
         isVirtual: false,
     });
 

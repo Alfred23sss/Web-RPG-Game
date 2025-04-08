@@ -16,7 +16,6 @@ describe('TileDto', () => {
                 name: 'JohnDoe',
                 avatar: 'avatar.png',
                 speed: 10,
-                vitality: 100,
                 isAdmin: false,
                 isActive: true,
                 hasAbandoned: false,

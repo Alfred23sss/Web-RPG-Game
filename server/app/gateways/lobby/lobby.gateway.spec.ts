@@ -40,7 +40,6 @@ const MOCK_PLAYER: Player = {
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
-    vitality: 0,
     isVirtual: false,
 };
 const MOCK_WAITING_PLAYER = { socketId: 'socket2', avatar: 'avatar2' };
@@ -576,7 +575,6 @@ describe('LobbyGateway', () => {
                     name: playerName,
                     avatar: 'avatar1',
                     speed: 5,
-                    vitality: 10,
                     attack: { value: 4, bonusDice: DiceType.D6 },
                     defense: { value: 4, bonusDice: DiceType.D4 },
                     hp: { current: 10, max: 10 },
@@ -631,7 +629,6 @@ describe('LobbyGateway', () => {
                     name: playerName,
                     avatar: 'avatar1',
                     speed: 5,
-                    vitality: 10,
                     attack: { value: 4, bonusDice: DiceType.D6 },
                     defense: { value: 4, bonusDice: DiceType.D4 },
                     hp: { current: 10, max: 10 },

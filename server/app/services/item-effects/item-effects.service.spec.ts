@@ -20,7 +20,6 @@ const MOCK_PLAYER: Player = {
     name: 'test-player',
     avatar: 'test-avatar',
     speed: DEFAULT_STAT_VALUE,
-    vitality: DEFAULT_STAT_VALUE,
     attack: {
         value: DEFAULT_STAT_VALUE,
         bonusDice: DiceType.D6,
