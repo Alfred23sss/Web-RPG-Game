@@ -78,7 +78,6 @@ export class GameSocketService {
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
-                console.log('playerClientUpdate', data.player);
                 const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
                 if (player.inventory.every((item) => item?.name !== 'flag') && data.player.inventory.some((item) => item?.name === 'flag')) {
                     this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
