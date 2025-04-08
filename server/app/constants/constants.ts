@@ -55,6 +55,7 @@ export const RANDOM_ITEMS = [
 export const BASE_STAT = 4;
 export const BONUS_STAT = 6;
 export const VP_ACTION_WAIT_TIME_MS = 3000;
+export const DOOR_ACTION_WAIT_TIME_MS = 1500;
 
 export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',

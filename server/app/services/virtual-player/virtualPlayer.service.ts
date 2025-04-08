@@ -36,7 +36,7 @@ export class VirtualPlayerService implements OnModuleInit {
             }
         });
         this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
-            if (player.isVirtual) {
+            if (player.isVirtual && player.behavior === Behavior.Defensive) {
                 this.virtualPlayer = player;
                 const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(player, accessCode);
                 if (hasEscaped) return;
@@ -52,8 +52,10 @@ export class VirtualPlayerService implements OnModuleInit {
         this.virtualPlayer.movementPoints = this.movementPoints;
         this.virtualPlayer.actionPoints = this.actionsPoints;
     }
+
     private executeVirtualPlayerTurn(accessCode: string): void {
         const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) return;
 
         console.log(this.virtualPlayer.movementPoints, 'actionpoints', this.virtualPlayer.actionPoints);
         if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;

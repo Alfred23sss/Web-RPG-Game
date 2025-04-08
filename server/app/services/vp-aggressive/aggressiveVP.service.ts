@@ -58,7 +58,6 @@ export class AggressiveVPService {
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
         const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
-        console.log(path);
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
             console.log(move.tile.id, movementCost);

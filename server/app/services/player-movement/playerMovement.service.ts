@@ -29,13 +29,15 @@ export class PlayerMovementService {
             if (!next) break;
             const { tile: currentTile, cost: currentCost } = next;
 
-            if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);
-
+            if (currentTile === targetTile) {
+                const fullPath = this.reconstructPath(previous, targetTile);
+                const pathUntilDoor = this.trimPathAtDoor(fullPath);
+                return pathUntilDoor;
+            }
             for (const neighbor of this.getNeighbors(currentTile, grid)) {
                 if (!this.isValidNeighbor(neighbor)) continue;
 
                 const moveCost = this.getMoveCost(neighbor);
-                if (moveCost === Infinity) continue;
 
                 const newCost = currentCost + moveCost;
                 if (!costs.has(neighbor) || newCost < this.getMoveCost(neighbor)) {
@@ -62,6 +64,7 @@ export class PlayerMovementService {
     hasAdjacentTileType(clientPlayerTile: Tile, grid: Tile[][], tileType: TileType): boolean {
         return this.getNeighbors(clientPlayerTile, grid).some((tile) => tile.type === tileType);
     }
+
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
@@ -132,6 +135,15 @@ export class PlayerMovementService {
         return bestMoveTile;
     }
 
+    private trimPathAtDoor(path: Tile[]): Tile[] {
+        for (let i = 0; i < path.length; i++) {
+            if (path[i].type === TileType.Door && !path[i].isOpen) {
+                return path.slice(0, i + 1); // does include door
+            }
+        }
+        return path;
+    }
+
     private getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const path = this.quickestPath(virtualPlayerTile, targetTile, grid);
         if (!path || path.length === 0) return undefined;
@@ -155,12 +167,11 @@ export class PlayerMovementService {
     }
 
     private isValidNeighbor(neighbor: Tile): boolean {
-        if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
-        return this.movementCosts.has(neighbor.type);
+        return neighbor.player === undefined || neighbor.type !== TileType.Wall;
     }
 
     private isValidNeighborForVirtualPlayer(tile: Tile, virtualPlayer: Player): boolean {
-        if (tile.type === TileType.Door && !tile.isOpen) return false;
+        if (tile.type === TileType.Door && !tile.isOpen && virtualPlayer.actionPoints === 0) return false;
 
         if (tile.player !== undefined && tile.player.name !== virtualPlayer.name) return false;
 

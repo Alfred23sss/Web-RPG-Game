@@ -146,9 +146,11 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
-        if (payload.attacker.isVirtual || payload.defender.isVirtual) {
-            this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
-        }
+        // if (payload.attacker.isVirtual || payload.defender.isVirtual) {
+        //     this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
+        // } this will not work if the player starting the combat is an actual client
+        // mettre code au dessus dn une fonction dn gameCombatService... rajouter qui a commencer le combat ???,
+        // important de savoir qd differente logique si c'est virtuel ou normal qui commence le combat
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 
@@ -187,7 +189,7 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
         });
-        this.logger.log(payload.grid);
+        // this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
 
