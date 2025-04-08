@@ -87,6 +87,7 @@ describe('GameGateway', () => {
             callTeleport: jest.fn(),
             handleItemDropped: jest.fn(),
             updateWallTile: jest.fn(),
+            handlePlayerItemReset: jest.fn(),
         };
         serverMock = {
             to: jest.fn().mockReturnThis(),
