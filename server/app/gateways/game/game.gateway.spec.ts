@@ -13,6 +13,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { GameGateway } from './game.gateway';
 import { Item } from '@app/interfaces/Item';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 
 const MOCK_PLAYER: Player = {
     name: 'test-player',
@@ -53,6 +54,7 @@ describe('GameGateway', () => {
     let loggerMock: Partial<Logger>;
     let combatServiceMock: Partial<GameCombatService>;
     let accessCodeServiceMock: Partial<AccessCodesService>;
+    let gameStatisticsServiceMock: Partial<GameStatisticsService>;
 
     const mockTile: Tile = {
         id: 'tile1',
@@ -105,6 +107,10 @@ describe('GameGateway', () => {
             getLobbyPlayers: jest.fn().mockReturnValue([MOCK_PLAYER]),
         };
 
+        gameStatisticsServiceMock = {
+            getGameStatistics: jest.fn(),
+        };
+
         loggerMock = {
             log: jest.fn(),
             error: jest.fn(),
@@ -129,6 +135,7 @@ describe('GameGateway', () => {
                 { provide: GameSessionService, useValue: gameSessionServiceMock },
                 { provide: GameCombatService, useValue: combatServiceMock },
                 { provide: AccessCodesService, useValue: accessCodeServiceMock },
+                { provide: GameStatisticsService, useValue: gameStatisticsServiceMock },
             ],
         }).compile();
 
@@ -382,6 +389,7 @@ describe('GameGateway', () => {
                 attackSuccessful: true,
                 attackerScore: 15,
                 defenseScore: 12,
+                accessCode: ACCESS_CODE,
             };
 
             gateway.handleCombatResult(payload);
@@ -434,6 +442,7 @@ describe('GameGateway', () => {
                 attackSuccessful: true,
                 attackerScore: 15,
                 defenseScore: 12,
+                accessCode: ACCESS_CODE,
             };
 
             gateway.handleCombatResult(payload);
