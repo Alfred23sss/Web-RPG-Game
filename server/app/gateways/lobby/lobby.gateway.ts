@@ -90,21 +90,27 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
     @SubscribeMessage(LobbyEvents.LeaveLobby)
     handleLeaveLobby(@MessageBody() data: { accessCode: string; playerName: string }, @ConnectedSocket() client: Socket) {
+        this.logger.log('rentre dans leave lobby');
         const { accessCode, playerName } = data;
 
         const lobby = this.lobbyService.getLobby(accessCode);
-        if (!lobby) return;
+        if (!lobby) {
+            this.logger.log('Lobby not found');
+            return;
+        }
         const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
         if (isAdminLeaving) {
             this.server.to(accessCode).emit('adminLeft', { playerSocketId: client.id, message: "L'admin a quitté la partie, le lobby est fermé." });
         }
         const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
         lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
-
+        this.logger.log(this.lobbyService.getLobbyPlayers(accessCode));
         if (isLobbyDeleted) {
+            this.logger.log(this.lobbyService.getLobbyPlayers(accessCode));
             this.server.to(accessCode).emit('lobbyDeleted');
             this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
         } else {
+            this.logger.log(this.lobbyService.getLobbyPlayers(accessCode));
             const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
             this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
             this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
@@ -232,12 +238,11 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     }
 
     handleDisconnect(@ConnectedSocket() client: Socket) {
-        const accessCode = this.lobbyService.getLobbyIdByPlayer(client.id);
-        if (accessCode) {
-            this.lobbyService.leaveLobby(accessCode, client.id);
-            this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-        }
-        this.lobbyService.removePlayerSocket(client.id);
+        const player = this.lobbyService.getPlayerBySocketId(client.id);
+        this.logger.log(`Player ${player?.name} disconnected`);
+        const accessCode = this.lobbyService.getLobbyIdByPlayer(player.name);
+        this.logger.log(accessCode);
+        this.handleLeaveLobby({ accessCode, playerName: player.name }, client);
         this.logger.log(`User disconnected: ${client.id}`);
     }
 }
