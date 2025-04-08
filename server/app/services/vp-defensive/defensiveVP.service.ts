@@ -3,22 +3,21 @@ import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
-import { LobbyService } from '@app/services/lobby/lobby.service';
+import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
+import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { Injectable } from '@nestjs/common';
-import { GameCombatService } from '../combat-manager/combat-manager.service';
-import { GridManagerService } from '../grid-manager/grid-manager.service';
-import { VirtualPlayerActionsService } from '../virtualPlayer-actions/virtualPlayerActions.service';
 
 const DEFENSIVE_ITEM_SCORE = 1000;
 const AGGRESSIVE_ITEM_SCORE = 150;
 const IN_RANGE_BONUS = 500;
 const INVALID_ITEM_PENALTY = -200;
-const ATTACK_PENALTY = -5000;
+const ATTACK_PENALTY = -1000;
+const NO_SCORE = 0;
 
 @Injectable()
 export class DefensiveVPService {
     constructor(
-        private readonly lobbyService: LobbyService,
         private readonly gameCombatService: GameCombatService,
         private readonly gridManagerService: GridManagerService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
@@ -84,6 +83,7 @@ export class DefensiveVPService {
         }
     }
 
+
     // private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move {
     //     const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby);
     //     scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -102,10 +102,9 @@ export class DefensiveVPService {
 
     private scoreMoves(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move[] {
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
-
         return moves.map((move) => {
             move.score = 0;
-            this.calculateItemScore(move);
+
             this.calculateMovementScore(move, virtualPlayerTile, virtualPlayer, lobby);
 
             this.calculateAttackScore(move);

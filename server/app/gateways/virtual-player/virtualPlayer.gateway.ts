@@ -68,7 +68,6 @@ export class VirtualPlayerGateway {
 
     @OnEvent(VirtualPlayerEvents.EndVirtualPlayerTurn)
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
-        // reset points here
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
         this.virtualPlayerService.resetStats();
         const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);

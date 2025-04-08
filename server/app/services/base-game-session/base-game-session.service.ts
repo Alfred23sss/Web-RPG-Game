@@ -111,9 +111,9 @@ export abstract class BaseGameSessionService {
         this.updateGameSessionPlayerList(accessCode, name, updatedPlayer);
     }
 
-    updateGameSessionPlayerList(accessCode: string, playername: string, updates: Partial<Player>): void {
+    updateGameSessionPlayerList(accessCode: string, playerName: string, updates: Partial<Player>): void {
         const players = this.getPlayers(accessCode);
-        const player = players.find((p) => p.name === playername);
+        const player = players.find((p) => p.name === playerName);
         this.updatePlayer(player, updates);
     }
 

@@ -1,3 +1,4 @@
+import { VP_TURN_DONE_MS } from '@app/constants/constants';
 import { Behavior, EventEmit, ItemName, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -15,8 +16,8 @@ import { EventEmitter2 } from 'eventemitter2';
 @Injectable()
 export class VirtualPlayerService implements OnModuleInit {
     private virtualPlayer: VirtualPlayer;
-    movementPoints: number;
-    actionsPoints: number;
+    private movementPoints: number;
+    private actionsPoints: number;
 
     constructor(
         private readonly eventEmitter: EventEmitter2,
@@ -30,7 +31,6 @@ export class VirtualPlayerService implements OnModuleInit {
         this.eventEmitter.on(EventEmit.GameTurnStarted, ({ accessCode, player }) => {
             if (player.isVirtual) {
                 this.virtualPlayer = player;
-                console.log(this.virtualPlayer.movementPoints);
                 this.movementPoints = this.virtualPlayer.movementPoints;
                 this.actionsPoints = this.virtualPlayer.actionPoints;
                 this.executeVirtualPlayerTurn(accessCode);
@@ -44,8 +44,8 @@ export class VirtualPlayerService implements OnModuleInit {
             }
         }); 
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
-            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), 1000);
-            console.log('starting another turn beahvior');
+            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), VP_TURN_DONE_MS);
+            console.log('starting another turn behavior');
         });
     }
 
@@ -53,8 +53,10 @@ export class VirtualPlayerService implements OnModuleInit {
         this.virtualPlayer.movementPoints = this.movementPoints;
         this.virtualPlayer.actionPoints = this.actionsPoints;
     }
+
     private executeVirtualPlayerTurn(accessCode: string): void {
         const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) return;
 
         console.log(this.virtualPlayer.movementPoints, 'actionpoints', this.virtualPlayer.actionPoints);
         if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
@@ -70,7 +72,6 @@ export class VirtualPlayerService implements OnModuleInit {
         }
     }
 
-    // complete behavior for all cases just like for normal player
     private hasAvailableActions(accessCode: string, virtualPlayer: Player, lobby: Lobby): boolean {
         if (!this.virtualPlayerActions.checkAvailableActions(virtualPlayer, lobby)) {
             this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
