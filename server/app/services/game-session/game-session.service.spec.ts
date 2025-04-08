@@ -1020,25 +1020,17 @@ describe('GameSessionService', () => {
         });
 
         it('should return early if gameSession is not found when updating door tile', () => {
-            // Setup
             const accessCode = 'non-existent-code';
             const previousTile = CLOSED_DOOR_TILE;
             const newTile = OPEN_DOOR_TILE;
 
-            // Mock the internal methods that would be called if the condition doesn't return
             const gridManagerSpy = jest.spyOn(gridManagerService, 'updateDoorTile');
 
-            // Make sure gameSessions map doesn't have this access code
-            // This can be done by directly accessing the private property or by
-            // mocking an implementation that returns undefined for this specific access code
             const gameSessions = new Map<string, GameSession>();
-            // @ts-ignore - Accessing private property for testing
             gameSessionService['gameSessions'] = gameSessions;
 
-            // Act
             gameSessionService.updateDoorTile(accessCode, previousTile, newTile);
 
-            // Assert
             expect(gridManagerSpy).not.toHaveBeenCalled();
         });
     });
