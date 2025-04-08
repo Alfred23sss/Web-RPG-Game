@@ -160,6 +160,13 @@ describe('GameplayService', () => {
         expect(service).toBeTruthy();
     });
 
+    describe('navigateToFinalPage', () => {
+        it('should navigate to the game end page', () => {
+            service.navigateToFinalPage();
+            expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.GameEndPage], {});
+        });
+    });
+
     it('should return true when players are on the same team', () => {
         const gameData = createMockGameData({
             lobby: {

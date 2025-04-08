@@ -113,7 +113,7 @@ describe('GameSocketService', () => {
             `👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`,
         );
         tick(DELAY_BEFORE_ENDING_GAME);
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameplayServiceSpy.navigateToFinalPage).toHaveBeenCalled();
     }));
 
     it('should handle gameEnded event with multiple winnners', fakeAsync(() => {
@@ -123,7 +123,7 @@ describe('GameSocketService', () => {
             `👑 ${data.winner.join(', ')} ont remporté la partie ! Redirection vers la page de fin sous peu`,
         );
         tick(DELAY_BEFORE_ENDING_GAME);
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameplayServiceSpy.navigateToFinalPage).toHaveBeenCalled();
     }));
 
     it('should handle adminModeDisabled event', () => {
@@ -142,6 +142,26 @@ describe('GameSocketService', () => {
                 grid: MOCK_GRID,
             },
         };
+
+        const callback = socketEvents['gameStarted'];
+
+        callback(data);
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toEqual(data.orderedPlayers);
+        expect(gameStateServiceSpy.gameDataSubjectValue.game).toEqual(data.updatedGame);
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should handle gameStarted event even if name in orderedPlayers is not clientPlayer', () => {
+        const data = {
+            orderedPlayers: [MOCK_PLAYER, { ...MOCK_PLAYER, name: 'Player2' }],
+            updatedGame: {
+                ...MOCK_GAME,
+                grid: MOCK_GRID,
+            },
+        };
+
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = { ...MOCK_PLAYER, name: 'null' };
 
         const callback = socketEvents['gameStarted'];
 
