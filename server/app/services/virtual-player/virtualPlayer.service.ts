@@ -42,7 +42,7 @@ export class VirtualPlayerService implements OnModuleInit {
                 const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(player, accessCode);
                 if (hasEscaped) return;
             }
-        }); 
+        });
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
             const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
             setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
