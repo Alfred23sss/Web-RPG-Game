@@ -177,9 +177,10 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.GameDoorUpdate)
-    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
+    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][]; isOpen: boolean }) {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
+            isOpen: payload.isOpen,
         });
         this.logger.log('Door update event emitted');
     }
