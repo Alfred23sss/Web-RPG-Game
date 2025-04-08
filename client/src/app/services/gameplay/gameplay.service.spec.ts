@@ -160,21 +160,6 @@ describe('GameplayService', () => {
         expect(service).toBeTruthy();
     });
 
-    // it('should emit itemDrop event with correct parameters', () => {
-    //     const gameData = createMockGameData();
-    //     const mockItem = { id: '1', name: 'Default', imageSrc: 'default.png' } as Item;
-
-    //     // Access the private method correctly
-    //     (service as any).handleItemDropped(gameData, mockItem);
-
-    //     // Verify the exact parameters
-    //     expect(mockSocketClientService.emit).toHaveBeenCalledWith('itemDrop', {
-    //         accessCode: '1234',
-    //         player: gameData.clientPlayer,
-    //         item: mockItem,
-    //     });
-    // });
-
     it('should return true when players are on the same team', () => {
         const gameData = createMockGameData({
             lobby: {
@@ -215,6 +200,13 @@ describe('GameplayService', () => {
 
         it('should not attack when not in action mode', () => {
             gameData.isActionMode = false;
+            service.handleAttackCTF(gameData, targetTile);
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should not attack when targetTile does not have a player', () => {
+            targetTile.player = undefined;
             service.handleAttackCTF(gameData, targetTile);
             expect(mockSocketClientService.emit).not.toHaveBeenCalled();
             expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
@@ -486,39 +478,6 @@ describe('GameplayService', () => {
             expect(playerTile).toBeUndefined();
         });
     });
-
-    // describe('checkAvailableActions', () => {
-    //     it('should end turn when no action points and no adjacent action', () => {
-    //         const gameData = createMockGameData();
-    //         mockMatDialog.closeAll();
-    //         gameData.clientPlayer.actionPoints = 0;
-    //         gameData.clientPlayer.movementPoints = 0;
-    //         mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
-    //         mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-    //         spyOn(service, 'endTurn');
-    //         service.checkAvailableActions(gameData);
-    //         expect(service.endTurn).toHaveBeenCalledWith(gameData);
-    //     });
-    //     it('should end turn when 1 action point and no movement, with no adjacent ice or actions', () => {
-    //         const gameData = createMockGameData();
-    //         gameData.clientPlayer.actionPoints = 1;
-    //         gameData.clientPlayer.movementPoints = 0;
-    //         mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
-    //         mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-    //         spyOn(service, 'endTurn');
-    //         service.checkAvailableActions(gameData);
-    //         expect(service.endTurn).toHaveBeenCalledWith(gameData);
-    //     });
-    //     it('should return early when clientPlayerPosition is undefined', () => {
-    //         const gameData = createMockGameData();
-    //         spyOn(service, 'getClientPlayerPosition').and.returnValue(undefined);
-    //         spyOn(service, 'endTurn');
-    //         service.checkAvailableActions(gameData);
-    //         expect(service.endTurn).not.toHaveBeenCalled();
-    //         expect(mockPlayerMovementService.hasAdjacentTileType).not.toHaveBeenCalled();
-    //         expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).not.toHaveBeenCalled();
-    //     });
-    // });
 
     it('should not handle door click when in combat mode', () => {
         const gameData = createMockGameData({ isInCombatMode: true });
