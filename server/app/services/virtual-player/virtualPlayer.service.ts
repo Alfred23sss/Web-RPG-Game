@@ -1,4 +1,4 @@
-import { VP_TURN_DONE_MS } from '@app/constants/constants';
+import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
 import { Behavior, EventEmit, ItemName, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -44,8 +44,9 @@ export class VirtualPlayerService implements OnModuleInit {
             }
         });
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
-            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), VP_TURN_DONE_MS);
-            console.log('starting another turn behavior');
+            const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
+            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
+            console.log('starting another turn behavior', randomDelay);
         });
     }
 

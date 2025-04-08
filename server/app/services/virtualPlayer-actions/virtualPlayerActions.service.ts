@@ -1,11 +1,4 @@
-import {
-    ACTION_COST,
-    DESTINATION_POSITION,
-    DOOR_ACTION_WAIT_TIME_MS,
-    NO_SCORE,
-    PLAYER_POSITION,
-    VP_ACTION_WAIT_TIME_MS,
-} from '@app/constants/constants';
+import { ACTION_COST, ACTION_MAX_MS, ACTION_MIN_MS, DESTINATION_POSITION, DOOR_ACTION_MAX_MS, DOOR_ACTION_MIN_MS, NO_SCORE, PLAYER_POSITION } from '@app/constants/constants';
 import { EventEmit, ItemName, MoveType, TileType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -85,6 +78,10 @@ export class VirtualPlayerActionsService {
         return true;
     }
 
+    getRandomDelay(delayMinMS: number, delayLimitMS: number): number {
+        return delayMinMS + Math.random() * (delayLimitMS - delayMinMS);
+    }
+
     private async executeMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<Tile[]> {
         const movement = this.getMovement(move, virtualPlayerTile, lobby.game.grid);
         if (!movement) return;
@@ -128,7 +125,7 @@ export class VirtualPlayerActionsService {
     }
 
     private async executeAttack(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
-        await new Promise((resolve) => setTimeout(resolve, VP_ACTION_WAIT_TIME_MS));
+        await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
         if (!actionTile.player || !currentTile.player) return;
         this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
         this.updateActionPoints(currentTile.player);
@@ -136,13 +133,12 @@ export class VirtualPlayerActionsService {
 
     private async openDoor(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
         if (!actionTile) return;
-        await new Promise((resolve) => setTimeout(resolve, DOOR_ACTION_WAIT_TIME_MS));
+        await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(DOOR_ACTION_MIN_MS, DOOR_ACTION_MAX_MS)));
         const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         gameService.updateDoorTile(accessCode, currentTile, actionTile);
         this.updateActionPoints(currentTile.player);
         this.emitEvent(EventEmit.VPActionDone, accessCode);
     }
-
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
