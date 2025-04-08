@@ -75,7 +75,6 @@ export class ItemEffectsService {
             item.isActive = false;
         }
     }
-    S;
 
     isHealthConditionValid(player: Player, item: Item): boolean {
         return item.name !== ItemName.Fire || player.hp.current <= player.hp.max * HEALTH_CONDITION_THRESHOLD;
