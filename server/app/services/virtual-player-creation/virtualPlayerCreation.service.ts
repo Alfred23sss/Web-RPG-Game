@@ -35,6 +35,7 @@ export class VirtualPlayerCreationService {
         vPlayer.behavior = behavior;
         vPlayer.name = this.findValidName(lobby, vPlayer);
         vPlayer.avatar = this.findValidAvatar(lobby);
+        vPlayer.inventory = [null, null];
 
         this.updateVirtualPlayerStats(vPlayer);
         this.addVPlayerToLobby(lobby, vPlayer);
@@ -57,7 +58,7 @@ export class VirtualPlayerCreationService {
     }
 
     // type de retour trop long faudrait mettre en interface ou qqch
-    private randomizeSpeedAndVitality(): SpeedVitalityStats  {
+    private randomizeSpeedAndVitality(): SpeedVitalityStats {
         const values = [BASE_STAT, BONUS_STAT];
         const speedIndex = Math.floor(Math.random() * 2);
         const vitalityIndex = 1 - speedIndex;

@@ -76,11 +76,6 @@ export class PlayerMovementService {
         return adjacentTiles.some((tile) => tile.player !== undefined);
     }
 
-    // chek pr action possible durant son parcours,
-    // chek si dn parcous ya item et gere si c'est le cas.
-    // chek aussi pendant quil cherche le plus petit parcours de prendre en compte les portes et quil peut les ouvrir =>
-    // (split move en 2 , premier move ensuite action(item aussi) si available ouvre porte et ensuite 2e move)
-
     findClosestReachableTile(moveTile: Tile, virtualPlayerTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const bestMoveTile = this.findBestMoveTile(moveTile, virtualPlayerTile, grid);
         if (!bestMoveTile) return undefined;
@@ -139,7 +134,7 @@ export class PlayerMovementService {
     private trimPathAtDoor(path: Tile[]): Tile[] {
         for (let i = 0; i < path.length; i++) {
             if (path[i].type === TileType.Door && !path[i].isOpen) {
-                return path.slice(0, i + 1); // does include door
+                return path.slice(0, i + 1);
             }
         }
         return path;

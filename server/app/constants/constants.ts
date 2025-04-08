@@ -63,6 +63,7 @@ export const NO_SCORE = 0;
 export const AGGRESSIVE_ITEM_SCORE = 50;
 export const IN_RANGE_BONUS = 1000;
 export const INVALID_ITEM_PENALTY = -10000;
+export const FLAG_SCORE = 1500;
 export const PLAYER_POSITION = -2;
 export const DESTINATION_POSITION = -1;
 export const ACTION_COST = 1;

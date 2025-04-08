@@ -1,4 +1,13 @@
-import { ACTION_COST, ACTION_MAX_MS, ACTION_MIN_MS, DESTINATION_POSITION, DOOR_ACTION_MAX_MS, DOOR_ACTION_MIN_MS, NO_SCORE, PLAYER_POSITION } from '@app/constants/constants';
+import {
+    ACTION_COST,
+    ACTION_MAX_MS,
+    ACTION_MIN_MS,
+    DESTINATION_POSITION,
+    DOOR_ACTION_MAX_MS,
+    DOOR_ACTION_MIN_MS,
+    NO_SCORE,
+    PLAYER_POSITION,
+} from '@app/constants/constants';
 import { EventEmit, ItemName, MoveType, TileType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';

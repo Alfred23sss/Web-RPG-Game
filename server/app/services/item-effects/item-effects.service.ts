@@ -67,8 +67,8 @@ export class ItemEffectsService {
         }
         if (item.name === ItemName.Rubik) {
             item.modifiers = [
-                { attribute: AttributeType.Speed, value: BONUS_VALUE },
                 { attribute: AttributeType.Hp, value: PENALTY_VALUE },
+                { attribute: AttributeType.Speed, value: BONUS_VALUE },
             ];
             item.isActive = false;
         }

@@ -1,5 +1,5 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
-import { Behavior, EventEmit, ItemName, MoveType } from '@app/enums/enums';
+import { Behavior, EventEmit, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -102,7 +102,7 @@ export class VirtualPlayerService implements OnModuleInit {
     private findItems(grid: Tile[][]): Move[] {
         return grid.flatMap((row) =>
             row
-                .filter((tile) => tile.item && tile.item.name !== ItemName.Home)
+                .filter((tile) => tile.item)
                 .map((tile) => ({
                     tile,
                     type: MoveType.Item,
