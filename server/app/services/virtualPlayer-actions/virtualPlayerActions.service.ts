@@ -129,7 +129,9 @@ export class VirtualPlayerActionsService {
             closestReachableTile = move.tile;
         }
         if (closestReachableTile) {
-            return this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, grid);
+            const path = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, grid);
+            const pathUntilDoor = this.playerMovementService.trimPathAtDoor(path);
+            return pathUntilDoor;
         }
     }
 

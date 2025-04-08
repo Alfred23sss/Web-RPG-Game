@@ -54,6 +54,7 @@ export class AggressiveVPService {
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
         const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
+
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
             console.log(move.tile.id, movementCost);
@@ -89,7 +90,11 @@ export class AggressiveVPService {
                     move.score += FLAG_SCORE;
                     break;
                 case ItemName.Home:
-                    move.score += this.isFlagInInventory(virtualPlayer) ? FLAG_SCORE : INVALID_ITEM_PENALTY;
+                    if ((virtualPlayer.spawnPoint.tileId = move.tile.id)) {
+                        move.score += this.isFlagInInventory(virtualPlayer) ? FLAG_SCORE : INVALID_ITEM_PENALTY;
+                    } else {
+                        move.score += INVALID_ITEM_PENALTY;
+                    }
                     break;
                 default:
                     move.score += INVALID_ITEM_PENALTY;
