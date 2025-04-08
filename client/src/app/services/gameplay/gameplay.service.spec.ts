@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
@@ -828,6 +829,151 @@ describe('GameplayService', () => {
             const result = (service as any).isAvailablePath(gameData, targetTile);
 
             expect(result).toBeFalse();
+        });
+        it('should emit itemDrop with correct parameters when handleItemDropped is called', () => {
+            const mockGameData = createMockGameData();
+            const mockItem = new Item();
+
+            (service['handleItemDropped'] as jasmine.Spy).and.callThrough();
+
+            service['handleItemDropped'](mockGameData, mockItem);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('itemDrop', {
+                accessCode: mockGameData.lobby.accessCode,
+                player: mockGameData.clientPlayer,
+                item: mockItem,
+            });
+        });
+    });
+    describe('checkAvailableActions', () => {
+        let mockGameData: GameData;
+        let mockTile: Tile;
+
+        beforeEach(() => {
+            mockTile = {
+                id: 'test-tile',
+                player: createMockPlayer(),
+                imageSrc: ImageType.Default,
+                isOccupied: true,
+                type: TileType.Default,
+                isOpen: false,
+            };
+
+            mockGameData = createMockGameData();
+
+            mockGameData.game!.grid = mockGameData.game!.grid as Tile[][];
+
+            (service.checkAvailableActions as jasmine.Spy).and.callThrough();
+
+            spyOn(service, 'getClientPlayerPosition').and.returnValue(mockTile);
+            spyOn(service, 'endTurn');
+
+            Object.defineProperty(service, 'dialog', {
+                get: () => ({
+                    openDialogs: [],
+                }),
+            });
+        });
+
+        it('should return early if dialog is open', () => {
+            Object.defineProperty(service, 'dialog', {
+                get: () => ({
+                    openDialogs: [{}],
+                }),
+            });
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).not.toHaveBeenCalled();
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should end turn when player has no action or movement points and no ice nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 0;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Ice);
+            expect(service.endTurn).toHaveBeenCalledWith(mockGameData);
+        });
+
+        it('should not end turn when player has no action or movement points but has ice nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 0;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
+                return type === TileType.Ice;
+            });
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Ice);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        // eslint-disable-next-line max-len
+        it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no lightning/wall combo', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
+            mockTile.player = createMockPlayer({
+                inventory: [null, null],
+            });
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][]);
+            expect(service.endTurn).toHaveBeenCalledWith(mockGameData);
+        });
+
+        it('should not end turn with 1 action point and no movement points when there is ice nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
+                return type === TileType.Ice;
+            });
+
+            service.checkAvailableActions(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should not end turn with 1 action point and no movement points when there is action available', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(true);
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][]);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should not end turn with 1 action point and no movement points when player has lightning and wall nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockTile.player = createMockPlayer({
+                inventory: [{ name: ItemName.Lightning } as Item, null],
+            });
+            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
+                return type === TileType.Wall;
+            });
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Wall);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should not end turn when player has movement points available', () => {
+            mockGameData.clientPlayer.actionPoints = 0;
+            mockGameData.clientPlayer.movementPoints = 1;
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.endTurn).not.toHaveBeenCalled();
         });
     });
 });
