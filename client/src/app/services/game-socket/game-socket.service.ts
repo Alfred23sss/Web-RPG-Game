@@ -79,7 +79,6 @@ export class GameSocketService {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
-            console.log('Player updated:', data.player.spawnPoint);
         });
     }
 

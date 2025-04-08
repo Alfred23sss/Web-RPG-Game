@@ -404,6 +404,7 @@ describe('GameSocketService', () => {
         });
 
         it('should do nothing when grid is missing', () => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             gameStateServiceSpy.gameDataSubjectValue.game = { ...MOCK_GAME, grid: undefined! };
             const initialActionPoints = gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints;
 
