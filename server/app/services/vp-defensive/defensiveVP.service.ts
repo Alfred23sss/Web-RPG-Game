@@ -10,7 +10,7 @@ import { GridManagerService } from '../grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '../virtualPlayer-actions/virtualPlayerActions.service';
 
 const DEFENSIVE_ITEM_SCORE = 200;
-const AGGRESSIVE_ITEM_SCORE = 50;
+const AGGRESSIVE_ITEM_SCORE = 150;
 const IN_RANGE_BONUS = 500;
 const INVALID_ITEM_PENALTY = -200;
 const ATTACK_PENALTY = -5000;

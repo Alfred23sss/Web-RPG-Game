@@ -37,12 +37,12 @@ export class VirtualPlayerService implements OnModuleInit {
             }
         });
         this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
-            if (player.isVirtual) {
+            if (player.isVirtual && player.behavior === Behavior.Defensive) {
                 this.virtualPlayer = player;
                 const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(player, accessCode);
                 if (hasEscaped) return;
             }
-        });
+        }); 
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
             setTimeout(() => this.executeVirtualPlayerTurn(accessCode), 1000);
             console.log('starting another turn beahvior');
