@@ -68,6 +68,7 @@ export class GameSocketService {
         });
     }
 
+    // no need to be client side
     private onItemDropped(): void {
         this.socketClientService.on('itemDropped', (data: { accessCode: string; player: Player; item: Item }) => {
             this.socketClientService.emit('itemDrop', data);
@@ -77,6 +78,10 @@ export class GameSocketService {
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
+                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
+                if (player.inventory.every((item) => item?.name !== 'flag') && data.player.inventory.some((item) => item?.name === 'flag')) {
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                }
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
         });
@@ -130,6 +135,7 @@ export class GameSocketService {
         });
     }
 
+    // refactor for god sake
     private onPlayerMovement(): void {
         this.socketClientService.on('playerMovement', (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
             if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
@@ -144,6 +150,9 @@ export class GameSocketService {
                         data.player,
                     );
                 const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
+                if (player.inventory.every((item) => item?.name !== 'flag') && data.player.inventory.some((item) => item?.name === 'flag')) {
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                }
                 player.inventory = data.player.inventory;
                 player.hp = data.player.hp;
                 player.attack.value = data.player.attack.value;
