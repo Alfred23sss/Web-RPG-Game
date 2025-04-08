@@ -15,6 +15,7 @@ const IN_RANGE_BONUS = 500;
 const INVALID_ITEM_PENALTY = -200;
 const ATTACK_PENALTY = -5000;
 
+
 @Injectable()
 export class DefensiveVPService {
     constructor(
@@ -23,24 +24,37 @@ export class DefensiveVPService {
         private readonly gridManagerService: GridManagerService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
+    private targetTiles = new Map<string, Tile>(); // clé = nom du joueur
 
     async executeDefensiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
         const bestMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         if (!virtualPlayerTile || !bestMove) return;
+        if (!virtualPlayerTile || !bestMove || !bestMove.inRange) return;
 
         switch (bestMove.type) {
             case MoveType.Item:
                 this.virtualPlayerActions.pickUpItem(bestMove, virtualPlayerTile, lobby);
                 break;
-            case MoveType.Attack:
-                this.virtualPlayerActions.moveToAttack(bestMove, virtualPlayerTile, lobby);
-                break;
+            // case MoveType.Attack:
+            //     this.virtualPlayerActions.moveToAttack(bestMove, virtualPlayerTile, lobby);
+            //     break;
         }
     }
 
-    private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move {
-        const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby);
+    // private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move {
+    //     const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby);
+    //     scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
+    //     return scoredMoves[0];
+    // }
+    private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move | undefined {
+        // 👉 Supprimer tous les mouvements de type Attack
+        const itemMoves = moves.filter((move) => move.type === MoveType.Item);
+        if (itemMoves.length === 0) return undefined;
+
+        const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
+        const scoredMoves = this.scoreMoves(itemMoves, virtualPlayer, lobby);
+
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
         return scoredMoves[0];
     }
@@ -76,7 +90,7 @@ export class DefensiveVPService {
                 move.inRange = true;
 
                 if (move.type !== MoveType.Attack) {
-                    move.score += IN_RANGE_BONUS;
+                    move.score += ATTACK_PENALTY;
                 }
             }
         }

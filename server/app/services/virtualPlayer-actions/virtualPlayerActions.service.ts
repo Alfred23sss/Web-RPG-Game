@@ -117,6 +117,10 @@ export class VirtualPlayerActionsService {
         }
     }
 
+    getMoveCost(tile: Tile): number {
+        return this.playerMovementService.getMoveCost(tile);
+    }
+
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
