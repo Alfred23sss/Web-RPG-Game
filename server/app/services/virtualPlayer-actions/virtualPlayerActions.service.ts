@@ -53,6 +53,10 @@ export class VirtualPlayerActionsService {
     }
 
     checkAvailableActions(virtualPlayer: Player, lobby: Lobby): boolean {
+        if (!lobby || !lobby.game || !lobby.game.grid) {
+            console.warn('[⚠️] lobby ou lobby.game manquant dans checkAvailableActions');
+            return false;
+        }
         const grid = lobby.game.grid;
         const virtualPlayerTile = this.gridManagerService.findTileByPlayer(grid, virtualPlayer);
         const hasIce = this.playerMovementService.hasAdjacentTileType(virtualPlayerTile, grid, TileType.Ice);

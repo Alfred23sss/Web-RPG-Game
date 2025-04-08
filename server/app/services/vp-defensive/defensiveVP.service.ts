@@ -9,10 +9,11 @@ import { GameCombatService } from '../combat-manager/combat-manager.service';
 import { GridManagerService } from '../grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '../virtualPlayer-actions/virtualPlayerActions.service';
 
-const DEFENSIVE_ITEM_SCORE = 100;
-const IN_RANGE_BONUS = 1000;
+const DEFENSIVE_ITEM_SCORE = 200;
+const AGGRESSIVE_ITEM_SCORE = 50;
+const IN_RANGE_BONUS = 500;
 const INVALID_ITEM_PENALTY = -200;
-const ATTACK_PENALTY = -1000;
+const ATTACK_PENALTY = -5000;
 
 @Injectable()
 export class DefensiveVPService {
@@ -22,6 +23,7 @@ export class DefensiveVPService {
         private readonly gridManagerService: GridManagerService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
+
     async executeDefensiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
         const bestMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
@@ -63,11 +65,19 @@ export class DefensiveVPService {
 
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
+
+            if (movementCost > virtualPlayer.movementPoints) {
+                move.score = -Infinity;
+                return;
+            }
             move.score -= movementCost;
 
             if (movementCost <= virtualPlayer.movementPoints) {
                 move.inRange = true;
-                move.score += IN_RANGE_BONUS;
+
+                if (move.type !== MoveType.Attack) {
+                    move.score += IN_RANGE_BONUS;
+                }
             }
         }
     }
@@ -76,18 +86,29 @@ export class DefensiveVPService {
         if (move.type !== MoveType.Item || !move.tile.item) return;
 
         const item = move.tile.item;
-        const isDefensive = item.name === ItemName.Swap;
 
-        if (isDefensive) {
-            move.score += DEFENSIVE_ITEM_SCORE;
-        } else {
-            move.score += INVALID_ITEM_PENALTY;
+        switch (item.name) {
+            case ItemName.Swap:
+                move.score += DEFENSIVE_ITEM_SCORE;
+                break;
+            case ItemName.Potion:
+                move.score += AGGRESSIVE_ITEM_SCORE;
+                break;
+            case ItemName.Fire:
+                move.score += AGGRESSIVE_ITEM_SCORE;
+                break;
+            case ItemName.Rubik:
+                move.score += AGGRESSIVE_ITEM_SCORE;
+                break;
+            default:
+                move.score += INVALID_ITEM_PENALTY;
+                break;
         }
     }
 
     private calculateAttackScore(move: Move): void {
         if (move.type === MoveType.Attack) {
-            move.score += ATTACK_PENALTY;
+            move.score = ATTACK_PENALTY;
         }
     }
 
@@ -97,15 +118,10 @@ export class DefensiveVPService {
 
     async tryToEscapeIfWounded(virtualPlayer: Player, accessCode: string): Promise<boolean> {
         const isInCombat = this.gameCombatService.isCombatActive(accessCode);
-
         if (!isInCombat) return false;
-
         const combatState = this.gameCombatService.getCombatState(accessCode);
-
         if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return false;
-
         const healthRatio = virtualPlayer.hp.current / virtualPlayer.hp.max;
-
         if (healthRatio < 1) {
             console.log('🚨 Trying to escape...');
             this.gameCombatService.attemptEscape(accessCode, virtualPlayer);
