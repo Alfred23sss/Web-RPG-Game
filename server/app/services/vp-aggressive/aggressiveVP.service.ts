@@ -1,3 +1,4 @@
+import { AGGRESSIVE_ITEM_SCORE, ATTACK_SCORE, IN_RANGE_BONUS, INVALID_ITEM_PENALTY, NO_SCORE } from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -6,12 +7,6 @@ import { Tile } from '@app/interfaces/Tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { Injectable } from '@nestjs/common';
-
-const ATTACK_SCORE = 100;
-const NO_SCORE = 0;
-const AGGRESSIVE_ITEM_SCORE = 50;
-const IN_RANGE_BONUS = 1000;
-const INVALID_ITEM_PENALTY = -10000;
 
 @Injectable()
 export class AggressiveVPService {

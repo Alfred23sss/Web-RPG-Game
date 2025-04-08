@@ -55,7 +55,16 @@ export const RANDOM_ITEMS = [
 export const BASE_STAT = 4;
 export const BONUS_STAT = 6;
 export const VP_ACTION_WAIT_TIME_MS = 3000;
-export const DOOR_ACTION_WAIT_TIME_MS = 1500;
+export const DOOR_ACTION_WAIT_TIME_MS = 500;
+export const VP_TURN_DONE_MS = 1000;
+export const ATTACK_SCORE = 100;
+export const NO_SCORE = 0;
+export const AGGRESSIVE_ITEM_SCORE = 50;
+export const IN_RANGE_BONUS = 1000;
+export const INVALID_ITEM_PENALTY = -10000;
+export const PLAYER_POSITION = -2;
+export const DESTINATION_POSITION = -1;
+export const ACTION_COST = 1;
 
 export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',

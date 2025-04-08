@@ -1,4 +1,11 @@
-import { DOOR_ACTION_WAIT_TIME_MS, VP_ACTION_WAIT_TIME_MS } from '@app/constants/constants';
+import {
+    ACTION_COST,
+    DESTINATION_POSITION,
+    DOOR_ACTION_WAIT_TIME_MS,
+    NO_SCORE,
+    PLAYER_POSITION,
+    VP_ACTION_WAIT_TIME_MS,
+} from '@app/constants/constants';
 import { EventEmit, ItemName, MoveType, TileType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -25,15 +32,15 @@ export class VirtualPlayerActionsService {
     async moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
-        const destinationTile = movement.at(-1);
+        const destinationTile = movement.at(DESTINATION_POSITION);
         const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
         const isAdjacentToPlayer = this.playerMovementService.getNeighbors(move.tile, lobby.game.grid).includes(destinationTile);
-        if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > 0) {
+        if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > NO_SCORE) {
             await this.executeAttack(lobby.accessCode, destinationTile, move.tile);
             return;
         }
-        if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > 0) {
-            await this.openDoor(lobby.accessCode, movement.at(-2), destinationTile);
+        if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
+            await this.openDoor(lobby.accessCode, movement.at(PLAYER_POSITION), destinationTile);
             return;
         }
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
@@ -68,11 +75,11 @@ export class VirtualPlayerActionsService {
         const hasWall = this.playerMovementService.hasAdjacentTileType(virtualPlayerTile, grid, TileType.Wall);
         const hasLightning = virtualPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(virtualPlayerTile, grid);
-        if (virtualPlayer.actionPoints === 0 && virtualPlayer.movementPoints === 0) {
+        if (virtualPlayer.actionPoints === NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             if (!hasIce) return false;
-        } else if (virtualPlayer.actionPoints > 0 && virtualPlayer.movementPoints === 0) {
+        } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) return false;
-        } else if (virtualPlayer.movementPoints > 0 && virtualPlayer.actionPoints === 0) {
+        } else if (virtualPlayer.movementPoints > NO_SCORE && virtualPlayer.actionPoints === NO_SCORE) {
             if (this.playerMovementService.hasAdjacentPlayer(virtualPlayerTile, grid)) return false;
         }
         return true;
@@ -98,12 +105,11 @@ export class VirtualPlayerActionsService {
     }
 
     private updateActionPoints(virtualPlayer: Player): void {
-        virtualPlayer.actionPoints -= 1; // put 1 in constant folder
+        virtualPlayer.actionPoints -= ACTION_COST;
     }
 
     private updateMovePoints(virtualPlayer: Player, movement: Tile[]): void {
         const moveCost = this.calculateTotalMovementCost(movement);
-        console.log(moveCost);
         virtualPlayer.movementPoints -= moveCost;
         return;
     }
