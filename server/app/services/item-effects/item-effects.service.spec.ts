@@ -332,6 +332,15 @@ describe('ItemEffectsService', () => {
             expect(swap.modifiers[0].attribute).toBe(AttributeType.Defense);
         });
 
+        it('should return early when item is not valid', () => {
+            const item: Item = { id: 'flag', name: ItemName.Flag } as Item;
+
+            service.applyItemModifiers(item);
+
+            expect(item.modifiers).toBeUndefined();
+            expect(item.isActive).toBeUndefined();
+        });
+
         it('should handle unknown attribute types in default case', () => {
             const playerCopy = JSON.parse(JSON.stringify(MOCK_PLAYER));
             const invalidModifier = {
