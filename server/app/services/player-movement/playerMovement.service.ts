@@ -1,3 +1,4 @@
+import { DEFAULT_COST, DOOR_COST, ICE_COST, WALL_COST, WATER_COST } from '@app/constants/constants';
 import { TileType } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
@@ -6,11 +7,11 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class PlayerMovementService {
     private movementCosts = new Map<TileType, number>([
-        [TileType.Ice, 0],
-        [TileType.Default, 1],
-        [TileType.Water, 2],
-        [TileType.Wall, Infinity],
-        [TileType.Door, 1],
+        [TileType.Ice, ICE_COST],
+        [TileType.Default, DEFAULT_COST],
+        [TileType.Water, WATER_COST],
+        [TileType.Wall, WALL_COST],
+        [TileType.Door, DOOR_COST],
     ]);
 
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
@@ -59,7 +60,7 @@ export class PlayerMovementService {
     }
 
     getMoveCost(neighbor: Tile): number {
-        return this.movementCosts.get(neighbor.type) ?? Infinity;
+        return this.movementCosts.get(neighbor.type) ?? WALL_COST;
     }
     hasAdjacentTileType(clientPlayerTile: Tile, grid: Tile[][], tileType: TileType): boolean {
         return this.getNeighbors(clientPlayerTile, grid).some((tile) => tile.type === tileType);
@@ -117,7 +118,7 @@ export class PlayerMovementService {
 
     findBestMoveTile(moveTile: Tile, virtualPlayerTile: Tile, grid: Tile[][]): Tile | undefined {
         let bestMoveTile: Tile | undefined;
-        let minCost = Infinity;
+        let minCost = WALL_COST;
 
         for (const adjacentTile of this.getNeighbors(moveTile, grid)) {
             if (this.isValidNeighborForVirtualPlayer(adjacentTile, virtualPlayerTile.player)) {

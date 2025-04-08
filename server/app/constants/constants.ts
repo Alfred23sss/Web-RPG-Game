@@ -66,6 +66,12 @@ export const PLAYER_POSITION = -2;
 export const DESTINATION_POSITION = -1;
 export const ACTION_COST = 1;
 
+export const ICE_COST = 0;
+export const WATER_COST = 2;
+export const DEFAULT_COST = 1;
+export const DOOR_COST = 1;
+export const WALL_COST = Infinity;
+
 export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',
     avatar: '',
