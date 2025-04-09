@@ -1,87 +1,156 @@
-body,
-html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-}
-
-.inventory,
 .player-info {
-    background-color: #3e4a65;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 350px;
+    background: rgba(10, 30, 50, 0.5);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 20, 40, 0.5);
+    padding: 15px;
+    font-family: 'Pixel', sans-serif;
+    color: #d4f1ff;
+    text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+    margin: 0 auto;
 }
 
-.inventory h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #f8f0a1;
-    border-bottom: 1px solid #5c6a85;
-    padding-bottom: 5px;
-}
-
-.inventory-slot {
-    background-color: #1f2a44;
-    border: 1px dashed #f8f0a1;
-    padding: 10px;
-    margin: 5px 0;
+.player-info h3 {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
     text-align: center;
-    border-radius: 4px;
-    color: #f8f0a1;
+    color: #d4f1ff;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.8);
 }
 
-.player-name.active {
-    color: green !important;
-    font-weight: bold;
-}
-
-.player-name {
-    display: inline-block;
-    margin-right: 8px;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 500;
-}
-
-.player-admin {
-    background-color: #d1af00;
-    color: #2c3b56;
-    border: 1px solid #b38a00;
-    font-weight: 700;
-}
-
-.player-admin::before {
-    content: '👑 ';
-}
-
-.player-regular {
-    background-color: #f8f0a1;
-    color: #2c3b56;
-    border: 1px solid #b38a00;
-}
-
-.player-name:hover {
-    transform: translateY(-2px);
-    transition: transform 0.2s ease;
+.player-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(20, 80, 120, 0.2);
+    padding: 10px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(100, 200, 255, 0.1);
 }
 
 .player-avatar {
-    width: 40px;
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 2px solid #64c8ff;
+    box-shadow: 0 0 15px rgba(100, 200, 255, 0.5);
+    background: rgba(20, 80, 120, 0.2);
+    margin-bottom: 10px;
 }
 
-.item-image {
-    width: 40px;
-    height: 40px;
+.player-name {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    color: #d4f1ff;
+    text-shadow: 0 0 8px rgba(0, 200, 255, 0.6);
+}
+
+.player-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.health-bar,
+.stat-bar {
+    display: flex;
+    gap: 4px;
+    margin-top: 5px;
+}
+
+.health-segment,
+.stat-segment {
+    width: 20px;
+    height: 20px;
+    border-radius: 3px;
+    background-color: rgba(100, 200, 255, 0.1);
+    transition: all 0.3s ease;
+}
+.health-segment.filled {
+    background-color: #8b0000;
+    box-shadow:
+        0 0 8px rgba(139, 0, 0, 0.7),
+        0 0 20px rgba(139, 0, 0, 0.5);
+}
+
+.stat-segment.filled {
+    background-color: #64c8ff;
+    box-shadow: 0 0 6px rgba(100, 200, 255, 0.7);
+}
+
+.attributes-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.attribute {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px;
+    background: rgba(20, 80, 120, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(100, 200, 255, 0.1);
+    font-size: 0.85rem;
+}
+
+.attribute-label {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: #d4f1ff;
+    text-shadow: 0 0 6px rgba(0, 200, 255, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.attribute-value {
+    font-size: 0.9rem;
+    color: #d4f1ff;
+    text-shadow: 0 0 6px rgba(0, 200, 255, 0.6);
+}
+
+.inventory {
+    background: rgba(20, 80, 120, 0.2);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(100, 200, 255, 0.1);
+    font-size: 0.9rem;
+    color: #d4f1ff;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.inventory h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    text-shadow: 0 0 6px rgba(100, 200, 255, 0.7);
 }
 
 .inventory-slot {
-    background-color: #1f2a44;
-    border: 1px dashed #f8f0a1;
-    padding: 10px;
-    margin: 5px 0;
-    text-align: center;
-    border-radius: 4px;
-    color: #f8f0a1;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    margin: 5px;
+    background: rgba(10, 30, 50, 0.3);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(100, 200, 255, 0.2);
+    font-size: 0.8rem;
+    color: #a5cfe8;
+}
+
+.item-image {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 5px;
+    box-shadow: 0 0 8px rgba(100, 200, 255, 0.5);
+    background: rgba(255, 255, 255, 0.05);
 }
