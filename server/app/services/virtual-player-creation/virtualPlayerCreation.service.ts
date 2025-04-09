@@ -57,7 +57,6 @@ export class VirtualPlayerCreationService {
         }
     }
 
-    // type de retour trop long faudrait mettre en interface ou qqch
     private randomizeSpeedAndVitality(): SpeedVitalityStats {
         const values = [BASE_STAT, BONUS_STAT];
         const speedIndex = Math.floor(Math.random() * 2);
@@ -66,7 +65,6 @@ export class VirtualPlayerCreationService {
         return { speed: values[speedIndex], vitality, hp: { current: vitality, max: vitality } };
     }
 
-    // type de retour trop long faudrait mettre en interface ou qqch
     private randomizeAttackAndDefense(): AttackDefenseStats {
         const dicePairs: [DiceType, DiceType][] = [
             [DiceType.D4, DiceType.D6],
