@@ -4,7 +4,6 @@ import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
-import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { Injectable } from '@nestjs/common';
@@ -14,7 +13,6 @@ export class AggressiveVPService {
     constructor(
         private readonly gridManagerService: GridManagerService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
-        private readonly gameCombatService: GameCombatService,
     ) {}
 
     async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
@@ -56,18 +54,12 @@ export class AggressiveVPService {
     private calculateMovementScore(move: Move, virtualPlayerTile: Tile, virtualPlayer: Player, lobby: Lobby): void {
         let movementCost = 0;
         const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
-        if (path) {
-            movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
-            move.score -= movementCost;
+        if (!path) return;
+        movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
+        move.score -= movementCost;
+        move.inRange = movementCost <= virtualPlayer.movementPoints;
 
-            if (movementCost <= virtualPlayer.movementPoints) {
-                move.inRange = true;
-            }
-        }
-
-        if (move.inRange) {
-            move.score += IN_RANGE_BONUS;
-        }
+        if (move.inRange) move.score += IN_RANGE_BONUS;
     }
 
     private calculateAttackScore(move: Move): void {
@@ -80,26 +72,26 @@ export class AggressiveVPService {
     }
 
     private calculateItemScore(move: Move, virtualPlayer: Player): void {
-        if (move.type === MoveType.Item) {
-            switch (move.tile.item.name) {
-                case ItemName.Fire:
-                case ItemName.Potion:
-                    move.score += AGGRESSIVE_ITEM_SCORE;
-                    break;
-                case ItemName.Flag:
-                    move.score += FLAG_SCORE;
-                    break;
-                case ItemName.Home:
-                    if (virtualPlayer.spawnPoint.tileId === move.tile.id) {
-                        move.score += this.isFlagInInventory(virtualPlayer) ? FLAG_SCORE : INVALID_ITEM_PENALTY;
-                    } else {
-                        move.score += INVALID_ITEM_PENALTY;
-                    }
-                    break;
-                default:
+        if (move.type !== MoveType.Item) return;
+        switch (move.tile.item.name) {
+            case ItemName.Fire:
+            case ItemName.Potion:
+                move.score += AGGRESSIVE_ITEM_SCORE;
+                break;
+            case ItemName.Flag:
+                move.score += FLAG_SCORE;
+                break;
+            case ItemName.Home:
+                if (virtualPlayer.spawnPoint.tileId === move.tile.id) {
+                    const hasFlag = this.isFlagInInventory(virtualPlayer);
+                    move.score += hasFlag ? FLAG_SCORE : INVALID_ITEM_PENALTY;
+                } else {
                     move.score += INVALID_ITEM_PENALTY;
-                    break;
-            }
+                }
+                break;
+            default:
+                move.score += INVALID_ITEM_PENALTY;
+                break;
         }
     }
 

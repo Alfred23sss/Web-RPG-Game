@@ -29,15 +29,10 @@ export class VirtualPlayerGateway {
     @SubscribeMessage(VirtualPlayerEvents.CreateVirtualPlayer)
     handleCreateVirtualPlayer(@MessageBody() data: { behavior: Behavior; accessCode: string }): void {
         const lobby = this.lobbyService.getLobby(data.accessCode);
-
-        this.logger.log('Received request to create Virtual Player with behavior', data.behavior);
-
         this.virtualPlayerCreationService.createVirtualPlayer(data.behavior, lobby);
         const avatars = this.virtualPlayerCreationService.getUsedAvatars(lobby);
-
         this.server.to(data.accessCode).emit('updatePlayers', lobby.players);
         this.server.to(data.accessCode).emit('updateUnavailableOptions', { avatars });
-
         if (lobby.isLocked) {
             this.server.to(data.accessCode).emit('lobbyLocked', { accessCode: data.accessCode, isLocked: true });
         }
@@ -48,9 +43,6 @@ export class VirtualPlayerGateway {
         const lobby = this.lobbyService.getLobby(data.accessCode);
         this.virtualPlayerCreationService.kickVirtualPlayer(lobby, data.player);
         const avatars = this.virtualPlayerCreationService.getUsedAvatars(lobby);
-
-        this.logger.log(avatars);
-
         this.server.to(data.accessCode).emit('updatePlayers', lobby.players);
         this.server.to(data.accessCode).emit('updateUnavailableOptions', { avatars });
     }
@@ -71,6 +63,7 @@ export class VirtualPlayerGateway {
     @OnEvent(VirtualPlayerEvents.EndVirtualPlayerTurn)
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
+
         this.virtualPlayerService.resetStats();
         const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
         gameService.endTurn(data.accessCode);
