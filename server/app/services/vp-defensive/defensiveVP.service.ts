@@ -31,6 +31,11 @@ export class DefensiveVPService {
         //* on cherche la case (tuile) ou se trouve notre joueur virtuel avec la methode getVirtualPlayerTile()
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         if (!virtualPlayerTile) return;
+        if (virtualPlayer.inventory.filter((i) => i !== null).length >= 2) {
+            console.log('📦 Inventaire plein, aucune action effectuée.');
+            //TODO: fonction pour attaque
+            return;
+        }
 
         //Calcule le meilleure move
         //* on choisit celle avec le plus gros score avec la methode getNextMove()
