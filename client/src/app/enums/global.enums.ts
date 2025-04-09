@@ -204,7 +204,7 @@ export enum ItemDescription {
     Stop = 'Donne un deuxième D6 au joueur.',
     QuestionMark = 'Objet aléatoire.',
     Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
-    Rubik = 'Augmente la Vitesse de 2, mais réduit la Vitalité de 1.',
+    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
     Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
     Flag = 'Drapeau à capturer.',
     Default = 'rien',
