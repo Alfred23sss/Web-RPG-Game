@@ -74,6 +74,26 @@ export const DEFAULT_COST = 1;
 export const DOOR_COST = 1;
 export const WALL_COST = Infinity;
 
+export const AGGRESSIVE_ITEM_ORDER: ItemName[] = [
+    ItemName.Flag,
+    ItemName.Potion,
+    ItemName.Fire,
+    ItemName.Stop,
+    ItemName.Rubik,
+    ItemName.Swap,
+    ItemName.Lightning,
+];
+
+export const DEFENSIVE_ITEM_ORDER: ItemName[] = [
+    ItemName.Flag,
+    ItemName.Rubik,
+    ItemName.Swap,
+    ItemName.Stop,
+    ItemName.Potion,
+    ItemName.Fire,
+    ItemName.Lightning,
+];
+
 export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',
     avatar: '',

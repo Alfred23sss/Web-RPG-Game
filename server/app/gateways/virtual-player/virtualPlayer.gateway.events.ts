@@ -3,4 +3,5 @@ export enum VirtualPlayerEvents {
     KickVirtualPlayer = 'kickVirtualPlayer',
     VirtualPlayerMove = 'vpMove',
     EndVirtualPlayerTurn = 'endVPTurn',
+    ChooseItem = 'chooseItem',
 }

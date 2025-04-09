@@ -151,7 +151,7 @@ export class GameGateway {
             this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
         }
         if (payload.attacker.isVirtual && payload.attacker.name !== payload.currentFighter.name) {
-            this.gameCombatService.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, payload.accessCode);
+            this.gameCombatService.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: payload.accessCode });
         }
 
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);

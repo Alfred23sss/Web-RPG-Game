@@ -1,6 +1,7 @@
-import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
+import { ACTION_MAX_MS, ACTION_MIN_MS, AGGRESSIVE_ITEM_ORDER, DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
 import { Behavior, EventEmit, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
+import { Item } from '@app/interfaces/Item';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
@@ -33,7 +34,8 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.virtualPlayer = player;
                 this.movementPoints = this.virtualPlayer.movementPoints;
                 this.actionsPoints = this.virtualPlayer.actionPoints;
-                this.executeVirtualPlayerTurn(accessCode);
+                const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
+                setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
             }
         });
         this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
@@ -55,6 +57,22 @@ export class VirtualPlayerService implements OnModuleInit {
         this.virtualPlayer.actionPoints = this.actionsPoints;
     }
 
+    itemChoice(behavior: Behavior, items: Item[]): Item {
+        if (behavior === Behavior.Null) return;
+        const itemChoiceOrder = behavior === Behavior.Aggressive ? AGGRESSIVE_ITEM_ORDER : DEFENSIVE_ITEM_ORDER;
+        const result: Item[] = [];
+
+        for (const name of itemChoiceOrder) {
+            const found = items.find((item) => item.name === name);
+            if (found && !result.includes(found)) {
+                result.push(found);
+                if (result.length === 2) break;
+            }
+        }
+        const removed = items.find((item) => !result.includes(item));
+        return removed || null;
+    }
+
     private executeVirtualPlayerTurn(accessCode: string): void {
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) return;
@@ -63,6 +81,7 @@ export class VirtualPlayerService implements OnModuleInit {
         if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
 
         const moves = this.findAllMoves(lobby.game.grid);
+        console.log('spwanpoint', this.virtualPlayer.spawnPoint);
         switch (this.virtualPlayer.behavior) {
             case Behavior.Aggressive:
                 this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);

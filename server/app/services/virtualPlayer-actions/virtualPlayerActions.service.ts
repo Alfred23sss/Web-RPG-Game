@@ -34,22 +34,33 @@ export class VirtualPlayerActionsService {
     async moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
+        console.log('movement', movement);
         const destinationTile = movement.at(DESTINATION_POSITION);
         const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
         const isAdjacentToPlayer = this.playerMovementService.getNeighbors(move.tile, lobby.game.grid).includes(destinationTile);
-        if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > NO_SCORE) {
-            await this.executeAttack(lobby.accessCode, destinationTile, move.tile);
-            return;
-        }
         if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
             await this.openDoor(lobby.accessCode, movement.at(PLAYER_POSITION), destinationTile);
             return;
         }
+        if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > NO_SCORE) {
+            await this.executeAttack(lobby.accessCode, destinationTile, move.tile);
+            return;
+        }
+
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
 
     async pickUpItem(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
-        await this.executeMove(move, virtualPlayerTile, lobby);
+        const movement = await this.executeMove(move, virtualPlayerTile, lobby);
+        if (!movement) return;
+        console.log('movement', movement);
+        const destinationTile = movement.at(DESTINATION_POSITION);
+        const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
+        if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
+            console.log('entered open door');
+            await this.openDoor(lobby.accessCode, movement.at(PLAYER_POSITION), destinationTile);
+            return;
+        }
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
 
@@ -78,11 +89,11 @@ export class VirtualPlayerActionsService {
         const hasLightning = virtualPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(virtualPlayerTile, grid);
         if (virtualPlayer.actionPoints === NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
-            if (!hasIce) return false;
+            if (!hasIce) return false; // tester glace
         } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) return false;
         } else if (virtualPlayer.movementPoints > NO_SCORE && virtualPlayer.actionPoints === NO_SCORE) {
-            if (this.playerMovementService.hasAdjacentPlayer(virtualPlayerTile, grid)) return false;
+            // si peux pas bouger return false
         }
         return true;
     }
@@ -103,6 +114,13 @@ export class VirtualPlayerActionsService {
         if (lastTile.type === TileType.Door && !lastTile.isOpen) {
             realMovement = movement.slice(0, -1);
         }
+        console.log('player action points', virtualPlayerTile.player.actionPoints, 'real movement length', realMovement.length, realMovement);
+        if (realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === 0) {
+            console.log('ending virtual player turn');
+            this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
+            return;
+        }
+
         const payload = {
             virtualPlayerTile,
             closestReachableTile: move.tile,
@@ -134,20 +152,28 @@ export class VirtualPlayerActionsService {
         }
         if (closestReachableTile) {
             const path = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, grid);
-            const pathUntilDoor = this.playerMovementService.trimPathAtDoor(path);
-            return pathUntilDoor;
+            // console.log('getmovement path', path);
+            const trimmedPath = this.playerMovementService.trimPathAtObstacle(path);
+            console.log('rtimmed', trimmedPath);
+            return trimmedPath;
         }
     }
 
     private async executeAttack(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
         await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
-        if (!actionTile.player || !currentTile.player) return;
+        if (!actionTile.player || !currentTile.player) {
+            this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
+            return;
+        }
         this.gameCombatService.startCombat(accessCode, currentTile.player.name, actionTile.player.name);
         this.updateActionPoints(currentTile.player);
     }
 
     private async openDoor(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
-        if (!actionTile) return;
+        if (!actionTile) {
+            this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
+            return;
+        }
         await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(DOOR_ACTION_MIN_MS, DOOR_ACTION_MAX_MS)));
         const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
         gameService.updateDoorTile(accessCode, currentTile, actionTile);

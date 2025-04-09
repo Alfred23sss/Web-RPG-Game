@@ -1,4 +1,6 @@
+import { DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
+import { Item } from '@app/interfaces/Item';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
@@ -43,7 +45,7 @@ export class DefensiveVPService {
 
         this.moveAlongPath(partialPath, virtualPlayerTile, lobby);
     }
- 
+
     async tryToEscapeIfWounded(virtualPlayer: Player, accessCode: string): Promise<boolean> {
         const isInCombat = this.gameCombatService.isCombatActive(accessCode);
         if (!isInCombat) return false;

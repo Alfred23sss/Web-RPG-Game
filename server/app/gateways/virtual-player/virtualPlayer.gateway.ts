@@ -1,5 +1,7 @@
 import { Behavior } from '@app/enums/enums';
+import { Item } from '@app/interfaces/Item';
 import { Tile } from '@app/interfaces/Tile';
+import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Player } from '@app/model/database/player';
 import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -70,7 +72,15 @@ export class VirtualPlayerGateway {
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
         this.virtualPlayerService.resetStats();
+        console.log('accesCode', data.accessCode);
         const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
         gameService.endTurn(data.accessCode);
+    }
+
+    @OnEvent(VirtualPlayerEvents.ChooseItem)
+    handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[] }) {
+        const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
+        const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
+        gameService.handleItemDropped(data.accessCode, data.player, removedItem);
     }
 }

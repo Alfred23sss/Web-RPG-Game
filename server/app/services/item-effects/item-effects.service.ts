@@ -1,4 +1,5 @@
 import { AttributeType, EventEmit, ItemName, TileType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
@@ -58,27 +59,31 @@ export class ItemEffectsService {
     }
 
     applyItemModifiers(item: Item) {
-        if (item.name === ItemName.Potion) {
-            item.modifiers = [
-                { attribute: AttributeType.Attack, value: BONUS_VALUE },
-                { attribute: AttributeType.Defense, value: PENALTY_VALUE },
-            ];
-            item.isActive = false;
-        }
-        if (item.name === ItemName.Rubik) {
-            item.modifiers = [
-                { attribute: AttributeType.Hp, value: PENALTY_VALUE },
-                { attribute: AttributeType.Speed, value: BONUS_VALUE },
-            ];
-            item.isActive = false;
-        }
-        if (item.name === ItemName.Fire) {
-            item.modifiers = [{ attribute: AttributeType.Attack, value: BONUS_VALUE }];
-            item.isActive = false;
-        }
-        if (item.name === ItemName.Swap) {
-            item.modifiers = [{ attribute: AttributeType.Defense, value: BONUS_VALUE }];
-            item.isActive = false;
+        switch (item.name) {
+            case ItemName.Potion:
+                item.modifiers = [
+                    { attribute: AttributeType.Attack, value: BONUS_VALUE },
+                    { attribute: AttributeType.Defense, value: PENALTY_VALUE },
+                ];
+                item.isActive = false;
+                break;
+            case ItemName.Rubik:
+                item.modifiers = [
+                    { attribute: AttributeType.Hp, value: PENALTY_VALUE },
+                    { attribute: AttributeType.Speed, value: BONUS_VALUE },
+                ];
+                item.isActive = false;
+                break;
+            case ItemName.Fire:
+                item.modifiers = [{ attribute: AttributeType.Attack, value: BONUS_VALUE }];
+                item.isActive = false;
+                break;
+            case ItemName.Swap:
+                item.modifiers = [{ attribute: AttributeType.Defense, value: BONUS_VALUE }];
+                item.isActive = false;
+                break;
+            default:
+                break;
         }
     }
 
@@ -178,7 +183,11 @@ export class ItemEffectsService {
             }
         }
         const items = [player.inventory[0], player.inventory[1], item];
-        this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
+        if (player.isVirtual) {
+            this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items });
+        } else {
+            this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
+        }
         return { player, items };
     }
 
