@@ -34,8 +34,7 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.virtualPlayer = player;
                 this.movementPoints = this.virtualPlayer.movementPoints;
                 this.actionsPoints = this.virtualPlayer.actionPoints;
-                const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
-                setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
+                this.delay(accessCode);
             }
         });
         this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
@@ -46,9 +45,8 @@ export class VirtualPlayerService implements OnModuleInit {
             }
         });
         this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
-            const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
-            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
-            console.log('starting another turn behavior', randomDelay);
+            console.log('starting another turn behavior');
+            this.delay(accessCode);
         });
     }
 
@@ -81,7 +79,6 @@ export class VirtualPlayerService implements OnModuleInit {
         if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
 
         const moves = this.findAllMoves(lobby.game.grid);
-        console.log('spwanpoint', this.virtualPlayer.spawnPoint);
         switch (this.virtualPlayer.behavior) {
             case Behavior.Aggressive:
                 this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
@@ -90,6 +87,10 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.defensiveVPService.executeDefensiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
         }
+    }
+    private delay(accessCode: string): void {
+        const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
+        setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
     }
 
     private hasAvailableActions(accessCode: string, virtualPlayer: Player, lobby: Lobby): boolean {

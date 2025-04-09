@@ -34,7 +34,6 @@ export class VirtualPlayerActionsService {
     async moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
-        console.log('movement', movement);
         const destinationTile = movement.at(DESTINATION_POSITION);
         const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
         const isAdjacentToPlayer = this.playerMovementService.getNeighbors(move.tile, lobby.game.grid).includes(destinationTile);
@@ -53,11 +52,9 @@ export class VirtualPlayerActionsService {
     async pickUpItem(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
-        console.log('movement', movement);
         const destinationTile = movement.at(DESTINATION_POSITION);
         const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
         if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
-            console.log('entered open door');
             await this.openDoor(lobby.accessCode, movement.at(PLAYER_POSITION), destinationTile);
             return;
         }
@@ -92,8 +89,6 @@ export class VirtualPlayerActionsService {
             if (!hasIce) return false; // tester glace
         } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) return false;
-        } else if (virtualPlayer.movementPoints > NO_SCORE && virtualPlayer.actionPoints === NO_SCORE) {
-            // si peux pas bouger return false
         }
         return true;
     }
@@ -114,7 +109,6 @@ export class VirtualPlayerActionsService {
         if (lastTile.type === TileType.Door && !lastTile.isOpen) {
             realMovement = movement.slice(0, -1);
         }
-        console.log('player action points', virtualPlayerTile.player.actionPoints, 'real movement length', realMovement.length, realMovement);
         if (realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === 0) {
             console.log('ending virtual player turn');
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
@@ -152,9 +146,7 @@ export class VirtualPlayerActionsService {
         }
         if (closestReachableTile) {
             const path = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, grid);
-            // console.log('getmovement path', path);
             const trimmedPath = this.playerMovementService.trimPathAtObstacle(path);
-            console.log('rtimmed', trimmedPath);
             return trimmedPath;
         }
     }

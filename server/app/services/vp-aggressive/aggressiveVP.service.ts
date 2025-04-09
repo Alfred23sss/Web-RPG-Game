@@ -4,6 +4,7 @@ import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
+import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { Injectable } from '@nestjs/common';
@@ -13,6 +14,7 @@ export class AggressiveVPService {
     constructor(
         private readonly gridManagerService: GridManagerService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
+        private readonly gameCombatService: GameCombatService,
     ) {}
 
     async executeAggressiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
@@ -46,7 +48,7 @@ export class AggressiveVPService {
             this.calculateMovementScore(move, virtualPlayerTile, virtualPlayer, lobby);
             this.calculateAttackScore(move);
             this.calculateItemScore(move, virtualPlayer);
-            console.log('tile', move.tile.id, 'score', move.score);
+            console.log(move.tile.id, 'score', move.score);
             return move;
         });
     }
@@ -56,7 +58,6 @@ export class AggressiveVPService {
         const path = this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby);
         if (path) {
             movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
-            console.log(move.tile.id, movementCost);
             move.score -= movementCost;
 
             if (movementCost <= virtualPlayer.movementPoints) {
@@ -89,7 +90,7 @@ export class AggressiveVPService {
                     move.score += FLAG_SCORE;
                     break;
                 case ItemName.Home:
-                    if ((virtualPlayer.spawnPoint.tileId = move.tile.id)) {
+                    if (virtualPlayer.spawnPoint.tileId === move.tile.id) {
                         move.score += this.isFlagInInventory(virtualPlayer) ? FLAG_SCORE : INVALID_ITEM_PENALTY;
                     } else {
                         move.score += INVALID_ITEM_PENALTY;

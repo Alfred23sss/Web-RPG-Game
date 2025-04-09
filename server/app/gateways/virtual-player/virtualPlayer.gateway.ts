@@ -72,7 +72,6 @@ export class VirtualPlayerGateway {
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
         this.virtualPlayerService.resetStats();
-        console.log('accesCode', data.accessCode);
         const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
         gameService.endTurn(data.accessCode);
     }
