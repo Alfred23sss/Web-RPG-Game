@@ -68,6 +68,7 @@ export class VirtualPlayerService implements OnModuleInit {
                 this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
             case Behavior.Defensive:
+                console.log(this.virtualPlayer);
                 this.defensiveVPService.executeDefensiveBehavior(this.virtualPlayer, lobby, moves);
                 break;
         }

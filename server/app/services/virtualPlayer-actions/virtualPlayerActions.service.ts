@@ -158,4 +158,23 @@ export class VirtualPlayerActionsService {
     private emitEvent<T>(eventName: string, payload: T): void {
         this.eventEmitter.emit(eventName, payload);
     }
+
+
+    moveAlongPartialPath(path: Tile[], virtualPlayerTile: Tile, lobby: Lobby): void {
+        if (!path || path.length <= 1) return;
+    
+        const payload = {
+            virtualPlayerTile,
+            closestReachableTile: path.at(-1),
+            movement: path,
+            accessCode: lobby.accessCode,
+        };
+    
+        // Mise à jour correcte des points de déplacement selon le chemin limité
+        // this.updateMovePoints(virtualPlayerTile.player, path);
+    
+        // Émission de l'événement (comme avant)
+        this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
+    }
+    
 }
