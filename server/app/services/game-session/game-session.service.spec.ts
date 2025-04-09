@@ -391,34 +391,32 @@ describe('GameSessionService', () => {
             expect(emitSpy).toHaveBeenCalled();
         });
 
-        describe('updateDoorTile', () => {
-            it('should open closed doors and emit update', () => {
-                const grid = [
-                    [
-                        { ...CLOSED_DOOR_TILE, id: 'tile-1' },
-                        { ...CLOSED_DOOR_TILE, id: 'tile-2' },
-                    ],
-                ];
+        it('should open closed doors and emit update', () => {
+            const grid = [
+                [
+                    { ...CLOSED_DOOR_TILE, id: 'tile-1' },
+                    { ...CLOSED_DOOR_TILE, id: 'tile-2' },
+                ],
+            ];
 
-                const mockGameSession = createMockGameSession(grid, {
-                    orderedPlayers: [],
-                    currentPlayer: null,
-                });
+            const mockGameSession = createMockGameSession(grid, {
+                orderedPlayers: [],
+                currentPlayer: null,
+            });
 
-                gameSessionService['gameSessions'].set(ACCESS_CODE, mockGameSession);
+            gameSessionService['gameSessions'].set(ACCESS_CODE, mockGameSession);
 
-                const targetTile = grid[0][1];
-                jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(true);
-                const emitSpy = jest.spyOn(eventEmitter, 'emit');
+            const targetTile = grid[0][1];
+            jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(true);
+            const emitSpy = jest.spyOn(eventEmitter, 'emit');
 
-                gameSessionService.updateDoorTile(ACCESS_CODE, grid[0][0], targetTile);
+            gameSessionService.updateDoorTile(ACCESS_CODE, grid[0][0], targetTile);
 
-                expect(targetTile.imageSrc).toBe(ImageType.OpenDoor);
-                expect(targetTile.isOpen).toBe(true);
-                expect(emitSpy).toHaveBeenCalledWith('game.door.update', {
-                    accessCode: ACCESS_CODE,
-                    grid: mockGameSession.game.grid,
-                });
+            expect(targetTile.imageSrc).toBe(ImageType.OpenDoor);
+            expect(targetTile.isOpen).toBe(true);
+            expect(emitSpy).toHaveBeenCalledWith('game.door.update', {
+                accessCode: ACCESS_CODE,
+                grid: mockGameSession.game.grid,
             });
         });
     });
