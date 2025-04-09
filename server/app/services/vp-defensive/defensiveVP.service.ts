@@ -1,5 +1,7 @@
 import { FLAG_SCORE } from '@app/constants/constants';
+import { DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
+import { Item } from '@app/interfaces/Item';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
@@ -61,6 +63,7 @@ export class DefensiveVPService {
         //sinon le joueur avance sur le chemain partiel -->PAS de probleme enfaite si on execute en haut on return donc ici ca va jamais etre execute
         this.moveAlongPath(partialPath, virtualPlayerTile, lobby); //POTENTIEL PROBLEME APELLE PICKUPITEM A LA DERNIER CASE DU CHEMAIN --> bouge et apres la fonction le fait rebouger
     }
+ 
     async tryToEscapeIfWounded(virtualPlayer: Player, accessCode: string): Promise<boolean> {
         const isInCombat = this.gameCombatService.isCombatActive(accessCode);
         if (!isInCombat) return false;
