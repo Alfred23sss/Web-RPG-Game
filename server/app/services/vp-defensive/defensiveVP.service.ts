@@ -12,7 +12,7 @@ import { Injectable } from '@nestjs/common';
 const DEFENSIVE_ITEM_SCORE = 9999;
 const AGGRESSIVE_ITEM_SCORE = 1000;
 const IN_RANGE_BONUS = 100;
-const INVALID_ITEM_PENALTY = -200;
+const INVALID_ITEM_PENALTY = -5000;
 const ATTACK_PENALTY = -1000;
 const NO_SCORE = 0;
 
