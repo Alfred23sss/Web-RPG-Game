@@ -1,4 +1,4 @@
-import { Behavior } from '@app/enums/enums';
+import { Behavior, EventEmit } from '@app/enums/enums';
 import { Item } from '@app/interfaces/Item';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
@@ -81,5 +81,21 @@ export class VirtualPlayerGateway {
         const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
         const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
         gameService.handleItemDropped(data.accessCode, data.player, removedItem);
+    }
+
+    @OnEvent(EventEmit.GameTurnStarted)
+    handleVirtualPlayerTurnStarted(@MessageBody() data: { accessCode: string; player: VirtualPlayer }) {
+        this.virtualPlayerService.handleTurnStart(data.accessCode, data.player);
+    }
+
+    @OnEvent(EventEmit.GameCombatTurnStarted)
+    handleCombatTurnStarted(@MessageBody() data: { accessCode: string; player: VirtualPlayer }) {
+        this.virtualPlayerService.handleCombatTurnStart(data.accessCode, data.player);
+    }
+
+    @OnEvent(EventEmit.VPActionDone)
+    handleActionDone(@MessageBody() accessCode: string) {
+        console.log('starting another turn behavior');
+        this.virtualPlayerService.delay(accessCode);
     }
 }

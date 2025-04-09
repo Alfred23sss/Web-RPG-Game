@@ -115,15 +115,19 @@ export class VirtualPlayerActionsService {
             return;
         }
 
-        const payload = {
-            virtualPlayerTile,
-            closestReachableTile: move.tile,
-            movement: realMovement,
-            accessCode: lobby.accessCode,
-        };
-        this.updateMovePoints(virtualPlayerTile.player, realMovement);
-        this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
+        this.move(virtualPlayerTile, move.tile, realMovement, lobby.accessCode);
         return movement;
+    }
+
+    private move(startTile: Tile, endTile: Tile, path: Tile[], accessCode: string): void {
+        const payload = {
+            virtualPlayerTile: startTile,
+            closestReachableTile: endTile,
+            movement: path,
+            accessCode,
+        };
+        this.updateMovePoints(startTile.player, path);
+        this.emitEvent(VirtualPlayerEvents.VirtualPlayerMove, payload);
     }
 
     private updateActionPoints(virtualPlayer: Player): void {
