@@ -133,7 +133,7 @@ export class DefensiveVPService {
                 move.score += AGGRESSIVE_ITEM_SCORE;
                 break;
             case ItemName.Rubik:
-                move.score += AGGRESSIVE_ITEM_SCORE;
+                move.score += DEFENSIVE_ITEM_SCORE;
                 break;
             //normalement seulement lorsque le joueur a le FLAG
             case ItemName.Home:
