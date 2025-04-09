@@ -98,18 +98,18 @@ export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',
     avatar: '',
     speed: BASE_STAT,
-    vitality: BASE_STAT, // Add the missing "vitality" field from Player
+    vitality: BASE_STAT,
     attack: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
     defense: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
     hp: { current: BASE_STAT, max: BASE_STAT },
     movementPoints: 4,
     actionPoints: 1,
     inventory: [null, null],
-    isAdmin: false, // Always false for virtual players
+    isAdmin: false,
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
-    isVirtual: true, // Always true for virtual players
+    isVirtual: true,
     behavior: Behavior.Null,
 };
 

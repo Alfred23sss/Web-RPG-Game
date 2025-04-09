@@ -109,7 +109,7 @@ export class VirtualPlayerActionsService {
         if (!movement) return;
         const realMovement = this.adjustMovementForDoor(movement);
 
-        if (realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === 0) {
+        if (realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === NO_SCORE) {
             console.log('ending virtual player turn');
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
             return;
@@ -120,8 +120,8 @@ export class VirtualPlayerActionsService {
     }
 
     private adjustMovementForDoor(movement: Tile[]): Tile[] {
-        const lastTile = movement.at(-1);
-        return lastTile.type === TileType.Door && !lastTile.isOpen ? movement.slice(0, -1) : movement;
+        const lastTile = movement.at(DESTINATION_POSITION);
+        return lastTile.type === TileType.Door && !lastTile.isOpen ? movement.slice(0, DESTINATION_POSITION) : movement;
     }
 
     private move(startTile: Tile, endTile: Tile, path: Tile[], accessCode: string): void {
