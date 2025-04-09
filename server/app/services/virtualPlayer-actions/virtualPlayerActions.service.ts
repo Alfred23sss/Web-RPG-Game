@@ -35,17 +35,10 @@ export class VirtualPlayerActionsService {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
         const destinationTile = movement.at(DESTINATION_POSITION);
-        const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
-        const isAdjacentToPlayer = this.playerMovementService.getNeighbors(move.tile, lobby.game.grid).includes(destinationTile);
-        if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
-            await this.openDoor(lobby.accessCode, movement.at(PLAYER_POSITION), destinationTile);
-            return;
-        }
-        if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > NO_SCORE) {
-            await this.executeAttack(lobby.accessCode, destinationTile, move.tile);
-            return;
-        }
-
+        const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode);
+        if (openedDoor) return;
+        const attacked = await this.handleAdjacentToPlayer(destinationTile, virtualPlayerTile, move, lobby);
+        if (attacked) return;
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
 
@@ -53,23 +46,15 @@ export class VirtualPlayerActionsService {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
         const destinationTile = movement.at(DESTINATION_POSITION);
-        const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
-        if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
-            await this.openDoor(lobby.accessCode, movement.at(PLAYER_POSITION), destinationTile);
-            return;
-        }
+        const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode);
+        if (openedDoor) return;
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
 
     getPathForMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Tile[] | undefined {
-        if (move.type === MoveType.Attack && move.tile.player) {
-            const adjacentTileToPlayer = this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, lobby.game.grid);
-            if (adjacentTileToPlayer) {
-                return this.playerMovementService.quickestPath(virtualPlayerTile, adjacentTileToPlayer, lobby.game.grid);
-            }
-        } else {
-            return this.playerMovementService.quickestPath(virtualPlayerTile, move.tile, lobby.game.grid);
-        }
+        const isMoveAttack = move.type === MoveType.Attack && move.tile.player;
+        const targetTile = isMoveAttack ? this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, lobby.game.grid) : move.tile;
+        return targetTile ? this.playerMovementService.quickestPath(virtualPlayerTile, targetTile, lobby.game.grid) : undefined;
     }
 
     calculateTotalMovementCost(path: Tile[]): number {
@@ -86,9 +71,9 @@ export class VirtualPlayerActionsService {
         const hasLightning = virtualPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(virtualPlayerTile, grid);
         if (virtualPlayer.actionPoints === NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
-            if (!hasIce) return false; // tester glace
+            return hasIce;
         } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
-            if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) return false;
+            return hasIce || hasActionAvailable || (hasLightning && !hasWall); // test this condition
         }
         return true;
     }
@@ -101,14 +86,29 @@ export class VirtualPlayerActionsService {
         return this.playerMovementService.getMoveCost(tile);
     }
 
+    private async handleAdjacentToClosedDoor(destinationTile: Tile, virtualPlayerTile: Tile, movement: Tile[], accessCode: string): Promise<boolean> {
+        const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
+        if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
+            await this.openDoor(accessCode, movement.at(PLAYER_POSITION), destinationTile);
+            return true;
+        }
+        return false;
+    }
+
+    private async handleAdjacentToPlayer(destinationTile: Tile, virtualPlayerTile: Tile, move: Move, lobby: Lobby): Promise<boolean> {
+        const isAdjacentToPlayer = this.playerMovementService.getNeighbors(move.tile, lobby.game.grid).includes(destinationTile);
+        if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > NO_SCORE) {
+            await this.executeAttack(lobby.accessCode, destinationTile, move.tile);
+            return true;
+        }
+        return false;
+    }
+
     private async executeMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<Tile[]> {
         const movement = this.getMovement(move, virtualPlayerTile, lobby.game.grid);
         if (!movement) return;
-        let realMovement = movement;
-        const lastTile = movement.at(-1);
-        if (lastTile.type === TileType.Door && !lastTile.isOpen) {
-            realMovement = movement.slice(0, -1);
-        }
+        const realMovement = this.adjustMovementForDoor(movement);
+
         if (realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === 0) {
             console.log('ending virtual player turn');
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
@@ -117,6 +117,11 @@ export class VirtualPlayerActionsService {
 
         this.move(virtualPlayerTile, move.tile, realMovement, lobby.accessCode);
         return movement;
+    }
+
+    private adjustMovementForDoor(movement: Tile[]): Tile[] {
+        const lastTile = movement.at(-1);
+        return lastTile.type === TileType.Door && !lastTile.isOpen ? movement.slice(0, -1) : movement;
     }
 
     private move(startTile: Tile, endTile: Tile, path: Tile[], accessCode: string): void {
