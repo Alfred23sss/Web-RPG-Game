@@ -8,12 +8,17 @@ import { Item } from '@app/classes/item';
     styleUrls: ['./item-pop-up.component.scss'],
 })
 export class ItemPopUpComponent {
+    private isClosing = false;
+
     constructor(
         public dialogRef: MatDialogRef<ItemPopUpComponent>,
         @Inject(MAT_DIALOG_DATA) public data: { items: [Item, Item, Item] },
     ) {}
 
     selectItem(item: Item): void {
-        this.dialogRef.close(item);
+        if (!this.isClosing) {
+            this.isClosing = true;
+            this.dialogRef.close(item);
+        }
     }
 }
