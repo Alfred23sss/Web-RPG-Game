@@ -14,7 +14,6 @@ export class PlayerMovementService {
         [TileType.Door, DOOR_COST],
     ]);
 
-    // return undefined si target tile est un item...
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
         if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
 
@@ -52,16 +51,10 @@ export class PlayerMovementService {
         return undefined;
     }
 
-    calculateRemainingMovementPoints(tile: Tile | undefined, player: Player): number {
-        if (tile) {
-            return this.getMoveCost(tile);
-        }
-        return player.movementPoints;
-    }
-
     getMoveCost(neighbor: Tile): number {
         return this.movementCosts.get(neighbor.type) ?? WALL_COST;
     }
+
     hasAdjacentTileType(clientPlayerTile: Tile, grid: Tile[][], tileType: TileType): boolean {
         return this.getNeighbors(clientPlayerTile, grid).some((tile) => tile.type === tileType);
     }
@@ -172,7 +165,6 @@ export class PlayerMovementService {
     }
 
     private isValidNeighborForVirtualPlayer(tile: Tile, virtualPlayer: Player): boolean {
-        // if (tile.type === TileType.Door && !tile.isOpen && virtualPlayer.actionPoints === 0) return false;
         if (tile.type === TileType.Wall) return false;
 
         if (tile.player !== undefined && tile.player.name !== virtualPlayer.name) return false;
