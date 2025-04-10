@@ -152,7 +152,6 @@ export class GameSocketService {
             if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
                 this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
             }
-
             const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
             if (playerBeforeUpdate) {
                 const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
@@ -166,7 +165,6 @@ export class GameSocketService {
                     }
                 }
             }
-
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
@@ -181,14 +179,12 @@ export class GameSocketService {
                 player.attack.value = data.player.attack.value;
                 player.defense.value = data.player.defense.value;
                 player.speed = data.player.speed;
-
                 this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
 
                 this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
                 this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             }
-
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });

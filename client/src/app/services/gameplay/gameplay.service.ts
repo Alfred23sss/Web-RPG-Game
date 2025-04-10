@@ -60,10 +60,7 @@ export class GameplayService {
 
     abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', {
-            player: gameData.clientPlayer,
-            accessCode: gameData.lobby.accessCode,
-        });
+        this.socketClientService.emit('manual_disconnect', { isInGame: true });
         this.backToHome();
     }
     getClientPlayerPosition(gameData: GameData): Tile | undefined {

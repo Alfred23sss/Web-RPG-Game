@@ -234,6 +234,12 @@ export class GameSessionService {
         }
     }
 
+    isPlayerInGame(accessCode: string, playerName: string): boolean {
+        const session = this.getGameSession(accessCode);
+        if (!session) return false;
+        return session.turn.orderedPlayers.some((player) => player.name === playerName);
+    }
+
     handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return null;
