@@ -1,4 +1,5 @@
 import { EventEmit, GameModeType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Player } from '@app/interfaces/Player';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
@@ -10,7 +11,6 @@ import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { VirtualPlayerEvents } from '../virtual-player/virtualPlayer.gateway.events';
 import { GameEvents } from './game.gateway.events';
 
 @WebSocketGateway({ cors: true })
@@ -52,14 +52,16 @@ export class GameGateway {
         this.logger.log(`Lobby ${lobby} has left lobby`);
         this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
         client.leave(payload.accessCode);
+        const areAllVirtual = lobby.players.every((player) => player.isVirtual);
 
-        if (lobby.players.length <= 1) {
+        if (lobby.players.length <= 1 || areAllVirtual) {
             this.lobbyService.clearLobby(payload.accessCode);
             gameService.deleteGameSession(payload.accessCode);
             this.accessCodesService.removeAccessCode(payload.accessCode);
             this.server.to(payload.accessCode).emit('gameDeleted');
             this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
         }
+
         this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
         this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
         this.logger.log('game abandoned emitted');

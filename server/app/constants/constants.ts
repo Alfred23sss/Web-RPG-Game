@@ -54,10 +54,10 @@ export const RANDOM_ITEMS = [
 
 export const BASE_STAT = 4;
 export const BONUS_STAT = 6;
-export const ACTION_MAX_MS = 3000;
-export const ACTION_MIN_MS = 1000;
+export const ACTION_MAX_MS = 1500;
+export const ACTION_MIN_MS = 500;
 export const DOOR_ACTION_MIN_MS = 500;
-export const DOOR_ACTION_MAX_MS = 1500;
+export const DOOR_ACTION_MAX_MS = 1000;
 export const ATTACK_SCORE = 100;
 export const NO_SCORE = 0;
 export const AGGRESSIVE_ITEM_SCORE = 50;
@@ -98,18 +98,18 @@ export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',
     avatar: '',
     speed: BASE_STAT,
-    vitality: BASE_STAT, // Add the missing "vitality" field from Player
+    vitality: BASE_STAT,
     attack: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
     defense: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
     hp: { current: BASE_STAT, max: BASE_STAT },
     movementPoints: 4,
     actionPoints: 1,
     inventory: [null, null],
-    isAdmin: false, // Always false for virtual players
+    isAdmin: false,
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
-    isVirtual: true, // Always true for virtual players
+    isVirtual: true,
     behavior: Behavior.Null,
 };
 

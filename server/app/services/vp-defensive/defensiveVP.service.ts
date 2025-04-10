@@ -1,3 +1,4 @@
+import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
 import { FLAG_SCORE } from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -65,7 +66,7 @@ export class DefensiveVPService {
         if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return false;
         const healthRatio = virtualPlayer.hp.current / virtualPlayer.hp.max;
         if (healthRatio < 1) {
-            console.log('🚨 Trying to escape...');
+            await new Promise((resolve) => setTimeout(resolve, this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
             this.gameCombatService.attemptEscape(accessCode, virtualPlayer);
             return true;
         }

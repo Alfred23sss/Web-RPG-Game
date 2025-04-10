@@ -1,5 +1,5 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS, AGGRESSIVE_ITEM_ORDER, DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
-import { Behavior, EventEmit, MoveType } from '@app/enums/enums';
+import { Behavior, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Item } from '@app/interfaces/Item';
 import { Lobby } from '@app/interfaces/Lobby';
@@ -11,11 +11,11 @@ import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { AggressiveVPService } from '@app/services/vp-aggressive/aggressiveVP.service';
 import { DefensiveVPService } from '@app/services/vp-defensive/defensiveVP.service';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
 @Injectable()
-export class VirtualPlayerService implements OnModuleInit {
+export class VirtualPlayerService {
     private virtualPlayer: VirtualPlayer;
     private movementPoints: number;
     private actionsPoints: number;
@@ -27,30 +27,6 @@ export class VirtualPlayerService implements OnModuleInit {
         private readonly lobbyService: LobbyService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
-
-    onModuleInit() {
-        this.eventEmitter.on(EventEmit.GameTurnStarted, ({ accessCode, player }) => {
-            if (player.isVirtual) {
-                this.virtualPlayer = player;
-                this.movementPoints = this.virtualPlayer.movementPoints;
-                this.actionsPoints = this.virtualPlayer.actionPoints;
-                const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
-                setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
-            }
-        });
-        this.eventEmitter.on(EventEmit.GameCombatTurnStarted, async ({ accessCode, player }) => {
-            if (player.isVirtual && player.behavior === Behavior.Defensive) {
-                this.virtualPlayer = player;
-                const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(player, accessCode);
-                if (hasEscaped) return;
-            }
-        });
-        this.eventEmitter.on(EventEmit.VPActionDone, (accessCode) => {
-            const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
-            setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
-            console.log('starting another turn behavior', randomDelay);
-        });
-    }
 
     resetStats(): void {
         this.virtualPlayer.movementPoints = this.movementPoints;
@@ -73,6 +49,28 @@ export class VirtualPlayerService implements OnModuleInit {
         return removed || null;
     }
 
+    handleTurnStart(accessCode: string, vPlayer: VirtualPlayer): void {
+        if (vPlayer.isVirtual) {
+            this.virtualPlayer = vPlayer;
+            this.movementPoints = this.virtualPlayer.movementPoints;
+            this.actionsPoints = this.virtualPlayer.actionPoints;
+            this.delay(accessCode);
+        }
+    }
+
+    async handleCombatTurnStart(accessCode: string, vPlayer: VirtualPlayer): Promise<void> {
+        if (vPlayer.isVirtual && vPlayer.behavior === Behavior.Defensive) {
+            this.virtualPlayer = vPlayer;
+            const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(vPlayer, accessCode);
+            if (hasEscaped) return;
+        }
+    }
+
+    delay(accessCode: string): void {
+        const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
+        setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
+    }
+
     private executeVirtualPlayerTurn(accessCode: string): void {
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) return;
@@ -81,7 +79,6 @@ export class VirtualPlayerService implements OnModuleInit {
         if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
 
         const moves = this.findAllMoves(lobby.game.grid);
-        console.log('spwanpoint', this.virtualPlayer.spawnPoint);
         switch (this.virtualPlayer.behavior) {
             case Behavior.Aggressive:
                 this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
