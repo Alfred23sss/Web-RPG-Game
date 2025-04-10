@@ -176,7 +176,7 @@ export class DefensiveVPService {
     private calculateAttackScore(move: Move, virtualPlayer: Player): void {
         if (move.type !== MoveType.Attack) return;
         const targetPlayer = move.tile.player;
-        if (!targetPlayer || targetPlayer.team === virtualPlayer.team) {
+        if (!targetPlayer || (targetPlayer.team === virtualPlayer.team && virtualPlayer.team)) {
             move.score += ALLY_ATTACK_PENALTY;
             return;
         }
