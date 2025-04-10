@@ -68,21 +68,33 @@ export class GameSocketService {
         });
     }
 
-    // no need to be client side
+    // no need to be client side dont even know if its used
     private onItemDropped(): void {
         this.socketClientService.on('itemDropped', (data: { accessCode: string; player: Player; item: Item }) => {
+            this.clientNotifier.addLogbookEntry(`${data.player.name} a déposé un item!`, [data.player]);
             this.socketClientService.emit('itemDrop', data);
         });
     }
 
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
-                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-                if (player.inventory.every((item) => item?.name !== 'flag') && data.player.inventory.some((item) => item?.name === 'flag')) {
-                    this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+            const gameData = this.gameStateService.gameDataSubjectValue;
+            const playerBeforeUpdate = gameData.lobby.players.find((p) => p.name === data.player.name);
+            if (playerBeforeUpdate) {
+                const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
+                const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
+                const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
+                if (addedItems.length > 0) {
+                    if (addedItems.includes('flag')) {
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                    } else {
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
+                    }
                 }
-                this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
+                playerBeforeUpdate.inventory = data.player.inventory;
+            }
+            if (gameData.clientPlayer.name === data.player.name) {
+                gameData.clientPlayer = data.player;
             }
         });
     }
@@ -98,14 +110,13 @@ export class GameSocketService {
 
     private onGameEnded(): void {
         this.socketClientService.on('gameEnded', (data: { winner: string[]; stats: GameStatistics }) => {
-            const players = this.gameStateService.gameDataSubjectValue.lobby.players;
+            const players = this.gameStateService.gameDataSubjectValue.lobby.players.filter((player) => player.hasAbandoned === false);
             if (data.winner.length <= 1) {
                 this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`);
             } else {
                 const winnerNames = data.winner.join(', ');
                 this.clientNotifier.displayMessage(`👑 ${winnerNames} ont remporté la partie ! Redirection vers la page de fin sous peu`);
             }
-
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
             this.gameStateService.gameDataSubjectValue.gameStats = data.stats;
             setTimeout(() => {
@@ -142,6 +153,20 @@ export class GameSocketService {
                 this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
             }
 
+            const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
+            if (playerBeforeUpdate) {
+                const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
+                const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
+                const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
+                if (addedItems.length > 0) {
+                    if (addedItems.includes('flag')) {
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                    } else {
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
+                    }
+                }
+            }
+
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
@@ -150,9 +175,7 @@ export class GameSocketService {
                         data.player,
                     );
                 const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-                if (player.inventory.every((item) => item?.name !== 'flag') && data.player.inventory.some((item) => item?.name === 'flag')) {
-                    this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
-                }
+                // repetition
                 player.inventory = data.player.inventory;
                 player.hp = data.player.hp;
                 player.attack.value = data.player.attack.value;
@@ -188,7 +211,7 @@ export class GameSocketService {
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on('doorClicked', (data: { grid: Tile[][] }) => {
+        this.socketClientService.on('doorClicked', (data: { grid: Tile[][]; isOpen: boolean }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -198,9 +221,8 @@ export class GameSocketService {
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joueur a effectue une action sur une porte!', [
-                this.gameStateService.gameDataSubjectValue.clientPlayer,
-            ]);
+            const action = data.isOpen ? 'fermé une porte' : 'ouvert une porte';
+            this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [this.gameStateService.gameDataSubjectValue.clientPlayer]);
         });
     }
 

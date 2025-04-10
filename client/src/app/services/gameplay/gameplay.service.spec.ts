@@ -154,6 +154,7 @@ describe('GameplayService', () => {
 
         spyOn(service, 'handleItemDropped' as any);
         spyOn(service, 'checkAvailableActions');
+        (mockMatDialog as any).openDialogs = [];
     });
 
     it('should be created', () => {
@@ -285,6 +286,7 @@ describe('GameplayService', () => {
         const mockGameData = createMockGameData();
 
         it('should open dialog with correct parameters', () => {
+            service.closePopUp();
             service.createItemPopUp(mockItems, mockGameData);
 
             expect(mockMatDialog.open).toHaveBeenCalledWith(

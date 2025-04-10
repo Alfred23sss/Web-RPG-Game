@@ -2,18 +2,18 @@
 /* eslint-disable max-lines */
 import { GameModeType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/Dice';
+import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { GameGateway } from './game.gateway';
-import { Item } from '@app/interfaces/Item';
-import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 
 const MOCK_PLAYER: Player = {
     name: 'test-player',
@@ -326,6 +326,7 @@ describe('GameGateway', () => {
             const payload = {
                 accessCode: ACCESS_CODE,
                 grid: mockGrid,
+                isOpen: true,
             };
 
             gateway.handleDoorUpdateEvent(payload);
@@ -339,6 +340,7 @@ describe('GameGateway', () => {
                         }),
                     ],
                 ],
+                isOpen: true,
             });
         });
     });
