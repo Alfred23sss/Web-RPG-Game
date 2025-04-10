@@ -95,6 +95,7 @@ export class ItemEffectsService {
             const newItem = tile.item;
             player.inventory.splice(index, 1);
             player.inventory.push(newItem);
+            item.isActive = false;
             tile.item = item;
             tile.player = player;
             this.addEffect(player, newItem, tile);
