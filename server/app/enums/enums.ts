@@ -174,13 +174,14 @@ export enum TileType {
 
 export enum ItemDescription {
     Home = 'Point de départ',
-    Lightning = 'paralyse',
-    Potion = 'soigne',
-    Stop = 'arrêt le jeu',
-    QuestionMark = 'objet aléatoire',
-    Fire = 'inflige des brûlure',
-    Rubik = 'bouge les colonnes ou les rangés',
-    Swap = 'échange les personnages',
+    Lightning = 'Permet de détruire des murs',
+    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
+    Stop = 'Donne un deuxième D6 au joueur.',
+    QuestionMark = 'Objet aléatoire.',
+    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
+    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
+    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
+    Flag = 'Drapeau à capturer.',
     Default = 'rien',
 }
 
