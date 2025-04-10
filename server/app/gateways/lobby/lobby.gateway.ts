@@ -84,6 +84,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     @SubscribeMessage('joinRoom')
     handleJoinRoom(@MessageBody() accessCode: string, @ConnectedSocket() client: Socket) {
         const lobby = this.lobbyService.getLobby(accessCode);
+        Logger.log(`Player ${client.id} requested to join room ${accessCode}`);
         if (!lobby) {
             client.emit('error', 'Lobby not found');
             return;
@@ -124,7 +125,6 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
     //     client.leave(accessCode);
     // }
-
     @SubscribeMessage('kickPlayer')
     handleKickPlayer(@MessageBody() data: { accessCode: string; playerName: string }) {
         this.logger.log(`Admin requested to kick player ${data.playerName} from lobby ${data.accessCode}`);
@@ -228,7 +228,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         client.emit('avatarDeselected');
     }
 
-    @SubscribeMessage('manual_disconnect')
+    @SubscribeMessage('manualDisconnect')
     handleManualDisconnect(@ConnectedSocket() client: Socket, @MessageBody() data: { isInGame: boolean } = { isInGame: false }) {
         this.logger.log(`Player manually disconnected: ${client.id}`);
         this.handlePlayerDisconnect(client, data.isInGame);
@@ -249,7 +249,9 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     }
 
     handleDisconnect(@ConnectedSocket() client: Socket) {
+        this.logger.log(`Player automatically disconnected: ${client.id}`);
         const player = this.lobbyService.getPlayerBySocketId(client.id);
+        this.logger.log(`Player ${player?.name} disconnected`);
         if (!player) return;
         const accessCode = this.lobbyService.getLobbyIdByPlayer(player.name);
         if (!accessCode) return;
@@ -261,6 +263,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const player = this.lobbyService.getPlayerBySocketId(client.id);
         if (!player) return;
         const accessCode = this.lobbyService.getLobbyIdByPlayer(player.name);
+        Logger.log(`Player ${player.name} disconnected from accessCode: ${accessCode}`);
         if (!accessCode) return;
         this.logger.log(`Player ${player.name} disconnected${isInGame ? ' from game' : ''}`);
         if (isInGame) {
@@ -269,6 +272,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.lobbyService.leaveLobby(accessCode, player.name, true);
             const lobby = this.lobbyService.getLobby(accessCode);
             if (lobby && lobby.players.length <= 1) {
+                Logger.log('clearing lobby');
                 this.lobbyService.clearLobby(accessCode);
                 this.gameSessionService.deleteGameSession(accessCode);
                 this.accessCodesService.removeAccessCode(accessCode);
