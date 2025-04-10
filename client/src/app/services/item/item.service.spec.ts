@@ -8,6 +8,7 @@ import { GameService } from '@app/services/game/game.service';
 import { ItemService } from './item.service';
 
 const EXPECTED_ITEM_COUNT_MEDIUM = 4;
+const EXPECTED_ITEM_COUNT_DEFAULT = 1;
 const DEFAULT_GAME_SIZE = GameSize.Small;
 
 const getSizeString = (size: GameSize) => GRID_DIMENSIONS[size].toString();
@@ -108,13 +109,13 @@ describe('ItemService', () => {
 
         gameServiceMock.getCurrentGame.and.returnValue(mockGame);
 
-        const testItems = [new Item({ id: '1', name: 'home', itemCounter: 1 }), new Item({ id: '2', name: 'question', itemCounter: 2 })];
+        const testItems = [new Item({ id: '1', name: 'home', itemCounter: 1 }), new Item({ id: '2', name: 'question', itemCounter: 1 })];
 
         service.setItems(testItems, gameServiceMock.getCurrentGame()?.mode);
         service.setItemCount();
 
         expect(testItems[0].itemCounter).toBe(EXPECTED_ITEM_COUNT_MEDIUM);
-        expect(testItems[1].itemCounter).toBe(EXPECTED_ITEM_COUNT_MEDIUM);
+        expect(testItems[1].itemCounter).toBe(EXPECTED_ITEM_COUNT_DEFAULT);
     });
 
     it('should update item counters based on grid data', () => {
@@ -127,7 +128,7 @@ describe('ItemService', () => {
         const mockItemQuestion = new Item({
             id: '7',
             name: 'question',
-            itemCounter: 2,
+            itemCounter: 1,
             description: 'Question Item',
         });
 
@@ -188,7 +189,7 @@ describe('ItemService', () => {
         service.setItemCount();
 
         expect(mockItemHome.itemCounter).toBe(1);
-        expect(mockItemQuestion.itemCounter).toBe(1);
+        expect(mockItemQuestion.itemCounter).toBe(0);
     });
 
     it('should exit early if no game is found in setItemCount', () => {

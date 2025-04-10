@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { ItemName } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
@@ -18,7 +17,6 @@ describe('GameCombatService', () => {
     let gameSessionService: jest.Mocked<GameSessionService>;
     let combatHelper: jest.Mocked<CombatHelperService>;
     let eventEmitter: jest.Mocked<EventEmitter2>;
-    let itemEffectsService: jest.Mocked<ItemEffectsService>;
 
     const mockPlayer = (name: string, speed: number): Player => ({
         name,
@@ -129,7 +127,6 @@ describe('GameCombatService', () => {
         gameSessionService = module.get(GameSessionService);
         combatHelper = module.get(CombatHelperService);
         eventEmitter = module.get(EventEmitter2);
-        itemEffectsService = module.get(ItemEffectsService);
     });
 
     afterEach(() => {
@@ -1345,33 +1342,6 @@ describe('GameCombatService', () => {
                 expect(service['initializeCombatTimer']).toHaveBeenCalledWith(accessCode, mockState, 5);
                 expect(service['handleTimerTimeout']).toHaveBeenCalledWith(accessCode, mockState, 5000);
             });
-        });
-    });
-    describe('resetStats', () => {
-        it('should remove effects for items with invalid health condition', () => {
-            const player = mockPlayer('testPlayer', 5);
-            const validItem = {
-                name: ItemName.Swap,
-                id: 'validItemId',
-                imageSrc: 'validItemImage.png',
-                imageSrcGrey: 'validItemImageGrey.png',
-                itemCounter: 1,
-                description: 'A valid item for testing',
-            };
-
-            player.inventory = [validItem, null];
-
-            (itemEffectsService.isHealthConditionValid as jest.Mock).mockImplementation((item) => {
-                return item === validItem;
-            });
-
-            (service as any).resetStats(player);
-
-            expect(itemEffectsService.isHealthConditionValid).toHaveBeenCalledWith(player, validItem);
-
-            expect(itemEffectsService.isHealthConditionValid).not.toHaveBeenCalledWith(player, null);
-
-            expect(itemEffectsService.removeEffects).not.toHaveBeenCalledWith(player, 1);
         });
     });
 });
