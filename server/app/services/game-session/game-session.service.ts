@@ -293,7 +293,7 @@ export class GameSessionService {
         const grid = gameSession.game.grid;
         const { player: updatedPlayer, items } = this.itemEffectsService.addItemToPlayer(player, item, grid, accessCode);
         if (!items) {
-            this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { inventory: updatedPlayer.inventory });
+            this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { ...updatedPlayer });
         }
     }
 
