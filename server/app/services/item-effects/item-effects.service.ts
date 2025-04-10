@@ -182,6 +182,7 @@ export class ItemEffectsService {
             }
         }
         const items = [player.inventory[0], player.inventory[1], item];
+        Logger.log('Items:', items);
         this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
         this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
             accessCode,

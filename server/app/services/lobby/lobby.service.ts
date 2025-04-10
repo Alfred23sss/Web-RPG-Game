@@ -116,6 +116,18 @@ export class LobbyService {
         return lobby.players.some((p) => p.name === playerName && p.isAdmin);
     }
 
+    getPlayerBySocketId(socketId: string): Player | undefined {
+        const playerEntry = Array.from(this.playerSockets.entries()).find(([, sId]) => sId === socketId);
+        if (!playerEntry) return undefined;
+
+        const playerName = playerEntry[0];
+        const lobbyId = this.getLobbyIdByPlayer(playerName);
+        if (!lobbyId) return undefined;
+
+        const lobby = this.getLobby(lobbyId);
+        return lobby?.players.find((p) => p.name === playerName);
+    }
+
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {
         const existingNames = lobby.players.map((player) => player.name.toLowerCase());
 

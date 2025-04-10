@@ -25,6 +25,7 @@ export class GameplayService {
     ) {}
 
     createItemPopUp(items: [Item, Item, Item], gameData: GameData): void {
+        if (this.dialog.openDialogs.length > 0) return;
         const dialogRef = this.dialog.open(ItemPopUpComponent, {
             data: { items },
             panelClass: 'item-pop-up-dialog',

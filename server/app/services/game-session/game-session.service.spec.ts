@@ -417,6 +417,7 @@ describe('GameSessionService', () => {
             expect(emitSpy).toHaveBeenCalledWith('game.door.update', {
                 accessCode: ACCESS_CODE,
                 grid: mockGameSession.game.grid,
+                    isOpen: true,
             });
         });
     });

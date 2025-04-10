@@ -20,8 +20,13 @@ export class ClientNotifierServices {
         }
         const formattedEntry = `[${formattedTime}] - ${entry}${playerNames}`;
 
-        this.logBook.unshift(formattedEntry);
+        this.logBook.push(formattedEntry);
 
+        this.logBookUpdated.next(this.logBook);
+    }
+
+    clearLogbook(): void {
+        this.logBook = [];
         this.logBookUpdated.next(this.logBook);
     }
 
