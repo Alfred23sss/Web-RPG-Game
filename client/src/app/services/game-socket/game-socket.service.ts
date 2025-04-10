@@ -64,7 +64,6 @@ export class GameSocketService {
 
     private onItemChoice(): void {
         this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
-            console.log('itemChoice');
             this.gameplayService.createItemPopUp(data.items, this.gameStateService.gameDataSubjectValue);
         });
     }
