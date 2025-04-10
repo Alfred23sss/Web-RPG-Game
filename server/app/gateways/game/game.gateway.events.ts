@@ -1,5 +1,6 @@
 export enum GameEvents {
     AbandonedGame = 'abandonedGame',
+    DecrementItem = 'decrement.item',
     EndTurn = 'endTurn',
     CreateGame = 'createGame',
     StartCombat = 'startCombat',

@@ -135,6 +135,12 @@ export class GameGateway {
         this.logger.log('player teleported');
     }
 
+    @SubscribeMessage(GameEvents.DecrementItem)
+    handleDecrementItem(@ConnectedSocket() client: Socket, @MessageBody() payload: { selectedItem: Item; accessCode: string; player: Player }): void {
+        Logger.log(`Decrementing item ${payload.selectedItem.name} for player ${payload.player.name}`);
+        this.statisticsService.decrementItem(payload.accessCode, payload.selectedItem, payload.player);
+    }
+
     // no need to receive it here
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {

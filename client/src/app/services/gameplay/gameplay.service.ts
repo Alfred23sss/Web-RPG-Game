@@ -37,6 +37,14 @@ export class GameplayService {
                 this.handleItemDropped(gameData, selectedItem);
                 this.checkAvailableActions(gameData);
             }
+            if (selectedItem === items[2]) {
+                console.log('decrement item');
+                this.socketClientService.emit('decrement.item', {
+                    selectedItem,
+                    accessCode: gameData.lobby.accessCode,
+                    player: gameData.clientPlayer,
+                });
+            }
         });
     }
 

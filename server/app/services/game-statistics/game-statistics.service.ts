@@ -84,14 +84,10 @@ export class GameStatisticsService {
         const { accessCode, item, player } = payload;
         const gameStats = this.gameStatistics.get(accessCode);
         if (!gameStats) return;
-
         const playerStats = gameStats.playerStats.get(player.name);
-        if (playerStats.uniqueItemsCollected.has(item.name)) {
-            return;
-        }
-
-        playerStats.uniqueItemsCollected.add(item.name);
-
+        const currentCount = playerStats.uniqueItemsCollected.get(item.name) || 0;
+        playerStats.uniqueItemsCollected.set(item.name, currentCount + 1);
+        Logger.log(`Item ${item.name} added to player ${player.name} in statistics.`);
         if (item.name === 'flag') {
             const flagHolderSet = this.flagHolders.get(accessCode);
             if (flagHolderSet) {
@@ -175,6 +171,19 @@ export class GameStatisticsService {
         return this.gameStatistics.get(accessCode);
     }
 
+    decrementItem(accessCode: string, item: Item, player: Player): void {
+        const gameStats = this.gameStatistics.get(accessCode);
+        if (!gameStats) return;
+        const playerStats = gameStats.playerStats.get(player.name);
+        const currentCount = playerStats.uniqueItemsCollected.get(item.name) || 0;
+        if (currentCount > 1) {
+            playerStats.uniqueItemsCollected.set(item.name, currentCount - 1);
+        } else if (currentCount === 1) {
+            playerStats.uniqueItemsCollected.delete(item.name);
+            Logger.log(`Item ${item.name} removed from player ${player.name} in statistics.`);
+        }
+    }
+
     cleanUp(accessCode: string): void {
         this.gameStatistics.delete(accessCode);
         this.visitedTiles.forEach((_, key) => {
@@ -210,7 +219,7 @@ export class GameStatisticsService {
                 defeats: 0,
                 healthLost: 0,
                 damageCaused: 0,
-                uniqueItemsCollected: new Set<string>(),
+                uniqueItemsCollected: new Map<string, number>(),
                 tilesVisitedPercentage: 0,
                 visitedTileSet: visitedTileMap,
                 hasAbandoned: player.hasAbandoned || false,
