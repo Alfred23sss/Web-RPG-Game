@@ -37,6 +37,9 @@ export class GameplayService {
                 this.handleItemDropped(gameData, selectedItem);
                 this.checkAvailableActions(gameData);
             }
+            if (selectedItem === items[2]) {
+                // TODO: ajouter le logbook ici. On décrémente le nombre d'items picked up
+            }
         });
     }
 
