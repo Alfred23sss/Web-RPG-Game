@@ -81,12 +81,12 @@ export class DefensiveVPService {
     //c'est ici qu'on choisi la meilleure option possible parmi toutes les actions
     private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move | undefined {
         //on ne garde juste les les actions qui concernent les items (Pas d'attaques) --> A ENLEVER quand on va ajouter le joeuru qui attaque quand il n'y a plus d'tems
-        const itemMoves = moves.filter((move) => move.type === MoveType.Item); //itemMoves est un tabeau qui contient que les moves qui concernant les item
-        if (itemMoves.length === 0) return undefined;
+
+        if (moves.length === 0) return undefined;
 
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         //donne a chaque move dans itemMoves un score (un move a un attribut optionnel qui est score)
-        const scoredMoves = this.scoreMoves(itemMoves, virtualPlayer, lobby); //scoredMoves est un tableau de moves ou on rajoute a chacun son score cslcule
+        const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby); //scoredMoves est un tableau de moves ou on rajoute a chacun son score cslcule
 
         //on trie du plus gros score au plus petit
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -110,7 +110,7 @@ export class DefensiveVPService {
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid); //on la refait plusieurs fois
         return moves.map((move) => {
             //Pour chaque moce dans la liste passe en parametre (moves)
-            move.score = 0; //on initialise le score de base à 0
+            move.score = NO_SCORE; //on initialise le score de base à 0
             this.calculateItemScore(move, virtualPlayer); //Donne le bonus celon l'item
             this.calculateMovementScore(move, virtualPlayerTile, virtualPlayer, lobby); //enleve des points si c'est loin
             this.calculateAttackScore(move); //enleve beaucoup si c'est une attaque --> Normalement JAMAIS le cas car on filtre la liste pour enlever les attauqes avant de la passer en parametre
