@@ -30,6 +30,7 @@ describe('GameSocketService', () => {
                 lobby: { players: [] },
                 game: { grid: MOCK_GRID },
                 clientPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
+                currentPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
                 isDebugMode: true,
                 movementPointsRemaining: 10,
             },
