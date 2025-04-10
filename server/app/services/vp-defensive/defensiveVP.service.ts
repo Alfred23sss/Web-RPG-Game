@@ -13,6 +13,7 @@ const DEFENSIVE_ITEM_SCORE = 9999;
 const AGGRESSIVE_ITEM_SCORE = 1000;
 const IN_RANGE_BONUS = 100;
 const INVALID_ITEM_PENALTY = -5000;
+const ALLY_ATTACK_PENALTY = -9000;
 const NO_SCORE = 0;
 const ATTACK_SCORE = 50;
 
@@ -27,10 +28,18 @@ export class DefensiveVPService {
     async executeDefensiveBehavior(virtualPlayer: Player, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         if (!virtualPlayerTile) return;
-        const nextMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
-        if (!nextMove) {
+
+        const ctfBlockingMove = this.getCTFBlockingMove(virtualPlayer, lobby);
+        if (ctfBlockingMove) {
+            const path = this.virtualPlayerActions.getPathForMove(ctfBlockingMove, virtualPlayerTile, lobby);
+            if (!path || path.length === 0) return;
+
+            const partialPath = this.getPathWithLimitedCost(path, virtualPlayer.movementPoints);
+            this.moveAlongPath(partialPath, virtualPlayerTile, lobby);
             return;
         }
+        const nextMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
+        if (!nextMove) return;
 
         const path = this.virtualPlayerActions.getPathForMove(nextMove, virtualPlayerTile, lobby);
         if (!path || path.length === 0) return;
@@ -77,11 +86,29 @@ export class DefensiveVPService {
 
     private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move | undefined {
         if (moves.length === 0) return undefined;
+
         const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
+
+        const flagMove = moves.find((move) => move.type === MoveType.Item && move.tile.item?.name === ItemName.Flag);
+        if (flagMove) {
+            return flagMove;
+        }
+        if (this.isFlagInInventory(virtualPlayer)) {
+            const homeTile = this.gridManagerService.findTileBySpawnPoint(lobby.game.grid, virtualPlayer);
+            if (homeTile) {
+                return {
+                    tile: homeTile,
+                    type: MoveType.Item,
+                    inRange: true,
+                };
+            }
+        }
         const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby);
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
+
         console.table(
             scoredMoves.map((move) => ({
+                type: move.type,
                 item: move.tile.item?.name ?? 'attack',
                 score: move.score,
                 inRange: move.inRange,
@@ -90,6 +117,7 @@ export class DefensiveVPService {
                 ),
             })),
         );
+
         return scoredMoves[0];
     }
 
@@ -147,6 +175,11 @@ export class DefensiveVPService {
 
     private calculateAttackScore(move: Move, virtualPlayer: Player): void {
         if (move.type !== MoveType.Attack) return;
+        const targetPlayer = move.tile.player;
+        if (!targetPlayer || targetPlayer.team === virtualPlayer.team) {
+            move.score += ALLY_ATTACK_PENALTY;
+            return;
+        }
         const inventoryFull = virtualPlayer.inventory.filter((i) => i !== null).length >= 2;
         if (inventoryFull) {
             move.score += ATTACK_SCORE;
@@ -186,5 +219,33 @@ export class DefensiveVPService {
 
     private moveAlongPath(path: Tile[], fromTile: Tile, lobby: Lobby): void {
         this.virtualPlayerActions.moveAlongPartialPath(path, fromTile, lobby);
+    }
+
+    private findFlagCarrier(lobby: Lobby, currentPlayer: Player): Player | undefined {
+        return lobby.players.find(
+            (player) =>
+                player.name !== currentPlayer.name &&
+                player.team !== currentPlayer.team &&
+                player.inventory.some((item) => item?.name === ItemName.Flag),
+        );
+    }
+
+    private getCTFBlockingMove(virtualPlayer: Player, lobby: Lobby): Move | undefined {
+        const flagCarrier = this.findFlagCarrier(lobby, virtualPlayer);
+        if (!flagCarrier) return undefined;
+
+        const grid = lobby.game.grid;
+        const spawnTile = this.gridManagerService.findTileBySpawnPoint(grid, flagCarrier);
+        if (!spawnTile) return undefined;
+
+        const targetTile = spawnTile.player ? this.gridManagerService.findClosestAvailableTile(grid, spawnTile) : spawnTile;
+
+        if (!targetTile) return undefined;
+
+        return {
+            tile: targetTile,
+            type: MoveType.Item,
+            inRange: true,
+        };
     }
 }
