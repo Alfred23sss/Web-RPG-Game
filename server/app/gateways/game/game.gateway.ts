@@ -55,7 +55,7 @@ export class GameGateway {
         this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
         client.leave(payload.accessCode);
 
-        if (lobby.players.length <= 1) {
+        if (lobby.players.length <= 1 || this.gameSessionService.isTeamAbandoned(payload.accessCode, payload.player)) {
             this.lobbyService.clearLobby(payload.accessCode);
             this.gameSessionService.deleteGameSession(payload.accessCode);
             this.accessCodesService.removeAccessCode(payload.accessCode);

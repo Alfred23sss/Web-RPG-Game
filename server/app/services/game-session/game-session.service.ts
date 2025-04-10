@@ -249,13 +249,6 @@ export class GameSessionService {
             }
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.emitGridUpdate(accessCode, gameSession.game.grid);
-
-            if (this.isTeamAbandoned(player, gameSession)) {
-                this.endGameSession(
-                    accessCode,
-                    gameSession.turn.orderedPlayers.filter((p) => p.team !== player.team).map((p) => p.name),
-                );
-            }
         }
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
@@ -266,7 +259,8 @@ export class GameSessionService {
         return player;
     }
 
-    private isTeamAbandoned(player: Player, gameSession: GameSession): boolean {
+    isTeamAbandoned(accessCode: string, player: Player): boolean {
+        const gameSession = this.gameSessions.get(accessCode);
         const team = player.team;
         const teamPlayers = gameSession.turn.orderedPlayers.filter((p) => p.team === team);
         return teamPlayers.every((p) => p.hasAbandoned);
