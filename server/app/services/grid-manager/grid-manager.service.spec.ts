@@ -712,6 +712,7 @@ describe('GridManagerService', () => {
             expect(spyEmit).toHaveBeenCalledWith(EventEmit.GameDoorUpdate, {
                 accessCode: 'abc123',
                 grid: mockGrid,
+                isOpen: false,
             });
             expect(result).toBe(mockGrid);
         });

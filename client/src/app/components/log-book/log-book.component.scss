@@ -13,6 +13,22 @@
     overflow-y: auto;
 }
 
+.log-content {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 8px;
+
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    li {
+        margin-bottom: 6px;
+    }
+}
+
 .game-messages h3 {
     margin-top: 0;
     margin-bottom: 10px;

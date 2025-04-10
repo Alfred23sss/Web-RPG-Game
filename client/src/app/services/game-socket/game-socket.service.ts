@@ -64,6 +64,7 @@ export class GameSocketService {
 
     private onItemChoice(): void {
         this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
+            console.log('itemChoice');
             this.gameplayService.createItemPopUp(data.items, this.gameStateService.gameDataSubjectValue);
         });
     }
@@ -78,15 +79,12 @@ export class GameSocketService {
 
     private onPlayerClientUpdate(): void {
         this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
-                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-
-                const oldInventoryNames = (player.inventory ?? []).map((item) => item?.name);
+            const gameData = this.gameStateService.gameDataSubjectValue;
+            const playerBeforeUpdate = gameData.lobby.players.find((p) => p.name === data.player.name);
+            if (playerBeforeUpdate) {
+                const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
                 const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
-
-                // repetition
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
-
                 if (addedItems.length > 0) {
                     if (addedItems.includes('flag')) {
                         this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
@@ -94,8 +92,10 @@ export class GameSocketService {
                         this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
                     }
                 }
-
-                this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
+                playerBeforeUpdate.inventory = data.player.inventory;
+            }
+            if (gameData.clientPlayer.name === data.player.name) {
+                gameData.clientPlayer = data.player;
             }
         });
     }
@@ -154,16 +154,9 @@ export class GameSocketService {
                 this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
             }
 
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
-                this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
-                    this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
-                    this.playerMovementService.calculateRemainingMovementPoints(
-                        this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
-                        data.player,
-                    );
-                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-                // repetition
-                const oldInventoryNames = (player.inventory ?? []).map((item) => item?.name);
+            const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
+            if (playerBeforeUpdate) {
+                const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
                 const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
                 if (addedItems.length > 0) {
@@ -173,6 +166,17 @@ export class GameSocketService {
                         this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
                     }
                 }
+            }
+
+            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
+                this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
+                    this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
+                    this.playerMovementService.calculateRemainingMovementPoints(
+                        this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
+                        data.player,
+                    );
+                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
+                // repetition
                 player.inventory = data.player.inventory;
                 player.hp = data.player.hp;
                 player.attack.value = data.player.attack.value;

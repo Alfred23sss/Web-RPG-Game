@@ -90,7 +90,7 @@
         @if (activeTab === 'chat'){
         <app-chat [author]="gameData.clientPlayer.name"></app-chat>
         } @if(activeTab === 'log'){
-        <app-log-book></app-log-book>
+        <app-log-book [playerName]="gameData.clientPlayer.name"></app-log-book>
         }
     </div>
 </div>

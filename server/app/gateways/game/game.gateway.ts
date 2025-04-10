@@ -203,11 +203,13 @@ export class GameGateway {
     @OnEvent(EventEmit.ItemChoice)
     handleItemChoiceEvent(payload: { player: Player; items: [Item, Item, Item] }) {
         const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        Logger.log('emitting choice event');
         this.server.to(socketId).emit('itemChoice', {
             items: payload.items,
         });
     }
 
+    // PlayerUpdate pour enum mais valeur de player client update? pas trop clair
     @OnEvent(EventEmit.PlayerUpdate)
     handlePlayerClientUpdate(payload: { accessCode: string; player: Player }) {
         this.logger.log(`playerUpdateClientEventCalled ${payload.player.name}`);
