@@ -408,7 +408,7 @@ describe('CharacterService', () => {
     it('should call returnHome when joinStatus is RedirectToHome', () => {
         spyOn(service as any, 'returnHome');
 
-        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode);
+        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame);
 
         expect((service as any).returnHome).toHaveBeenCalled();
     });
