@@ -7,6 +7,7 @@ export class GameData {
     game: Game;
     clientPlayer: Player;
     currentPlayer: Player;
+    playersInFight: Player[];
     availablePath: Tile[] | undefined;
     quickestPath: Tile[] | undefined;
     playerTile: Tile | undefined;
@@ -27,6 +28,7 @@ export class GameData {
         this.game = {} as Game;
         this.clientPlayer = {} as Player;
         this.currentPlayer = {} as Player;
+        this.playersInFight = [];
         this.availablePath = undefined;
         this.quickestPath = undefined;
         this.playerTile = undefined;

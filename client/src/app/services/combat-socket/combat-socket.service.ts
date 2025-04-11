@@ -11,7 +11,6 @@ import { SocketClientService } from '@app/services/socket/socket-client-service'
     providedIn: 'root',
 })
 export class CombatSocketService {
-    playersInFight: Player[] = [];
     constructor(
         private socketClientService: SocketClientService,
         private gameStateService: GameStateSocketService,
@@ -34,12 +33,12 @@ export class CombatSocketService {
         this.socketClientService.on('combatStarted', (data: { attacker: Player; defender: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
-            this.playersInFight = gameData.lobby.players.filter((p) => p.name === data.attacker.name || p.name === data.defender.name);
+            gameData.playersInFight = gameData.lobby.players.filter((p) => p.name === data.attacker.name || p.name === data.defender.name);
             this.clientNotifier.addLogbookEntry('Combat commencé!', [data.attacker, data.defender]);
 
             this.dialog.open(GameCombatComponent, {
-                width: '800px',
-                height: '500px',
+                width: '900px',
+                height: '600px',
                 disableClose: true,
                 data: { gameData, attacker: data.attacker, defender: data.defender },
             });
@@ -96,7 +95,6 @@ export class CombatSocketService {
             gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
             gameData.evadeResult = null;
             gameData.attackResult = null;
-            gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             if (data && data.winner && !data.hasEvaded) {
                 this.clientNotifier.showMultipleMessages(`${data.winner.name} a gagné le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             } else {

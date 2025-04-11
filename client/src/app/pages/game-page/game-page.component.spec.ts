@@ -9,7 +9,6 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { GameData } from '@app/classes/gameData';
 import { Item } from '@app/classes/item';
-import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DiceType, TileType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -242,25 +241,6 @@ describe('GamePageComponent', () => {
         component.executeNextAction();
         expect(mockGameplayService.executeNextAction).toHaveBeenCalledWith(mockGameData);
     });
-
-    it('should call attack on gameplay service', () => {
-        component.attack();
-        expect(mockGameplayService.attack).toHaveBeenCalledWith(mockGameData);
-    });
-
-    it('should call evade on gameplay service', () => {
-        component.evade();
-        expect(mockGameplayService.evade).toHaveBeenCalledWith(mockGameData);
-    });
-
-    it('should open combat popup dialog', () => {
-        component.openCombatPopup();
-        expect(mockDialog.open).toHaveBeenCalledWith(GameCombatComponent, {
-            width: '650px',
-            disableClose: true,
-        });
-    });
-
     it('should emit admin mode update when admin presses "d"', () => {
         component.gameData.clientPlayer.isAdmin = true;
         const event = new KeyboardEvent('keydown', { key: 'd' });

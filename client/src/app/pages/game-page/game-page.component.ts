@@ -1,9 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { GameData } from '@app/classes/gameData';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
@@ -30,7 +28,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private gameDataSubscription: Subscription;
 
     constructor(
-        private readonly dialog: MatDialog,
         private readonly gameplayService: GameplayService,
         private readonly gameStateSocketService: GameStateSocketService,
         private readonly socketListenerService: SocketListenerService,
@@ -89,21 +86,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         document.removeEventListener('keydown', this.keyPressHandler);
         this.socketListenerService.unsubscribeSocketListeners();
         sessionStorage.setItem('refreshed', 'false');
-    }
-
-    attack(): void {
-        this.gameplayService.attack(this.gameData);
-    }
-
-    evade(): void {
-        this.gameplayService.evade(this.gameData);
-    }
-
-    openCombatPopup(): void {
-        this.dialog.open(GameCombatComponent, {
-            width: '650px',
-            disableClose: true,
-        });
     }
 
     hasFlag(player: Player): boolean {

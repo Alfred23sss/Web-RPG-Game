@@ -28,7 +28,6 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.CreateGame)
     handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; gameMode: GameModeType }) {
-        // jai enleve la grid dans les parametres de payload on lutilise jamais
         this.logger.log(payload.accessCode);
         this.gameModeSelector.registerGameMode(payload.accessCode, payload.gameMode);
         const gameService = this.gameModeSelector.getService(payload.gameMode);
@@ -275,10 +274,10 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.UpdatePlayer)
-    handleDefenderHealthUpdate(payload: { player: Player }) {
+    handleDefenderHealthUpdate(payload: { player: Player; accessCode: string }) {
         this.logger.log(`playerUpdateEventCalled ${payload.player.name}`);
-        const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
-        this.server.to(socketId).emit('playerUpdate', {
+        // const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        this.server.to(payload.accessCode).emit('playerUpdate', {
             player: payload.player,
         });
     }

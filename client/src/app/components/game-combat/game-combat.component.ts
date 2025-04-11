@@ -27,12 +27,13 @@ export class GameCombatComponent implements OnDestroy {
         @Inject(MAT_DIALOG_DATA) public data: { gameData: GameData; attacker: Player; defender: Player },
     ) {
         this.gameData = data.gameData;
-        this.attacker = data.gameData.clientPlayer;
-        this.defender = data.defender;
+        if (this.gameData.playersInFight) {
+            this.attacker = data.gameData.playersInFight[0];
+            this.defender = data.gameData.playersInFight[1];
+        }
 
         this.gameDataSubscription = this.gameStateService.gameData$.subscribe((gameData) => {
             this.gameData = gameData;
-            console.log('data cahnge', gameData.clientPlayer.hp.current);
         });
 
         this.closePopupSubscription = this.gameStateService.closePopup$.subscribe(() => {

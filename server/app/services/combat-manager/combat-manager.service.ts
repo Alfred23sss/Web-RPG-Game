@@ -240,7 +240,7 @@ export class GameCombatService {
             this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
         });
 
-        this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
+        this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer, accessCode });
         if (defenderPlayer.hp.current === 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);
         } else {

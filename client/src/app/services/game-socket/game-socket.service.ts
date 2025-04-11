@@ -164,6 +164,10 @@ export class GameSocketService {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
+            const affectedPlayerIndex = this.gameStateService.gameDataSubjectValue.playersInFight.findIndex((p) => p.name === data.player.name);
+            if (affectedPlayerIndex !== -1) {
+                this.gameStateService.gameDataSubjectValue.playersInFight[affectedPlayerIndex] = data.player;
+            }
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }

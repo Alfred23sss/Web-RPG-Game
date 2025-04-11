@@ -67,7 +67,7 @@ export const INVALID_ITEM_PENALTY = -10000;
 export const ALLY_ATTACK_PENALTY = -100000; // change value
 export const FLAG_SCORE = 5000;
 
-export const DEFENSIVE_ITEM_SCORE = 1400;
+export const DEFENSIVE_ITEM_SCORE = 2400;
 export const NORMAL_ITEM_SCORE = 1200;
 export const DEFENSE_ATTACK_SCORE = 50;
 
