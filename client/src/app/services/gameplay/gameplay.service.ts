@@ -61,6 +61,7 @@ export class GameplayService {
 
     abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
+        console.log(`Player ${gameData.clientPlayer.name} has abandoned the game`);
         this.socketClientService.emit('manualDisconnect', { isInGame: true });
         this.backToHome();
     }
