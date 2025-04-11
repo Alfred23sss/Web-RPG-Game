@@ -91,6 +91,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
 
         client.join(accessCode);
+        lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => this.server.sockets.sockets.has(wp.socketId));
         const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
         this.server.to(client.id).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
     }
@@ -261,50 +262,62 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
 
     private handlePlayerDisconnect(client: Socket, isInGame: boolean = false) {
         const player = this.lobbyService.getPlayerBySocketId(client.id);
-        if (!player) return;
+        if (!player) {
+            return;
+        }
         const accessCode = this.lobbyService.getLobbyIdByPlayer(player.name);
-        Logger.log(`Player ${player.name} disconnected from accessCode: ${accessCode}`);
-        if (!accessCode) return;
+        this.logger.log(`Player ${player.name} disconnected from accessCode: ${accessCode}`);
+        if (!accessCode) {
+            return;
+        }
         this.logger.log(`Player ${player.name} disconnected${isInGame ? ' from game' : ''}`);
         if (isInGame) {
-            this.gameCombatService.handleCombatSessionAbandon(accessCode, player.name);
-            const playerAbandon = this.gameSessionService.handlePlayerAbandoned(accessCode, player.name);
-            this.lobbyService.leaveLobby(accessCode, player.name, true);
-            const lobby = this.lobbyService.getLobby(accessCode);
-            if (lobby && lobby.players.length <= 1) {
-                Logger.log('clearing lobby');
-                this.lobbyService.clearLobby(accessCode);
-                this.gameSessionService.deleteGameSession(accessCode);
-                this.accessCodesService.removeAccessCode(accessCode);
-                this.server.to(accessCode).emit('gameDeleted');
-                this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
-            }
-            this.server.to(accessCode).emit('game-abandoned', { player: playerAbandon });
-            this.logger.log('game abandoned emitted');
+            this.handleGamePlayerDisconnect(accessCode, player.name);
         } else {
-            const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, player.name);
-            if (isAdminLeaving) {
-                this.server.to(accessCode).emit('adminLeft', {
-                    playerSocketId: client.id,
-                    message: "L'admin a quitté la partie, le lobby est fermé.",
-                });
-            }
-            const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, player.name);
-            const lobby = this.lobbyService.getLobby(accessCode);
-            if (lobby) {
-                lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== client.id);
-            }
-            if (isLobbyDeleted) {
-                this.server.to(accessCode).emit('lobbyDeleted');
-                this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
-            } else if (lobby) {
-                const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
-                this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
-                this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
-            }
+            this.handleLobbyPlayerDisconnect(accessCode, player.name, client.id);
         }
         this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
         client.leave(accessCode);
         this.logger.log(`User disconnected: ${client.id}`);
+    }
+
+    private handleGamePlayerDisconnect(accessCode: string, playerName: string) {
+        this.gameCombatService.handleCombatSessionAbandon(accessCode, playerName);
+        const playerAbandon = this.gameSessionService.handlePlayerAbandoned(accessCode, playerName);
+        this.lobbyService.leaveLobby(accessCode, playerName, true);
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (lobby && lobby.players.length <= 1) {
+            this.logger.log('clearing lobby');
+            this.lobbyService.clearLobby(accessCode);
+            this.gameSessionService.deleteGameSession(accessCode);
+            this.accessCodesService.removeAccessCode(accessCode);
+            this.server.to(accessCode).emit('gameDeleted');
+            this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
+        }
+        this.server.to(accessCode).emit('game-abandoned', { player: playerAbandon });
+        this.logger.log('game abandoned emitted');
+    }
+
+    private handleLobbyPlayerDisconnect(accessCode: string, playerName: string, clientId: string) {
+        const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
+        if (isAdminLeaving) {
+            this.server.to(accessCode).emit('adminLeft', {
+                playerSocketId: clientId,
+                message: "L'admin a quitté la partie, le lobby est fermé.",
+            });
+        }
+        const isLobbyDeleted = this.lobbyService.leaveLobby(accessCode, playerName);
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (lobby) {
+            lobby.waitingPlayers = lobby.waitingPlayers.filter((wp) => wp.socketId !== clientId);
+        }
+        if (isLobbyDeleted) {
+            this.server.to(accessCode).emit('lobbyDeleted');
+            this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
+        } else if (lobby) {
+            const unavailableAvatars = [...lobby.players.map((p) => p.avatar), ...lobby.waitingPlayers.map((wp) => wp.avatar)];
+            this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: unavailableAvatars });
+            this.server.to(accessCode).emit('updatePlayers', this.lobbyService.getLobbyPlayers(accessCode));
+        }
     }
 }
