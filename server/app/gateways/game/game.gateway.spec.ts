@@ -88,6 +88,7 @@ describe('GameGateway', () => {
             handleItemDropped: jest.fn(),
             updateWallTile: jest.fn(),
             handlePlayerItemReset: jest.fn(),
+            isTeamAbandoned: jest.fn().mockReturnValue(false),
         };
         serverMock = {
             to: jest.fn().mockReturnThis(),
