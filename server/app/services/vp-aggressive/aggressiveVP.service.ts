@@ -1,4 +1,12 @@
-import { AGGRESSIVE_ITEM_SCORE, ATTACK_SCORE, FLAG_SCORE, IN_RANGE_BONUS, INVALID_ITEM_PENALTY, NO_SCORE } from '@app/constants/constants';
+import {
+    AGGRESSIVE_ITEM_SCORE,
+    ALLY_ATTACK_PENALTY,
+    ATTACK_SCORE,
+    FLAG_SCORE,
+    IN_RANGE_BONUS,
+    INVALID_ITEM_PENALTY,
+    NO_SCORE,
+} from '@app/constants/constants';
 import { ItemName, MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -38,6 +46,20 @@ export class AggressiveVPService {
     private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move {
         const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby);
         scoredMoves.sort((a, b) => b.score - a.score);
+
+        const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
+        console.table(
+            scoredMoves.map((move) => ({
+                type: move.type,
+                item: move.tile.item?.name ?? 'attack',
+                score: move.score,
+                inRange: move.inRange,
+                distance: this.virtualPlayerActions.calculateTotalMovementCost(
+                    this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby) || [],
+                ),
+            })),
+        );
+
         return scoredMoves[0];
     }
 
@@ -46,9 +68,8 @@ export class AggressiveVPService {
         return moves.map((move) => {
             move.score = NO_SCORE;
             this.calculateMovementScore(move, virtualPlayerTile, virtualPlayer, lobby);
-            this.calculateAttackScore(move);
+            this.calculateAttackScore(move, virtualPlayer);
             this.calculateItemScore(move, virtualPlayer);
-            console.log(move.tile.id, 'score', move.score);
             return move;
         });
     }
@@ -63,18 +84,25 @@ export class AggressiveVPService {
         if (move.inRange) move.score += IN_RANGE_BONUS;
     }
 
-    private calculateAttackScore(move: Move): void {
-        if (move.type === MoveType.Attack) {
-            move.score += ATTACK_SCORE;
+    private calculateAttackScore(move: Move, virtualPlayer: Player): void {
+        if (move.type !== MoveType.Attack) return;
+        const targetPlayer = move.tile.player;
+        const sameTeam = this.virtualPlayerActions.areOnSameTeam(targetPlayer.team, virtualPlayer.team);
+        if (sameTeam) {
+            move.score += ALLY_ATTACK_PENALTY;
+            return;
         }
         if (this.virtualPlayerActions.isFlagInInventory(move.tile.player)) {
             move.score += FLAG_SCORE;
+            return;
         }
+        move.score += ATTACK_SCORE;
     }
 
     private calculateItemScore(move: Move, virtualPlayer: Player): void {
-        if (move.type !== MoveType.Item) return;
-        switch (move.tile.item.name) {
+        if (move.type !== MoveType.Item || !move.tile.item) return;
+        const item = move.tile.item;
+        switch (item.name) {
             case ItemName.Fire:
             case ItemName.Potion:
                 move.score += AGGRESSIVE_ITEM_SCORE;
@@ -83,17 +111,18 @@ export class AggressiveVPService {
                 move.score += FLAG_SCORE;
                 break;
             case ItemName.Home:
-                if (virtualPlayer.spawnPoint.tileId === move.tile.id) {
-                    const hasFlag = this.virtualPlayerActions.isFlagInInventory(virtualPlayer);
-                    move.score += hasFlag ? FLAG_SCORE : INVALID_ITEM_PENALTY;
-                } else {
-                    move.score += INVALID_ITEM_PENALTY;
-                }
+                this.handleHomeItemScore(move, virtualPlayer);
                 break;
             default:
                 move.score += INVALID_ITEM_PENALTY;
                 break;
         }
+    }
+
+    private handleHomeItemScore(move: Move, virtualPlayer: Player): void {
+        const hasFlag = this.virtualPlayerActions.isFlagInInventory(virtualPlayer);
+        const isSpawnPoint = virtualPlayer.spawnPoint.tileId === move.tile.id;
+        move.score += hasFlag && isSpawnPoint ? FLAG_SCORE : INVALID_ITEM_PENALTY;
     }
 
     private getVirtualPlayerTile(virtualPlayer: Player, grid: Tile[][]): Tile {

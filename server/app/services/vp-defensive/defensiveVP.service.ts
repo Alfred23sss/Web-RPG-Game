@@ -64,10 +64,10 @@ export class DefensiveVPService {
 
     private getNextMove(moves: Move[], virtualPlayer: Player, lobby: Lobby): Move | undefined {
         if (moves.length === 0) return undefined;
-        const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         const scoredMoves = this.scoreMoves(moves, virtualPlayer, lobby);
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
 
+        const virtualPlayerTile = this.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
         console.table(
             scoredMoves.map((move) => ({
                 type: move.type,
