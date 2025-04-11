@@ -62,8 +62,8 @@ export class ItemEffectsService {
                 break;
             case ItemName.Rubik:
                 item.modifiers = [
-                    { attribute: AttributeType.Speed, value: BONUS_VALUE },
-                    { attribute: AttributeType.Hp, value: PENALTY_VALUE },
+                    { attribute: AttributeType.Hp, value: BONUS_VALUE },
+                    { attribute: AttributeType.Speed, value: PENALTY_VALUE },
                 ];
                 break;
             case ItemName.Fire:
@@ -96,6 +96,7 @@ export class ItemEffectsService {
             const newItem = tile.item;
             player.inventory.splice(index, 1);
             player.inventory.push(newItem);
+            item.isActive = false;
             tile.item = item;
             tile.player = player;
             this.addEffect(player, newItem, tile);

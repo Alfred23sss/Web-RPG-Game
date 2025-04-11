@@ -149,6 +149,11 @@ export class GameGateway {
         this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
     }
 
+    @SubscribeMessage(GameEvents.PlayerItemReset)
+    handlePlayerItemReset(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player }) {
+        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
+    }
+
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
         if (payload.attacker.name === payload.currentFighter.name && payload.attacker.isVirtual) {

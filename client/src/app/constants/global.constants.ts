@@ -200,7 +200,7 @@ export const ITEM_BAR_ITEMS = [
         name: ItemName.QuestionMark,
         imageSrc: ItemType.QuestionMark,
         imageSrcGrey: ItemType.QuestionMarkGray,
-        itemCounter: 2,
+        itemCounter: 1,
         description: ItemDescription.QuestionMark,
     },
     {
@@ -220,7 +220,7 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.None]: 0,
 };
 
-export const ITEMS_TO_UPDATE = new Set(['home', 'question']);
+export const ITEMS_TO_UPDATE = new Set(['home']);
 
 export const MOCK_PLAYER: Player = {
     name: 'testPlayer',

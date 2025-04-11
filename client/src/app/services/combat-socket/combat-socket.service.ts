@@ -93,7 +93,9 @@ export class CombatSocketService {
             gameData.isInCombatMode = false;
             gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             gameData.isActionMode = false;
-            gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
+                gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            }
             gameData.evadeResult = null;
             gameData.attackResult = null;
             gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;

@@ -105,7 +105,6 @@ export const DEFAULT_VIRTUAL_PLAYER: VirtualPlayer = {
     name: '',
     avatar: '',
     speed: BASE_STAT,
-    vitality: BASE_STAT,
     attack: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
     defense: { value: BASE_STAT, bonusDice: DiceType.Uninitialized },
     hp: { current: BASE_STAT, max: BASE_STAT },

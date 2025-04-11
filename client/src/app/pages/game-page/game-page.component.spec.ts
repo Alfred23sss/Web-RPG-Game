@@ -284,7 +284,7 @@ describe('GamePageComponent', () => {
     });
 
     it('should return flag image if there is a flag and default image if not', () => {
-        expect(component.getFlagImage(mockPlayer)).toBe('./assets/items/flag.png');
+        expect(component.getFlagImage(mockPlayer)).toBe('./assets/items/banner-medieval.png');
         mockPlayer.inventory = [{ name: ItemName.Flag, imageSrc: 'test' } as Item, null];
         expect(component.getFlagImage(mockPlayer)).toBe('test');
     });
