@@ -84,7 +84,7 @@ export class VirtualPlayerCreationService {
     }
 
     private updateVirtualPlayerStats(vPlayer: Player): void {
-        const { speed, vitality, hp } = this.randomizeSpeedAndVitality();
+        const { speed, hp } = this.randomizeSpeedAndVitality();
         const { attack, defense } = this.randomizeAttackAndDefense();
         vPlayer.speed = speed;
         vPlayer.movementPoints = speed;

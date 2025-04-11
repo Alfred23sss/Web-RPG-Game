@@ -12,9 +12,6 @@ export class PlayerDto {
     @IsNumber()
     speed: number;
 
-    @IsNumber()
-    vitality: number;
-
     @IsOptional()
     @ValidateNested()
     attack: { value: number; bonusDice: DiceType };

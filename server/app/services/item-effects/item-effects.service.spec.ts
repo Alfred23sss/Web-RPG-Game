@@ -20,7 +20,6 @@ const MOCK_PLAYER: Player = {
     name: 'test-player',
     avatar: 'test-avatar',
     speed: DEFAULT_STAT_VALUE,
-    vitality: DEFAULT_STAT_VALUE,
     attack: {
         value: DEFAULT_STAT_VALUE,
         bonusDice: DiceType.D6,
@@ -344,8 +343,8 @@ describe('ItemEffectsService', () => {
             service.applyItemModifiers(rubikItem);
 
             expect(rubikItem.modifiers).toEqual([
-                { attribute: AttributeType.Speed, value: BONUS_VALUE },
-                { attribute: AttributeType.Hp, value: PENALTY_VALUE },
+                { attribute: AttributeType.Hp, value: BONUS_VALUE },
+                { attribute: AttributeType.Speed, value: PENALTY_VALUE },
             ]);
             expect(rubikItem.isActive).toBe(false);
         });
