@@ -320,7 +320,15 @@ export class GameGateway {
         this.accessCodesService.removeAccessCode(payload.accessCode);
         const statsObject = {
             ...stats,
-            playerStats: Object.fromEntries(stats.playerStats),
+            playerStats: Object.fromEntries(
+                Array.from(stats.playerStats.entries()).map(([key, value]) => [
+                    key,
+                    {
+                        ...value,
+                        uniqueItemsCollected: Object.fromEntries(value.uniqueItemsCollected),
+                    },
+                ]),
+            ),
         };
         this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats: statsObject });
     }
