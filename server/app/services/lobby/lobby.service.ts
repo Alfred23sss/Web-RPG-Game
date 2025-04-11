@@ -9,6 +9,7 @@ import { Injectable } from '@nestjs/common';
 export class LobbyService {
     private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
     private playerSockets: Map<string, string> = new Map<string, string>();
+    private playerRoomMap = new Map<string, string>();
 
     constructor(private readonly accessCodeService: AccessCodesService) {}
 
@@ -114,6 +115,18 @@ export class LobbyService {
         if (!lobby) return false;
 
         return lobby.players.some((p) => p.name === playerName && p.isAdmin);
+    }
+
+    addPlayerToRoom(socketId: string, roomId: string) {
+        this.playerRoomMap.set(socketId, roomId);
+    }
+
+    removePlayerFromRoom(socketId: string) {
+        this.playerRoomMap.delete(socketId);
+    }
+
+    getRoomForPlayer(socketId: string): string | null {
+        return this.playerRoomMap.get(socketId) || null;
     }
 
     getPlayerBySocketId(socketId: string): Player | undefined {
