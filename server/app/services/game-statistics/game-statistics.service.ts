@@ -232,14 +232,12 @@ export class GameStatisticsService {
         const durationInSeconds = Math.floor((gameStats.endTime.getTime() - gameStats.startTime.getTime()) / TIME_DIVIDER);
         gameStats.globalStats.gameDuration = durationInSeconds;
 
-        const hours = Math.floor(durationInSeconds / SECOND_IN_HOURS)
+        const minutes = Math.floor(durationInSeconds / SECOND_IN_MINUTES)
             .toString()
             .padStart(2, '0');
-        const minutes = Math.floor((durationInSeconds % SECOND_IN_HOURS) / SECOND_IN_MINUTES)
-            .toString()
-            .padStart(2, '0');
+        const seconds = (durationInSeconds % SECOND_IN_MINUTES).toString().padStart(2, '0');
 
-        gameStats.globalStats.formattedDuration = `${hours}:${minutes}`;
+        gameStats.globalStats.formattedDuration = `${minutes}:${seconds}`;
     }
 
     private calculateGlobalTileVisitedPercentage(accessCode: string, gameStats: GameStatistics): void {
