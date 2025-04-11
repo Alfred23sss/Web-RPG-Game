@@ -95,9 +95,18 @@ export class PlayerMovementService {
     hasAdjacentTileType(clientPlayerTile: Tile, grid: Tile[][], tileType: TileType): boolean {
         return this.getNeighbors(clientPlayerTile, grid).some((tile) => tile.type === tileType);
     }
-    hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
-        const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
-        return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
+    hasAdjacentPlayerOrDoor(currentPlayerTile: Tile, grid: Tile[][]): boolean {
+        const currentPlayer = currentPlayerTile.player;
+        const adjacentTiles = this.getNeighbors(currentPlayerTile, grid);
+        return adjacentTiles.some((tile) => {
+            if (tile.type === TileType.Door) return true;
+            const adjacentPlayer = tile.player;
+            if (adjacentPlayer) {
+                if (!currentPlayer || currentPlayer.team === undefined) return true;
+                return adjacentPlayer.team !== currentPlayer.team;
+            }
+            return false;
+        });
     }
 
     private getNeighborAndCost(neighbor: Tile, points: number): { tile: Tile; cost: number } {
