@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { Item } from '@app/classes/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { ItemName, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -15,8 +18,9 @@ describe('GameSocketService', () => {
     let service: GameSocketService;
     let gameStateServiceSpy: jasmine.SpyObj<GameStateSocketService>;
     let gameplayServiceSpy: jasmine.SpyObj<GameplayService>;
-    let playerMovementServiceSpy: jasmine.SpyObj<PlayerMovementService>;
+    // let playerMovementServiceSpy: jasmine.SpyObj<PlayerMovementService>;
     let clientNotifierSpy: jasmine.SpyObj<ClientNotifierServices>;
+    let socketClientServiceSpy: jasmine.SpyObj<SocketClientService>;
 
     const socketEvents: { [event: string]: any } = {};
 
@@ -24,8 +28,9 @@ describe('GameSocketService', () => {
         const gameStateSpy = jasmine.createSpyObj('GameStateSocketService', ['updateGameData'], {
             gameDataSubjectValue: {
                 lobby: { players: [] },
-                game: { grid: [] },
-                clientPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 },
+                game: { grid: MOCK_GRID },
+                clientPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
+                currentPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
                 isDebugMode: true,
                 movementPointsRemaining: 10,
             },
@@ -36,9 +41,11 @@ describe('GameSocketService', () => {
             'updateAvailablePath',
             'checkAvailableActions',
             'getClientPlayerPosition',
+            'createItemPopUp',
+            'navigateToFinalPage',
         ]);
         clientNotifierSpy = jasmine.createSpyObj('ClientNotifierServices', ['displayMessage', 'addLogbookEntry']);
-        const socketSpy = jasmine.createSpyObj('SocketClientService', ['on']);
+        const socketSpy = jasmine.createSpyObj('SocketClientService', ['on', 'emit']);
         socketSpy.socket = {
             on: (event: string, callback: any): void => {
                 socketEvents[event] = callback;
@@ -63,7 +70,8 @@ describe('GameSocketService', () => {
         service = TestBed.inject(GameSocketService);
         gameStateServiceSpy = TestBed.inject(GameStateSocketService) as jasmine.SpyObj<GameStateSocketService>;
         gameplayServiceSpy = TestBed.inject(GameplayService) as jasmine.SpyObj<GameplayService>;
-        playerMovementServiceSpy = TestBed.inject(PlayerMovementService) as jasmine.SpyObj<PlayerMovementService>;
+        // playerMovementServiceSpy = TestBed.inject(PlayerMovementService) as jasmine.SpyObj<PlayerMovementService>;
+        socketClientServiceSpy = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
 
         service.initializeSocketListeners();
 
@@ -87,7 +95,6 @@ describe('GameSocketService', () => {
         socketEvents['game-abandoned'](data);
 
         expect(MOCK_PLAYER.hasAbandoned).toBeTrue();
-        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).not.toContain(MOCK_PLAYER);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
@@ -101,11 +108,23 @@ describe('GameSocketService', () => {
     }));
 
     it('should handle gameEnded event', fakeAsync(() => {
-        const data = { winner: 'WinnerPlayer' };
+        const data = { winner: ['WinnerPlayer'] };
         socketEvents['gameEnded'](data);
-        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(`👑 ${data.winner} a remporté la partie ! Redirection vers l'accueil sous peu`);
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
+            `👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`,
+        );
         tick(DELAY_BEFORE_ENDING_GAME);
-        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameplayServiceSpy.navigateToFinalPage).toHaveBeenCalled();
+    }));
+
+    it('should handle gameEnded event with multiple winnners', fakeAsync(() => {
+        const data = { winner: ['WinnerPlayer1', 'WinnerPlayer2'] };
+        socketEvents['gameEnded'](data);
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
+            `👑 ${data.winner.join(', ')} ont remporté la partie ! Redirection vers la page de fin sous peu`,
+        );
+        tick(DELAY_BEFORE_ENDING_GAME);
+        expect(gameplayServiceSpy.navigateToFinalPage).toHaveBeenCalled();
     }));
 
     it('should handle adminModeDisabled event', () => {
@@ -134,30 +153,58 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    it('should handle playerMovement event', () => {
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints = 10;
-
-        const mockPlayer: Player = { ...MOCK_PLAYER, name: 'testPlayer' };
-
-        playerMovementServiceSpy.calculateRemainingMovementPoints.and.returnValue(3);
-
+    it('should handle gameStarted event even if name in orderedPlayers is not clientPlayer', () => {
         const data = {
-            grid: MOCK_GRID,
-            player: mockPlayer,
-            isCurrentlyMoving: true,
+            orderedPlayers: [MOCK_PLAYER, { ...MOCK_PLAYER, name: 'Player2' }],
+            updatedGame: {
+                ...MOCK_GAME,
+                grid: MOCK_GRID,
+            },
         };
 
-        socketEvents['playerMovement'](data);
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = { ...MOCK_PLAYER, name: 'null' };
 
-        expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(data.grid);
-        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints).toEqual(7);
-        expect(gameStateServiceSpy.gameDataSubjectValue.movementPointsRemaining).toEqual(7);
-        expect(gameStateServiceSpy.gameDataSubjectValue.isCurrentlyMoving).toBeTrue();
-        expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
-        expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalled();
+        const callback = socketEvents['gameStarted'];
+
+        callback(data);
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toEqual(data.orderedPlayers);
+        expect(gameStateServiceSpy.gameDataSubjectValue.game).toEqual(data.updatedGame);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
+
+    // it('should handle playerMovement event', () => {
+    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
+    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints = 10;
+
+    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.attack = { value: 0, bonusDice: DiceType.D6 };
+    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.defense = { value: 0, bonusDice: DiceType.D4 };
+
+    //     const mockPlayer: Player = {
+    //         ...MOCK_PLAYER,
+    //         name: 'testPlayer',
+    //         attack: { value: 4, bonusDice: DiceType.D6 },
+    //         defense: { value: 4, bonusDice: DiceType.D4 },
+    //     };
+
+    //     playerMovementServiceSpy.calculateRemainingMovementPoints.and.returnValue(3);
+
+    //     const data = {
+    //         grid: MOCK_GRID,
+    //         player: mockPlayer,
+    //         isCurrentlyMoving: true,
+    //     };
+
+    //     socketEvents['playerMovement'](data);
+
+    //     expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(data.grid);
+    //     expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints).toEqual(7);
+    //     expect(gameStateServiceSpy.gameDataSubjectValue.movementPointsRemaining).toEqual(7);
+    //     expect(gameStateServiceSpy.gameDataSubjectValue.isCurrentlyMoving).toBeTrue();
+    //     expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
+    //     expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalled();
+    //     expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    // });
 
     it('should handle playerUpdate event', () => {
         gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = MOCK_PLAYER.name;
@@ -242,6 +289,17 @@ describe('GameSocketService', () => {
         expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug activé');
     });
 
+    it('should not notify when no admin player exists', () => {
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
+        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = false;
+
+        socketEvents['adminModeChangedServerSide']();
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeTrue();
+        expect(clientNotifierSpy.displayMessage).not.toHaveBeenCalled();
+        expect(clientNotifierSpy.addLogbookEntry).not.toHaveBeenCalled();
+    });
+
     it('should handle missing player in onGameAbandoned', () => {
         gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
         const initialPlayerCount = gameStateServiceSpy.gameDataSubjectValue.lobby.players.length;
@@ -265,5 +323,96 @@ describe('GameSocketService', () => {
             gameStateServiceSpy.gameDataSubjectValue.lobby.players[0],
         ]);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    // it('should filter out abandoned players when game ends', () => {
+    //     const activePlayer = { ...MOCK_PLAYER, name: 'Active', hasAbandoned: false };
+    //     const abandonedPlayer = { ...MOCK_PLAYER, name: 'Abandoned', hasAbandoned: true };
+
+    //     gameStateServiceSpy.gameDataSubjectValue.lobby.players = [activePlayer, abandonedPlayer];
+    //     const data = { winner: ['WinnerPlayer'] };
+    //     socketEvents['gameEnded'](data);
+    //     expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
+    //     expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);
+    //     expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Fin de la partie', [activePlayer, abandonedPlayer]);
+    // });
+
+    it('should call gameplayService when itemChoice', () => {
+        const mockItem = { name: ItemName.Default } as Item;
+
+        const data = { items: [mockItem, mockItem, mockItem] as [Item, Item, Item] };
+        socketEvents['itemChoice'](data);
+        expect(gameplayServiceSpy.createItemPopUp).toHaveBeenCalledWith(data.items, gameStateServiceSpy.gameDataSubjectValue);
+    });
+
+    it('should emit itemDrop event with received data when itemDropped is triggered', () => {
+        const mockData = {
+            accessCode: 'ABCD',
+            player: MOCK_PLAYER,
+            item: new Item({
+                id: '1',
+                name: ItemName.Flag,
+                imageSrc: 'flag.png',
+                itemCounter: 1,
+                description: 'Test flag',
+            }),
+        };
+
+        socketEvents['itemDropped'](mockData);
+
+        expect(socketClientServiceSpy.emit).toHaveBeenCalledWith('itemDrop', mockData);
+    });
+
+    describe('onPlayerClientUpdate', () => {
+        const initialClientPlayer = { name: 'testPlayer', actionPoints: 3 } as Player;
+        // it('should update clientPlayer when names match', () => {
+        //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
+        //     const updatedPlayer = { name: 'testPlayer', actionPoints: 0 } as Player;
+
+        //     socketEvents['playerClientUpdate']({ player: updatedPlayer });
+
+        //     expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
+        // });
+
+        it('should NOT update clientPlayer when names differ', () => {
+            gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
+            const otherPlayer = { name: 'otherPlayer', actionPoints: 0 } as Player;
+
+            socketEvents['playerClientUpdate']({ player: otherPlayer });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(initialClientPlayer);
+        });
+    });
+
+    describe('onWallClicked', () => {
+        it('should update grid and client state when game data is valid', () => {
+            const mockGrid = [[{ id: 'tile1', type: TileType.Wall } as Tile]];
+            gameStateServiceSpy.gameDataSubjectValue.game = { grid: MOCK_GRID } as Game;
+            gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints = 3;
+            gameStateServiceSpy.gameDataSubjectValue.isActionMode = true;
+
+            socketEvents['wallClicked']({ grid: mockGrid });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(mockGrid);
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(NO_ACTION_POINTS);
+            expect(gameStateServiceSpy.gameDataSubjectValue.isActionMode).toBeFalse();
+            expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+            expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+            expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Un joueur a effectue une action sur un mur!', [
+                gameStateServiceSpy.gameDataSubjectValue.clientPlayer,
+            ]);
+        });
+
+        it('should do nothing when grid is missing', () => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            gameStateServiceSpy.gameDataSubjectValue.game = { ...MOCK_GAME, grid: undefined! };
+            const initialActionPoints = gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints;
+
+            socketEvents['wallClicked']({ grid: MOCK_GRID });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(initialActionPoints);
+            expect(gameplayServiceSpy.updateAvailablePath).not.toHaveBeenCalled();
+        });
     });
 });

@@ -72,9 +72,8 @@ describe('VirtualPlayerService', () => {
             expect(createdPlayer.attack.value).toBe(BASE_STAT);
             expect(createdPlayer.defense.value).toBe(BASE_STAT);
             expect(createdPlayer.attack.bonusDice).not.toBe(createdPlayer.defense.bonusDice);
-            expect(createdPlayer.hp.current).toBe(createdPlayer.vitality);
-            expect(createdPlayer.hp.max).toBe(createdPlayer.vitality);
-            expect(createdPlayer.speed).not.toBe(createdPlayer.vitality);
+            expect(createdPlayer.hp.max).toBe(createdPlayer.hp.current);
+            expect(createdPlayer.speed).not.toBe(createdPlayer.hp.max);
         });
     });
 
@@ -208,7 +207,7 @@ describe('VirtualPlayerService', () => {
 
         (service as any).addVPlayerToLobby(lobby, vPlayer);
 
-        expect(lobby.players.length).toBe(1); // n'a pas été ajouté
+        expect(lobby.players.length).toBe(1);
         expect(lobby.players.find((p) => p.name === 'ShouldNotBeAdded')).toBeUndefined();
     });
 
@@ -218,19 +217,17 @@ describe('VirtualPlayerService', () => {
                 attack: { value: 0, bonusDice: DiceType.Uninitialized },
                 defense: { value: 0, bonusDice: DiceType.Uninitialized },
                 speed: 0,
-                vitality: 0,
                 hp: { current: 0, max: 0 },
             } as Player;
 
             (service as any).updateVirtualPlayerStats(player);
 
             expect([BASE_STAT, BONUS_STAT]).toContain(player.speed);
-            expect([BASE_STAT, BONUS_STAT]).toContain(player.vitality);
+            expect([BASE_STAT, BONUS_STAT]).toContain(player.hp.max);
             expect(player.attack.value).toBe(BASE_STAT);
             expect(player.defense.value).toBe(BASE_STAT);
             expect(player.attack.bonusDice).not.toBe(player.defense.bonusDice);
-            expect(player.hp.current).toBe(player.vitality);
-            expect(player.hp.max).toBe(player.vitality);
+            expect(player.hp.current).toBe(player.hp.max);
         });
     });
 });

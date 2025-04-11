@@ -21,32 +21,27 @@ export class ItemEffectsService {
     ) {}
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
-        Logger.log(`Picked up: ${item.name}`);
-        if (!item.modifiers) {
+        if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
             this.applyItemModifiers(item);
         }
-
         if (
             item.isActive ||
             (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
             (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item))
         ) {
-            Logger.log('conditions failed');
             return;
         }
         if (item.modifiers) {
             item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER));
         }
         item.isActive = true;
-        Logger.log('isActive = true');
     }
 
     removeEffects(player: Player, index: number): void {
         const item = player.inventory[index];
-        Logger.log('removeEffects');
 
         if (!item || !item.isActive) {
-            Logger.log('conditions failed');
+            Logger.log('Remove conditions failed');
             return;
         }
 
@@ -55,7 +50,6 @@ export class ItemEffectsService {
         }
 
         item.isActive = false;
-        Logger.log('isActive = false');
     }
 
     applyItemModifiers(item: Item) {
@@ -65,26 +59,24 @@ export class ItemEffectsService {
                     { attribute: AttributeType.Attack, value: BONUS_VALUE },
                     { attribute: AttributeType.Defense, value: PENALTY_VALUE },
                 ];
-                item.isActive = false;
                 break;
             case ItemName.Rubik:
                 item.modifiers = [
-                    { attribute: AttributeType.Hp, value: PENALTY_VALUE },
-                    { attribute: AttributeType.Speed, value: BONUS_VALUE },
+                    { attribute: AttributeType.Hp, value: BONUS_VALUE },
+                    { attribute: AttributeType.Speed, value: PENALTY_VALUE },
                 ];
-                item.isActive = false;
                 break;
             case ItemName.Fire:
                 item.modifiers = [{ attribute: AttributeType.Attack, value: BONUS_VALUE }];
-                item.isActive = false;
                 break;
             case ItemName.Swap:
                 item.modifiers = [{ attribute: AttributeType.Defense, value: BONUS_VALUE }];
-                item.isActive = false;
                 break;
             default:
-                break;
+                return;
         }
+
+        item.isActive = false;
     }
 
     isHealthConditionValid(player: Player, item: Item): boolean {
@@ -103,7 +95,8 @@ export class ItemEffectsService {
             this.removeEffects(player, index);
             const newItem = tile.item;
             player.inventory.splice(index, 1);
-            player.inventory.push(tile.item);
+            player.inventory.push(newItem);
+            item.isActive = false;
             tile.item = item;
             tile.player = player;
             this.addEffect(player, newItem, tile);
@@ -169,8 +162,16 @@ export class ItemEffectsService {
             for (let i = 0; i < player.inventory.length; i++) {
                 if (!player.inventory[i]) {
                     player.inventory[i] = tile.item;
-                    tile.item = undefined;
-
+                    this.addEffect(player, tile.item, tile);
+                    tile.item = null;
+                    player = {
+                        ...player,
+                        attack: { ...player.attack },
+                        defense: { ...player.defense },
+                        hp: { ...player.hp },
+                        speed: player.speed,
+                        inventory: player.inventory,
+                    };
                     this.eventEmitter.emit(EventEmit.GameGridUpdate, { accessCode, grid });
                     this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
                         accessCode,
@@ -183,17 +184,22 @@ export class ItemEffectsService {
             }
         }
         const items = [player.inventory[0], player.inventory[1], item];
+        Logger.log('Items:', items);
         if (player.isVirtual) {
             this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items });
         } else {
             this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
+            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+                accessCode,
+                grid,
+                player,
+                isCurrentlyMoving: false,
+            });
         }
         return { player, items };
     }
 
     private applyModifier(player: Player, modifier: ItemModifier, multiplier: number) {
-        Logger.log('Applying Modifiers');
-        Logger.log(`Multiplier: ${multiplier}`);
         const adjustedValue = modifier.value * multiplier;
         switch (modifier.attribute) {
             case AttributeType.Attack:
@@ -210,7 +216,6 @@ export class ItemEffectsService {
                 player.hp.max += adjustedValue;
                 break;
             default:
-                Logger.log(`Unknown attribute type: ${modifier.attribute}`);
                 break;
         }
     }

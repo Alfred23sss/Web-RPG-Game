@@ -32,7 +32,9 @@ export class TurnSocketService {
             gameData.isCurrentlyMoving = false;
             gameData.isActionMode = false;
             gameData.isInCombatMode = false;
-            gameData.clientPlayer.actionPoints = DEFAULT_ACTION_POINTS;
+            if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
+                gameData.clientPlayer.actionPoints = DEFAULT_ACTION_POINTS;
+            }
             gameData.clientPlayer.movementPoints = gameData.clientPlayer.speed;
             gameData.turnTimer = data.turnDuration;
             gameData.hasTurnEnded = gameData.clientPlayer.name !== gameData.currentPlayer.name;

@@ -32,6 +32,8 @@ export class ChatComponent implements OnDestroy {
     }
 
     handleKeyDown(event: KeyboardEvent) {
+        event.stopPropagation();
+
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             this.sendMessage();

@@ -1,10 +1,17 @@
 <div class="game-messages">
     <h3>Journal de Bord</h3>
-    <div class="log-content">
-        @if (logs.length === 0){
+    <button (click)="toggleFilter()">
+        {{ filterByPlayer ? 'Afficher tous les messages' : 'Filtrer par joueur' }}
+    </button>
+    <div #logContainer class="log-content">
+        @if (filteredLogs.length === 0) {
         <p>Aucun message pour le moment.</p>
-        } @else{ @for(log of logs; track $index){
-        <li>{{ log }}</li>
-        } }
+        } @else {
+        <ul>
+            @for (log of filteredLogs; track $index) {
+            <li>{{ log }}</li>
+            }
+        </ul>
+        }
     </div>
 </div>

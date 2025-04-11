@@ -9,7 +9,8 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { GameData } from '@app/classes/gameData';
 import { Item } from '@app/classes/item';
-import { DiceType, TileType } from '@app/enums/global.enums';
+import { DiceType, ItemName, TileType } from '@app/enums/global.enums';
+import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
@@ -109,6 +110,7 @@ describe('GamePageComponent', () => {
             'attack',
             'evade',
             'emitAdminModeUpdate',
+            'handleWallClick',
         ]);
         mockGameStateSocketService = jasmine.createSpyObj('GameStateSocketService', ['gameData$'], {
             gameData$: of(mockGameData),
@@ -180,6 +182,9 @@ describe('GamePageComponent', () => {
 
         mockGameData.clientPlayer = mockPlayer;
         mockGameData.currentPlayer = mockPlayer;
+        mockGameData.lobby = {
+            players: [{ hasAbandoned: false, inventory: [null, null] } as Player, { hasAbandoned: true, inventory: [null, null] } as Player],
+        } as Lobby;
         component.gameData = mockGameData;
 
         mockMessageService.updateAccessCode.and.callThrough();
@@ -246,5 +251,21 @@ describe('GamePageComponent', () => {
         const event = new KeyboardEvent('keydown', { key: 'd' });
         component['handleKeyPress'](event);
         expect(mockGameplayService.emitAdminModeUpdate).toHaveBeenCalledWith(mockGameData);
+    });
+
+    it('should exclude abandoned players from activePlayerCount', () => {
+        expect(component.activePlayerCount).toBe(1);
+    });
+
+    it('should call gameplayService.handleWallClick with gameData, targetTile, and clientPlayer', () => {
+        component.handleWallClick(mockTile);
+
+        expect(mockGameplayService.handleWallClick).toHaveBeenCalledWith(component.gameData, mockTile, mockPlayer);
+    });
+
+    it('should return flag image if there is a flag and default image if not', () => {
+        expect(component.getFlagImage(mockPlayer)).toBe('./assets/items/banner-medieval.png');
+        mockPlayer.inventory = [{ name: ItemName.Flag, imageSrc: 'test' } as Item, null];
+        expect(component.getFlagImage(mockPlayer)).toBe('test');
     });
 });

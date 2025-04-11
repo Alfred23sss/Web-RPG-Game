@@ -3,7 +3,7 @@ import { Item } from '@app/interfaces/Item';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Player } from '@app/model/database/player';
-import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
@@ -23,7 +23,7 @@ export class VirtualPlayerGateway {
         private readonly logger: Logger,
         private readonly virtualPlayerCreationService: VirtualPlayerCreationService,
         private readonly virtualPlayerService: VirtualPlayerService,
-        private readonly gameModeSelector: GameModeSelectorService,
+        private readonly gameSessionService: GameSessionService,
     ) {}
 
     @SubscribeMessage(VirtualPlayerEvents.CreateVirtualPlayer)
@@ -53,8 +53,7 @@ export class VirtualPlayerGateway {
     ): Promise<void> {
         const virtualPlayer = data.virtualPlayerTile.player;
         try {
-            const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
-            await gameService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
+            await this.gameSessionService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
         } catch (error) {
             this.logger.error('Error updating virtual player position', error);
         }
@@ -65,15 +64,13 @@ export class VirtualPlayerGateway {
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
 
         this.virtualPlayerService.resetStats();
-        const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
-        gameService.endTurn(data.accessCode);
+        this.gameSessionService.endTurn(data.accessCode);
     }
 
     @OnEvent(VirtualPlayerEvents.ChooseItem)
     handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[] }) {
         const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
-        const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
-        gameService.handleItemDropped(data.accessCode, data.player, removedItem);
+        this.gameSessionService.handleItemDropped(data.accessCode, data.player, removedItem);
     }
 
     @OnEvent(EventEmit.GameTurnStarted)

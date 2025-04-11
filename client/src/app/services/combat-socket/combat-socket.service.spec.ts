@@ -211,4 +211,140 @@ describe('CombatSocketService', () => {
 
         expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(MOCK_PLAYER.movementPoints);
     });
+
+    describe('onCombatEndedLog', () => {
+        it('should add log entry for combat won when hasEvaded is false', () => {
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+            });
+
+            service.initializeCombatListeners();
+
+            const testData = {
+                winner: MOCK_PLAYER,
+                attacker: MOCK_PLAYER,
+                defender: { ...MOCK_PLAYER, name: 'Defender' },
+                hasEvaded: false,
+            };
+
+            EVENT_HANDLERS['combatEndedLog'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`Combat gagné par ${testData.winner.name}`, [
+                testData.attacker,
+                testData.defender,
+            ]);
+        });
+
+        it('should add log entry for combat escaped when hasEvaded is true', () => {
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+            });
+
+            service.initializeCombatListeners();
+
+            const testData = {
+                winner: MOCK_PLAYER,
+                attacker: MOCK_PLAYER,
+                defender: { ...MOCK_PLAYER, name: 'Defender' },
+                hasEvaded: true,
+            };
+
+            EVENT_HANDLERS['combatEndedLog'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`Combat évadé par ${testData.winner.name}`, [
+                testData.attacker,
+                testData.defender,
+            ]);
+        });
+    });
+
+    describe('onCombatStartedLog', () => {
+        it('should add log entry when combat starts', () => {
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+            });
+
+            service.initializeCombatListeners();
+
+            const testData = {
+                attacker: { ...MOCK_PLAYER, name: 'Attacker' },
+                defender: { ...MOCK_PLAYER, name: 'Defender' },
+            };
+
+            EVENT_HANDLERS['combatStartedLog'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith('Combat commencé', [testData.attacker, testData.defender]);
+        });
+    });
+
+    describe('onAttackResult', () => {
+        beforeEach(() => {
+            clientNotifierMock.addLogbookEntry.calls.reset();
+
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+                return socketClientServiceMock;
+            });
+
+            service.initializeCombatListeners();
+        });
+
+        it('should handle successful attack', () => {
+            const testData = { success: true, attackScore: 10, defenseScore: 5 };
+
+            expect(EVENT_HANDLERS['attackResult']).toBeDefined();
+
+            EVENT_HANDLERS['attackResult'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith('Attaque réussie (Attaque: 10, Défense: 5)');
+            expect(gameplayServiceMock.updateAttackResult).toHaveBeenCalled();
+            expect(gameStateServiceMock.updateGameData).toHaveBeenCalled();
+        });
+
+        it('should handle failed attack', () => {
+            const testData = { success: false, attackScore: 3, defenseScore: 7 };
+            EVENT_HANDLERS['attackResult'](testData);
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith('Attaque échouée (Attaque: 3, Défense: 7)');
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith('Attaque échouée (Attaque: 3, Défense: 7)');
+        });
+    });
+
+    describe('onEscapeAttempt', () => {
+        it('should handle failed escape', () => {
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+                return socketClientServiceMock;
+            });
+            service.initializeCombatListeners();
+
+            const testData = { attemptsLeft: 2, isEscapeSuccessful: false };
+
+            expect(EVENT_HANDLERS['escapeAttempt']).toBeDefined();
+            EVENT_HANDLERS['escapeAttempt'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith("Tentative d'évasion raté", []);
+            expect(gameStateServiceMock.gameDataSubjectValue.evadeResult).toEqual(testData);
+            expect(gameStateServiceMock.updateGameData).toHaveBeenCalled();
+        });
+    });
+
+    describe('onCombatTurnStarted', () => {
+        it('should update current player and game data', () => {
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+                return socketClientServiceMock;
+            });
+            service.initializeCombatListeners();
+            const newPlayer = { ...MOCK_PLAYER, name: 'NewFighter' };
+            const testData = {
+                fighter: newPlayer,
+                duration: 30,
+                escapeAttemptsLeft: 2,
+            };
+            expect(EVENT_HANDLERS['combatTurnStarted']).toBeDefined();
+            EVENT_HANDLERS['combatTurnStarted'](testData);
+            expect(gameStateServiceMock.gameDataSubjectValue.currentPlayer).toEqual(newPlayer);
+            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
+        });
+    });
 });

@@ -227,7 +227,7 @@ app-grid {
 }
 
 .player-name.active {
-    color: green !important;
+    color: green !important; //not recommended
     font-weight: bold;
 }
 
@@ -382,6 +382,7 @@ app-grid {
     display: inline-block;
     margin-left: 5px;
     font-size: 0.8em;
+    width: 10px;
     vertical-align: middle;
     color: red;
     filter: drop-shadow(0 0 1px black);

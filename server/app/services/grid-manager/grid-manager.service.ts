@@ -1,7 +1,7 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
-import { EventEmit, ImageType, ItemName, TileType } from '@app/enums/enums';
+import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/model/database/tile';
+import { Tile, TileType } from '@app/model/database/tile';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -23,7 +23,7 @@ export class GridManagerService {
     }
 
     findTileBySpawnPoint(grid: Tile[][], player: Player): Tile | undefined {
-        return grid.flat().find((tile) => tile.id === player.spawnPoint.tileId);
+        return player.spawnPoint ? grid.flat().find((tile) => tile.id === player.spawnPoint.tileId) : undefined;
     }
 
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
@@ -66,7 +66,9 @@ export class GridManagerService {
             targetTile.imageSrc = ImageType.OpenDoor;
         }
         targetTile.isOpen = !targetTile.isOpen;
-        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid });
+        this.logger.log('emitting door update');
+        this.eventEmitter.emit(EventEmit.UpdateDoorStats, { accessCode, tile: previousTile });
+        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: newTile.isOpen });
         return grid;
     }
 
@@ -98,6 +100,10 @@ export class GridManagerService {
                 }
             }
         }
+    }
+
+    countDoors(grid: Tile[][]): number {
+        return grid.flat().filter((tile) => tile.type === TileType.Door).length;
     }
 
     findSpawnPoints(grid: Tile[][]): Tile[] {
@@ -140,7 +146,7 @@ export class GridManagerService {
         for (const row of grid) {
             for (const tile of row) {
                 if (tile.item?.name === ItemName.QuestionMark) {
-                    const randomItem = remainingItems[Math.floor(Math.random() * RANDOM_ITEMS.length)];
+                    const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)];
                     tile.item = randomItem;
                     remainingItems = remainingItems.filter((item) => item.name !== randomItem.name);
                 }
@@ -206,9 +212,9 @@ export class GridManagerService {
     isFlagOnSpawnPoint(grid: Tile[][], player: Player): boolean {
         const playerTile = this.findTileByPlayer(grid, player);
         const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
-        if (playerTile.id === playerSpawnPoint.id) {
-            for (const item of player.inventory) {
-                if (item && item.name === ItemName.Flag) {
+        if (playerTile && playerSpawnPoint && playerTile.id === playerSpawnPoint.id) {
+            for (const item of player.inventory || []) {
+                if (item?.name === ItemName.Flag) {
                     return true;
                 }
             }

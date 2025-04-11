@@ -44,23 +44,25 @@ export enum ImageType {
 }
 
 export enum ItemType {
-    Home = 'assets/items/home.png',
-    HomeGray = 'assets/items/home-gray.png',
-    Lightning = 'assets/items/lightning.png',
-    LightningGray = 'assets/items/lightning-gray.png',
-    Potion = 'assets/items/potion.png',
-    PotionGray = 'assets/items/potion-gray.png',
-    Stop = 'assets/items/stop.png',
-    StopGray = 'assets/items/stop-gray.png',
-    QuestionMark = 'assets/items/question-mark.png',
-    QuestionMarkGray = 'assets/items/question-mark-gray.png',
-    Fire = 'assets/items/fire.png',
-    FireGray = 'assets/items/fire-gray.png',
-    Rubik = 'assets/items/rubik.png',
-    RubikGray = 'assets/items/rubik-gray.png',
-    Swap = 'assets/items/swap.png',
-    SwapGray = 'assets/items/swap-gray.png',
-    Default = 'assets/items/question-mark.png',
+    Home = './assets/items/home-removebg-preview.png',
+    HomeGray = './assets/items/home-gray.png',
+    Lightning = './assets/items/pickaxe.png',
+    LightningGray = './assets/items/lightning-gray.png',
+    Potion = './assets/items/ice-sword.png',
+    PotionGray = './assets/items/potion-gray.png',
+    Stop = './assets/items/armor-preview.png',
+    StopGray = './assets/items/stop-gray.png',
+    QuestionMark = './assets/items/chest.png',
+    QuestionMarkGray = './assets/items/question-mark-gray.png',
+    Fire = './assets/items/black-sword-preview.png',
+    FireGray = './assets/items/fire-gray.png',
+    Rubik = './assets/items/erdtree_greatshield.png',
+    RubikGray = './assets/items/rubik-gray.png',
+    Swap = './assets/items/ice-shield-chat.png',
+    SwapGray = './assets/items/swap-gray.png',
+    Flag = './assets/items/banner-medieval.png',
+    FlagGray = './assets/items/flag-gray.png',
+    Default = './assets/items/question-mark.png',
 }
 
 export enum BonusValue {
@@ -174,13 +176,14 @@ export enum TileType {
 
 export enum ItemDescription {
     Home = 'Point de départ',
-    Lightning = 'paralyse',
-    Potion = 'soigne',
-    Stop = 'arrêt le jeu',
-    QuestionMark = 'objet aléatoire',
-    Fire = 'inflige des brûlure',
-    Rubik = 'bouge les colonnes ou les rangés',
-    Swap = 'échange les personnages',
+    Lightning = 'Permet de détruire des murs',
+    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
+    Stop = 'Donne un deuxième D6 au joueur.',
+    QuestionMark = 'Objet aléatoire.',
+    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
+    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
+    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
+    Flag = 'Drapeau à capturer.',
     Default = 'rien',
 }
 
@@ -195,15 +198,19 @@ export enum EventEmit {
     UpdatePlayerList = 'update.player.list',
     UpdatePlayer = 'update.player',
     GameCombatStarted = 'game.combat.started',
+    DecrementItem = 'decrement.item',
+    // stat
     GameCombatAttackResult = 'game.combat.attack.result',
     GameCombatEscape = 'game.combat.escape',
     GameCombatEnded = 'game.combat.ended',
     AdminModeDisabled = 'admin.mode.disabled',
+    // stat
     GameDoorUpdate = 'game.door.update',
     GameTurnTimeout = 'game.turn.timeout',
     GamePlayerMovement = 'game.player.movement',
     GameEnded = 'game.ended',
     GameGridUpdate = 'game.grid.update',
+    // stat
     GameTransitionStarted = 'game.transition.started',
     GameTransitionCountdown = 'game.transition.countdown',
     GameTurnStarted = 'game.turn.started',
@@ -213,6 +220,12 @@ export enum EventEmit {
     ItemChoice = 'item.choice',
     PlayerUpdate = 'player.client.update',
     TeamCreated = 'team.created',
+    GameItemCollected = 'game.item.collected',
+    GameTileVisited = 'game.tile.visited',
+    GameFlagPossessed = 'game.flag.possessed',
+    InitializeGameStatistics = 'initialize.game.statistics',
+    ShowGlobalStats = 'show.global.stats',
+    UpdateDoorStats = 'update.door.stats',
     VPActionDone = 'vp.action.done',
 }
 

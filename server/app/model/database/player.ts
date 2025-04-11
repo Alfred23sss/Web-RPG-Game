@@ -22,9 +22,6 @@ export class Player {
     @Prop({ required: true })
     speed: number;
 
-    @Prop({ required: true })
-    vitality: number;
-
     @Prop({ required: true, type: Object })
     attack: { value: number; bonusDice: DiceType };
 

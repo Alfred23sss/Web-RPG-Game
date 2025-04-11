@@ -9,13 +9,13 @@
                 class="player-name"
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
-                 [class.virtual-player]="player.isVirtual"
+                [class.virtual-player]="player.isVirtual"
                 [class.abandoned]="player.hasAbandoned"
                 [class.active]="gameData.currentPlayer && player.name === gameData.currentPlayer.name"
             >
                 {{ player?.name }}
                 @if(hasFlag(player)) {
-                    <img draggable="false" alt="Flag" [src]="getFlagImage(player)" class="flag-overlay" />
+                <img draggable="false" alt="Flag" [src]="getFlagImage(player)" class="flag-overlay" />
                 }
                 <br />
                 Combats gagnés: {{ player.combatWon }}
@@ -24,7 +24,7 @@
                 }
             </p>
             } @if(gameData.lobby.players){
-            <p>Joueur actif: {{ gameData.lobby.players.length }}</p>
+            <p>Joueurs actifs: {{ activePlayerCount }}</p>
             }
         </div>
         <app-player-info></app-player-info>
@@ -44,6 +44,7 @@
                 [quickestPath]="gameData.quickestPath"
                 [isEditionMode]="false"
                 [isDebugMode]="gameData.isDebugMode"
+                [clientPlayer]="gameData.clientPlayer"
                 (tileHovered)="updateQuickestPath($event)"
                 (tileClicked)="handleTileClick($event)"
                 (doorClicked)="handleDoorClick($event)"
@@ -89,7 +90,7 @@
         @if (activeTab === 'chat'){
         <app-chat [author]="gameData.clientPlayer.name"></app-chat>
         } @if(activeTab === 'log'){
-        <app-log-book></app-log-book>
+        <app-log-book [playerName]="gameData.clientPlayer.name"></app-log-book>
         }
     </div>
 </div>

@@ -1,7 +1,6 @@
 import { Game, gameSchema } from '@app/model/database/game';
-import { ClassicGameSessionService } from '@app/services/classic-game-session/classic-game-session.service';
-import { CTFGameSessionService } from '@app/services/ctf-game-session/ctf-game-session.service';
-import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { Logger, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -52,6 +51,7 @@ import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/vi
         VirtualPlayerCreationService,
         VirtualPlayerScoreService,
         VirtualPlayerBehaviorService,
+        GameStatisticsService,
         LobbyGateway,
         LobbyService,
         ChatGateway,
@@ -59,9 +59,7 @@ import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/vi
         Logger,
         GameService,
         AccessCodesService,
-        ClassicGameSessionService,
-        CTFGameSessionService,
-        GameModeSelectorService,
+        GameSessionService,
         GameCombatService,
         GridManagerService,
         GameSessionTurnService,

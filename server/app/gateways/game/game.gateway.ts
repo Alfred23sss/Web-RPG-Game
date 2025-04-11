@@ -5,7 +5,8 @@ import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
-import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -18,59 +19,58 @@ export class GameGateway {
     @WebSocketServer()
     server: Server;
 
+    // faudra split ce gateway en plusieurs fichiers anyways!
+    // eslint-disable-next-line max-params
     constructor(
         private readonly logger: Logger,
         private readonly lobbyService: LobbyService,
-        private readonly gameModeSelector: GameModeSelectorService,
+        private readonly gameSessionService: GameSessionService,
         private readonly gameCombatService: GameCombatService,
         private readonly accessCodesService: AccessCodesService,
+        private readonly statisticsService: GameStatisticsService,
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)
     handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; gameMode: GameModeType }) {
         this.logger.log(payload.accessCode);
-        this.gameModeSelector.registerGameMode(payload.accessCode, payload.gameMode);
-        const gameService = this.gameModeSelector.getService(payload.gameMode);
+        this.gameSessionService.createGameSession(payload.accessCode, payload.gameMode);
+        const gameSession = this.gameSessionService.getGameSession(payload.accessCode);
         this.logger.log(`type du service cree ${payload.gameMode}`);
-        const gameSession = gameService.createGameSession(payload.accessCode);
-        this.server.to(payload.accessCode).emit('gameStarted', { orderedPlayers: gameSession.turn.orderedPlayers, updatedGame: gameSession.game });
-
+        this.server.to(payload.accessCode).emit('gameStarted', {
+            orderedPlayers: gameSession.turn.orderedPlayers,
+            updatedGame: gameSession.game,
+        });
         Logger.log('emitting gameStarted');
         this.logger.log('game created emitted');
     }
 
-    @SubscribeMessage(GameEvents.AbandonedGame)
-    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string; isGameEnding: boolean }) {
-        if (payload.isGameEnding) return;
-        this.logger.log(`Player ${payload.player.name} has abandoned game`);
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        if (!gameService) return;
-        this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
-        const playerAbandon = gameService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
-        const lobby = this.lobbyService.getLobby(payload.accessCode);
-        this.logger.log(`Lobby ${lobby} has left lobby`);
-        this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
-        client.leave(payload.accessCode);
-        const areAllVirtual = lobby.players.every((player) => player.isVirtual);
+    // @SubscribeMessage(GameEvents.AbandonedGame)
+    // handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
+    //     this.logger.log(`Player ${payload.player.name} has abandoned game`);
+    //     this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
+    //     const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
+    //     const lobby = this.lobbyService.getLobby(payload.accessCode);
+    //     if (!lobby) return;
+    //     this.logger.log(`Lobby ${lobby} has left lobby`);
+    //     this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
+    //     client.leave(payload.accessCode);
 
-        if (lobby.players.length <= 1 || areAllVirtual) {
-            this.lobbyService.clearLobby(payload.accessCode);
-            gameService.deleteGameSession(payload.accessCode);
-            this.accessCodesService.removeAccessCode(payload.accessCode);
-            this.server.to(payload.accessCode).emit('gameDeleted');
-            this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
-        }
-
-        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
-        this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
-        this.logger.log('game abandoned emitted');
-    }
+    //     if (lobby.players.length <= 1) {
+    //         this.lobbyService.clearLobby(payload.accessCode);
+    //         this.gameSessionService.deleteGameSession(payload.accessCode);
+    //         this.accessCodesService.removeAccessCode(payload.accessCode);
+    //         this.server.to(payload.accessCode).emit('gameDeleted');
+    //         this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
+    //     }
+    //     this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
+    //     this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
+    //     this.logger.log('game abandoned emitted');
+    // }
 
     @SubscribeMessage(GameEvents.EndTurn)
     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
         this.logger.log(`Ending turn for game ${payload.accessCode}`);
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        gameService.endTurn(payload.accessCode);
+        this.gameSessionService.endTurn(payload.accessCode);
     }
 
     @SubscribeMessage(GameEvents.StartCombat)
@@ -96,8 +96,7 @@ export class GameGateway {
         const player: Player = payload.previousTile.player;
 
         try {
-            const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-            await gameService.updatePlayerPosition(payload.accessCode, payload.movement, player);
+            await this.gameSessionService.updatePlayerPosition(payload.accessCode, payload.movement, player);
         } catch (err) {
             this.logger.error('Error updating player position', err);
         }
@@ -105,8 +104,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.DoorUpdate)
     handleDoorUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile }) {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        gameService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile);
+        this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile);
         this.logger.log('Door update emitted');
     }
 
@@ -115,8 +113,7 @@ export class GameGateway {
         @ConnectedSocket() client: Socket,
         @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile; player: Player },
     ) {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        gameService.updateWallTile(payload.accessCode, payload.currentTile, payload.targetTile, payload.player);
+        this.gameSessionService.updateWallTile(payload.accessCode, payload.currentTile, payload.targetTile, payload.player);
         this.logger.log('Door update emitted');
     }
 
@@ -135,15 +132,25 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.TeleportPlayer)
     handleTeleportPlayer(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; targetTile: Tile }) {
         this.logger.log(payload.targetTile);
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        gameService.callTeleport(payload.accessCode, payload.player, payload.targetTile);
+        this.gameSessionService.callTeleport(payload.accessCode, payload.player, payload.targetTile);
         this.logger.log('player teleported');
     }
 
+    @SubscribeMessage(GameEvents.DecrementItem)
+    handleDecrementItem(@ConnectedSocket() client: Socket, @MessageBody() payload: { selectedItem: Item; accessCode: string; player: Player }): void {
+        Logger.log(`Decrementing item ${payload.selectedItem.name} for player ${payload.player.name}`);
+        this.statisticsService.decrementItem(payload.accessCode, payload.selectedItem, payload.player);
+    }
+
+    // no need to receive it here
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        gameService.handleItemDropped(payload.accessCode, payload.player, payload.item);
+        this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
+    }
+
+    @SubscribeMessage(GameEvents.PlayerItemReset)
+    handlePlayerItemReset(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player }) {
+        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
     }
 
     @OnEvent(EventEmit.GameCombatEnded)
@@ -189,11 +196,11 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.GameDoorUpdate)
-    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][] }) {
+    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][]; isOpen: boolean }) {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
+            isOpen: payload.isOpen,
         });
-        // this.logger.log(payload.grid);
         this.logger.log('Door update event emitted');
     }
 
@@ -215,11 +222,13 @@ export class GameGateway {
     @OnEvent(EventEmit.ItemChoice)
     handleItemChoiceEvent(payload: { player: Player; items: [Item, Item, Item] }) {
         const socketId = this.lobbyService.getPlayerSocket(payload.player.name);
+        Logger.log('emitting choice event');
         this.server.to(socketId).emit('itemChoice', {
             items: payload.items,
         });
     }
 
+    // PlayerUpdate pour enum mais valeur de player client update? pas trop clair
     @OnEvent(EventEmit.PlayerUpdate)
     handlePlayerClientUpdate(payload: { accessCode: string; player: Player }) {
         this.logger.log(`playerUpdateClientEventCalled ${payload.player.name}`);
@@ -262,6 +271,7 @@ export class GameGateway {
         attackSuccessful: boolean;
         attackerScore: number;
         defenseScore: number;
+        accessCode: string;
     }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.currentFighter.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defenderPlayer.name);
@@ -316,20 +326,26 @@ export class GameGateway {
     @OnEvent(EventEmit.GameEnded)
     handleGameEnded(payload: { accessCode: string; winner: string[] }) {
         this.logger.log('emitting game ended to client');
-
-        const gameService = this.gameModeSelector.getServiceByAccessCode(payload.accessCode);
-        gameService.deleteGameSession(payload.accessCode);
-        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner });
-        this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
-        const lobbyPlayers = this.lobbyService.getLobbyPlayers(payload.accessCode);
-        this.lobbyService.clearLobby(payload.accessCode);
-        for (const player of lobbyPlayers) {
-            const playerSocketId = this.lobbyService.getPlayerSocket(player.name);
-            const playerClient = this.server.sockets.sockets.get(playerSocketId);
-            if (playerClient) {
-                playerClient.leave(payload.accessCode);
-            }
+        const stats = this.statisticsService.calculateStats(payload.accessCode);
+        this.statisticsService.cleanUp(payload.accessCode);
+        this.gameSessionService.deleteGameSession(payload.accessCode);
+        this.accessCodesService.removeAccessCode(payload.accessCode);
+        for (const player of stats.playerStats.values()) {
+            Logger.log(player.uniqueItemsCollected.size);
         }
+        const statsObject = {
+            ...stats,
+            playerStats: Object.fromEntries(
+                Array.from(stats.playerStats.entries()).map(([key, value]) => [
+                    key,
+                    {
+                        ...value,
+                        uniqueItemsCollected: Object.fromEntries(value.uniqueItemsCollected),
+                    },
+                ]),
+            ),
+        };
+        this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats: statsObject });
     }
 
     @OnEvent(EventEmit.GameCombatTimer)

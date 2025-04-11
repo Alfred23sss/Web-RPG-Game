@@ -58,23 +58,23 @@ export enum ImageType {
 }
 
 export enum ItemType {
-    Home = './assets/items/home.png',
+    Home = './assets/items/home-removebg-preview.png',
     HomeGray = './assets/items/home-gray.png',
-    Lightning = './assets/items/lightning.png',
+    Lightning = './assets/items/pickaxe.png',
     LightningGray = './assets/items/lightning-gray.png',
-    Potion = './assets/items/potion.png',
+    Potion = './assets/items/ice-sword.png',
     PotionGray = './assets/items/potion-gray.png',
-    Stop = './assets/items/stop.png',
+    Stop = './assets/items/armor-preview.png',
     StopGray = './assets/items/stop-gray.png',
-    QuestionMark = './assets/items/question-mark.png',
+    QuestionMark = './assets/items/chest.png',
     QuestionMarkGray = './assets/items/question-mark-gray.png',
-    Fire = './assets/items/fire.png',
+    Fire = './assets/items/black-sword-preview.png',
     FireGray = './assets/items/fire-gray.png',
-    Rubik = './assets/items/rubik.png',
+    Rubik = './assets/items/erdtree_greatshield.png',
     RubikGray = './assets/items/rubik-gray.png',
-    Swap = './assets/items/swap.png',
+    Swap = './assets/items/ice-shield-chat.png',
     SwapGray = './assets/items/swap-gray.png',
-    Flag = './assets/items/flag.png',
+    Flag = './assets/items/banner-medieval.png',
     FlagGray = './assets/items/flag-gray.png',
     Default = './assets/items/question-mark.png',
 }
@@ -135,6 +135,7 @@ export enum Routes {
     CreatePage = '/create',
     CreateView = '/create',
     Game = '/game',
+    GameEndPage = '/game-end',
 }
 
 export enum ItemName {
@@ -198,14 +199,14 @@ export enum TileType {
 
 export enum ItemDescription {
     Home = 'Point de départ',
-    Lightning = 'paralyse',
-    Potion = 'soigne',
-    Stop = 'arrêt le jeu',
-    QuestionMark = 'objet aléatoire',
-    Fire = 'inflige des brûlure',
-    Rubik = 'bouge les colonnes ou les rangés',
-    Swap = 'échange les personnages',
-    Flag = 'Drapeau à capturer',
+    Lightning = 'Permet de détruire des murs',
+    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
+    Stop = 'Donne un deuxième D6 au joueur.',
+    QuestionMark = 'Objet aléatoire.',
+    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
+    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
+    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
+    Flag = 'Drapeau à capturer.',
     Default = 'rien',
 }
 

@@ -24,11 +24,27 @@ export class GameplayService {
         private dialog: MatDialog,
     ) {}
 
-    createItemPopUp(items: [Item, Item, Item]): void {
-        this.dialog.open(ItemPopUpComponent, {
+    createItemPopUp(items: [Item, Item, Item], gameData: GameData): void {
+        if (this.dialog.openDialogs.length > 0) return;
+        const dialogRef = this.dialog.open(ItemPopUpComponent, {
             data: { items },
             panelClass: 'item-pop-up-dialog',
             hasBackdrop: false,
+        });
+
+        dialogRef.afterClosed().subscribe((selectedItem: Item | undefined) => {
+            if (selectedItem) {
+                this.handleItemDropped(gameData, selectedItem);
+                this.checkAvailableActions(gameData);
+            }
+            if (selectedItem === items[2]) {
+                console.log('decrement item');
+                this.socketClientService.emit('decrement.item', {
+                    selectedItem,
+                    accessCode: gameData.lobby.accessCode,
+                    player: gameData.clientPlayer,
+                });
+            }
         });
     }
 
@@ -42,13 +58,9 @@ export class GameplayService {
         this.socketClientService.emit('endTurn', { accessCode: gameData.lobby.accessCode });
     }
 
-    abandonGame(gameData: GameData, isGameEnding: boolean): void {
+    abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', {
-            player: gameData.clientPlayer,
-            accessCode: gameData.lobby.accessCode,
-            isGameEnding,
-        });
+        this.socketClientService.emit('manualDisconnect', { isInGame: true });
         this.backToHome();
     }
     getClientPlayerPosition(gameData: GameData): Tile | undefined {
@@ -68,6 +80,11 @@ export class GameplayService {
     backToHome(): void {
         this.router.navigate([Routes.HomePage]);
     }
+
+    navigateToFinalPage(): void {
+        this.router.navigate([Routes.GameEndPage], {});
+    }
+
     updateAttackResult(gameData: GameData, data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
         gameData.attackResult = data;
     }
@@ -85,6 +102,9 @@ export class GameplayService {
     }
 
     checkAvailableActions(gameData: GameData): void {
+        if (this.dialog.openDialogs.length > 0) {
+            return;
+        }
         const clientPlayerPosition = this.getClientPlayerPosition(gameData);
         if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
         const hasIce = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Ice);

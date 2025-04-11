@@ -16,6 +16,12 @@
     height: fit-content;
 }
 
+spawn-highlight {
+    outline: 3px solid limegreen;
+    background-color: rgba(0, 255, 0, 0.1);
+    z-index: 2;
+}
+
 .highlight-player {
     border-color: red;
     border: 1px solid red;

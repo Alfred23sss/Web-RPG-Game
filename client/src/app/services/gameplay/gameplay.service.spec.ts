@@ -1,14 +1,20 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { GameData } from '@app/classes/gameData';
-import { DiceType, ImageType, Routes, TileType } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item';
+import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
+import { DiceType, ImageType, ItemName, Routes, TileType } from '@app/enums/global.enums';
+import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { of } from 'rxjs';
 import { GameplayService } from './gameplay.service';
 
 describe('GameplayService', () => {
@@ -17,6 +23,8 @@ describe('GameplayService', () => {
     let mockSocketClientService: jasmine.SpyObj<SocketClientService>;
     let mockSnackbarService: jasmine.SpyObj<SnackbarService>;
     let mockRouter: jasmine.SpyObj<Router>;
+    let mockMatDialog: jasmine.SpyObj<MatDialog>;
+    let mockDialogRef: jasmine.SpyObj<any>;
 
     const createMockGameData = (overrides: Partial<GameData> = {}): GameData => {
         const mockGameData = new GameData();
@@ -73,6 +81,7 @@ describe('GameplayService', () => {
             isDebugMode: false,
             escapeAttempts: 0,
             evadeResult: null,
+            isGameEnding: false,
             movementPointsRemaining: 2,
             ...overrides,
         });
@@ -111,13 +120,15 @@ describe('GameplayService', () => {
     beforeEach(() => {
         const playerMovementSpy = jasmine.createSpyObj('PlayerMovementService', [
             'availablePath',
-            'hasAdjacentIce',
             'hasAdjacentPlayerOrDoor',
             'quickestPath',
+            'hasAdjacentTileType',
         ]);
         const socketClientSpy = jasmine.createSpyObj('SocketClientService', ['emit', 'sendPlayerMovementUpdate']);
         const snackbarSpy = jasmine.createSpyObj('SnackbarService', ['showMessage']);
         const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+        const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open', 'closeAll']);
+        const dialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -126,6 +137,8 @@ describe('GameplayService', () => {
                 { provide: SocketClientService, useValue: socketClientSpy },
                 { provide: SnackbarService, useValue: snackbarSpy },
                 { provide: Router, useValue: routerSpy },
+                { provide: MatDialog, useValue: matDialogSpy },
+                { provide: MatDialogRef, useValue: dialogRefSpy },
             ],
         });
 
@@ -134,10 +147,174 @@ describe('GameplayService', () => {
         mockSocketClientService = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
         mockSnackbarService = TestBed.inject(SnackbarService) as jasmine.SpyObj<SnackbarService>;
         mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+        mockMatDialog = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+        mockDialogRef = TestBed.inject(MatDialogRef) as jasmine.SpyObj<any>;
+        mockMatDialog.open.and.returnValue(dialogRefSpy);
+        mockDialogRef.afterClosed.and.returnValue(of(undefined));
+
+        spyOn(service, 'handleItemDropped' as any);
+        spyOn(service, 'checkAvailableActions');
+        (mockMatDialog as any).openDialogs = [];
     });
 
     it('should be created', () => {
         expect(service).toBeTruthy();
+    });
+
+    describe('navigateToFinalPage', () => {
+        it('should navigate to the game end page', () => {
+            service.navigateToFinalPage();
+            expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.GameEndPage], {});
+        });
+    });
+
+    it('should return true when players are on the same team', () => {
+        const gameData = createMockGameData({
+            lobby: {
+                accessCode: '1234',
+                players: [
+                    { name: 'Player1', team: 'red' },
+                    { name: 'Player2', team: 'red' },
+                    { name: 'Player3', team: 'blue' },
+                    { name: 'Player4', team: 'blue' },
+                    { name: 'NoTeamPlayer' },
+                ] as unknown as Player[],
+                maxPlayers: 4,
+            } as Lobby,
+        });
+        const result = (service as any).isTeamate('Player1', 'Player2', gameData);
+        expect(result).toBeTrue();
+    });
+
+    describe('handleAttackCTF', () => {
+        let gameData: GameData;
+        let targetTile: Tile;
+
+        beforeEach(() => {
+            gameData = createMockGameData({
+                isActionMode: true,
+                clientPlayer: createMockPlayer({ actionPoints: 1 }),
+            });
+            targetTile = gameData.game?.grid?.[0][1] as Tile;
+            targetTile.player = createMockPlayer({ name: 'EnemyPlayer' });
+        });
+
+        it('should show message when attacking a teammate', () => {
+            spyOn(service as any, 'isTeamate').and.returnValue(true);
+            service.handleAttackCTF(gameData, targetTile);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith("TRAITRE!!! C'EST MOI TON AMI");
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+
+        it('should not attack when not in action mode', () => {
+            gameData.isActionMode = false;
+            service.handleAttackCTF(gameData, targetTile);
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should not attack when targetTile does not have a player', () => {
+            targetTile.player = undefined;
+            service.handleAttackCTF(gameData, targetTile);
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should emit startCombat when attacking adjacent enemy', () => {
+            spyOn(service as any, 'isTeamate').and.returnValue(false);
+            spyOn(service as any, 'findAndCheckAdjacentTiles').and.returnValue(true);
+
+            service.handleAttackCTF(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('startCombat', {
+                attackerName: gameData.clientPlayer.name,
+                defenderName: 'EnemyPlayer',
+                accessCode: '1234',
+                isDebugMode: false,
+            });
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('handleWallClick', () => {
+        let gameData: GameData;
+        let targetTile: Tile;
+        let player: Player;
+
+        beforeEach(() => {
+            gameData = createMockGameData();
+            targetTile = gameData.game?.grid?.[0][0] as Tile;
+            player = createMockPlayer();
+        });
+
+        it('should emit wall update when conditions are met and player has lightning item', () => {
+            gameData.isInCombatMode = false;
+            gameData.clientPlayer.actionPoints = 1;
+            gameData.isActionMode = true;
+            gameData.clientPlayer.inventory = [{ id: '1', name: ItemName.Lightning } as Item, null];
+            service.handleWallClick(gameData, targetTile, player);
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('wallUpdate', {
+                currentTile: gameData.game?.grid?.[0][0],
+                targetTile,
+                accessCode: '1234',
+                player,
+            });
+        });
+
+        it('should not handle wall click when in combat mode', () => {
+            gameData.isInCombatMode = true;
+            service.handleWallClick(gameData, targetTile, player);
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+
+        it('should not handle wall click when current tile is undefined', () => {
+            gameData.isInCombatMode = false;
+            gameData.clientPlayer.actionPoints = 1;
+            gameData.isActionMode = true;
+            spyOn(service, 'getClientPlayerPosition').and.returnValue(undefined);
+            service.handleWallClick(gameData, targetTile, player);
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('createItemPopUp', () => {
+        const mockItems = [
+            { id: '1', name: 'Flag', imageSrc: 'flag.png' } as Item,
+            { id: '2', name: 'Sword', imageSrc: 'sword.png' } as Item,
+            { id: '3', name: 'Sword', imageSrc: 'sword.png' } as Item,
+        ] as [Item, Item, Item];
+        const mockGameData = createMockGameData();
+
+        it('should open dialog with correct parameters', () => {
+            service.closePopUp();
+            service.createItemPopUp(mockItems, mockGameData);
+
+            expect(mockMatDialog.open).toHaveBeenCalledWith(
+                ItemPopUpComponent,
+                jasmine.objectContaining({
+                    data: { items: mockItems },
+                    panelClass: 'item-pop-up-dialog',
+                    hasBackdrop: false,
+                }),
+            );
+        });
+
+        it('should handle item selection and update game state', () => {
+            const selectedItem = mockItems[0];
+            mockDialogRef.afterClosed.and.returnValue(of(selectedItem));
+
+            service.createItemPopUp(mockItems, mockGameData);
+
+            expect(service['handleItemDropped']).toHaveBeenCalledWith(mockGameData, selectedItem);
+            expect(service.checkAvailableActions).toHaveBeenCalledWith(mockGameData);
+        });
+    });
+
+    describe('closePopUp', () => {
+        it('should close all open dialogs', () => {
+            service.closePopUp();
+            expect(mockMatDialog.closeAll).toHaveBeenCalled();
+        });
     });
 
     describe('endTurn', () => {
@@ -153,14 +330,26 @@ describe('GameplayService', () => {
 
     describe('abandonGame', () => {
         it('should mark player as abandoned and navigate to home', () => {
-            const gameData = createMockGameData();
-            service.abandonGame(gameData);
-
-            expect(gameData.clientPlayer.hasAbandoned).toBe(true);
-            expect(mockSocketClientService.emit).toHaveBeenCalledWith('abandonedGame', {
-                player: gameData.clientPlayer,
-                accessCode: '1234',
+            const mockPlayer = createMockPlayer();
+            const mockGameData = createMockGameData({
+                clientPlayer: mockPlayer,
+                lobby: { accessCode: '1234' } as unknown as Lobby,
             });
+            (service as any)['gameData'] = mockGameData;
+
+            service.abandonGame(mockGameData);
+
+            expect(mockPlayer.hasAbandoned).toBeTrue();
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith(
+                'abandonedGame',
+                jasmine.objectContaining({
+                    player: jasmine.objectContaining({
+                        name: 'TestPlayer',
+                        hasAbandoned: true,
+                    }),
+                    accessCode: '1234',
+                }),
+            );
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
         });
     });
@@ -299,48 +488,6 @@ describe('GameplayService', () => {
         });
     });
 
-    describe('checkAvailableActions', () => {
-        it('should end turn when no action points and no adjacent action', () => {
-            const gameData = createMockGameData();
-            gameData.clientPlayer.actionPoints = 0;
-            gameData.clientPlayer.movementPoints = 0;
-
-            mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
-            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-
-            spyOn(service, 'endTurn');
-            service.checkAvailableActions(gameData);
-
-            expect(service.endTurn).toHaveBeenCalledWith(gameData);
-        });
-
-        it('should end turn when 1 action point and no movement, with no adjacent ice or actions', () => {
-            const gameData = createMockGameData();
-            gameData.clientPlayer.actionPoints = 1;
-            gameData.clientPlayer.movementPoints = 0;
-
-            mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
-            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-
-            spyOn(service, 'endTurn');
-            service.checkAvailableActions(gameData);
-
-            expect(service.endTurn).toHaveBeenCalledWith(gameData);
-        });
-
-        it('should return early when clientPlayerPosition is undefined', () => {
-            const gameData = createMockGameData();
-            spyOn(service, 'getClientPlayerPosition').and.returnValue(undefined);
-            spyOn(service, 'endTurn');
-
-            service.checkAvailableActions(gameData);
-
-            expect(service.endTurn).not.toHaveBeenCalled();
-            expect(mockPlayerMovementService.hasAdjacentIce).not.toHaveBeenCalled();
-            expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).not.toHaveBeenCalled();
-        });
-    });
-
     it('should not handle door click when in combat mode', () => {
         const gameData = createMockGameData({ isInCombatMode: true });
         const targetTile = gameData.game?.grid?.[0][0] as Tile;
@@ -434,6 +581,20 @@ describe('GameplayService', () => {
                 accessCode: '1234',
                 isDebugMode: true,
             });
+        });
+
+        it('should call handleAttackCTF when game mode is CTF', () => {
+            spyOn(service, 'handleAttackCTF' as any);
+
+            const gameData = createMockGameData({
+                isActionMode: true,
+                clientPlayer: createMockPlayer({ actionPoints: 1 }),
+            });
+            gameData.game.mode = 'CTF';
+            const defenderTile = gameData.game?.grid?.[0][1] as Tile;
+            defenderTile.player = createMockPlayer({ name: 'Enemy' });
+            service.handleAttackClick(gameData, defenderTile);
+            expect(service.handleAttackCTF).toHaveBeenCalled();
         });
 
         it('should emit exactly once when attacking adjacent player', () => {
@@ -595,5 +756,216 @@ describe('GameplayService', () => {
     it('should return false when tiles not found', () => {
         const result = (service as any).findAndCheckAdjacentTiles('tile1', 'tile2', []);
         expect(result).toBeFalse();
+    });
+
+    describe('isAvailablePath', () => {
+        it('should return true when tile is in availablePath', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile1' } as Tile;
+            gameData.availablePath = [targetTile];
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeTrue();
+        });
+
+        it('should return false when tile is not in availablePath', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile3' } as Tile;
+            gameData.availablePath = [{ id: 'tile1' } as Tile, { id: 'tile2' } as Tile];
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeFalse();
+        });
+
+        it('should return false when availablePath is empty', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile1' } as Tile;
+            gameData.availablePath = [];
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeFalse();
+        });
+
+        it('should return false when availablePath is undefined', () => {
+            const gameData = createMockGameData();
+            const targetTile = { id: 'tile1' } as Tile;
+            gameData.availablePath = undefined;
+
+            const result = (service as any).isAvailablePath(gameData, targetTile);
+
+            expect(result).toBeFalse();
+        });
+        it('should emit itemDrop with correct parameters when handleItemDropped is called', () => {
+            const mockGameData = createMockGameData();
+            const mockItem = new Item();
+
+            (service['handleItemDropped'] as jasmine.Spy).and.callThrough();
+
+            service['handleItemDropped'](mockGameData, mockItem);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('itemDrop', {
+                accessCode: mockGameData.lobby.accessCode,
+                player: mockGameData.clientPlayer,
+                item: mockItem,
+            });
+        });
+    });
+    describe('checkAvailableActions', () => {
+        let mockGameData: GameData;
+        let mockTile: Tile;
+
+        beforeEach(() => {
+            mockTile = {
+                id: 'test-tile',
+                player: createMockPlayer(),
+                imageSrc: ImageType.Default,
+                isOccupied: true,
+                type: TileType.Default,
+                isOpen: false,
+            };
+
+            mockGameData = createMockGameData();
+
+            mockGameData.game!.grid = mockGameData.game!.grid as Tile[][];
+
+            (service.checkAvailableActions as jasmine.Spy).and.callThrough();
+
+            spyOn(service, 'getClientPlayerPosition').and.returnValue(mockTile);
+            spyOn(service, 'endTurn');
+
+            Object.defineProperty(service, 'dialog', {
+                get: () => ({
+                    openDialogs: [],
+                }),
+            });
+        });
+
+        it('should return early if dialog is open', () => {
+            Object.defineProperty(service, 'dialog', {
+                get: () => ({
+                    openDialogs: [{}],
+                }),
+            });
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).not.toHaveBeenCalled();
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should end turn when player has no action or movement points and no ice nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 0;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Ice);
+            expect(service.endTurn).toHaveBeenCalledWith(mockGameData);
+        });
+
+        it('should not end turn when player has no action or movement points but has ice nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 0;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
+                return type === TileType.Ice;
+            });
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Ice);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        // eslint-disable-next-line max-len
+        it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no lightning/wall combo', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
+            mockTile.player = createMockPlayer({
+                inventory: [null, null],
+            });
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][]);
+            expect(service.endTurn).toHaveBeenCalledWith(mockGameData);
+        });
+
+        it('should not end turn with 1 action point and no movement points when there is ice nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
+                return type === TileType.Ice;
+            });
+
+            service.checkAvailableActions(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should not end turn with 1 action point and no movement points when there is action available', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(true);
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][]);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should not end turn with 1 action point and no movement points when player has lightning and wall nearby', () => {
+            mockGameData.clientPlayer.actionPoints = 1;
+            mockGameData.clientPlayer.movementPoints = 0;
+            mockTile.player = createMockPlayer({
+                inventory: [{ name: ItemName.Lightning } as Item, null],
+            });
+            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
+                return type === TileType.Wall;
+            });
+            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Wall);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should not end turn when player has movement points available', () => {
+            mockGameData.clientPlayer.actionPoints = 0;
+            mockGameData.clientPlayer.movementPoints = 1;
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+        it('should return early if gameData.game is null', () => {
+            mockGameData.game = undefined as any;
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+
+        it('should return early if gameData.game.grid is null', () => {
+            mockGameData.game!.grid = null as any;
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
+        it('should return early if gameData.game.grid is undefined', () => {
+            mockGameData.game!.grid = undefined as any;
+
+            service.checkAvailableActions(mockGameData);
+
+            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
+            expect(service.endTurn).not.toHaveBeenCalled();
+        });
     });
 });

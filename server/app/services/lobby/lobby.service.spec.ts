@@ -17,7 +17,6 @@ const MOCK_PLAYER: Player = {
     name: 'Player1',
     avatar: 'avatar1',
     speed: 5,
-    vitality: 10,
     attack: { value: 4, bonusDice: DiceType.D6 },
     defense: { value: 4, bonusDice: DiceType.D4 },
     hp: { current: 10, max: 10 },
