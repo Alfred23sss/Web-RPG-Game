@@ -5,11 +5,10 @@ import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-// import { InventoryManagerService } from '@app/services/inventory-manager/inventory-manager.service';
-import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 
 const PLAYER_MOVE_DELAY = 150;
 

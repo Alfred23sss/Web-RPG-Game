@@ -417,7 +417,7 @@ describe('GameSessionService', () => {
             expect(emitSpy).toHaveBeenCalledWith('game.door.update', {
                 accessCode: ACCESS_CODE,
                 grid: mockGameSession.game.grid,
-                    isOpen: true,
+                isOpen: true,
             });
         });
     });
@@ -578,7 +578,7 @@ describe('GameSessionService', () => {
 
                 expect(itemService.addItemToPlayer).toHaveBeenCalledWith(testPlayer, item, mockGameSession.game.grid, ACCESS_CODE);
                 expect((gameSessionService as any).updateGameSessionPlayerList).toHaveBeenCalledWith(ACCESS_CODE, testPlayer.name, {
-                    inventory: updatedInventory,
+                    ...updatedPlayer,
                 });
             });
 
