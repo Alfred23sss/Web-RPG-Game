@@ -1,3 +1,4 @@
+import { BONUS_VALUE, HEALTH_CONDITION_THRESHOLD, MULTIPLIER_ITEM_EFFECTS, PENALTY_VALUE, RANDOMIZER } from '@app/constants/constants';
 import { AttributeType, EventEmit, ItemName, TileType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/Item';
@@ -6,12 +7,6 @@ import { Tile } from '@app/interfaces/Tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-
-const HEALTH_CONDITION_THRESHOLD = 0.5;
-const BONUS_VALUE = 2;
-const PENALTY_VALUE = -1;
-const MULTIPLIER = 1;
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class ItemEffectsService {
@@ -32,7 +27,7 @@ export class ItemEffectsService {
             return;
         }
         if (item.modifiers) {
-            item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER));
+            item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER_ITEM_EFFECTS));
         }
         item.isActive = true;
     }
@@ -46,7 +41,7 @@ export class ItemEffectsService {
         }
 
         if (item.modifiers) {
-            item.modifiers.forEach((mod) => this.applyModifier(player, mod, -MULTIPLIER));
+            item.modifiers.forEach((mod) => this.applyModifier(player, mod, -MULTIPLIER_ITEM_EFFECTS));
         }
 
         item.isActive = false;

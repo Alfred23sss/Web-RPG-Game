@@ -1,14 +1,10 @@
+import { RANDOMIZER, SECOND, TRANSITION_PHASE_DURATION, TURN_DURATION } from '@app/constants/constants';
 import { EventEmit, TeamType } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Turn } from '@app/interfaces/Turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-const TRANSITION_PHASE_DURATION = 3000;
-const TURN_DURATION = 30000;
-const SECOND = 1000;
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GameSessionTurnService {
@@ -130,9 +126,7 @@ export class GameSessionTurnService {
             turn.currentTurnCountdown = timeLeft;
             this.emitEvent(EventEmit.GameTurnTimer, { accessCode, timeLeft });
             if (timeLeft <= 0) {
-                if (turn.countdownInterval) {
-                    clearInterval(turn.countdownInterval);
-                }
+                if (turn.countdownInterval) clearInterval(turn.countdownInterval);
                 turn.countdownInterval = null;
             }
         }, SECOND);
@@ -145,9 +139,7 @@ export class GameSessionTurnService {
     getNextPlayer(accessCode: string, turn: Turn): Player {
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
-        if (!turn.currentPlayer) {
-            return activePlayers[0];
-        }
+        if (!turn.currentPlayer) return activePlayers[0];
         const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer.name);
 
         const nextIndex = (currentIndex + 1) % activePlayers.length;
@@ -156,14 +148,10 @@ export class GameSessionTurnService {
 
     orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = [...players].sort((a, b) => {
-            if (a.speed === b.speed) {
-                return Math.random() < RANDOMIZER ? -1 : 1;
-            }
+            if (a.speed === b.speed) return Math.random() < RANDOMIZER ? -1 : 1;
             return b.speed - a.speed;
         });
-        if (playerList.length > 0) {
-            playerList[0].isActive = true;
-        }
+        if (playerList.length > 0) playerList[0].isActive = true;
         return playerList;
     }
 

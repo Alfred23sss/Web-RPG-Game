@@ -240,7 +240,6 @@ export class GameSessionService {
         return session.turn.orderedPlayers.some((player) => player.name === playerName);
     }
 
-    //
     handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return null;
@@ -257,7 +256,6 @@ export class GameSessionService {
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.emitGridUpdate(accessCode, gameSession.game.grid);
         }
-        // ici
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
         }

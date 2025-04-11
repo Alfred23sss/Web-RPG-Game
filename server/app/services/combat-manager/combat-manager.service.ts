@@ -78,9 +78,7 @@ export class GameCombatService {
         this.resetCombatTimers(accessCode);
         const { currentFighter, remainingEscapeAttempts, attacker, defender } = combatState;
         combatState.playerPerformedAction = true;
-        if (currentFighter.name !== player.name) {
-            return;
-        }
+        if (currentFighter.name !== player.name) return;
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
 

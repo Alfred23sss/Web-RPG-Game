@@ -54,7 +54,7 @@ export class VirtualPlayerActionsService {
     getPathForMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Tile[] | undefined {
         const grid = lobby.game.grid;
         const isMoveAttack = move.type === MoveType.Attack && move.tile.player;
-        const playerOnMove = !!move.tile.player && move.tile.player.name !== virtualPlayerTile.player.name && move.type !== MoveType.Attack;
+        const playerOnMove = move.tile.player && move.tile.player.name !== virtualPlayerTile.player.name && move.type !== MoveType.Attack;
         let targetTile = move.tile;
         if (isMoveAttack || playerOnMove) {
             targetTile = this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, grid);

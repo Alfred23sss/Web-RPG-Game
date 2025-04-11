@@ -64,7 +64,7 @@ export const NO_SCORE = 0;
 export const AGGRESSIVE_ITEM_SCORE = 50;
 export const IN_RANGE_BONUS = 1000;
 export const INVALID_ITEM_PENALTY = -10000;
-export const ALLY_ATTACK_PENALTY = -100000; // change value
+export const ALLY_ATTACK_PENALTY = -100000;
 export const FLAG_SCORE = 5000;
 
 export const DEFENSIVE_ITEM_SCORE = 2400;
@@ -80,6 +80,21 @@ export const WATER_COST = 2;
 export const DEFAULT_COST = 1;
 export const DOOR_COST = 1;
 export const WALL_COST = Infinity;
+
+export const TRANSITION_PHASE_DURATION = 3000;
+export const TURN_DURATION = 30000;
+export const SECOND = 1000;
+export const RANDOMIZER = 0.5;
+
+export const TIME_DIVIDER = 1000;
+export const MULTIPLIER = 100;
+export const SECOND_IN_HOURS = 3600;
+export const SECOND_IN_MINUTES = 60;
+
+export const HEALTH_CONDITION_THRESHOLD = 0.5;
+export const BONUS_VALUE = 2;
+export const PENALTY_VALUE = -1;
+export const MULTIPLIER_ITEM_EFFECTS = 1;
 
 export const AGGRESSIVE_ITEM_ORDER: ItemName[] = [
     ItemName.Flag,
@@ -125,9 +140,9 @@ export const VIRTUAL_PLAYER_NAMES: string[] = [
     'CroissantFurtif',
     'Escargodzilla',
     'Jean-Michel Bot',
-    'Tartiflex',
+    'LebronJamesVAD',
     'RacletteOP',
     'PoutinePower',
-    'MacaronFou',
-    'OmeletteDuRisk',
+    'MacaroniToutGarni',
+    'JeanPorc',
 ];

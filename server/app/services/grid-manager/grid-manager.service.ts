@@ -1,11 +1,9 @@
-import { RANDOM_ITEMS } from '@app/constants/constants';
+import { RANDOM_ITEMS, RANDOMIZER } from '@app/constants/constants';
 import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
 import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GridManagerService {
@@ -174,9 +172,7 @@ export class GridManagerService {
         ) {
             if (isPlayerSpawnPoint) {
                 destinationTile = this.findClosestAvailableTile(grid, targetTile);
-                if (!destinationTile) {
-                    return grid;
-                }
+                if (!destinationTile) return grid;
             } else {
                 return grid;
             }

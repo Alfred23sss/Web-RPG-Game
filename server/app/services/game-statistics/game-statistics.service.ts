@@ -1,3 +1,4 @@
+import { MULTIPLIER, SECOND_IN_HOURS, SECOND_IN_MINUTES, TIME_DIVIDER } from '@app/constants/constants';
 import { EventEmit, GameMode } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
@@ -8,19 +9,12 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
-// bouge ca dans constant global et trouver meilleur nom
-const TIME_DIVIDER = 1000;
-const MULTIPLIER = 100;
-const SECOND_IN_HOURS = 3600;
-const SECOND_IN_MINUTES = 60;
-
 @Injectable()
 export class GameStatisticsService {
     private gameStatistics: Map<string, GameStatistics> = new Map<string, GameStatistics>();
     private visitedTiles: Map<string, Set<string>> = new Map<string, Set<string>>();
     private manipulatedDoors: Map<string, Set<string>> = new Map<string, Set<string>>();
     private flagHolders: Map<string, Set<string>> = new Map<string, Set<string>>();
-    // surement a enlever (a voir)
     private turnCounts: Map<string, number> = new Map<string, number>();
 
     constructor(
@@ -272,7 +266,6 @@ export class GameStatisticsService {
         return total > 0 ? Math.round((value / total) * MULTIPLIER) : 0;
     }
 
-    // to remove after no need to test, only useful for debugging
     private logStatistics(accessCode: string, gameStats: GameStatistics): void {
         this.logger.log('=== Game Statistics ===');
         this.logger.log(`Game Access Code: ${accessCode}`);

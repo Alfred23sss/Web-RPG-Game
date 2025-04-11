@@ -131,9 +131,7 @@ export class PlayerMovementService {
             const isClosedDoor = tile.type === TileType.Door && !tile.isOpen;
             const hasItem = tile.item && tile.item.name !== ItemName.Home;
 
-            if (isClosedDoor || hasItem) {
-                return path.slice(0, i + 1);
-            }
+            if (isClosedDoor || hasItem) return path.slice(0, i + 1);
         }
         return path;
     }
@@ -147,9 +145,7 @@ export class PlayerMovementService {
         for (let i = 1; i < path.length; i++) {
             const tile = path[i];
             const tileCost = this.getMoveCost(tile);
-            if (movementCost + tileCost > movementPoints) {
-                break;
-            }
+            if (movementCost + tileCost > movementPoints) break;
             movementCost += tileCost;
             farthestReachableTile = tile;
         }

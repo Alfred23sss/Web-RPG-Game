@@ -17,7 +17,6 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { LobbyEvents } from './lobby.gateway.events';
-// Add to events all the emit as well !!!
 @WebSocketGateway({ cors: true })
 export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
     @WebSocketServer()
