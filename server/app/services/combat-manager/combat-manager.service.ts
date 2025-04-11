@@ -29,11 +29,11 @@ export class GameCombatService {
     handleCombatSessionAbandon(accessCode: string, playerName: string): void {
         const players = this.gameSessionService.getPlayers(accessCode);
         const combatState = this.combatStates[accessCode];
+        if (!combatState) return;
         const areFightersVirtual = combatState.attacker.isVirtual && combatState.defender.isVirtual;
         const isAbandonnedPlayerInCombat = combatState.attacker.name === playerName || combatState.defender.name === playerName;
         const arePlayersLeft = players.some((player) => !player.isVirtual && player.name !== playerName);
         const shouldEndCombat = (areFightersVirtual && !arePlayersLeft) || isAbandonnedPlayerInCombat;
-        if (!combatState) return;
         if (shouldEndCombat) {
             Logger.log('Combat session abandoned, ending combat');
             const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
