@@ -97,27 +97,9 @@ html {
     opacity: 0.6;
 }
 
-.game-details,
-.inventory,
-.player-info {
-    background-color: #3e4a65;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.game-details h3,
-.inventory h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: #f8f0a1;
-    border-bottom: 1px solid #5c6a85;
-    padding-bottom: 5px;
-}
-
-.game-details p {
-    margin-top: 1px;
-    margin-bottom: 1px;
+.game-details {
+    display: flex;
+    flex-direction: column;
 }
 
 .inventory-slot {
@@ -386,4 +368,120 @@ app-grid {
     vertical-align: middle;
     color: red;
     filter: drop-shadow(0 0 1px black);
+}
+
+.game-details {
+    width: 100%;
+    max-width: 350px;
+    background: rgba(10, 30, 50, 0.5);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 20, 40, 0.5);
+    padding: 15px;
+    font-family: 'Pixel', sans-serif;
+    color: #d4f1ff;
+    text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+    margin: 20px auto;
+}
+
+.game-details h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    text-align: center;
+    color: #d4f1ff;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.8);
+}
+
+.game-details .game-size,
+.game-details .game-subtitle,
+.game-details .game-active-count {
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.player-name-container {
+    display: flex;
+    align-items: center;
+    background: rgba(20, 80, 120, 0.2);
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(100, 200, 255, 0.1);
+    margin-bottom: 8px;
+    gap: 10px;
+    box-shadow: 0 0 6px rgba(100, 200, 255, 0.15);
+    transition: background 0.3s ease;
+}
+
+.player-name-container.active {
+    background: rgba(100, 200, 255, 0.2);
+    box-shadow: 0 0 10px rgba(100, 200, 255, 0.5);
+}
+
+.info-avatar-container {
+    flex-shrink: 0;
+}
+
+.info-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 2px solid #64c8ff;
+    box-shadow: 0 0 8px rgba(100, 200, 255, 0.5);
+    background: rgba(20, 80, 120, 0.2);
+}
+
+.player-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-name-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    text-shadow: 0 0 6px rgba(100, 200, 255, 0.6);
+}
+
+.info-player-name {
+    color: #d4f1ff;
+}
+
+.player-combats {
+    font-size: 0.8rem;
+    color: #a5cfe8;
+    margin-top: 2px;
+}
+
+.flag-container {
+    width: 16px;
+    height: 16px;
+}
+
+.flag-overlay {
+    width: 100%;
+    height: 100%;
+    border-radius: 3px;
+    box-shadow: 0 0 4px rgba(100, 200, 255, 0.6);
+}
+
+.flashy {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+}
+
+.red-flashy {
+    background: red;
+    box-shadow: 0 0 6px red;
+}
+
+.blue-flashy {
+    background: blue;
+    box-shadow: 0 0 6px blue;
 }

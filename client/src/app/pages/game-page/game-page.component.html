@@ -2,31 +2,41 @@
     <div class="game-info">
         <div class="game-details">
             <h3>Informations de partie</h3>
-            <p>Taille de la carte: {{ gameData.game.size }}x{{ gameData.game.size }}</p>
-            <p>Joueurs actuels:</p>
+            <p class="game-size">Taille {{ gameData.game.size }}x{{ gameData.game.size }}</p>
+            <p class="game-subtitle">Joueurs actuels:</p>
+
             @for(player of gameData.lobby.players; track $index){
-            <p
-                class="player-name"
+            <div
+                class="player-name-container"
                 [class.player-admin]="player.isAdmin"
                 [class.player-regular]="!player.isAdmin"
                 [class.virtual-player]="player.isVirtual"
                 [class.abandoned]="player.hasAbandoned"
                 [class.active]="gameData.currentPlayer && player.name === gameData.currentPlayer.name"
             >
-                {{ player?.name }}
-                @if(hasFlag(player)) {
-                <img draggable="false" alt="Flag" [src]="getFlagImage(player)" class="flag-overlay" />
-                }
-                <br />
-                Combats gagnés: {{ player.combatWon }}
-                @if(player.team !== undefined){
-                <span [class.red-flashy]="player.team === teamType.RED" [class.blue-flashy]="player.team === teamType.BLUE" class="flashy"> </span>
-                }
-            </p>
+                <div class="info-avatar-container">
+                    <img draggable="false" alt="Avatar" [src]="player.avatar" class="info-avatar" />
+                </div>
+                <div class="player-details">
+                    <div class="player-name-line">
+                        <span class="info-player-name">{{ player?.name }}</span>
+                        @if (hasFlag(player)) {
+                        <div class="flag-container">
+                            <img draggable="false" alt="Flag" [src]="getFlagImage(player)" class="flag-overlay" />
+                        </div>
+                        }
+                    </div>
+                    <div class="player-combats">Combats gagnés: {{ player.combatWon }}</div>
+                    @if (player.team !== undefined) {
+                    <span [class.red-flashy]="player.team === teamType.RED" [class.blue-flashy]="player.team === teamType.BLUE" class="flashy"></span>
+                    }
+                </div>
+            </div>
             } @if(gameData.lobby.players){
-            <p>Joueurs actifs: {{ activePlayerCount }}</p>
+            <p class="game-active-count">Joueurs actifs: {{ activePlayerCount }}</p>
             }
         </div>
+
         <app-player-info></app-player-info>
     </div>
 
