@@ -201,7 +201,6 @@ export class CharacterService {
             case JoinLobbyResult.StayInLobby:
                 return;
             case JoinLobbyResult.RedirectToHome:
-                console.log('alsdmaksdma');
                 this.returnHome();
                 this.socketClientService.emit('manualDisconnect', {
                     isInGame: false,
