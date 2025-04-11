@@ -19,6 +19,7 @@ export class GameEndComponent implements OnInit, OnDestroy {
     gameData: GameData = new GameData();
     sortKey: keyof PlayerStatistics | '' = '';
     sortAsc = true;
+    objectKeys = Object.keys;
 
     constructor(
         private gameStateSocketService: GameStateSocketService,

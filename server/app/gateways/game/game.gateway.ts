@@ -318,6 +318,9 @@ export class GameGateway {
         this.statisticsService.cleanUp(payload.accessCode);
         this.gameSessionService.deleteGameSession(payload.accessCode);
         this.accessCodesService.removeAccessCode(payload.accessCode);
+        for (const player of stats.playerStats.values()) {
+            Logger.log(player.uniqueItemsCollected.size);
+        }
         const statsObject = {
             ...stats,
             playerStats: Object.fromEntries(
