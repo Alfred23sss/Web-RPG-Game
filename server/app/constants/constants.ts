@@ -58,12 +58,19 @@ export const ACTION_MAX_MS = 1500;
 export const ACTION_MIN_MS = 500;
 export const DOOR_ACTION_MIN_MS = 500;
 export const DOOR_ACTION_MAX_MS = 1000;
+
 export const ATTACK_SCORE = 100;
 export const NO_SCORE = 0;
 export const AGGRESSIVE_ITEM_SCORE = 50;
 export const IN_RANGE_BONUS = 1000;
 export const INVALID_ITEM_PENALTY = -10000;
-export const FLAG_SCORE = 1500;
+export const ALLY_ATTACK_PENALTY = -100000; // change value
+export const FLAG_SCORE = 5000;
+
+export const DEFENSIVE_ITEM_SCORE = 1400;
+export const NORMAL_ITEM_SCORE = 1200;
+export const DEFENSE_ATTACK_SCORE = 50;
+
 export const PLAYER_POSITION = -2;
 export const DESTINATION_POSITION = -1;
 export const ACTION_COST = 1;

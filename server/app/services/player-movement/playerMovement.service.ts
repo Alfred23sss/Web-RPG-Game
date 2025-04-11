@@ -138,7 +138,7 @@ export class PlayerMovementService {
         return path;
     }
 
-    private getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
+    getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const path = this.quickestPath(virtualPlayerTile, targetTile, grid);
         if (!path || path.length === 0) return undefined;
         let movementCost = 0;

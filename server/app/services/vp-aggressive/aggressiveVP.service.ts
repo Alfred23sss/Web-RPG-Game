@@ -25,10 +25,12 @@ export class AggressiveVPService {
         switch (move.type) {
             case MoveType.Attack:
                 await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
+                console.log('att');
                 break;
 
             case MoveType.Item:
                 await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby);
+                console.log('item');
                 break;
         }
     }
@@ -58,7 +60,6 @@ export class AggressiveVPService {
         movementCost = this.virtualPlayerActions.calculateTotalMovementCost(path);
         move.score -= movementCost;
         move.inRange = movementCost <= virtualPlayer.movementPoints;
-
         if (move.inRange) move.score += IN_RANGE_BONUS;
     }
 
@@ -66,7 +67,7 @@ export class AggressiveVPService {
         if (move.type === MoveType.Attack) {
             move.score += ATTACK_SCORE;
         }
-        if (this.isFlagInInventory(move.tile.player)) {
+        if (this.virtualPlayerActions.isFlagInInventory(move.tile.player)) {
             move.score += FLAG_SCORE;
         }
     }
@@ -83,7 +84,7 @@ export class AggressiveVPService {
                 break;
             case ItemName.Home:
                 if (virtualPlayer.spawnPoint.tileId === move.tile.id) {
-                    const hasFlag = this.isFlagInInventory(virtualPlayer);
+                    const hasFlag = this.virtualPlayerActions.isFlagInInventory(virtualPlayer);
                     move.score += hasFlag ? FLAG_SCORE : INVALID_ITEM_PENALTY;
                 } else {
                     move.score += INVALID_ITEM_PENALTY;
@@ -97,10 +98,5 @@ export class AggressiveVPService {
 
     private getVirtualPlayerTile(virtualPlayer: Player, grid: Tile[][]): Tile {
         return this.gridManagerService.findTileByPlayer(grid, virtualPlayer);
-    }
-
-    private isFlagInInventory(player: Player): boolean {
-        if (!player || !player.inventory) return false;
-        return player.inventory.some((item) => item && item.name === ItemName.Flag);
     }
 }
