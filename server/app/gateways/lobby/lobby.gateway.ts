@@ -248,12 +248,14 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     }
 
     private handleGamePlayerDisconnect(accessCode: string, playerName: string) {
+        const playerAbandon = this.gameSessionService.getPlayers(accessCode).find((p) => p.name === playerName);
+        this.gameSessionService.handlePlayerItemReset(accessCode, playerAbandon);
         this.gameCombatService.handleCombatSessionAbandon(accessCode, playerName);
-        const playerAbandon = this.gameSessionService.handlePlayerAbandoned(accessCode, playerName);
+        this.gameSessionService.handlePlayerAbandoned(accessCode, playerName);
         this.lobbyService.leaveLobby(accessCode, playerName, true);
         const lobby = this.lobbyService.getLobby(accessCode);
         const areAllVirtual = lobby.players.every((player) => player.isVirtual);
-        if ((lobby && lobby.players.length <= 1) || areAllVirtual) {
+        if ((lobby && lobby.players.length <= 1) || areAllVirtual || this.gameSessionService.isTeamAbandoned(accessCode, playerAbandon)) {
             this.logger.log('clearing lobby');
             this.lobbyService.clearLobby(accessCode);
             this.gameSessionService.deleteGameSession(accessCode);

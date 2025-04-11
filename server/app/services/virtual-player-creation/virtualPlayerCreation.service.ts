@@ -88,7 +88,6 @@ export class VirtualPlayerCreationService {
         const { attack, defense } = this.randomizeAttackAndDefense();
         vPlayer.speed = speed;
         vPlayer.movementPoints = speed;
-        vPlayer.vitality = vitality;
         vPlayer.hp = hp;
         vPlayer.attack = attack;
         vPlayer.defense = defense;
