@@ -3,7 +3,7 @@ import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
@@ -130,16 +130,23 @@ export class LobbyService {
     }
 
     getPlayerBySocketId(socketId: string): Player | undefined {
+        for (const [, lobby] of this.lobbies.entries()) {
+            if (lobby && lobby.players && lobby.players.length > 0) {
+                for (const player of lobby.players) {
+                    if (this.playerSockets.get(player.name) === socketId) {
+                        this.playerSockets.set(player.name, socketId);
+                        return player;
+                    }
+                }
+            }
+        }
         const playerEntry = Array.from(this.playerSockets.entries()).find(([, sId]) => sId === socketId);
         if (!playerEntry) return undefined;
-        Logger.log('Player isnt undefined');
         const playerName = playerEntry[0];
         const lobbyId = this.getRoomForPlayer(socketId);
-        Logger.log('lobbyId', lobbyId);
         if (!lobbyId) return undefined;
-
-        const lobby = this.getLobby(lobbyId);
-        return lobby?.players.find((p) => p.name === playerName);
+        const playerLobby = this.getLobby(lobbyId);
+        return playerLobby?.players.find((p) => p.name === playerName);
     }
 
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {
