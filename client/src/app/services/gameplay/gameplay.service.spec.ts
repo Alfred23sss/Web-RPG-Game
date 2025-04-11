@@ -340,16 +340,7 @@ describe('GameplayService', () => {
             service.abandonGame(mockGameData);
 
             expect(mockPlayer.hasAbandoned).toBeTrue();
-            expect(mockSocketClientService.emit).toHaveBeenCalledWith(
-                'abandonedGame',
-                jasmine.objectContaining({
-                    player: jasmine.objectContaining({
-                        name: 'TestPlayer',
-                        hasAbandoned: true,
-                    }),
-                    accessCode: '1234',
-                }),
-            );
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('manualDisconnect', { isInGame: true });
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
         });
     });

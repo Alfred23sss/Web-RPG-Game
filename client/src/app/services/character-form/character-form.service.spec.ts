@@ -421,7 +421,7 @@ describe('CharacterService', () => {
         await service.submitCharacter(player, currentAccessCode, true, mockGame);
 
         expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
-        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
+        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame);
     });
 
     it('should validate game availability', () => {
