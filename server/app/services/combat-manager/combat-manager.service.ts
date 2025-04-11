@@ -1,4 +1,5 @@
 import { EventEmit, GameMode } from '@app/enums/enums';
+import { AttackScore } from '@app/interfaces/AttackScore';
 import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
@@ -218,7 +219,7 @@ export class GameCombatService {
             this.gameSessionService.getGameSession(accessCode).game.grid,
         );
         return {
-            attackSuccessful: attackerScore > defenseScore,
+            attackSuccessful: attackerScore.score > defenseScore.score,
             attackerScore,
             defenseScore,
             defenderPlayer,
@@ -227,12 +228,12 @@ export class GameCombatService {
 
     private handleSuccessfulAttack(
         combatState: CombatState,
-        attackerScore: number,
-        defenseScore: number,
+        attackerScore: AttackScore,
+        defenseScore: AttackScore,
         defenderPlayer: Player,
         accessCode: string,
     ): void {
-        const attackDamage = attackerScore - defenseScore;
+        const attackDamage = attackerScore.score - defenseScore.score;
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
 
         defenderPlayer.inventory.forEach((item) => {

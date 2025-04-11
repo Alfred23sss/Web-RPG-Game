@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
@@ -37,8 +38,6 @@ export class CombatSocketService {
             this.clientNotifier.addLogbookEntry('Combat commencé!', [data.attacker, data.defender]);
 
             this.dialog.open(GameCombatComponent, {
-                width: '900px',
-                height: '600px',
                 disableClose: true,
                 data: { gameData, attacker: data.attacker, defender: data.defender },
             });
@@ -46,7 +45,7 @@ export class CombatSocketService {
     }
 
     private onAttackResult(): void {
-        this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: number; defenseScore: number }) => {
+        this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: AttackScore; defenseScore: AttackScore }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             this.gameplayService.updateAttackResult(gameData, data);
 

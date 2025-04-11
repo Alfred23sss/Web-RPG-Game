@@ -6,37 +6,39 @@
     --light-gray: #f0f0f0;
     --dark-gray: #333333;
 }
+* {
+    box-sizing: border-box;
+}
 
-.overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
+body,
+html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
     height: 100%;
-    background: rgba(0, 20, 40, 0.9);
-    z-index: 1000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .combat-container {
-    background: rgba(10, 30, 50, 0.8);
-    border-radius: 15px;
+    background: rgba(0, 20, 40, 0.9);
     box-shadow: 0 5px 30px rgba(0, 20, 40, 0.7);
     border: 1px solid rgba(100, 200, 255, 0.2);
     padding: 20px;
     width: 800px;
     height: 500px;
+    max-width: 90vw;
+    max-height: 90vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     position: relative;
-    color: #d4f1ff;
     text-shadow: 0 0 5px rgba(100, 200, 255, 0.4);
 }
 
 .timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background-color: rgba(12, 77, 162, 0.3);
     padding: 8px 15px;
     border-radius: 10px;
@@ -44,7 +46,7 @@
     text-align: center;
     font-weight: bold;
     border: 1px solid var(--blue);
-    width: 80%;
+    width: 100%;
     font-size: 14px;
 }
 
@@ -148,12 +150,13 @@
     border-radius: 10px;
     padding: 12px;
     margin: 15px 0;
-    width: 90%;
+    width: 100%;
     min-height: 80px;
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     font-size: 14px;
 }
 
@@ -163,8 +166,8 @@
 
 .actions-container {
     display: flex;
-    justify-content: space-around;
-    width: 90%;
+    justify-content: center;
+    width: 100%;
     margin: 15px 0;
     gap: 10px;
 }

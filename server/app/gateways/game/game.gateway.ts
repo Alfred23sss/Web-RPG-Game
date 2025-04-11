@@ -13,6 +13,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameEvents } from './game.gateway.events';
+import { AttackScore } from '@app/interfaces/AttackScore';
 
 @WebSocketGateway({ cors: true })
 export class GameGateway {
@@ -269,8 +270,8 @@ export class GameGateway {
         currentFighter: Player;
         defenderPlayer: Player;
         attackSuccessful: boolean;
-        attackerScore: number;
-        defenseScore: number;
+        attackerScore: AttackScore;
+        defenseScore: AttackScore;
         accessCode: string;
     }) {
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.currentFighter.name);

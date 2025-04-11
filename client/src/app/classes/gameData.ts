@@ -1,3 +1,4 @@
+import { AttackScore } from '@app/interfaces/attack-score';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -20,7 +21,7 @@ export class GameData {
     isCurrentlyMoving: boolean;
     escapeAttempts: number;
     evadeResult: { attemptsLeft: number; isEscapeSuccessful: boolean } | null;
-    attackResult: { success: boolean; attackScore: number; defenseScore: number } | null;
+    attackResult: { success: boolean; attackScore: AttackScore; defenseScore: AttackScore } | null;
     movementPointsRemaining: number = 0;
     isDebugMode: boolean = false;
     isGameEnding: boolean = false;

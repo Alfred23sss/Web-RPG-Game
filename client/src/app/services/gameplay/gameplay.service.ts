@@ -6,6 +6,7 @@ import { Item } from '@app/classes/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { ItemName, Routes, TileType } from '@app/enums/global.enums';
+import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
@@ -85,7 +86,7 @@ export class GameplayService {
         this.router.navigate([Routes.GameEndPage], {});
     }
 
-    updateAttackResult(gameData: GameData, data: { success: boolean; attackScore: number; defenseScore: number } | null): void {
+    updateAttackResult(gameData: GameData, data: { success: boolean; attackScore: AttackScore; defenseScore: AttackScore } | null): void {
         gameData.attackResult = data;
     }
 

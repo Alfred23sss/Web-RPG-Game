@@ -1,4 +1,5 @@
 import { ItemName, TileType } from '@app/enums/enums';
+import { AttackScore } from '@app/interfaces/AttackScore';
 import { CombatState } from '@app/interfaces/CombatState';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/model/database/player';
@@ -19,26 +20,30 @@ export class CombatHelperService {
         return attacker.speed > defender.speed ? [attacker, defender] : [defender, attacker];
     }
 
-    getRandomDefenseScore(defender: Player, isDebugMode: boolean, grid: Tile[][]): number {
+    getRandomDefenseScore(defender: Player, isDebugMode: boolean, grid: Tile[][]): AttackScore {
         let iceDisadvantage = 0;
         const tile = this.gridManagerService.findTileByPlayer(grid, defender);
         if (tile && tile.type === TileType.Ice) {
             iceDisadvantage = ICE_PENALTY;
         }
         const diceValue = this.hasStopItem(defender) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(defender.defense.bonusDice);
-        const defenseBonus = isDebugMode ? diceValue : Math.floor(Math.random() * diceValue) + 1;
-        return defender.defense.value + defenseBonus + iceDisadvantage;
+        const diceRolled = Math.floor(Math.random() * diceValue);
+        const defenseBonus = isDebugMode ? diceValue : diceRolled + 1;
+        const score = defender.defense.value + defenseBonus + iceDisadvantage;
+        return { score, diceRolled };
     }
 
-    getRandomAttackScore(attacker: Player, isDebugMode: boolean, grid: Tile[][]): number {
+    getRandomAttackScore(attacker: Player, isDebugMode: boolean, grid: Tile[][]): AttackScore {
         let iceDisadvantage = 0;
         const tile = this.gridManagerService.findTileByPlayer(grid, attacker);
         if (tile && tile.type === TileType.Ice) {
             iceDisadvantage = ICE_PENALTY;
         }
         const diceValue = this.hasStopItem(attacker) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(attacker.attack.bonusDice);
-        const attackBonus = isDebugMode ? diceValue : Math.floor(Math.random() * diceValue) + 1;
-        return attacker.attack.value + attackBonus + iceDisadvantage;
+        const diceRolled = Math.floor(Math.random() * diceValue);
+        const attackBonus = isDebugMode ? diceValue : diceRolled + 1;
+        const score = attacker.attack.value + attackBonus + iceDisadvantage;
+        return { score, diceRolled };
     }
 
     resetLoserPlayerPosition(player: Player, grid: Tile[][]): Tile[][] {

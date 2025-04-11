@@ -1,93 +1,100 @@
-<div class="overlay">
-    <div class="combat-container">
-        <div class="timer">
-            @if (gameData.currentPlayer && gameData.clientPlayer.name) { @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
-            <p>C'est votre tour</p>
-            } @else { @if (gameData.currentPlayer) {
-            <p>C'est le tour à {{ gameData.currentPlayer.name }}</p>
-            } }
-            <p>Temps restant: {{ gameData.turnTimer }} secondes</p>
-            }
+<div class="combat-container">
+    <div class="timer">
+        @if (gameData.currentPlayer && gameData.clientPlayer.name) { @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
+        <div><span class="label">Votre tour!</span></div>
+        } @else {
+        <div>
+            <span class="label">{{ gameData.currentPlayer.name }}</span>
         </div>
+        }
+        <div>
+            <span class="label">{{ gameData.turnTimer }}</span>
+        </div>
+        }
+    </div>
 
-        <!-- Players Row -->
-        <div class="players-container">
-            <div class="player attacker-player">
-                <h2>{{ attacker.name }}</h2>
-                <div class="avatar-container">
-                    <img [src]="attacker.avatar" alt="Player 1 Avatar" class="avatar-image" />
-                </div>
-                <div class="health-bar-container">
-                    <div class="health-bar">
-                        @for (segment of [].constructor(gameData.playersInFight[0].hp.max); track $index) {
-                        <div class="health-segment" [class.filled]="$index + 1 <= gameData.playersInFight[0].hp.current"></div>
-                        }
-                    </div>
-                </div>
+    <!-- Players Row -->
+    <div class="players-container">
+        <div class="player attacker-player">
+            <h2>{{ attacker.name }}</h2>
+            <div class="avatar-container">
+                <img [src]="attacker.avatar" alt="Player 1 Avatar" class="avatar-image" />
             </div>
-
-            <div class="vs-container">
-                <span>VS</span>
-            </div>
-
-            <div class="player defender-player">
-                <h2>{{ defender.name }}</h2>
-                <div class="avatar-container">
-                    <img [src]="defender.avatar" alt="Player 2 Avatar" class="avatar-image" />
-                </div>
-                <div class="health-bar-container">
-                    <div class="health-bar">
-                        @for (segment of [].constructor(gameData.playersInFight[1].hp.max); track $index) {
-                        <div class="health-segment" [class.filled]="$index + 1 <= gameData.playersInFight[1].hp.current"></div>
-                        }
-                    </div>
+            <div class="health-bar-container">
+                <div class="health-bar">
+                    @for (segment of [].constructor(gameData.playersInFight[0].hp.max); track $index) {
+                    <div class="health-segment" [class.filled]="$index + 1 <= gameData.playersInFight[0].hp.current"></div>
+                    }
                 </div>
             </div>
         </div>
 
-        <div class="combat-result">
-            @if (gameData.attackResult) {
-            <p>Résultat du combat :</p>
-            @if(gameData.attackResult.success){
-            <p>
-                ✅ Attaque réussi! <br />
-                Dé Attaque: {{ gameData.attackResult.attackScore - 4 }} <br />
-                Dé Défense: {{ gameData.attackResult.defenseScore - 4 }} <br />
-                Dégats infligés: {{ gameData.attackResult.attackScore - gameData.attackResult.defenseScore }}
-            </p>
-            } @else {
-            <p>
-                ❌ Attaque ratée! <br />
-                Dé Attaque: {{ gameData.attackResult.attackScore - 4 }} <br />
-                Dé Défense: {{ gameData.attackResult.defenseScore - 4 }} <br />
-                Dégats infligés: 0
-            </p>
-            } } @if (gameData.evadeResult) { @if (gameData.evadeResult.isEscapeSuccessful) {
-            <p>✅ Évasion réussie!</p>
-            } @else {
-            <p>❌ Évasion ratée!</p>
-            } }
+        <div class="vs-container">
+            <span>VS</span>
         </div>
 
-        <!-- Buttons Row -->
-        <div class="actions-container">
-            <button
-                class="dice"
-                (click)="onAttack()"
-                [disabled]="gameData.clientPlayer.name !== gameData.currentPlayer.name"
-                [ngClass]="{ 'disabled-btn': gameData.clientPlayer.name !== gameData.currentPlayer.name }"
-            >
-                Attaquer
-            </button>
-
-            <button
-                class="dice"
-                (click)="onEvade()"
-                [disabled]="gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name"
-                [ngClass]="{ 'disabled-btn': gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name }"
-            >
-                {{ gameData.escapeAttempts > 0 ? "S'Évader (" + gameData.escapeAttempts + ')' : 'Aucune tentative' }}
-            </button>
+        <div class="player defender-player">
+            <h2>{{ defender.name }}</h2>
+            <div class="avatar-container">
+                <img [src]="defender.avatar" alt="Player 2 Avatar" class="avatar-image" />
+            </div>
+            <div class="health-bar-container">
+                <div class="health-bar">
+                    @for (segment of [].constructor(gameData.playersInFight[1].hp.max); track $index) {
+                    <div class="health-segment" [class.filled]="$index + 1 <= gameData.playersInFight[1].hp.current"></div>
+                    }
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="combat-result">
+        @if (gameData.attackResult) {
+        <p><span class="label">Résultat du combat :</span></p>
+        @if (gameData.attackResult.success) {
+        <p>
+            <span class="success">✅ Attaque réussie!</span><br />
+            <span class="label">Dé Attaque:</span> <span class="value">{{ gameData.attackResult.attackScore.diceRolled }}</span
+            ><br />
+            <span class="label">Dé Défense:</span> <span class="value">{{ gameData.attackResult.defenseScore.diceRolled }}</span
+            ><br />
+            <span class="label">Dégats infligés:</span>
+            <span class="value">{{ gameData.attackResult.attackScore.score - gameData.attackResult.defenseScore.score }}</span>
+        </p>
+        } @else {
+        <p>
+            <span class="failure">❌ Attaque ratée!</span><br />
+            <span class="label">Dé Attaque:</span> <span class="value">{{ gameData.attackResult.attackScore.diceRolled }}</span
+            ><br />
+            <span class="label">Dé Défense:</span> <span class="value">{{ gameData.attackResult.defenseScore.diceRolled }}</span
+            ><br />
+            <span class="label">Dégats infligés:</span> <span class="value">0</span>
+        </p>
+        } } @if (gameData.evadeResult) { @if (gameData.evadeResult.isEscapeSuccessful) {
+        <p><span class="success">✅ Évasion réussie!</span></p>
+        } @else {
+        <p><span class="failure">❌ Évasion ratée!</span></p>
+        } }
+    </div>
+
+    <!-- Buttons Row -->
+    <div class="actions-container">
+        <button
+            class="button dice-button"
+            (click)="onAttack()"
+            [disabled]="gameData.clientPlayer.name !== gameData.currentPlayer.name"
+            [ngClass]="{ 'disabled-btn': gameData.clientPlayer.name !== gameData.currentPlayer.name }"
+        >
+            Attaquer
+        </button>
+
+        <button
+            class="button dice-button"
+            (click)="onEvade()"
+            [disabled]="gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name"
+            [ngClass]="{ 'disabled-btn': gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name }"
+        >
+            {{ gameData.escapeAttempts > 0 ? "S'Évader (" + gameData.escapeAttempts + ')' : 'Aucune tentative' }}
+        </button>
     </div>
 </div>
