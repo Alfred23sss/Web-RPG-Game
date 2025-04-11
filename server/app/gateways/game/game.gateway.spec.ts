@@ -29,7 +29,6 @@ const MOCK_PLAYER: Player = {
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
-    vitality: 0,
     isVirtual: false,
 };
 const ACCESS_CODE = 'test123';
@@ -88,6 +87,8 @@ describe('GameGateway', () => {
             callTeleport: jest.fn(),
             handleItemDropped: jest.fn(),
             updateWallTile: jest.fn(),
+            handlePlayerItemReset: jest.fn(),
+            isTeamAbandoned: jest.fn().mockReturnValue(false),
         };
         serverMock = {
             to: jest.fn().mockReturnThis(),

@@ -47,6 +47,7 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.AbandonedGame)
     handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
         this.logger.log(`Player ${payload.player.name} has abandoned game`);
+        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
         this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
         const lobby = this.lobbyService.getLobby(payload.accessCode);
@@ -54,7 +55,7 @@ export class GameGateway {
         this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
         client.leave(payload.accessCode);
 
-        if (lobby.players.length <= 1) {
+        if (lobby.players.length <= 1 || this.gameSessionService.isTeamAbandoned(payload.accessCode, payload.player)) {
             this.lobbyService.clearLobby(payload.accessCode);
             this.gameSessionService.deleteGameSession(payload.accessCode);
             this.accessCodesService.removeAccessCode(payload.accessCode);
@@ -139,6 +140,11 @@ export class GameGateway {
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
         this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
+    }
+
+    @SubscribeMessage(GameEvents.PlayerItemReset)
+    handlePlayerItemReset(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player }) {
+        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
     }
 
     @OnEvent(EventEmit.GameCombatEnded)

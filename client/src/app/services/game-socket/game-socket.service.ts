@@ -216,7 +216,9 @@ export class GameSocketService {
                 return;
             }
             this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
-            this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
+                this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            }
             this.gameStateService.gameDataSubjectValue.isActionMode = false;
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
@@ -232,7 +234,9 @@ export class GameSocketService {
                 return;
             }
             this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
-            this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
+                this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+            }
             this.gameStateService.gameDataSubjectValue.isActionMode = false;
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);

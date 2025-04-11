@@ -1,4 +1,4 @@
-import { EventEmit } from '@app/enums/enums';
+import { EventEmit, GameMode } from '@app/enums/enums';
 import { CombatState } from '@app/interfaces/CombatState';
 import { GameCombatMap } from '@app/interfaces/GameCombatMap';
 import { Player } from '@app/interfaces/Player';
@@ -91,7 +91,7 @@ export class GameCombatService {
     }
 
     checkPlayerWon(accessCode: string, player: Player): boolean {
-        if (player.combatWon === WIN_CONDITION) {
+        if (player.combatWon === WIN_CONDITION && this.gameSessionService.getGameSession(accessCode).game.mode !== GameMode.CTF) {
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
             this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.gameSessionService.endGameSession(accessCode, [player.name]);
@@ -176,17 +176,8 @@ export class GameCombatService {
     private resetHealth(players: Player[], accessCode): void {
         players.forEach((player) => {
             player.hp.current = player.hp.max;
-            this.resetStats(player);
             this.emitEvent(EventEmit.UpdatePlayer, { player });
             this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, player);
-        });
-    }
-
-    private resetStats(player: Player): void {
-        player.inventory.forEach((item, index) => {
-            if (!(item === null) && !this.itemEffectsService.isHealthConditionValid(player, item)) {
-                this.itemEffectsService.removeEffects(player, index);
-            }
         });
     }
 

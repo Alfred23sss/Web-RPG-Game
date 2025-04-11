@@ -5,11 +5,10 @@ import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-// import { InventoryManagerService } from '@app/services/inventory-manager/inventory-manager.service';
-import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 
 const PLAYER_MOVE_DELAY = 150;
 
@@ -259,6 +258,13 @@ export class GameSessionService {
         return player;
     }
 
+    isTeamAbandoned(accessCode: string, player: Player): boolean {
+        const gameSession = this.gameSessions.get(accessCode);
+        const team = player.team;
+        const teamPlayers = gameSession.turn.orderedPlayers.filter((p) => p.team === team);
+        return teamPlayers.every((p) => p.hasAbandoned);
+    }
+
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
@@ -286,7 +292,7 @@ export class GameSessionService {
         const grid = gameSession.game.grid;
         const { player: updatedPlayer, items } = this.itemEffectsService.addItemToPlayer(player, item, grid, accessCode);
         if (!items) {
-            this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { inventory: updatedPlayer.inventory });
+            this.updateGameSessionPlayerList(accessCode, updatedPlayer.name, { ...updatedPlayer });
         }
     }
 
