@@ -8,7 +8,7 @@ import {
     NO_SCORE,
     PLAYER_POSITION,
 } from '@app/constants/constants';
-import { EventEmit, ItemName, MoveType, TileType } from '@app/enums/enums';
+import { EventEmit, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -52,8 +52,14 @@ export class VirtualPlayerActionsService {
     }
 
     getPathForMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Tile[] | undefined {
+        const grid = lobby.game.grid;
         const isMoveAttack = move.type === MoveType.Attack && move.tile.player;
-        const targetTile = isMoveAttack ? this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, lobby.game.grid) : move.tile;
+        const playerOnMove = !!move.tile.player && move.tile.player.name !== virtualPlayerTile.player.name && move.type !== MoveType.Attack;
+        let targetTile = move.tile;
+        if (isMoveAttack || playerOnMove) {
+            targetTile = this.playerMovementService.findBestMoveTile(move.tile, virtualPlayerTile, grid);
+        }
+
         return targetTile ? this.playerMovementService.quickestPath(virtualPlayerTile, targetTile, lobby.game.grid) : undefined;
     }
 
@@ -86,6 +92,15 @@ export class VirtualPlayerActionsService {
         return this.playerMovementService.getMoveCost(tile);
     }
 
+    areOnSameTeam(teamA: TeamType, teamB: TeamType) {
+        return teamA !== undefined && teamB !== undefined && teamA === teamB;
+    }
+
+    isFlagInInventory(player: Player): boolean {
+        if (!player || !player.inventory) return false;
+        return player.inventory.some((item) => item && item.name === ItemName.Flag);
+    }
+
     private async handleAdjacentToClosedDoor(destinationTile: Tile, virtualPlayerTile: Tile, movement: Tile[], accessCode: string): Promise<boolean> {
         const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
         if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
@@ -108,8 +123,9 @@ export class VirtualPlayerActionsService {
         const movement = this.getMovement(move, virtualPlayerTile, lobby.game.grid);
         if (!movement) return;
         const realMovement = this.adjustMovementForDoor(movement);
-
-        if (realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === NO_SCORE) {
+        const isMoveStayInPlace = movement.length <= 1 && move.type === MoveType.Item;
+        const isDoorBlockingMove = realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === NO_SCORE;
+        if (isDoorBlockingMove || isMoveStayInPlace) {
             console.log('ending virtual player turn');
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
             return;
@@ -147,11 +163,13 @@ export class VirtualPlayerActionsService {
 
     private getMovement(move: Move, virtualPlayerTile: Tile, grid: Tile[][]): Tile[] {
         let closestReachableTile: Tile;
-        if (move.type === MoveType.Attack && move.tile.player) {
-            const movePoints = virtualPlayerTile.player.movementPoints;
+        const movePoints = virtualPlayerTile.player.movementPoints;
+        const isAttackMove = move.type === MoveType.Attack && move.tile.player;
+        const isPlayerOnMove = !!move.tile.player && move.tile.player.name !== virtualPlayerTile.player.name && move.type !== MoveType.Attack;
+        if (isAttackMove || isPlayerOnMove) {
             closestReachableTile = this.playerMovementService.findClosestReachableTile(move.tile, virtualPlayerTile, grid, movePoints);
         } else {
-            closestReachableTile = move.tile;
+            closestReachableTile = this.playerMovementService.getFarthestReachableTile(virtualPlayerTile, move.tile, grid, movePoints);
         }
         if (closestReachableTile) {
             const path = this.playerMovementService.quickestPath(virtualPlayerTile, closestReachableTile, grid);

@@ -22,11 +22,11 @@ import { GridManagerService } from './services/grid-manager/grid-manager.service
 import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
 import { PlayerMovementService } from './services/player-movement/playerMovement.service';
+import { VirtualPlayerBehaviorService } from './services/virtual-player-behavior/virtualPlayerBehavior.service';
 import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtualPlayerCreation.service';
+import { VirtualPlayerScoreService } from './services/virtual-player-score/virtualPlayerScore.service';
 import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
 import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/virtualPlayerActions.service';
-import { AggressiveVPService } from './services/vp-aggressive/aggressiveVP.service';
-import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),
@@ -50,8 +50,8 @@ import { DefensiveVPService } from './services/vp-defensive/defensiveVP.service'
         VirtualPlayerGateway,
         VirtualPlayerService,
         VirtualPlayerCreationService,
-        AggressiveVPService,
-        DefensiveVPService,
+        VirtualPlayerScoreService,
+        VirtualPlayerBehaviorService,
         LobbyGateway,
         LobbyService,
         ChatGateway,
