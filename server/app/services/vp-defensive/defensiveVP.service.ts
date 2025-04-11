@@ -19,7 +19,6 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
 import { Injectable } from '@nestjs/common';
-// changer attribution de score
 
 @Injectable()
 export class DefensiveVPService {
@@ -118,9 +117,7 @@ export class DefensiveVPService {
         if (virtualPlayer.spawnPoint.tileId === move.tile.id) {
             const hasFlag = this.virtualPlayerActions.isFlagInInventory(virtualPlayer);
             move.score += hasFlag ? FLAG_SCORE : INVALID_ITEM_PENALTY;
-        }
-        // revise this
-        else if (flagCarrier?.spawnPoint.tileId === move.tile.id) {
+        } else if (flagCarrier?.spawnPoint.tileId === move.tile.id) {
             move.score += FLAG_SCORE;
         } else {
             move.score += INVALID_ITEM_PENALTY;
