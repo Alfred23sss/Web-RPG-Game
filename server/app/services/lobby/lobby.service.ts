@@ -139,7 +139,6 @@ export class LobbyService {
         if (!lobbyId) return undefined;
 
         const lobby = this.getLobby(lobbyId);
-        Logger.log('lobby', lobby);
         return lobby?.players.find((p) => p.name === playerName);
     }
 

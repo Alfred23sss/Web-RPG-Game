@@ -252,7 +252,8 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const playerAbandon = this.gameSessionService.handlePlayerAbandoned(accessCode, playerName);
         this.lobbyService.leaveLobby(accessCode, playerName, true);
         const lobby = this.lobbyService.getLobby(accessCode);
-        if (lobby && lobby.players.length <= 1) {
+        const areAllVirtual = lobby.players.every((player) => player.isVirtual);
+        if ((lobby && lobby.players.length <= 1) || areAllVirtual) {
             this.logger.log('clearing lobby');
             this.lobbyService.clearLobby(accessCode);
             this.gameSessionService.deleteGameSession(accessCode);

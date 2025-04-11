@@ -15,7 +15,7 @@ import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
-import { GameModeSelectorService } from '@app/services/game-mode-selector/game-mode-selector.service';
+import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
 import { Injectable } from '@nestjs/common';
@@ -28,7 +28,7 @@ export class VirtualPlayerActionsService {
         private readonly eventEmitter: EventEmitter2,
         private readonly gameCombatService: GameCombatService,
         private readonly gridManagerService: GridManagerService,
-        private readonly gameModeSelector: GameModeSelectorService,
+        private readonly gameSessionService: GameSessionService,
     ) {}
 
     async moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
@@ -194,8 +194,7 @@ export class VirtualPlayerActionsService {
             return;
         }
         await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(DOOR_ACTION_MIN_MS, DOOR_ACTION_MAX_MS)));
-        const gameService = this.gameModeSelector.getServiceByAccessCode(accessCode);
-        gameService.updateDoorTile(accessCode, currentTile, actionTile);
+        this.gameSessionService.updateDoorTile(accessCode, currentTile, actionTile);
         this.updateActionPoints(currentTile.player);
         this.emitEvent(EventEmit.VPActionDone, accessCode);
     }
