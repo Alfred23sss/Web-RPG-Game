@@ -1,7 +1,6 @@
 <div class="player-info">
-    <h3>Informations du joueur</h3>
+    <h3>{{ gameData.clientPlayer.name }}</h3>
     <div class="player-header">
-        <p class="player-name">{{ gameData.clientPlayer.name }}</p>
         <img [src]="gameData.clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
     </div>
     <div class="player-stats">

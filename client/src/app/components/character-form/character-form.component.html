@@ -6,7 +6,7 @@
         <button class="button custom-button" (click)="submitCharacter()">Confirmer</button>
     </div>
 
-    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="20" />
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="15" />
 
     <div class="character-form_body">
         <div class="character-form_content">

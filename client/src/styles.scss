@@ -49,8 +49,9 @@ $indigo-pink-theme: mat.m2-define-light-theme(
     @include mat.all-component-colors($purple-green-theme);
 }
 
-/* You can add global styles to this file, and also import other style files */
-
+* {
+    text-transform: uppercase;
+}
 html,
 body {
     display: block;
@@ -60,7 +61,6 @@ body {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    font-family: Roboto, 'Helvetica Neue', sans-serif;
 }
 
 * {
@@ -101,7 +101,7 @@ body {
 
 @font-face {
     font-family: 'Pixel';
-    src: url('/assets/fonts/SoulOfHolitter.ttf') format('truetype');
+    src: url('/assets/fonts/PixelSerif_16px_v02.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
