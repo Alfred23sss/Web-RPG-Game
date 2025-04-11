@@ -1,4 +1,5 @@
 import { EventEmit, GameModeType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Player } from '@app/interfaces/Player';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
@@ -150,6 +151,13 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
+        if (payload.attacker.name === payload.currentFighter.name && payload.attacker.isVirtual) {
+            this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
+        }
+        if (payload.attacker.isVirtual && payload.attacker.name !== payload.currentFighter.name) {
+            this.gameCombatService.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: payload.accessCode });
+        }
+
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 

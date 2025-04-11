@@ -6,6 +6,26 @@ import { Player } from '@app/model/database/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 
+type SpeedVitalityStats = {
+    speed: number;
+    vitality: number;
+    hp: {
+        current: number;
+        max: number;
+    };
+};
+
+type AttackDefenseStats = {
+    attack: {
+        value: number;
+        bonusDice: DiceType;
+    };
+    defense: {
+        value: number;
+        bonusDice: DiceType;
+    };
+};
+
 @Injectable()
 export class VirtualPlayerCreationService {
     constructor(private readonly lobbyService: LobbyService) {}
@@ -15,9 +35,9 @@ export class VirtualPlayerCreationService {
         vPlayer.behavior = behavior;
         vPlayer.name = this.findValidName(lobby, vPlayer);
         vPlayer.avatar = this.findValidAvatar(lobby);
+        vPlayer.inventory = [null, null];
 
         this.updateVirtualPlayerStats(vPlayer);
-
         this.addVPlayerToLobby(lobby, vPlayer);
     }
 
@@ -37,7 +57,7 @@ export class VirtualPlayerCreationService {
         }
     }
 
-    private randomizeSpeedAndVitality(): { speed: number; vitality: number; hp: { current: number; max: number } } {
+    private randomizeSpeedAndVitality(): SpeedVitalityStats {
         const values = [BASE_STAT, BONUS_STAT];
         const speedIndex = Math.floor(Math.random() * 2);
         const vitalityIndex = 1 - speedIndex;
@@ -45,7 +65,7 @@ export class VirtualPlayerCreationService {
         return { speed: values[speedIndex], vitality, hp: { current: vitality, max: vitality } };
     }
 
-    private randomizeAttackAndDefense(): { attack: { value: number; bonusDice: DiceType }; defense: { value: number; bonusDice: DiceType } } {
+    private randomizeAttackAndDefense(): AttackDefenseStats {
         const dicePairs: [DiceType, DiceType][] = [
             [DiceType.D4, DiceType.D6],
             [DiceType.D6, DiceType.D4],
@@ -67,6 +87,7 @@ export class VirtualPlayerCreationService {
         const { speed, vitality, hp } = this.randomizeSpeedAndVitality();
         const { attack, defense } = this.randomizeAttackAndDefense();
         vPlayer.speed = speed;
+        vPlayer.movementPoints = speed;
         vPlayer.vitality = vitality;
         vPlayer.hp = hp;
         vPlayer.attack = attack;

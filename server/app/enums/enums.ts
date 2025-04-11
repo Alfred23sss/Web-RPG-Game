@@ -184,6 +184,11 @@ export enum ItemDescription {
     Default = 'rien',
 }
 
+export enum MoveType {
+    Attack = 'attack',
+    Item = 'item',
+}
+
 export enum EventEmit {
     GameCombatTimer = 'game.combat.timer',
     GameCombatTurnStarted = 'game.combat.turn.started',
@@ -218,6 +223,7 @@ export enum EventEmit {
     InitializeGameStatistics = 'initialize.game.statistics',
     ShowGlobalStats = 'show.global.stats',
     UpdateDoorStats = 'update.door.stats',
+    VPActionDone = 'vp.action.done',
 }
 
 export enum Behavior {

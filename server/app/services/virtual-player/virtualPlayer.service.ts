@@ -1,112 +1,119 @@
-import { Behavior, EventEmit } from '@app/enums/enums';
+import { ACTION_MAX_MS, ACTION_MIN_MS, AGGRESSIVE_ITEM_ORDER, DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
+import { Behavior, MoveType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
+import { Item } from '@app/interfaces/Item';
+import { Lobby } from '@app/interfaces/Lobby';
+import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
-import { VPMoveType } from '@app/interfaces/VPMoveTypes';
-import { TileType } from '@app/model/database/tile';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
-import { AggressiveVPService } from '@app/services/vp-aggressive/aggressiveVP.service';
-import { DefensiveVPService } from '@app/services/vp-defensive/defensiveVP.service';
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtualPlayerBehavior.service';
+import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
 @Injectable()
-export class VirtualPlayerService implements OnModuleInit {
+export class VirtualPlayerService {
     private virtualPlayer: VirtualPlayer;
+    private movementPoints: number;
+    private actionsPoints: number;
 
     constructor(
         private readonly eventEmitter: EventEmitter2,
-        private readonly aggressiveVPService: AggressiveVPService,
-        private readonly defensiveVPService: DefensiveVPService,
+        private readonly virtualPlayerBehavior: VirtualPlayerBehaviorService,
         private readonly lobbyService: LobbyService,
-        private readonly playerMovementService: PlayerMovementService,
+        private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
 
-    onModuleInit() {
-        this.eventEmitter.on(EventEmit.GameTurnStarted, ({ accessCode, player }) => {
-            if (player.isVirtual) {
-                this.virtualPlayer = player;
-                this.executeVirtualPlayerTurn(accessCode);
-            }
-        });
+    resetStats(): void {
+        this.virtualPlayer.movementPoints = this.movementPoints;
+        this.virtualPlayer.actionPoints = this.actionsPoints;
     }
 
-    private async executeVirtualPlayerTurn(accessCode: string): Promise<void> {
-        const lobby = this.lobbyService.getLobby(accessCode);
+    itemChoice(behavior: Behavior, items: Item[]): Item {
+        if (behavior === Behavior.Null) return;
+        const itemChoiceOrder = behavior === Behavior.Aggressive ? AGGRESSIVE_ITEM_ORDER : DEFENSIVE_ITEM_ORDER;
+        const result: Item[] = [];
 
-        while (this.hasRemainingActions()) {
-            const possibleMoves = this.findAllMoves(lobby.game.grid);
-            const movesInRange = this.getMovesInRange(possibleMoves, this.virtualPlayer, lobby.game.grid);
-            if (this.virtualPlayer.behavior === Behavior.Aggressive) {
-                await this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, possibleMoves, movesInRange);
-            } else if (this.virtualPlayer.behavior === Behavior.Defensive) {
-                // await this.defensiveVPService.executeDefensiveBehavior(playerTiles, this.virtualPlayer, lobby);
+        for (const name of itemChoiceOrder) {
+            const found = items.find((item) => item.name === name);
+            if (found && !result.includes(found)) {
+                result.push(found);
+                if (result.length === 2) break;
             }
         }
-
-        // When all points are exhausted, end the turn
-        // this.eventEmitter.emit(EventEmit.GameTurnEnded, { accessCode });
+        const removed = items.find((item) => !result.includes(item));
+        return removed || null;
     }
 
-    private findAllMoves(grid: Tile[][]): VPMoveType {
-        const playerTiles = this.findPlayers(grid);
-        const itemTiles = this.findItems(grid);
-        const doors = this.findDoors(grid);
-
-        return {
-            playerTiles,
-            itemTiles,
-            doors,
-        };
+    handleTurnStart(accessCode: string, vPlayer: VirtualPlayer): void {
+        if (vPlayer.isVirtual) {
+            this.virtualPlayer = vPlayer;
+            this.movementPoints = this.virtualPlayer.movementPoints;
+            this.actionsPoints = this.virtualPlayer.actionPoints;
+            this.delay(accessCode);
+        }
     }
 
-    private getMovesInRange(allMoves: VPMoveType, virtualPlayer: Player, grid: Tile[][]): VPMoveType {
-        if (!virtualPlayer || !grid) return { playerTiles: [], itemTiles: [], doors: [] };
-
-        const virtualPlayerTile = this.findTileByPlayer(grid, virtualPlayer);
-        if (!virtualPlayerTile) return { playerTiles: [], itemTiles: [], doors: [] };
-
-        return {
-            playerTiles: this.filterTilesByMovementRange(allMoves.playerTiles, virtualPlayerTile, grid, virtualPlayer.movementPoints),
-            itemTiles: this.filterTilesByMovementRange(allMoves.itemTiles, virtualPlayerTile, grid, virtualPlayer.movementPoints),
-            doors: this.filterTilesByMovementRange(allMoves.doors, virtualPlayerTile, grid, virtualPlayer.movementPoints),
-        };
+    async handleCombatTurnStart(accessCode: string, vPlayer: VirtualPlayer): Promise<void> {
+        if (vPlayer.isVirtual && vPlayer.behavior === Behavior.Defensive) {
+            this.virtualPlayer = vPlayer;
+            const hasEscaped = await this.virtualPlayerBehavior.tryToEscapeIfWounded(vPlayer, accessCode);
+            if (hasEscaped) return;
+        }
     }
 
-    private filterTilesByMovementRange(tiles: Tile[], startTile: Tile, grid: Tile[][], maxMovement: number): Tile[] {
-        return tiles.filter((targetTile) => {
-            // First check if tile is in available path (more efficient for large grids)
-            const reachableTiles = this.playerMovementService.availablePath(startTile, maxMovement, grid);
-            if (reachableTiles.includes(targetTile)) return true;
-
-            // Fallback to path calculation for edge cases
-            const path = this.playerMovementService.quickestPath(startTile, targetTile, grid);
-            if (!path) return false;
-
-            const totalCost = path.reduce((sum, tile) => sum + this.playerMovementService.getMoveCost(tile), 0);
-            return totalCost <= maxMovement;
-        });
+    delay(accessCode: string): void {
+        const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
+        setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
     }
 
-    private findPlayers(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.player && tile.player.name !== this.virtualPlayer.name));
+    private executeVirtualPlayerTurn(accessCode: string): void {
+        const lobby = this.lobbyService.getLobby(accessCode);
+        if (!lobby) return;
+
+        if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
+
+        const moves = this.findAllMoves(lobby.game.grid);
+        this.virtualPlayerBehavior.executeBehavior(this.virtualPlayer, lobby, moves);
     }
 
-    // tous les items incluant home ... faire attention. home utile seulement pour defensive en mode ctf
-    private findItems(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.item));
+    private hasAvailableActions(accessCode: string, virtualPlayer: Player, lobby: Lobby): boolean {
+        if (!this.virtualPlayerActions.checkAvailableActions(virtualPlayer, lobby)) {
+            this.eventEmitter.emit(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
+            return false;
+        }
+        return true;
+    }
+    private findAllMoves(grid: Tile[][]): Move[] {
+        const playerMoves = this.findPlayers(grid);
+        const itemMoves = this.findItems(grid);
+
+        return [...playerMoves, ...itemMoves];
     }
 
-    private findDoors(grid: Tile[][]): Tile[] {
-        return grid.flatMap((row) => row.filter((tile) => tile.type === TileType.Door));
+    private findPlayers(grid: Tile[][]): Move[] {
+        return grid.flatMap((row) =>
+            row
+                .filter((tile) => tile.player && tile.player.name !== this.virtualPlayer.name)
+                .map((tile) => ({
+                    tile,
+                    type: MoveType.Attack,
+                    inRange: false,
+                })),
+        );
     }
 
-    private hasRemainingActions(): boolean {
-        return this.virtualPlayer.actionPoints > 0 || this.virtualPlayer.movementPoints > 0;
-    }
-
-    private findTileByPlayer(grid: Tile[][], player: Player): Tile | undefined {
-        return grid.flat().find((tile) => tile.player?.name === player.name);
+    private findItems(grid: Tile[][]): Move[] {
+        return grid.flatMap((row) =>
+            row
+                .filter((tile) => tile.item)
+                .map((tile) => ({
+                    tile,
+                    type: MoveType.Item,
+                    inRange: false,
+                })),
+        );
     }
 }

@@ -1,4 +1,5 @@
 import { AttributeType, EventEmit, ItemName, TileType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
@@ -183,13 +184,17 @@ export class ItemEffectsService {
         }
         const items = [player.inventory[0], player.inventory[1], item];
         Logger.log('Items:', items);
-        this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
-        this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
-            accessCode,
-            grid,
-            player,
-            isCurrentlyMoving: false,
-        });
+        if (player.isVirtual) {
+            this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items });
+        } else {
+            this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
+            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+                accessCode,
+                grid,
+                player,
+                isCurrentlyMoving: false,
+            });
+        }
         return { player, items };
     }
 
