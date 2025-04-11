@@ -48,6 +48,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         const { game } = data;
         const accessCode = this.lobbyService.createLobby(game);
         client.join(accessCode);
+        this.lobbyService.addPlayerToRoom(client.id, accessCode);
         this.logger.log(`Lobby created with game: ${game.name} and accessCode: ${accessCode}`);
         client.emit('lobbyCreated', { accessCode });
     }
@@ -67,6 +68,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         }
         const success = this.lobbyService.joinLobby(accessCode, player).success;
         if (success) {
+            this.lobbyService.addPlayerToRoom(client.id, accessCode);
             client.join(accessCode);
             this.logger.log(`Player ${player.name} joined lobby ${accessCode}`);
             this.lobbyService.setPlayerSocket(player.name, client.id);
@@ -265,6 +267,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
     private handleLobbyPlayerDisconnect(accessCode: string, playerName: string, clientId: string) {
         const isAdminLeaving = this.lobbyService.isAdminLeaving(accessCode, playerName);
         if (isAdminLeaving) {
+            this.logger.log(`Admin ${playerName} left the lobby ${accessCode}`);
             this.server.to(accessCode).emit('adminLeft', {
                 playerSocketId: clientId,
                 message: "L'admin a quitté la partie, le lobby est fermé.",

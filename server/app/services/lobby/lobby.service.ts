@@ -3,7 +3,7 @@ import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
 import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
@@ -132,12 +132,14 @@ export class LobbyService {
     getPlayerBySocketId(socketId: string): Player | undefined {
         const playerEntry = Array.from(this.playerSockets.entries()).find(([, sId]) => sId === socketId);
         if (!playerEntry) return undefined;
-
+        Logger.log('Player isnt undefined');
         const playerName = playerEntry[0];
-        const lobbyId = this.getLobbyIdByPlayer(playerName);
+        const lobbyId = this.getRoomForPlayer(socketId);
+        Logger.log('lobbyId', lobbyId);
         if (!lobbyId) return undefined;
 
         const lobby = this.getLobby(lobbyId);
+        Logger.log('lobby', lobby);
         return lobby?.players.find((p) => p.name === playerName);
     }
 
