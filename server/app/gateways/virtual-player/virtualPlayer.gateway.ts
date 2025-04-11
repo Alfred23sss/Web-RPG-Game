@@ -64,15 +64,13 @@ export class VirtualPlayerGateway {
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
 
         this.virtualPlayerService.resetStats();
-        const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
-        gameService.endTurn(data.accessCode);
+        this.gameSessionService.endTurn(data.accessCode);
     }
 
     @OnEvent(VirtualPlayerEvents.ChooseItem)
     handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[] }) {
         const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
-        const gameService = this.gameModeSelector.getServiceByAccessCode(data.accessCode);
-        gameService.handleItemDropped(data.accessCode, data.player, removedItem);
+        this.gameSessionService.handleItemDropped(data.accessCode, data.player, removedItem);
     }
 
     @OnEvent(EventEmit.GameTurnStarted)
