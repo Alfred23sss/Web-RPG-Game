@@ -8,9 +8,8 @@ import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtualPlayerBehavior.service';
 import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
-import { AggressiveVPService } from '@app/services/vp-aggressive/aggressiveVP.service';
-import { DefensiveVPService } from '@app/services/vp-defensive/defensiveVP.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
@@ -22,8 +21,7 @@ export class VirtualPlayerService {
 
     constructor(
         private readonly eventEmitter: EventEmitter2,
-        private readonly aggressiveVPService: AggressiveVPService,
-        private readonly defensiveVPService: DefensiveVPService,
+        private readonly virtualPlayerBehavior: VirtualPlayerBehaviorService,
         private readonly lobbyService: LobbyService,
         private readonly virtualPlayerActions: VirtualPlayerActionsService,
     ) {}
@@ -61,7 +59,7 @@ export class VirtualPlayerService {
     async handleCombatTurnStart(accessCode: string, vPlayer: VirtualPlayer): Promise<void> {
         if (vPlayer.isVirtual && vPlayer.behavior === Behavior.Defensive) {
             this.virtualPlayer = vPlayer;
-            const hasEscaped = await this.defensiveVPService.tryToEscapeIfWounded(vPlayer, accessCode);
+            const hasEscaped = await this.virtualPlayerBehavior.tryToEscapeIfWounded(vPlayer, accessCode);
             if (hasEscaped) return;
         }
     }
@@ -75,19 +73,10 @@ export class VirtualPlayerService {
         const lobby = this.lobbyService.getLobby(accessCode);
         if (!lobby) return;
 
-        console.log(this.virtualPlayer.movementPoints, 'actionpoints', this.virtualPlayer.actionPoints);
         if (!this.hasAvailableActions(accessCode, this.virtualPlayer, lobby)) return;
 
         const moves = this.findAllMoves(lobby.game.grid);
-        switch (this.virtualPlayer.behavior) {
-            case Behavior.Aggressive:
-                this.aggressiveVPService.executeAggressiveBehavior(this.virtualPlayer, lobby, moves);
-                break;
-            case Behavior.Defensive:
-                console.log(this.virtualPlayer);
-                this.defensiveVPService.executeDefensiveBehavior(this.virtualPlayer, lobby, moves);
-                break;
-        }
+        this.virtualPlayerBehavior.executeBehavior(this.virtualPlayer, lobby, moves);
     }
 
     private hasAvailableActions(accessCode: string, virtualPlayer: Player, lobby: Lobby): boolean {

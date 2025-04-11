@@ -38,7 +38,6 @@ export class VirtualPlayerActionsService {
         const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode);
         if (openedDoor) return;
         const attacked = await this.handleAdjacentToPlayer(destinationTile, virtualPlayerTile, move, lobby);
-        console.log('attacked', attacked);
         if (attacked) return;
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
@@ -113,7 +112,6 @@ export class VirtualPlayerActionsService {
 
     private async handleAdjacentToPlayer(destinationTile: Tile, virtualPlayerTile: Tile, move: Move, lobby: Lobby): Promise<boolean> {
         const isAdjacentToPlayer = this.playerMovementService.getNeighbors(move.tile, lobby.game.grid).includes(destinationTile);
-        console.log('entered adjaceentplaye', isAdjacentToPlayer, 'score', virtualPlayerTile.player.actionPoints);
         if (isAdjacentToPlayer && virtualPlayerTile.player.actionPoints > NO_SCORE) {
             await this.executeAttack(lobby.accessCode, destinationTile, move.tile);
             return true;
