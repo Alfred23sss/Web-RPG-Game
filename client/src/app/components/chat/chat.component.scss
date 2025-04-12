@@ -13,12 +13,15 @@
 .game-messages h3 {
     font-size: 1.5rem;
     font-family: 'Pixel', sans-serif;
-    color: #64c8ff;
-    text-shadow: 0 0 8px rgba(100, 200, 255, 0.6);
     margin: 0 0 15px 0;
     padding-bottom: 10px;
     border-bottom: 1px solid rgba(100, 200, 255, 0.3);
     flex-shrink: 0;
+
+    margin-bottom: 5px;
+    text-align: center;
+    color: #d4f1ff;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.8);
 }
 
 .messages-content {

@@ -10,7 +10,14 @@
     </div>
 
     <div class="message-input-container">
-        <input type="text" [(ngModel)]="newMessage" maxlength="144" placeholder="Écrire un message..." class="message-field" (keydown)="handleKeyDown($event)" />
+        <input
+            type="text"
+            [(ngModel)]="newMessage"
+            maxlength="144"
+            placeholder="Écrire un message..."
+            class="message-field"
+            (keydown)="handleKeyDown($event)"
+        />
         <button class="send-button" (click)="sendMessage()"><i class="fas fa-paper-plane"></i> ENVOYER</button>
     </div>
 </div>

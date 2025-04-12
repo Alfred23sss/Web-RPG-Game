@@ -111,6 +111,7 @@ export class CombatSocketService {
 
     private onCombatEndedLog(): void {
         this.socketClientService.on('combatEndedLog', (data: { winner: Player; attacker: Player; defender: Player; hasEvaded: boolean }) => {
+            this.gameStateService.gameDataSubjectValue.isInCombatMode = false;
             if (!data.hasEvaded) {
                 this.clientNotifier.addLogbookEntry(`Combat gagné par ${data.winner.name}`, [data.attacker, data.defender]);
             } else {
@@ -121,6 +122,7 @@ export class CombatSocketService {
 
     private onCombatStartedLog(): void {
         this.socketClientService.on('combatStartedLog', (data: { attacker: Player; defender: Player }) => {
+            this.gameStateService.gameDataSubjectValue.isInCombatMode = true;
             this.clientNotifier.addLogbookEntry('Combat commencé', [data.attacker, data.defender]);
         });
     }

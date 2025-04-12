@@ -102,6 +102,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         return flagItem?.imageSrc || ItemType.Flag;
     }
 
+    toggleTab(): void {
+        this.activeTab = this.activeTab === 'chat' ? 'log' : 'chat';
+    }
+
     private handleKeyPress(event: KeyboardEvent): void {
         if (event.key.toLowerCase() === 'd' && this.gameData.clientPlayer.isAdmin) {
             this.gameplayService.emitAdminModeUpdate(this.gameData);

@@ -129,5 +129,5 @@ export const VIRTUAL_PLAYER_NAMES: string[] = [
     'RacletteOP',
     'PoutinePower',
     'MacaronFou',
-    'OmeletteDuRisk',
+    'LebronsVAD',
 ];

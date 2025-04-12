@@ -1,14 +1,14 @@
 .player-info {
     width: 100%;
-    max-width: 350px;
     background: rgba(10, 30, 50, 0.5);
-    border: 1px solid rgba(100, 200, 255, 0.2);
+    border: 2px solid #00c8ff;
+    box-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 20, 40, 0.5);
     padding: 5px;
     font-family: 'Pixel', sans-serif;
     color: #d4f1ff;
     text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+    margin: 5px;
 }
 
 .player-info h3 {
@@ -85,11 +85,11 @@
     background: rgba(20, 80, 120, 0.2);
     border-radius: 10px;
     border: 1px solid rgba(100, 200, 255, 0.1);
-    font-size: 0.85rem;
+    font-size: 1rem;
 }
 
 .attribute-label {
-    font-size: 0.85rem;
+    font-size: 1rem;
     font-weight: bold;
     color: #d4f1ff;
     text-shadow: 0 0 6px rgba(0, 200, 255, 0.6);
@@ -99,7 +99,7 @@
 }
 
 .attribute-value {
-    font-size: 0.9rem;
+    font-size: 1rem;
     color: #d4f1ff;
     text-shadow: 0 0 6px rgba(0, 200, 255, 0.6);
 }

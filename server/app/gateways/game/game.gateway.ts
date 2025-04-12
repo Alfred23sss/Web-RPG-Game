@@ -1,5 +1,6 @@
 import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
+import { AttackScore } from '@app/interfaces/AttackScore';
 import { Player } from '@app/interfaces/Player';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
@@ -13,7 +14,6 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameEvents } from './game.gateway.events';
-import { AttackScore } from '@app/interfaces/AttackScore';
 
 @WebSocketGateway({ cors: true })
 export class GameGateway {
@@ -188,9 +188,8 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.GameCombatEscape)
-    handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number; isEscapeSuccessful: boolean }): void {
-        const playerSocketId = this.lobbyService.getPlayerSocket(payload.player.name);
-        this.server.to(playerSocketId).emit('escapeAttempt', {
+    handleNoMoreEscapeAttempts(payload: { player: Player; attemptsLeft: number; isEscapeSuccessful: boolean; accessCode: string }): void {
+        this.server.to(payload.accessCode).emit('escapeAttempt', {
             attemptsLeft: payload.attemptsLeft,
             isEscapeSuccessful: payload.isEscapeSuccessful,
         });

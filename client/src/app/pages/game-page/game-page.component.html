@@ -72,21 +72,39 @@
     </div>
 
     <div class="timer-chat-container">
-        @if (!gameData.isInCombatMode) {
         <div class="timer">
+            @if (gameData.turnTimer === 0) {
+            <p>Transition de tour...</p>
+            } @else {@if (!gameData.isInCombatMode) {
+            <p>Tour de</p>
             @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
-            <p>C'est votre tour</p>
+            <p>{{ gameData.clientPlayer.name }}</p>
             } @else { @if (gameData.currentPlayer) {
-            <p>C'est le tour à {{ gameData.currentPlayer.name }}</p>
+            <p>{{ gameData.currentPlayer.name }}</p>
             } }
-            <p>Temps restant: {{ gameData.turnTimer }} secondes</p>
+            <div class="time">
+                <span>{{ gameData.turnTimer }}</span>
+            </div>
+            } @else {
+            <span class="combat-mode">⚔️ Joueurs en combat ⚔️</span>
+            }}
         </div>
-        }
 
         <div class="action-buttons">
-            @if(gameData.currentPlayer.name === gameData.clientPlayer.name){ @if(!gameData.isInCombatMode){
-            <button class="action-btn end-turn" (click)="endTurn()" [disabled]="gameData.hasTurnEnded">Terminer tour</button>
-            <button class="action-btn execute-action" (click)="executeNextAction()" [disabled]="gameData.clientPlayer.actionPoints === 0">
+            <button
+                class="button end-turn"
+                [class.disabled]="gameData.hasTurnEnded || gameData.currentPlayer.name !== gameData.clientPlayer.name"
+                (click)="endTurn()"
+                [disabled]="gameData.hasTurnEnded || gameData.currentPlayer.name !== gameData.clientPlayer.name"
+            >
+                Terminer tour
+            </button>
+            <button
+                class="button execute-action"
+                [class.disabled]="gameData.clientPlayer.actionPoints === 0 || gameData.currentPlayer.name !== gameData.clientPlayer.name"
+                (click)="executeNextAction()"
+                [disabled]="gameData.clientPlayer.actionPoints === 0 || gameData.currentPlayer.name !== gameData.clientPlayer.name"
+            >
                 {{
                     gameData.clientPlayer.actionPoints === 0
                         ? 'Aucune action restante '
@@ -95,18 +113,20 @@
                         : 'Exécuter action'
                 }}
             </button>
-            } }
-            <button class="action-btn abandon-game" (click)="abandonGame()">Abandonner</button>
+            <button class="button abandon-game" (click)="abandonGame()">Abandonner</button>
         </div>
 
         <div class="message-toggle">
-            <button [class.active]="activeTab === 'chat'" (click)="activeTab = 'chat'">Clavardage</button>
-            <button [class.active]="activeTab === 'log'" (click)="activeTab = 'log'">Journal de bord</button>
+            <button class="button" [class.active]="activeTab === 'chat'" (click)="toggleTab()">
+                {{ activeTab === 'chat' ? 'Journal de bord' : 'Clavardage' }}
+            </button>
         </div>
-        @if (activeTab === 'chat'){
-        <app-chat [author]="gameData.clientPlayer.name"></app-chat>
-        } @if(activeTab === 'log'){
-        <app-log-book [playerName]="gameData.clientPlayer.name"></app-log-book>
-        }
+        <div class="chat-log-container">
+            @if (activeTab === 'chat'){
+            <app-chat [author]="gameData.clientPlayer.name"></app-chat>
+            } @if(activeTab === 'log'){
+            <app-log-book [playerName]="gameData.clientPlayer.name"></app-log-book>
+            }
+        </div>
     </div>
 </div>

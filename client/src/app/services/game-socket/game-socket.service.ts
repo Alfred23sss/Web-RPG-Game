@@ -101,6 +101,7 @@ export class GameSocketService {
 
     private onGameDeleted(): void {
         this.socketClientService.on('gameDeleted', () => {
+            this.gameStateService.gameDataSubjectValue.turnTimer = 0;
             this.clientNotifier.displayMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
             setTimeout(() => {
                 this.gameplayService.backToHome();
@@ -119,6 +120,7 @@ export class GameSocketService {
             }
             this.clientNotifier.addLogbookEntry('Fin de la partie', players);
             this.gameStateService.gameDataSubjectValue.gameStats = data.stats;
+            this.gameStateService.gameDataSubjectValue.turnTimer = 0;
             setTimeout(() => {
                 this.gameplayService.navigateToFinalPage();
             }, DELAY_BEFORE_ENDING_GAME);

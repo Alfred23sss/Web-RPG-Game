@@ -59,6 +59,7 @@ export class TurnSocketService {
             if (data.nextPlayer.name === gameData.clientPlayer.name) {
                 gameData.clientPlayer = data.nextPlayer;
             }
+            gameData.turnTimer = 0;
             this.gameStateService.updateGameData(gameData);
         });
     }
