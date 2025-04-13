@@ -62,6 +62,11 @@ export class VirtualPlayerService {
             const hasEscaped = await this.virtualPlayerBehavior.tryToEscapeIfWounded(vPlayer, accessCode);
             if (hasEscaped) return;
         }
+        if (vPlayer.isVirtual && vPlayer.behavior === Behavior.Aggressive) {
+            this.virtualPlayer = vPlayer;
+            await this.virtualPlayerBehavior.attack(vPlayer, accessCode);
+            return;
+        }
     }
 
     delay(accessCode: string): void {
