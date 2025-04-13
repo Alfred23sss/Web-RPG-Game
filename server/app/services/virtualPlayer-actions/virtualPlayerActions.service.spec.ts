@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable max-lines */
 import { DiceType, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
@@ -332,7 +335,7 @@ describe('VirtualPlayerActionsService', () => {
             mockPlayer = createMockPlayer();
         });
         it('should return true when player has both action and movement points', () => {
-            const mockPlayer = createMockPlayer({ actionPoints: 1, movementPoints: 1 });
+            mockPlayer = createMockPlayer({ actionPoints: 1, movementPoints: 1 });
             const mockLobby = createMockLobby();
 
             const result = service.checkAvailableActions(mockPlayer, mockLobby);
@@ -340,7 +343,7 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should return true when player has movement points only', () => {
-            const mockPlayer = createMockPlayer({ actionPoints: 0, movementPoints: 1 });
+            mockPlayer = createMockPlayer({ actionPoints: 0, movementPoints: 1 });
             const mockLobby = createMockLobby();
 
             const result = service.checkAvailableActions(mockPlayer, mockLobby);
@@ -348,7 +351,7 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should return true when hasIce is true and no points left', () => {
-            const mockPlayer = createMockPlayer({ actionPoints: 0, movementPoints: 0 });
+            mockPlayer = createMockPlayer({ actionPoints: 0, movementPoints: 0 });
             const mockLobby = createMockLobby();
             const mockVirtualTile = createMockTile({ player: mockPlayer });
 
@@ -360,7 +363,7 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should return true when hasActionAvailable is true and only action points left', () => {
-            const mockPlayer = createMockPlayer({ actionPoints: 1, movementPoints: 0 });
+            mockPlayer = createMockPlayer({ actionPoints: 1, movementPoints: 0 });
             const mockLobby = createMockLobby();
             const mockVirtualTile = createMockTile({ player: mockPlayer });
 
@@ -372,7 +375,7 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should return true when hasLightning and no wall adjacent with only action points left', () => {
-            const mockPlayer = createMockPlayer({
+            mockPlayer = createMockPlayer({
                 actionPoints: 1,
                 movementPoints: 0,
                 inventory: [{ name: ItemName.Lightning } as any, null],
