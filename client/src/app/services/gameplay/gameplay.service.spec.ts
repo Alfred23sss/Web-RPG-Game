@@ -417,10 +417,24 @@ describe('GameplayService', () => {
     describe('updateAttackResult', () => {
         it('should update the attackResult in gameData', () => {
             const gameData = {} as GameData;
-            const mockData = { success: true, attackScore: 5, defenseScore: 3 };
-
+            const mockData = {
+                success: true,
+                attackScore: { 
+                    value: 5,
+                    bonusDice: DiceType.D6,
+                    score: 8,
+                    diceRolled: 4 // Un seul nombre au lieu d'un tableau
+                },
+                defenseScore: { 
+                    value: 3,
+                    bonusDice: DiceType.D4,
+                    score: 5,
+                    diceRolled: 3 // Un seul nombre au lieu d'un tableau
+                }
+            };
+    
             service.updateAttackResult(gameData, mockData);
-
+    
             expect(gameData.attackResult).toEqual(mockData);
         });
     });
