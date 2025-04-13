@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { GameData } from '@app/classes/gameData';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
@@ -13,12 +13,13 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
     standalone: true,
     imports: [CommonModule, ChatComponent],
 })
-export class GameEndComponent implements OnInit {
+export class GameEndComponent implements OnInit, OnDestroy {
     gameStats!: GameStatistics;
     sortedStats: PlayerStatistics[] = [];
     gameData: GameData = new GameData();
     sortKey: keyof PlayerStatistics | '' = '';
     sortAsc = true;
+    objectKeys = Object.keys;
 
     constructor(
         private gameStateSocketService: GameStateSocketService,
@@ -29,6 +30,10 @@ export class GameEndComponent implements OnInit {
         this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
         this.sortedStats = Object.values(this.gameStats.playerStats);
         this.sortedStats.sort((a, b) => a.playerName.localeCompare(b.playerName));
+    }
+
+    ngOnDestroy(): void {
+        sessionStorage.setItem('refreshed', 'false');
     }
 
     sortBy(column: keyof PlayerStatistics): void {

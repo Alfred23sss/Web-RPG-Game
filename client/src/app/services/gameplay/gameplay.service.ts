@@ -38,7 +38,12 @@ export class GameplayService {
                 this.checkAvailableActions(gameData);
             }
             if (selectedItem === items[2]) {
-                // TODO: ajouter le logbook ici. On décrémente le nombre d'items picked up
+                console.log('decrement item');
+                this.socketClientService.emit('decrement.item', {
+                    selectedItem,
+                    accessCode: gameData.lobby.accessCode,
+                    player: gameData.clientPlayer,
+                });
             }
         });
     }
@@ -55,10 +60,7 @@ export class GameplayService {
 
     abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
-        this.socketClientService.emit('abandonedGame', {
-            player: gameData.clientPlayer,
-            accessCode: gameData.lobby.accessCode,
-        });
+        this.socketClientService.emit('manualDisconnect', { isInGame: true });
         this.backToHome();
     }
     getClientPlayerPosition(gameData: GameData): Tile | undefined {

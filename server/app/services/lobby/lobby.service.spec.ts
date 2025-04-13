@@ -11,6 +11,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
 
 const ACCESS_CODE = 'test-code';
+const SOCKED_ID = 'test-id';
 const GAME = { size: GameSizeTileCount.Small } as Game;
 
 const MOCK_PLAYER: Player = {
@@ -477,6 +478,98 @@ describe('LobbyService', () => {
                 names: ['Player1', 'Player2'],
                 avatars: ['avatar1', 'avatar2'],
             });
+        });
+    });
+
+    describe('addPlayerToRoom', () => {
+        it('should add player to room mapping', () => {
+            const socketId = 'socket-123';
+            const roomId = 'ROOM_ID';
+
+            lobbyService.addPlayerToRoom(socketId, roomId);
+
+            expect(lobbyService.getRoomForPlayer(socketId)).toBe(roomId);
+        });
+    });
+
+    describe('getPlayerBySocketId', () => {
+        it('should find player in lobby by socket ID', () => {
+            const playerName = 'TestPlayer';
+            const accessCode = 'ROOM_ID';
+
+            (lobbyService as any).playerSockets.set(playerName, SOCKED_ID);
+
+            (lobbyService as any).playerRoomMap.set(SOCKED_ID, accessCode);
+
+            const mockPlayer = {
+                ...MOCK_PLAYER,
+                name: playerName,
+            };
+            const lobby = {
+                accessCode,
+                players: [mockPlayer],
+                game: GAME,
+                isLocked: false,
+                maxPlayers: 4,
+                waitingPlayers: [],
+            };
+            (lobbyService as any).lobbies.set(accessCode, lobby);
+
+            const result = lobbyService.getPlayerBySocketId(SOCKED_ID);
+
+            expect(result).toEqual(mockPlayer);
+        });
+
+        it('should return undefined when playerEntry does not exist', () => {
+            const unknownSocketId = 'unknown-socket';
+
+            const result = lobbyService.getPlayerBySocketId(unknownSocketId);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should return undefined when lobbyId is not found for socket ID', () => {
+            const playerName = 'TestPlayer';
+
+            (lobbyService as any).playerSockets.set(playerName, SOCKED_ID);
+
+            const result = lobbyService.getPlayerBySocketId(SOCKED_ID);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should return undefined when lobby does not exist', () => {
+            const playerName = 'test-player';
+            const invalidAccessCode = 'invalid-room';
+
+            (lobbyService as any).playerSockets.set(playerName, SOCKED_ID);
+            (lobbyService as any).playerRoomMap.set(SOCKED_ID, invalidAccessCode);
+
+            const result = lobbyService.getPlayerBySocketId(SOCKED_ID);
+            expect(result).toBeUndefined();
+        });
+    });
+
+    describe('removePlayerFromRoom', () => {
+        it('should remove player from room mapping', () => {
+            const roomId = 'ROOM_ID';
+
+            lobbyService.addPlayerToRoom(SOCKED_ID, roomId);
+            expect(lobbyService.getRoomForPlayer(SOCKED_ID)).toBe(roomId);
+
+            lobbyService.removePlayerFromRoom(SOCKED_ID);
+
+            expect(lobbyService.getRoomForPlayer(SOCKED_ID)).toBeNull();
+        });
+
+        it('should handle non-existent socket ID', () => {
+            const invalidSocketId = 'invalid-socket';
+
+            expect(() => {
+                lobbyService.removePlayerFromRoom(invalidSocketId);
+            }).not.toThrow();
+
+            expect(lobbyService.getRoomForPlayer(invalidSocketId)).toBeNull();
         });
     });
 });

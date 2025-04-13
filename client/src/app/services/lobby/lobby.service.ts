@@ -67,10 +67,7 @@ export class LobbyService {
 
         const isPlayerInLobby = lobby.players.some((p) => p.name === player.name);
         if (this.accessCode && isPlayerInLobby && !this.isGameStartingSubject.value) {
-            this.socketClientService.emit('leaveLobby', {
-                accessCode: this.accessCode,
-                playerName: player.name,
-            });
+            this.socketClientService.emit('manualDisconnect', { isInGame: false });
         }
     }
     navigateToHome(): void {
@@ -95,7 +92,7 @@ export class LobbyService {
     removeSocketListeners(): void {
         this.socketClientService.socket.off('joinLobby');
         this.socketClientService.socket.off('lobbyUpdate');
-        this.socketClientService.socket.off('leaveLobby');
+        this.socketClientService.socket.off('manualDisconnect');
         this.socketClientService.socket.off('kicked');
         this.socketClientService.socket.off('lobbyLocked');
         this.socketClientService.socket.off('lobbyUnlocked');

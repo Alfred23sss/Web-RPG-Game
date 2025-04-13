@@ -51,6 +51,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
+        console.log(this.currentAccessCode);
         this.characterService.initializeLobby(this.currentAccessCode);
         this.subscriptions.add(
             this.characterService.unavailableAvatars$.subscribe((avatars) => {
@@ -102,9 +103,8 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     closePopup(): void {
         this.createdPlayer.name = '';
         this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
-        this.socketClientService.emit('leaveLobby', {
-            accessCode: this.currentAccessCode,
-            playerName: this.createdPlayer.name,
+        this.socketClientService.emit('manualDisconnect', {
+            isInGame: false,
         });
         this.characterService.resetAttributes();
         this.dialogRef.close();
@@ -151,6 +151,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     };
 
     private returnHome(): void {
+        console.log('Returning home...');
         this.closePopup();
         this.characterService.returnHome();
     }

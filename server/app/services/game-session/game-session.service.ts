@@ -208,6 +208,7 @@ export class GameSessionService {
         } else {
             turn = this.turnService.initializeTurn(accessCode);
         }
+        turn.currentPlayer = turn.orderedPlayers[0];
         turn.beginnerPlayer = turn.orderedPlayers[0];
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
@@ -233,6 +234,13 @@ export class GameSessionService {
         }
     }
 
+    isPlayerInGame(accessCode: string, playerName: string): boolean {
+        const session = this.getGameSession(accessCode);
+        if (!session) return false;
+        return session.turn.orderedPlayers.some((player) => player.name === playerName);
+    }
+
+    //
     handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return null;
@@ -249,6 +257,7 @@ export class GameSessionService {
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.emitGridUpdate(accessCode, gameSession.game.grid);
         }
+        // ici
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
         }
