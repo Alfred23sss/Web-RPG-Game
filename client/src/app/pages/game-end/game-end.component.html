@@ -107,7 +107,7 @@
                 <td>{{ player.defeats }}</td>
                 <td>{{ player.healthLost }}</td>
                 <td>{{ player.damageCaused }}</td>
-                <td>{{ player.uniqueItemsCollected.size }}</td>
+                <td>{{ objectKeys(player.uniqueItemsCollected).length }}</td>
                 <td>{{ player.tilesVisitedPercentage }}%</td>
             </tr>
         </tbody>

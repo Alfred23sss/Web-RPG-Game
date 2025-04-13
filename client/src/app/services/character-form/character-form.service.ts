@@ -31,12 +31,15 @@ export class CharacterService {
 
     initializePlayer(player: Player): void {
         Object.assign(player, { ...UNINITIALIZED_PLAYER });
+        player.attack.bonusDice = DiceType.Uninitialized;
+        player.defense.bonusDice = DiceType.Uninitialized;
     }
 
     initializeLobby(accessCode: string): void {
         this.socketClientService.emit('joinRoom', accessCode);
 
         this.socketClientService.on<{ avatars?: string[] }>('updateUnavailableOptions', (data) => {
+            console.log('updateUnavailableOptions', data);
             if (!data.avatars) return;
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
@@ -99,7 +102,7 @@ export class CharacterService {
 
         if (isLobbyCreated) {
             const joinResult = await this.joinExistingLobby(currentAccessCode, player);
-            this.handleLobbyJoining(joinResult, player, game, currentAccessCode);
+            this.handleLobbyJoining(joinResult, player, game);
         } else {
             player.isAdmin = true;
             await this.createAndJoinLobby(game, player);
@@ -192,7 +195,7 @@ export class CharacterService {
         }
     }
 
-    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, currentAccessCode: string): void {
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game): void {
         switch (joinStatus) {
             case JoinLobbyResult.JoinedLobby:
                 this.finalizeCharacterSubmission(player);
@@ -200,10 +203,10 @@ export class CharacterService {
             case JoinLobbyResult.StayInLobby:
                 return;
             case JoinLobbyResult.RedirectToHome:
+                console.log('alsdmaksdma');
                 this.returnHome();
-                this.socketClientService.emit('leaveLobby', {
-                    accessCode: currentAccessCode,
-                    playerName: '',
+                this.socketClientService.emit('manualDisconnect', {
+                    isInGame: false,
                 });
 
                 return;

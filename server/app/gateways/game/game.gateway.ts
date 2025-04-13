@@ -1,4 +1,5 @@
 import { EventEmit, GameModeType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Player } from '@app/interfaces/Player';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
@@ -44,28 +45,28 @@ export class GameGateway {
         this.logger.log('game created emitted');
     }
 
-    @SubscribeMessage(GameEvents.AbandonedGame)
-    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
-        this.logger.log(`Player ${payload.player.name} has abandoned game`);
-        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
-        this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
-        const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
-        const lobby = this.lobbyService.getLobby(payload.accessCode);
-        this.logger.log(`Lobby ${lobby} has left lobby`);
-        this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
-        client.leave(payload.accessCode);
+    // @SubscribeMessage(GameEvents.AbandonedGame)
+    // handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
+    //     this.logger.log(`Player ${payload.player.name} has abandoned game`);
+    //     this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
+    //     const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
+    //     const lobby = this.lobbyService.getLobby(payload.accessCode);
+    //     if (!lobby) return;
+    //     this.logger.log(`Lobby ${lobby} has left lobby`);
+    //     this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
+    //     client.leave(payload.accessCode);
 
-        if (lobby.players.length <= 1 || this.gameSessionService.isTeamAbandoned(payload.accessCode, payload.player)) {
-            this.lobbyService.clearLobby(payload.accessCode);
-            this.gameSessionService.deleteGameSession(payload.accessCode);
-            this.accessCodesService.removeAccessCode(payload.accessCode);
-            this.server.to(payload.accessCode).emit('gameDeleted');
-            this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
-        }
-        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
-        this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
-        this.logger.log('game abandoned emitted');
-    }
+    //     if (lobby.players.length <= 1) {
+    //         this.lobbyService.clearLobby(payload.accessCode);
+    //         this.gameSessionService.deleteGameSession(payload.accessCode);
+    //         this.accessCodesService.removeAccessCode(payload.accessCode);
+    //         this.server.to(payload.accessCode).emit('gameDeleted');
+    //         this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
+    //     }
+    //     this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
+    //     this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
+    //     this.logger.log('game abandoned emitted');
+    // }
 
     @SubscribeMessage(GameEvents.EndTurn)
     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
@@ -136,6 +137,12 @@ export class GameGateway {
         this.logger.log('player teleported');
     }
 
+    @SubscribeMessage(GameEvents.DecrementItem)
+    handleDecrementItem(@ConnectedSocket() client: Socket, @MessageBody() payload: { selectedItem: Item; accessCode: string; player: Player }): void {
+        Logger.log(`Decrementing item ${payload.selectedItem.name} for player ${payload.player.name}`);
+        this.statisticsService.decrementItem(payload.accessCode, payload.selectedItem, payload.player);
+    }
+
     // no need to receive it here
     @SubscribeMessage(GameEvents.ItemDrop)
     handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
@@ -149,6 +156,13 @@ export class GameGateway {
 
     @OnEvent(EventEmit.GameCombatEnded)
     handleCombatEnded(payload: { attacker: Player; defender: Player; currentFighter: Player; hasEvaded: boolean; accessCode: string }): void {
+        if (payload.attacker.name === payload.currentFighter.name && payload.attacker.isVirtual) {
+            this.gameCombatService.emitEvent(EventEmit.VPActionDone, payload.accessCode);
+        }
+        if (payload.attacker.isVirtual && payload.attacker.name !== payload.currentFighter.name) {
+            this.gameCombatService.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: payload.accessCode });
+        }
+
         const attackerSocketId = this.lobbyService.getPlayerSocket(payload.attacker.name);
         const defenderSocketId = this.lobbyService.getPlayerSocket(payload.defender.name);
 
@@ -317,9 +331,20 @@ export class GameGateway {
         this.statisticsService.cleanUp(payload.accessCode);
         this.gameSessionService.deleteGameSession(payload.accessCode);
         this.accessCodesService.removeAccessCode(payload.accessCode);
+        for (const player of stats.playerStats.values()) {
+            Logger.log(player.uniqueItemsCollected.size);
+        }
         const statsObject = {
             ...stats,
-            playerStats: Object.fromEntries(stats.playerStats),
+            playerStats: Object.fromEntries(
+                Array.from(stats.playerStats.entries()).map(([key, value]) => [
+                    key,
+                    {
+                        ...value,
+                        uniqueItemsCollected: Object.fromEntries(value.uniqueItemsCollected),
+                    },
+                ]),
+            ),
         };
         this.server.to(payload.accessCode).emit('gameEnded', { winner: payload.winner, stats: statsObject });
     }

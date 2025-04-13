@@ -5,7 +5,7 @@ import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const COMBAT_TURN_DURATION = 5000;
@@ -27,9 +27,15 @@ export class GameCombatService {
     ) {}
 
     handleCombatSessionAbandon(accessCode: string, playerName: string): void {
+        const players = this.gameSessionService.getPlayers(accessCode);
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
-        if (combatState.attacker.name === playerName || combatState.defender.name === playerName) {
+        const areFightersVirtual = combatState.attacker.isVirtual && combatState.defender.isVirtual;
+        const isAbandonnedPlayerInCombat = combatState.attacker.name === playerName || combatState.defender.name === playerName;
+        const arePlayersLeft = players.some((player) => !player.isVirtual && player.name !== playerName);
+        const shouldEndCombat = (areFightersVirtual && !arePlayersLeft) || isAbandonnedPlayerInCombat;
+        if (shouldEndCombat) {
+            Logger.log('Combat session abandoned, ending combat');
             const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
             this.updateWinningPlayerAfterCombat(playerToUpdate, accessCode);
             this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
@@ -143,6 +149,10 @@ export class GameCombatService {
         this.startCombatTurn(accessCode, orderedFighters[0]);
     }
 
+    emitEvent<T>(eventName: string, payload: T): void {
+        this.eventEmitter.emit(eventName, payload);
+    }
+
     private initialiseCombatState(accessCode: string, attacker: Player, defender: Player, pausedTimeRemaining: number, isDebugMode: boolean) {
         this.combatStates[accessCode] = {
             attacker,
@@ -194,6 +204,7 @@ export class GameCombatService {
     }
 
     private calculateAttackResult(combatState: CombatState, accessCode: string) {
+        if (!this.gameSessionService.getGameSession(accessCode)) return;
         const { attacker, defender, currentFighter, isDebugMode } = combatState;
         const attackerScore = this.combatHelper.getRandomAttackScore(
             currentFighter,
@@ -315,9 +326,5 @@ export class GameCombatService {
                 this.performAttack(accessCode, combatState.currentFighter.name);
             }
         }, turnDuration);
-    }
-
-    private emitEvent<T>(eventName: string, payload: T): void {
-        this.eventEmitter.emit(eventName, payload);
     }
 }

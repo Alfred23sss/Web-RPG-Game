@@ -19,7 +19,7 @@ export interface PlayerStatistics {
     defeats: number;
     healthLost: number;
     damageCaused: number;
-    uniqueItemsCollected: Set<string>;
+    uniqueItemsCollected: Map<string, number>;
     tilesVisitedPercentage: number;
     visitedTileSet: Map<string, Set<string>>;
     hasAbandoned: boolean;

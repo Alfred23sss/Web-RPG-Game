@@ -1032,4 +1032,57 @@ describe('GameSessionService', () => {
             expect(gridManagerSpy).not.toHaveBeenCalled();
         });
     });
+
+    describe('isTeamAbandoned', () => {
+        it('should return true when all team members have abandoned', () => {
+            const team = TeamType.RED;
+            const mockPlayers = [
+                { ...createValidPlayer(PLAYER_1_NAME, 5, true), team, hasAbandoned: true },
+                { ...createValidPlayer(PLAYER_2_NAME, 5, false), team, hasAbandoned: true },
+            ];
+
+            const session = gameSessionService.getGameSession(ACCESS_CODE);
+            session.turn.orderedPlayers = mockPlayers;
+
+            const result = gameSessionService.isTeamAbandoned(ACCESS_CODE, mockPlayers[0]);
+            expect(result).toBe(true);
+        });
+
+        it('should return false when at least one team member is active', () => {
+            const team = TeamType.RED;
+            const mockPlayers = [
+                { ...createValidPlayer(PLAYER_1_NAME, 5, true), team, hasAbandoned: true },
+                { ...createValidPlayer(PLAYER_2_NAME, 5, false), team, hasAbandoned: false },
+            ];
+
+            const session = gameSessionService.getGameSession(ACCESS_CODE);
+            session.turn.orderedPlayers = mockPlayers;
+
+            const result = gameSessionService.isTeamAbandoned(ACCESS_CODE, mockPlayers[0]);
+            expect(result).toBe(false);
+        });
+    });
+
+    describe('isPlayerInGame', () => {
+        it('should return false for non-existent access code', () => {
+            const result = gameSessionService.isPlayerInGame('invalid-code', PLAYER_1_NAME);
+            expect(result).toBe(false);
+        });
+
+        it('should return true if player exists in session', () => {
+            const session = gameSessionService.getGameSession(ACCESS_CODE);
+            session.turn.orderedPlayers = [createValidPlayer(PLAYER_1_NAME, 5, true)];
+
+            const result = gameSessionService.isPlayerInGame(ACCESS_CODE, PLAYER_1_NAME);
+            expect(result).toBe(true);
+        });
+
+        it('should return false if player not in session', () => {
+            const session = gameSessionService.getGameSession(ACCESS_CODE);
+            session.turn.orderedPlayers = [createValidPlayer(PLAYER_1_NAME, 5, true)];
+
+            const result = gameSessionService.isPlayerInGame(ACCESS_CODE, 'NonExistentPlayer');
+            expect(result).toBe(false);
+        });
+    });
 });

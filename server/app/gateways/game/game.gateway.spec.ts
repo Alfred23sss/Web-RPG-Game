@@ -166,37 +166,37 @@ describe('GameGateway', () => {
         });
     });
 
-    describe('handleGameAbandoned', () => {
-        it('should handle player abandonment and emit events', () => {
-            const payload = {
-                player: MOCK_PLAYER,
-                accessCode: ACCESS_CODE,
-                isGameEnding: false,
-            };
-            gateway.handleGameAbandoned(MOCK_CLIENT, payload);
+    // describe('handleGameAbandoned', () => {
+    //     it('should handle player abandonment and emit events', () => {
+    //         const payload = {
+    //             player: MOCK_PLAYER,
+    //             accessCode: ACCESS_CODE,
+    //             isGameEnding: false,
+    //         };
+    //         gateway.handleGameAbandoned(MOCK_CLIENT, payload);
 
-            expect(combatServiceMock.handleCombatSessionAbandon).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
-            expect(gameSessionServiceMock.handlePlayerAbandoned).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
-            expect(lobbyServiceMock.leaveLobby).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name, true);
-        });
+    //         expect(combatServiceMock.handleCombatSessionAbandon).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
+    //         expect(gameSessionServiceMock.handlePlayerAbandoned).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
+    //         expect(lobbyServiceMock.leaveLobby).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name, true);
+    //     });
 
-        it('should clear lobby and delete session when last player leaves', () => {
-            lobbyServiceMock.getLobby = jest.fn().mockReturnValue({ players: [MOCK_PLAYER] });
-            const mockClient = { leave: jest.fn() } as unknown as Socket;
+    //     it('should clear lobby and delete session when last player leaves', () => {
+    //         lobbyServiceMock.getLobby = jest.fn().mockReturnValue({ players: [MOCK_PLAYER] });
+    //         const mockClient = { leave: jest.fn() } as unknown as Socket;
 
-            const payload = {
-                player: MOCK_PLAYER,
-                accessCode: ACCESS_CODE,
-                isGameEnding: false,
-            };
-            gateway.handleGameAbandoned(mockClient, payload);
+    //         const payload = {
+    //             player: MOCK_PLAYER,
+    //             accessCode: ACCESS_CODE,
+    //             isGameEnding: false,
+    //         };
+    //         gateway.handleGameAbandoned(mockClient, payload);
 
-            expect(lobbyServiceMock.clearLobby).toHaveBeenCalledWith(payload.accessCode);
-            expect(gameSessionServiceMock.deleteGameSession).toHaveBeenCalledWith(payload.accessCode);
-            expect(accessCodeServiceMock.removeAccessCode).toHaveBeenCalledWith(payload.accessCode);
-            expect(serverMock.emit).toHaveBeenCalledWith('gameDeleted');
-        });
-    });
+    //         expect(lobbyServiceMock.clearLobby).toHaveBeenCalledWith(payload.accessCode);
+    //         expect(gameSessionServiceMock.deleteGameSession).toHaveBeenCalledWith(payload.accessCode);
+    //         expect(accessCodeServiceMock.removeAccessCode).toHaveBeenCalledWith(payload.accessCode);
+    //         expect(serverMock.emit).toHaveBeenCalledWith('gameDeleted');
+    //     });
+    // });
 
     describe('handleEndTurn', () => {
         it('should end the current turn', () => {
