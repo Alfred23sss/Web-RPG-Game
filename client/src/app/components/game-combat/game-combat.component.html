@@ -1,7 +1,7 @@
 <div class="combat-container">
     <div class="timer">
         @if (gameData.currentPlayer && gameData.clientPlayer.name) { @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
-        <div><span class="label">Votre tour!</span></div>
+        <div><span class="label">Votre Tour</span></div>
         } @else {
         <div>
             <span class="label">{{ gameData.currentPlayer.name }}</span>
@@ -13,7 +13,6 @@
         }
     </div>
 
-    <!-- Players Row -->
     <div class="players-container">
         <div class="player attacker-player">
             <h2>{{ attacker.name }}</h2>
@@ -80,19 +79,17 @@
     <!-- Buttons Row -->
     <div class="actions-container">
         <button
-            class="button dice-button"
+            class="button action-button"
             (click)="onAttack()"
-            [disabled]="gameData.clientPlayer.name !== gameData.currentPlayer.name"
-            [ngClass]="{ 'disabled-btn': gameData.clientPlayer.name !== gameData.currentPlayer.name }"
+            [disabled]="gameData.clientPlayer.name !== gameData.currentPlayer.name || gameData.actionTaken"
         >
             Attaquer
         </button>
 
         <button
-            class="button dice-button"
+            class="button action-button"
             (click)="onEvade()"
-            [disabled]="gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name"
-            [ngClass]="{ 'disabled-btn': gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name }"
+            [disabled]="gameData.escapeAttempts === 0 || gameData.clientPlayer.name !== gameData.currentPlayer.name || gameData.actionTaken"
         >
             {{ gameData.escapeAttempts > 0 ? "S'Évader (" + gameData.escapeAttempts + ')' : 'Aucune tentative' }}
         </button>

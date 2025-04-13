@@ -63,7 +63,10 @@ html {
     justify-content: center;
     align-items: center;
     padding: 20px;
-    background-color: #2c3b56;
+    background: rgba(10, 30, 50, 0.5);
+    border: 2px solid #00c8ff;
+    box-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
+    border-radius: 15px;
     overflow: auto;
 }
 
@@ -238,6 +241,7 @@ app-grid {
     box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
     z-index: 10;
     animation: fadeIn 0.3s ease-in-out;
+    font-family: 'Pixel', sans-serif;
 }
 
 .game-details {

@@ -47,10 +47,12 @@ export class GameCombatComponent implements OnDestroy {
     }
 
     onAttack() {
+        this.gameStateService.gameDataSubjectValue.actionTaken = true;
         this.gameplayService.attack(this.gameData);
     }
 
     onEvade() {
+        this.gameStateService.gameDataSubjectValue.actionTaken = true;
         this.gameplayService.evade(this.gameData);
     }
 

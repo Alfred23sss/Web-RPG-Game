@@ -18,6 +18,7 @@ export class GameData {
     isInCombatMode: boolean;
     hasTurnEnded: boolean;
     isActionMode: boolean;
+    actionTaken: boolean;
     isCurrentlyMoving: boolean;
     escapeAttempts: number;
     evadeResult: { attemptsLeft: number; isEscapeSuccessful: boolean } | null;
@@ -41,6 +42,7 @@ export class GameData {
         this.isInCombatMode = false;
         this.hasTurnEnded = false;
         this.isActionMode = false;
+        this.actionTaken = false;
         this.isCurrentlyMoving = false;
         this.escapeAttempts = 2;
         this.evadeResult = null;
