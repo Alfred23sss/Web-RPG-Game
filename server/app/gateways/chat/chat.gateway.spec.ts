@@ -3,8 +3,8 @@
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
-import { ChatGateway } from './chat.gateaway';
-import { ChatEvents } from './chat.gateaway.events';
+import { ChatGateway } from './chat.gateway';
+import { ChatEvents } from './chat.gateway.events';
 
 jest.mock('socket.io');
 
