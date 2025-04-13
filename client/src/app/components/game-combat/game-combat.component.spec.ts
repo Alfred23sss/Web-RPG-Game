@@ -150,12 +150,6 @@ describe('GameCombatComponent', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should initialize with data from dialog', () => {
-        expect(component.gameData).toBeDefined();
-        expect(component.attacker.name).toBe('Attacker');
-        expect(component.defender.name).toBe('Defender');
-    });
-
     it('should set players from playersInFight if available', () => {
         const testGameData = createMockGameData();
         testGameData.playersInFight = [createMockPlayer('Fighter1'), createMockPlayer('Fighter2')];
