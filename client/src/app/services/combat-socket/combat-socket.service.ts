@@ -50,7 +50,7 @@ export class CombatSocketService {
             this.gameplayService.updateAttackResult(gameData, data);
 
             const attackOutcome = data.success ? 'réussie' : 'échouée';
-            this.clientNotifier.addLogbookEntry(`Attaque ${attackOutcome} (Attaque: ${data.attackScore}, Défense: ${data.defenseScore})`);
+            this.clientNotifier.addLogbookEntry(`Attaque ${attackOutcome} (Attaque: ${data.attackScore.score}, Défense: ${data.defenseScore.score})`);
 
             gameData.evadeResult = null;
             this.gameStateService.updateGameData(gameData);

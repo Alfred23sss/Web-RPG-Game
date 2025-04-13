@@ -237,7 +237,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.logger.log(`Player ${player.name} disconnected from accessCode: ${accessCode}`);
         this.logger.log(`Player ${player.name} disconnected${isInGame ? ' from game' : ''}`);
         if (isInGame) {
-            this.handleGamePlayerDisconnect(accessCode, player.name);
+            this.handleGamePlayerDisconnect(accessCode, player.name, client);
         } else {
             this.handleLobbyPlayerDisconnect(accessCode, player.name, client.id);
         }
@@ -247,7 +247,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
         this.logger.log(`User disconnected: ${client.id}`);
     }
 
-    private handleGamePlayerDisconnect(accessCode: string, playerName: string) {
+    private handleGamePlayerDisconnect(accessCode: string, playerName: string, client: Socket) {
         const playerAbandon = this.gameSessionService.getPlayers(accessCode).find((p) => p.name === playerName);
         this.gameSessionService.handlePlayerItemReset(accessCode, playerAbandon);
         this.gameCombatService.handleCombatSessionAbandon(accessCode, playerName);
@@ -263,6 +263,7 @@ export class LobbyGateway implements OnGatewayConnection, OnGatewayDisconnect, O
             this.server.to(accessCode).emit('gameDeleted');
             this.server.to(accessCode).emit('updateUnavailableOptions', { avatars: [] });
         }
+        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
         this.server.to(accessCode).emit('game-abandoned', { player: playerAbandon });
         this.logger.log('game abandoned emitted');
     }

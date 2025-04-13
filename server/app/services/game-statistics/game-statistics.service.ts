@@ -1,4 +1,5 @@
 import { EventEmit, GameMode } from '@app/enums/enums';
+import { AttackScore } from '@app/interfaces/AttackScore';
 import { GameSession } from '@app/interfaces/GameSession';
 import { Player } from '@app/interfaces/Player';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/Statistic';
@@ -66,15 +67,15 @@ export class GameStatisticsService {
         currentFighter: Player;
         defenderPlayer: Player;
         attackSuccessful: boolean;
-        attackerScore: number;
-        defenseScore: number;
+        attackerScore: AttackScore;
+        defenseScore: AttackScore;
         accessCode: string;
     }): void {
         const { currentFighter, defenderPlayer, attackSuccessful, attackerScore, defenseScore, accessCode } = payload;
         const gameStats = this.gameStatistics.get(accessCode);
         if (!gameStats || !attackSuccessful) return;
 
-        const finalAttack = Math.max(0, attackerScore - defenseScore);
+        const finalAttack = Math.max(0, attackerScore.score - defenseScore.score);
         gameStats.playerStats.get(defenderPlayer.name).healthLost += finalAttack;
         gameStats.playerStats.get(currentFighter.name).damageCaused += finalAttack;
     }
