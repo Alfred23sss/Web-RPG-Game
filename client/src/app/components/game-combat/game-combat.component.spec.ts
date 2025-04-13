@@ -18,6 +18,8 @@ describe('GameCombatComponent', () => {
     let mockDialogRef: jasmine.SpyObj<MatDialogRef<GameCombatComponent>>;
     let mockGameStateService: jasmine.SpyObj<GameStateSocketService>;
     let mockGameplayService: jasmine.SpyObj<GameplayService>;
+    let gameDataSubject: Subject<GameData>;
+    let closePopupSubject: Subject<void>;
 
     const createMockItem = (): Item =>
         new Item({
@@ -106,10 +108,13 @@ describe('GameCombatComponent', () => {
     };
 
     beforeEach(async () => {
+        gameDataSubject = new Subject<GameData>();
+        closePopupSubject = new Subject<void>();
+
         mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
         mockGameStateService = jasmine.createSpyObj('GameStateSocketService', [], {
-            gameData$: new Subject<GameData>(),
-            closePopup$: new Subject<void>(),
+            gameData$: gameDataSubject.asObservable(),
+            closePopup$: closePopupSubject.asObservable(),
             gameDataSubjectValue: createMockGameData(),
         });
         mockGameplayService = jasmine.createSpyObj('GameplayService', ['attack', 'evade']);
@@ -133,25 +138,88 @@ describe('GameCombatComponent', () => {
 
         fixture = TestBed.createComponent(GameCombatComponent);
         component = fixture.componentInstance;
-
-        component.attacker = createMockPlayer('Attacker');
-        component.defender = createMockPlayer('Defender');
-        component.gameData = createMockGameData();
-
         fixture.detectChanges();
+    });
+
+    afterEach(() => {
+        gameDataSubject.complete();
+        closePopupSubject.complete();
     });
 
     it('should create', () => {
         expect(component).toBeTruthy();
     });
 
-    it('should have valid tile types', () => {
-        expect(component.gameData.playerTile?.type).toBe(TileType.Default);
-        expect(component.gameData.availablePath?.[0]?.type).toBe(TileType.Default);
+    it('should initialize with data from dialog', () => {
+        expect(component.gameData).toBeDefined();
+        expect(component.attacker.name).toBe('Attacker');
+        expect(component.defender.name).toBe('Defender');
     });
 
-    it('should handle tiles correctly', () => {
-        expect(component.gameData.playerTile?.isOccupied).toBeTrue();
-        expect(component.gameData.availablePath?.[0]?.isOccupied).toBeFalsy();
+    it('should set players from playersInFight if available', () => {
+        const testGameData = createMockGameData();
+        testGameData.playersInFight = [createMockPlayer('Fighter1'), createMockPlayer('Fighter2')];
+
+        TestBed.resetTestingModule();
+        TestBed.configureTestingModule({
+            imports: [GameCombatComponent],
+            providers: [
+                { provide: MatDialogRef, useValue: mockDialogRef },
+                { provide: GameStateSocketService, useValue: mockGameStateService },
+                { provide: GameplayService, useValue: mockGameplayService },
+                {
+                    provide: MAT_DIALOG_DATA,
+                    useValue: {
+                        gameData: testGameData,
+                        attacker: createMockPlayer('Attacker'),
+                        defender: createMockPlayer('Defender'),
+                    },
+                },
+            ],
+        });
+
+        const testFixture = TestBed.createComponent(GameCombatComponent);
+        const testComponent = testFixture.componentInstance;
+        testFixture.detectChanges();
+
+        expect(testComponent.attacker.name).toBe('Fighter1');
+        expect(testComponent.defender.name).toBe('Fighter2');
+    });
+
+    describe('Subscriptions', () => {
+        it('should update gameData when gameData$ emits', () => {
+            const newGameData = createMockGameData();
+            newGameData.isInCombatMode = false;
+            newGameData.attackResult = null;
+
+            gameDataSubject.next(newGameData);
+
+            expect(component.gameData.isInCombatMode).toBeFalse();
+            expect(component.gameData.attackResult).toBeNull();
+        });
+
+        it('should close dialog when closePopup$ emits', () => {
+            closePopupSubject.next();
+            expect(mockDialogRef.close).toHaveBeenCalled();
+        });
+    });
+
+    describe('Methods', () => {
+        it('should call attack service', () => {
+            component.onAttack();
+            expect(mockGameplayService.attack).toHaveBeenCalledWith(component.gameData);
+            expect(mockGameStateService.gameDataSubjectValue.actionTaken).toBeTrue();
+        });
+
+        it('should call evade service', () => {
+            component.onEvade();
+            expect(mockGameplayService.evade).toHaveBeenCalledWith(component.gameData);
+            expect(mockGameStateService.gameDataSubjectValue.actionTaken).toBeTrue();
+        });
+
+        it('should close dialog', () => {
+            component.onClose();
+            expect(mockDialogRef.close).toHaveBeenCalled();
+        });
     });
 });
