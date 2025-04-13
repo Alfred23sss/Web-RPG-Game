@@ -62,7 +62,7 @@ describe('VirtualPlayerBehaviorService', () => {
             const mockLobby = { game: { grid: [] } } as Lobby;
             const mockMoves = [mockMove];
 
-            jest.spyOn(service as any, 'getNextMove').mockReturnValue(mockMove);
+            jest.spyOn(service as unknown, 'getNextMove').mockReturnValue(mockMove);
 
             await service.executeBehavior(mockVirtualPlayer, mockLobby, mockMoves);
 
@@ -126,7 +126,7 @@ describe('VirtualPlayerBehaviorService', () => {
         });
 
         it('should return undefined with no moves', () => {
-            const result = (service as any).getNextMove([], {} as VirtualPlayer, mockLobby);
+            const result = (service as unknown).getNextMove([], {} as VirtualPlayer, mockLobby);
             expect(result).toBeUndefined();
         });
 
@@ -134,7 +134,7 @@ describe('VirtualPlayerBehaviorService', () => {
             const mockMoves = [createMockMove()];
             const mockPlayer = { behavior: Behavior.Aggressive } as VirtualPlayer;
 
-            (service as any).getNextMove(mockMoves, mockPlayer, mockLobby);
+            (service as unknown).getNextMove(mockMoves, mockPlayer, mockLobby);
 
             expect(mockVirtualPlayerScoreService.scoreAggressiveMoves).toHaveBeenCalledWith(mockMoves, mockPlayer, mockLobby);
         });
@@ -143,7 +143,7 @@ describe('VirtualPlayerBehaviorService', () => {
             const mockMoves = [createMockMove()];
             const mockPlayer = { behavior: Behavior.Defensive } as VirtualPlayer;
 
-            (service as any).getNextMove(mockMoves, mockPlayer, mockLobby);
+            (service as unknown).getNextMove(mockMoves, mockPlayer, mockLobby);
 
             expect(mockVirtualPlayerScoreService.scoreDefensiveMoves).toHaveBeenCalledWith(mockMoves, mockPlayer, mockLobby);
         });
@@ -151,7 +151,7 @@ describe('VirtualPlayerBehaviorService', () => {
         it('should sort moves by score', () => {
             const mockMoves = [createMockMove(2), createMockMove(3)];
 
-            const result = (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
+            const result = (service as unknown).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(result.score).toBe(3);
         });
@@ -179,7 +179,7 @@ describe('VirtualPlayerBehaviorService', () => {
         it('should handle undefined scores using OR fallback', () => {
             const mockMoves = [createMockMove({ score: undefined }), createMockMove({ score: undefined })];
 
-            const result = (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
+            const result = (service as unknown).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(result.score).toBe(undefined);
         });
@@ -187,7 +187,7 @@ describe('VirtualPlayerBehaviorService', () => {
         it('should handle null scores using OR fallback', () => {
             const mockMoves = [createMockMove({ score: null as unknown as number }), createMockMove({ score: 3 })];
 
-            const result = (service as any).getNextMove(mockMoves, { behavior: Behavior.Defensive } as VirtualPlayer, mockLobby);
+            const result = (service as unknown).getNextMove(mockMoves, { behavior: Behavior.Defensive } as VirtualPlayer, mockLobby);
 
             expect(result.score).toBe(3);
         });
@@ -195,7 +195,7 @@ describe('VirtualPlayerBehaviorService', () => {
         it('should handle zero scores correctly', () => {
             const mockMoves = [createMockMove({ score: 0 }), createMockMove({ score: 1 })];
 
-            const result = (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
+            const result = (service as unknown).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(result.score).toBe(1);
         });
@@ -205,7 +205,7 @@ describe('VirtualPlayerBehaviorService', () => {
 
             (mockVirtualPlayerActions.getPathForMove as jest.Mock).mockReturnValue(undefined);
 
-            (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
+            (service as unknown).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(mockVirtualPlayerActions.calculateTotalMovementCost).toHaveBeenCalledWith([]);
         });
@@ -214,13 +214,13 @@ describe('VirtualPlayerBehaviorService', () => {
     describe('executeNextMove', () => {
         it('should handle attack moves', async () => {
             const mockMove = { type: MoveType.Attack } as Move;
-            await (service as any).executeNextMove(mockMove, {} as Tile, {} as Lobby);
+            await (service as unknown).executeNextMove(mockMove, {} as Tile, {} as Lobby);
             expect(mockVirtualPlayerActions.moveToAttack).toHaveBeenCalled();
         });
 
         it('should handle item moves', async () => {
             const mockMove = { type: MoveType.Item } as Move;
-            await (service as any).executeNextMove(mockMove, {} as Tile, {} as Lobby);
+            await (service as unknown).executeNextMove(mockMove, {} as Tile, {} as Lobby);
             expect(mockVirtualPlayerActions.pickUpItem).toHaveBeenCalled();
         });
     });

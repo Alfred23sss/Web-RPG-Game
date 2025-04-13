@@ -131,10 +131,7 @@ describe('VirtualPlayerService', () => {
         });
 
         it('should return null when all items are preferred', () => {
-            const preferredItems = [
-                createMockItem(ItemName.Flag), 
-                createMockItem(ItemName.Potion), 
-            ];
+            const preferredItems = [createMockItem(ItemName.Flag), createMockItem(ItemName.Potion)];
             const result = service.itemChoice(Behavior.Aggressive, preferredItems);
             expect(result).toBeNull();
         });
@@ -199,7 +196,7 @@ describe('VirtualPlayerService', () => {
             const result = await service.handleCombatTurnStart('1234', mockPlayer);
 
             expect(mockBehaviorService.tryToEscapeIfWounded).toHaveBeenCalledWith(mockPlayer, '1234');
-            expect(result).toBeUndefined(); 
+            expect(result).toBeUndefined();
         });
     });
 
