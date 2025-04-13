@@ -31,6 +31,8 @@ export class CharacterService {
 
     initializePlayer(player: Player): void {
         Object.assign(player, { ...UNINITIALIZED_PLAYER });
+        player.attack.bonusDice = DiceType.Uninitialized;
+        player.defense.bonusDice = DiceType.Uninitialized;
     }
 
     initializeLobby(accessCode: string): void {

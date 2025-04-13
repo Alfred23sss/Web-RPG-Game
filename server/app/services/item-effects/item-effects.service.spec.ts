@@ -1,6 +1,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, DiceType, EventEmit, ItemName } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
@@ -283,6 +284,19 @@ describe('ItemEffectsService', () => {
             service.handlePlayerItemReset(player, [[occupiedTile]], TEST_CODE);
 
             expect(occupiedTile.item).toBe(MOCK_ITEM);
+        });
+
+        it('should emit VirtualPlayerEvents.ChooseItem when player is virtual and inventory is full', () => {
+            const virtualPlayer: Player = { ...MOCK_PLAYER, isVirtual: true, inventory: [MOCK_ITEM, MOCK_ITEM] };
+            MOCK_TILE.item = MOCK_ITEM;
+
+            service.addItemToPlayer(virtualPlayer, MOCK_ITEM, [[MOCK_TILE]], TEST_CODE);
+
+            expect(eventEmitter.emit).toHaveBeenCalledWith(VirtualPlayerEvents.ChooseItem, {
+                accessCode: TEST_CODE,
+                player: virtualPlayer,
+                items: [MOCK_ITEM, MOCK_ITEM, MOCK_ITEM],
+            });
         });
     });
 

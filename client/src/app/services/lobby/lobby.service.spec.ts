@@ -115,9 +115,8 @@ describe('LobbyService', () => {
             service.initializeLobby();
             service.removePlayerAndCleanup(mockPlayer, mockLobby);
 
-            expect(socketSpy.emit).toHaveBeenCalledWith('leaveLobby', {
-                accessCode: '1234',
-                playerName: 'test',
+            expect(socketSpy.emit).toHaveBeenCalledWith('manualDisconnect', {
+                isInGame: false,
             });
 
             expect(socketSpy.emit).toHaveBeenCalledTimes(1);
@@ -307,7 +306,7 @@ describe('LobbyService', () => {
 
             expect(socketSpy.socket.off).toHaveBeenCalledWith('joinLobby');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('lobbyUpdate');
-            expect(socketSpy.socket.off).toHaveBeenCalledWith('leaveLobby');
+            expect(socketSpy.socket.off).toHaveBeenCalledWith('manualDisconnect');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('kicked');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('lobbyLocked');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('lobbyUnlocked');
