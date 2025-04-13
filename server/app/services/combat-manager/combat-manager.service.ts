@@ -239,9 +239,9 @@ export class GameCombatService {
         defenderPlayer.inventory.forEach((item) => {
             this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
         });
-
+        Logger.log(`Player defender ${defenderPlayer.name}, current HP`);
         this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer, accessCode });
-        if (defenderPlayer.hp.current === 0) {
+        if (defenderPlayer.hp.current <= 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);
         } else {
             this.endCombatTurn(accessCode);
