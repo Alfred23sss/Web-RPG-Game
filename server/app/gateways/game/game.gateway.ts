@@ -45,28 +45,28 @@ export class GameGateway {
         this.logger.log('game created emitted');
     }
 
-    @SubscribeMessage(GameEvents.AbandonedGame)
-    handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
-        this.logger.log(`Player ${payload.player.name} has abandoned game`);
-        this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
-        this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
-        const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
-        const lobby = this.lobbyService.getLobby(payload.accessCode);
-        this.logger.log(`Lobby ${lobby} has left lobby`);
-        this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
-        client.leave(payload.accessCode);
+    // @SubscribeMessage(GameEvents.AbandonedGame)
+    // handleGameAbandoned(@ConnectedSocket() client: Socket, @MessageBody() payload: { player: Player; accessCode: string }) {
+    //     this.logger.log(`Player ${payload.player.name} has abandoned game`);
+    //     this.gameCombatService.handleCombatSessionAbandon(payload.accessCode, payload.player.name);
+    //     const playerAbandon = this.gameSessionService.handlePlayerAbandoned(payload.accessCode, payload.player.name);
+    //     const lobby = this.lobbyService.getLobby(payload.accessCode);
+    //     if (!lobby) return;
+    //     this.logger.log(`Lobby ${lobby} has left lobby`);
+    //     this.lobbyService.leaveLobby(payload.accessCode, payload.player.name, true);
+    //     client.leave(payload.accessCode);
 
-        if (lobby.players.length <= 1 || this.gameSessionService.isTeamAbandoned(payload.accessCode, payload.player)) {
-            this.lobbyService.clearLobby(payload.accessCode);
-            this.gameSessionService.deleteGameSession(payload.accessCode);
-            this.accessCodesService.removeAccessCode(payload.accessCode);
-            this.server.to(payload.accessCode).emit('gameDeleted');
-            this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
-        }
-        this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
-        this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
-        this.logger.log('game abandoned emitted');
-    }
+    //     if (lobby.players.length <= 1) {
+    //         this.lobbyService.clearLobby(payload.accessCode);
+    //         this.gameSessionService.deleteGameSession(payload.accessCode);
+    //         this.accessCodesService.removeAccessCode(payload.accessCode);
+    //         this.server.to(payload.accessCode).emit('gameDeleted');
+    //         this.server.to(payload.accessCode).emit('updateUnavailableOptions', { avatars: [] });
+    //     }
+    //     this.server.to(client.id).emit('updateUnavailableOptions', { avatars: [] });
+    //     this.server.to(payload.accessCode).emit('game-abandoned', { player: playerAbandon });
+    //     this.logger.log('game abandoned emitted');
+    // }
 
     @SubscribeMessage(GameEvents.EndTurn)
     handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {

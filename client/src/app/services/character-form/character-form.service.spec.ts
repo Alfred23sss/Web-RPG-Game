@@ -408,7 +408,7 @@ describe('CharacterService', () => {
     it('should call returnHome when joinStatus is RedirectToHome', () => {
         spyOn(service as any, 'returnHome');
 
-        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode);
+        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame);
 
         expect((service as any).returnHome).toHaveBeenCalled();
     });
@@ -421,7 +421,7 @@ describe('CharacterService', () => {
         await service.submitCharacter(player, currentAccessCode, true, mockGame);
 
         expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
-        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode);
+        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame);
     });
 
     it('should validate game availability', () => {
