@@ -3,17 +3,18 @@
     background: rgba(10, 30, 50, 0.5);
     border: 2px solid #00c8ff;
     box-shadow: 0 0 10px rgba(0, 200, 255, 0.4);
-    border-radius: 15px;
-    padding: 5px;
+    border-radius: 12px;
+    padding: 4px;
     font-family: 'Pixel', sans-serif;
     color: #d4f1ff;
     text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
     margin: 5px;
+    font-size: 0.9rem;
 }
 
 .player-info h3 {
-    font-size: 1.2rem;
-    margin-bottom: 5px;
+    font-size: 1rem;
+    margin-bottom: 4px;
     text-align: center;
     color: #d4f1ff;
     text-shadow: 0 0 10px rgba(0, 200, 255, 0.8);
@@ -23,16 +24,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     width: fit-content;
     margin-inline: auto;
 }
 
 .player-avatar {
-    width: 90x;
-    height: 90px;
-    border-radius: 10px;
+    width: 70px;
+    height: 70px;
+    border-radius: 8px;
     object-fit: cover;
     border: 2px solid #64c8ff;
     box-shadow: 0 0 10px rgba(100, 200, 255, 0.4);
@@ -42,54 +42,55 @@
 .player-stats {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .health-bar,
 .stat-bar {
     display: flex;
-    gap: 4px;
-    margin-top: 5px;
+    gap: 3px;
+    margin-top: 4px;
 }
 
 .health-segment,
 .stat-segment {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 3px;
     background-color: rgba(100, 200, 255, 0.1);
     transition: all 0.3s ease;
 }
+
 .health-segment.filled {
     background-color: #8b0000;
     box-shadow:
-        0 0 8px rgba(139, 0, 0, 0.7),
-        0 0 20px rgba(139, 0, 0, 0.5);
+        0 0 6px rgba(139, 0, 0, 0.7),
+        0 0 16px rgba(139, 0, 0, 0.5);
 }
 
 .stat-segment.filled {
     background-color: #64c8ff;
-    box-shadow: 0 0 6px rgba(100, 200, 255, 0.7);
+    box-shadow: 0 0 5px rgba(100, 200, 255, 0.7);
 }
 
 .attributes-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
 }
 
 .attribute {
     display: flex;
     justify-content: space-between;
-    padding: 8px;
+    padding: 6px;
     background: rgba(20, 80, 120, 0.2);
-    border-radius: 10px;
+    border-radius: 8px;
     border: 1px solid rgba(100, 200, 255, 0.1);
-    font-size: 1rem;
+    font-size: 0.9rem;
 }
 
 .attribute-label {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: bold;
     color: #d4f1ff;
     text-shadow: 0 0 6px rgba(0, 200, 255, 0.6);
@@ -99,25 +100,25 @@
 }
 
 .attribute-value {
-    font-size: 1rem;
+    font-size: 0.9rem;
     color: #d4f1ff;
     text-shadow: 0 0 6px rgba(0, 200, 255, 0.6);
 }
 
 .inventory {
     background: rgba(20, 80, 120, 0.2);
-    padding: 10px;
-    border-radius: 10px;
+    padding: 6px;
+    border-radius: 8px;
     border: 1px solid rgba(100, 200, 255, 0.1);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #d4f1ff;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 8px;
 }
 
 .inventory h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+    font-size: 1rem;
+    margin-bottom: 8px;
     text-shadow: 0 0 6px rgba(100, 200, 255, 0.7);
 }
 
@@ -125,21 +126,21 @@
     display: inline-flex;
     justify-content: center;
     align-items: center;
-    width: 60px;
-    height: 60px;
-    margin: 5px;
+    width: 48px;
+    height: 48px;
+    margin: 4px;
     background: rgba(10, 30, 50, 0.3);
     border: 1px solid rgba(100, 200, 255, 0.2);
-    border-radius: 8px;
-    box-shadow: 0 0 6px rgba(100, 200, 255, 0.2);
-    font-size: 0.8rem;
+    border-radius: 6px;
+    box-shadow: 0 0 5px rgba(100, 200, 255, 0.2);
+    font-size: 0.7rem;
     color: #a5cfe8;
 }
 
 .item-image {
     max-width: 100%;
     max-height: 100%;
-    border-radius: 5px;
-    box-shadow: 0 0 8px rgba(100, 200, 255, 0.5);
+    border-radius: 4px;
+    box-shadow: 0 0 6px rgba(100, 200, 255, 0.5);
     background: rgba(255, 255, 255, 0.05);
 }
