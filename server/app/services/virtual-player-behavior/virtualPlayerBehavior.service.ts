@@ -32,10 +32,24 @@ export class VirtualPlayerBehaviorService {
         const healthRatio = virtualPlayer.hp.current / virtualPlayer.hp.max;
         if (healthRatio < 1) {
             await new Promise((resolve) => setTimeout(resolve, this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
-            this.gameCombatService.attemptEscape(accessCode, virtualPlayer);
+            if (combatState.remainingEscapeAttempts.get(virtualPlayer.name) > 0) {
+                this.gameCombatService.attemptEscape(accessCode, virtualPlayer);
+            } else {
+                this.gameCombatService.performAttack(accessCode, virtualPlayer.name);
+            }
+
             return true;
         }
         return false;
+    }
+
+    async attack(virtualPlayer: Player, accessCode: string): Promise<void> {
+        const isInCombat = this.gameCombatService.isCombatActive(accessCode);
+        if (!isInCombat) return;
+        const combatState = this.gameCombatService.getCombatState(accessCode);
+        if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return;
+        await new Promise((resolve) => setTimeout(resolve, this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
+        this.gameCombatService.performAttack(accessCode, virtualPlayer.name);
     }
 
     private async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
