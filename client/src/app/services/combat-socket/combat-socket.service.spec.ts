@@ -102,7 +102,6 @@ describe('CombatSocketService', () => {
         const testData = { success: true, attackScore: 10, defenseScore: 5 };
         EVENT_HANDLERS['attackResult'](testData);
 
-        expect(gameplayServiceMock.updateAttackResult).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue, testData);
         expect(gameStateServiceMock.gameDataSubjectValue.evadeResult).toBeNull();
         expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
     });

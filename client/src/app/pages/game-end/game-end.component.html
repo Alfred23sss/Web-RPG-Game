@@ -9,10 +9,12 @@
                 <h2 class="stats-section-title">Statistiques globales</h2>
                 <ul class="global-stats-list">
                     <li>
-                        <span class="stat-name">Durée:</span> <span class="stat-value">{{ gameStats.globalStats.formattedDuration || 'N/A' }}</span>
+                        <span class="stat-name">Durée:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.formattedDuration || 'N/A' }}</span>
                     </li>
                     <li>
-                        <span class="stat-name">Total de tours:</span> <span class="stat-value">{{ gameStats.globalStats.totalTurns }}</span>
+                        <span class="stat-name">Total de tours:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.totalTurns }}</span>
                     </li>
                     <li>
                         <span class="stat-name">% Record de tuiles visitées:</span>
@@ -46,81 +48,91 @@
                     <thead>
                         <tr>
                             <th (click)="sortBy('playerName')">
-                                Nom
-                                <span *ngIf="sortKey === 'playerName'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'playerName'">&#8597;</span>
+                                Nom @if (sortKey === 'playerName') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('combats')">
-                                Combats
-                                <span *ngIf="sortKey === 'combats'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'combats'">&#8597;</span>
+                                Combats @if (sortKey === 'combats') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('escapes')">
-                                Évasions
-                                <span *ngIf="sortKey === 'escapes'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'escapes'">&#8597;</span>
+                                Évasions @if (sortKey === 'escapes') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('victories')">
-                                Victoires
-                                <span *ngIf="sortKey === 'victories'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'victories'">&#8597;</span>
+                                Victoires @if (sortKey === 'victories') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('defeats')">
-                                Défaites
-                                <span *ngIf="sortKey === 'defeats'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'defeats'">&#8597;</span>
+                                Défaites @if (sortKey === 'defeats') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('healthLost')">
-                                PV perdus
-                                <span *ngIf="sortKey === 'healthLost'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'healthLost'">&#8597;</span>
+                                PV perdus @if (sortKey === 'healthLost') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('damageCaused')">
-                                PV infligés
-                                <span *ngIf="sortKey === 'damageCaused'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'damageCaused'">&#8597;</span>
+                                PV infligés @if (sortKey === 'damageCaused') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('uniqueItemsCollected')">
-                                Objets ramassés
-                                <span *ngIf="sortKey === 'uniqueItemsCollected'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'uniqueItemsCollected'">&#8597;</span>
+                                Objets ramassés @if (sortKey === 'uniqueItemsCollected') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                             <th (click)="sortBy('tilesVisitedPercentage')">
-                                Tuiles visitées %
-                                <span *ngIf="sortKey === 'tilesVisitedPercentage'">
-                                    <span *ngIf="sortAsc">&#8593;</span>
-                                    <span *ngIf="!sortAsc">&#8595;</span>
-                                </span>
-                                <span *ngIf="sortKey !== 'tilesVisitedPercentage'">&#8597;</span>
+                                Tuiles visitées % @if (sortKey === 'tilesVisitedPercentage') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
                             </th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr *ngFor="let player of sortedStats">
+                        @for (player of sortedStats; track player.playerName) {
+                        <tr>
                             <td>{{ player.playerName }}</td>
                             <td>{{ player.combats }}</td>
                             <td>{{ player.escapes }}</td>
@@ -131,6 +143,7 @@
                             <td>{{ objectKeys(player.uniqueItemsCollected).length }}</td>
                             <td>{{ player.tilesVisitedPercentage }}%</td>
                         </tr>
+                        }
                     </tbody>
                 </table>
             </div>

@@ -6,7 +6,7 @@ import { ChatComponent } from '@app/components/chat/chat.component';
 import { Routes } from '@app/enums/global.enums';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
-import { GameplayService } from '@app/services/gameplay/gameplay.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Component({
     selector: 'app-game-end',
@@ -24,18 +24,18 @@ export class GameEndComponent implements OnInit, OnDestroy {
     objectKeys = Object.keys;
 
     constructor(
-        private gameStateSocketService: GameStateSocketService,
-        private gameplayService: GameplayService,
-        private router: Router,
-    ) {
+        private readonly gameStateSocketService: GameStateSocketService,
+        // private readonly gameplayService: GameplayService,
+        private readonly socketClientService: SocketClientService,
+        private readonly router: Router,
+    ) {}
+
+    ngOnInit(): void {
         const wasRefreshed = sessionStorage.getItem('refreshed') === 'true';
         if (wasRefreshed || !this.gameStateSocketService.gameDataSubjectValue?.gameStats) {
             this.router.navigate(['/home']);
         }
         sessionStorage.setItem('refreshed', 'true');
-    }
-
-    ngOnInit(): void {
         if (this.gameStateSocketService.gameDataSubjectValue?.gameStats) {
             this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
             this.sortedStats = Object.values(this.gameStats.playerStats);
@@ -68,7 +68,13 @@ export class GameEndComponent implements OnInit, OnDestroy {
     }
 
     goHome(): void {
-        this.gameplayService.abandonGame(this.gameStateSocketService.gameDataSubjectValue);
+        this.abandonGame(this.gameData);
         this.router.navigate([Routes.HomePage]);
+    }
+
+    private abandonGame(gameData: GameData): void {
+        gameData.clientPlayer.hasAbandoned = true;
+        gameData.turnTimer = 0;
+        this.socketClientService.emit('manualDisconnect', { isInGame: false });
     }
 }
