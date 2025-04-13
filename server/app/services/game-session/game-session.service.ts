@@ -267,13 +267,6 @@ export class GameSessionService {
         return player;
     }
 
-    isTeamAbandoned(accessCode: string, player: Player): boolean {
-        const gameSession = this.gameSessions.get(accessCode);
-        const team = player.team;
-        const teamPlayers = gameSession.turn.orderedPlayers.filter((p) => p.team === team);
-        return teamPlayers.every((p) => p.hasAbandoned);
-    }
-
     private startTransitionPhase(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
