@@ -62,10 +62,10 @@ export class GameplayService {
     abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
         gameData.turnTimer = 0;
-        console.log(`Player ${gameData.clientPlayer.name} has abandoned the game`);
         this.socketClientService.emit('manualDisconnect', { isInGame: true });
         this.backToHome();
     }
+
     getClientPlayerPosition(gameData: GameData): Tile | undefined {
         if (!gameData.game || !gameData.game.grid || !gameData.clientPlayer) {
             return undefined;
