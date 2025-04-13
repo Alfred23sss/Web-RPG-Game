@@ -156,7 +156,6 @@ describe('GameplayService', () => {
         spyOn(service, 'checkAvailableActions');
         (mockMatDialog as any).openDialogs = [];
     });
-
     it('should be created', () => {
         expect(service).toBeTruthy();
     });
