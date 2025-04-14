@@ -35,7 +35,6 @@ export class CombatSocketService {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
             gameData.playersInFight = gameData.lobby.players.filter((p) => p.name === data.attacker.name || p.name === data.defender.name);
-            this.clientNotifier.addLogbookEntry('Combat commencé!', [data.attacker, data.defender]);
 
             this.dialog.open(GameCombatComponent, {
                 disableClose: true,
@@ -50,7 +49,12 @@ export class CombatSocketService {
             this.gameplayService.updateAttackResult(gameData, data);
 
             const attackOutcome = data.success ? 'réussie' : 'échouée';
-            this.clientNotifier.addLogbookEntry(`Attaque ${attackOutcome} (Attaque: ${data.attackScore.score}, Défense: ${data.defenseScore.score})`);
+            const diff = data.attackScore.score - data.defenseScore.score;
+            const attackScore = diff > 0 ? diff : 0;
+            this.clientNotifier.addLogbookEntry(
+                `Attaque ${attackOutcome} (Dé d'Attaque: ${data.attackScore.diceRolled}, ` +
+                    `Dé de Défense: ${data.defenseScore.diceRolled}, Résultat d'Attaque: ${attackScore})`,
+            );
 
             gameData.evadeResult = null;
             this.gameStateService.updateGameData(gameData);
