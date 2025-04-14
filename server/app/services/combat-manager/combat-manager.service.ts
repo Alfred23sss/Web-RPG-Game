@@ -78,9 +78,7 @@ export class GameCombatService {
         this.resetCombatTimers(accessCode);
         const { currentFighter, remainingEscapeAttempts, attacker, defender } = combatState;
         combatState.playerPerformedAction = true;
-        if (currentFighter.name !== player.name) {
-            return;
-        }
+        if (currentFighter.name !== player.name) return;
         let attemptsLeft = remainingEscapeAttempts.get(player.name) || 0;
         attemptsLeft--;
 
@@ -97,31 +95,70 @@ export class GameCombatService {
     }
 
     checkPlayerWon(accessCode: string, player: Player): boolean {
-        if (player.combatWon === WIN_CONDITION && this.gameSessionService.getGameSession(accessCode).game.mode !== GameMode.CTF) {
-            this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
-            this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
-            this.gameSessionService.endGameSession(accessCode, [player.name]);
-            return true;
+        const gameSession = this.gameSessionService.getGameSession(accessCode);
+        const isCTFMode = gameSession.game.mode === GameMode.CTF;
+
+        if (player.combatWon !== WIN_CONDITION || isCTFMode) {
+            return false;
         }
-        return false;
+
+        this.gameSessionService.updateGameSessionPlayerList(accessCode, player.name, { combatWon: player.combatWon });
+
+        const players = this.gameSessionService.getPlayers(accessCode);
+        this.emitEvent(EventEmit.UpdatePlayerList, { players, accessCode });
+
+        this.gameSessionService.endGameSession(accessCode, [player.name]);
+        return true;
     }
 
+    // endCombat(accessCode: string, isEscape: boolean = false): void {
+    //     const combatState = this.combatStates[accessCode];
+    //     if (!combatState) return;
+    //     this.resetCombatTimers(accessCode);
+    //     const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
+    //     this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
+    //     delete this.combatStates[accessCode];
+    //     if (!this.gameSessionService.getGameSession(accessCode)) return;
+    //     this.gameSessionService.setCombatState(accessCode, false);
+    //     if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
+    //     this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
+    //     } else if (!isEscape && currentFighter) {
+    //     this.gameSessionService.endTurn(accessCode);
+    //     } else {
+    //     this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
+    //     }
+    // }
+
     endCombat(accessCode: string, isEscape: boolean = false): void {
+        // not sure if this works
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
-        this.resetCombatTimers(accessCode);
+
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
-        this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
+
+        this.resetCombatTimers(accessCode);
+        this.emitEvent(EventEmit.GameCombatEnded, {
+            attacker,
+            defender,
+            currentFighter,
+            hasEvaded,
+            accessCode,
+        });
+
         delete this.combatStates[accessCode];
-        if (!this.gameSessionService.getGameSession(accessCode)) return;
+
+        const session = this.gameSessionService.getGameSession(accessCode);
+        if (!session) return;
+
         this.gameSessionService.setCombatState(accessCode, false);
-        if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
-            this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-        } else if (!isEscape && currentFighter) {
+
+        const isCurrentPlayer = currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name);
+
+        if (!isEscape && currentFighter && !isCurrentPlayer) {
             this.gameSessionService.endTurn(accessCode);
-        } else {
-            this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
+            return;
         }
+        this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
     }
 
     isCombatActive(accessCode: string): boolean {
