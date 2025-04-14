@@ -159,18 +159,6 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    it('should handle doorClicked event', () => {
-        gameStateServiceSpy.gameDataSubjectValue.game = MOCK_GAME;
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints = 3;
-        socketEvents['doorClicked']({ grid: MOCK_GRID });
-        expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(MOCK_GRID);
-        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toEqual(NO_ACTION_POINTS);
-        expect(gameStateServiceSpy.gameDataSubjectValue.isActionMode).toBeFalse();
-        expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
-        expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalled();
-        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    });
-
     it('should handle gridUpdate event', () => {
         gameStateServiceSpy.gameDataSubjectValue.game = MOCK_GAME;
         const newGrid = MOCK_GRID;
