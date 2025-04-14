@@ -299,6 +299,21 @@ describe('GameplayService', () => {
             );
         });
 
+        it('should not open item popup if a dialog is already open', () => {
+            const mockItem = [{ id: '1', name: 'Item1' } as Item, { id: '2', name: 'Item2' } as Item, { id: '3', name: 'Item3' } as Item] as [
+                Item,
+                Item,
+                Item,
+            ];
+            const mockOpenGameData = createMockGameData();
+            Object.defineProperty(mockMatDialog, 'openDialogs', {
+                get: () => [{}],
+            });
+
+            service.createItemPopUp(mockItem, mockOpenGameData);
+            expect(mockMatDialog.open).not.toHaveBeenCalled();
+        });
+
         it('should handle item selection and update game state', () => {
             const selectedItem = mockItems[0];
             mockDialogRef.afterClosed.and.returnValue(of(selectedItem));
@@ -307,6 +322,24 @@ describe('GameplayService', () => {
 
             expect(service['handleItemDropped']).toHaveBeenCalledWith(mockGameData, selectedItem);
             expect(service.checkAvailableActions).toHaveBeenCalledWith(mockGameData);
+        });
+        it('should emit "decrement.item" if selectedItem is the third item in the popup', () => {
+            const mockPopupItems = [{ id: '1', name: 'Item1' } as Item, { id: '2', name: 'Item2' } as Item, { id: '3', name: 'Item3' } as Item] as [
+                Item,
+                Item,
+                Item,
+            ];
+            const mockPopupGameData = createMockGameData();
+
+            mockDialogRef.afterClosed.and.returnValue(of(mockPopupItems[2]));
+
+            service.createItemPopUp(mockPopupItems, mockPopupGameData);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('decrement.item', {
+                selectedItem: mockPopupItems[2],
+                accessCode: mockPopupGameData.lobby.accessCode,
+                player: mockPopupGameData.clientPlayer,
+            });
         });
     });
 
