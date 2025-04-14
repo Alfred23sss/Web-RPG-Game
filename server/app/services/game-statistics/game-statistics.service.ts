@@ -1,5 +1,5 @@
 import { EventEmit } from '@app/enums/enums';
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { GameSession } from '@app/interfaces/game-session';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistic';
