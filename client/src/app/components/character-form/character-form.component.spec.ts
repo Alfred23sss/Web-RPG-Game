@@ -4,13 +4,14 @@ import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AttributeType, DiceType } from '@app/enums/global.enums';
+import { AttributeType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
 import { CharacterFormComponent } from './character-form.component';
+import { DiceType } from '@common/enums';
 
 describe('CharacterFormComponent', () => {
     let component: CharacterFormComponent;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
+import { ErrorMessages, HttpStatus, AttributeType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
@@ -9,6 +9,7 @@ import { GameCommunicationService } from '@app/services/game-communication/game-
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject, Subject } from 'rxjs';
+import { Routes, DiceType, JoinLobbyResult } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

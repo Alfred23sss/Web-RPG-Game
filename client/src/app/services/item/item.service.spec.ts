@@ -2,10 +2,11 @@
 import { TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { GRID_DIMENSIONS } from '@app/constants/global.constants';
-import { GameSize, TileType } from '@app/enums/global.enums';
+import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { ItemService } from './item.service';
+import { GameSize } from '@common/enums';
 
 const EXPECTED_ITEM_COUNT_MEDIUM = 4;
 const EXPECTED_ITEM_COUNT_DEFAULT = 1;

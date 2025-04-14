@@ -3,13 +3,6 @@ export enum GameModeType {
     CTF = 'CTF',
 }
 
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
-}
-
 export enum GameSizeTileCount {
     Small = '10',
     Medium = '15',
@@ -30,36 +23,11 @@ export enum TileType {
     Default = 'défaut',
 }
 
-export enum BonusValue {
-    Default = 2,
-}
-
-export enum DiceType {
-    D4 = 'D4',
-    D6 = 'D6',
-    Uninitialized = '',
-}
-
 export enum AttributeType {
     Hp = 'hp',
     Speed = 'Vitesse',
     Attack = 'Attaque',
     Defense = 'Défense',
-}
-
-export enum JoinLobbyResult {
-    RedirectToHome = 'redirectToHome',
-    StayInLobby = 'stayInLobby',
-    JoinedLobby = 'joinedLobby',
-}
-
-export enum Routes {
-    WaitingView = '/waiting-view',
-    EditionView = '/edition',
-    AdminPage = '/admin',
-    HomePage = '/home',
-    CreatePage = '/create',
-    CreateView = '/create',
 }
 
 export enum HttpStatus {

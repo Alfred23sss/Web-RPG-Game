@@ -1,6 +1,6 @@
-import { Behavior, DiceType } from '@app/enums/enums';
+import { Behavior } from '@app/enums/enums';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
-import { ItemType, ItemName, ItemDescription } from '@common/enums';
+import { ItemType, ItemName, ItemDescription, DiceType } from '@common/enums';
 
 export const RANDOM_ITEMS = [
     {

@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { GRID_DIMENSIONS } from '@app/constants/global.constants';
-import { GameSize, TileType } from '@app/enums/global.enums';
+import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
-import { ImageType } from '@common/enums';
+import { ImageType, GameSize } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

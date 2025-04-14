@@ -3,7 +3,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -11,6 +11,7 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
+import { Routes } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

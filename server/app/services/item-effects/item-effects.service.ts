@@ -1,4 +1,4 @@
-import { AttributeType, EventEmit, TileType } from '@app/enums/enums';
+import { EventEmit, TileType, AttributeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';

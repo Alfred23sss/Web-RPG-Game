@@ -3,13 +3,13 @@ import { Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { GAME_MODES_LIST, GAME_SIZES_LIST } from '@app/constants/global.constants';
-import { ErrorMessages, GameSize, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
-import { GameDecorations, GameMode } from '@common/enums';
+import { GameDecorations, GameMode, GameSize, Routes } from '@common/enums';
 @Component({
     selector: 'app-pop-up',
     templateUrl: './pop-up.component.html',

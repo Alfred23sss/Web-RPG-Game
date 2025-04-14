@@ -24,32 +24,9 @@ export enum ItemCount {
     LargeItemCount = 6,
 }
 
-export enum BonusValue {
-    Default = 2,
-}
-
-export enum DiceType {
-    D4 = 'D4',
-    D6 = 'D6',
-    Uninitialized = '',
-}
-
-export enum JoinLobbyResult {
-    RedirectToHome = 'redirectToHome',
-    StayInLobby = 'stayInLobby',
-    JoinedLobby = 'joinedLobby',
-}
-
 export enum GameModeLabel {
     Classic = 'Classique',
     CTF = 'Capture Le Drapeau',
-}
-
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
 }
 
 export enum GameSizeNumber {
@@ -64,17 +41,6 @@ export enum AttributeType {
     Speed = 'Vitesse',
     Attack = 'Attaque',
     Defense = 'Défense',
-}
-
-export enum Routes {
-    WaitingView = '/waiting-view',
-    EditionView = '/edition',
-    AdminPage = '/admin',
-    HomePage = '/home',
-    CreatePage = '/create',
-    CreateView = '/create',
-    Game = '/game',
-    GameEndPage = '/game-end',
 }
 
 export enum HttpStatus {

@@ -91,3 +91,33 @@ export enum ItemDescription {
     Flag = 'Drapeau à capturer.',
     Default = 'rien',
 }
+
+export enum DiceType {
+    D4 = 'D4',
+    D6 = 'D6',
+    Uninitialized = '',
+}
+
+export enum JoinLobbyResult {
+    RedirectToHome = 'redirectToHome',
+    StayInLobby = 'stayInLobby',
+    JoinedLobby = 'joinedLobby',
+}
+
+export enum GameSize {
+    Small = 'small',
+    Medium = 'medium',
+    Large = 'large',
+    None = '',
+}
+
+export enum Routes {
+    WaitingView = '/waiting-view',
+    EditionView = '/edition',
+    AdminPage = '/admin',
+    HomePage = '/home',
+    CreatePage = '/create',
+    CreateView = '/create',
+    Game = '/game',
+    GameEndPage = '/game-end',
+}
