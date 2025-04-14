@@ -500,7 +500,7 @@ fdescribe('LobbyGateway', () => {
 
             jest.spyOn(lobbyService, 'isAdminLeaving').mockReturnValueOnce(false);
             jest.spyOn(lobbyService, 'leaveLobby').mockReturnValueOnce(true);
-            jest.spyOn(lobbyService, 'getLobby').mockReturnValueOnce(undefined); 
+            jest.spyOn(lobbyService, 'getLobby').mockReturnValueOnce(undefined);
 
             (gateway as any).handleLobbyPlayerDisconnect(accessCode, playerName, clientId);
 
@@ -512,7 +512,7 @@ fdescribe('LobbyGateway', () => {
             const accessCode = 'ROOM_X';
 
             jest.spyOn(lobbyService, 'getRoomForPlayer').mockReturnValue(accessCode);
-            jest.spyOn(lobbyService, 'getLobby').mockReturnValue(null); 
+            jest.spyOn(lobbyService, 'getLobby').mockReturnValue(null);
 
             await (gateway as any).handleFormDisconnect(mockClient);
             expect(mockClient.leave).not.toHaveBeenCalled();
