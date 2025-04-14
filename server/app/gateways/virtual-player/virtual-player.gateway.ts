@@ -1,5 +1,5 @@
 import { Behavior, EventEmit } from '@app/enums/enums';
-import { Item } from '@app/interfaces/item';
+import { Item } from '@app/interfaces/Item';
 import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
@@ -7,7 +7,6 @@ import { GameSessionService } from '@app/services/game-session/game-session.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtual-player-creation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
-import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
@@ -20,7 +19,6 @@ export class VirtualPlayerGateway {
 
     constructor(
         private readonly lobbyService: LobbyService,
-        private readonly logger: Logger,
         private readonly virtualPlayerCreationService: VirtualPlayerCreationService,
         private readonly virtualPlayerService: VirtualPlayerService,
         private readonly gameSessionService: GameSessionService,
@@ -52,17 +50,11 @@ export class VirtualPlayerGateway {
         @MessageBody() data: { virtualPlayerTile: Tile; closestPlayerTile: Tile; movement: Tile[]; accessCode: string },
     ): Promise<void> {
         const virtualPlayer = data.virtualPlayerTile.player;
-        try {
-            await this.gameSessionService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
-        } catch (error) {
-            this.logger.error('Error updating virtual player position', error);
-        }
+        await this.gameSessionService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
     }
 
     @OnEvent(VirtualPlayerEvents.EndVirtualPlayerTurn)
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
-        this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
-
         this.virtualPlayerService.resetStats();
         this.gameSessionService.endTurn(data.accessCode);
     }

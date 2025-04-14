@@ -1,18 +1,15 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
 import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
-import { Player } from '@app/interfaces/player';
+import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
 const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GridManagerService {
-    constructor(
-        private readonly logger: Logger,
-        private readonly eventEmitter: EventEmitter2,
-    ) {}
+    constructor(private readonly eventEmitter: EventEmitter2) {}
 
     findTileById(grid: Tile[][], tileId: string): Tile | undefined {
         return grid.flat().find((tile) => tile.id === tileId);
@@ -66,7 +63,6 @@ export class GridManagerService {
             targetTile.imageSrc = ImageType.OpenDoor;
         }
         targetTile.isOpen = !targetTile.isOpen;
-        this.logger.log('emitting door update');
         this.eventEmitter.emit(EventEmit.UpdateDoorStats, { accessCode, tile: previousTile });
         this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: newTile.isOpen });
         return grid;
@@ -158,7 +154,6 @@ export class GridManagerService {
     teleportPlayer(grid: Tile[][], player: Player, targetTile: Tile): Tile[][] {
         const currentPlayerTile = this.findTileByPlayer(grid, player);
         if (!currentPlayerTile) {
-            this.logger.warn(`Player ${player.name} not found on any tile.`);
             return grid;
         }
         if (currentPlayerTile === targetTile) {
@@ -237,7 +232,6 @@ export class GridManagerService {
     private parseTileCoordinates(tileId: string): { row: number; col: number } | null {
         const match = tileId.match(/tile-(\d+)-(\d+)/);
         if (!match) {
-            this.logger.error(`Invalid tile ID format: ${tileId}`);
             return null;
         }
         return {
