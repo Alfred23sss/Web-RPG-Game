@@ -186,7 +186,6 @@ export class GameSocketService {
 
                 this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
                     this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
-
                 this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
                 this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             }
