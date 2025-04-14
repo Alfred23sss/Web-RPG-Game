@@ -87,7 +87,7 @@ describe('GameCombatComponent', () => {
         data.currentPlayer = mockPlayer;
         data.playersInFight = [mockPlayer, mockPlayer];
         data.lobby = {
-            accessCode: 'TEST',
+            accessCode: '1234',
             isLocked: false,
             game: null,
             players: [mockPlayer],
