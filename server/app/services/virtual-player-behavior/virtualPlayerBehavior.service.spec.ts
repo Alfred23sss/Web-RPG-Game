@@ -25,6 +25,7 @@ describe('VirtualPlayerBehaviorService', () => {
             isCombatActive: jest.fn(),
             getCombatState: jest.fn(),
             attemptEscape: jest.fn(),
+            performAttack: jest.fn(),
         };
 
         mockVirtualPlayerActions = {
@@ -76,14 +77,14 @@ describe('VirtualPlayerBehaviorService', () => {
     describe('tryToEscapeIfWounded', () => {
         it('should return false if not in combat', async () => {
             (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(false);
-            const result = await service.tryToEscapeIfWounded({} as Player, 'code');
+            const result = await service.tryToEscapeIfWounded({} as Player, '1234');
             expect(result).toBe(false);
         });
 
         it('should return false if not current fighter', async () => {
             (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
             (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({ currentFighter: { name: 'other' } });
-            const result = await service.tryToEscapeIfWounded({ name: 'test' } as Player, 'code');
+            const result = await service.tryToEscapeIfWounded({ name: 'test' } as Player, '1243');
             expect(result).toBe(false);
         });
 
@@ -92,9 +93,43 @@ describe('VirtualPlayerBehaviorService', () => {
             (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({ currentFighter: { name: 'test' } });
             const mockPlayer = { name: 'test', hp: { current: 100, max: 100 } };
 
-            const result = await service.tryToEscapeIfWounded(mockPlayer as Player, 'code');
+            const result = await service.tryToEscapeIfWounded(mockPlayer as Player, '1234');
 
             expect(result).toBe(false);
+        });
+
+        it('should attempt escape when wounded and escape attempts are available', async () => {
+            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
+            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({
+                currentFighter: { name: 'bot' },
+                remainingEscapeAttempts: new Map([['bot', 1]]),
+            });
+
+            const mockPlayer = { name: 'bot', hp: { current: 5, max: 10 } } as Player;
+
+            const result = await service.tryToEscapeIfWounded(mockPlayer, '1234');
+
+            expect(mockVirtualPlayerActions.getRandomDelay).toHaveBeenCalled();
+            expect(mockGameCombatService.attemptEscape).toHaveBeenCalledWith('1234', mockPlayer);
+            expect(result).toBe(true);
+        });
+
+        it('should perform attack when wounded and no escape attempts left', async () => {
+            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
+            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({
+                currentFighter: { name: 'bot' },
+                remainingEscapeAttempts: new Map([['bot', 0]]),
+            });
+
+            const mockPlayer = { name: 'bot', hp: { current: 2, max: 10 } } as Player;
+
+            (mockGameCombatService.performAttack as jest.Mock) = jest.fn();
+
+            const result = await service.tryToEscapeIfWounded(mockPlayer, '1234');
+
+            expect(mockVirtualPlayerActions.getRandomDelay).toHaveBeenCalled();
+            expect(mockGameCombatService.performAttack).toHaveBeenCalledWith('1234', 'bot');
+            expect(result).toBe(true);
         });
     });
 
@@ -199,6 +234,53 @@ describe('VirtualPlayerBehaviorService', () => {
             (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(mockVirtualPlayerActions.calculateTotalMovementCost).toHaveBeenCalledWith([]);
+        });
+    });
+
+    describe('attack', () => {
+        it('should return early if combat is not active', async () => {
+            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(false);
+
+            await service.attack({ name: 'bot' } as Player, '1234');
+
+            expect(mockGameCombatService.getCombatState).not.toHaveBeenCalled();
+        });
+
+        it('should return early if combat state is undefined', async () => {
+            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
+            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue(undefined);
+
+            await service.attack({ name: 'bot' } as Player, '1234');
+
+            expect(mockGameCombatService.performAttack).not.toHaveBeenCalled();
+        });
+
+        it('should return early if current fighter is not the virtual player', async () => {
+            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
+            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({
+                currentFighter: { name: 'other' },
+            });
+
+            await service.attack({ name: 'bot' } as Player, '1234');
+
+            expect(mockGameCombatService.performAttack).not.toHaveBeenCalled();
+        });
+
+        it('should perform attack if combat is active and current fighter is virtual player', async () => {
+            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
+            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({
+                currentFighter: { name: 'bot' },
+            });
+
+            const performAttackSpy = jest.fn();
+            (mockGameCombatService.performAttack as jest.Mock) = performAttackSpy;
+
+            const mockPlayer = { name: 'bot' } as Player;
+
+            await service.attack(mockPlayer, '1234');
+
+            expect(mockVirtualPlayerActions.getRandomDelay).toHaveBeenCalled();
+            expect(performAttackSpy).toHaveBeenCalledWith('1234', 'bot');
         });
     });
 
