@@ -150,8 +150,14 @@ export class GameplayService {
     }
 
     handleAttackCTF(gameData: GameData, targetTile: Tile) {
-        if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        const isSelfAttack = targetTile.player?.name === gameData.clientPlayer?.name;
+        const hasNoActionPoints = gameData.clientPlayer?.actionPoints === NO_ACTION_POINTS;
+        const shouldAbort = isSelfAttack || hasNoActionPoints;
+        if (shouldAbort) return;
+
         const currentTile = this.getClientPlayerPosition(gameData);
+        if (!targetTile.player) return;
+
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
             if (this.isTeamate(targetTile.player.name, currentTile.player.name, gameData)) {
                 this.snackBarService.showMessage("TRAITRE!!! C'EST MOI TON AMI");
@@ -175,8 +181,9 @@ export class GameplayService {
             return;
         }
         const currentTile = this.getClientPlayerPosition(gameData);
+        const canAttack = gameData.isActionMode && currentTile;
 
-        if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
+        if (canAttack && gameData.game.grid && currentTile.player) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
                 this.socketClientService.emit('startCombat', {
                     attackerName: currentTile.player.name,

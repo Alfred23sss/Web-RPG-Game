@@ -16,7 +16,13 @@ export class PlayerMovementService {
     ]);
 
     availablePath(startTile: Tile | undefined, maxMovement: number, grid: Tile[][]): Tile[] {
-        if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return [];
+        const isStartMissing = !startTile;
+        const isGridInvalid = !grid;
+        const isStartWall = startTile?.type === TileType.Wall;
+        const isClosedDoor = startTile?.type === TileType.Door && !startTile?.isOpen;
+        const shouldAbort = isStartMissing || isGridInvalid || isStartWall || isClosedDoor;
+
+        if (shouldAbort) return [];
 
         const reachableTiles = new Set<Tile>();
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: maxMovement }];
@@ -47,7 +53,14 @@ export class PlayerMovementService {
     }
 
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
-        if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
+        const isStartTileInvalid = !startTile;
+        const isTargetTileInvalid = !targetTile;
+        const isTargetWall = targetTile?.type === TileType.Wall;
+        const isGridInvalid = !grid;
+
+        const shouldAbortPathfinding = isStartTileInvalid || isTargetTileInvalid || isTargetWall || isGridInvalid;
+
+        if (shouldAbortPathfinding) return undefined;
 
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: 0 }];
         const costs = new Map<Tile, number>();
