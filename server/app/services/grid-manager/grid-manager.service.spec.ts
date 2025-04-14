@@ -1,13 +1,14 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */ // needed to access actual function
 /* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
-import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
-import { Item } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
+import { EventEmit, ItemName } from '@app/enums/enums';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { GridManagerService } from './grid-manager.service';
+import { ImageType } from '@common/enums';
 
 describe('GridManagerService', () => {
     let service: GridManagerService;
