@@ -286,6 +286,53 @@ describe('VirtualPlayerScoreService', () => {
 
             expect(move.score).toBe(FLAG_SCORE);
         });
+
+        it('should call handleHomeItemScore when item is Home', () => {
+            const move: Move = {
+                tile: {
+                    ...mockTile,
+                    item: {
+                        name: ItemName.Home,
+                        imageSrc: '',
+                        id: '',
+                        imageSrcGrey: '',
+                        description: '',
+                        itemCounter: 0,
+                    },
+                },
+                type: MoveType.Item,
+                score: 0,
+                inRange: false,
+            };
+
+            const spy = jest.spyOn(service as any, 'handleHomeItemScore');
+
+            service['calculateItemScore'](move, virtualPlayer);
+
+            expect(spy).toHaveBeenCalledWith(move, virtualPlayer);
+        });
+        it('should add invalid penalty for unknown item', () => {
+            const move: Move = {
+                tile: {
+                    ...mockTile,
+                    item: {
+                        name: 'UnknownItem' as ItemName,
+                        imageSrc: '',
+                        id: '',
+                        imageSrcGrey: '',
+                        description: '',
+                        itemCounter: 0,
+                    },
+                },
+                type: MoveType.Item,
+                score: 0,
+                inRange: false,
+            };
+
+            service['calculateItemScore'](move, virtualPlayer);
+
+            expect(move.score).toBe(INVALID_ITEM_PENALTY);
+        });
     });
 
     describe('calculateDefensiveItemScore', () => {
@@ -439,6 +486,29 @@ describe('VirtualPlayerScoreService', () => {
             };
 
             service['handleDefensiveHomeItemScore'](move, virtualPlayer, lobby);
+
+            expect(move.score).toBe(INVALID_ITEM_PENALTY);
+        });
+        it('should add invalid penalty when not own spawn and not flag carrier spawn', () => {
+            mockVirtualPlayerActions.isFlagInInventory.mockReturnValue(false);
+
+            const unrelatedTile = {
+                ...homeTile,
+                id: 'unrelated-tile',
+            };
+
+            const move: Move = {
+                tile: unrelatedTile,
+                type: MoveType.Item,
+                score: 0,
+                inRange: false,
+            };
+            const modifiedLobby = {
+                ...lobby,
+                players: [enemyPlayer],
+            };
+
+            service['handleDefensiveHomeItemScore'](move, virtualPlayer, modifiedLobby);
 
             expect(move.score).toBe(INVALID_ITEM_PENALTY);
         });
