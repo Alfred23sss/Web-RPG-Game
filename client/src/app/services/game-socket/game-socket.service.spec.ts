@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
@@ -11,8 +11,8 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { GameSocketService } from './game-socket.service';
 import { ItemName, TileType } from '@common/enums';
+import { GameSocketService } from './game-socket.service';
 
 describe('GameSocketService', () => {
     let service: GameSocketService;

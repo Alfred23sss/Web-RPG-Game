@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GameData } from '@app/classes/game-data/game-data';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
+import { DiceType, TileType } from '@common/enums';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { GameCombatComponent } from './game-combat.component';
-import { DiceType, TileType } from '@common/enums';
 
 describe('GameCombatComponent', () => {
     let component: GameCombatComponent;

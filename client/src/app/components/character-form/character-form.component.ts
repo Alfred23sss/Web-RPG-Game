@@ -3,12 +3,13 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestro
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { ATTRIBUTE_KEYS, KEY_DOWN_EVENT_LISTENER } from '@app/constants/global.constants';
+import { AttributeType, Keys, SocketEvent } from '@app/enums/global.enums';
 import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { AttributeType, AvatarType, DiceType, GameDecorations, Keys, SocketEvent } from '@common/enums';
+import { AvatarType, DiceType, GameDecorations } from '@common/enums';
 import { Subscription } from 'rxjs';
 
 @Component({

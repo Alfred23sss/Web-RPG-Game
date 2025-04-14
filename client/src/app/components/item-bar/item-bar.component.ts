@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { Item } from '@app/classes/item/item';
 import { ITEM_BAR_ITEMS } from '@app/constants/global.constants';
-import { GameMode, ItemName } from '@app/enums/global.enums';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
+import { GameMode, ItemName } from '@common/enums';
 
 @Component({
     selector: 'app-item-bar',

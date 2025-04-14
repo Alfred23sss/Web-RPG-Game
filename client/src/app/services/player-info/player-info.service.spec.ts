@@ -2,11 +2,11 @@
 /* eslint-disable @typescript-eslint/no-shadow*/
 /* eslint-disable @typescript-eslint/no-magic-numbers*/
 import { TestBed } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
+import { MOCK_PLAYER } from '@app/constants/global.constants';
 import { Player } from '@app/interfaces/player';
 import { BehaviorSubject } from 'rxjs';
 import { PlayerInfoService } from './player-info.service';
-import { MOCK_PLAYER } from '@app/constants/global.constants';
 
 const MAX_HP_TEST = 100;
 
