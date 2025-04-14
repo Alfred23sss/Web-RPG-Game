@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data';
 import { Item } from '@app/classes/item';
 import { DiceType, TileType } from '@app/enums/global.enums';
 import { AttackScore } from '@app/interfaces/attack-score';
