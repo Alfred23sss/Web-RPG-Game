@@ -1,6 +1,5 @@
-import { Behavior } from '@app/enums/enums';
-import { Item } from '@app/interfaces/Item';
-import { Tile } from '@app/interfaces/Tile';
+import { Item } from '@app/interfaces/item';
+import { Tile } from '@app/interfaces/tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
@@ -11,6 +10,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'socket.io';
 import { VirtualPlayerGateway } from './virtual-player.gateway';
+import { Behavior } from '@common/enums';
 
 describe('VirtualPlayerGateway', () => {
     let gateway: VirtualPlayerGateway;

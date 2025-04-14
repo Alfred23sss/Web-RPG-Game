@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GameData } from '@app/classes/game-data';
 import { Item } from '@app/classes/item';
-import { TileType } from '@app/enums/global.enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -11,7 +10,7 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { GameCombatComponent } from './game-combat.component';
-import { DiceType } from '@common/enums';
+import { DiceType, TileType } from '@common/enums';
 
 describe('GameCombatComponent', () => {
     let component: GameCombatComponent;

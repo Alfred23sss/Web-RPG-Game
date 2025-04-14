@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
-import { TileType } from '@app/enums/global.enums';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ImageType } from '@common/enums';
+import { ImageType, TileType } from '@common/enums';
 
 interface ToolSelection {
     tool: TileType;

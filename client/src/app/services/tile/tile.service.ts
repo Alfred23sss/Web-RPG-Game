@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
 import { ToolService } from '@app/services/tool/tool.service';
-import { ImageType } from '@common/enums';
+import { ImageType, TileType } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

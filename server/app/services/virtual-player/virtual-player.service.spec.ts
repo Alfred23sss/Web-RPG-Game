@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Behavior, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { DiceType } from '@app/interfaces/dice';
 import { Game } from '@app/interfaces/game';
@@ -15,7 +15,7 @@ import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behav
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { VirtualPlayerService } from './virtual-player.service';
-import { ItemName } from '@common/enums';
+import { ItemName, Behavior } from '@common/enums';
 
 describe('VirtualPlayerService', () => {
     let service: VirtualPlayerService;

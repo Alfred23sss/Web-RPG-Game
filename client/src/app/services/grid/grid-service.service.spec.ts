@@ -1,8 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { TileType } from '@app/enums/global.enums';
 import { GridService } from './grid-service.service';
 import { MOCK_GRID } from '@app/constants/global.constants';
-import { ImageType, GameSize } from '@common/enums';
+import { ImageType, GameSize, TileType } from '@common/enums';
 
 const SMALL_GRID_SIZE = 10;
 const MEDIUM_GRID_SIZE = 15;

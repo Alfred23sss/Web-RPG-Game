@@ -1,4 +1,4 @@
-import { EventEmit, TileType, AttributeType } from '@app/enums/enums';
+import { EventEmit, AttributeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
@@ -6,7 +6,7 @@ import { Tile } from '@app/interfaces/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-import { ItemName } from '@common/enums';
+import { ItemName, TileType } from '@common/enums';
 
 const HEALTH_CONDITION_THRESHOLD = 0.5;
 const BONUS_VALUE = 2;

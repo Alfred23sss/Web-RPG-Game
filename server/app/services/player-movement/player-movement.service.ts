@@ -1,9 +1,8 @@
 import { DEFAULT_COST, DOOR_COST, ICE_COST, WALL_COST, WATER_COST } from '@app/constants/constants';
-import { TileType } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { Injectable } from '@nestjs/common';
-import { ItemName } from '@common/enums';
+import { ItemName, TileType } from '@common/enums';
 
 @Injectable()
 export class PlayerMovementService {

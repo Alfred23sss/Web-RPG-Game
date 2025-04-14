@@ -43,16 +43,6 @@ export enum AttributeType {
     Defense = 'Défense',
 }
 
-export enum HttpStatus {
-    InternalServerError = 500,
-    Forbidden = 403,
-}
-
-export enum TimeConstants {
-    SecondDivider = 1000,
-    SecondModulo = 60,
-}
-
 export enum ErrorMessages {
     MissingCharacterDetails = 'Veuillez vous assurer d’avoir attribué des bonus et des dés, et d’avoir saisi un nom et un avatar.',
     InvalidGameSize = 'Taille de jeu invalide sélectionnée !',
@@ -81,14 +71,6 @@ export enum ErrorMessages {
     MaxPlayersReached = '❌ Le nombre maximal de joueurs est atteint pour cette partie',
 }
 
-export enum TileType {
-    Water = 'eau',
-    Ice = 'glace',
-    Wall = 'mur',
-    Door = 'porte',
-    Default = 'défaut',
-}
-
 export enum AccessCodeGenerator {
     Minimum = 1000,
     Maximum = 9000,
@@ -97,12 +79,6 @@ export enum AccessCodeGenerator {
 export enum MouseButton {
     Left = 0,
     Right = 2,
-}
-
-export enum Behavior {
-    Aggressive = 'aggressive',
-    Defensive = 'defensive',
-    Null = '',
 }
 
 export enum SocketEvent {
