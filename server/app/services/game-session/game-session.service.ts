@@ -1,5 +1,6 @@
 import { EventEmit, GameMode, ItemName, TileType } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/GameSession';
+import { Turn } from '@app/interfaces/Turn';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
@@ -31,7 +32,6 @@ export class GameSessionService {
     endTurn(accessCode: string): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-        gameSession.turn.beginnerPlayer = this.turnService.getNextPlayer(accessCode, gameSession.turn);
         this.turnService.endTurn(gameSession.turn);
         this.startTransitionPhase(accessCode);
     }
@@ -202,14 +202,13 @@ export class GameSessionService {
         const game = lobby.game;
         const grid = this.gridManager.assignItemsToRandomItems(game.grid);
         const spawnPoints = this.gridManager.findSpawnPoints(grid);
-        let turn;
+        let turn: Turn;
         if (gameMode === GameMode.CTF) {
             turn = this.turnService.initializeTurnCTF(accessCode);
         } else {
             turn = this.turnService.initializeTurn(accessCode);
         }
         turn.currentPlayer = turn.orderedPlayers[0];
-        turn.beginnerPlayer = turn.orderedPlayers[0];
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
         game.mode = gameMode;

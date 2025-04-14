@@ -13,7 +13,7 @@ const COMBAT_TURN_DURATION = 5000;
 const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
 const MAX_ESCAPE_ATTEMPTS = 2;
 const SECOND = 1000;
-const ESCAPE_THRESHOLD = 0.3;
+const ESCAPE_THRESHOLD = 1;
 const WIN_CONDITION = 3;
 
 @Injectable()
@@ -110,8 +110,13 @@ export class GameCombatService {
     endCombat(accessCode: string, isEscape: boolean = false): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
+        Logger.log('passed combat stae');
+
         this.resetCombatTimers(accessCode);
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
+        Logger.log('att ', attacker);
+        Logger.log('def', defender);
+        Logger.log('pcuurebt ', currentFighter);
         this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;

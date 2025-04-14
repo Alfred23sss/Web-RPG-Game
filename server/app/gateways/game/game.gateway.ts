@@ -169,6 +169,7 @@ export class GameGateway {
         this.server.to(payload.accessCode).emit('escapeAttempt', {
             attemptsLeft: payload.attemptsLeft,
             isEscapeSuccessful: payload.isEscapeSuccessful,
+            player: payload.player,
         });
     }
 

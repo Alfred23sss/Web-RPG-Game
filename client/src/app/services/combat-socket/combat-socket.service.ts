@@ -75,10 +75,12 @@ export class CombatSocketService {
     }
 
     private onEscapeAttempt(): void {
-        this.socketClientService.on('escapeAttempt', (data: { attemptsLeft: number; isEscapeSuccessful: boolean }) => {
+        this.socketClientService.on('escapeAttempt', (data: { attemptsLeft: number; isEscapeSuccessful: boolean; player: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.evadeResult = data;
             gameData.attackResult = null;
+            if (data.player.name !== gameData.clientPlayer.name) return;
+
             gameData.escapeAttempts = data.attemptsLeft;
             const hasEvaded = data.isEscapeSuccessful ? 'réussi' : 'raté';
             this.clientNotifier.addLogbookEntry(`Tentative d'évasion ${hasEvaded}`, []); // pt rajoute nom joueur ici
