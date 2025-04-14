@@ -79,6 +79,38 @@ export enum ItemType {
     Default = './assets/items/banner-medieval.png',
 }
 
+export enum ItemName {
+    Home = 'home',
+    Lightning = 'lightning',
+    Potion = 'potion',
+    Stop = 'stop',
+    QuestionMark = 'question',
+    Fire = 'fire',
+    Rubik = 'rubik',
+    Swap = 'swap',
+    Flag = 'flag',
+    Default = 'default',
+}
+
+export enum ItemDescription {
+    Home = 'Point de départ',
+    Lightning = 'Permet de détruire des murs',
+    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
+    Stop = 'Donne un deuxième D6 au joueur.',
+    QuestionMark = 'Objet aléatoire.',
+    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
+    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
+    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
+    Flag = 'Drapeau à capturer.',
+    Default = 'rien',
+}
+
+export enum ItemCount {
+    SmallItemCount = 2,
+    MediumItemCount = 4,
+    LargeItemCount = 6,
+}
+
 export enum BonusValue {
     Default = 2,
 }
@@ -138,19 +170,6 @@ export enum Routes {
     GameEndPage = '/game-end',
 }
 
-export enum ItemName {
-    Home = 'home',
-    Lightning = 'lightning',
-    Potion = 'potion',
-    Stop = 'stop',
-    QuestionMark = 'question',
-    Fire = 'fire',
-    Rubik = 'rubik',
-    Swap = 'swap',
-    Flag = 'flag',
-    Default = 'default',
-}
-
 export enum HttpStatus {
     InternalServerError = 500,
     Forbidden = 403,
@@ -197,19 +216,6 @@ export enum TileType {
     Default = 'défaut',
 }
 
-export enum ItemDescription {
-    Home = 'Point de départ',
-    Lightning = 'Permet de détruire des murs',
-    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
-    Stop = 'Donne un deuxième D6 au joueur.',
-    QuestionMark = 'Objet aléatoire.',
-    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
-    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
-    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
-    Flag = 'Drapeau à capturer.',
-    Default = 'rien',
-}
-
 export enum AccessCodeGenerator {
     Minimum = 1000,
     Maximum = 9000,
@@ -218,12 +224,6 @@ export enum AccessCodeGenerator {
 export enum MouseButton {
     Left = 0,
     Right = 2,
-}
-
-export enum ItemCount {
-    SmallItemCount = 2,
-    MediumItemCount = 4,
-    LargeItemCount = 6,
 }
 
 export enum Behavior {

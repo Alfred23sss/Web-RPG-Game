@@ -138,6 +138,49 @@ export const MOCK_GAMES = [
 export const ESCAPE_CHANCE = 0.3;
 export const NO_ESCAPES_TIMER = 3;
 
+export const UNINITIALIZED_PLAYER: Player = {
+    name: '',
+    avatar: '',
+    speed: 4,
+    attack: { value: 4, bonusDice: DiceType.Uninitialized },
+    defense: { value: 4, bonusDice: DiceType.Uninitialized },
+    hp: { current: 4, max: 4 },
+    movementPoints: 4,
+    actionPoints: 1,
+    inventory: [null, null],
+    isAdmin: false,
+    isVirtual: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
+export const MOCK_PLAYER: Player = {
+    name: 'testPlayer',
+    avatar: 'testAvatar',
+    speed: 4,
+    attack: {
+        value: 4,
+        bonusDice: DiceType.D6,
+    },
+    defense: {
+        value: 4,
+        bonusDice: DiceType.D4,
+    },
+    hp: {
+        current: 10,
+        max: 10,
+    },
+    movementPoints: 3,
+    actionPoints: 3,
+    inventory: [null, null],
+    isAdmin: false,
+    isVirtual: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
 export const ITEM_BAR_ITEMS = [
     {
         id: '0',
@@ -222,32 +265,6 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 
 export const ITEMS_TO_UPDATE = new Set(['home']);
 
-export const MOCK_PLAYER: Player = {
-    name: 'testPlayer',
-    avatar: 'testAvatar',
-    speed: 4,
-    attack: {
-        value: 4,
-        bonusDice: DiceType.D6,
-    },
-    defense: {
-        value: 4,
-        bonusDice: DiceType.D4,
-    },
-    hp: {
-        current: 10,
-        max: 10,
-    },
-    movementPoints: 3,
-    actionPoints: 3,
-    inventory: [null, null],
-    isAdmin: false,
-    isVirtual: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
-};
-
 export const MOCK_GRID: Tile[][] = [
     [
         { id: 'tile-0-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
@@ -279,23 +296,6 @@ export const DEFAULT_LOBBY: Lobby = {
     players: [],
     game: MOCK_GAME,
     maxPlayers: 0,
-};
-
-export const UNINITIALIZED_PLAYER: Player = {
-    name: '',
-    avatar: '',
-    speed: 4,
-    attack: { value: 4, bonusDice: DiceType.Uninitialized },
-    defense: { value: 4, bonusDice: DiceType.Uninitialized },
-    hp: { current: 4, max: 4 },
-    movementPoints: 4,
-    actionPoints: 1,
-    inventory: [null, null],
-    isAdmin: false,
-    isVirtual: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
 };
 
 export const MOCK_LOBBY = DEFAULT_LOBBY;
