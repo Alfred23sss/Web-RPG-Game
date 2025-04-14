@@ -4,8 +4,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { AttackScore } from '@app/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
-import { DiceType } from '@app/interfaces/dice';
-import { Player } from '@app/interfaces/player';
+import { DiceType } from '@app/interfaces/Dice';
+import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
@@ -289,7 +289,6 @@ describe('GameCombatService', () => {
             service['combatStates'][accessCode] = combatState;
             combatHelper.isValidAttacker.mockReturnValue(true);
 
-            // Now use score objects
             const attackerScore: AttackScore = { score: 10, diceRolled: 2 };
             const defenseScore: AttackScore = { score: 5, diceRolled: 2 };
 

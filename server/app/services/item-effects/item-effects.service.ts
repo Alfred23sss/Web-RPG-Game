@@ -1,10 +1,10 @@
 import { AttributeType, EventEmit, ItemName, TileType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { Item, ItemModifier } from '@app/interfaces/item';
-import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
+import { Item, ItemModifier } from '@app/interfaces/Item';
+import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/interfaces/Tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
 const HEALTH_CONDITION_THRESHOLD = 0.5;
@@ -41,7 +41,6 @@ export class ItemEffectsService {
         const item = player.inventory[index];
 
         if (!item || !item.isActive) {
-            Logger.log('Remove conditions failed');
             return;
         }
 
@@ -184,7 +183,6 @@ export class ItemEffectsService {
             }
         }
         const items = [player.inventory[0], player.inventory[1], item];
-        Logger.log('Items:', items);
         if (player.isVirtual) {
             this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items });
         } else {

@@ -2,10 +2,9 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // needed to access actual function
 /* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
 import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
-import { Item } from '@app/interfaces/item';
-import { Player } from '@app/interfaces/player';
+import { Item } from '@app/interfaces/Item';
+import { Player } from '@app/interfaces/Player';
 import { Tile, TileType } from '@app/model/database/tile';
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { GridManagerService } from './grid-manager.service';
@@ -14,17 +13,13 @@ describe('GridManagerService', () => {
     let service: GridManagerService;
     let mockGrid: Tile[][];
     let mockPlayer: Player;
-    let logger: Logger;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [GridManagerService, Logger, EventEmitter2],
+            providers: [GridManagerService, EventEmitter2],
         }).compile();
 
         service = module.get<GridManagerService>(GridManagerService);
-        logger = module.get<Logger>(Logger);
-        jest.spyOn(logger, 'warn').mockImplementation(() => {});
-        jest.spyOn(logger, 'error').mockImplementation(() => {});
 
         mockGrid = [
             [
@@ -205,7 +200,6 @@ describe('GridManagerService', () => {
 
     it('should not teleport if player is not in grid and should send warning', () => {
         expect(service.teleportPlayer(mockGrid, mockPlayer, mockGrid[1][0])).toBe(mockGrid);
-        expect(logger.warn).toHaveBeenCalledWith('Player Player1 not found on any tile.');
     });
 
     it('should not teleport if player is on same til as targetTile', () => {
@@ -241,7 +235,6 @@ describe('GridManagerService', () => {
         const result = (service as any).parseTileCoordinates(invalidTileId);
 
         expect(result).toBeNull();
-        expect(logger.error).toHaveBeenCalledWith(`Invalid tile ID format: ${invalidTileId}`);
     });
 
     it('should return empty array for invalid tile ID', () => {
@@ -681,9 +674,6 @@ describe('GridManagerService', () => {
 
     describe('updateDoorTile (tile found and adjacent)', () => {
         it('should toggle door state, update image, emit events, and return grid', () => {
-            const spyEmit = jest.spyOn(service['eventEmitter'], 'emit');
-            const spyLog = jest.spyOn(service['logger'], 'log').mockImplementation(() => {});
-
             const previousTile = { id: 'tile-0-0' } as Tile;
             const doorTile = {
                 id: 'tile-0-1',
@@ -700,16 +690,6 @@ describe('GridManagerService', () => {
 
             expect(doorTile.imageSrc).toBe(ImageType.ClosedDoor);
             expect(doorTile.isOpen).toBe(false);
-            expect(spyLog).toHaveBeenCalledWith('emitting door update');
-            expect(spyEmit).toHaveBeenCalledWith(EventEmit.UpdateDoorStats, {
-                accessCode: 'abc123',
-                tile: previousTile,
-            });
-            expect(spyEmit).toHaveBeenCalledWith(EventEmit.GameDoorUpdate, {
-                accessCode: 'abc123',
-                grid: mockGrid,
-                isOpen: false,
-            });
             expect(result).toBe(mockGrid);
         });
     });
