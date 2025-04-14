@@ -1,11 +1,11 @@
 import { AttackScore } from '@app/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
-import { DiceType } from '@app/interfaces/dice';
+import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { Injectable } from '@nestjs/common';
 import { ItemName, TileType } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 
 const ICE_PENALTY = -2;
 
