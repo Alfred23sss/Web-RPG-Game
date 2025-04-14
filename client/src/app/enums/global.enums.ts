@@ -118,6 +118,15 @@ export enum SocketEvent {
     CombatEnded = 'combatEnded',
     CombatEndedLog = 'combatEndedLog',
     CombatStartedLog = 'combatStartedLog',
+    DecrementItem = 'decrement.item',
+    EndTurn = 'endTurn',
+    DoorUpdate = 'doorUpdate',
+    WallUpdate = 'wallUpdate',
+    StartCombat = 'startCombat',
+    TeleportPlayer = 'teleportPlayer',
+    PerformAttack = 'performAttack',
+    Evade = 'evade',
+    AdminModeUpdate = 'adminModeUpdate',
 }
 
 export enum SnackBarMessage {
@@ -126,6 +135,9 @@ export enum SnackBarMessage {
     NonExistent = "La partie que vous souhaitez rejoindre n'existe pas!",
     GetImpossible = 'Impossible de récupérer la partie.',
     LobbyFull = 'Le lobby est plein, impossible de le déverrouiller.',
+    FriendlyFire = "TRAITRE!!! C'EST MOI TON AMI",
+    ActivatedMode = 'Mode action activé',
+    DeactivatedMode = 'Mode action désactivé',
 }
 
 export enum LogBookEntry {
@@ -165,4 +177,5 @@ export enum ClientNotifierMessage {
 
 export enum Keys {
     Escape = 'Escape',
+    D = 'd',
 }
