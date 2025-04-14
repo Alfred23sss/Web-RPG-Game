@@ -21,11 +21,11 @@ import { GridManagerService } from './services/grid-manager/grid-manager.service
 import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
 import { PlayerMovementService } from './services/player-movement/player-movement.service';
+import { VirtualPlayerActionsService } from './services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerBehaviorService } from './services/virtual-player-behavior/virtual-player-behavior.service';
 import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtual-player-creation.service';
 import { VirtualPlayerScoreService } from './services/virtual-player-score/virtual-player-score.service';
 import { VirtualPlayerService } from './services/virtual-player/virtual-player.service';
-import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/virtual-player-actions.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),

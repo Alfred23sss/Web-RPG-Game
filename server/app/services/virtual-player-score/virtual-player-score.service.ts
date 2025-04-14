@@ -16,7 +16,7 @@ import { Move } from '@app/interfaces/move';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtual-player-actions.service';
+import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

@@ -21,7 +21,7 @@ import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { TileType } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtual-player-actions.service';
+import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from './virtual-player-score.service';
 
 describe('VirtualPlayerScoreService', () => {

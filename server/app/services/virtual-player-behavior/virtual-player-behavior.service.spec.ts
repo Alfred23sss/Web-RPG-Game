@@ -9,8 +9,8 @@ import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Item } from '@app/model/database/item';
 import { TileType } from '@app/model/database/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
+import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
-import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtual-player-actions.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerBehaviorService } from './virtual-player-behavior.service';
 
