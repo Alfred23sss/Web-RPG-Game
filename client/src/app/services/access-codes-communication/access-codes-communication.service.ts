@@ -6,7 +6,6 @@ import { Observable } from 'rxjs';
     providedIn: 'root',
 })
 export class AccessCodesCommunicationService {
-    // private apiUrl = `${environment.serverUrl}/accessCodes`;
     private apiUrl = 'http://localhost:3000/api/accessCodes';
 
     constructor(private readonly http: HttpClient) {}

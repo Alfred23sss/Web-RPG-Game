@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { AttackScore } from '@app/interfaces/AttackScore';
-import { CombatState } from '@app/interfaces/CombatState';
+import { AttackScore } from '@app/interfaces/attack-score';
+import { CombatState } from '@app/interfaces/combat-state';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/interfaces/Player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
@@ -231,7 +231,6 @@ describe('GameCombatService', () => {
             const abandoningPlayerName = 'defender';
 
             const combatState = mockCombatState();
-
             combatState.currentFighter = combatState.attacker;
 
             service['combatStates'][accessCode] = combatState;

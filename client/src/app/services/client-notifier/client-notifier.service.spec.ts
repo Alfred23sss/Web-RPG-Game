@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
-import { DiceType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { take } from 'rxjs';
+import { DiceType } from '@common/enums';
 
 describe('ClientNotifierServices', () => {
     let service: ClientNotifierServices;

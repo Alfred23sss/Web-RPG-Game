@@ -1,18 +1,20 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
-import { DiceType, EventEmit, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Move } from '@app/interfaces/Move';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { MoveType } from '@app/enums/enums';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
-import { VirtualPlayerActionsService } from './virtualPlayerActions.service';
+import { VirtualPlayerActionsService } from './virtual-player-actions.service';
+import { TeamType, ItemName, DiceType, TileType } from '@common/enums';
 
 describe('VirtualPlayerActionsService', () => {
     let service: VirtualPlayerActionsService;
@@ -139,11 +141,26 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should do nothing if movement fails', async () => {
+            mockMove = createMockMove();
             jest.spyOn(service as any, 'executeMove').mockResolvedValue(undefined);
 
             await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
 
             expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should complete move normally if no special actions', async () => {
+            const mockTargetTile = createMockTile();
+            mockMove = createMockMove({ tile: mockTargetTile });
+            const mockPath = [mockVirtualTile, mockTargetTile];
+
+            jest.spyOn(service as any, 'executeMove').mockResolvedValue(mockPath);
+            jest.spyOn(service as any, 'handleAdjacentToClosedDoor').mockResolvedValue(false);
+            jest.spyOn(service as any, 'handleAdjacentToPlayer').mockResolvedValue(false);
+
+            await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
+
+            expect(mockEventEmitter.emit).toHaveBeenCalled();
         });
 
         it('should return early when door is opened', async () => {

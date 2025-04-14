@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
-import { ImageType, ItemDescription, ItemName, ItemType, MouseButton, TileType } from '@app/enums/global.enums';
+import { MouseButton } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { TileComponent } from './tile.component';
+import { ImageType, ItemType, ItemName, ItemDescription, TileType } from '@common/enums';
 
 describe('TileComponent', () => {
     let component: TileComponent;

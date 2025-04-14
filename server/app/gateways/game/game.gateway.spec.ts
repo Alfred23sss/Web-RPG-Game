@@ -2,9 +2,8 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { AttackScore } from '@app/interfaces/AttackScore';
+import { AttackScore } from '@app/interfaces/attack-score';
 import { DiceType } from '@app/interfaces/Dice';
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
@@ -14,7 +13,6 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 
@@ -55,7 +53,6 @@ describe('GameGateway', () => {
     let serverMock: Partial<Server>;
     let gameSessionServiceMock: Partial<GameSessionService>;
     let lobbyServiceMock: Partial<LobbyService>;
-    let loggerMock: Partial<Logger>;
     let combatServiceMock: Partial<GameCombatService>;
     let accessCodeServiceMock: Partial<AccessCodesService>;
     let gameStatisticsServiceMock: Partial<GameStatisticsService>;
@@ -116,11 +113,6 @@ describe('GameGateway', () => {
             getGameStatistics: jest.fn(),
         };
 
-        loggerMock = {
-            log: jest.fn(),
-            error: jest.fn(),
-        };
-
         combatServiceMock = {
             startCombat: jest.fn(),
             performAttack: jest.fn(),
@@ -135,7 +127,6 @@ describe('GameGateway', () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 GameGateway,
-                { provide: Logger, useValue: loggerMock },
                 { provide: LobbyService, useValue: lobbyServiceMock },
                 { provide: GameSessionService, useValue: gameSessionServiceMock },
                 { provide: GameCombatService, useValue: combatServiceMock },
@@ -174,7 +165,6 @@ describe('GameGateway', () => {
             gateway.handleEndTurn(MOCK_CLIENT, MOCK_PAYLOAD);
 
             expect(gameSessionServiceMock.endTurn).toHaveBeenCalledWith(MOCK_PAYLOAD.accessCode);
-            expect(loggerMock.log).toHaveBeenCalledWith(`Ending turn for game ${MOCK_PAYLOAD.accessCode}`);
         });
     });
 
@@ -389,7 +379,6 @@ describe('GameGateway', () => {
 
             gateway.handleTransitionStarted(TRANSITION_PAYLOAD);
 
-            expect(loggerMock.log).toHaveBeenCalledWith('Received transition started event for game test123');
             expect(serverMock.to).toHaveBeenCalledWith(ACCESS_CODE);
             expect(serverMock.emit).toHaveBeenCalledWith('transitionStarted', {
                 nextPlayer: MOCK_PLAYER,
@@ -623,6 +612,7 @@ describe('GameGateway', () => {
     describe('handleDefenderHealthUpdate', () => {
         it('should send player update to specific socket', () => {
             gateway.handleDefenderHealthUpdate(MOCK_PAYLOAD);
+
             const expectedSocketId = 'test123';
             expect(serverMock.to).toHaveBeenCalledWith(expectedSocketId);
             expect(serverMock.emit).toHaveBeenCalledWith('playerUpdate', {
@@ -743,35 +733,6 @@ describe('GameGateway', () => {
             });
         });
     });
-    it('should log player names and emit teamCreated event with correct data', () => {
-        const redTeam = [
-            { ...MOCK_PLAYER, name: 'RedPlayer1' },
-            { ...MOCK_PLAYER, name: 'RedPlayer2' },
-        ];
-        const blueTeam = [
-            { ...MOCK_PLAYER, name: 'BluePlayer1' },
-            { ...MOCK_PLAYER, name: 'BluePlayer2' },
-        ];
-        const accessCode = 'test-access-code';
-
-        gateway.handleTeamCreated({
-            redTeam,
-            blueTeam,
-            accessCode,
-        });
-
-        expect(loggerMock.log).toHaveBeenCalledWith('RedPlayer1');
-        expect(loggerMock.log).toHaveBeenCalledWith('RedPlayer2');
-        expect(loggerMock.log).toHaveBeenCalledWith('BluePlayer1');
-        expect(loggerMock.log).toHaveBeenCalledWith('BluePlayer2');
-
-        expect(loggerMock.log).toHaveBeenCalledWith(expect.stringContaining('teamCreated'));
-        expect(serverMock.to).toHaveBeenCalledWith(accessCode);
-        expect(serverMock.emit).toHaveBeenCalledWith('teamCreated', {
-            redTeam,
-            blueTeam,
-        });
-    });
     it('should log player update and emit playerClientUpdate event with correct player data', () => {
         const mockPlayer = { ...MOCK_PLAYER, name: 'UpdatedPlayer' };
         const accessCode = 'update-access-code';
@@ -780,8 +741,6 @@ describe('GameGateway', () => {
             accessCode,
             player: mockPlayer,
         });
-
-        expect(loggerMock.log).toHaveBeenCalledWith(`playerUpdateClientEventCalled ${mockPlayer.name}`);
 
         expect(serverMock.to).toHaveBeenCalledWith(accessCode);
         expect(serverMock.emit).toHaveBeenCalledWith('playerClientUpdate', {
@@ -835,7 +794,6 @@ describe('GameGateway', () => {
         expect(serverMock.emit).toHaveBeenCalledWith('wallClicked', {
             grid: mockGrid,
         });
-        expect(loggerMock.log).toHaveBeenCalledWith('Wall update event emitted');
     });
     it('should call gameSessionService.handleItemDropped with correct payload', () => {
         const mockItem: Item = {
@@ -892,7 +850,5 @@ describe('GameGateway', () => {
             payload.targetTile,
             payload.player,
         );
-
-        expect(loggerMock.log).toHaveBeenCalledWith('Door update emitted');
     });
 });

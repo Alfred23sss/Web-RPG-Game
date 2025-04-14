@@ -1,8 +1,8 @@
 import { DEFAULT_COST, DOOR_COST, ICE_COST, WALL_COST, WATER_COST } from '@app/constants/constants';
-import { ItemName, TileType } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { Injectable, Logger } from '@nestjs/common';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Injectable } from '@nestjs/common';
+import { ItemName, TileType } from '@common/enums';
 
 @Injectable()
 export class PlayerMovementService {
@@ -25,27 +25,15 @@ export class PlayerMovementService {
         previous.set(startTile, null);
 
         while (queue.length > 0) {
-            queue.sort((a, b) => a.cost - b.cost);
+            this.sortQueueByCost(queue);
             const next = queue.shift();
             if (!next) break;
+
             const { tile: currentTile, cost: currentCost } = next;
 
-            if (currentTile === targetTile) {
-                const fullPath = this.reconstructPath(previous, targetTile);
-                return fullPath;
-            }
-            for (const neighbor of this.getNeighbors(currentTile, grid)) {
-                if (!this.isValidNeighbor(neighbor)) continue;
+            if (currentTile === targetTile) return this.reconstructPath(previous, targetTile);
 
-                const moveCost = this.getMoveCost(neighbor);
-
-                const newCost = currentCost + moveCost;
-                if (!costs.has(neighbor) || newCost < this.getMoveCost(neighbor)) {
-                    costs.set(neighbor, newCost);
-                    previous.set(neighbor, currentTile);
-                    queue.push(this.getNeighborAndCost(neighbor, newCost));
-                }
-            }
+            this.processNeighbors({ currentTile, currentCost, grid }, { queue, costs, previous });
         }
 
         return undefined;
@@ -186,5 +174,36 @@ export class PlayerMovementService {
             current = previous.get(current) || null;
         }
         return path;
+    }
+
+    private sortQueueByCost(queue: { tile: Tile; cost: number }[]): void {
+        queue.sort((a, b) => a.cost - b.cost);
+    }
+
+    private processNeighbors(
+        context: { currentTile: Tile; currentCost: number; grid: Tile[][] },
+        state: {
+            queue: { tile: Tile; cost: number }[];
+            costs: Map<Tile, number>;
+            previous: Map<Tile, Tile | null>;
+        },
+    ): void {
+        const { currentTile, currentCost, grid } = context;
+        const { queue, costs, previous } = state;
+
+        for (const neighbor of this.getValidNeighbors(currentTile, grid)) {
+            const moveCost = this.getMoveCost(neighbor);
+            const newCost = currentCost + moveCost;
+
+            if (!costs.has(neighbor) || newCost < (costs.get(neighbor) ?? Infinity)) {
+                costs.set(neighbor, newCost);
+                previous.set(neighbor, currentTile);
+                queue.push(this.getNeighborAndCost(neighbor, newCost));
+            }
+        }
+    }
+
+    private getValidNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
+        return this.getNeighbors(tile, grid).filter((neighbor) => this.isValidNeighbor(neighbor));
     }
 }

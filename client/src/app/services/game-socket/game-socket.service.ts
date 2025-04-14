@@ -10,6 +10,7 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { SocketEvent } from '@app/enums/global.enums';
 
 @Injectable({
     providedIn: 'root',
@@ -50,7 +51,7 @@ export class GameSocketService {
     }
 
     private onGameAbandoned(): void {
-        this.socketClientService.on('game-abandoned', (data: { player: Player }) => {
+        this.socketClientService.on(SocketEvent.GameAbandoned, (data: { player: Player }) => {
             const abandonedPlayer = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
@@ -58,26 +59,26 @@ export class GameSocketService {
             //     (p) => p.name !== data.player.name,
             // );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joeur a abandonne la partie', [data.player]);
+            this.clientNotifier.addLogbookEntry('Un joueur a abandonne la partie', [data.player]);
         });
     }
 
     private onItemChoice(): void {
-        this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
+        this.socketClientService.on(SocketEvent.ItemChoice, (data: { items: [Item, Item, Item] }) => {
             this.gameplayService.createItemPopUp(data.items, this.gameStateService.gameDataSubjectValue);
         });
     }
 
     // no need to be client side dont even know if its used
     private onItemDropped(): void {
-        this.socketClientService.on('itemDropped', (data: { accessCode: string; player: Player; item: Item }) => {
+        this.socketClientService.on(SocketEvent.ItemDropped, (data: { accessCode: string; player: Player; item: Item }) => {
             this.clientNotifier.addLogbookEntry(`${data.player.name} a déposé un item!`, [data.player]);
-            this.socketClientService.emit('itemDrop', data);
+            this.socketClientService.emit(SocketEvent.ItemDrop, data);
         });
     }
 
     private onPlayerClientUpdate(): void {
-        this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
+        this.socketClientService.on(SocketEvent.PlayerClientUpdate, (data: { player: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             const playerBeforeUpdate = gameData.lobby.players.find((p) => p.name === data.player.name);
             if (playerBeforeUpdate) {
@@ -100,7 +101,7 @@ export class GameSocketService {
     }
 
     private onGameDeleted(): void {
-        this.socketClientService.on('gameDeleted', () => {
+        this.socketClientService.on(SocketEvent.GameDeleted, () => {
             this.gameStateService.gameDataSubjectValue.turnTimer = 0;
             this.clientNotifier.displayMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
             setTimeout(() => {
@@ -110,7 +111,7 @@ export class GameSocketService {
     }
 
     private onGameEnded(): void {
-        this.socketClientService.on('gameEnded', (data: { winner: string[]; stats: GameStatistics }) => {
+        this.socketClientService.on(SocketEvent.GameEnded, (data: { winner: string[]; stats: GameStatistics }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players.filter((player) => player.hasAbandoned === false);
             if (data.winner.length <= 1) {
                 this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`);
@@ -128,7 +129,7 @@ export class GameSocketService {
     }
 
     private onAdminModeDisabled(): void {
-        this.socketClientService.on('adminModeDisabled', () => {
+        this.socketClientService.on(SocketEvent.AdminModeDisabled, () => {
             if (this.gameStateService.gameDataSubjectValue.isDebugMode) {
                 this.clientNotifier.displayMessage("Mode debug 'désactivé'");
             }
@@ -138,7 +139,7 @@ export class GameSocketService {
     }
 
     private onGameStarted(): void {
-        this.socketClientService.socket.on('gameStarted', (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
+        this.socketClientService.socket.on(SocketEvent.GameStarted, (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
             this.gameStateService.gameDataSubjectValue.lobby.players = data.orderedPlayers;
             this.gameStateService.gameDataSubjectValue.clientPlayer =
                 data.orderedPlayers.find((p) => p.name === this.gameStateService.gameDataSubjectValue.clientPlayer.name) ||
@@ -150,7 +151,7 @@ export class GameSocketService {
 
     // refactor for god sake
     private onPlayerMovement(): void {
-        this.socketClientService.on('playerMovement', (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
+        this.socketClientService.on(SocketEvent.PlayerMovement, (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
             if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
                 this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
             }
@@ -196,7 +197,7 @@ export class GameSocketService {
     }
 
     private onPlayerUpdate(): void {
-        this.socketClientService.on('playerUpdate', (data: { player: Player }) => {
+        this.socketClientService.on(SocketEvent.PlayerUpdate, (data: { player: Player }) => {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
             }
@@ -209,14 +210,14 @@ export class GameSocketService {
     }
 
     private onPlayerListUpdate(): void {
-        this.socketClientService.on('playerListUpdate', (data: { players: Player[] }) => {
+        this.socketClientService.on(SocketEvent.PlayerListUpdate, (data: { players: Player[] }) => {
             this.gameStateService.gameDataSubjectValue.lobby.players = data.players;
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on('doorClicked', (data: { grid: Tile[][]; isOpen: boolean }) => {
+        this.socketClientService.on(SocketEvent.DoorClicked, (data: { grid: Tile[][]; isOpen: boolean }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -234,7 +235,7 @@ export class GameSocketService {
     }
 
     private onWallClicked(): void {
-        this.socketClientService.on('wallClicked', (data: { grid: Tile[][] }) => {
+        this.socketClientService.on(SocketEvent.WallClicked, (data: { grid: Tile[][] }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -253,7 +254,7 @@ export class GameSocketService {
     }
 
     private onGridUpdate(): void {
-        this.socketClientService.on('gridUpdate', (data: { grid: Tile[][] }) => {
+        this.socketClientService.on(SocketEvent.GridUpdate, (data: { grid: Tile[][] }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -264,7 +265,7 @@ export class GameSocketService {
     }
 
     private onAdminModeChangedServerSide(): void {
-        this.socketClientService.on('adminModeChangedServerSide', () => {
+        this.socketClientService.on(SocketEvent.AdminModeChangedServerSide, () => {
             this.gameStateService.gameDataSubjectValue.isDebugMode = !this.gameStateService.gameDataSubjectValue.isDebugMode;
             const playerAdmin = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.isAdmin === true);
             if (!playerAdmin) return;

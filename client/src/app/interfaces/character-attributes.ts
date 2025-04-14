@@ -1,4 +1,5 @@
-import { AttributeType, DiceType } from '@app/enums/global.enums';
+import { AttributeType } from '@app/enums/global.enums';
+import { DiceType } from '@common/enums';
 
 export interface BonusAssigned {
     [AttributeType.Vitality]: boolean;

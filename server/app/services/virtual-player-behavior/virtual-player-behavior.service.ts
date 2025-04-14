@@ -1,14 +1,15 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
-import { Behavior, MoveType } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Move } from '@app/interfaces/Move';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { MoveType } from '@app/enums/enums';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
-import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtualPlayerScore.service';
-import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
+import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
+import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
 import { Injectable } from '@nestjs/common';
+import { Behavior } from '@common/enums';
 
 @Injectable()
 export class VirtualPlayerBehaviorService {
@@ -55,11 +56,9 @@ export class VirtualPlayerBehaviorService {
     private async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
         switch (move.type) {
             case MoveType.Attack:
-                console.log('att');
                 await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
                 break;
             case MoveType.Item:
-                console.log('item');
                 await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby);
                 break;
         }
@@ -78,20 +77,6 @@ export class VirtualPlayerBehaviorService {
         }
 
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
-
-        const virtualPlayerTile = this.virtualPlayerScoreService.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
-        console.table(
-            scoredMoves.map((move) => ({
-                type: move.type,
-                item: move.tile.item?.name ?? 'attack',
-                score: move.score,
-                inRange: move.inRange,
-                distance: this.virtualPlayerActions.calculateTotalMovementCost(
-                    this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby) || [],
-                ),
-            })),
-        );
-
         return scoredMoves[0];
     }
 }

@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-// disabled, car l'ordre n'est pas possible à respecter, car les subject doivent etre defini avant d'etre utilisé...
+// disabled, because the order is impossible to respect since the subjects need to be defined before we can use them...
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -11,12 +11,12 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
+import { Routes } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
 })
 export class LobbyService {
-    // Refactor les sockets ....!!!!!!!!!
     accessCode: string;
     private lobbySubject = new BehaviorSubject<Lobby | null>(null);
     private isLoadingSubject = new BehaviorSubject<boolean>(true);

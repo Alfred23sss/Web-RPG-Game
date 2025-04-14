@@ -1,4 +1,4 @@
-import { GameMode } from '@app/enums/global.enums';
+import { GameMode } from '@common/enums';
 
 export interface GameStatistics {
     accessCode: string;

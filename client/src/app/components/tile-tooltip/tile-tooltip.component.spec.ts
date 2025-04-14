@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { TileTooltipComponent } from './tile-tooltip.component';
+import { TileType } from '@common/enums';
 
 describe('TileTooltipComponent', () => {
     let component: TileTooltipComponent;

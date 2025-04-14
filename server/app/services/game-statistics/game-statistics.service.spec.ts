@@ -2,28 +2,26 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { GameMode, TileType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Game } from '@app/interfaces/Game';
-import { GameSession } from '@app/interfaces/GameSession';
-import { Item } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { GameSession } from '@app/interfaces/game-session';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Turn } from '@app/interfaces/turn';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameStatisticsService } from './game-statistics.service';
+import { Logger } from '@nestjs/common';
+import { GameMode, TileType } from '@common/enums';
 
 const PLAYER_1_NAME = 'Player 1';
 const PLAYER_2_NAME = 'Player 2';
 
 describe('GameStatisticsService', () => {
     let service: GameStatisticsService;
-    let eventEmitter: EventEmitter2;
     let gridManager: GridManagerService;
-    let logger: Logger;
 
     const mockAccessCode = 'test123';
 
@@ -133,15 +131,17 @@ describe('GameStatisticsService', () => {
                     provide: Logger,
                     useValue: {
                         log: jest.fn(),
+                        warn: jest.fn(),
+                        error: jest.fn(),
+                        debug: jest.fn(),
+                        verbose: jest.fn(),
                     },
                 },
             ],
         }).compile();
 
         service = module.get<GameStatisticsService>(GameStatisticsService);
-        eventEmitter = module.get<EventEmitter2>(EventEmitter2);
         gridManager = module.get<GridManagerService>(GridManagerService);
-        logger = module.get<Logger>(Logger);
 
         service.handleGameStarted({
             accessCode: mockAccessCode,
@@ -725,8 +725,7 @@ describe('GameStatisticsService', () => {
         });
     });
 
-    it('should return early and not log or add when tile is undefined', () => {
-        const logSpy = jest.spyOn(logger, 'log');
+    it('should return early and add when tile is undefined', () => {
         const accessCode = mockAccessCode;
 
         const mockSet = new Set<string>();
@@ -734,7 +733,6 @@ describe('GameStatisticsService', () => {
 
         service.handleDoorManipulated({ accessCode, tile: undefined as any });
 
-        expect(logSpy).not.toHaveBeenCalled();
         expect(mockSet.size).toBe(0);
     });
 });

@@ -1,17 +1,17 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data';
 import { Item } from '@app/classes/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { ItemName, Routes, TileType } from '@app/enums/global.enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { ItemName, Routes, TileType } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -125,31 +125,28 @@ export class GameplayService {
     }
 
     handleDoorClick(gameData: GameData, targetTile: Tile): void {
-        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
-        const currentTile = this.getClientPlayerPosition(gameData);
-        if (!currentTile || !gameData.game || !gameData.game.grid) {
-            return;
-        }
+        const currentTile = this.validateAction(gameData);
+        if (!currentTile) return;
+
         this.socketClientService.emit('doorUpdate', {
             currentTile,
             targetTile,
             accessCode: gameData.lobby.accessCode,
         });
     }
-    // duplication de code ici entre la fonction ci-dessus et ci-dessous, à refaire
+
     handleWallClick(gameData: GameData, targetTile: Tile, player: Player): void {
-        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
-        const currentTile = this.getClientPlayerPosition(gameData);
-        if (!currentTile || !gameData.game || !gameData.game.grid) {
-            return;
-        }
-        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning))
+        const currentTile = this.validateAction(gameData);
+        if (!currentTile) return;
+
+        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning)) {
             this.socketClientService.emit('wallUpdate', {
                 currentTile,
                 targetTile,
                 accessCode: gameData.lobby.accessCode,
                 player,
             });
+        }
     }
 
     handleAttackCTF(gameData: GameData, targetTile: Tile) {
@@ -254,6 +251,19 @@ export class GameplayService {
 
     emitAdminModeUpdate(gameData: GameData): void {
         this.socketClientService.emit('adminModeUpdate', { accessCode: gameData.lobby.accessCode });
+    }
+
+    private validateAction(gameData: GameData): Tile | undefined {
+        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) {
+            return undefined;
+        }
+
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (!currentTile || !gameData.game?.grid) {
+            return undefined;
+        }
+
+        return currentTile;
     }
 
     private isAvailablePath(gameData: GameData, tile: Tile): boolean {

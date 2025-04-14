@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // approved by education team, disabling magic numbers in tests
 /* eslint-disable @typescript-eslint/no-explicit-any */ // To test private methods
 
-import { ItemName, TileType } from '@app/enums/enums';
-import { CombatState } from '@app/interfaces/CombatState';
+import { CombatState } from '@app/interfaces/combat-state';
 import { DiceType } from '@app/interfaces/Dice';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { ItemName, TileType } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CombatHelperService } from './combat-helper.service';
 

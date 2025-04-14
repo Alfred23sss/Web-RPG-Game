@@ -3,23 +3,22 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
-import { GameMode, ImageType, ItemName, TeamType, TileType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Game } from '@app/interfaces/Game';
-import { GameSession } from '@app/interfaces/GameSession';
-import { Item } from '@app/interfaces/Item';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { GameSession } from '@app/interfaces/game-session';
+import { Item } from '@app/interfaces/item';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Turn } from '@app/interfaces/turn';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
+import { ImageType, GameMode, TeamType, ItemName, TileType } from '@common/enums';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;
@@ -142,7 +141,6 @@ describe('GameSessionService', () => {
     let itemService: ItemEffectsService;
     let accessCodesService: AccessCodesService;
     let eventEmitter: EventEmitter2;
-    let logger: Logger;
     let gridManagerService: GridManagerService;
     let turnService: GameSessionTurnService;
     let testPlayer: Player;
@@ -151,18 +149,10 @@ describe('GameSessionService', () => {
     beforeEach(() => {
         jest.useFakeTimers();
 
-        logger = {
-            log: jest.fn(),
-            error: jest.fn(),
-            warn: jest.fn(),
-            debug: jest.fn(),
-            verbose: jest.fn(),
-        } as unknown as Logger;
-
         accessCodesService = new AccessCodesService();
         lobbyService = new LobbyService(accessCodesService);
         eventEmitter = new EventEmitter2();
-        gridManagerService = new GridManagerService(logger, eventEmitter);
+        gridManagerService = new GridManagerService(eventEmitter);
         turnService = new GameSessionTurnService(lobbyService, eventEmitter);
         itemService = new ItemEffectsService(eventEmitter, gridManagerService);
 

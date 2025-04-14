@@ -1,6 +1,6 @@
 import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
+import { Lobby, WaintingPlayers } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { Injectable } from '@nestjs/common';

@@ -19,10 +19,6 @@ const modules = [
     MatTooltipModule,
 ];
 
-/**
- * Material module
- * IMPORTANT : Remove unused modules and only keep actual used ones.
- */
 @NgModule({
     imports: [...modules],
     exports: [...modules],

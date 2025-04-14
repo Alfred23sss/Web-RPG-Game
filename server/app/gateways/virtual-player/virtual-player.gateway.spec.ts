@@ -1,17 +1,16 @@
-import { Behavior } from '@app/enums/enums';
-import { Item } from '@app/interfaces/Item';
-import { Tile } from '@app/interfaces/Tile';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { Item } from '@app/interfaces/item';
+import { Tile } from '@app/interfaces/tile';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
-import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
-import { Logger } from '@nestjs/common';
+import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtual-player-creation.service';
+import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'socket.io';
-import { VirtualPlayerGateway } from './virtualPlayer.gateway';
+import { VirtualPlayerGateway } from './virtual-player.gateway';
+import { Behavior } from '@common/enums';
 
 describe('VirtualPlayerGateway', () => {
     let gateway: VirtualPlayerGateway;
@@ -20,7 +19,6 @@ describe('VirtualPlayerGateway', () => {
     let mockVirtualPlayerCreationService: Partial<VirtualPlayerCreationService>;
     let mockVirtualPlayerService: Partial<VirtualPlayerService>;
     let mockGameSessionService: Partial<GameSessionService>;
-    let mockLogger: Partial<Logger>;
 
     beforeEach(async () => {
         mockServer = {
@@ -52,11 +50,6 @@ describe('VirtualPlayerGateway', () => {
             handleItemDropped: jest.fn(),
         };
 
-        mockLogger = {
-            error: jest.fn(),
-            log: jest.fn(),
-        };
-
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 VirtualPlayerGateway,
@@ -65,7 +58,6 @@ describe('VirtualPlayerGateway', () => {
                 { provide: VirtualPlayerCreationService, useValue: mockVirtualPlayerCreationService },
                 { provide: VirtualPlayerService, useValue: mockVirtualPlayerService },
                 { provide: GameSessionService, useValue: mockGameSessionService },
-                { provide: Logger, useValue: mockLogger },
             ],
         }).compile();
 
@@ -151,24 +143,6 @@ describe('VirtualPlayerGateway', () => {
             await gateway.handleVirtualPlayerMove(data);
 
             expect(mockGameSessionService.updatePlayerPosition).toHaveBeenCalledWith(accessCode, data.movement, virtualPlayer);
-            expect(mockLogger.error).not.toHaveBeenCalled();
-        });
-
-        it('should log error if update fails', async () => {
-            const accessCode = 'TEST123';
-            const virtualPlayer = { name: 'vp1' } as Player;
-            const data = {
-                virtualPlayerTile: { player: virtualPlayer } as Tile,
-                closestPlayerTile: {} as Tile,
-                movement: [],
-                accessCode,
-            };
-            const error = new Error('Update failed');
-            mockGameSessionService.updatePlayerPosition = jest.fn().mockRejectedValue(error);
-
-            await gateway.handleVirtualPlayerMove(data);
-
-            expect(mockLogger.error).toHaveBeenCalledWith('Error updating virtual player position', error);
         });
     });
 

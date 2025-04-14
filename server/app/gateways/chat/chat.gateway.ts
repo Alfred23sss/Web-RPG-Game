@@ -1,15 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { DELAY_BEFORE_EMITTING_TIME, WORD_MIN_LENGTH } from './chat.gateaway.constants';
-import { ChatEvents } from './chat.gateaway.events';
+import { DELAY_BEFORE_EMITTING_TIME, WORD_MIN_LENGTH } from './chat.gateway.constants';
+import { ChatEvents } from './chat.gateway.events';
 
 @WebSocketGateway({ cors: true })
 @Injectable()
 export class ChatGateway implements OnGatewayInit {
     @WebSocketServer() private server: Server;
-
-    constructor(private readonly logger: Logger) {}
 
     @SubscribeMessage(ChatEvents.Validate)
     validate(socket: Socket, word: string) {
@@ -28,20 +26,11 @@ export class ChatGateway implements OnGatewayInit {
 
     @SubscribeMessage(ChatEvents.RoomMessage)
     roomMessage(socket: Socket, payload: { message: string; author: string; room: string }) {
-        this.logger.log('recu dans chat');
         const { message, room, author } = payload;
-
-        if (!room) {
-            socket.emit(ChatEvents.Error, 'Invalid room ID');
-            return;
-        }
-
+        if (!room) return;
         if (this.server.sockets.adapter.rooms.has(room)) {
-            this.logger.log('Message received, sending to the room');
             const formattedMessage = this.formatMessage(author, message);
             this.server.to(room).emit(ChatEvents.RoomMessage, formattedMessage);
-        } else {
-            this.logger.log('Message not received, not in the room');
         }
     }
 

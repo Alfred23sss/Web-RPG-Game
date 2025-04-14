@@ -1,5 +1,5 @@
 import { Item } from '@app/classes/item';
-import { DiceType, TeamType } from '@app/enums/global.enums';
+import { TeamType, DiceType } from '@common/enums';
 
 export interface Player {
     name: string;

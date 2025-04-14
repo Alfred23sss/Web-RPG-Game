@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item';
 import { ITEM_COUNTS, ITEMS_TO_UPDATE } from '@app/constants/global.constants';
-import { GameSize } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
+import { GameSize } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

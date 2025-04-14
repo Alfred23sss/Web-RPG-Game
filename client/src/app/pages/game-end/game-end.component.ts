@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { Routes } from '@app/enums/global.enums';
+import { Routes } from '@common/enums';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
@@ -25,7 +25,6 @@ export class GameEndComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly gameStateSocketService: GameStateSocketService,
-        // private readonly gameplayService: GameplayService,
         private readonly socketClientService: SocketClientService,
         private readonly router: Router,
     ) {}

@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { POPUP_DELAY } from '@app/constants/global.constants';
-import { TileType } from '@app/enums/global.enums';
+import { TileType } from '@common/enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 

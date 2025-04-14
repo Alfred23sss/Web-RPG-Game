@@ -8,18 +8,19 @@ import {
     NO_SCORE,
     PLAYER_POSITION,
 } from '@app/constants/constants';
-import { EventEmit, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Move } from '@app/interfaces/Move';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { EventEmit, MoveType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
+import { TeamType, ItemName, TileType } from '@common/enums';
 
 @Injectable()
 export class VirtualPlayerActionsService {
@@ -79,7 +80,7 @@ export class VirtualPlayerActionsService {
         if (virtualPlayer.actionPoints === NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             return hasIce;
         } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
-            return hasIce || hasActionAvailable || (hasLightning && !hasWall); // test this condition
+            return hasIce || hasActionAvailable || (hasLightning && !hasWall);
         }
         return true;
     }
@@ -126,7 +127,6 @@ export class VirtualPlayerActionsService {
         const isMoveStayInPlace = movement.length <= 1 && move.type === MoveType.Item;
         const isDoorBlockingMove = realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === NO_SCORE;
         if (isDoorBlockingMove || isMoveStayInPlace) {
-            console.log('ending virtual player turn');
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
             return;
         }

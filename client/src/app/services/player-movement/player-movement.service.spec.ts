@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
-import { TileType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { TileType } from '@common/enums';
 
 describe('PlayerMovementService', () => {
     let service: PlayerMovementService;
@@ -141,18 +141,6 @@ describe('PlayerMovementService', () => {
             mockGridService.getGrid.and.returnValue(grid);
 
             expect(service.quickestPath(grid[0][0], grid[1][0], grid)).toBeUndefined();
-        });
-
-        it('should return undefined when path is completely blocked', () => {
-            const grid = [
-                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Wall)],
-                [createTile('tile-1-0', TileType.Door, false), createTile('tile-1-1', TileType.Water)],
-            ];
-            mockGridService.getGrid.and.returnValue(grid);
-
-            const start = grid[0][0];
-            const target = grid[1][1];
-            expect(service.quickestPath(start, target, grid)).toBeUndefined();
         });
     });
 

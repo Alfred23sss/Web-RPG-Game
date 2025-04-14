@@ -49,10 +49,6 @@ export class GameService {
         );
     }
 
-    getGames(): Game[] {
-        return this.games;
-    }
-
     getGameById(id: string): Game | undefined {
         return this.games.find((game) => game.id === id);
     }

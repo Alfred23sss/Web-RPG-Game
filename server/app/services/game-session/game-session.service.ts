@@ -1,5 +1,5 @@
-import { EventEmit, GameMode, ItemName, TileType } from '@app/enums/enums';
-import { GameSession } from '@app/interfaces/GameSession';
+import { EventEmit } from '@app/enums/enums';
+import { GameSession } from '@app/interfaces/game-session';
 import { Turn } from '@app/interfaces/Turn';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
@@ -10,6 +10,7 @@ import { ItemEffectsService } from '@app/services/item-effects/item-effects.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { GameMode, ItemName, TileType } from '@common/enums';
 
 const PLAYER_MOVE_DELAY = 150;
 
@@ -238,7 +239,6 @@ export class GameSessionService {
         return session.turn.orderedPlayers.some((player) => player.name === playerName);
     }
 
-    //
     handlePlayerAbandoned(accessCode: string, playerName: string): Player | null {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return null;
