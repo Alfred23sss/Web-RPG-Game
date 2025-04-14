@@ -91,6 +91,7 @@ export class VirtualPlayerService {
         }
         return true;
     }
+
     private findAllMoves(grid: Tile[][]): Move[] {
         const playerMoves = this.findPlayers(grid);
         const itemMoves = this.findItems(grid);

@@ -176,6 +176,7 @@ export class VirtualPlayerActionsService {
             const trimmedPath = this.playerMovementService.trimPathAtObstacle(path);
             return trimmedPath;
         }
+        return [virtualPlayerTile];
     }
 
     private async executeAttack(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {

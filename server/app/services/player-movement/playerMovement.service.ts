@@ -131,6 +131,7 @@ export class PlayerMovementService {
             const isClosedDoor = tile.type === TileType.Door && !tile.isOpen;
             const hasItem = tile.item && tile.item.name !== ItemName.Home;
             const hasPlayer = !!tile.player; // fix
+            Logger.log(hasPlayer);
             const shouldTrim = isClosedDoor || hasItem || hasPlayer;
 
             if (shouldTrim) {
@@ -150,6 +151,9 @@ export class PlayerMovementService {
         for (let i = 1; i < path.length; i++) {
             const tile = path[i];
             const tileCost = this.getMoveCost(tile);
+            if (tile.player) {
+                break;
+            }
             if (movementCost + tileCost > movementPoints) {
                 break;
             }
