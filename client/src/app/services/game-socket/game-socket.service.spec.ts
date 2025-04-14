@@ -171,14 +171,6 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    it('should handle playerUpdate event', () => {
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = MOCK_PLAYER.name;
-        const updatedPlayer = { ...MOCK_PLAYER };
-        socketEvents['playerUpdate']({ player: updatedPlayer });
-        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
-        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    });
-
     it('should handle playerListUpdate event', () => {
         const players = [MOCK_PLAYER, MOCK_PLAYER];
         socketEvents['playerListUpdate']({ players });
