@@ -43,28 +43,6 @@ export enum ItemDescription {
     Default = 'rien',
 }
 
-export enum ItemType {
-    Home = './assets/items/home-removebg-preview.png',
-    HomeGray = './assets/items/home-gray.png',
-    Lightning = './assets/items/pickaxe.png',
-    LightningGray = './assets/items/lightning-gray.png',
-    Potion = './assets/items/ice-sword.png',
-    PotionGray = './assets/items/potion-gray.png',
-    Stop = './assets/items/armor-preview.png',
-    StopGray = './assets/items/armor-gray.png',
-    QuestionMark = './assets/items/chest.png',
-    QuestionMarkGray = './assets/items/chest-gray.png',
-    Fire = './assets/items/black-sword-preview.png',
-    FireGray = './assets/items/black-sword-gray.png',
-    Rubik = './assets/items/erdtree_greatshield.png',
-    RubikGray = './assets/items/erdtree_greatshield-gray.png',
-    Swap = './assets/items/ice-shield-chat.png',
-    SwapGray = './assets/items/ice-shield-gray.png',
-    Flag = './assets/items/banner-medieval.png',
-    FlagGray = './assets/items/flag-gray.png',
-    Default = './assets/items/banner-medieval.png',
-}
-
 export enum ItemName {
     Home = 'home',
     Lightning = 'lightning',
