@@ -208,7 +208,6 @@ export class GameSessionService {
         } else {
             turn = this.turnService.initializeTurn(accessCode);
         }
-        turn.currentPlayer = turn.orderedPlayers[0];
         const [players, updatedGrid] = this.gridManager.assignPlayersToSpawnPoints(turn.orderedPlayers, spawnPoints, grid);
         game.grid = updatedGrid;
         game.mode = gameMode;

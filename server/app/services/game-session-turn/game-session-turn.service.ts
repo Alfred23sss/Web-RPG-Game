@@ -150,6 +150,7 @@ export class GameSessionTurnService {
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
         if (!turn.currentPlayer) {
+            // at first doesnt go here why?
             return activePlayers[0];
         }
         const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer.name);
@@ -169,6 +170,9 @@ export class GameSessionTurnService {
         if (playerList.length > 0) {
             playerList[0].isActive = true;
         }
+        playerList.forEach((player, index) => {
+            Logger.log('player', player, index);
+        });
         return playerList;
     }
 
