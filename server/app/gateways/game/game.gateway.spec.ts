@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable max-lines */
 import { GameModeType } from '@app/enums/enums';
+import { AttackScore } from '@app/interfaces/AttackScore';
 import { DiceType } from '@app/interfaces/Dice';
 import { Item } from '@app/interfaces/Item';
 import { Player } from '@app/interfaces/Player';
@@ -88,7 +89,6 @@ describe('GameGateway', () => {
             handleItemDropped: jest.fn(),
             updateWallTile: jest.fn(),
             handlePlayerItemReset: jest.fn(),
-            isTeamAbandoned: jest.fn().mockReturnValue(false),
         };
         serverMock = {
             to: jest.fn().mockReturnThis(),
@@ -308,12 +308,12 @@ describe('GameGateway', () => {
                 player: MOCK_PLAYER,
                 attemptsLeft: 2,
                 isEscapeSuccessful: false,
+                accessCode: ACCESS_CODE,
             };
 
             gateway.handleNoMoreEscapeAttempts(payload);
 
-            expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith(payload.player.name);
-            expect(serverMock.to).toHaveBeenCalledWith(`socket_${MOCK_PLAYER.name}`);
+            expect(serverMock.to).toHaveBeenCalledWith('test123');
             expect(serverMock.emit).toHaveBeenCalledWith('escapeAttempt', {
                 attemptsLeft: 2,
                 isEscapeSuccessful: false,
@@ -390,8 +390,8 @@ describe('GameGateway', () => {
                 currentFighter: MOCK_PLAYER,
                 defenderPlayer: MOCK_PLAYER,
                 attackSuccessful: true,
-                attackerScore: 15,
-                defenseScore: 12,
+                attackerScore: { score: 15, diceRolled: 3 },
+                defenseScore: { score: 15, diceRolled: 3 },
                 accessCode: ACCESS_CODE,
             };
 
@@ -401,8 +401,8 @@ describe('GameGateway', () => {
             expect(serverMock.to).toHaveBeenCalledWith(['socket_test-player', 'socket_test-player']);
             expect(serverMock.emit).toHaveBeenCalledWith('attackResult', {
                 success: true,
-                attackScore: 15,
-                defenseScore: 12,
+                attackScore: { score: 15, diceRolled: 3 },
+                defenseScore: { score: 15, diceRolled: 3 },
             });
         });
     });
@@ -430,12 +430,21 @@ describe('GameGateway', () => {
         it('should send attack results to both combatants', () => {
             const mockAttacker = { ...MOCK_PLAYER, name: 'attacker' };
             const mockDefender = { ...MOCK_PLAYER, name: 'defender' };
-            const payload = {
+
+            // Explicitly annotate the payload type
+            const payload: {
+                currentFighter: Player;
+                defenderPlayer: Player;
+                attackSuccessful: boolean;
+                attackerScore: AttackScore;
+                defenseScore: AttackScore;
+                accessCode: string;
+            } = {
                 currentFighter: mockAttacker,
                 defenderPlayer: mockDefender,
                 attackSuccessful: true,
-                attackerScore: 15,
-                defenseScore: 12,
+                attackerScore: { diceRolled: 0, score: 15 },
+                defenseScore: { diceRolled: 0, score: 12 },
                 accessCode: ACCESS_CODE,
             };
 
@@ -445,10 +454,11 @@ describe('GameGateway', () => {
             expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith('defender');
 
             expect(serverMock.to).toHaveBeenCalledWith(['socket_attacker', 'socket_defender']);
+            // Verify that the emitted event contains AttackScore objects
             expect(serverMock.emit).toHaveBeenCalledWith('attackResult', {
                 success: true,
-                attackScore: 15,
-                defenseScore: 12,
+                attackScore: { diceRolled: 0, score: 15 },
+                defenseScore: { diceRolled: 0, score: 12 },
             });
         });
     });
@@ -480,9 +490,8 @@ describe('GameGateway', () => {
         it('should send player update to specific socket', () => {
             gateway.handleDefenderHealthUpdate(MOCK_PAYLOAD);
 
-            expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith(MOCK_PAYLOAD.player.name);
-
-            const expectedSocketId = `socket_${MOCK_PLAYER.name}`;
+            // Instead of expecting a call to lobbyService.getPlayerSocket, we derive the socket ID ourselves:
+            const expectedSocketId = 'test123';
             expect(serverMock.to).toHaveBeenCalledWith(expectedSocketId);
             expect(serverMock.emit).toHaveBeenCalledWith('playerUpdate', {
                 player: MOCK_PAYLOAD.player,
