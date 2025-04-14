@@ -4,9 +4,9 @@
 
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { AttackScore } from '@app/interfaces/attack-score';
-import { DiceType } from '@app/interfaces/Dice';
-import { Item } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
+import { DiceType } from '@app/interfaces/dice';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';

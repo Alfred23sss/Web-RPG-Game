@@ -8,8 +8,8 @@ import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
-import { Injectable } from '@nestjs/common';
 import { Behavior } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class VirtualPlayerBehaviorService {
@@ -29,7 +29,11 @@ export class VirtualPlayerBehaviorService {
         const isInCombat = this.gameCombatService.isCombatActive(accessCode);
         if (!isInCombat) return false;
         const combatState = this.gameCombatService.getCombatState(accessCode);
-        if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return false;
+
+        const combatStateInvalid = !combatState;
+        const notCurrentFighter = combatState?.currentFighter?.name !== virtualPlayer.name;
+        if (combatStateInvalid || notCurrentFighter) return false;
+
         const healthRatio = virtualPlayer.hp.current / virtualPlayer.hp.max;
         if (healthRatio < 1) {
             await new Promise((resolve) => setTimeout(resolve, this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
@@ -48,7 +52,11 @@ export class VirtualPlayerBehaviorService {
         const isInCombat = this.gameCombatService.isCombatActive(accessCode);
         if (!isInCombat) return;
         const combatState = this.gameCombatService.getCombatState(accessCode);
-        if (!combatState || combatState.currentFighter.name !== virtualPlayer.name) return;
+        const combatStateInvalid = !combatState;
+
+        const notCurrentFighter = combatState?.currentFighter?.name !== virtualPlayer.name;
+        if (combatStateInvalid || notCurrentFighter) return;
+
         await new Promise((resolve) => setTimeout(resolve, this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS)));
         this.gameCombatService.performAttack(accessCode, virtualPlayer.name);
     }

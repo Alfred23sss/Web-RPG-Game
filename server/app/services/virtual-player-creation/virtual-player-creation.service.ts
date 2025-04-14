@@ -1,10 +1,10 @@
 import { BASE_STAT, BONUS_STAT, DEFAULT_VIRTUAL_PLAYER, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
-import { DiceType } from '@app/interfaces/dice';
-import { Lobby } from '@app/interfaces/lobby';
+import { DiceType } from '@app/interfaces/Dice';
+import { Lobby } from '@app/interfaces/Lobby';
 import { Player } from '@app/model/database/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Injectable } from '@nestjs/common';
 import { AvatarType, Behavior } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 
 type SpeedVitalityStats = {
     speed: number;

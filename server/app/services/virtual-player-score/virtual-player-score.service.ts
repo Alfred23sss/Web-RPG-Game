@@ -11,14 +11,14 @@ import {
     NORMAL_ITEM_SCORE,
 } from '@app/constants/constants';
 import { MoveType } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/lobby';
-import { Move } from '@app/interfaces/move';
-import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
+import { Lobby } from '@app/interfaces/Lobby';
+import { Move } from '@app/interfaces/Move';
+import { Player } from '@app/interfaces/Player';
+import { Tile } from '@app/interfaces/Tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
-import { Injectable } from '@nestjs/common';
 import { ItemName } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class VirtualPlayerScoreService {
@@ -120,7 +120,11 @@ export class VirtualPlayerScoreService {
     }
 
     private calculateItemScore(move: Move, virtualPlayer: Player): void {
-        if (move.type !== MoveType.Item || !move.tile.item) return;
+        const isItemMove = move.type === MoveType.Item;
+        const hasItemOnTile = Boolean(move.tile?.item);
+        const shouldSkipItemCalculation = !isItemMove || !hasItemOnTile;
+
+        if (shouldSkipItemCalculation) return;
         const item = move.tile.item;
         switch (item.name) {
             case ItemName.Fire:
