@@ -605,6 +605,55 @@ describe('GameStatisticsService', () => {
         expect(stats?.playerStats.get(mockPlayer1.name).uniqueItemsCollected.has(mockItem.name)).toBeTruthy();
     });
 
+    describe('decrementItem', () => {
+        it('should decrement item count if current count > 1', () => {
+            const item = { ...mockItem, name: 'Golden Key' };
+            const accessCode = mockAccessCode;
+            const stats = service.getGameStatistics(accessCode);
+            stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.set(item.name, 3);
+            service.decrementItem(accessCode, item, mockPlayer1);
+            const updatedCount = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.get(item.name);
+            expect(updatedCount).toBe(2);
+        });
+
+        it('should return early if no game statistics exist for accessCode', () => {
+            const spy = jest.spyOn<any, any>(service['gameStatistics'], 'get').mockReturnValue(undefined);
+
+            service.decrementItem('invalid-code', mockItem, mockPlayer1);
+
+            expect(spy).toHaveBeenCalledWith('invalid-code');
+        });
+
+        it('should remove item from map if current count === 1', () => {
+            const item = { ...mockItem, name: 'Golden Key' };
+            const accessCode = mockAccessCode;
+
+            const stats = service.getGameStatistics(accessCode);
+            stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.set(item.name, 1);
+
+            const logSpy = jest.spyOn(Logger, 'log');
+
+            service.decrementItem(accessCode, item, mockPlayer1);
+
+            const updatedMap = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected;
+            expect(updatedMap.has(item.name)).toBe(false);
+            expect(logSpy).toHaveBeenCalledWith(`Item ${item.name} removed from player ${mockPlayer1.name} in statistics.`);
+        });
+
+        it('should do nothing if item is not found in player stats', () => {
+            const item = { ...mockItem, name: 'NonExistentItem' };
+            const accessCode = mockAccessCode;
+
+            const stats = service.getGameStatistics(accessCode);
+            const initialSize = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.size;
+
+            service.decrementItem(accessCode, item, mockPlayer1);
+
+            const updatedSize = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.size;
+            expect(updatedSize).toBe(initialSize);
+        });
+    });
+
     describe('calculation methods with undefined sets', () => {
         it('should handle undefined visitedTiles set when calculating global tile percentage', () => {
             const accessCode = 'undefinedTilesTest';
