@@ -224,7 +224,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10), createPlayer('Player2', 20)];
             const turn = createTurn(players, players[0]);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[1]);
         });
@@ -233,7 +233,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10), createPlayer('Player2', 20)];
             const turn = createTurn(players);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[0]);
         });
@@ -242,7 +242,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10, true), createPlayer('Player2', 20, true)];
             const turn = createTurn(players);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[0]);
         });
