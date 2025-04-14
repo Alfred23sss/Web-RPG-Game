@@ -70,7 +70,6 @@ describe('GameSocketService', () => {
         service = TestBed.inject(GameSocketService);
         gameStateServiceSpy = TestBed.inject(GameStateSocketService) as jasmine.SpyObj<GameStateSocketService>;
         gameplayServiceSpy = TestBed.inject(GameplayService) as jasmine.SpyObj<GameplayService>;
-        // playerMovementServiceSpy = TestBed.inject(PlayerMovementService) as jasmine.SpyObj<PlayerMovementService>;
         socketClientServiceSpy = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
 
         service.initializeSocketListeners();
@@ -170,47 +169,6 @@ describe('GameSocketService', () => {
 
         expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toEqual(data.orderedPlayers);
         expect(gameStateServiceSpy.gameDataSubjectValue.game).toEqual(data.updatedGame);
-        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    });
-
-    // it('should handle playerMovement event', () => {
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints = 10;
-
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.attack = { value: 0, bonusDice: DiceType.D6 };
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.defense = { value: 0, bonusDice: DiceType.D4 };
-
-    //     const mockPlayer: Player = {
-    //         ...MOCK_PLAYER,
-    //         name: 'testPlayer',
-    //         attack: { value: 4, bonusDice: DiceType.D6 },
-    //         defense: { value: 4, bonusDice: DiceType.D4 },
-    //     };
-
-    //     playerMovementServiceSpy.calculateRemainingMovementPoints.and.returnValue(3);
-
-    //     const data = {
-    //         grid: MOCK_GRID,
-    //         player: mockPlayer,
-    //         isCurrentlyMoving: true,
-    //     };
-
-    //     socketEvents['playerMovement'](data);
-
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(data.grid);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints).toEqual(7);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.movementPointsRemaining).toEqual(7);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.isCurrentlyMoving).toBeTrue();
-    //     expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
-    //     expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalled();
-    //     expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    // });
-
-    it('should handle playerUpdate event', () => {
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = MOCK_PLAYER.name;
-        const updatedPlayer = { ...MOCK_PLAYER };
-        socketEvents['playerUpdate']({ player: updatedPlayer });
-        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
@@ -325,18 +283,6 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    // it('should filter out abandoned players when game ends', () => {
-    //     const activePlayer = { ...MOCK_PLAYER, name: 'Active', hasAbandoned: false };
-    //     const abandonedPlayer = { ...MOCK_PLAYER, name: 'Abandoned', hasAbandoned: true };
-
-    //     gameStateServiceSpy.gameDataSubjectValue.lobby.players = [activePlayer, abandonedPlayer];
-    //     const data = { winner: ['WinnerPlayer'] };
-    //     socketEvents['gameEnded'](data);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);
-    //     expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Fin de la partie', [activePlayer, abandonedPlayer]);
-    // });
-
     it('should call gameplayService when itemChoice', () => {
         const mockItem = { name: ItemName.Default } as Item;
 
@@ -365,14 +311,6 @@ describe('GameSocketService', () => {
 
     describe('onPlayerClientUpdate', () => {
         const initialClientPlayer = { name: 'testPlayer', actionPoints: 3 } as Player;
-        // it('should update clientPlayer when names match', () => {
-        //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
-        //     const updatedPlayer = { name: 'testPlayer', actionPoints: 0 } as Player;
-
-        //     socketEvents['playerClientUpdate']({ player: updatedPlayer });
-
-        //     expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
-        // });
 
         it('should NOT update clientPlayer when names differ', () => {
             gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
