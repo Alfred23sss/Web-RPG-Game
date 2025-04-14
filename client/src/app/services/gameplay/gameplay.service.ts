@@ -271,22 +271,29 @@ export class GameplayService {
     }
 
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
-        let tile1Pos: { row: number; col: number } | null = null;
-        let tile2Pos: { row: number; col: number } | null = null;
+        const tile1Pos = this.findTilePosition(tileId1, grid);
+        const tile2Pos = this.findTilePosition(tileId2, grid);
+
+        if (!tile1Pos || !tile2Pos) return false;
+
+        return this.areTilesAdjacent(tile1Pos, tile2Pos);
+    }
+
+    private findTilePosition(tileId: string, grid: Tile[][]): { row: number; col: number } | null {
         for (let row = 0; row < grid.length; row++) {
             for (let col = 0; col < grid[row].length; col++) {
-                if (grid[row][col].id === tileId1) {
-                    tile1Pos = { row, col };
+                if (grid[row][col].id === tileId) {
+                    return { row, col };
                 }
-                if (grid[row][col].id === tileId2) {
-                    tile2Pos = { row, col };
-                }
-                if (tile1Pos && tile2Pos) break;
             }
-            if (tile1Pos && tile2Pos) break;
         }
-        if (!tile1Pos || !tile2Pos) return false;
-        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+        return null;
+    }
+
+    private areTilesAdjacent(pos1: { row: number; col: number }, pos2: { row: number; col: number }): boolean {
+        const rowDiff = Math.abs(pos1.row - pos2.row);
+        const colDiff = Math.abs(pos1.col - pos2.col);
+        return rowDiff + colDiff === 1;
     }
 
     private isTeamate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
