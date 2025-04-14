@@ -3,11 +3,6 @@ export enum GameModeType {
     CTF = 'CTF',
 }
 
-export enum GameMode {
-    Classic = 'Classique',
-    CTF = 'CTF',
-    None = '',
-}
 export enum GameSize {
     Small = 'small',
     Medium = 'medium',

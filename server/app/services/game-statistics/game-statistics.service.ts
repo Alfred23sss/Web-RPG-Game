@@ -1,4 +1,4 @@
-import { EventEmit, GameMode } from '@app/enums/enums';
+import { EventEmit } from '@app/enums/enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { GameSession } from '@app/interfaces/game-session';
 import { Player } from '@app/interfaces/player';
@@ -8,6 +8,7 @@ import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
+import { GameMode } from '@common/enums';
 
 // bouge ca dans constant global et trouver meilleur nom
 const TIME_DIVIDER = 1000;

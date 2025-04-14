@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { ErrorMessages, GameMode, ItemName, ItemCount, TileType, GameSizeNumber } from '@app/enums/global.enums';
+import { ErrorMessages, ItemName, ItemCount, TileType, GameSizeNumber } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GridPosition } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
+import { GameMode } from '@common/enums';
 
 enum TitleLength {
     Min = 0,

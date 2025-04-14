@@ -2,7 +2,6 @@
 import {
     AttributeType,
     DiceType,
-    GameMode,
     GameModeLabel,
     GameModeType,
     GameSize,
@@ -16,7 +15,7 @@ import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
-import { ImageType } from '@common/enums';
+import { ImageType, GameMode } from '@common/enums';
 export const BONUS_VALUE = 2;
 export const MAX_GAMES_SHOWN = 3;
 export const POPUP_DELAY = 2000;

@@ -17,3 +17,9 @@ export enum GameDecorations {
     X = './assets/game-decorations/X.png',
     Default = './assets/game-decorations/logo.png',
 }
+
+export enum GameMode {
+    Classic = 'Classique',
+    CTF = 'CTF',
+    None = '',
+}

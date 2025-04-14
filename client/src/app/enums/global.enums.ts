@@ -108,12 +108,6 @@ export enum JoinLobbyResult {
     JoinedLobby = 'joinedLobby',
 }
 
-export enum GameMode {
-    Classic = 'Classique',
-    CTF = 'CTF',
-    None = '',
-}
-
 export enum GameModeLabel {
     Classic = 'Classique',
     CTF = 'Capture Le Drapeau',

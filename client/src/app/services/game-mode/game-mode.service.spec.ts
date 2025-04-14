@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 
-import { GameMode, GameSize } from '@app/enums/global.enums';
+import { GameSize } from '@app/enums/global.enums';
 import { GameModeService } from './game-mode.service';
+import { GameMode } from '@common/enums';
 
 describe('GameModeService', () => {
     let service: GameModeService;

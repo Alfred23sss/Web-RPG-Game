@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
-import { GameMode, ItemName, TeamType, TileType } from '@app/enums/enums';
+import { ItemName, TeamType, TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Game } from '@app/interfaces/game';
 import { GameSession } from '@app/interfaces/game-session';
@@ -19,7 +19,7 @@ import { ItemEffectsService } from '@app/services/item-effects/item-effects.serv
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
-import { ImageType } from '@common/enums';
+import { ImageType, GameMode } from '@common/enums';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;
