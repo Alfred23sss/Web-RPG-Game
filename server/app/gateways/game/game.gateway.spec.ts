@@ -2,8 +2,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { AttackScore } from '@common/interfaces/attack-score';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { DiceType } from '@app/interfaces/dice';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
@@ -13,11 +12,12 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 
-import { GameGateway } from './game.gateway';
 import { EventEmit, GameModeType } from '@app/enums/enums';
+import { GameGateway } from './game.gateway';
 
 const MOCK_PLAYER: Player = {
     name: 'test-player',
