@@ -237,14 +237,13 @@ describe('CombatSocketService', () => {
             const testData = {
                 attemptsLeft: 2,
                 isEscapeSuccessful: true,
-                player: { name: 'anotherPlayer' }, // différent du joueur client
+                player: { name: 'anotherPlayer' },
             };
 
             gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
 
             EVENT_HANDLERS['escapeAttempt'](testData);
 
-            // On vérifie que rien n’a été fait
             expect(clientNotifierMock.addLogbookEntry).not.toHaveBeenCalled();
             expect(gameStateServiceMock.updateGameData).not.toHaveBeenCalled();
         });

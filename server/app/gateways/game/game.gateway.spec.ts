@@ -842,4 +842,29 @@ describe('GameGateway', () => {
             payload.player,
         );
     });
+    describe('handleTeamCreated', () => {
+        it('should emit teamCreated event with red and blue teams', () => {
+            const redTeam: Player[] = [
+                { ...MOCK_PLAYER, name: 'Red1' },
+                { ...MOCK_PLAYER, name: 'Red2' },
+            ];
+            const blueTeam: Player[] = [
+                { ...MOCK_PLAYER, name: 'Blue1' },
+                { ...MOCK_PLAYER, name: 'Blue2' },
+            ];
+            const accessCode = '1234';
+
+            gateway.handleTeamCreated({
+                redTeam,
+                blueTeam,
+                accessCode,
+            });
+
+            expect(serverMock.to).toHaveBeenCalledWith(accessCode);
+            expect(serverMock.emit).toHaveBeenCalledWith('teamCreated', {
+                redTeam,
+                blueTeam,
+            });
+        });
+    });
 });

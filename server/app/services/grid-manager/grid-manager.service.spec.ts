@@ -6,7 +6,7 @@ import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Tile, TileType } from '@app/model/database/tile';
-import { ImageType, ItemName } from '@common/enums';
+import { Behavior, ImageType, ItemName } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { GridManagerService } from './grid-manager.service';
@@ -606,6 +606,38 @@ describe('GridManagerService', () => {
 
             expect(result).toBe(mockGrid);
             expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should emit correct door update event when player is virtual', () => {
+            const previousTile: Tile = { id: 'tile-0-0' } as Tile;
+
+            const doorTile: Tile = {
+                id: 'tile-0-1',
+                type: TileType.Door,
+                isOpen: true,
+                imageSrc: ImageType.OpenDoor,
+            } as Tile;
+
+            mockGrid[0][1] = doorTile;
+
+            const mockPlayerVirtual: VirtualPlayer = {
+                ...mockPlayer,
+                isVirtual: true,
+                behavior: Behavior.Aggressive,
+            };
+
+            jest.spyOn(service, 'findAndCheckAdjacentTiles').mockReturnValue(true);
+            const emitSpy = jest.spyOn((service as any).eventEmitter, 'emit');
+
+            service.updateDoorTile(mockGrid, mockAccessCode, previousTile, doorTile, mockPlayerVirtual);
+
+            // Vérifie bien que `isOpen` est inversé car player est virtuel
+            expect(emitSpy).toHaveBeenCalledWith(EventEmit.GameDoorUpdate, {
+                accessCode: mockAccessCode,
+                grid: mockGrid,
+                isOpen: !doorTile.isOpen,
+                player: mockPlayerVirtual,
+            });
         });
     });
     describe('findTileBySpawnPoint', () => {

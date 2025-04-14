@@ -277,5 +277,41 @@ describe('PlayerMovementService', () => {
             const result = service.getFarthestReachableTile(virtualPlayerTile, targetTile, grid, movementPoints);
             expect(result).toEqual(grid[0][2]);
         });
+        it('should stop path when tile has a player (player present in path)', () => {
+            const tileWithPlayer: Tile = {
+                id: 'tile-0-1',
+                type: TileType.Default,
+                imageSrc: '',
+                isOccupied: true,
+                isOpen: true,
+                player: { name: 'Enemy' } as Player,
+            };
+
+            const tileStart: Tile = {
+                id: 'tile-0-0',
+                type: TileType.Default,
+                imageSrc: '',
+                isOccupied: false,
+                isOpen: true,
+            };
+
+            const targetTile: Tile = {
+                id: 'tile-0-2',
+                type: TileType.Default,
+                imageSrc: '',
+                isOccupied: false,
+                isOpen: true,
+            };
+
+            const grid: Tile[][] = [[tileStart, tileWithPlayer, targetTile]];
+
+            // Override quickestPath to return a controlled path with a tile that has a player
+            jest.spyOn(service, 'quickestPath').mockReturnValue([tileStart, tileWithPlayer, targetTile]);
+
+            const result = service.getFarthestReachableTile(tileStart, targetTile, grid, 5);
+
+            // Should stop at tileStart and not proceed due to player being on path
+            expect(result).toEqual(tileStart);
+        });
     });
 });
