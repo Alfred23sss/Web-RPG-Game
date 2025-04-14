@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics } from '@app/interfaces/statistics';
@@ -10,7 +11,6 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { SocketEvent } from '@app/enums/global.enums';
 
 @Injectable({
     providedIn: 'root',

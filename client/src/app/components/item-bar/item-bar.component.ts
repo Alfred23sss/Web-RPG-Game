@@ -1,11 +1,12 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { ITEM_BAR_ITEMS } from '@app/constants/global.constants';
+import { GameMode, ItemName } from '@app/enums/global.enums';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
-import { GameModeService } from '@app/services/game-mode/game-mode.service';
 
 @Component({
     selector: 'app-item-bar',
@@ -26,8 +27,8 @@ export class ItemBarComponent implements OnInit {
 
     ngOnInit(): void {
         this.items = ITEM_BAR_ITEMS.map((data) => Object.assign(new Item(), data));
-        if (this.gameModeService.getGameMode() === 'Classique') {
-            this.items = this.items.filter((item) => item.name !== 'flag');
+        if (this.gameModeService.getGameMode() === GameMode.Classic) {
+            this.items = this.items.filter((item) => item.name !== ItemName.Flag);
         }
 
         this.itemService.setItems(this.items, this.gameModeService.getGameMode());

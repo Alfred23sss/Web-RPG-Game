@@ -1,4 +1,4 @@
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { TileType } from '@app/enums/global.enums';
 import { Player } from './player';
 

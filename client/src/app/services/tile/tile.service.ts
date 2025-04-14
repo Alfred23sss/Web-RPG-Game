@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { ImageType, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';

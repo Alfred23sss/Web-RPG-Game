@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { LogBookEntry, SocketEvent } from '@app/enums/global.enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
@@ -31,11 +32,11 @@ export class CombatSocketService {
         this.onCombatStartedLog();
     }
     private onCombatStarted(): void {
-        this.socketClientService.on('combatStarted', (data: { attacker: Player; defender: Player }) => {
+        this.socketClientService.on(SocketEvent.CombatStarted, (data: { attacker: Player; defender: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             gameData.isInCombatMode = true;
             gameData.playersInFight = gameData.lobby.players.filter((p) => p.name === data.attacker.name || p.name === data.defender.name);
-            this.clientNotifier.addLogbookEntry('Combat commencé!', [data.attacker, data.defender]);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.CombatStarted, [data.attacker, data.defender]);
 
             this.dialog.open(GameCombatComponent, {
                 disableClose: true,
@@ -45,7 +46,7 @@ export class CombatSocketService {
     }
 
     private onAttackResult(): void {
-        this.socketClientService.on('attackResult', (data: { success: boolean; attackScore: AttackScore; defenseScore: AttackScore }) => {
+        this.socketClientService.on(SocketEvent.attackResult, (data: { success: boolean; attackScore: AttackScore; defenseScore: AttackScore }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             this.gameplayService.updateAttackResult(gameData, data);
 

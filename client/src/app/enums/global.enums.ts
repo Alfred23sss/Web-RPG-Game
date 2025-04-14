@@ -249,4 +249,36 @@ export enum SocketEvent {
     ItemDropped = 'itemDropped',
     ItemDrop = 'itemDrop',
     PlayerClientUpdate = 'playerClientUpdate',
+    JoinRoom = 'joinRoom',
+    UnavailableOption = 'updateUnavailableOptions',
+    RequestUnavailableOptions = 'requestUnavailableOptions',
+    SelectAvatar = 'selectAvatar',
+    DeselectAvatar = 'deselectAvatar',
+    ManualDisconnect = 'manualDisconnect',
+    UnlockLobby = 'unlockLobby',
+    LockLobby = 'lockLobby',
+    KickPlayer = 'kickPlayer',
+    KickVirtualPlayer = 'kickVirtualPlayer',
+    CreateGame = 'createGame',
+    CreateVirtualPlayer = 'createVirtualPlayer',
+    CombatStarted = 'combatStarted',
+    attackResult = 'attackResult',
+}
+
+export enum SnackBarMessage {
+    LobbyLocked = 'Le lobby est verrouillé et ne peut pas être rejoint.',
+    Error = "Une erreur s'est produite.",
+    NonExistent = "La partie que vous souhaitez rejoindre n'existe pas!",
+    GetImpossible = 'Impossible de récupérer la partie.',
+    LobbyFull = 'Le lobby est plein, impossible de le déverrouiller.',
+}
+
+export enum LogBookEntry {
+    CombatStarted = 'Combat commencé!',
+    AttackResultSuccess = 'réussie',
+    AttackResultFail = 'échouée',
+}
+
+export enum Keys {
+    Escape = 'Escape',
 }

@@ -265,6 +265,11 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 
 export const ITEMS_TO_UPDATE = new Set(['home']);
 
+export const PLAYER_STORAGE = 'player';
+export const LOBBY_STORAGE = 'lobby';
+
+export const KEY_DOWN_EVENT_LISTENER = 'keydown';
+
 export const MOCK_GRID: Tile[][] = [
     [
         { id: 'tile-0-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },

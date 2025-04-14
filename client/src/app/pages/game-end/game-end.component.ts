@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { GameData } from '@app/classes/game-data';
+import { GameData } from '@app/classes/game-data/game-data';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { Routes } from '@app/enums/global.enums';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';

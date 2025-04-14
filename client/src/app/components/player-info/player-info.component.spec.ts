@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { GameData } from '@app/classes/game-data';
+import { GameData } from '@app/classes/game-data/game-data';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { BehaviorSubject } from 'rxjs';
 import { PlayerInfoComponent } from './player-info.component';
