@@ -36,6 +36,7 @@ export class GameEndComponent implements OnInit, OnDestroy {
             this.router.navigate(['/home']);
         }
         sessionStorage.setItem('refreshed', 'true');
+        this.gameData = this.gameStateSocketService.gameDataSubjectValue;
         if (this.gameStateSocketService.gameDataSubjectValue?.gameStats) {
             this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
             this.sortedStats = Object.values(this.gameStats.playerStats);
