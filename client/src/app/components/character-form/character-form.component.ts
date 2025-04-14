@@ -51,7 +51,6 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        console.log(this.currentAccessCode);
         this.characterService.initializeLobby(this.currentAccessCode);
         this.subscriptions.add(
             this.characterService.unavailableAvatars$.subscribe((avatars) => {
@@ -151,7 +150,6 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     };
 
     private returnHome(): void {
-        console.log('Returning home...');
         this.closePopup();
         this.characterService.returnHome();
     }
