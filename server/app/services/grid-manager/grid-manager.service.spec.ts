@@ -681,7 +681,6 @@ describe('GridManagerService', () => {
 
     describe('updateDoorTile (tile found and adjacent)', () => {
         it('should toggle door state, update image, emit events, and return grid', () => {
-            // Arrange
             const spyEmit = jest.spyOn(service['eventEmitter'], 'emit');
             const spyLog = jest.spyOn(service['logger'], 'log').mockImplementation(() => {});
 
@@ -695,13 +694,10 @@ describe('GridManagerService', () => {
 
             mockGrid[0][1] = doorTile;
 
-            // Mock adjacency function to return true
             jest.spyOn<any, any>(service, 'findAndCheckAdjacentTiles').mockReturnValue(true);
 
-            // Act
             const result = service.updateDoorTile(mockGrid, 'abc123', previousTile, doorTile);
 
-            // Assert
             expect(doorTile.imageSrc).toBe(ImageType.ClosedDoor);
             expect(doorTile.isOpen).toBe(false);
             expect(spyLog).toHaveBeenCalledWith('emitting door update');

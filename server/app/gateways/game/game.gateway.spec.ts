@@ -763,19 +763,4 @@ describe('GameGateway', () => {
 
         expect(loggerMock.log).toHaveBeenCalledWith('Door update emitted');
     });
-    // it('should not handle anything if the game is ending', () => {
-    //     const payload = {
-    //         player: MOCK_PLAYER,
-    //         accessCode: ACCESS_CODE,
-    //         isGameEnding: true,
-    //     };
-
-    //     gateway.handleGameAbandoned(MOCK_CLIENT, payload);
-
-    //     expect(loggerMock.log).not.toHaveBeenCalled();
-    //     expect(gameSessionServiceMock.handlePlayerAbandoned).not.toHaveBeenCalled();
-    //     expect(gameSessionServiceMock.deleteGameSession).not.toHaveBeenCalled();
-    //     expect(lobbyServiceMock.leaveLobby).not.toHaveBeenCalled();
-    //     expect(serverMock.emit).not.toHaveBeenCalled();
-    // });
 });

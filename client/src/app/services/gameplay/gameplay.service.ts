@@ -126,31 +126,28 @@ export class GameplayService {
     }
 
     handleDoorClick(gameData: GameData, targetTile: Tile): void {
-        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
-        const currentTile = this.getClientPlayerPosition(gameData);
-        if (!currentTile || !gameData.game || !gameData.game.grid) {
-            return;
-        }
+        const currentTile = this.validateAction(gameData);
+        if (!currentTile) return;
+
         this.socketClientService.emit('doorUpdate', {
             currentTile,
             targetTile,
             accessCode: gameData.lobby.accessCode,
         });
     }
-    // duplication de code ici entre la fonction ci-dessus et ci-dessous, à refaire
+
     handleWallClick(gameData: GameData, targetTile: Tile, player: Player): void {
-        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) return;
-        const currentTile = this.getClientPlayerPosition(gameData);
-        if (!currentTile || !gameData.game || !gameData.game.grid) {
-            return;
-        }
-        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning))
+        const currentTile = this.validateAction(gameData);
+        if (!currentTile) return;
+
+        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning)) {
             this.socketClientService.emit('wallUpdate', {
                 currentTile,
                 targetTile,
                 accessCode: gameData.lobby.accessCode,
                 player,
             });
+        }
     }
 
     handleAttackCTF(gameData: GameData, targetTile: Tile) {
@@ -255,6 +252,19 @@ export class GameplayService {
 
     emitAdminModeUpdate(gameData: GameData): void {
         this.socketClientService.emit('adminModeUpdate', { accessCode: gameData.lobby.accessCode });
+    }
+
+    private validateAction(gameData: GameData): Tile | undefined {
+        if (gameData.isInCombatMode || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS || !gameData.isActionMode) {
+            return undefined;
+        }
+
+        const currentTile = this.getClientPlayerPosition(gameData);
+        if (!currentTile || !gameData.game?.grid) {
+            return undefined;
+        }
+
+        return currentTile;
     }
 
     private isAvailablePath(gameData: GameData, tile: Tile): boolean {

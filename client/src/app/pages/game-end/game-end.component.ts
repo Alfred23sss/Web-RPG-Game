@@ -25,7 +25,6 @@ export class GameEndComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly gameStateSocketService: GameStateSocketService,
-        // private readonly gameplayService: GameplayService,
         private readonly socketClientService: SocketClientService,
         private readonly router: Router,
     ) {}

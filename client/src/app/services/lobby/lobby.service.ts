@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/member-ordering */
-// disabled, car l'ordre n'est pas possible à respecter, car les subject doivent etre defini avant d'etre utilisé...
+// disabled, because the order is impossible to respect since the subjects need to be defined before we can use them...
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
@@ -16,7 +16,6 @@ import { BehaviorSubject } from 'rxjs';
     providedIn: 'root',
 })
 export class LobbyService {
-    // Refactor les sockets ....!!!!!!!!!
     accessCode: string;
     private lobbySubject = new BehaviorSubject<Lobby | null>(null);
     private isLoadingSubject = new BehaviorSubject<boolean>(true);

@@ -200,7 +200,6 @@ describe('GameCombatService', () => {
             const abandoningPlayerName = 'defender';
 
             const combatState = mockCombatState();
-            // Here we set currentFighter to attacker.
             combatState.currentFighter = combatState.attacker;
 
             service['combatStates'][accessCode] = combatState;
@@ -210,7 +209,6 @@ describe('GameCombatService', () => {
             const updateWinningPlayerSpy = jest.spyOn(service as any, 'updateWinningPlayerAfterCombat');
             service.handleCombatSessionAbandon(accessCode, abandoningPlayerName);
 
-            // When defender abandons, the attacker wins.
             expect(updateWinningPlayerSpy).toHaveBeenCalledWith(combatState.attacker, accessCode);
             expect(service['combatStates'][accessCode]).toBeUndefined();
         });

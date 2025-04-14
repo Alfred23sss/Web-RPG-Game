@@ -81,7 +81,7 @@ export class CombatSocketService {
             gameData.attackResult = null;
             gameData.escapeAttempts = data.attemptsLeft;
             const hasEvaded = data.isEscapeSuccessful ? 'réussi' : 'raté';
-            this.clientNotifier.addLogbookEntry(`Tentative d'évasion ${hasEvaded}`, []); // pt rajoute nom joueur ici
+            this.clientNotifier.addLogbookEntry(`Tentative d'évasion ${hasEvaded}`, []);
             this.gameStateService.updateGameData(gameData);
         });
     }
