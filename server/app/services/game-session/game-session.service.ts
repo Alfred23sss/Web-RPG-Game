@@ -71,12 +71,12 @@ export class GameSessionService {
                 }
             }
             if (!isCurrentlyMoving && movement[i].item && movement[i].item !== undefined) {
-                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
                 if (movement[i].item.name !== ItemName.Home) {
+                    const collectedItem = movement[i].item;
                     this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
                     this.emitEvent(EventEmit.GameItemCollected, {
                         accessCode,
-                        item: movement[i].item,
+                        item: collectedItem,
                         player,
                     });
                     break;

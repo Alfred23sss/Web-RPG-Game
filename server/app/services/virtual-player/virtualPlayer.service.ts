@@ -40,6 +40,7 @@ export class VirtualPlayerService {
             const found = items.find((item) => item.name === name);
             if (found && !result.includes(found)) {
                 result.push(found);
+
                 if (result.length === 2) break;
             }
         }
