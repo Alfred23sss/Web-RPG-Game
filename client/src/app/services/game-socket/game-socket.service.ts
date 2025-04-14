@@ -17,6 +17,8 @@ import { SocketEvent } from '@app/enums/global.enums';
     providedIn: 'root',
 })
 export class GameSocketService {
+    private doorClickedTimer: number | null = null;
+    private readonly DoorClickedDelay = 50;
     constructor(
         private gameStateService: GameStateSocketService,
         private gameplayService: GameplayService,
@@ -218,20 +220,14 @@ export class GameSocketService {
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on(SocketEvent.DoorClicked, (data: { grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }) => {
-            if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
+        this.socketClientService.on<{ grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }>(SocketEvent.DoorClicked, (data) => {
+            if (this.doorClickedTimer !== null) {
                 return;
             }
-            this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
-                this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
-            }
-            this.gameStateService.gameDataSubjectValue.isActionMode = false;
-            this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
-            this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
-            this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            const action = data.isOpen ? 'fermé une porte' : 'ouvert une porte';
-            this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [data.player]);
+            this.doorClickedTimer = window.setTimeout(() => {
+                this.processDoorClicked(data);
+                this.doorClickedTimer = null;
+            }, this.DoorClickedDelay);
         });
     }
 
@@ -276,5 +272,21 @@ export class GameSocketService {
             ]);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
+    }
+
+    private processDoorClicked(data: { grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }): void {
+        if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
+            return;
+        }
+        this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
+        if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
+            this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+        }
+        this.gameStateService.gameDataSubjectValue.isActionMode = false;
+        this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
+        this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
+        this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+        const action = data.isOpen ? 'fermé une porte' : 'ouvert une porte';
+        this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [data.player]);
     }
 }
