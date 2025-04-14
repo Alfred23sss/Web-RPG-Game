@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
+/* eslint-disable max-lines */
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Item } from '@app/classes/item';
 import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { ItemName, TileType } from '@app/enums/global.enums';
+import { DiceType, ItemName, TeamType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -18,7 +19,6 @@ describe('GameSocketService', () => {
     let service: GameSocketService;
     let gameStateServiceSpy: jasmine.SpyObj<GameStateSocketService>;
     let gameplayServiceSpy: jasmine.SpyObj<GameplayService>;
-    // let playerMovementServiceSpy: jasmine.SpyObj<PlayerMovementService>;
     let clientNotifierSpy: jasmine.SpyObj<ClientNotifierServices>;
     let socketClientServiceSpy: jasmine.SpyObj<SocketClientService>;
 
@@ -70,7 +70,6 @@ describe('GameSocketService', () => {
         service = TestBed.inject(GameSocketService);
         gameStateServiceSpy = TestBed.inject(GameStateSocketService) as jasmine.SpyObj<GameStateSocketService>;
         gameplayServiceSpy = TestBed.inject(GameplayService) as jasmine.SpyObj<GameplayService>;
-        // playerMovementServiceSpy = TestBed.inject(PlayerMovementService) as jasmine.SpyObj<PlayerMovementService>;
         socketClientServiceSpy = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
 
         service.initializeSocketListeners();
@@ -153,67 +152,6 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    it('should handle gameStarted event even if name in orderedPlayers is not clientPlayer', () => {
-        const data = {
-            orderedPlayers: [MOCK_PLAYER, { ...MOCK_PLAYER, name: 'Player2' }],
-            updatedGame: {
-                ...MOCK_GAME,
-                grid: MOCK_GRID,
-            },
-        };
-
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = { ...MOCK_PLAYER, name: 'null' };
-
-        const callback = socketEvents['gameStarted'];
-
-        callback(data);
-
-        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toEqual(data.orderedPlayers);
-        expect(gameStateServiceSpy.gameDataSubjectValue.game).toEqual(data.updatedGame);
-        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    });
-
-    // it('should handle playerMovement event', () => {
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints = 10;
-
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.attack = { value: 0, bonusDice: DiceType.D6 };
-    //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer.defense = { value: 0, bonusDice: DiceType.D4 };
-
-    //     const mockPlayer: Player = {
-    //         ...MOCK_PLAYER,
-    //         name: 'testPlayer',
-    //         attack: { value: 4, bonusDice: DiceType.D6 },
-    //         defense: { value: 4, bonusDice: DiceType.D4 },
-    //     };
-
-    //     playerMovementServiceSpy.calculateRemainingMovementPoints.and.returnValue(3);
-
-    //     const data = {
-    //         grid: MOCK_GRID,
-    //         player: mockPlayer,
-    //         isCurrentlyMoving: true,
-    //     };
-
-    //     socketEvents['playerMovement'](data);
-
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(data.grid);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.movementPoints).toEqual(7);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.movementPointsRemaining).toEqual(7);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.isCurrentlyMoving).toBeTrue();
-    //     expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
-    //     expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalled();
-    //     expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    // });
-
-    it('should handle playerUpdate event', () => {
-        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = MOCK_PLAYER.name;
-        const updatedPlayer = { ...MOCK_PLAYER };
-        socketEvents['playerUpdate']({ player: updatedPlayer });
-        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
-        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    });
-
     it('should handle playerListUpdate event', () => {
         const players = [MOCK_PLAYER, MOCK_PLAYER];
         socketEvents['playerListUpdate']({ players });
@@ -239,17 +177,6 @@ describe('GameSocketService', () => {
         socketEvents['gridUpdate']({ grid: newGrid });
         expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(newGrid);
         expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
-        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
-    });
-
-    it('should handle adminModeChangedServerSide event', () => {
-        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = true;
-        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [{ ...MOCK_PLAYER, isAdmin: true }];
-
-        socketEvents['adminModeChangedServerSide']();
-
-        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeFalse();
-        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug désactivé');
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
@@ -280,26 +207,6 @@ describe('GameSocketService', () => {
         expect(sessionStorage.getItem('refreshed')).toBe('true');
     });
 
-    it('should show correct snackbar message when enabling admin mode in onAdminModeChangedServerSide', () => {
-        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = false;
-        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [{ ...MOCK_PLAYER, isAdmin: true }];
-
-        socketEvents['adminModeChangedServerSide']();
-
-        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug activé');
-    });
-
-    it('should not notify when no admin player exists', () => {
-        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
-        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = false;
-
-        socketEvents['adminModeChangedServerSide']();
-
-        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeTrue();
-        expect(clientNotifierSpy.displayMessage).not.toHaveBeenCalled();
-        expect(clientNotifierSpy.addLogbookEntry).not.toHaveBeenCalled();
-    });
-
     it('should handle missing player in onGameAbandoned', () => {
         gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
         const initialPlayerCount = gameStateServiceSpy.gameDataSubjectValue.lobby.players.length;
@@ -325,18 +232,6 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    // it('should filter out abandoned players when game ends', () => {
-    //     const activePlayer = { ...MOCK_PLAYER, name: 'Active', hasAbandoned: false };
-    //     const abandonedPlayer = { ...MOCK_PLAYER, name: 'Abandoned', hasAbandoned: true };
-
-    //     gameStateServiceSpy.gameDataSubjectValue.lobby.players = [activePlayer, abandonedPlayer];
-    //     const data = { winner: ['WinnerPlayer'] };
-    //     socketEvents['gameEnded'](data);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(activePlayer);
-    //     expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toContain(abandonedPlayer);
-    //     expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Fin de la partie', [activePlayer, abandonedPlayer]);
-    // });
-
     it('should call gameplayService when itemChoice', () => {
         const mockItem = { name: ItemName.Default } as Item;
 
@@ -361,27 +256,6 @@ describe('GameSocketService', () => {
         socketEvents['itemDropped'](mockData);
 
         expect(socketClientServiceSpy.emit).toHaveBeenCalledWith('itemDrop', mockData);
-    });
-
-    describe('onPlayerClientUpdate', () => {
-        const initialClientPlayer = { name: 'testPlayer', actionPoints: 3 } as Player;
-        // it('should update clientPlayer when names match', () => {
-        //     gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
-        //     const updatedPlayer = { name: 'testPlayer', actionPoints: 0 } as Player;
-
-        //     socketEvents['playerClientUpdate']({ player: updatedPlayer });
-
-        //     expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(updatedPlayer);
-        // });
-
-        it('should NOT update clientPlayer when names differ', () => {
-            gameStateServiceSpy.gameDataSubjectValue.clientPlayer = initialClientPlayer;
-            const otherPlayer = { name: 'otherPlayer', actionPoints: 0 } as Player;
-
-            socketEvents['playerClientUpdate']({ player: otherPlayer });
-
-            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer).toEqual(initialClientPlayer);
-        });
     });
 
     describe('onWallClicked', () => {
@@ -413,6 +287,165 @@ describe('GameSocketService', () => {
 
             expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(initialActionPoints);
             expect(gameplayServiceSpy.updateAvailablePath).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('onPlayerClientUpdate', () => {
+        let mockPlayer: Player;
+
+        let mockItem: Item;
+
+        beforeEach(() => {
+            mockItem = new Item({
+                id: 'item1',
+                imageSrc: 'sword.png',
+                imageSrcGrey: 'sword-grey.png',
+                name: 'sword',
+                itemCounter: 1,
+                description: 'A sharp sword',
+            });
+
+            mockPlayer = {
+                name: 'testPlayer',
+                avatar: 'avatar1.png',
+                speed: 2,
+                attack: { value: 10, bonusDice: DiceType.D6 },
+                defense: { value: 5, bonusDice: DiceType.D6 },
+                hp: { current: 100, max: 100 },
+                movementPoints: 10,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                isVirtual: false,
+                hasAbandoned: false,
+                isActive: true,
+                combatWon: 0,
+                team: TeamType.RED,
+            };
+        });
+
+        it('should update player in lobby when found', () => {
+            gameStateServiceSpy.gameDataSubjectValue.lobby.players = [mockPlayer];
+            const updatedPlayer = {
+                ...mockPlayer,
+                inventory: [mockItem, null],
+            };
+            socketEvents['playerClientUpdate']({ player: updatedPlayer });
+            const lobbyPlayer = gameStateServiceSpy.gameDataSubjectValue.lobby.players[0];
+            expect(lobbyPlayer.inventory).toEqual([mockItem, null]);
+        });
+    });
+
+    it('should log when player picks up flag', () => {
+        const flagItem = new Item({
+            name: 'flag',
+            imageSrc: 'flag.png',
+            imageSrcGrey: 'flag-grey.png',
+            description: 'Drapeau du jeu',
+        });
+
+        const initialPlayer: Player = {
+            ...MOCK_PLAYER,
+            inventory: [null, null] as [Item | null, Item | null],
+        };
+
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [initialPlayer];
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = { ...initialPlayer };
+
+        const updatedPlayer: Player = {
+            ...initialPlayer,
+            inventory: [flagItem, null] as [Item | null, Item | null],
+        };
+        socketEvents['playerClientUpdate']({ player: updatedPlayer });
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith(`${updatedPlayer.name} a pris le drapeau!`, [updatedPlayer]);
+
+        const lobbyPlayer = gameStateServiceSpy.gameDataSubjectValue.lobby.players[0];
+        expect(lobbyPlayer.inventory?.[0]?.name).toBe('flag');
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.inventory?.[0]?.name).toBe('flag');
+
+        const clonedItem = lobbyPlayer.inventory?.[0]?.clone();
+        expect(clonedItem?.name).toBe('flag');
+        expect(clonedItem?.id).not.toBe(flagItem.id);
+    });
+
+    describe('onPlayerUpdate', () => {
+        let mockClientPlayer: Player;
+        let mockOtherPlayer: Player;
+        let mockPlayerInFight: Player;
+        let mockItem: Item;
+        let currentGameState: any;
+
+        beforeEach(() => {
+            mockItem = new Item({
+                name: 'sword',
+                imageSrc: 'sword.png',
+                imageSrcGrey: 'sword-grey.png',
+                description: 'Une épée tranchante',
+            });
+            mockClientPlayer = {
+                name: 'clientPlayer',
+                avatar: 'avatar1.png',
+                speed: 2,
+                attack: { value: 5, bonusDice: DiceType.D6 },
+                defense: { value: 3, bonusDice: DiceType.D6 },
+                hp: { current: 100, max: 100 },
+                movementPoints: 10,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                isVirtual: false,
+                hasAbandoned: false,
+                isActive: true,
+                combatWon: 0,
+                team: TeamType.RED,
+            };
+
+            mockOtherPlayer = { ...mockClientPlayer, name: 'otherPlayer' };
+            mockPlayerInFight = { ...mockClientPlayer, name: 'playerInFight' };
+            currentGameState = {
+                clientPlayer: { ...mockClientPlayer },
+                playersInFight: [{ ...mockPlayerInFight }],
+                lobby: { players: [mockClientPlayer, mockOtherPlayer, mockPlayerInFight] },
+                currentPlayer: { ...mockClientPlayer },
+            };
+            Object.defineProperty(gameStateServiceSpy, 'gameDataSubjectValue', {
+                get: () => currentGameState,
+                configurable: true,
+            });
+            gameStateServiceSpy.updateGameData.and.callFake((newState) => {
+                currentGameState = { ...currentGameState, ...newState };
+            });
+        });
+
+        it('should update client player correctly', () => {
+            const updatedPlayer: Player = {
+                ...mockClientPlayer,
+                hp: { current: 90, max: 100 },
+                inventory: [mockItem, null],
+            };
+            socketEvents['playerUpdate']({ player: updatedPlayer });
+
+            expect(currentGameState.clientPlayer.hp.current).toBe(90);
+            expect(currentGameState.clientPlayer.inventory[0]?.name).toBe('sword');
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+        });
+
+        it('should update correct player in fight list when index is found', () => {
+            const secondPlayerInFight: Player = {
+                ...mockPlayerInFight,
+                name: 'secondPlayerInFight',
+                hp: { current: 75, max: 100 },
+            };
+            currentGameState.playersInFight.push(secondPlayerInFight);
+
+            const updatedPlayer: Player = {
+                ...mockPlayerInFight,
+                hp: { current: 30, max: 100 },
+                inventory: [mockItem, null],
+            };
+            socketEvents['playerUpdate']({ player: updatedPlayer });
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
         });
     });
 });

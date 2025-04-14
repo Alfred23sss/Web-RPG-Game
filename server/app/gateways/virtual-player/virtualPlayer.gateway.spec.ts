@@ -21,7 +21,6 @@ describe('VirtualPlayerGateway', () => {
     let mockVirtualPlayerService: Partial<VirtualPlayerService>;
     let mockGameSessionService: Partial<GameSessionService>;
     let mockLogger: Partial<Logger>;
-    let eventEmitter: EventEmitter2;
 
     beforeEach(async () => {
         mockServer = {
@@ -71,7 +70,6 @@ describe('VirtualPlayerGateway', () => {
         }).compile();
 
         gateway = module.get<VirtualPlayerGateway>(VirtualPlayerGateway);
-        eventEmitter = module.get<EventEmitter2>(EventEmitter2);
         gateway.server = mockServer as Server;
     });
 

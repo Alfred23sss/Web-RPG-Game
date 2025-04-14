@@ -268,4 +268,13 @@ describe('GamePageComponent', () => {
         mockPlayer.inventory = [{ name: ItemName.Flag, imageSrc: 'test' } as Item, null];
         expect(component.getFlagImage(mockPlayer)).toBe('test');
     });
+
+    it('should toggle activeTab between "chat" and "log"', () => {
+        component.activeTab = 'chat';
+        component.toggleTab();
+        expect(component.activeTab).toBe('log');
+
+        component.toggleTab();
+        expect(component.activeTab).toBe('chat');
+    });
 });
