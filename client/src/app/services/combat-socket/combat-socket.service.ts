@@ -97,6 +97,7 @@ export class CombatSocketService {
             if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
                 gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
             }
+            gameData.clientPlayer.hp.current = gameData.clientPlayer.hp.max;
             gameData.evadeResult = null;
             gameData.attackResult = null;
             if (data && data.winner && !data.hasEvaded) {
@@ -105,6 +106,8 @@ export class CombatSocketService {
                 this.clientNotifier.showMultipleMessages(`${data.winner.name} a evadé le combat !`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             }
             if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
+                console.log('movement poitns reamning', gameData.movementPointsRemaining);
+                // probleme vien dici
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
             this.gameStateService.updateGameData(gameData);

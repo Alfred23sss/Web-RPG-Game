@@ -110,13 +110,9 @@ export class GameCombatService {
     endCombat(accessCode: string, isEscape: boolean = false): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
-        Logger.log('passed combat stae');
 
         this.resetCombatTimers(accessCode);
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
-        Logger.log('att ', attacker);
-        Logger.log('def', defender);
-        Logger.log('pcuurebt ', currentFighter);
         this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
