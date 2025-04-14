@@ -1,13 +1,3 @@
-export enum GameDecorations {
-    Background = '../../../assets/gifs/background4gif.gif',
-    ExampleGame = './assets/game-decorations/example.png',
-    Logo = './assets/game-decorations/logoC.png',
-    Forge = './assets/game-decorations/medieval-forge.png',
-    XSwords = './assets/game-decorations/X-sword.png',
-    X = './assets/game-decorations/X.png',
-    Default = './assets/game-decorations/logo.png',
-}
-
 export enum GameModeType {
     Classic = './assets/gamemodes/classic.png',
     CTF = './assets/gamemodes/CTF.png',
