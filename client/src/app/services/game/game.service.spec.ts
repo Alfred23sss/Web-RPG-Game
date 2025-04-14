@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { ImageType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
@@ -121,7 +122,7 @@ describe('GameService', () => {
         service.deleteGame(testGame1.id).subscribe();
 
         expect(gameCommunicationServiceSpy.deleteGame).toHaveBeenCalledWith(testGame1.id);
-        expect(service.getGames()).not.toContain(testGame1);
+        expect((service as any).games).not.toContain(testGame1);
     });
 
     it('should add game when saveGame is called with a new game', () => {
@@ -129,13 +130,14 @@ describe('GameService', () => {
 
         service.saveGame(testGame1);
 
-        expect(service.getGames()).toContain(testGame1);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        expect((service as any).games).toContain(testGame1);
     });
 
     it('should get all games', () => {
         service.games = [testGame1, testGame2];
 
-        const games = service.getGames();
+        const games = (service as any).games;
         expect(games).toEqual([testGame1, testGame2]);
     });
 
@@ -155,7 +157,7 @@ describe('GameService', () => {
 
         service.deleteGame(testGame1.id).subscribe();
 
-        expect(service.getGames().length).toBe(1);
+        expect((service as any).games.length).toBe(1);
         expect(service.getGameById(testGame1.id)).toBeUndefined();
         expect(service.getGameById(testGame2.id)).toEqual(testGame2);
     });
@@ -179,7 +181,7 @@ describe('GameService', () => {
         service.saveGame(testGame1);
 
         expect(gameCommunicationServiceSpy.updateGame).toHaveBeenCalledWith(testGame1.id, testGame1);
-        expect(service.getGames()[0]).toEqual(updatedGame);
+        expect((service as any).games[0]).toEqual(updatedGame);
     });
 
     it('should return the current game if it exists', () => {
