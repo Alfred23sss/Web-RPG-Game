@@ -3,18 +3,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
 import { MoveType } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/lobby';
-import { Move } from '@app/interfaces/move';
-import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
+import { Lobby } from '@app/interfaces/lobbys';
+import { Move } from '@app/interfaces/moves';
+import { Player } from '@app/interfaces/players';
+import { Tile } from '@app/interfaces/tiles';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { DiceType, ItemName, TeamType, TileType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerActionsService } from './virtual-player-actions.service';
-import { TeamType, ItemName, DiceType, TileType } from '@common/enums';
 
 describe('VirtualPlayerActionsService', () => {
     let service: VirtualPlayerActionsService;

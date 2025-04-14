@@ -3,22 +3,22 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
-import { DiceType } from '@app/interfaces/dice';
-import { Game } from '@app/interfaces/game';
+import { DiceType } from '@app/interfaces/dices';
 import { GameSession } from '@app/interfaces/game-session';
-import { Item } from '@app/interfaces/item';
-import { Lobby } from '@app/interfaces/lobby';
-import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
-import { Turn } from '@app/interfaces/turn';
+import { Game } from '@app/interfaces/games';
+import { Item } from '@app/interfaces/items';
+import { Lobby } from '@app/interfaces/lobbys';
+import { Player } from '@app/interfaces/players';
+import { Tile } from '@app/interfaces/tiles';
+import { Turn } from '@app/interfaces/turns';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { GameMode, ImageType, ItemName, TeamType, TileType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
-import { ImageType, GameMode, TeamType, ItemName, TileType } from '@common/enums';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;

@@ -1,5 +1,5 @@
 import { Behavior } from '@common/enums';
-import { Player } from './player';
+import { Player } from './players';
 
 export interface VirtualPlayer extends Player {
     behavior: Behavior;

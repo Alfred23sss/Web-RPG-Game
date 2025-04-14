@@ -2,19 +2,19 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { DiceType } from '@app/interfaces/dice';
-import { Game } from '@app/interfaces/game';
+import { DiceType } from '@app/interfaces/dices';
 import { GameSession } from '@app/interfaces/game-session';
-import { Item } from '@app/interfaces/item';
-import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
-import { Turn } from '@app/interfaces/turn';
+import { Game } from '@app/interfaces/games';
+import { Item } from '@app/interfaces/items';
+import { Player } from '@app/interfaces/players';
+import { Tile } from '@app/interfaces/tiles';
+import { Turn } from '@app/interfaces/turns';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { GameMode, TileType } from '@common/enums';
+import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameStatisticsService } from './game-statistics.service';
-import { Logger } from '@nestjs/common';
-import { GameMode, TileType } from '@common/enums';
 
 const PLAYER_1_NAME = 'Player 1';
 const PLAYER_2_NAME = 'Player 2';

@@ -1,5 +1,5 @@
 import { MoveType } from '@app/enums/enums';
-import { Tile } from './tile';
+import { Tile } from './tiles';
 
 export interface Move {
     tile: Tile;

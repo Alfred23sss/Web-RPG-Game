@@ -1,4 +1,4 @@
-import { Player } from '@app/interfaces/player';
+import { Player } from '@app/interfaces/players';
 import { Game } from '@app/model/database/game';
 
 export interface Lobby {

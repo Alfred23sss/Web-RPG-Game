@@ -1,16 +1,16 @@
-import { Item } from '@app/interfaces/item';
-import { Tile } from '@app/interfaces/tile';
+import { Item } from '@app/interfaces/items';
+import { Tile } from '@app/interfaces/tiles';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtual-player-creation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
+import { Behavior } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server } from 'socket.io';
 import { VirtualPlayerGateway } from './virtual-player.gateway';
-import { Behavior } from '@common/enums';
 
 describe('VirtualPlayerGateway', () => {
     let gateway: VirtualPlayerGateway;

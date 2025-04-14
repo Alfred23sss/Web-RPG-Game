@@ -1,7 +1,7 @@
 import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { AttackScore } from '@app/interfaces/attack-score';
-import { Player } from '@app/interfaces/player';
+import { Player } from '@app/interfaces/players';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';

@@ -1,14 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */ // the original file respects this condition
 import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/dice';
-import { Lobby } from '@app/interfaces/lobby';
-import { Player } from '@app/interfaces/player';
+import { DiceType } from '@app/interfaces/dices';
+import { Lobby } from '@app/interfaces/lobbys';
+import { Player } from '@app/interfaces/players';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
+import { GameSize } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
-import { GameSize } from '@common/enums';
 
 const ACCESS_CODE = 'test-code';
 const SOCKED_ID = 'test-id';

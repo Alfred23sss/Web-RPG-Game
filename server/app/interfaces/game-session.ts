@@ -1,6 +1,6 @@
 import { Game } from '@app/model/database/game';
 import { Player } from '@app/model/database/player';
-import { Turn } from './turn';
+import { Turn } from './turns';
 
 export interface GameSession {
     game: Game;

@@ -1,6 +1,6 @@
 import { Item } from '@app/model/database/item';
 import { TileType } from '@app/model/database/tile';
-import { Player } from './player';
+import { Player } from './players';
 
 export interface Tile {
     id: string;

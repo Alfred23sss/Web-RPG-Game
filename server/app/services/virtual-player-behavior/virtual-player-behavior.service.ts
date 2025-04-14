@@ -1,15 +1,15 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
 import { MoveType } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/lobby';
-import { Move } from '@app/interfaces/move';
-import { Player } from '@app/interfaces/player';
-import { Tile } from '@app/interfaces/tile';
+import { Lobby } from '@app/interfaces/lobbys';
+import { Move } from '@app/interfaces/moves';
+import { Player } from '@app/interfaces/players';
+import { Tile } from '@app/interfaces/tiles';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
-import { Injectable } from '@nestjs/common';
 import { Behavior } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class VirtualPlayerBehaviorService {

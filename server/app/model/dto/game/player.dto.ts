@@ -1,4 +1,4 @@
-import { DiceType } from '@app/interfaces/dice';
+import { DiceType } from '@app/interfaces/dices';
 import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { ItemDto } from './item.dto';
 

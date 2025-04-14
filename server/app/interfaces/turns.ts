@@ -1,4 +1,4 @@
-import { Player } from './player';
+import { Player } from './players';
 
 export interface Turn {
     orderedPlayers: Player[];
