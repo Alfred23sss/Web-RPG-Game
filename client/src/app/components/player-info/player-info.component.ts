@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { Subscription } from 'rxjs';
 

@@ -14,6 +14,30 @@ export enum GameModeType {
     CTF = 'CTF',
 }
 
+export enum GameMode {
+    Classic = 'Classique',
+    CTF = 'CTF',
+    None = '',
+}
+export enum GameSize {
+    Small = 'small',
+    Medium = 'medium',
+    Large = 'large',
+    None = '',
+}
+
+export enum GameSizeTileCount {
+    Small = '10',
+    Medium = '15',
+    Large = '20',
+}
+
+export enum GameSizePlayerCount {
+    Small = 2,
+    Medium = 4,
+    Large = 6,
+}
+
 export enum TeamType {
     RED = 'red',
     BLUE = 'blue',
@@ -43,6 +67,27 @@ export enum ImageType {
     Default = './assets/tile-items/floorB.PNG',
 }
 
+export enum TileType {
+    Water = 'eau',
+    Ice = 'glace',
+    Wall = 'mur',
+    Door = 'porte',
+    Default = 'défaut',
+}
+
+export enum ItemDescription {
+    Home = 'Point de départ',
+    Lightning = 'Permet de détruire des murs',
+    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
+    Stop = 'Donne un deuxième D6 au joueur.',
+    QuestionMark = 'Objet aléatoire.',
+    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
+    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
+    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
+    Flag = 'Drapeau à capturer.',
+    Default = 'rien',
+}
+
 export enum ItemType {
     Home = './assets/items/home-removebg-preview.png',
     HomeGray = './assets/items/home-gray.png',
@@ -65,62 +110,6 @@ export enum ItemType {
     Default = './assets/items/banner-medieval.png',
 }
 
-export enum BonusValue {
-    Default = 2,
-}
-
-export enum DiceType {
-    D4 = 'D4',
-    D6 = 'D6',
-    Uninitialized = '',
-}
-
-export enum JoinLobbyResult {
-    RedirectToHome = 'redirectToHome',
-    StayInLobby = 'stayInLobby',
-    JoinedLobby = 'joinedLobby',
-}
-
-export enum GameMode {
-    Classic = 'Classique',
-    CTF = 'CTF',
-    None = '',
-}
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
-}
-
-export enum GameSizeTileCount {
-    Small = '10',
-    Medium = '15',
-    Large = '20',
-}
-
-export enum GameSizePlayerCount {
-    Small = 2,
-    Medium = 4,
-    Large = 6,
-}
-
-export enum AttributeType {
-    Hp = 'hp',
-    Speed = 'Vitesse',
-    Attack = 'Attaque',
-    Defense = 'Défense',
-}
-
-export enum Routes {
-    WaitingView = '/waiting-view',
-    EditionView = '/edition',
-    AdminPage = '/admin',
-    HomePage = '/home',
-    CreatePage = '/create',
-    CreateView = '/create',
-}
-
 export enum ItemName {
     Home = 'home',
     Lightning = 'lightning',
@@ -132,6 +121,38 @@ export enum ItemName {
     Swap = 'swap',
     Flag = 'flag',
     Default = 'default',
+}
+
+export enum BonusValue {
+    Default = 2,
+}
+
+export enum DiceType {
+    D4 = 'D4',
+    D6 = 'D6',
+    Uninitialized = '',
+}
+
+export enum AttributeType {
+    Hp = 'hp',
+    Speed = 'Vitesse',
+    Attack = 'Attaque',
+    Defense = 'Défense',
+}
+
+export enum JoinLobbyResult {
+    RedirectToHome = 'redirectToHome',
+    StayInLobby = 'stayInLobby',
+    JoinedLobby = 'joinedLobby',
+}
+
+export enum Routes {
+    WaitingView = '/waiting-view',
+    EditionView = '/edition',
+    AdminPage = '/admin',
+    HomePage = '/home',
+    CreatePage = '/create',
+    CreateView = '/create',
 }
 
 export enum HttpStatus {
@@ -164,27 +185,6 @@ export enum ErrorMessages {
     InnacessibleTerrain = '❌ Aucune tuile de terrain accessible trouvée',
     SomeTilesInnacessible = '❌ Il y a des tuiles inaccesseibles sur le terrain',
     MustPlaceHouseItems = 'items maisons doivent être placées',
-}
-
-export enum TileType {
-    Water = 'eau',
-    Ice = 'glace',
-    Wall = 'mur',
-    Door = 'porte',
-    Default = 'défaut',
-}
-
-export enum ItemDescription {
-    Home = 'Point de départ',
-    Lightning = 'Permet de détruire des murs',
-    Potion = "Augmente l'Attaque de 2, mais réduit la Défense de 1.",
-    Stop = 'Donne un deuxième D6 au joueur.',
-    QuestionMark = 'Objet aléatoire.',
-    Fire = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
-    Rubik = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
-    Swap = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
-    Flag = 'Drapeau à capturer.',
-    Default = 'rien',
 }
 
 export enum MoveType {

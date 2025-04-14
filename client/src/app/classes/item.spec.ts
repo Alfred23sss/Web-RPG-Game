@@ -1,4 +1,4 @@
-import { GameData } from './gameData';
+import { GameData } from './game-data';
 import { Item } from './item';
 
 describe('Item', () => {

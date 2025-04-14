@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data';
 import { Item } from '@app/classes/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
