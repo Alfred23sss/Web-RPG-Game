@@ -9,8 +9,6 @@ import { ChatEvents } from './chat.gateway.events';
 export class ChatGateway implements OnGatewayInit {
     @WebSocketServer() private server: Server;
 
-    constructor(private readonly logger: Logger) {}
-
     @SubscribeMessage(ChatEvents.Validate)
     validate(socket: Socket, word: string) {
         socket.emit(ChatEvents.WordValidated, word?.length > WORD_MIN_LENGTH);
@@ -28,7 +26,7 @@ export class ChatGateway implements OnGatewayInit {
 
     @SubscribeMessage(ChatEvents.RoomMessage)
     roomMessage(socket: Socket, payload: { message: string; author: string; room: string }) {
-        this.logger.log('recu dans chat');
+        Logger.log('recu dans chat');
         const { message, room, author } = payload;
 
         if (!room) {
@@ -37,11 +35,11 @@ export class ChatGateway implements OnGatewayInit {
         }
 
         if (this.server.sockets.adapter.rooms.has(room)) {
-            this.logger.log('Message received, sending to the room');
+            Logger.log('Message received, sending to the room');
             const formattedMessage = this.formatMessage(author, message);
             this.server.to(room).emit(ChatEvents.RoomMessage, formattedMessage);
         } else {
-            this.logger.log('Message not received, not in the room');
+            Logger.log('Message not received, not in the room');
         }
     }
 
