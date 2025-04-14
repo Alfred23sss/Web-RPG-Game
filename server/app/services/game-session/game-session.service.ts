@@ -165,7 +165,7 @@ export class GameSessionService {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession || !gameSession.turn.currentPlayer) return false;
         const player = gameSession.turn.orderedPlayers.find((p) => p.name === playerName);
-        return gameSession.turn.currentPlayer.name === playerName && !player?.hasAbandoned;
+        return gameSession.turn.beginnerPlayer.name === playerName && !player?.hasAbandoned;
     }
 
     pauseGameTurn(accessCode: string): number {

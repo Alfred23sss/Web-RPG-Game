@@ -1,3 +1,4 @@
+import { ACTION_MAX_MS } from '@app/constants/constants';
 import { Behavior, EventEmit } from '@app/enums/enums';
 import { Item } from '@app/interfaces/Item';
 import { Tile } from '@app/interfaces/Tile';
@@ -64,7 +65,9 @@ export class VirtualPlayerGateway {
         this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
 
         this.virtualPlayerService.resetStats();
-        this.gameSessionService.endTurn(data.accessCode);
+        setTimeout(() => {
+            this.gameSessionService.endTurn(data.accessCode);
+        }, ACTION_MAX_MS);
     }
 
     @OnEvent(VirtualPlayerEvents.ChooseItem)

@@ -121,9 +121,9 @@ export class GameCombatService {
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
         this.gameSessionService.setCombatState(accessCode, false);
-        if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
+        if (!isEscape && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-        } else if (!isEscape && currentFighter) {
+        } else if (!isEscape) {
             this.gameSessionService.endTurn(accessCode);
         } else {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
