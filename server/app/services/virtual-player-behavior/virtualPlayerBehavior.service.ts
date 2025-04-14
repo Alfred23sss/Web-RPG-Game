@@ -76,20 +76,6 @@ export class VirtualPlayerBehaviorService {
         }
 
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
-
-        const virtualPlayerTile = this.virtualPlayerScoreService.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
-        console.table(
-            scoredMoves.map((move) => ({
-                type: move.type,
-                item: move.tile.item?.name ?? 'attack',
-                score: move.score,
-                inRange: move.inRange,
-                distance: this.virtualPlayerActions.calculateTotalMovementCost(
-                    this.virtualPlayerActions.getPathForMove(move, virtualPlayerTile, lobby) || [],
-                ),
-            })),
-        );
-
         return scoredMoves[0];
     }
 }
