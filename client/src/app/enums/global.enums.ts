@@ -18,11 +18,6 @@ export enum ChatEvents {
     Error = 'error',
 }
 
-export enum TeamType {
-    RED = 'red',
-    BLUE = 'blue',
-}
-
 export enum ItemType {
     Home = './assets/items/home-removebg-preview.png',
     HomeGray = './assets/items/home-gray.png',

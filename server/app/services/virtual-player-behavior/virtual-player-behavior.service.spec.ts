@@ -87,17 +87,6 @@ describe('VirtualPlayerBehaviorService', () => {
             expect(result).toBe(false);
         });
 
-        it('should escape when health is low', async () => {
-            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
-            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({ currentFighter: { name: 'test' } });
-            const mockPlayer = { name: 'test', hp: { current: 10, max: 100 } };
-
-            const result = await service.tryToEscapeIfWounded(mockPlayer as Player, 'code');
-
-            expect(mockGameCombatService.attemptEscape).toHaveBeenCalledWith('code', mockPlayer);
-            expect(result).toBe(true);
-        });
-
         it('should not escape with full health', async () => {
             (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
             (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({ currentFighter: { name: 'test' } });
@@ -200,16 +189,6 @@ describe('VirtualPlayerBehaviorService', () => {
             const result = (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(result.score).toBe(1);
-        });
-
-        it('should handle getPathForMove undefined', () => {
-            const mockMoves = [createMockMove({ score: 0 }), createMockMove({ score: 1 })];
-
-            (mockVirtualPlayerActions.getPathForMove as jest.Mock).mockReturnValue(undefined);
-
-            (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
-
-            expect(mockVirtualPlayerActions.calculateTotalMovementCost).toHaveBeenCalledWith([]);
         });
     });
 

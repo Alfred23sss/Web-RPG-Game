@@ -2,7 +2,7 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { TeamType } from '@app/enums/enums';
+import { TeamType } from '@common/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Player } from '@app/interfaces/player';
 import { Turn } from '@app/interfaces/turn';

@@ -1,4 +1,4 @@
-import { TeamType } from '@app/enums/enums';
+import { TeamType } from '@common/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Item } from '@app/interfaces/item';
 

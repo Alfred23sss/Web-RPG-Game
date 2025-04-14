@@ -38,3 +38,8 @@ export enum AvatarType {
     ValkyrieB = './assets/avatars/valkyrieB_Idle.gif',
     ValkyrieC = './assets/avatars/valkyrieC_Idle.gif',
 }
+
+export enum TeamType {
+    RED = 'red',
+    BLUE = 'blue',
+}

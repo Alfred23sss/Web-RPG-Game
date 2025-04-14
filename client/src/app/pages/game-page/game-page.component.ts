@@ -5,13 +5,14 @@ import { ChatComponent } from '@app/components/chat/chat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
-import { ItemName, ItemType, TeamType } from '@app/enums/global.enums';
+import { ItemName, ItemType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
 import { Subscription } from 'rxjs';
+import { TeamType } from '@common/enums';
 
 @Component({
     selector: 'app-game-page',

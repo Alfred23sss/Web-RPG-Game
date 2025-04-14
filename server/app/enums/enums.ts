@@ -22,11 +22,6 @@ export enum GameSizePlayerCount {
     Large = 6,
 }
 
-export enum TeamType {
-    RED = 'red',
-    BLUE = 'blue',
-}
-
 export enum TileType {
     Water = 'eau',
     Ice = 'glace',
