@@ -1,4 +1,4 @@
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';

@@ -2,15 +2,15 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType } from '@app/enums/global.enums';
+import { ATTRIBUTE_KEYS, KEY_DOWN_EVENT_LISTENER } from '@app/constants/global.constants';
+import { AttributeType, Keys, SocketEvent } from '@app/enums/global.enums';
 import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { AvatarType, DiceType, GameDecorations } from '@common/enums';
 import { Subscription } from 'rxjs';
-import { GameDecorations, AvatarType, DiceType } from '@common/enums';
 
 @Component({
     selector: 'app-character-form',
@@ -65,7 +65,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
             }),
         );
 
-        document.addEventListener('keydown', this.handleKeyDown);
+        document.addEventListener(KEY_DOWN_EVENT_LISTENER, this.handleKeyDown);
     }
 
     assignBonus(attribute: AttributeType): void {
@@ -103,7 +103,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     closePopup(): void {
         this.createdPlayer.name = '';
         this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
-        this.socketClientService.emit('manualDisconnect', {
+        this.socketClientService.emit(SocketEvent.ManualDisconnect, {
             isInGame: false,
         });
         this.characterService.resetAttributes();
@@ -117,7 +117,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
-        document.removeEventListener('keydown', this.handleKeyDown);
+        document.removeEventListener(KEY_DOWN_EVENT_LISTENER, this.handleKeyDown);
     }
 
     getSegmentCount(attribute: AttributeType): number {
@@ -145,7 +145,7 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     }
 
     private handleKeyDown = (event: KeyboardEvent): void => {
-        if (event.key === 'Escape') {
+        if (event.key === Keys.Escape) {
             this.closePopup();
         }
     };

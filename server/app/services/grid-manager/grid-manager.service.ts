@@ -28,28 +28,26 @@ export class GridManagerService {
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
         let tile1Pos: { row: number; col: number } | null = null;
         let tile2Pos: { row: number; col: number } | null = null;
+
         for (let row = 0; row < grid.length; row++) {
             for (let col = 0; col < grid[row].length; col++) {
-                if (grid[row][col].id === tileId1) {
-                    tile1Pos = { row, col };
+                const tileId = grid[row][col].id;
+
+                if (tileId === tileId1) tile1Pos = { row, col };
+                if (tileId === tileId2) tile2Pos = { row, col };
+
+                if (tile1Pos && tile2Pos) {
+                    return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
                 }
-                if (grid[row][col].id === tileId2) {
-                    tile2Pos = { row, col };
-                }
-                if (tile1Pos && tile2Pos) break;
             }
-            if (tile1Pos && tile2Pos) break;
         }
-        if (!tile1Pos || !tile2Pos) return false;
-        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+        return false;
     }
 
     clearPlayerFromGrid(grid: Tile[][], playerName: string): void {
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.player?.name === playerName) {
-                    tile.player = undefined;
-                }
+        for (const tile of grid.flat()) {
+            if (tile.player?.name === playerName) {
+                tile.player = undefined;
             }
         }
     }
@@ -94,13 +92,9 @@ export class GridManagerService {
     }
 
     setPlayerOnTile(grid: Tile[][], targetTile: Tile, player: Player): void {
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.id === targetTile.id) {
-                    tile.player = player;
-                    return;
-                }
-            }
+        const tile = grid.flat().find((t) => t.id === targetTile.id);
+        if (tile) {
+            tile.player = player;
         }
     }
 
@@ -136,24 +130,26 @@ export class GridManagerService {
     }
 
     assignItemsToRandomItems(grid: Tile[][]): Tile[][] {
-        const existingItems = new Set<string>();
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.item?.name && tile.item.name !== ItemName.QuestionMark && tile.item.name !== ItemName.Home) {
-                    existingItems.add(tile.item.name);
-                }
-            }
-        }
+        const getExistingItems = (): Set<string> => {
+            const items = grid.flatMap((row) =>
+                row.map((tile) => tile.item?.name).filter((name) => name && name !== ItemName.QuestionMark && name !== ItemName.Home),
+            );
+            return new Set(items);
+        };
+
+        const existingItems = getExistingItems();
         let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.item?.name === ItemName.QuestionMark) {
-                    const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)];
+
+        grid.flat().forEach((tile) => {
+            if (tile.item?.name === ItemName.QuestionMark) {
+                const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)] ?? null;
+                if (randomItem) {
                     tile.item = randomItem;
                     remainingItems = remainingItems.filter((item) => item.name !== randomItem.name);
                 }
             }
-        }
+        });
+
         return grid;
     }
 
@@ -211,16 +207,9 @@ export class GridManagerService {
     }
 
     isFlagOnSpawnPoint(grid: Tile[][], player: Player): boolean {
-        const playerTile = this.findTileByPlayer(grid, player);
-        const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
-        if (playerTile && playerSpawnPoint && playerTile.id === playerSpawnPoint.id) {
-            for (const item of player.inventory || []) {
-                if (item?.name === ItemName.Flag) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        const isAtSpawn = this.findTileByPlayer(grid, player)?.id === this.findTileBySpawnPoint(grid, player)?.id;
+
+        return (isAtSpawn && player.inventory?.some((item) => item?.name === ItemName.Flag)) ?? false;
     }
 
     private getAdjacentTiles(grid: Tile[][], tile: Tile): Tile[] {

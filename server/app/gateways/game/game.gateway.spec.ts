@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { DiceType } from '@app/interfaces/dice';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';

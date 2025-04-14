@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
-import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { Item } from '@app/classes/item/item';
+import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS, REFRESH_STORAGE } from '@app/constants/global.constants';
+import { ClientNotifierMessage, LogBookEntry, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics } from '@app/interfaces/statistics';
@@ -11,7 +12,7 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { SocketEvent } from '@app/enums/global.enums';
+import { ItemName } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -46,10 +47,10 @@ export class GameSocketService {
     }
 
     private handlePageRefresh(): void {
-        if (sessionStorage.getItem('refreshed') === 'true') {
+        if (sessionStorage.getItem(REFRESH_STORAGE) === 'true') {
             this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
         } else {
-            sessionStorage.setItem('refreshed', 'true');
+            sessionStorage.setItem(REFRESH_STORAGE, 'true');
         }
     }
 
@@ -58,11 +59,8 @@ export class GameSocketService {
             const abandonedPlayer = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
-            // this.gameStateService.gameDataSubjectValue.lobby.players = this.gameStateService.gameDataSubjectValue.lobby.players.filter(
-            //     (p) => p.name !== data.player.name,
-            // );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joueur a abandonne la partie', [data.player]);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.PlayerAbandoned, [data.player]);
         });
     }
 
@@ -72,10 +70,9 @@ export class GameSocketService {
         });
     }
 
-    // no need to be client side dont even know if its used
     private onItemDropped(): void {
         this.socketClientService.on(SocketEvent.ItemDropped, (data: { accessCode: string; player: Player; item: Item }) => {
-            this.clientNotifier.addLogbookEntry(`${data.player.name} a déposé un item!`, [data.player]);
+            this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemDropped}`, [data.player]);
             this.socketClientService.emit(SocketEvent.ItemDrop, data);
         });
     }
@@ -90,9 +87,9 @@ export class GameSocketService {
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
                 if (addedItems.length > 0) {
                     if (addedItems.includes('flag')) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
                     } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
                     }
                 }
                 playerBeforeUpdate.inventory = data.player.inventory;
@@ -106,7 +103,7 @@ export class GameSocketService {
     private onGameDeleted(): void {
         this.socketClientService.on(SocketEvent.GameDeleted, () => {
             this.gameStateService.gameDataSubjectValue.turnTimer = 0;
-            this.clientNotifier.displayMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
+            this.clientNotifier.displayMessage(ClientNotifierMessage.redirectHome);
             setTimeout(() => {
                 this.gameplayService.backToHome();
             }, DELAY_BEFORE_HOME);
@@ -117,12 +114,12 @@ export class GameSocketService {
         this.socketClientService.on(SocketEvent.GameEnded, (data: { winner: string[]; stats: GameStatistics }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players.filter((player) => player.hasAbandoned === false);
             if (data.winner.length <= 1) {
-                this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`);
+                this.clientNotifier.displayMessage(`👑 ${data.winner} ${ClientNotifierMessage.SoloWin}`);
             } else {
                 const winnerNames = data.winner.join(', ');
-                this.clientNotifier.displayMessage(`👑 ${winnerNames} ont remporté la partie ! Redirection vers la page de fin sous peu`);
+                this.clientNotifier.displayMessage(`👑 ${winnerNames} ${ClientNotifierMessage.TeamWin}`);
             }
-            this.clientNotifier.addLogbookEntry('Fin de la partie', players);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.GameEnded, players);
             this.gameStateService.gameDataSubjectValue.gameStats = data.stats;
             this.gameStateService.gameDataSubjectValue.turnTimer = 0;
             setTimeout(() => {
@@ -134,7 +131,7 @@ export class GameSocketService {
     private onAdminModeDisabled(): void {
         this.socketClientService.on(SocketEvent.AdminModeDisabled, () => {
             if (this.gameStateService.gameDataSubjectValue.isDebugMode) {
-                this.clientNotifier.displayMessage("Mode debug 'désactivé'");
+                this.clientNotifier.displayMessage(ClientNotifierMessage.DeactivatedDebug);
             }
             this.gameStateService.gameDataSubjectValue.isDebugMode = false;
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
@@ -152,7 +149,6 @@ export class GameSocketService {
         });
     }
 
-    // refactor for god sake
     private onPlayerMovement(): void {
         this.socketClientService.on(SocketEvent.PlayerMovement, (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
             if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
@@ -165,10 +161,10 @@ export class GameSocketService {
                 const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
                 if (addedItems.length > 0) {
-                    if (addedItems.includes('flag')) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                    if (addedItems.includes(ItemName.Flag)) {
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
                     } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
                     }
                 }
             }
@@ -181,7 +177,6 @@ export class GameSocketService {
                         data.player,
                     );
                 const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-                // repetition
                 player.inventory = data.player.inventory;
                 player.hp = data.player.hp;
                 player.attack.value = data.player.attack.value;
@@ -244,9 +239,7 @@ export class GameSocketService {
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joueur a effectue une action sur un mur!', [
-                this.gameStateService.gameDataSubjectValue.clientPlayer,
-            ]);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.WallAction, [this.gameStateService.gameDataSubjectValue.clientPlayer]);
         });
     }
 
@@ -266,10 +259,17 @@ export class GameSocketService {
             this.gameStateService.gameDataSubjectValue.isDebugMode = !this.gameStateService.gameDataSubjectValue.isDebugMode;
             const playerAdmin = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.isAdmin === true);
             if (!playerAdmin) return;
-            this.clientNotifier.displayMessage(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`);
-            this.clientNotifier.addLogbookEntry(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`, [
-                playerAdmin,
-            ]);
+            this.clientNotifier.displayMessage(
+                `${LogBookEntry.DebugMode} ${
+                    this.gameStateService.gameDataSubjectValue.isDebugMode ? LogBookEntry.Activated : LogBookEntry.Deactivated
+                }`,
+            );
+            this.clientNotifier.addLogbookEntry(
+                `${LogBookEntry.DebugMode} ${
+                    this.gameStateService.gameDataSubjectValue.isDebugMode ? LogBookEntry.Activated : LogBookEntry.Deactivated
+                }`,
+                [playerAdmin],
+            );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }

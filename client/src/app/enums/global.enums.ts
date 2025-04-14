@@ -98,4 +98,71 @@ export enum SocketEvent {
     ItemDropped = 'itemDropped',
     ItemDrop = 'itemDrop',
     PlayerClientUpdate = 'playerClientUpdate',
+    JoinRoom = 'joinRoom',
+    UnavailableOption = 'updateUnavailableOptions',
+    RequestUnavailableOptions = 'requestUnavailableOptions',
+    SelectAvatar = 'selectAvatar',
+    DeselectAvatar = 'deselectAvatar',
+    ManualDisconnect = 'manualDisconnect',
+    UnlockLobby = 'unlockLobby',
+    LockLobby = 'lockLobby',
+    KickPlayer = 'kickPlayer',
+    KickVirtualPlayer = 'kickVirtualPlayer',
+    CreateGame = 'createGame',
+    CreateVirtualPlayer = 'createVirtualPlayer',
+    CombatStarted = 'combatStarted',
+    AttackResult = 'attackResult',
+    CombatTurnStarted = 'combatTurnStarted',
+    CombatTimerUpdate = 'combatTimerUpdate',
+    EscapeAttempt = 'escapeAttempt',
+    CombatEnded = 'combatEnded',
+    CombatEndedLog = 'combatEndedLog',
+    CombatStartedLog = 'combatStartedLog',
+}
+
+export enum SnackBarMessage {
+    LobbyLocked = 'Le lobby est verrouillé et ne peut pas être rejoint.',
+    Error = "Une erreur s'est produite.",
+    NonExistent = "La partie que vous souhaitez rejoindre n'existe pas!",
+    GetImpossible = 'Impossible de récupérer la partie.',
+    LobbyFull = 'Le lobby est plein, impossible de le déverrouiller.',
+}
+
+export enum LogBookEntry {
+    CombatStartedExclamation = 'Combat commencé!',
+    CombatStarted = 'Combat commencé',
+    AttackResultSuccess = 'réussie',
+    AttackResultFail = 'échouée',
+    EvadeResultSuccess = 'réussi',
+    EvadeResultFail = 'raté',
+    Attack = 'Attaque',
+    AttackStart = '(Attaque:',
+    Defense = ', Défense:',
+    EvadeAttempt = "Tentative d'évasion",
+    CombatWon = 'Combat gagné par',
+    CombatEvaded = 'Combat évadé par',
+    PlayerAbandoned = 'Un joueur a abandonne la partie',
+    ItemDropped = 'a déposé un item!',
+    FlagPickedUp = 'a pris le drapeau!',
+    ItemPickedUp = 'a pris un item!',
+    GameEnded = 'Fin de la partie',
+    DoorClosed = 'Un joueur a fermé une porte',
+    DoorOpened = 'Un joueur a ouvert une porte',
+    WallAction = 'Un joueur a effectue une action sur un mur!',
+    DebugMode = 'Mode debug',
+    Activated = 'activé',
+    Deactivated = 'désactivé',
+}
+
+export enum ClientNotifierMessage {
+    CombatWon = 'a gagné le combat !',
+    CombatEvaded = 'a evadé le combat !',
+    redirectHome = "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
+    SoloWin = 'a remporté la partie ! Redirection vers la page de fin sous peu',
+    TeamWin = 'ont remporté la partie ! Redirection vers la page de fin sous peu',
+    DeactivatedDebug = "Mode debug 'désactivé'",
+}
+
+export enum Keys {
+    Escape = 'Escape',
 }

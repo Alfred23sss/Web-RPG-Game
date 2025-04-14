@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { GameData } from '@app/classes/game-data';
+import { GameData } from '@app/classes/game-data/game-data';
 import { MOCK_GAME, MOCK_LOBBY, MOCK_PLAYER } from '@app/constants/global.constants';
 import { GameStateSocketService } from './game-state-socket.service';
 

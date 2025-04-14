@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { GameData } from '@app/classes/game-data';
+import { GameData } from '@app/classes/game-data/game-data';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';

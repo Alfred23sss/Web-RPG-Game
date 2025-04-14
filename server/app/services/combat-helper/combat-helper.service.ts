@@ -1,4 +1,4 @@
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
 import { DiceType } from '@app/interfaces/dice';
 import { Player } from '@app/model/database/player';

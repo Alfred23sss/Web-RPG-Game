@@ -5,7 +5,7 @@ import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
-import { ImageType, GameMode, ItemType, ItemName, ItemDescription, GameSize, DiceType, TileType } from '@common/enums';
+import { DiceType, GameMode, GameSize, ImageType, ItemDescription, ItemName, ItemType, TileType } from '@common/enums';
 export const BONUS_VALUE = 2;
 export const MAX_GAMES_SHOWN = 3;
 export const POPUP_DELAY = 2000;
@@ -253,6 +253,11 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 };
 
 export const ITEMS_TO_UPDATE = new Set(['home']);
+
+export const PLAYER_STORAGE = 'player';
+export const LOBBY_STORAGE = 'lobby';
+export const REFRESH_STORAGE = 'refreshed';
+export const KEY_DOWN_EVENT_LISTENER = 'keydown';
 
 export const MOCK_GRID: Tile[][] = [
     [

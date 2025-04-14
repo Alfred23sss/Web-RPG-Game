@@ -130,16 +130,24 @@ export class LobbyService {
     }
 
     getPlayerBySocketId(socketId: string): Player | undefined {
-        for (const [, lobby] of this.lobbies.entries()) {
-            if (lobby && lobby.players && lobby.players.length > 0) {
-                for (const player of lobby.players) {
-                    if (this.playerSockets.get(player.name) === socketId) {
-                        this.playerSockets.set(player.name, socketId);
-                        return player;
-                    }
-                }
-            }
+        // for (const [, lobby] of this.lobbies.entries()) {
+        //     if (lobby && lobby.players && lobby.players.length > 0) {
+        //         for (const player of lobby.players) {
+        //             if (this.playerSockets.get(player.name) === socketId) {
+        //                 this.playerSockets.set(player.name, socketId);
+        //                 return player;
+        //             }
+        //         }
+        //     }
+        // }
+        const allLobbies = Array.from(this.lobbies.values());
+        const matchingPlayer = allLobbies.flatMap((lobby) => lobby?.players || []).find((player) => this.playerSockets.get(player.name) === socketId);
+        if (matchingPlayer) {
+            this.playerSockets.set(matchingPlayer.name, socketId);
+            return matchingPlayer;
         }
+        // normally replaces the above code
+
         const playerEntry = Array.from(this.playerSockets.entries()).find(([, sId]) => sId === socketId);
         if (!playerEntry) return undefined;
         const playerName = playerEntry[0];

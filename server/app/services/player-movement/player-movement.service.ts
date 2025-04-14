@@ -15,7 +15,12 @@ export class PlayerMovementService {
     ]);
 
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
-        if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
+        const isStartTileValid = Boolean(startTile);
+        const isTargetTileValid = Boolean(targetTile) && targetTile.type !== TileType.Wall;
+        const isGridValid = Boolean(grid);
+        const shouldAbort = !isStartTileValid || !isTargetTileValid || !isGridValid;
+
+        if (shouldAbort) return undefined;
 
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: 0 }];
         const costs = new Map<Tile, number>();

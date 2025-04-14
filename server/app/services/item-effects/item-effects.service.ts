@@ -25,13 +25,7 @@ export class ItemEffectsService {
         if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
             this.applyItemModifiers(item);
         }
-        if (
-            item.isActive ||
-            (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
-            (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item))
-        ) {
-            return;
-        }
+        if (this.shouldSkipItemApplication(item, player, tile)) return;
         if (item.modifiers) {
             item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER));
         }
@@ -216,6 +210,19 @@ export class ItemEffectsService {
                 break;
             default:
                 break;
+        }
+    }
+
+    private shouldSkipItemApplication(item: Item, player: Player, tile: Tile): boolean {
+        if (item.isActive) return true;
+
+        switch (item.name) {
+            case ItemName.Fire:
+                return !this.isHealthConditionValid(player, item);
+            case ItemName.Swap:
+                return !this.isIceConditionValid(tile, item);
+            default:
+                return false;
         }
     }
 }

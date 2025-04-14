@@ -4,8 +4,8 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GameData } from '@app/classes/game-data';
-import { Item } from '@app/classes/item';
+import { GameData } from '@app/classes/game-data/game-data';
+import { Item } from '@app/classes/item/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';

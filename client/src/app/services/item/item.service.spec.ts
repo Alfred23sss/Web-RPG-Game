@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { GRID_DIMENSIONS } from '@app/constants/global.constants';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
-import { ItemService } from './item.service';
 import { GameSize, TileType } from '@common/enums';
+import { ItemService } from './item.service';
 
 const EXPECTED_ITEM_COUNT_MEDIUM = 4;
 const EXPECTED_ITEM_COUNT_DEFAULT = 1;

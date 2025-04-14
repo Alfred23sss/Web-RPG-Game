@@ -2,12 +2,12 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
-import { ItemBarComponent } from './item-bar.component';
 import { GameMode, TileType } from '@common/enums';
-import { GameModeService } from '@app/services/game-mode/game-mode.service';
+import { ItemBarComponent } from './item-bar.component';
 
 const TEST_ITEM = new Item({
     id: '1',

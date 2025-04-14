@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { ITEM_COUNTS, ITEMS_TO_UPDATE } from '@app/constants/global.constants';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';

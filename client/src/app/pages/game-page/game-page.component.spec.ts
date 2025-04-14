@@ -7,8 +7,8 @@ import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { GameData } from '@app/classes/game-data';
-import { Item } from '@app/classes/item';
+import { GameData } from '@app/classes/game-data/game-data';
+import { Item } from '@app/classes/item/item';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -18,9 +18,9 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { MessageService } from '@app/services/message/message.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, ItemName, TileType } from '@common/enums';
 import { BehaviorSubject, of } from 'rxjs';
 import { GamePageComponent } from './game-page.component';
-import { ItemName, DiceType, TileType } from '@common/enums';
 
 @Component({
     selector: 'app-chat',

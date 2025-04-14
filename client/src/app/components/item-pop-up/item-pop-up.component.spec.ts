@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { ItemPopUpComponent } from './item-pop-up.component';
 
 describe('ItemPopUpComponent', () => {
