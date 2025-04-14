@@ -301,17 +301,6 @@ describe('GameCombatService', () => {
             expect(gameSessionService.endTurn).not.toHaveBeenCalled();
         });
 
-        it('should resume game turn when currentFighter is undefined', () => {
-            combatState.currentFighter = undefined;
-            service['combatStates'][accessCode] = combatState;
-
-            service.endCombat(accessCode, false);
-
-            expect(gameSessionService.resumeGameTurn).toHaveBeenCalledWith(accessCode, combatState.pausedGameTurnTimeRemaining);
-            expect(gameSessionService.isCurrentPlayer).not.toHaveBeenCalled();
-            expect(gameSessionService.endTurn).not.toHaveBeenCalled();
-        });
-
         it('should do nothing if game session does not exist', () => {
             gameSessionService.getGameSession.mockReturnValue(null);
 

@@ -297,6 +297,7 @@ describe('ItemEffectsService', () => {
                 accessCode: TEST_CODE,
                 player: virtualPlayer,
                 items: [MOCK_ITEM, MOCK_ITEM, MOCK_ITEM],
+                item: MOCK_ITEM,
             });
         });
     });

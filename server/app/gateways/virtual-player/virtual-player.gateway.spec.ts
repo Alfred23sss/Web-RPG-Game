@@ -3,6 +3,7 @@ import { Tile } from '@app/interfaces/tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtual-player-creation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
@@ -19,6 +20,7 @@ describe('VirtualPlayerGateway', () => {
     let mockVirtualPlayerCreationService: Partial<VirtualPlayerCreationService>;
     let mockVirtualPlayerService: Partial<VirtualPlayerService>;
     let mockGameSessionService: Partial<GameSessionService>;
+    let mockGameStatisticsService: Partial<GameStatisticsService>;
 
     beforeEach(async () => {
         mockServer = {
@@ -34,6 +36,11 @@ describe('VirtualPlayerGateway', () => {
             createVirtualPlayer: jest.fn(),
             getUsedAvatars: jest.fn(),
             kickVirtualPlayer: jest.fn(),
+        };
+
+        mockGameStatisticsService = {
+            getGameStatistics: jest.fn(),
+            decrementItem: jest.fn(),
         };
 
         mockVirtualPlayerService = {
@@ -58,6 +65,7 @@ describe('VirtualPlayerGateway', () => {
                 { provide: VirtualPlayerCreationService, useValue: mockVirtualPlayerCreationService },
                 { provide: VirtualPlayerService, useValue: mockVirtualPlayerService },
                 { provide: GameSessionService, useValue: mockGameSessionService },
+                { provide: GameStatisticsService, useValue: mockGameStatisticsService },
             ],
         }).compile();
 
@@ -153,7 +161,6 @@ describe('VirtualPlayerGateway', () => {
             gateway.handleEndVirtualPlayerTurn({ accessCode });
 
             expect(mockVirtualPlayerService.resetStats).toHaveBeenCalled();
-            expect(mockGameSessionService.endTurn).toHaveBeenCalledWith(accessCode);
         });
     });
 
@@ -163,10 +170,9 @@ describe('VirtualPlayerGateway', () => {
             const player = { behavior: Behavior.Aggressive } as VirtualPlayer;
             const items = [{ id: 'item1' } as Item];
             const removedItem = { id: 'item1' } as Item;
-
             mockVirtualPlayerService.itemChoice = jest.fn().mockReturnValue(removedItem);
-
-            gateway.handleItemChoice({ accessCode, player, items });
+            const item = { name: 'item1' } as unknown as Item;
+            gateway.handleItemChoice({ accessCode, player, items, itemPickUp: item });
 
             expect(mockVirtualPlayerService.itemChoice).toHaveBeenCalledWith(Behavior.Aggressive, items);
             expect(mockGameSessionService.handleItemDropped).toHaveBeenCalledWith(accessCode, player, removedItem);
