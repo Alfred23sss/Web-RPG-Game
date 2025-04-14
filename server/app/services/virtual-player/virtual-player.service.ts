@@ -1,15 +1,15 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS, AGGRESSIVE_ITEM_ORDER, DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
 import { Behavior, MoveType } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { Item } from '@app/interfaces/Item';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Move } from '@app/interfaces/Move';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { Item } from '@app/interfaces/item';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtualPlayerBehavior.service';
-import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
+import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtual-player-behavior.service';
+import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtual-player-actions.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 

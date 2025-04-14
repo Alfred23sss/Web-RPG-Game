@@ -2,10 +2,10 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { AttackScore } from '@app/interfaces/AttackScore';
-import { CombatState } from '@app/interfaces/CombatState';
-import { DiceType } from '@app/interfaces/Dice';
-import { Player } from '@app/interfaces/Player';
+import { AttackScore } from '@app/interfaces/attack-score';
+import { CombatState } from '@app/interfaces/combat-state';
+import { DiceType } from '@app/interfaces/dice';
+import { Player } from '@app/interfaces/player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';

@@ -3,13 +3,13 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { GameMode, TileType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Game } from '@app/interfaces/Game';
-import { GameSession } from '@app/interfaces/GameSession';
-import { Item } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { GameSession } from '@app/interfaces/game-session';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Turn } from '@app/interfaces/turn';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';

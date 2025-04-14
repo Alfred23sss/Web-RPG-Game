@@ -1,7 +1,7 @@
 import { DEFAULT_COST, DOOR_COST, ICE_COST, WALL_COST, WATER_COST } from '@app/constants/constants';
 import { ItemName, TileType } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()

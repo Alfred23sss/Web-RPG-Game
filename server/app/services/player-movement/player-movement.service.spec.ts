@@ -1,9 +1,9 @@
 import { DEFAULT_COST, DOOR_COST, ICE_COST, WALL_COST, WATER_COST } from '@app/constants/constants';
 import { ItemName, TileType } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { Test, TestingModule } from '@nestjs/testing';
-import { PlayerMovementService } from './playerMovement.service';
+import { PlayerMovementService } from './player-movement.service';
 
 describe('PlayerMovementService', () => {
     let service: PlayerMovementService;

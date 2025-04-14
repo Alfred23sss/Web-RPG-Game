@@ -9,15 +9,15 @@ import {
     PLAYER_POSITION,
 } from '@app/constants/constants';
 import { EventEmit, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Move } from '@app/interfaces/Move';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { PlayerMovementService } from '@app/services/player-movement/playerMovement.service';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 

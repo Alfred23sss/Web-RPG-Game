@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, DiceType, EventEmit, ItemName } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { Item } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { TileType } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';

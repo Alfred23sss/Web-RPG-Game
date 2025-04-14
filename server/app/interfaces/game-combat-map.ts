@@ -1,4 +1,4 @@
-import { CombatState } from './CombatState';
+import { CombatState } from './combat-state';
 
 export interface GameCombatMap {
     [accessCode: string]: CombatState;

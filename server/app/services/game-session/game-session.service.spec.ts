@@ -4,14 +4,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
 import { GameMode, ImageType, ItemName, TeamType, TileType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Game } from '@app/interfaces/Game';
-import { GameSession } from '@app/interfaces/GameSession';
-import { Item } from '@app/interfaces/Item';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { GameSession } from '@app/interfaces/game-session';
+import { Item } from '@app/interfaces/item';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Turn } from '@app/interfaces/turn';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';

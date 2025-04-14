@@ -1,6 +1,6 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
 import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
+import { Player } from '@app/interfaces/player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';

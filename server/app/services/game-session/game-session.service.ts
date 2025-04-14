@@ -1,5 +1,5 @@
 import { EventEmit, GameMode, ItemName, TileType } from '@app/enums/enums';
-import { GameSession } from '@app/interfaces/GameSession';
+import { GameSession } from '@app/interfaces/game-session';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';

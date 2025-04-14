@@ -2,12 +2,12 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { BASE_STAT, BONUS_STAT, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
 import { AvatarType, Behavior } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
+import { DiceType } from '@app/interfaces/dice';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Test, TestingModule } from '@nestjs/testing';
-import { VirtualPlayerCreationService } from './virtualPlayerCreation.service';
+import { VirtualPlayerCreationService } from './virtual-player-creation.service';
 
 describe('VirtualPlayerService', () => {
     let service: VirtualPlayerCreationService;

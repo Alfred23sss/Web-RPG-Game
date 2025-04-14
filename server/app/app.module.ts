@@ -10,7 +10,7 @@ import { GameController } from './controllers/game/game.controller';
 import { ChatGateway } from './gateways/chat/chat.gateway';
 import { GameGateway } from './gateways/game/game.gateway';
 import { LobbyGateway } from './gateways/lobby/lobby.gateway';
-import { VirtualPlayerGateway } from './gateways/virtual-player/virtualPlayer.gateway';
+import { VirtualPlayerGateway } from './gateways/virtual-player/virtual-player.gateway';
 import { Item, itemSchema } from './model/database/item';
 import { AccessCodesService } from './services/access-codes/access-codes.service';
 import { CombatHelperService } from './services/combat-helper/combat-helper.service';
@@ -20,12 +20,12 @@ import { GameService } from './services/game/game.service';
 import { GridManagerService } from './services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from './services/item-effects/item-effects.service';
 import { LobbyService } from './services/lobby/lobby.service';
-import { PlayerMovementService } from './services/player-movement/playerMovement.service';
-import { VirtualPlayerBehaviorService } from './services/virtual-player-behavior/virtualPlayerBehavior.service';
-import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtualPlayerCreation.service';
-import { VirtualPlayerScoreService } from './services/virtual-player-score/virtualPlayerScore.service';
-import { VirtualPlayerService } from './services/virtual-player/virtualPlayer.service';
-import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/virtualPlayerActions.service';
+import { PlayerMovementService } from './services/player-movement/player-movement.service';
+import { VirtualPlayerBehaviorService } from './services/virtual-player-behavior/virtual-player-behavior.service';
+import { VirtualPlayerCreationService } from './services/virtual-player-creation/virtual-player-creation.service';
+import { VirtualPlayerScoreService } from './services/virtual-player-score/virtual-player-score.service';
+import { VirtualPlayerService } from './services/virtual-player/virtual-player.service';
+import { VirtualPlayerActionsService } from './services/virtualPlayer-actions/virtual-player-actions.service';
 @Module({
     imports: [
         EventEmitterModule.forRoot(),

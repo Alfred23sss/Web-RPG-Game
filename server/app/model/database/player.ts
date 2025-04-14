@@ -1,5 +1,5 @@
 import { TeamType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
+import { DiceType } from '@app/interfaces/dice';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Item } from './item';

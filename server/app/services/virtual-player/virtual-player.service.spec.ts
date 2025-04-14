@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Behavior, ItemName, MoveType } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { DiceType } from '@app/interfaces/Dice';
-import { Game } from '@app/interfaces/Game';
-import { Lobby } from '@app/interfaces/Lobby';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { Lobby } from '@app/interfaces/lobby';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtualPlayerBehavior.service';
-import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtualPlayerActions.service';
+import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtual-player-behavior.service';
+import { VirtualPlayerActionsService } from '@app/services/virtualPlayer-actions/virtual-player-actions.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
-import { VirtualPlayerService } from './virtualPlayer.service';
+import { VirtualPlayerService } from './virtual-player.service';
 
 describe('VirtualPlayerService', () => {
     let service: VirtualPlayerService;
