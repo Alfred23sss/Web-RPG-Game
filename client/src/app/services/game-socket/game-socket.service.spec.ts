@@ -12,8 +12,8 @@ import { GameStateSocketService } from '@app/services/game-state-socket/game-sta
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, ItemName, TeamType, TileType } from '@common/enums';
 import { GameSocketService } from './game-socket.service';
-import { ItemName, TileType } from '@common/enums';
 
 describe('GameSocketService', () => {
     let service: GameSocketService;

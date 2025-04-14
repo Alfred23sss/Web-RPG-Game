@@ -1,8 +1,8 @@
 import { DEFAULT_COST, DOOR_COST, ICE_COST, WALL_COST, WATER_COST } from '@app/constants/constants';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
-import { Injectable } from '@nestjs/common';
 import { ItemName, TileType } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class PlayerMovementService {
@@ -118,12 +118,10 @@ export class PlayerMovementService {
             const tile = path[i];
             const isClosedDoor = tile.type === TileType.Door && !tile.isOpen;
             const hasItem = tile.item && tile.item.name !== ItemName.Home;
-            const hasPlayer = !!tile.player; // fix
-            Logger.log(hasPlayer);
+            const hasPlayer = !!tile.player;
             const shouldTrim = isClosedDoor || hasItem || hasPlayer;
 
             if (shouldTrim) {
-                Logger.log('trim path');
                 return path.slice(0, i + 1);
             }
         }

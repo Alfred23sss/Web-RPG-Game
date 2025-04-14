@@ -17,6 +17,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 
 import { GameGateway } from './game.gateway';
+import { EventEmit, GameModeType } from '@app/enums/enums';
 
 const MOCK_PLAYER: Player = {
     name: 'test-player',
