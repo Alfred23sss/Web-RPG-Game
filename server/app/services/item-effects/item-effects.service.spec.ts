@@ -1,6 +1,6 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { AttributeType, DiceType, EventEmit, ItemName } from '@app/enums/enums';
+import { AttributeType, DiceType, EventEmit } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
@@ -10,6 +10,7 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ItemEffectsService } from './item-effects.service';
+import { ItemName } from '@common/enums';
 
 const BONUS_VALUE = 2;
 const PENALTY_VALUE = -1;

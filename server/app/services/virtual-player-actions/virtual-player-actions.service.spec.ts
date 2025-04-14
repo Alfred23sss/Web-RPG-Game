@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
-import { DiceType, ItemName, MoveType, TileType } from '@app/enums/enums';
+import { DiceType, MoveType, TileType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
 import { Player } from '@app/interfaces/player';
@@ -14,7 +14,7 @@ import { PlayerMovementService } from '@app/services/player-movement/player-move
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerActionsService } from './virtual-player-actions.service';
-import { TeamType } from '@common/enums';
+import { TeamType, ItemName } from '@common/enums';
 
 describe('VirtualPlayerActionsService', () => {
     let service: VirtualPlayerActionsService;

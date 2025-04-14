@@ -1,10 +1,10 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
-import { EventEmit, ItemName } from '@app/enums/enums';
+import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-import { ImageType } from '@common/enums';
+import { ImageType, ItemName } from '@common/enums';
 
 const RANDOMIZER = 0.5;
 

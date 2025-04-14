@@ -10,7 +10,7 @@ import {
     NO_SCORE,
     NORMAL_ITEM_SCORE,
 } from '@app/constants/constants';
-import { ItemName, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
 import { Player } from '@app/interfaces/player';
@@ -18,6 +18,7 @@ import { Tile } from '@app/interfaces/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { Injectable } from '@nestjs/common';
+import { ItemName } from '@common/enums';
 
 @Injectable()
 export class VirtualPlayerScoreService {

@@ -13,7 +13,7 @@ import {
     INVALID_ITEM_PENALTY,
     NORMAL_ITEM_SCORE,
 } from '@app/constants/constants';
-import { ItemName, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
@@ -23,7 +23,7 @@ import { TileType } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from './virtual-player-score.service';
-import { TeamType } from '@common/enums';
+import { TeamType, ItemName } from '@common/enums';
 
 describe('VirtualPlayerScoreService', () => {
     let service: VirtualPlayerScoreService;

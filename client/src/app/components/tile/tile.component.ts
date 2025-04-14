@@ -1,9 +1,9 @@
 import { Component, HostListener, Input } from '@angular/core';
-import { ItemName, MouseButton } from '@app/enums/global.enums';
+import { MouseButton } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { TileService } from '@app/services/tile/tile.service';
-import { ItemType } from '@common/enums';
+import { ItemType, ItemName } from '@common/enums';
 
 @Component({
     selector: 'app-tile',
