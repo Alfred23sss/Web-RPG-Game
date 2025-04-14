@@ -1,3 +1,4 @@
+import { ACTION_MAX_MS } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Item } from '@app/interfaces/item';
 import { Tile } from '@app/interfaces/tile';
@@ -13,8 +14,6 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { VirtualPlayerEvents } from './virtual-player.gateway.events';
-import { Behavior } from '@common/enums';
-import { ACTION_MAX_MS } from '@app/constants/constants';
 
 @WebSocketGateway({ cors: true })
 export class VirtualPlayerGateway {

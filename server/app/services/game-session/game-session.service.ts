@@ -1,7 +1,7 @@
 import { EventEmit } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/game-session';
-import { Turn } from '@app/interfaces/Turn';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { Turn } from '@app/interfaces/turn';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
@@ -9,9 +9,9 @@ import { GameSessionTurnService } from '@app/services/game-session-turn/game-ses
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { GameMode, ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameMode, ItemName, TileType } from '@common/enums';
 
 const PLAYER_MOVE_DELAY = 150;
 

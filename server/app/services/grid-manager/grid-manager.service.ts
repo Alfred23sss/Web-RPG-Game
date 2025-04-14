@@ -1,7 +1,7 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { ImageType, ItemName } from '@common/enums';
 import { Injectable } from '@nestjs/common';
