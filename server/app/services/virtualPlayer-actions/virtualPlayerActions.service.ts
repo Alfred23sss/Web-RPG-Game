@@ -14,6 +14,7 @@ import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
 import { Tile } from '@app/interfaces/Tile';
+import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
@@ -31,22 +32,22 @@ export class VirtualPlayerActionsService {
         private readonly gameSessionService: GameSessionService,
     ) {}
 
-    async moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
+    async moveToAttack(move: Move, virtualPlayerTile: Tile, lobby: Lobby, virtualPlayer: VirtualPlayer): Promise<void> {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
         const destinationTile = movement.at(DESTINATION_POSITION);
-        const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode);
+        const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode, virtualPlayer);
         if (openedDoor) return;
         const attacked = await this.handleAdjacentToPlayer(destinationTile, virtualPlayerTile, move, lobby);
         if (attacked) return;
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
 
-    async pickUpItem(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
+    async pickUpItem(move: Move, virtualPlayerTile: Tile, lobby: Lobby, virtualPlayer: VirtualPlayer): Promise<void> {
         const movement = await this.executeMove(move, virtualPlayerTile, lobby);
         if (!movement) return;
         const destinationTile = movement.at(DESTINATION_POSITION);
-        const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode);
+        const openedDoor = await this.handleAdjacentToClosedDoor(destinationTile, virtualPlayerTile, movement, lobby.accessCode, virtualPlayer);
         if (openedDoor) return;
         this.emitEvent(EventEmit.VPActionDone, lobby.accessCode);
     }
@@ -101,10 +102,16 @@ export class VirtualPlayerActionsService {
         return player.inventory.some((item) => item && item.name === ItemName.Flag);
     }
 
-    private async handleAdjacentToClosedDoor(destinationTile: Tile, virtualPlayerTile: Tile, movement: Tile[], accessCode: string): Promise<boolean> {
+    private async handleAdjacentToClosedDoor(
+        destinationTile: Tile,
+        virtualPlayerTile: Tile,
+        movement: Tile[],
+        accessCode: string,
+        virtualPlayer: VirtualPlayer,
+    ): Promise<boolean> {
         const isAdjacentToClosedDoor = destinationTile.type === TileType.Door && !destinationTile.isOpen;
         if (isAdjacentToClosedDoor && virtualPlayerTile.player.actionPoints > NO_SCORE) {
-            await this.openDoor(accessCode, movement.at(PLAYER_POSITION), destinationTile);
+            await this.openDoor(accessCode, movement.at(PLAYER_POSITION), destinationTile, virtualPlayer);
             return true;
         }
         return false;
@@ -189,13 +196,13 @@ export class VirtualPlayerActionsService {
         this.updateActionPoints(currentTile.player);
     }
 
-    private async openDoor(accessCode: string, currentTile: Tile, actionTile: Tile | undefined): Promise<void> {
+    private async openDoor(accessCode: string, currentTile: Tile, actionTile: Tile | undefined, virtualPlayer: VirtualPlayer): Promise<void> {
         if (!actionTile) {
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode });
             return;
         }
         await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(DOOR_ACTION_MIN_MS, DOOR_ACTION_MAX_MS)));
-        this.gameSessionService.updateDoorTile(accessCode, currentTile, actionTile);
+        this.gameSessionService.updateDoorTile(accessCode, currentTile, actionTile, virtualPlayer);
         this.updateActionPoints(currentTile.player);
         this.emitEvent(EventEmit.VPActionDone, accessCode);
     }

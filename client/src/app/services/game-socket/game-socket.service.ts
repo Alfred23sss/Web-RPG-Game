@@ -5,6 +5,7 @@ import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics } from '@app/interfaces/statistics';
 import { Tile } from '@app/interfaces/tile';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -217,7 +218,7 @@ export class GameSocketService {
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on('doorClicked', (data: { grid: Tile[][]; isOpen: boolean }) => {
+        this.socketClientService.on('doorClicked', (data: { grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -230,7 +231,7 @@ export class GameSocketService {
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
             const action = data.isOpen ? 'fermé une porte' : 'ouvert une porte';
-            this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [this.gameStateService.gameDataSubjectValue.clientPlayer]);
+            this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [data.player]);
         });
     }
 
