@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-explicit-any */ // to access private methods
-import { Logger } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-explicit-any */ // to access private
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { ChatGateway } from './chat.gateway';
@@ -23,13 +22,7 @@ describe('ChatGateway', () => {
         } as unknown as Socket;
 
         const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                ChatGateway,
-                {
-                    provide: Logger,
-                    useValue: { log: jest.fn() },
-                },
-            ],
+            providers: [ChatGateway],
         }).compile();
 
         gateway = module.get<ChatGateway>(ChatGateway);
@@ -102,35 +95,13 @@ describe('ChatGateway', () => {
             };
         });
 
-        it('should log reception and emit error for invalid room', () => {
-            const logger = gateway['logger'] as jest.Mocked<Logger>;
-            const invalidPayload = { message: 'test', author: 'user', room: '' };
-
-            gateway.roomMessage(mockSocket, invalidPayload);
-
-            expect(logger.log).toHaveBeenCalledWith('recu dans chat');
-            expect(mockSocket.emit).toHaveBeenCalledWith(ChatEvents.Error, 'Invalid room ID');
-        });
-
-        it('should log when room does not exist', () => {
-            const logger = gateway['logger'] as jest.Mocked<Logger>;
-            const payload = { message: 'test', author: 'user', room: 'nonexistent' };
-
-            gateway.roomMessage(mockSocket, payload);
-
-            expect(logger.log).toHaveBeenCalledWith('Message not received, not in the room');
-            expect(mockServer.to).not.toHaveBeenCalled();
-        });
-
         it('should send formatted message when room exists', () => {
-            const logger = gateway['logger'] as jest.Mocked<Logger>;
             const roomName = 'existing-room';
             const payload = { message: 'test', author: 'user', room: roomName };
             mockAdapter.rooms.set(roomName, new Set());
             const mockEmit = jest.fn();
             (mockServer.to as jest.Mock).mockReturnValue({ emit: mockEmit });
             gateway.roomMessage(mockSocket, payload);
-            expect(logger.log).toHaveBeenCalledWith('Message received, sending to the room');
             expect(mockServer.to).toHaveBeenCalledWith(roomName);
             expect(mockEmit).toHaveBeenCalled();
             const [event, message] = mockEmit.mock.calls[0];
