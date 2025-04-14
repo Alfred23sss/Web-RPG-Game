@@ -16,9 +16,9 @@ import { GameSessionTurnService } from '@app/services/game-session-turn/game-ses
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { GameMode, ImageType, ItemName, TeamType, TileType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { GameSessionService } from './game-session.service';
-import { ImageType, GameMode, TeamType, ItemName, TileType } from '@common/enums';
 
 const DEFAULT_TIME = 3000;
 const SHORT_TIME = 1000;

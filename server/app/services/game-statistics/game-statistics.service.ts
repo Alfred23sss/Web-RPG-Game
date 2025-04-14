@@ -6,9 +6,9 @@ import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistic';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { GameMode } from '@common/enums';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { GameMode } from '@common/enums';
 
 // bouge ca dans constant global et trouver meilleur nom
 const TIME_DIVIDER = 1000;

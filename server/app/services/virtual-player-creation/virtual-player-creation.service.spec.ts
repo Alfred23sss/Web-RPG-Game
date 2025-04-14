@@ -5,9 +5,9 @@ import { DiceType } from '@app/interfaces/dice';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { AvatarType, Behavior } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerCreationService } from './virtual-player-creation.service';
-import { AvatarType, Behavior } from '@common/enums';
 
 describe('VirtualPlayerService', () => {
     let service: VirtualPlayerCreationService;

@@ -1,8 +1,8 @@
 import { DiceType } from '@app/interfaces/dice';
+import { TeamType } from '@common/enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { Item } from './item';
-import { TeamType } from '@common/enums';
 
 const spawnPointSchema = new MongooseSchema({
     x: { type: Number, required: true },

@@ -1,6 +1,6 @@
-import { TeamType } from '@common/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Item } from '@app/interfaces/item';
+import { TeamType } from '@common/enums';
 
 export interface Player {
     name: string;

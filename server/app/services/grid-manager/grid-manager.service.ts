@@ -3,9 +3,9 @@ import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Tile, TileType } from '@app/model/database/tile';
+import { ImageType, ItemName } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-import { ImageType, ItemName } from '@common/enums';
 
 const RANDOMIZER = 0.5;
 

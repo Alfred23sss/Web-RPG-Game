@@ -19,9 +19,9 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { ItemName, TeamType, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-import { TeamType, ItemName, TileType } from '@common/enums';
 
 @Injectable()
 export class VirtualPlayerActionsService {

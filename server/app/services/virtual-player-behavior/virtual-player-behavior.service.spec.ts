@@ -11,9 +11,9 @@ import { TileType } from '@app/model/database/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
+import { Behavior } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerBehaviorService } from './virtual-player-behavior.service';
-import { Behavior } from '@common/enums';
 
 describe('VirtualPlayerBehaviorService', () => {
     let service: VirtualPlayerBehaviorService;

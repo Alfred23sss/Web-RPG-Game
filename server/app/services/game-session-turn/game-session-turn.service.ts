@@ -2,9 +2,9 @@ import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { TeamType } from '@common/enums';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { TeamType } from '@common/enums';
 
 const TRANSITION_PHASE_DURATION = 3000;
 const TURN_DURATION = 30000;

@@ -6,9 +6,9 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
+import { GameSize } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
-import { GameSize } from '@common/enums';
 
 const ACCESS_CODE = 'test-code';
 const SOCKED_ID = 'test-id';

@@ -11,10 +11,10 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { DiceType, ItemName, TeamType, TileType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerActionsService } from './virtual-player-actions.service';
-import { TeamType, ItemName, DiceType, TileType } from '@common/enums';
 
 describe('VirtualPlayerActionsService', () => {
     let service: VirtualPlayerActionsService;

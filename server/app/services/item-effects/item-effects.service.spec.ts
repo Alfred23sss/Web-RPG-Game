@@ -7,10 +7,10 @@ import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { TileType } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { DiceType, ItemName } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ItemEffectsService } from './item-effects.service';
-import { ItemName, DiceType } from '@common/enums';
 
 const BONUS_VALUE = 2;
 const PENALTY_VALUE = -1;

@@ -5,10 +5,10 @@ import { EventEmit } from '@app/enums/enums';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
 import { Tile, TileType } from '@app/model/database/tile';
+import { ImageType, ItemName } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { GridManagerService } from './grid-manager.service';
-import { ImageType, ItemName } from '@common/enums';
 
 describe('GridManagerService', () => {
     let service: GridManagerService;

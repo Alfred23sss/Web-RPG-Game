@@ -8,6 +8,7 @@ import { GameStatisticsService } from '@app/services/game-statistics/game-statis
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtual-player-creation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtual-player.service';
+import { Behavior } from '@common/enums';
 import { OnEvent } from '@nestjs/event-emitter';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';

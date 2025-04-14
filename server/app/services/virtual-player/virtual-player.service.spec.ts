@@ -12,10 +12,10 @@ import { Tile, TileType } from '@app/model/database/tile';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtual-player-behavior.service';
+import { Behavior, ItemName } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { VirtualPlayerService } from './virtual-player.service';
-import { ItemName, Behavior } from '@common/enums';
 
 describe('VirtualPlayerService', () => {
     let service: VirtualPlayerService;
