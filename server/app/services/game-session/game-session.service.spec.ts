@@ -3,14 +3,14 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // necessary to get actual reference
 /* eslint-disable @typescript-eslint/no-explicit-any */ // allows access to GameSessionService
 
-import { DiceType } from '@app/interfaces/dices';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
 import { GameSession } from '@app/interfaces/game-session';
-import { Game } from '@app/interfaces/games';
-import { Item } from '@app/interfaces/items';
-import { Lobby } from '@app/interfaces/lobbys';
-import { Player } from '@app/interfaces/players';
-import { Tile } from '@app/interfaces/tiles';
-import { Turn } from '@app/interfaces/turns';
+import { Item } from '@app/interfaces/item';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Turn } from '@app/interfaces/turn';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';

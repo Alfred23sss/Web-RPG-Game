@@ -2,9 +2,9 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { DiceType } from '@app/interfaces/dices';
-import { Player } from '@app/interfaces/players';
-import { Turn } from '@app/interfaces/turns';
+import { DiceType } from '@app/interfaces/dice';
+import { Player } from '@app/interfaces/player';
+import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { TeamType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';

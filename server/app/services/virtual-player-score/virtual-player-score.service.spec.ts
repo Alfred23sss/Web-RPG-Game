@@ -14,11 +14,11 @@ import {
     NORMAL_ITEM_SCORE,
 } from '@app/constants/constants';
 import { MoveType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/dices';
-import { Lobby } from '@app/interfaces/lobbys';
-import { Move } from '@app/interfaces/moves';
-import { Player } from '@app/interfaces/players';
-import { Tile } from '@app/interfaces/tiles';
+import { DiceType } from '@app/interfaces/dice';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { TileType } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';

@@ -1,6 +1,6 @@
 import { EventEmit } from '@app/enums/enums';
-import { Player } from '@app/interfaces/players';
-import { Turn } from '@app/interfaces/turns';
+import { Player } from '@app/interfaces/player';
+import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { TeamType } from '@common/enums';
 import { Injectable } from '@nestjs/common';

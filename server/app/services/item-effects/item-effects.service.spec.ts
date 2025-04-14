@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { AttributeType, EventEmit } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { Item } from '@app/interfaces/items';
-import { Player } from '@app/interfaces/players';
-import { Tile } from '@app/interfaces/tiles';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { TileType } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { DiceType, ItemName } from '@common/enums';

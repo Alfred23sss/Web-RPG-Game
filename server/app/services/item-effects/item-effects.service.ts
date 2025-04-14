@@ -1,8 +1,8 @@
 import { AttributeType, EventEmit } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { Item, ItemModifier } from '@app/interfaces/items';
-import { Player } from '@app/interfaces/players';
-import { Tile } from '@app/interfaces/tiles';
+import { Item, ItemModifier } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';

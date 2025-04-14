@@ -11,10 +11,10 @@ import {
     NORMAL_ITEM_SCORE,
 } from '@app/constants/constants';
 import { MoveType } from '@app/enums/enums';
-import { Lobby } from '@app/interfaces/lobbys';
-import { Move } from '@app/interfaces/moves';
-import { Player } from '@app/interfaces/players';
-import { Tile } from '@app/interfaces/tiles';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { ItemName } from '@common/enums';

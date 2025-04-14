@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */ // needed to access actual function
 /* eslint-disable @typescript-eslint/no-explicit-any */ // needed to access private service
 import { EventEmit } from '@app/enums/enums';
-import { Item } from '@app/interfaces/items';
-import { Player } from '@app/interfaces/players';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { ImageType, ItemName } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';

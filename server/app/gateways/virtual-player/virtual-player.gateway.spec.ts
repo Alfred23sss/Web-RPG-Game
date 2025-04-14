@@ -1,5 +1,5 @@
-import { Item } from '@app/interfaces/items';
-import { Tile } from '@app/interfaces/tiles';
+import { Item } from '@app/interfaces/item';
+import { Tile } from '@app/interfaces/tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';

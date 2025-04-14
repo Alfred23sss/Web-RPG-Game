@@ -1,4 +1,4 @@
-import { Player } from '@app/interfaces/players';
+import { Player } from '@app/interfaces/player';
 
 export interface CombatTurn {
     attacker: Player;

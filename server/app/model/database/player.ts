@@ -1,4 +1,4 @@
-import { DiceType } from '@app/interfaces/dices';
+import { DiceType } from '@app/interfaces/dice';
 import { TeamType } from '@common/enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';

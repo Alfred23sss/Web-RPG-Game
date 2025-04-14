@@ -10,10 +10,10 @@ import {
 } from '@app/constants/constants';
 import { EventEmit, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { Lobby } from '@app/interfaces/lobbys';
-import { Move } from '@app/interfaces/moves';
-import { Player } from '@app/interfaces/players';
-import { Tile } from '@app/interfaces/tiles';
+import { Lobby } from '@app/interfaces/lobby';
+import { Move } from '@app/interfaces/move';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';

@@ -2,7 +2,7 @@ import { EventEmit } from '@app/enums/enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
 import { GameCombatMap } from '@app/interfaces/game-combat-map';
-import { Player } from '@app/interfaces/players';
+import { Player } from '@app/interfaces/player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';

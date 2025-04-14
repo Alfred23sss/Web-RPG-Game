@@ -1,8 +1,8 @@
 import { EventEmit } from '@app/enums/enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { GameSession } from '@app/interfaces/game-session';
-import { Player } from '@app/interfaces/players';
-import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
+import { Player } from '@app/interfaces/player';
+import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistic';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';

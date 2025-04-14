@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { DiceType } from '@app/interfaces/dices';
-import { Game } from '@app/interfaces/games';
-import { Lobby } from '@app/interfaces/lobbys';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { Lobby } from '@app/interfaces/lobby';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
