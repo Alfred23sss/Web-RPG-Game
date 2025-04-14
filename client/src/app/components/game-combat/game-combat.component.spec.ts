@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { GameData } from '@app/classes/game-data/game-data';
 import { Item } from '@app/classes/item/item';
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';

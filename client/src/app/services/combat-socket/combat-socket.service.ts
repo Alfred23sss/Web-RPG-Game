@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { LogBookEntry, SocketEvent } from '@app/enums/global.enums';
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';

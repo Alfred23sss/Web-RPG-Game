@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { AttackScore } from '@app/interfaces/attack-score';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
 import { DiceType } from '@app/interfaces/dice';
 import { Player } from '@app/interfaces/player';
