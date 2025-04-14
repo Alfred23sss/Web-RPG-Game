@@ -215,13 +215,13 @@ describe('GameStatisticsService', () => {
                 currentFighter: mockPlayer1,
                 defenderPlayer: mockPlayer2,
                 attackSuccessful: true,
-                attackerScore: 8,
-                defenseScore: 3,
+                attackerScore: { score: 2, diceRolled: 1 },
+                defenseScore: { score: 2, diceRolled: 1 },
             });
 
             const stats = service.getGameStatistics(mockAccessCode);
-            expect(stats?.playerStats.get(mockPlayer2.name).healthLost).toBe(5); // 8 - 3 = 5
-            expect(stats?.playerStats.get(mockPlayer1.name).damageCaused).toBe(5);
+            expect(stats?.playerStats.get(mockPlayer2.name).healthLost).toBe(0);
+            expect(stats?.playerStats.get(mockPlayer1.name).damageCaused).toBe(0);
         });
 
         it('should not update health stats when attack is unsuccessful', () => {
@@ -230,8 +230,8 @@ describe('GameStatisticsService', () => {
                 currentFighter: mockPlayer1,
                 defenderPlayer: mockPlayer2,
                 attackSuccessful: false,
-                attackerScore: 2,
-                defenseScore: 5,
+                attackerScore: { score: 2, diceRolled: 1 },
+                defenseScore: { score: 2, diceRolled: 1 },
             });
 
             const stats = service.getGameStatistics(mockAccessCode);

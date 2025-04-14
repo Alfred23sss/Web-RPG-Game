@@ -39,7 +39,6 @@ export class CharacterService {
         this.socketClientService.emit('joinRoom', accessCode);
 
         this.socketClientService.on<{ avatars?: string[] }>('updateUnavailableOptions', (data) => {
-            console.log('updateUnavailableOptions', data);
             if (!data.avatars) return;
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
@@ -203,7 +202,6 @@ export class CharacterService {
             case JoinLobbyResult.StayInLobby:
                 return;
             case JoinLobbyResult.RedirectToHome:
-                console.log('alsdmaksdma');
                 this.returnHome();
                 this.socketClientService.emit('manualDisconnect', {
                     isInGame: false,

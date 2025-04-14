@@ -39,7 +39,6 @@ export class GameplayService {
                 this.checkAvailableActions(gameData);
             }
             if (selectedItem === items[2]) {
-                console.log('decrement item');
                 this.socketClientService.emit('decrement.item', {
                     selectedItem,
                     accessCode: gameData.lobby.accessCode,
