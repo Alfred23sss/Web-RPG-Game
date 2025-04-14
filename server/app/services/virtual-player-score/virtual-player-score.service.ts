@@ -120,7 +120,11 @@ export class VirtualPlayerScoreService {
     }
 
     private calculateItemScore(move: Move, virtualPlayer: Player): void {
-        if (move.type !== MoveType.Item || !move.tile.item) return;
+        const isItemMove = move.type === MoveType.Item;
+        const hasItemOnTile = Boolean(move.tile?.item);
+        const shouldSkipItemCalculation = !isItemMove || !hasItemOnTile;
+
+        if (shouldSkipItemCalculation) return;
         const item = move.tile.item;
         switch (item.name) {
             case ItemName.Fire:
