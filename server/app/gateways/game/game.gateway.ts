@@ -2,6 +2,7 @@ import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
+import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
@@ -69,7 +70,8 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.DoorUpdate)
     handleDoorUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile }) {
-        this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile);
+        const player = this.lobbyService.getPlayerBySocketId(client.id) as VirtualPlayer;
+        this.gameSessionService.updateDoorTile(payload.accessCode, payload.currentTile, payload.targetTile, player);
     }
 
     @SubscribeMessage(GameEvents.WallUpdate)
@@ -152,10 +154,11 @@ export class GameGateway {
     }
 
     @OnEvent(EventEmit.GameDoorUpdate)
-    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][]; isOpen: boolean }) {
+    handleDoorUpdateEvent(payload: { accessCode: string; grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }) {
         this.server.to(payload.accessCode).emit('doorClicked', {
             grid: payload.grid,
             isOpen: payload.isOpen,
+            player: payload.player,
         });
     }
 

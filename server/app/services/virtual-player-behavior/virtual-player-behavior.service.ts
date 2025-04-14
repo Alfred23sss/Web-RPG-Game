@@ -22,7 +22,7 @@ export class VirtualPlayerBehaviorService {
     async executeBehavior(virtualPlayer: VirtualPlayer, lobby: Lobby, possibleMoves: Move[]): Promise<void> {
         const nextMove = this.getNextMove(possibleMoves, virtualPlayer, lobby);
         const virtualPlayerTile = this.virtualPlayerScoreService.getVirtualPlayerTile(virtualPlayer, lobby.game.grid);
-        await this.executeNextMove(nextMove, virtualPlayerTile, lobby);
+        await this.executeNextMove(nextMove, virtualPlayerTile, lobby, virtualPlayer);
     }
 
     async tryToEscapeIfWounded(virtualPlayer: Player, accessCode: string): Promise<boolean> {
@@ -53,13 +53,13 @@ export class VirtualPlayerBehaviorService {
         this.gameCombatService.performAttack(accessCode, virtualPlayer.name);
     }
 
-    private async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby): Promise<void> {
+    private async executeNextMove(move: Move, virtualPlayerTile: Tile, lobby: Lobby, virtualPlayer: VirtualPlayer): Promise<void> {
         switch (move.type) {
             case MoveType.Attack:
-                await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby);
+                await this.virtualPlayerActions.moveToAttack(move, virtualPlayerTile, lobby, virtualPlayer);
                 break;
             case MoveType.Item:
-                await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby);
+                await this.virtualPlayerActions.pickUpItem(move, virtualPlayerTile, lobby, virtualPlayer);
                 break;
         }
     }

@@ -1,6 +1,7 @@
 import { EventEmit } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/game-session';
 import { Turn } from '@app/interfaces/Turn';
+import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Item } from '@app/model/database/item';
 import { Player } from '@app/model/database/player';
 import { Tile } from '@app/model/database/tile';
@@ -104,10 +105,10 @@ export class GameSessionService {
         }
     }
 
-    updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile): void {
+    updateDoorTile(accessCode: string, previousTile: Tile, newTile: Tile, player: VirtualPlayer): void {
         const gameSession = this.gameSessions.get(accessCode);
         if (!gameSession) return;
-        gameSession.game.grid = this.gridManager.updateDoorTile(gameSession.game.grid, accessCode, previousTile, newTile);
+        gameSession.game.grid = this.gridManager.updateDoorTile(gameSession.game.grid, accessCode, previousTile, newTile, player);
     }
 
     callTeleport(accessCode: string, player: Player, targetTile: Tile): void {

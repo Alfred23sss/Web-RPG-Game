@@ -1,6 +1,7 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
+import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Tile, TileType } from '@app/model/database/tile';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
@@ -53,7 +54,7 @@ export class GridManagerService {
         }
     }
 
-    updateDoorTile(grid: Tile[][], accessCode: string, previousTile: Tile, newTile: Tile): Tile[][] {
+    updateDoorTile(grid: Tile[][], accessCode: string, previousTile: Tile, newTile: Tile, player: VirtualPlayer): Tile[][] {
         const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
         if (!isAdjacent) return grid;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
@@ -65,7 +66,11 @@ export class GridManagerService {
         }
         targetTile.isOpen = !targetTile.isOpen;
         this.eventEmitter.emit(EventEmit.UpdateDoorStats, { accessCode, tile: previousTile });
-        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: newTile.isOpen });
+        if (player.isVirtual) {
+            this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: !newTile.isOpen, player });
+        } else {
+            this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: newTile.isOpen, player });
+        }
         return grid;
     }
 
