@@ -604,7 +604,7 @@ describe('VirtualPlayerActionsService', () => {
             const result = await (service as any).handleAdjacentToClosedDoor(mockDestinationTile, mockVirtualTile, mockMovement, mockAccessCode);
 
             expect(result).toBe(true);
-            expect(mockGameSessionService.updateDoorTile).toHaveBeenCalledWith(mockAccessCode, mockVirtualTile, mockDestinationTile);
+            expect(mockGameSessionService.updateDoorTile).toHaveBeenCalledWith(mockAccessCode, mockVirtualTile, mockDestinationTile, undefined);
             expect(mockVirtualTile.player.actionPoints).toBe(2);
         });
     });
@@ -703,7 +703,7 @@ describe('VirtualPlayerActionsService', () => {
 
             const result = (service as any).getMovement(mockMove, mockVirtualTile, mockGrid);
 
-            expect(result).toBeUndefined();
+            expect(result).toEqual([mockVirtualTile]);
         });
 
         it('should trim path at obstacles', () => {
