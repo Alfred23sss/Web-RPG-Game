@@ -5,13 +5,13 @@ import { GameData } from '@app/classes/game-data/game-data';
 import { Item } from '@app/classes/item/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { ItemName, Routes, TileType } from '@app/enums/global.enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { ItemName, Routes, TileType } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

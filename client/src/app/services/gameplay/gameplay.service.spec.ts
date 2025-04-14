@@ -7,7 +7,6 @@ import { Router } from '@angular/router';
 import { GameData } from '@app/classes/game-data/game-data';
 import { Item } from '@app/classes/item/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
-import { DiceType, ImageType, ItemName, Routes, TileType } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -16,6 +15,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { of } from 'rxjs';
 import { GameplayService } from './gameplay.service';
+import { ImageType, ItemName, Routes, DiceType, TileType } from '@common/enums';
 
 describe('GameplayService', () => {
     let service: GameplayService;

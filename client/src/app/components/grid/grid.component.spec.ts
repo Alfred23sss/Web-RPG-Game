@@ -1,10 +1,10 @@
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { POPUP_DELAY } from '@app/constants/global.constants';
-import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { of } from 'rxjs';
 import { GridComponent } from './grid.component';
+import { TileType } from '@common/enums';
 
 describe('GridComponent', () => {
     let component: GridComponent;

@@ -1,11 +1,12 @@
-import { EventEmit, GameMode } from '@app/enums/enums';
+import { EventEmit } from '@app/enums/enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
 import { GameCombatMap } from '@app/interfaces/game-combat-map';
-import { Player } from '@app/interfaces/Player';
+import { Player } from '@app/interfaces/player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
+import { GameMode } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -111,32 +112,12 @@ export class GameCombatService {
         return true;
     }
 
-    // endCombat(accessCode: string, isEscape: boolean = false): void {
-    //     const combatState = this.combatStates[accessCode];
-    //     if (!combatState) return;
-    //     this.resetCombatTimers(accessCode);
-    //     const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
-    //     this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
-    //     delete this.combatStates[accessCode];
-    //     if (!this.gameSessionService.getGameSession(accessCode)) return;
-    //     this.gameSessionService.setCombatState(accessCode, false);
-    //     if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
-    //     this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-    //     } else if (!isEscape && currentFighter) {
-    //     this.gameSessionService.endTurn(accessCode);
-    //     } else {
-    //     this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-    //     }
-    // }
-
     endCombat(accessCode: string, isEscape: boolean = false): void {
-        // not sure if this works
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
 
-        const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
-
         this.resetCombatTimers(accessCode);
+        const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
         this.emitEvent(EventEmit.GameCombatEnded, {
             attacker,
             defender,
@@ -144,21 +125,24 @@ export class GameCombatService {
             hasEvaded,
             accessCode,
         });
-
         delete this.combatStates[accessCode];
 
-        const session = this.gameSessionService.getGameSession(accessCode);
-        if (!session) return;
-
+        if (!this.gameSessionService.getGameSession(accessCode)) return;
         this.gameSessionService.setCombatState(accessCode, false);
 
-        const isCurrentPlayer = currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name);
+        const currentFighterExists = Boolean(currentFighter);
+        const isCurrentPlayer = currentFighterExists && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name);
 
-        if (!isEscape && currentFighter && !isCurrentPlayer) {
+        const shouldResumeForCurrentPlayer = !isEscape && isCurrentPlayer;
+        const shouldEndTurnForNonCurrent = !isEscape && currentFighterExists && !isCurrentPlayer;
+
+        if (shouldResumeForCurrentPlayer) {
+            this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
+        } else if (shouldEndTurnForNonCurrent) {
             this.gameSessionService.endTurn(accessCode);
-            return;
+        } else {
+            this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
         }
-        this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
     }
 
     isCombatActive(accessCode: string): boolean {

@@ -2,11 +2,11 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { TeamType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Player } from '@app/interfaces/player';
 import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { TeamType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameSessionTurnService } from './game-session-turn.service';

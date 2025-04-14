@@ -1,4 +1,4 @@
-import { EventEmit, GameMode } from '@app/enums/enums';
+import { EventEmit } from '@app/enums/enums';
 import { AttackScore } from '@app/interfaces/attack-score';
 import { GameSession } from '@app/interfaces/game-session';
 import { Player } from '@app/interfaces/player';
@@ -6,13 +6,13 @@ import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistic';
 import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { GameMode } from '@common/enums';
 import { Injectable, Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 // bouge ca dans constant global et trouver meilleur nom
 const TIME_DIVIDER = 1000;
 const MULTIPLIER = 100;
-const SECOND_IN_HOURS = 3600;
 const SECOND_IN_MINUTES = 60;
 
 @Injectable()

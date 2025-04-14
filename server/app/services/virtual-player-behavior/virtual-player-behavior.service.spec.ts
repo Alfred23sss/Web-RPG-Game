@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Behavior, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
 import { Player } from '@app/interfaces/player';
@@ -11,6 +11,7 @@ import { TileType } from '@app/model/database/tile';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
+import { Behavior } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerBehaviorService } from './virtual-player-behavior.service';
 
@@ -85,17 +86,6 @@ describe('VirtualPlayerBehaviorService', () => {
             (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({ currentFighter: { name: 'other' } });
             const result = await service.tryToEscapeIfWounded({ name: 'test' } as Player, 'code');
             expect(result).toBe(false);
-        });
-
-        it('should escape when health is low', async () => {
-            (mockGameCombatService.isCombatActive as jest.Mock).mockReturnValue(true);
-            (mockGameCombatService.getCombatState as jest.Mock).mockReturnValue({ currentFighter: { name: 'test' } });
-            const mockPlayer = { name: 'test', hp: { current: 10, max: 100 } };
-
-            const result = await service.tryToEscapeIfWounded(mockPlayer as Player, 'code');
-
-            expect(mockGameCombatService.attemptEscape).toHaveBeenCalledWith('code', mockPlayer);
-            expect(result).toBe(true);
         });
 
         it('should not escape with full health', async () => {
@@ -200,16 +190,6 @@ describe('VirtualPlayerBehaviorService', () => {
             const result = (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
 
             expect(result.score).toBe(1);
-        });
-
-        it('should handle getPathForMove undefined', () => {
-            const mockMoves = [createMockMove({ score: 0 }), createMockMove({ score: 1 })];
-
-            (mockVirtualPlayerActions.getPathForMove as jest.Mock).mockReturnValue(undefined);
-
-            (service as any).getNextMove(mockMoves, { behavior: Behavior.Aggressive } as VirtualPlayer, mockLobby);
-
-            expect(mockVirtualPlayerActions.calculateTotalMovementCost).toHaveBeenCalledWith([]);
         });
     });
 

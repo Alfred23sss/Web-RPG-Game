@@ -1,5 +1,5 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS, AGGRESSIVE_ITEM_ORDER, DEFENSIVE_ITEM_ORDER } from '@app/constants/constants';
-import { Behavior, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Item } from '@app/interfaces/item';
 import { Lobby } from '@app/interfaces/lobby';
@@ -10,9 +10,9 @@ import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtual-player-behavior.service';
+import { Behavior } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-
 @Injectable()
 export class VirtualPlayerService {
     private virtualPlayer: VirtualPlayer;

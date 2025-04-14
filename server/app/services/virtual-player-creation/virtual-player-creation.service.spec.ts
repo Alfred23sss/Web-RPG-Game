@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { BASE_STAT, BONUS_STAT, VIRTUAL_PLAYER_NAMES } from '@app/constants/constants';
-import { AvatarType, Behavior } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { AvatarType, Behavior } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerCreationService } from './virtual-player-creation.service';
 

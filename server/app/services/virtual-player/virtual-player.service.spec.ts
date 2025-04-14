@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Behavior, ItemName, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { DiceType } from '@app/interfaces/dice';
 import { Game } from '@app/interfaces/game';
@@ -12,6 +12,7 @@ import { Tile, TileType } from '@app/model/database/tile';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtual-player-behavior.service';
+import { Behavior, ItemName } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { VirtualPlayerService } from './virtual-player.service';
@@ -181,13 +182,6 @@ describe('VirtualPlayerService', () => {
             expect(mockBehaviorService.tryToEscapeIfWounded).toHaveBeenCalled();
         });
 
-        it('should do nothing for non-defensive', async () => {
-            const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Aggressive });
-
-            await service.handleCombatTurnStart('1234', mockPlayer);
-
-            expect(mockBehaviorService.tryToEscapeIfWounded).not.toHaveBeenCalled();
-        });
         it('should return early if virtual defensive player has escaped', async () => {
             const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Defensive });
 

@@ -8,7 +8,7 @@ import {
     NO_SCORE,
     PLAYER_POSITION,
 } from '@app/constants/constants';
-import { EventEmit, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
+import { EventEmit, MoveType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
@@ -18,6 +18,7 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { ItemName, TeamType, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 

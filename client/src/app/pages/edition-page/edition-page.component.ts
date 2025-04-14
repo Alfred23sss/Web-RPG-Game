@@ -6,7 +6,7 @@ import { Item } from '@app/classes/item/item';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
-import { Routes } from '@app/enums/global.enums';
+import { Routes } from '@common/enums';
 import { Game } from '@app/interfaces/game';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';

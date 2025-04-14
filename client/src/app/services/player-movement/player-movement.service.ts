@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { TileType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { TileType } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
-import { DiceType, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
 import { Player } from '@app/interfaces/player';
@@ -10,6 +11,7 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { DiceType, ItemName, TeamType, TileType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { VirtualPlayerActionsService } from './virtual-player-actions.service';
@@ -139,7 +141,7 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should do nothing if movement fails', async () => {
-            const mockMove = createMockMove();
+            mockMove = createMockMove();
             jest.spyOn(service as any, 'executeMove').mockResolvedValue(undefined);
 
             await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
@@ -149,7 +151,7 @@ describe('VirtualPlayerActionsService', () => {
 
         it('should complete move normally if no special actions', async () => {
             const mockTargetTile = createMockTile();
-            const mockMove = createMockMove({ tile: mockTargetTile });
+            mockMove = createMockMove({ tile: mockTargetTile });
             const mockPath = [mockVirtualTile, mockTargetTile];
 
             jest.spyOn(service as any, 'executeMove').mockResolvedValue(mockPath);

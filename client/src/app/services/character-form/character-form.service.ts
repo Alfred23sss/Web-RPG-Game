@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES, PLAYER_STORAGE, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes, SocketEvent } from '@app/enums/global.enums';
+import { AttributeType, ErrorMessages, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, HttpStatus, JoinLobbyResult, Routes } from '@common/enums';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
