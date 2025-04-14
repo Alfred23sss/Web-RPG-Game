@@ -139,7 +139,6 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should do nothing if movement fails', async () => {
-            const mockMove = createMockMove();
             jest.spyOn(service as any, 'executeMove').mockResolvedValue(undefined);
 
             await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
@@ -148,11 +147,6 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should complete move normally if no special actions', async () => {
-            const mockTargetTile = createMockTile();
-            const mockMove = createMockMove({ tile: mockTargetTile });
-            const mockPath = [mockVirtualTile, mockTargetTile];
-
-            jest.spyOn(service as any, 'executeMove').mockResolvedValue(mockPath);
             jest.spyOn(service as any, 'handleAdjacentToClosedDoor').mockResolvedValue(false);
             jest.spyOn(service as any, 'handleAdjacentToPlayer').mockResolvedValue(false);
 

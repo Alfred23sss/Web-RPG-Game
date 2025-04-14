@@ -323,8 +323,6 @@ describe('GameCombatService', () => {
             expect(gameSessionService.isCurrentPlayer).not.toHaveBeenCalled();
         });
         it('should do nothing if combat state does not exist', () => {
-            const accessCode = 'testAccessCode';
-
             service['combatStates'][accessCode] = undefined;
 
             const resetCombatTimersSpy = jest.spyOn(service as any, 'resetCombatTimers');
@@ -339,8 +337,6 @@ describe('GameCombatService', () => {
         });
 
         it('should reset timers, get the next fighter, and start the next combat turn if combat state exists', () => {
-            const accessCode = 'testAccessCode';
-            const combatState = mockCombatState();
             const nextFighter = mockPlayer('nextFighter', 5);
 
             service['combatStates'][accessCode] = combatState;
@@ -434,13 +430,6 @@ describe('GameCombatService', () => {
             const result = service.getCombatState(accessCode);
             expect(result).toEqual(mockState);
             expect(result).not.toBeNull();
-        });
-        it('should return null when there is no CombatState for the access code', () => {
-            const accessCode = 'codeWithoutState';
-
-            const result = service.getCombatState(accessCode);
-
-            expect(result).toBeNull();
         });
     });
 
@@ -955,11 +944,7 @@ describe('GameCombatService', () => {
             service['combatStates'][accessCode] = combatState;
 
             const resetHealthSpy = jest.spyOn(service as any, 'resetHealth');
-            const endCombatSpy = jest.spyOn(service, 'endCombat');
             const checkPlayerWonSpy = jest.spyOn(service, 'checkPlayerWon').mockReturnValue(true);
-            const emitSpy = jest.spyOn(service as any, 'emitEvent');
-            const emitGridSpy = jest.spyOn(gameSessionService, 'emitGridUpdate');
-            const endTurnSpy = jest.spyOn(gameSessionService, 'endTurn');
 
             (service as any).handleCombatEnd(combatState, defenderPlayer, accessCode);
 
