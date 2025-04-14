@@ -1,21 +1,19 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
-import { Player } from '@app/interfaces/player';
+import { Player } from '@app/interfaces/Player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 import { LobbyGateway } from './lobby.gateway';
 
-fdescribe('LobbyGateway', () => {
+describe('LobbyGateway', () => {
     let gateway: LobbyGateway;
     let lobbyService: LobbyService;
-    let accessCodesService: AccessCodesService;
     let gameSessionService: GameSessionService;
     let gameCombatService: GameCombatService;
 
@@ -75,12 +73,6 @@ fdescribe('LobbyGateway', () => {
                     },
                 },
                 {
-                    provide: Logger,
-                    useValue: {
-                        log: jest.fn(),
-                    },
-                },
-                {
                     provide: AccessCodesService,
                     useValue: {
                         removeAccessCode: jest.fn(),
@@ -107,7 +99,6 @@ fdescribe('LobbyGateway', () => {
 
         gateway = module.get<LobbyGateway>(LobbyGateway);
         lobbyService = module.get<LobbyService>(LobbyService);
-        accessCodesService = module.get<AccessCodesService>(AccessCodesService);
         gameSessionService = module.get<GameSessionService>(GameSessionService);
         gameCombatService = module.get<GameCombatService>(GameCombatService);
 

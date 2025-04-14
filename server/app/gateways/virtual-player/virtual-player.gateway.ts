@@ -1,6 +1,6 @@
 import { Behavior, EventEmit } from '@app/enums/enums';
 import { Item } from '@app/interfaces/item';
-import { Tile } from '@app/interfaces/tile';
+import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
