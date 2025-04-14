@@ -54,6 +54,7 @@ export class PlayerMovementService {
 
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
+        // faut aussi recheck ici pour le undefined
         return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player !== undefined);
     }
 
