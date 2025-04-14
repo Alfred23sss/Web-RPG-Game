@@ -231,3 +231,22 @@ export enum Behavior {
     Defensive = 'defensive',
     Null = '',
 }
+
+export enum SocketEvent {
+    GameAbandoned = 'game-abandoned',
+    GameDeleted = 'gameDeleted',
+    GameEnded = 'gameEnded',
+    AdminModeDisabled = 'adminModeDisabled',
+    GameStarted = 'gameStarted',
+    PlayerMovement = 'playerMovement',
+    PlayerUpdate = 'playerUpdate',
+    PlayerListUpdate = 'playerListUpdate',
+    DoorClicked = 'doorClicked',
+    WallClicked = 'wallClicked',
+    GridUpdate = 'gridUpdate',
+    AdminModeChangedServerSide = 'adminModeChangedServerSide',
+    ItemChoice = 'itemChoice',
+    ItemDropped = 'itemDropped',
+    ItemDrop = 'itemDrop',
+    PlayerClientUpdate = 'playerClientUpdate',
+}
