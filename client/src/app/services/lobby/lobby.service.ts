@@ -23,6 +23,8 @@ export class LobbyService {
     private playerSubject = new BehaviorSubject<Player | null>(null);
     private isGameStartingSubject = new BehaviorSubject<boolean>(false);
 
+    // COMMENT TO KEEP : REFACTOR THE OBSERVABLES TO BE PRIVATE AND ADD GETTERS TO THEM (TEO WILL DO IT) SO WE CAN REMOVE THE DISABLE LINT
+
     lobby$ = this.lobbySubject.asObservable();
     isLoading$ = this.isLoadingSubject.asObservable();
     player$ = this.playerSubject.asObservable();

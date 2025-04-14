@@ -1,6 +1,5 @@
 import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { AttackScore } from '@common/interfaces/attack-score';
 import { Player } from '@app/interfaces/player';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Item } from '@app/model/database/item';
@@ -10,6 +9,7 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -20,8 +20,6 @@ export class GameGateway {
     @WebSocketServer()
     server: Server;
 
-    // faudra split ce gateway en plusieurs fichiers anyways!
-    // eslint-disable-next-line max-params
     constructor(
         private readonly lobbyService: LobbyService,
         private readonly gameSessionService: GameSessionService,
