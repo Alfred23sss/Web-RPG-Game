@@ -172,6 +172,7 @@ export class GameStatisticsService {
     }
 
     decrementItem(accessCode: string, item: Item, player: Player): void {
+        if (!item) return;
         const gameStats = this.gameStatistics.get(accessCode);
         if (!gameStats) return;
         const playerStats = gameStats.playerStats.get(player.name);

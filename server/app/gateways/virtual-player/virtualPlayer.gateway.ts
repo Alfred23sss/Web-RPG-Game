@@ -5,6 +5,7 @@ import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
@@ -13,7 +14,6 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { VirtualPlayerEvents } from './virtualPlayer.gateway.events';
-
 @WebSocketGateway({ cors: true })
 export class VirtualPlayerGateway {
     @WebSocketServer()
@@ -21,10 +21,10 @@ export class VirtualPlayerGateway {
 
     constructor(
         private readonly lobbyService: LobbyService,
-        private readonly logger: Logger,
         private readonly virtualPlayerCreationService: VirtualPlayerCreationService,
         private readonly virtualPlayerService: VirtualPlayerService,
         private readonly gameSessionService: GameSessionService,
+        private readonly gameStatistics: GameStatisticsService,
     ) {}
 
     @SubscribeMessage(VirtualPlayerEvents.CreateVirtualPlayer)
@@ -56,13 +56,13 @@ export class VirtualPlayerGateway {
         try {
             await this.gameSessionService.updatePlayerPosition(data.accessCode, data.movement, virtualPlayer);
         } catch (error) {
-            this.logger.error('Error updating virtual player position', error);
+            Logger.error('Error updating virtual player position', error);
         }
     }
 
     @OnEvent(VirtualPlayerEvents.EndVirtualPlayerTurn)
     handleEndVirtualPlayerTurn(@MessageBody() data: { accessCode: string }) {
-        this.logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
+        Logger.log('Ending turn for VirtualPlayer for game', data.accessCode);
 
         this.virtualPlayerService.resetStats();
         setTimeout(() => {
@@ -73,6 +73,7 @@ export class VirtualPlayerGateway {
     @OnEvent(VirtualPlayerEvents.ChooseItem)
     handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[] }) {
         const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
+        this.gameStatistics.decrementItem(data.accessCode, removedItem, data.player);
         this.gameSessionService.handleItemDropped(data.accessCode, data.player, removedItem);
     }
 
@@ -88,7 +89,6 @@ export class VirtualPlayerGateway {
 
     @OnEvent(EventEmit.VPActionDone)
     handleActionDone(@MessageBody() accessCode: string) {
-        console.log('starting another turn behavior');
         this.virtualPlayerService.delay(accessCode);
     }
 }
