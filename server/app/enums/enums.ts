@@ -15,29 +15,11 @@ export enum GameSizePlayerCount {
     Large = 6,
 }
 
-export enum TileType {
-    Water = 'eau',
-    Ice = 'glace',
-    Wall = 'mur',
-    Door = 'porte',
-    Default = 'défaut',
-}
-
 export enum AttributeType {
     Hp = 'hp',
     Speed = 'Vitesse',
     Attack = 'Attaque',
     Defense = 'Défense',
-}
-
-export enum HttpStatus {
-    InternalServerError = 500,
-    Forbidden = 403,
-}
-
-export enum TimeConstants {
-    SecondDivider = 1000,
-    SecondModulo = 60,
 }
 
 export enum ErrorMessages {
@@ -102,10 +84,4 @@ export enum EventEmit {
     ShowGlobalStats = 'show.global.stats',
     UpdateDoorStats = 'update.door.stats',
     VPActionDone = 'vp.action.done',
-}
-
-export enum Behavior {
-    Aggressive = 'aggressive',
-    Defensive = 'defensive',
-    Null = '',
 }

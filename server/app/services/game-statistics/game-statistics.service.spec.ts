@@ -2,7 +2,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { TileType } from '@app/enums/enums';
 import { DiceType } from '@app/interfaces/dice';
 import { Game } from '@app/interfaces/game';
 import { GameSession } from '@app/interfaces/game-session';
@@ -15,7 +14,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameStatisticsService } from './game-statistics.service';
 import { Logger } from '@nestjs/common';
-import { GameMode } from '@common/enums';
+import { GameMode, TileType } from '@common/enums';
 
 const PLAYER_1_NAME = 'Player 1';
 const PLAYER_2_NAME = 'Player 2';

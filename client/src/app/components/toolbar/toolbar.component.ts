@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { TileType } from '@app/enums/global.enums';
 import { ToolService } from '@app/services/tool/tool.service';
-import { ImageType } from '@common/enums';
+import { ImageType, TileType } from '@common/enums';
 
 @Component({
     selector: 'app-toolbar',

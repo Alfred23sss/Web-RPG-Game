@@ -121,3 +121,27 @@ export enum Routes {
     Game = '/game',
     GameEndPage = '/game-end',
 }
+
+export enum HttpStatus {
+    InternalServerError = 500,
+    Forbidden = 403,
+}
+
+export enum TimeConstants {
+    SecondDivider = 1000,
+    SecondModulo = 60,
+}
+
+export enum TileType {
+    Water = 'eau',
+    Ice = 'glace',
+    Wall = 'mur',
+    Door = 'porte',
+    Default = 'défaut',
+}
+
+export enum Behavior {
+    Aggressive = 'aggressive',
+    Defensive = 'defensive',
+    Null = '',
+}

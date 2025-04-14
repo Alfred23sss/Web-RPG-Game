@@ -2,14 +2,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
 import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { Behavior, ErrorMessages } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Subscription } from 'rxjs';
-import { Routes } from '@common/enums';
+import { Routes, Behavior } from '@common/enums';
 @Component({
     selector: 'app-waiting-view',
     templateUrl: './waiting-view.component.html',

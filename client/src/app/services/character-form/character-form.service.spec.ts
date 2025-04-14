@@ -5,7 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
-import { AttributeType, ErrorMessages, HttpStatus } from '@app/enums/global.enums';
+import { AttributeType, ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -15,7 +15,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
-import { DiceType, JoinLobbyResult, Routes } from '@common/enums';
+import { DiceType, JoinLobbyResult, Routes, HttpStatus } from '@common/enums';
 
 describe('CharacterService', () => {
     let service: CharacterService;

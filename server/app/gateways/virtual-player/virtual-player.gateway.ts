@@ -1,6 +1,6 @@
-import { Behavior, EventEmit } from '@app/enums/enums';
-import { Item } from '@app/interfaces/Item';
-import { Tile } from '@app/interfaces/Tile';
+import { EventEmit } from '@app/enums/enums';
+import { Item } from '@app/interfaces/item';
+import { Tile } from '@app/interfaces/tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
@@ -11,6 +11,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'socket.io';
 import { VirtualPlayerEvents } from './virtual-player.gateway.events';
+import { Behavior } from '@common/enums';
 
 @WebSocketGateway({ cors: true })
 export class VirtualPlayerGateway {

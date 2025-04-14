@@ -1,5 +1,5 @@
 import { ACTION_MAX_MS, ACTION_MIN_MS } from '@app/constants/constants';
-import { Behavior, MoveType } from '@app/enums/enums';
+import { MoveType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Move } from '@app/interfaces/move';
 import { Player } from '@app/interfaces/player';
@@ -9,6 +9,7 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerScoreService } from '@app/services/virtual-player-score/virtual-player-score.service';
 import { Injectable } from '@nestjs/common';
+import { Behavior } from '@common/enums';
 
 @Injectable()
 export class VirtualPlayerBehaviorService {
