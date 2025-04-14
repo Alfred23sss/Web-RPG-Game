@@ -23,21 +23,6 @@ export enum TeamType {
     BLUE = 'blue',
 }
 
-export enum AvatarType {
-    SkeletonA = './assets/avatars/skeletonA_Idle.gif',
-    SkeletonB = './assets/avatars/skeletonB_Idle.gif',
-    SkeletonC = './assets/avatars/skeletonC_Idle.gif',
-    FangelA = './assets/avatars/fangelA_Idle.gif',
-    FangelB = './assets/avatars/fangelB_Idle.gif',
-    FangelC = './assets/avatars/fangelC_Idle.gif',
-    ReaperA = './assets/avatars/reaperA_Idle.gif',
-    ReaperB = './assets/avatars/reaperB_Idle.gif',
-    ReaperC = './assets/avatars/reaperC_Idle.gif',
-    ValkyrieA = './assets/avatars/valkyrieA_Idle.gif',
-    ValkyrieB = './assets/avatars/valkyrieB_Idle.gif',
-    ValkyrieC = './assets/avatars/valkyrieC_Idle.gif',
-}
-
 export enum ItemType {
     Home = './assets/items/home-removebg-preview.png',
     HomeGray = './assets/items/home-gray.png',
