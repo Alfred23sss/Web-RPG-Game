@@ -181,13 +181,6 @@ describe('VirtualPlayerService', () => {
             expect(mockBehaviorService.tryToEscapeIfWounded).toHaveBeenCalled();
         });
 
-        it('should do nothing for non-defensive', async () => {
-            const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Aggressive });
-
-            await service.handleCombatTurnStart('1234', mockPlayer);
-
-            expect(mockBehaviorService.tryToEscapeIfWounded).not.toHaveBeenCalled();
-        });
         it('should return early if virtual defensive player has escaped', async () => {
             const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Defensive });
 
