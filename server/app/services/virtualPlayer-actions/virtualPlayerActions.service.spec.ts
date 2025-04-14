@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */
-import { DiceType, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
+import { DiceType, EventEmit, ItemName, MoveType, TeamType, TileType } from '@app/enums/enums';
 import { Lobby } from '@app/interfaces/Lobby';
 import { Move } from '@app/interfaces/Move';
 import { Player } from '@app/interfaces/Player';
@@ -139,26 +139,11 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should do nothing if movement fails', async () => {
-            const mockMove = createMockMove();
             jest.spyOn(service as any, 'executeMove').mockResolvedValue(undefined);
 
             await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
 
             expect(mockEventEmitter.emit).not.toHaveBeenCalled();
-        });
-
-        it('should complete move normally if no special actions', async () => {
-            const mockTargetTile = createMockTile();
-            const mockMove = createMockMove({ tile: mockTargetTile });
-            const mockPath = [mockVirtualTile, mockTargetTile];
-
-            jest.spyOn(service as any, 'executeMove').mockResolvedValue(mockPath);
-            jest.spyOn(service as any, 'handleAdjacentToClosedDoor').mockResolvedValue(false);
-            jest.spyOn(service as any, 'handleAdjacentToPlayer').mockResolvedValue(false);
-
-            await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
-
-            expect(mockEventEmitter.emit).toHaveBeenCalled();
         });
 
         it('should return early when door is opened', async () => {
@@ -182,6 +167,19 @@ describe('VirtualPlayerActionsService', () => {
             await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
 
             expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should emit VPActionDone when no door is opened and no attack is performed', async () => {
+            const mockMovement = [mockVirtualTile, createMockTile()];
+            const mockDestination = mockMovement[1];
+
+            jest.spyOn(service as any, 'executeMove').mockResolvedValue(mockMovement);
+            jest.spyOn(service as any, 'handleAdjacentToClosedDoor').mockResolvedValue(false);
+            jest.spyOn(service as any, 'handleAdjacentToPlayer').mockResolvedValue(false);
+
+            await service.moveToAttack(mockMove, mockVirtualTile, mockLobby);
+
+            expect(mockEventEmitter.emit).toHaveBeenCalledWith(EventEmit.VPActionDone, mockLobby.accessCode);
         });
     });
 
@@ -216,19 +214,6 @@ describe('VirtualPlayerActionsService', () => {
             await service.pickUpItem(mockMove, mockVirtualTile, mockLobby);
 
             expect(mockEventEmitter.emit).not.toHaveBeenCalled();
-        });
-
-        it('should complete move normally if no special actions', async () => {
-            const mockTargetTile = createMockTile();
-            const mockMove = createMockMove({ tile: mockTargetTile });
-            const mockPath = [mockVirtualTile, mockTargetTile];
-
-            jest.spyOn(service as any, 'executeMove').mockResolvedValue(mockPath);
-            jest.spyOn(service as any, 'handleAdjacentToClosedDoor').mockResolvedValue(false);
-
-            await service.pickUpItem(mockMove, mockVirtualTile, mockLobby);
-
-            expect(mockEventEmitter.emit).toHaveBeenCalled();
         });
 
         it('should emit VPActionDone when no door is opened', async () => {
@@ -307,6 +292,25 @@ describe('VirtualPlayerActionsService', () => {
 
             expect(mockPlayerMovementService.findBestMoveTile).not.toHaveBeenCalled();
             expect(result).toEqual(expectedPath);
+        });
+
+        it('should return undefined if targetTile is undefined after best move logic', () => {
+            const mockMove = createMockMove({
+                type: MoveType.Attack,
+                tile: createMockTile({ player: createMockPlayer({ name: 'other-player' }) }),
+            });
+
+            const mockVirtualTile = createMockTile({
+                player: createMockPlayer({ name: 'virtual-player' }),
+            });
+
+            const mockLobby = createMockLobby();
+            mockPlayerMovementService.findBestMoveTile.mockReturnValue(undefined);
+
+            const result = service.getPathForMove(mockMove, mockVirtualTile, mockLobby);
+
+            expect(result).toBeUndefined();
+            expect(mockPlayerMovementService.quickestPath).not.toHaveBeenCalled();
         });
     });
 

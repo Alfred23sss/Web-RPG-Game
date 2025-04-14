@@ -64,6 +64,7 @@ describe('VirtualPlayerService', () => {
                     useValue: {
                         tryToEscapeIfWounded: jest.fn().mockResolvedValue(false),
                         executeBehavior: jest.fn(),
+                        attack: jest.fn(),
                     },
                 },
                 {
@@ -181,13 +182,6 @@ describe('VirtualPlayerService', () => {
             expect(mockBehaviorService.tryToEscapeIfWounded).toHaveBeenCalled();
         });
 
-        it('should do nothing for non-defensive', async () => {
-            const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Aggressive });
-
-            await service.handleCombatTurnStart('1234', mockPlayer);
-
-            expect(mockBehaviorService.tryToEscapeIfWounded).not.toHaveBeenCalled();
-        });
         it('should return early if virtual defensive player has escaped', async () => {
             const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Defensive });
 
@@ -197,6 +191,16 @@ describe('VirtualPlayerService', () => {
 
             expect(mockBehaviorService.tryToEscapeIfWounded).toHaveBeenCalledWith(mockPlayer, '1234');
             expect(result).toBeUndefined();
+        });
+        it('should attack if virtual player is aggressive', async () => {
+            const mockPlayer = createMockVirtualPlayer({ behavior: Behavior.Aggressive });
+
+            const attackSpy = jest.spyOn(mockBehaviorService, 'attack');
+
+            await service.handleCombatTurnStart('1234', mockPlayer);
+
+            expect(service['virtualPlayer']).toBe(mockPlayer);
+            expect(attackSpy).toHaveBeenCalledWith(mockPlayer, '1234');
         });
     });
 

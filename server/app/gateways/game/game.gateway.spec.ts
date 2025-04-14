@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable max-lines */
-import { GameModeType } from '@app/enums/enums';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { EventEmit, GameModeType } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
 import { AttackScore } from '@app/interfaces/AttackScore';
 import { DiceType } from '@app/interfaces/Dice';
 import { Item } from '@app/interfaces/Item';
@@ -14,6 +17,7 @@ import { LobbyService } from '@app/services/lobby/lobby.service';
 import { Logger } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
+
 import { GameGateway } from './game.gateway';
 
 const MOCK_PLAYER: Player = {
@@ -150,7 +154,6 @@ describe('GameGateway', () => {
 
     describe('handleCreateGame', () => {
         it('should create a game session and emit gameStarted', () => {
-            // { accessCode: string; gameMode: GameModeType }
             const payload = {
                 accessCode: ACCESS_CODE,
                 gameMode: GameModeType.Classic,
@@ -165,38 +168,6 @@ describe('GameGateway', () => {
             });
         });
     });
-
-    // describe('handleGameAbandoned', () => {
-    //     it('should handle player abandonment and emit events', () => {
-    //         const payload = {
-    //             player: MOCK_PLAYER,
-    //             accessCode: ACCESS_CODE,
-    //             isGameEnding: false,
-    //         };
-    //         gateway.handleGameAbandoned(MOCK_CLIENT, payload);
-
-    //         expect(combatServiceMock.handleCombatSessionAbandon).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
-    //         expect(gameSessionServiceMock.handlePlayerAbandoned).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name);
-    //         expect(lobbyServiceMock.leaveLobby).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER.name, true);
-    //     });
-
-    //     it('should clear lobby and delete session when last player leaves', () => {
-    //         lobbyServiceMock.getLobby = jest.fn().mockReturnValue({ players: [MOCK_PLAYER] });
-    //         const mockClient = { leave: jest.fn() } as unknown as Socket;
-
-    //         const payload = {
-    //             player: MOCK_PLAYER,
-    //             accessCode: ACCESS_CODE,
-    //             isGameEnding: false,
-    //         };
-    //         gateway.handleGameAbandoned(mockClient, payload);
-
-    //         expect(lobbyServiceMock.clearLobby).toHaveBeenCalledWith(payload.accessCode);
-    //         expect(gameSessionServiceMock.deleteGameSession).toHaveBeenCalledWith(payload.accessCode);
-    //         expect(accessCodeServiceMock.removeAccessCode).toHaveBeenCalledWith(payload.accessCode);
-    //         expect(serverMock.emit).toHaveBeenCalledWith('gameDeleted');
-    //     });
-    // });
 
     describe('handleEndTurn', () => {
         it('should end the current turn', () => {
@@ -261,6 +232,49 @@ describe('GameGateway', () => {
             await gateway.handlePlayerMovementUpdate(MOCK_CLIENT, payload);
 
             expect(loggerMock.error).toHaveBeenCalledWith('Error updating player position', error);
+        });
+    });
+
+    describe('handleDecrementItem', () => {
+        it('should call decrementItem via manual injection', () => {
+            const mockItem: Item = {
+                id: '1',
+                name: 'Elixir',
+                description: '',
+                imageSrc: '',
+                imageSrcGrey: '',
+                itemCounter: 1,
+            };
+
+            const spy = jest.fn();
+            (gateway as any).statisticsService = { decrementItem: spy };
+
+            const payload = {
+                selectedItem: mockItem,
+                accessCode: ACCESS_CODE,
+                player: MOCK_PLAYER,
+            };
+
+            gateway.handleDecrementItem({} as Socket, payload);
+            expect(spy).toHaveBeenCalledWith(ACCESS_CODE, mockItem, MOCK_PLAYER);
+        });
+    });
+
+    describe('handlePlayerItemReset', () => {
+        it('should call gameSessionService.handlePlayerItemReset with correct parameters', () => {
+            const spy = jest.fn();
+            (gateway as any).gameSessionService = {
+                handlePlayerItemReset: spy,
+            };
+
+            const payload = {
+                accessCode: ACCESS_CODE,
+                player: MOCK_PLAYER,
+            };
+
+            gateway.handlePlayerItemReset({} as Socket, payload);
+
+            expect(spy).toHaveBeenCalledWith(ACCESS_CODE, MOCK_PLAYER);
         });
     });
 
@@ -419,6 +433,54 @@ describe('GameGateway', () => {
             });
         });
 
+        it('should emit VPActionDone if attacker is virtual and is currentFighter', () => {
+            const attacker = { ...MOCK_PLAYER, name: 'Bot1', isVirtual: true };
+            const payload = {
+                attacker,
+                defender: MOCK_PLAYER,
+                currentFighter: attacker,
+                hasEvaded: false,
+                accessCode: ACCESS_CODE,
+            };
+
+            const emitEventSpy = jest.fn();
+            (gateway as any).gameCombatService = {
+                emitEvent: emitEventSpy,
+            };
+            (gateway as any).lobbyService = {
+                getPlayerSocket: jest.fn().mockReturnValue('socket-Bot1'),
+            };
+
+            gateway.handleCombatEnded(payload);
+
+            expect(emitEventSpy).toHaveBeenCalledWith(EventEmit.VPActionDone, ACCESS_CODE);
+        });
+        it('should emit EndVirtualPlayerTurn if attacker is virtual and not the currentFighter', () => {
+            const attacker = { ...MOCK_PLAYER, name: 'Bot1', isVirtual: true };
+            const currentFighter = { ...MOCK_PLAYER, name: 'Human1', isVirtual: false };
+            const defender = { ...MOCK_PLAYER, name: 'Defender1' };
+
+            const payload = {
+                attacker,
+                defender,
+                currentFighter,
+                hasEvaded: false,
+                accessCode: ACCESS_CODE,
+            };
+
+            const emitEventSpy = jest.fn();
+            (gateway as any).gameCombatService = {
+                emitEvent: emitEventSpy,
+            };
+            (gateway as any).lobbyService = {
+                getPlayerSocket: jest.fn().mockReturnValue('socket-id'),
+            };
+
+            gateway.handleCombatEnded(payload);
+
+            expect(emitEventSpy).toHaveBeenCalledWith(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: ACCESS_CODE });
+        });
+
         it('should handle grid update event', () => {
             gateway.handleGridUpdateEvent(MOCK_PAYLOAD);
 
@@ -431,7 +493,6 @@ describe('GameGateway', () => {
             const mockAttacker = { ...MOCK_PLAYER, name: 'attacker' };
             const mockDefender = { ...MOCK_PLAYER, name: 'defender' };
 
-            // Explicitly annotate the payload type
             const payload: {
                 currentFighter: Player;
                 defenderPlayer: Player;
@@ -454,7 +515,6 @@ describe('GameGateway', () => {
             expect(lobbyServiceMock.getPlayerSocket).toHaveBeenCalledWith('defender');
 
             expect(serverMock.to).toHaveBeenCalledWith(['socket_attacker', 'socket_defender']);
-            // Verify that the emitted event contains AttackScore objects
             expect(serverMock.emit).toHaveBeenCalledWith('attackResult', {
                 success: true,
                 attackScore: { diceRolled: 0, score: 15 },
@@ -475,6 +535,80 @@ describe('GameGateway', () => {
         });
     });
 
+    describe('handleGameEnded', () => {
+        it('should log, clean up services, and emit gameEnded with correct stats', () => {
+            const accessCode = 'test-room';
+            const winner = ['Player1'];
+
+            const mockStats = {
+                playerStats: new Map<string, any>([
+                    [
+                        'Player1',
+                        {
+                            kills: 3,
+                            deaths: 1,
+                            uniqueItemsCollected: new Map<string, number>([
+                                ['item1', 1],
+                                ['item2', 2],
+                            ]),
+                        },
+                    ],
+                ]),
+                totalTurns: 10,
+            };
+
+            const calculateStatsSpy = jest.fn().mockReturnValue(mockStats);
+            const cleanUpSpy = jest.fn();
+            const deleteGameSessionSpy = jest.fn();
+            const removeAccessCodeSpy = jest.fn();
+            const loggerSpy = jest.fn();
+            const emitSpy = jest.fn();
+
+            (gateway as any).statisticsService = {
+                calculateStats: calculateStatsSpy,
+                cleanUp: cleanUpSpy,
+            };
+            (gateway as any).gameSessionService = {
+                deleteGameSession: deleteGameSessionSpy,
+            };
+            (gateway as any).accessCodesService = {
+                removeAccessCode: removeAccessCodeSpy,
+            };
+            (gateway as any).server = {
+                to: jest.fn().mockReturnThis(),
+                emit: emitSpy,
+            };
+            (gateway as any).logger = {
+                log: loggerSpy,
+            };
+
+            gateway.handleGameEnded({ accessCode, winner });
+
+            const expectedStatsObject = {
+                ...mockStats,
+
+                playerStats: {
+                    // eslint-disable-next-line @typescript-eslint/naming-convention
+                    Player1: {
+                        kills: 3,
+                        deaths: 1,
+                        uniqueItemsCollected: {
+                            item1: 1,
+                            item2: 2,
+                        },
+                    },
+                },
+            };
+
+            expect(loggerSpy).toHaveBeenCalledWith('emitting game ended to client');
+            expect(calculateStatsSpy).toHaveBeenCalledWith(accessCode);
+            expect(cleanUpSpy).toHaveBeenCalledWith(accessCode);
+            expect(deleteGameSessionSpy).toHaveBeenCalledWith(accessCode);
+            expect(removeAccessCodeSpy).toHaveBeenCalledWith(accessCode);
+            expect(emitSpy).toHaveBeenCalledWith('gameEnded', { winner, stats: expectedStatsObject });
+        });
+    });
+
     describe('handleGameTurnResumed', () => {
         it('should announce game turn resumed to the game room', () => {
             gateway.handleGameTurnResumed(MOCK_PAYLOAD);
@@ -489,8 +623,6 @@ describe('GameGateway', () => {
     describe('handleDefenderHealthUpdate', () => {
         it('should send player update to specific socket', () => {
             gateway.handleDefenderHealthUpdate(MOCK_PAYLOAD);
-
-            // Instead of expecting a call to lobbyService.getPlayerSocket, we derive the socket ID ourselves:
             const expectedSocketId = 'test123';
             expect(serverMock.to).toHaveBeenCalledWith(expectedSocketId);
             expect(serverMock.emit).toHaveBeenCalledWith('playerUpdate', {
@@ -763,19 +895,4 @@ describe('GameGateway', () => {
 
         expect(loggerMock.log).toHaveBeenCalledWith('Door update emitted');
     });
-    // it('should not handle anything if the game is ending', () => {
-    //     const payload = {
-    //         player: MOCK_PLAYER,
-    //         accessCode: ACCESS_CODE,
-    //         isGameEnding: true,
-    //     };
-
-    //     gateway.handleGameAbandoned(MOCK_CLIENT, payload);
-
-    //     expect(loggerMock.log).not.toHaveBeenCalled();
-    //     expect(gameSessionServiceMock.handlePlayerAbandoned).not.toHaveBeenCalled();
-    //     expect(gameSessionServiceMock.deleteGameSession).not.toHaveBeenCalled();
-    //     expect(lobbyServiceMock.leaveLobby).not.toHaveBeenCalled();
-    //     expect(serverMock.emit).not.toHaveBeenCalled();
-    // });
 });

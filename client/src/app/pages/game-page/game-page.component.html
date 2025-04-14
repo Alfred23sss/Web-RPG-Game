@@ -52,7 +52,7 @@
             {{ gameData.isInCombatMode ? 'Mode combat' : 'Faites une action' }}
         </div>
         }
-        <div class="game-map">
+        <div class="game-map" [ngClass]="{ 'no-clicks': gameData.hasTurnEnded }">
             <app-grid
                 [grid]="gameData.game.grid"
                 [isActionMode]="gameData.isActionMode"
@@ -101,9 +101,13 @@
             </button>
             <button
                 class="button execute-action"
-                [class.disabled]="gameData.clientPlayer.actionPoints === 0 || gameData.currentPlayer.name !== gameData.clientPlayer.name"
+                [class.disabled]="
+                    gameData.clientPlayer.actionPoints === 0 || gameData.currentPlayer.name !== gameData.clientPlayer.name || gameData.hasTurnEnded
+                "
                 (click)="executeNextAction()"
-                [disabled]="gameData.clientPlayer.actionPoints === 0 || gameData.currentPlayer.name !== gameData.clientPlayer.name"
+                [disabled]="
+                    gameData.clientPlayer.actionPoints === 0 || gameData.currentPlayer.name !== gameData.clientPlayer.name || gameData.hasTurnEnded
+                "
             >
                 {{
                     gameData.clientPlayer.actionPoints === 0
