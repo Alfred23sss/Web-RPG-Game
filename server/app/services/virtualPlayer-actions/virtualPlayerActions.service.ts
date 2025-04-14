@@ -126,7 +126,6 @@ export class VirtualPlayerActionsService {
         const isMoveStayInPlace = movement.length <= 1 && move.type === MoveType.Item;
         const isDoorBlockingMove = realMovement.length <= 1 && virtualPlayerTile.player.actionPoints === NO_SCORE;
         if (isDoorBlockingMove || isMoveStayInPlace) {
-            console.log('ending virtual player turn');
             this.emitEvent(VirtualPlayerEvents.EndVirtualPlayerTurn, { accessCode: lobby.accessCode });
             return;
         }

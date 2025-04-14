@@ -85,7 +85,6 @@ export class VirtualPlayerGateway {
 
     @OnEvent(EventEmit.VPActionDone)
     handleActionDone(@MessageBody() accessCode: string) {
-        console.log('starting another turn behavior');
         this.virtualPlayerService.delay(accessCode);
     }
 }
