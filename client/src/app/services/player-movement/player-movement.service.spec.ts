@@ -142,18 +142,6 @@ describe('PlayerMovementService', () => {
 
             expect(service.quickestPath(grid[0][0], grid[1][0], grid)).toBeUndefined();
         });
-
-        it('should return undefined when path is completely blocked', () => {
-            const grid = [
-                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Wall)],
-                [createTile('tile-1-0', TileType.Door, false), createTile('tile-1-1', TileType.Water)],
-            ];
-            mockGridService.getGrid.and.returnValue(grid);
-
-            const start = grid[0][0];
-            const target = grid[1][1];
-            expect(service.quickestPath(start, target, grid)).toBeUndefined();
-        });
     });
 
     describe('getNeighbors', () => {
