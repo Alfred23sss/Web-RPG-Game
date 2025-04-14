@@ -186,7 +186,7 @@ export class ItemEffectsService {
         const items = [player.inventory[0], player.inventory[1], item];
         Logger.log('Items:', items);
         if (player.isVirtual) {
-            this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items });
+            this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items, item });
         } else {
             this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
             this.eventEmitter.emit(EventEmit.GamePlayerMovement, {

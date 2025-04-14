@@ -5,6 +5,7 @@ import { Tile } from '@app/interfaces/Tile';
 import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
 import { Player } from '@app/model/database/player';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
+import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerCreationService } from '@app/services/virtual-player-creation/virtualPlayerCreation.service';
 import { VirtualPlayerService } from '@app/services/virtual-player/virtualPlayer.service';
@@ -23,6 +24,7 @@ export class VirtualPlayerGateway {
         private readonly virtualPlayerCreationService: VirtualPlayerCreationService,
         private readonly virtualPlayerService: VirtualPlayerService,
         private readonly gameSessionService: GameSessionService,
+        private readonly gameStatistics: GameStatisticsService,
     ) {}
 
     @SubscribeMessage(VirtualPlayerEvents.CreateVirtualPlayer)
@@ -69,8 +71,11 @@ export class VirtualPlayerGateway {
     }
 
     @OnEvent(VirtualPlayerEvents.ChooseItem)
-    handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[] }) {
+    handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[]; itemPickUp: Item }) {
         const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
+        if (removedItem.name === data.itemPickUp.name) {
+            this.gameStatistics.decrementItem(data.accessCode, data.itemPickUp, data.player);
+        }
         this.gameSessionService.handleItemDropped(data.accessCode, data.player, removedItem);
     }
 
