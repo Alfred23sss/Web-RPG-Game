@@ -390,11 +390,11 @@ describe('VirtualPlayerActionsService', () => {
             expect(result).toBe(true);
         });
 
-        it('should return true when hasLightning and no wall adjacent with only action points left', () => {
+        it('should return true when hasPickaxe and no wall adjacent with only action points left', () => {
             mockPlayer = createMockPlayer({
                 actionPoints: 1,
                 movementPoints: 0,
-                inventory: [{ name: ItemName.Lightning } as any, null],
+                inventory: [{ name: ItemName.Pickaxe } as any, null],
             });
             const mockLobby = createMockLobby();
             const mockVirtualTile = createMockTile({ player: mockPlayer });
@@ -478,7 +478,7 @@ describe('VirtualPlayerActionsService', () => {
         });
 
         it('should return true when flag is present in inventory', () => {
-            mockPlayer.inventory = [{ name: ItemName.Lightning } as any, { name: ItemName.Flag } as any];
+            mockPlayer.inventory = [{ name: ItemName.Pickaxe } as any, { name: ItemName.Flag } as any];
 
             const result = service.isFlagInInventory(mockPlayer);
             expect(result).toBe(true);

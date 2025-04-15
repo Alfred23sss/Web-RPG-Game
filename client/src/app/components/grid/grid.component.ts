@@ -84,8 +84,8 @@ export class GridComponent implements OnChanges {
         }
     }
 
-    hasLightningItem(): boolean {
-        return this.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
+    hasPickaxeItem(): boolean {
+        return this.clientPlayer.inventory.some((item) => item?.name === ItemName.Pickaxe);
     }
 
     isAccessible(tile: Tile): boolean {

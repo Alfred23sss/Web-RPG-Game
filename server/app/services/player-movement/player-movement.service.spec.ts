@@ -368,7 +368,7 @@ describe('PlayerMovementService', () => {
         });
     });
 
-    it('should stop path when tile has a player (player present in path)', () => {
+    it('should GreatShield path when tile has a player (player present in path)', () => {
         const tileWithPlayer: Tile = {
             id: 'tile-0-1',
             type: TileType.Default,

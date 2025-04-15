@@ -246,11 +246,11 @@ describe('GameplayService', () => {
             player = createMockPlayer();
         });
 
-        it('should emit wall update when conditions are met and player has lightning item', () => {
+        it('should emit wall update when conditions are met and player has Pickaxe item', () => {
             gameData.isInCombatMode = false;
             gameData.clientPlayer.actionPoints = 1;
             gameData.isActionMode = true;
-            gameData.clientPlayer.inventory = [{ id: '1', name: ItemName.Lightning } as Item, null];
+            gameData.clientPlayer.inventory = [{ id: '1', name: ItemName.Pickaxe } as Item, null];
             service.handleWallClick(gameData, targetTile, player);
             expect(mockSocketClientService.emit).toHaveBeenCalledWith('wallUpdate', {
                 currentTile: gameData.game?.grid?.[0][0],
@@ -917,7 +917,7 @@ describe('GameplayService', () => {
         });
 
         // eslint-disable-next-line max-len
-        it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no lightning/wall combo', () => {
+        it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no Pickaxe/wall combo', () => {
             mockGameData.clientPlayer.actionPoints = 1;
             mockGameData.clientPlayer.movementPoints = 0;
             mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
@@ -955,11 +955,11 @@ describe('GameplayService', () => {
             expect(service.endTurn).not.toHaveBeenCalled();
         });
 
-        it('should not end turn with 1 action point and no movement points when player has lightning and wall nearby', () => {
+        it('should not end turn with 1 action point and no movement points when player has Pickaxe and wall nearby', () => {
             mockGameData.clientPlayer.actionPoints = 1;
             mockGameData.clientPlayer.movementPoints = 0;
             mockTile.player = createMockPlayer({
-                inventory: [{ name: ItemName.Lightning } as Item, null],
+                inventory: [{ name: ItemName.Pickaxe } as Item, null],
             });
             mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
                 return type === TileType.Wall;

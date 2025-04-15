@@ -192,10 +192,10 @@ describe('VirtualPlayerGateway', () => {
         it('should decrement item if removedItem matches itemPickUp', () => {
             const accessCode = '1234';
             const player = { behavior: Behavior.Aggressive } as VirtualPlayer;
-            const items = [{ id: 'item1', name: 'fire' } as Item, { id: 'item2', name: 'shield' } as Item];
-            const itemPickUp = { name: 'fire' } as Item;
+            const items = [{ id: 'item1', name: 'IceSword' } as Item, { id: 'item2', name: 'shield' } as Item];
+            const itemPickUp = { name: 'IceSword' } as Item;
 
-            const removedItem = { name: 'fire' } as Item;
+            const removedItem = { name: 'IceSword' } as Item;
             mockVirtualPlayerService.itemChoice = jest.fn().mockReturnValue(removedItem);
 
             gateway.handleItemChoice({ accessCode, player, items, itemPickUp });

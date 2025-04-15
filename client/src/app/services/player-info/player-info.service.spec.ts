@@ -39,9 +39,9 @@ describe('PlayerInfoService', () => {
 
     const mockItem = new Item({
         id: '0',
-        name: 'Lightning',
-        imageSrc: 'lightning.png',
-        imageSrcGrey: 'lightning-gray.png',
+        name: 'Pickaxe',
+        imageSrc: 'Pickaxe.png',
+        imageSrcGrey: 'Pickaxe-gray.png',
         itemCounter: 1,
         description: 'Test item',
     });
