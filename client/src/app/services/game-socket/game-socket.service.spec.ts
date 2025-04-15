@@ -13,7 +13,6 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { DiceType, ItemName, TeamType, TileType } from '@common/enums';
-import { ItemName, TileType } from '@common/enums';
 import { GameSocketService } from './game-socket.service';
 
 describe('GameSocketService', () => {
@@ -395,9 +394,6 @@ describe('GameSocketService', () => {
                 gameStateServiceSpy.gameDataSubjectValue.clientPlayer,
             ]);
         });
-
-    
-
         it('should do nothing when grid is missing', () => {
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             gameStateServiceSpy.gameDataSubjectValue.game = { ...MOCK_GAME, grid: undefined! };
