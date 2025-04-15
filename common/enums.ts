@@ -4,7 +4,7 @@ export enum ImageType {
     OpenDoor = './assets/tile-items/door-openedA.png',
     ClosedDoor = './assets/tile-items/door-closedA.png',
     Ice = './assets/tile-items/iceA.PNG',
-    Default = './assets/tile-items/floorB.PNG',
+    Default = './assets/tile-items/floorG.jpeg',
 }
 
 export enum GameDecorations {
@@ -87,7 +87,7 @@ export enum ItemDescription {
     Chest = 'Objet aléatoire.',
     IceSword = "Augmente l'Attaque de 2 lorsque le joueur atteint 50% de sa Vitalité.",
     Armor = 'Augmente la Vitalité de 2, mais réduit la Vitesse de 1.',
-    IceShield = 'Augmente défense lorsque le joueur est sur une tuile de glace.', 
+    IceShield = 'Augmente défense lorsque le joueur est sur une tuile de glace.',
     Flag = 'Drapeau à capturer.',
     Default = 'rien',
 }
