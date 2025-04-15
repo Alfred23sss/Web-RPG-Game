@@ -133,10 +133,8 @@ export class CombatSocketService {
 
     private onCombatStartedLog(): void {
         this.socketClientService.on(SocketEvent.CombatStartedLog, (data: { attacker: Player; defender: Player }) => {
-            if (this.gameStateService.gameDataSubjectValue.isInCombatMode) {
-                // test this
-                this.clientNotifier.addLogbookEntry(LogBookEntry.CombatStarted, [data.attacker, data.defender]);
-            }
+            this.gameStateService.gameDataSubjectValue.isInCombatMode = true;
+            this.clientNotifier.addLogbookEntry(LogBookEntry.CombatStarted, [data.attacker, data.defender]);
         });
     }
 }

@@ -99,7 +99,7 @@ export class PlayerMovementService {
     }
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
-        return adjacentTiles.some((tile) => (tile.type === TileType.Door && !tile.isOpen) || tile.player);
+        return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player);
     }
 
     getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
