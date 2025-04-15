@@ -1,4 +1,4 @@
-import { RANDOM_ITEMS } from '@app/constants/constants';
+import { RANDOMIZER, RANDOM_ITEMS } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
@@ -6,8 +6,6 @@ import { Tile, TileType } from '@app/model/database/tile';
 import { ImageType, ItemName } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GridManagerService {

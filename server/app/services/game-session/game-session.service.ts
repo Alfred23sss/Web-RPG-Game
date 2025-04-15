@@ -1,3 +1,4 @@
+import { PLAYER_MOVE_DELAY } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/game-session';
 import { Turn } from '@app/interfaces/turn';
@@ -12,8 +13,6 @@ import { LobbyService } from '@app/services/lobby/lobby.service';
 import { GameMode, ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
 export class GameSessionService {

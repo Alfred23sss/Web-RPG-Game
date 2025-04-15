@@ -1,5 +1,12 @@
+import {
+    COMBAT_ESCAPE_LIMITED_DURATION,
+    COMBAT_TURN_DURATION,
+    ESCAPE_THRESHOLD,
+    MAX_ESCAPE_ATTEMPTS,
+    SECOND,
+    WIN_CONDITION,
+} from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
-import { AttackScore } from '@common/interfaces/attack-score';
 import { CombatState } from '@app/interfaces/combat-state';
 import { GameCombatMap } from '@app/interfaces/game-combat-map';
 import { Player } from '@app/interfaces/player';
@@ -7,15 +14,9 @@ import { CombatHelperService } from '@app/services/combat-helper/combat-helper.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { GameMode } from '@common/enums';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-const COMBAT_TURN_DURATION = 5000;
-const COMBAT_ESCAPE_LIMITED_DURATION = 3000;
-const MAX_ESCAPE_ATTEMPTS = 2;
-const SECOND = 1000;
-const ESCAPE_THRESHOLD = 0.3;
-const WIN_CONDITION = 3;
 
 @Injectable()
 export class GameCombatService {
