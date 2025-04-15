@@ -19,7 +19,7 @@ import { ItemName } from '@common/enums';
 })
 export class GameSocketService {
     private doorClickedTimer: number | null = null;
-    private readonly DoorClickedDelay = 50;
+    private readonly doorClickedDelay = 50;
     constructor(
         private gameStateService: GameStateSocketService,
         private gameplayService: GameplayService,
@@ -235,7 +235,7 @@ export class GameSocketService {
             this.doorClickedTimer = window.setTimeout(() => {
                 this.processDoorClicked(data);
                 this.doorClickedTimer = null;
-            }, this.DoorClickedDelay);
+            }, this.doorClickedDelay);
         });
     }
 
