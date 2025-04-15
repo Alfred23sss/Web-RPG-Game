@@ -55,6 +55,7 @@ export class GridComponent implements OnChanges {
     onTileClick(tile: Tile, event: MouseEvent): void {
         const gameData = this.gameStateService.gameDataSubjectValue;
         if (gameData.hasTurnEnded && event.button === 0) {
+            //test this
             return;
         }
         if (tile.player) {

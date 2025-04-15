@@ -186,4 +186,17 @@ describe('GridComponent', () => {
         expect(component.teleportClicked.emit).toHaveBeenCalledWith(testTile);
         expect(mockDialog.open).not.toHaveBeenCalled();
     });
+
+    it('should not emit any event when gameData.hasTurnEnded is true and left click event', () => {
+        spyOnProperty((component as any).gameStateService, 'gameDataSubjectValue', 'get').and.returnValue({ hasTurnEnded: true } as any);
+        spyOn(component.tileClicked, 'emit');
+        spyOn(component.playerAttacked, 'emit');
+        spyOn(component.doorClicked, 'emit');
+        spyOn(component.wallClicked, 'emit');
+        component.onTileClick(mockTile1, new MouseEvent('click'));
+        expect(component.tileClicked.emit).not.toHaveBeenCalled();
+        expect(component.playerAttacked.emit).not.toHaveBeenCalled();
+        expect(component.doorClicked.emit).not.toHaveBeenCalled();
+        expect(component.wallClicked.emit).not.toHaveBeenCalled();
+    });
 });
