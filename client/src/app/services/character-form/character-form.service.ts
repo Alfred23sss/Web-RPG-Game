@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES, PLAYER_STORAGE, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
 import { AttributeType, ErrorMessages, SocketEvent } from '@app/enums/global.enums';
@@ -22,12 +23,19 @@ export class CharacterService {
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
+    // Dans ce service, six parametres sont nécessaires car le rôle du service est de gérer la création de personnage on
+    // doit donc d'abord utiliser gameCommunicationService pour vérifier si le jeu est disponible, puis utiliser le service de
+    // communication de code d'accès pour valider le code d'accès, et enfin utiliser le service de socket pour créer la salle et
+    // rejoindre la salle. MatDialog, router et snackbar sont simplement utiliser pour afficher des messages et naviguer entre les
+    // pages.
+    // eslint-disable-next-line max-params
     constructor(
         private readonly router: Router,
         private readonly snackbarService: SnackbarService,
         private readonly gameCommunicationService: GameCommunicationService,
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
+        private readonly matDialog: MatDialog,
     ) {}
 
     initializePlayer(player: Player): void {
@@ -157,6 +165,8 @@ export class CharacterService {
     }
 
     returnHome(): void {
+        this.matDialog.closeAll();
+        this.resetAttributes();
         this.router.navigate([Routes.HomePage]);
     }
 
