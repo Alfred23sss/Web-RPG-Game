@@ -8,6 +8,7 @@ import { AccessCodesCommunicationService } from '@app/services/access-codes-comm
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { Observable } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
@@ -23,7 +24,7 @@ export class SocketClientService {
     }
 
     connect() {
-        this.socket = io('ws://localhost:3000', {
+        this.socket = io(environment.socketUrl, {
             transports: ['websocket'],
             upgrade: false,
         });
