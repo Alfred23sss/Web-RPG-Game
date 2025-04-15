@@ -1,7 +1,7 @@
 <div class="game-messages">
     <h3>MESSAGES - {{ author | uppercase }}</h3>
 
-    <div class="messages-content">
+    <div class="messages-content" #messagesContent>
         @for (message of messages; track message) {
         <div class="message-bubble">
             <span class="message-text">{{ message }}</span>
