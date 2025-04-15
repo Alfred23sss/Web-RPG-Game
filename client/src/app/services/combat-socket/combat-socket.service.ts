@@ -53,7 +53,7 @@ export class CombatSocketService {
             const diff = data.attackScore.score - data.defenseScore.score;
             const attackScore = diff > 0 ? diff : 0;
             this.clientNotifier.addLogbookEntry(
-                `${LogBookEntry.Attack}${attackOutcome} (Dé d'Attaque: ${data.attackScore.diceRolled}, ` +
+                `${LogBookEntry.Attack} ${attackOutcome} (Dé d'Attaque: ${data.attackScore.diceRolled}, ` +
                     `Dé de Défense: ${data.defenseScore.diceRolled}, Résultat d'Attaque: ${attackScore})`,
             );
 
@@ -119,8 +119,6 @@ export class CombatSocketService {
                 );
             }
             if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
-                console.log('movement poitns reamning', gameData.movementPointsRemaining);
-                // probleme vien dici
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
             this.gameStateService.updateGameData(gameData);

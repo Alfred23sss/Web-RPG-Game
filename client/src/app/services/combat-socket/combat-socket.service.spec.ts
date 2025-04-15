@@ -214,7 +214,7 @@ describe('CombatSocketService', () => {
 
             EVENT_HANDLERS['escapeAttempt'](testData);
 
-            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`Tentative d'évasion réussi`, []);
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith("Tentative d'évasion réussi", []);
             expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
         });
 
@@ -229,7 +229,7 @@ describe('CombatSocketService', () => {
 
             EVENT_HANDLERS['escapeAttempt'](testData);
 
-            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`Tentative d'évasion raté`, []);
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith("Tentative d'évasion raté", []);
             expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
         });
 
@@ -333,7 +333,7 @@ describe('CombatSocketService', () => {
             EVENT_HANDLERS['attackResult'](testData);
 
             expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(
-                `Attaque réussie (Dé d'Attaque: 4, Dé de Défense: 2, Résultat d'Attaque: 4)`,
+                "Attaque réussie (Dé d'Attaque: 4, Dé de Défense: 2, Résultat d'Attaque: 4)",
             );
         });
 
@@ -347,7 +347,7 @@ describe('CombatSocketService', () => {
             EVENT_HANDLERS['attackResult'](testData);
 
             expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(
-                `Attaque échouée (Dé d'Attaque: 1, Dé de Défense: 6, Résultat d'Attaque: 0)`,
+                "Attaque échouée (Dé d'Attaque: 1, Dé de Défense: 6, Résultat d'Attaque: 0)",
             );
         });
     });
