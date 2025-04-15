@@ -14,7 +14,7 @@
         <app-tile
             [tile]="tile"
             (mouseenter)="tileHovered.emit(tile)"
-            (click)="onTileClick(tile)"
+            (click)="onTileClick(tile, $event)"
             (contextmenu)="onTileRightClick($event, tile)"
             [ngClass]="{
                 'invalid-drop': tile.type === tileType.Wall || tile.isOccupied,

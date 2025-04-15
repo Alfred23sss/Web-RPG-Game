@@ -196,7 +196,6 @@ export class GameplayService {
             }
         }
     }
-
     handleTileClick(gameData: GameData, targetTile: Tile): void {
         if (gameData.isActionMode || gameData.isCurrentlyMoving) return;
         const currentTile = this.getClientPlayerPosition(gameData);
