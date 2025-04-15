@@ -39,7 +39,7 @@ app-tile {
 }
 
 .available-path {
-    border: 1px solid #00c8ff;
+    border: 1px solid #ff04c4;
 }
 .quickest-path {
     position: relative;
@@ -66,4 +66,22 @@ app-tile {
     max-height: 100px;
     margin-top: 8px;
     border-radius: 4px;
+}
+
+.highlight-spawn {
+    border: 1px solid #ffd700;
+    box-shadow: 0 0 10px #ffd700;
+    animation: pulseSpawn 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseSpawn {
+    0% {
+        box-shadow: 0 0 5px #ffd700;
+    }
+    50% {
+        box-shadow: 0 0 15px #ffd700;
+    }
+    100% {
+        box-shadow: 0 0 5px #ffd700;
+    }
 }
