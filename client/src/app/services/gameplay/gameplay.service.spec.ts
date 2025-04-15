@@ -13,9 +13,9 @@ import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, ImageType, ItemName, Routes, TileType } from '@common/enums';
 import { of } from 'rxjs';
 import { GameplayService } from './gameplay.service';
-import { ImageType, ItemName, Routes, DiceType, TileType } from '@common/enums';
 
 describe('GameplayService', () => {
     let service: GameplayService;
