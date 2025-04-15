@@ -73,10 +73,7 @@ export class GameSessionService {
         this.getGameSession(accessCode).game.grid = updatedGrid;
         this.handleIceShieldItem(player, targetTile, accessCode);
         this.emitGridUpdate(accessCode, updatedGrid);
-        const gameSession = this.getGameSession(accessCode);
-        if (gameSession) {
-            this.emitMovementEvent(accessCode, gameSession, player, false);
-        }
+        this.emitMovementEvent(accessCode, this.getGameSession(accessCode), player, false);
     }
 
     handleItemDropped(accessCode: string, player: Player, item: Item): void {
