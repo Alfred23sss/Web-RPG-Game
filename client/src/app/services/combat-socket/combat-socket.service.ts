@@ -52,7 +52,8 @@ export class CombatSocketService {
 
             const attackOutcome = data.success ? LogBookEntry.AttackResultSuccess : LogBookEntry.AttackResultFail;
             this.clientNotifier.addLogbookEntry(
-                `${LogBookEntry.Attack} ${attackOutcome} ${LogBookEntry.AttackStart} ${data.attackScore.score}${LogBookEntry.Defense} ${data.defenseScore.score})`,
+                `${LogBookEntry.Attack} ${attackOutcome} ${LogBookEntry.AttackStart}` +
+                    ` ${data.attackScore.score}${LogBookEntry.Defense} ${data.defenseScore.score})`,
             );
 
             gameData.evadeResult = null;

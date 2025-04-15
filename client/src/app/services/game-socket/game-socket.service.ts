@@ -100,7 +100,7 @@ export class GameSocketService {
     private onGameDeleted(): void {
         this.socketClientService.on(SocketEvent.GameDeleted, () => {
             this.gameStateService.gameDataSubjectValue.turnTimer = 0;
-            this.clientNotifier.displayMessage(ClientNotifierMessage.redirectHome);
+            this.clientNotifier.displayMessage(ClientNotifierMessage.RedirectHome);
             setTimeout(() => {
                 this.gameplayService.backToHome();
             }, DELAY_BEFORE_HOME);

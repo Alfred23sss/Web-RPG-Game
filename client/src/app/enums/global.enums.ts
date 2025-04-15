@@ -151,6 +151,10 @@ export enum SocketEvent {
     GetLobby = 'getLobby',
     UpdateLobby = 'updateLobby',
     PlayerMovementUpdate = 'playerMovementUpdate',
+    TurnStarted = 'turnStarted',
+    TimerUpdate = 'timerUpdate',
+    TransitionStarted = 'transitionStarted',
+    GameTurnResumed = 'gameTurnResumed',
 }
 
 export enum SnackBarMessage {
@@ -194,10 +198,15 @@ export enum LogBookEntry {
 export enum ClientNotifierMessage {
     CombatWon = 'a gagné le combat !',
     CombatEvaded = 'a evadé le combat !',
-    redirectHome = "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
+    RedirectHome = "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
     SoloWin = 'a remporté la partie ! Redirection vers la page de fin sous peu',
     TeamWin = 'ont remporté la partie ! Redirection vers la page de fin sous peu',
     DeactivatedDebug = "Mode debug 'désactivé'",
+    PlayerTurnStart = "C'est à",
+    PlayerTurnEnd = 'de jouer',
+    TurnStartingStart = 'Le tour à',
+    TurnStartingMiddle = 'commence dans',
+    TurnStartingEnd = 'secondes',
 }
 
 export enum Keys {

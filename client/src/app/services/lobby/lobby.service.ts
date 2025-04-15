@@ -93,7 +93,7 @@ export class LobbyService {
         this.socketClientService.socket.off(SocketEvent.JoinLobby);
         this.socketClientService.socket.off(SocketEvent.LobbyUpdate);
         this.socketClientService.socket.off(SocketEvent.ManualDisconnect);
-        this.socketClientService.socket.off(SocketEvent.KickPlayer);
+        this.socketClientService.socket.off(SocketEvent.Kicked);
         this.socketClientService.socket.off(SocketEvent.LobbyLocked);
         this.socketClientService.socket.off(SocketEvent.LobbyUnlocked);
         this.socketClientService.socket.off(SocketEvent.LobbyDeleted);
