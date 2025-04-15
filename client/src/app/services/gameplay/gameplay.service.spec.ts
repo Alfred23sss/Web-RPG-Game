@@ -167,6 +167,24 @@ describe('GameplayService', () => {
         });
     });
 
+    it('should return true when players are on the same team', () => {
+        const gameData = createMockGameData({
+            lobby: {
+                accessCode: '1234',
+                players: [
+                    { name: 'Player1', team: 'red' },
+                    { name: 'Player2', team: 'red' },
+                    { name: 'Player3', team: 'blue' },
+                    { name: 'Player4', team: 'blue' },
+                    { name: 'NoTeamPlayer' },
+                ] as unknown as Player[],
+                maxPlayers: 4,
+            } as Lobby,
+        });
+        const result = (service as any).isTeammate('Player1', 'Player2', gameData);
+        expect(result).toBeTrue();
+    });
+
     describe('handleAttackCTF', () => {
         let gameData: GameData;
         let targetTile: Tile;
@@ -180,6 +198,13 @@ describe('GameplayService', () => {
             targetTile.player = createMockPlayer({ name: 'EnemyPlayer' });
         });
 
+        it('should show message when attacking a teammate', () => {
+            spyOn(service as any, 'isTeammate').and.returnValue(true);
+            service.handleAttackCTF(gameData, targetTile);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith("TRAITRE!!! C'EST MOI TON AMI");
+            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+        });
+
         it('should not attack when not in action mode', () => {
             gameData.isActionMode = false;
             service.handleAttackCTF(gameData, targetTile);
@@ -191,6 +216,21 @@ describe('GameplayService', () => {
             targetTile.player = undefined;
             service.handleAttackCTF(gameData, targetTile);
             expect(mockSocketClientService.emit).not.toHaveBeenCalled();
+            expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
+        });
+
+        it('should emit startCombat when attacking adjacent enemy', () => {
+            spyOn(service as any, 'isTeammate').and.returnValue(false);
+            spyOn(service as any, 'findAndCheckAdjacentTiles').and.returnValue(true);
+
+            service.handleAttackCTF(gameData, targetTile);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('startCombat', {
+                attackerName: gameData.clientPlayer.name,
+                defenderName: 'EnemyPlayer',
+                accessCode: '1234',
+                isDebugMode: false,
+            });
             expect(mockSnackbarService.showMessage).not.toHaveBeenCalled();
         });
     });

@@ -161,7 +161,7 @@ export class GameplayService {
 
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
             if (this.isTeammate(targetTile.player.name, currentTile.player.name, gameData)) {
-                this.snackBarService.showMessage(SnackBarMessage.FriendlyIceSword);
+                this.snackBarService.showMessage(SnackBarMessage.FriendlyFire);
                 return;
             } else if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
                 this.socketClientService.emit(SocketEvent.StartCombat, {

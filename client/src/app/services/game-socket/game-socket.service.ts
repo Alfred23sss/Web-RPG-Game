@@ -84,11 +84,8 @@ export class GameSocketService {
                 const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
                 if (addedItems.length > 0) {
-                    if (addedItems.includes('flag')) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
-                    } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
-                    }
+                    const logbookEntry = addedItems.includes(ItemName.Flag) ? LogBookEntry.FlagPickedUp : LogBookEntry.ItemPickedUp;
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${logbookEntry}`, [data.player]);
                 }
                 playerBeforeUpdate.inventory = data.player.inventory;
             }
@@ -171,11 +168,8 @@ export class GameSocketService {
             const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
 
             if (addedItems.length > 0) {
-                if (addedItems.includes(ItemName.Flag)) {
-                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
-                } else {
-                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
-                }
+                const logBookEntry = addedItems.includes(ItemName.Flag) ? LogBookEntry.FlagPickedUp : LogBookEntry.ItemPickedUp;
+                this.clientNotifier.addLogbookEntry(`${data.player.name} ${logBookEntry}`, [data.player]);
             }
         }
     }

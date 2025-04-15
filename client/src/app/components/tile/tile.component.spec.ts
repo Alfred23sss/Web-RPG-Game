@@ -190,7 +190,6 @@ describe('TileComponent', () => {
 
             const event = new MouseEvent('contextmenu');
             spyOn(event, 'preventDefault');
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             spyOn(event, 'stopPropagation');
 
             component.onRightClick(event);

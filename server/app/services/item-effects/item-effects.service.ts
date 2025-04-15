@@ -1,3 +1,4 @@
+import { BONUS_VALUE, HEALTH_CONDITION_THRESHOLD, MULTIPLIER, PENALTY_VALUE, RANDOMIZER } from '@app/constants/constants';
 import { AttributeType, EventEmit } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/item';
@@ -7,12 +8,6 @@ import { GridManagerService } from '@app/services/grid-manager/grid-manager.serv
 import { ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-
-const HEALTH_CONDITION_THRESHOLD = 0.5;
-const BONUS_VALUE = 2;
-const PENALTY_VALUE = -1;
-const MULTIPLIER = 1;
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class ItemEffectsService {
@@ -119,6 +114,9 @@ export class ItemEffectsService {
         player.inventory.forEach((item, index) => {
             if (item !== null) {
                 this.removeEffects(player, index);
+                if (item.name === ItemName.IceShield) {
+                    player.defense.value -= BONUS_VALUE;
+                }
             }
         });
         const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);

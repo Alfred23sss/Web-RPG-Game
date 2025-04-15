@@ -39,8 +39,6 @@ export class PopUpComponent {
     setGameType(mode: GameMode): void {
         if (Object.values(GameMode).includes(mode)) {
             this.gameModeService.setGameMode(mode);
-        } else {
-            this.gameModeService.setGameMode(mode);
         }
     }
 
