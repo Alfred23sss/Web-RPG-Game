@@ -190,14 +190,15 @@ describe('TileComponent', () => {
 
             const event = new MouseEvent('contextmenu');
             spyOn(event, 'preventDefault');
-            spyOn(event, 'GreatShieldPropagation');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            spyOn(event, 'stopPropagation');
 
             component.onRightClick(event);
 
             expect(tileServiceSpy.removeTileObject).toHaveBeenCalledWith(mockTile);
             expect(TileComponent.activeButton).toBeNull();
             expect(event.preventDefault).toHaveBeenCalled();
-            expect(event.GreatShieldPropagation).toHaveBeenCalled();
+            expect(event.stopPropagation).toHaveBeenCalled();
         });
     });
 

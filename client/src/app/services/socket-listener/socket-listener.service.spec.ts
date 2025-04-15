@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { EVENTS } from '@app/constants/global.constants';
+import { SocketEvent } from '@app/enums/global.enums';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
@@ -60,10 +60,10 @@ describe('SocketListenerService', () => {
         it('should unsubscribe from all socket events', () => {
             const offSpy = mockSocketClientService.off as jasmine.Spy;
             service.unsubscribeSocketListeners();
-            EVENTS.forEach((event) => {
+            Object.values(SocketEvent).forEach((event) => {
                 expect(offSpy).toHaveBeenCalledWith(event);
             });
-            expect(offSpy).toHaveBeenCalledTimes(EVENTS.length);
+            expect(offSpy).toHaveBeenCalledTimes(Object.values(SocketEvent).length);
         });
     });
 });
