@@ -46,11 +46,11 @@ export enum TeamType {
 
 export enum ItemType {
     Home = './assets/items/home-removebg-preview.png',
-    HomeGray = './assets/items/home-gray.png',
+    HomeGray = './assets/items/home-removebg-preview-gray.png',
     Pickaxe = './assets/items/pickaxe.png',
-    PickaxeGray = './assets/items/Pickaxe-gray.png',
+    PickaxeGray = './assets/items/pickaxe-gray.png',
     IceSword = './assets/items/ice-sword.png',
-    IceSwordGray = './assets/items/BlackSword-gray.png',
+    IceSwordGray = './assets/items/ice-sword-gray.png',
     Armor = './assets/items/armor-preview.png',
     ArmorGray = './assets/items/armor-gray.png',
     Chest = './assets/items/chest.png',
@@ -62,7 +62,7 @@ export enum ItemType {
     IceShield = './assets/items/ice-shield-chat.png',
     IceShieldGray = './assets/items/ice-shield-gray.png',
     Flag = './assets/items/banner-medieval.png',
-    FlagGray = './assets/items/flag-gray.png',
+    FlagGray = './assets/items/banner-medieval-gray.png',
     Default = './assets/items/banner-medieval.png',
 }
 
