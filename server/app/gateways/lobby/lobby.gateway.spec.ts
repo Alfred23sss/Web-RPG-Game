@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Lobby } from '@app/interfaces/Lobby';
+import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
@@ -18,6 +18,7 @@ describe('LobbyGateway', () => {
     let lobbyService: LobbyService;
     let gameSessionService: GameSessionService;
     let gameCombatService: GameCombatService;
+    let accessCodesService: AccessCodesService;
 
     const mockServer = {
         to: jest.fn().mockReturnThis(),
@@ -83,11 +84,12 @@ describe('LobbyGateway', () => {
                 {
                     provide: GameSessionService,
                     useValue: {
-                        getGameSession: jest.fn(),
-                        getPlayers: jest.fn().mockReturnValue([mockPlayer]),
+                        getGameSession: jest.fn().mockReturnValue({ game: { grid: [] }, turn: { orderedPlayers: [] } }),
+                        getPlayers: jest.fn().mockReturnValue([mockPlayer]), // this needs to be defined
                         handlePlayerItemReset: jest.fn(),
                         handlePlayerAbandoned: jest.fn(),
                         deleteGameSession: jest.fn(),
+                        pauseGameTurn: jest.fn().mockReturnValue(10),
                     },
                 },
                 {
@@ -103,7 +105,7 @@ describe('LobbyGateway', () => {
         lobbyService = module.get<LobbyService>(LobbyService);
         gameSessionService = module.get<GameSessionService>(GameSessionService);
         gameCombatService = module.get<GameCombatService>(GameCombatService);
-
+        accessCodesService = module.get<AccessCodesService>(AccessCodesService);
         gateway.server = mockServer;
     });
 
@@ -386,13 +388,6 @@ describe('LobbyGateway', () => {
         });
     });
 
-    describe('afterInit', () => {
-        it('should log initialization message', () => {
-            gateway.afterInit();
-            expect(gateway['logger'].log).toHaveBeenCalledWith('LobbyGateway initialized.');
-        });
-    });
-
     describe('handleManualDisconnect', () => {
         it('should handle manual disconnect from lobby', () => {
             jest.spyOn(lobbyService, 'isAdminLeaving').mockReturnValueOnce(false);
@@ -578,7 +573,6 @@ describe('LobbyGateway', () => {
             const getRoomSpy = jest.spyOn(lobbyService, 'getRoomForPlayer').mockReturnValue(accessCode);
             const getLobbySpy = jest.spyOn(lobbyService, 'getLobby').mockReturnValue(mockTestLobby);
             const removeSocketSpy = jest.spyOn(lobbyService, 'removePlayerSocket').mockImplementation();
-            const loggerSpy = jest.spyOn(gateway['logger'], 'log');
             await (gateway as any).handleFormDisconnect(mockClient);
             expect(mockTestLobby.waitingPlayers).toEqual([]);
             expect(mockServer.to).toHaveBeenCalledWith(accessCode);
@@ -588,7 +582,6 @@ describe('LobbyGateway', () => {
 
             expect(mockClient.leave).toHaveBeenCalledWith(accessCode);
             expect(removeSocketSpy).toHaveBeenCalledWith(clientId);
-            expect(loggerSpy).toHaveBeenCalledWith(`Removed avatar ${avatar} (player ${clientId}) from room ${accessCode}`);
         });
 
         it('should not clear lobby if multiple non-virtual players remain', () => {

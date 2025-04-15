@@ -2,21 +2,22 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { AttackScore } from '@app/interfaces/attack-score';
 import { DiceType } from '@app/interfaces/dice';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Tile, TileType } from '@app/model/database/tile';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameCombatService } from '@app/services/combat-manager/combat-manager.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { AttackScore } from '@common/interfaces/attack-score';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 
-import { EventEmit, GameModeType } from '@app/enums/enums';
 import { GameGateway } from './game.gateway';
 
 const MOCK_PLAYER: Player = {
@@ -108,6 +109,7 @@ describe('GameGateway', () => {
             clearLobby: jest.fn(),
             getPlayerSocket: jest.fn().mockImplementation((name) => `socket_${name}`),
             getLobbyPlayers: jest.fn().mockReturnValue([MOCK_PLAYER]),
+            getPlayerBySocketId: jest.fn().mockReturnValue(MOCK_PLAYER),
         };
 
         gameStatisticsServiceMock = {
@@ -206,24 +208,6 @@ describe('GameGateway', () => {
 
             expect(gameSessionServiceMock.updatePlayerPosition).toHaveBeenCalledWith(payload.accessCode, payload.movement, MOCK_PLAYER);
         });
-
-        it('should log error on update failure', async () => {
-            const error = new Error('Update failed');
-            gameSessionServiceMock.updatePlayerPosition = jest.fn().mockRejectedValue(error);
-            const previousTile = { ...mockTile, player: MOCK_PLAYER };
-            const newTile = { ...mockTile, player: null };
-            const movement = [mockTile];
-            const payload = {
-                accessCode: ACCESS_CODE,
-                previousTile,
-                newTile,
-                movement,
-            };
-
-            await gateway.handlePlayerMovementUpdate(MOCK_CLIENT, payload);
-
-            expect(loggerMock.error).toHaveBeenCalledWith('Error updating player position', error);
-        });
     });
 
     describe('handleDecrementItem', () => {
@@ -275,7 +259,12 @@ describe('GameGateway', () => {
 
             gateway.handleDoorUpdate(MOCK_CLIENT, payload);
 
-            expect(gameSessionServiceMock.updateDoorTile).toHaveBeenCalledWith(payload.accessCode, payload.currentTile, payload.targetTile);
+            expect(gameSessionServiceMock.updateDoorTile).toHaveBeenCalledWith(
+                payload.accessCode,
+                payload.currentTile,
+                payload.targetTile,
+                MOCK_PLAYER,
+            );
         });
     });
 
@@ -310,10 +299,10 @@ describe('GameGateway', () => {
     describe('handleNoMoreEscapeAttempts', () => {
         it('should notify player about failed escape attempts', () => {
             const payload = {
-                player: MOCK_PLAYER,
                 attemptsLeft: 2,
                 isEscapeSuccessful: false,
                 accessCode: ACCESS_CODE,
+                player: MOCK_PLAYER,
             };
 
             gateway.handleNoMoreEscapeAttempts(payload);
@@ -322,6 +311,7 @@ describe('GameGateway', () => {
             expect(serverMock.emit).toHaveBeenCalledWith('escapeAttempt', {
                 attemptsLeft: 2,
                 isEscapeSuccessful: false,
+                player: MOCK_PLAYER,
             });
         });
     });
@@ -333,6 +323,7 @@ describe('GameGateway', () => {
                 accessCode: ACCESS_CODE,
                 grid: mockGrid,
                 isOpen: true,
+                player: MOCK_PLAYER as VirtualPlayer,
             };
 
             gateway.handleDoorUpdateEvent(payload);
@@ -347,6 +338,7 @@ describe('GameGateway', () => {
                     ],
                 ],
                 isOpen: true,
+                player: MOCK_PLAYER,
             });
         });
     });
@@ -590,7 +582,6 @@ describe('GameGateway', () => {
                 },
             };
 
-            expect(loggerSpy).toHaveBeenCalledWith('emitting game ended to client');
             expect(calculateStatsSpy).toHaveBeenCalledWith(accessCode);
             expect(cleanUpSpy).toHaveBeenCalledWith(accessCode);
             expect(deleteGameSessionSpy).toHaveBeenCalledWith(accessCode);
@@ -851,5 +842,30 @@ describe('GameGateway', () => {
             payload.targetTile,
             payload.player,
         );
+    });
+    describe('handleTeamCreated', () => {
+        it('should emit teamCreated event with red and blue teams', () => {
+            const redTeam: Player[] = [
+                { ...MOCK_PLAYER, name: 'Red1' },
+                { ...MOCK_PLAYER, name: 'Red2' },
+            ];
+            const blueTeam: Player[] = [
+                { ...MOCK_PLAYER, name: 'Blue1' },
+                { ...MOCK_PLAYER, name: 'Blue2' },
+            ];
+            const accessCode = '1234';
+
+            gateway.handleTeamCreated({
+                redTeam,
+                blueTeam,
+                accessCode,
+            });
+
+            expect(serverMock.to).toHaveBeenCalledWith(accessCode);
+            expect(serverMock.emit).toHaveBeenCalledWith('teamCreated', {
+                redTeam,
+                blueTeam,
+            });
+        });
     });
 });

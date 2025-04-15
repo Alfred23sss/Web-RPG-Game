@@ -71,7 +71,7 @@ describe('VirtualPlayerBehaviorService', () => {
             await service.executeBehavior(mockVirtualPlayer, mockLobby, mockMoves);
 
             expect(mockVirtualPlayerScoreService.getVirtualPlayerTile).toHaveBeenCalled();
-            expect(mockVirtualPlayerActions.moveToAttack).toHaveBeenCalledWith(mockMove, expect.anything(), mockLobby);
+            expect(mockVirtualPlayerActions.moveToAttack).toHaveBeenCalledWith(mockMove, expect.anything(), mockLobby, mockVirtualPlayer);
         });
     });
 

@@ -142,21 +142,6 @@ describe('CombatSocketService', () => {
         expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
     });
 
-    it('should handle escapeAttempt event', () => {
-        socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-            EVENT_HANDLERS[event] = callback;
-        });
-
-        service.initializeCombatListeners();
-        const testData = { attemptsLeft: 1, isEscapeSuccessful: true };
-        EVENT_HANDLERS['escapeAttempt'](testData);
-
-        expect(gameStateServiceMock.gameDataSubjectValue.evadeResult).toEqual(testData);
-        expect(gameStateServiceMock.gameDataSubjectValue.attackResult).toBeNull();
-        expect(gameStateServiceMock.gameDataSubjectValue.escapeAttempts).toBe(testData.attemptsLeft);
-        expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
-    });
-
     it('should handle combatEnded when winner has not evaded', () => {
         socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
             EVENT_HANDLERS[event] = callback;
@@ -207,6 +192,61 @@ describe('CombatSocketService', () => {
         eventHandlers['combatEnded'](testData);
 
         expect(gameStateServiceMock.gameDataSubjectValue.clientPlayer.movementPoints).toBe(MOCK_PLAYER.movementPoints);
+    });
+
+    describe('onEscapeAttempt', () => {
+        beforeEach(() => {
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+            });
+
+            service.initializeCombatListeners();
+        });
+
+        it('should log a successful escape attempt when isEscapeSuccessful is true', () => {
+            const testData = {
+                attemptsLeft: 1,
+                isEscapeSuccessful: true,
+                player: { name: 'testPlayer' },
+            };
+
+            gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
+
+            EVENT_HANDLERS['escapeAttempt'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`Tentative d'évasion réussi`, []);
+            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
+        });
+
+        it('should log a failed escape attempt when isEscapeSuccessful is false', () => {
+            const testData = {
+                attemptsLeft: 0,
+                isEscapeSuccessful: false,
+                player: { name: 'testPlayer' },
+            };
+
+            gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
+
+            EVENT_HANDLERS['escapeAttempt'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`Tentative d'évasion raté`, []);
+            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
+        });
+
+        it('should return early if the escape attempt is not from the client player', () => {
+            const testData = {
+                attemptsLeft: 2,
+                isEscapeSuccessful: true,
+                player: { name: 'anotherPlayer' },
+            };
+
+            gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
+
+            EVENT_HANDLERS['escapeAttempt'](testData);
+
+            expect(clientNotifierMock.addLogbookEntry).not.toHaveBeenCalled();
+            expect(gameStateServiceMock.updateGameData).not.toHaveBeenCalled();
+        });
     });
 
     describe('onCombatEndedLog', () => {
@@ -276,36 +316,39 @@ describe('CombatSocketService', () => {
 
     describe('onAttackResult', () => {
         beforeEach(() => {
-            clientNotifierMock.addLogbookEntry.calls.reset();
-
             socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
                 EVENT_HANDLERS[event] = callback;
-                return socketClientServiceMock;
             });
 
             service.initializeCombatListeners();
         });
 
-        it('should handle failed attack', () => {
-            const testData = { success: false, attackScore: 3, defenseScore: 7 };
+        it('should log positive attack result when diff > 0', () => {
+            const testData = {
+                success: true,
+                attackScore: { score: 10, diceRolled: 4 },
+                defenseScore: { score: 6, diceRolled: 2 },
+            };
+
             EVENT_HANDLERS['attackResult'](testData);
-            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalled();
+
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(
+                `Attaque réussie (Dé d'Attaque: 4, Dé de Défense: 2, Résultat d'Attaque: 4)`,
+            );
         });
-    });
 
-    describe('onEscapeAttempt', () => {
-        it('should handle failed escape', () => {
-            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-                EVENT_HANDLERS[event] = callback;
-                return socketClientServiceMock;
-            });
-            service.initializeCombatListeners();
+        it('should log 0 attack result when diff <= 0', () => {
+            const testData = {
+                success: false,
+                attackScore: { score: 3, diceRolled: 1 },
+                defenseScore: { score: 5, diceRolled: 6 },
+            };
 
-            const testData = { attemptsLeft: 2, isEscapeSuccessful: false };
+            EVENT_HANDLERS['attackResult'](testData);
 
-            expect(EVENT_HANDLERS['escapeAttempt']).toBeDefined();
-            EVENT_HANDLERS['escapeAttempt'](testData);
-            expect(gameStateServiceMock.updateGameData).toHaveBeenCalled();
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(
+                `Attaque échouée (Dé d'Attaque: 1, Dé de Défense: 6, Résultat d'Attaque: 0)`,
+            );
         });
     });
 

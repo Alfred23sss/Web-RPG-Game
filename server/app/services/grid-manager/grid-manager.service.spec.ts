@@ -4,8 +4,9 @@
 import { EventEmit } from '@app/enums/enums';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Tile, TileType } from '@app/model/database/tile';
-import { ImageType, ItemName } from '@common/enums';
+import { Behavior, ImageType, ItemName } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventEmitter2 } from 'eventemitter2';
 import { GridManagerService } from './grid-manager.service';
@@ -599,12 +600,44 @@ describe('GridManagerService', () => {
             const previousTile = mockGrid[0][0];
             const nonExistentTile = { id: 'non-existent-tile-id' } as Tile;
             (service.findAndCheckAdjacentTiles as jest.Mock).mockReturnValue(true);
-
-            const result = service.updateDoorTile(mockGrid, mockAccessCode, previousTile, nonExistentTile);
+            const mockPlayerVirtual = mockPlayer as VirtualPlayer;
+            const result = service.updateDoorTile(mockGrid, mockAccessCode, previousTile, nonExistentTile, mockPlayerVirtual);
             expect(service.findAndCheckAdjacentTiles).toHaveBeenCalledWith(previousTile.id, nonExistentTile.id, mockGrid);
 
             expect(result).toBe(mockGrid);
             expect(mockEventEmitter.emit).not.toHaveBeenCalled();
+        });
+
+        it('should emit correct door update event when player is virtual', () => {
+            const previousTile: Tile = { id: 'tile-0-0' } as Tile;
+
+            const doorTile: Tile = {
+                id: 'tile-0-1',
+                type: TileType.Door,
+                isOpen: true,
+                imageSrc: ImageType.OpenDoor,
+            } as Tile;
+
+            mockGrid[0][1] = doorTile;
+
+            const mockPlayerVirtual: VirtualPlayer = {
+                ...mockPlayer,
+                isVirtual: true,
+                behavior: Behavior.Aggressive,
+            };
+
+            jest.spyOn(service, 'findAndCheckAdjacentTiles').mockReturnValue(true);
+            const emitSpy = jest.spyOn((service as any).eventEmitter, 'emit');
+
+            service.updateDoorTile(mockGrid, mockAccessCode, previousTile, doorTile, mockPlayerVirtual);
+
+            // Vérifie bien que `isOpen` est inversé car player est virtuel
+            expect(emitSpy).toHaveBeenCalledWith(EventEmit.GameDoorUpdate, {
+                accessCode: mockAccessCode,
+                grid: mockGrid,
+                isOpen: !doorTile.isOpen,
+                player: mockPlayerVirtual,
+            });
         });
     });
     describe('findTileBySpawnPoint', () => {
@@ -686,8 +719,8 @@ describe('GridManagerService', () => {
             mockGrid[0][1] = doorTile;
 
             jest.spyOn<any, any>(service, 'findAndCheckAdjacentTiles').mockReturnValue(true);
-
-            const result = service.updateDoorTile(mockGrid, 'abc123', previousTile, doorTile);
+            const mockPlayerVirtual = mockPlayer as VirtualPlayer;
+            const result = service.updateDoorTile(mockGrid, 'abc123', previousTile, doorTile, mockPlayerVirtual);
 
             expect(doorTile.imageSrc).toBe(ImageType.ClosedDoor);
             expect(doorTile.isOpen).toBe(false);

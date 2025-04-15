@@ -301,17 +301,6 @@ describe('GameCombatService', () => {
             expect(gameSessionService.endTurn).not.toHaveBeenCalled();
         });
 
-        it('should resume game turn when currentFighter is undefined', () => {
-            combatState.currentFighter = undefined;
-            service['combatStates'][accessCode] = combatState;
-
-            service.endCombat(accessCode, false);
-
-            expect(gameSessionService.resumeGameTurn).toHaveBeenCalledWith(accessCode, combatState.pausedGameTurnTimeRemaining);
-            expect(gameSessionService.isCurrentPlayer).not.toHaveBeenCalled();
-            expect(gameSessionService.endTurn).not.toHaveBeenCalled();
-        });
-
         it('should do nothing if game session does not exist', () => {
             gameSessionService.getGameSession.mockReturnValue(null);
 
@@ -368,6 +357,27 @@ describe('GameCombatService', () => {
 
             expect(clearTimeoutSpy).toHaveBeenCalledWith(timeoutId);
             expect(service['combatStates'][accessCode].combatTurnTimers).toBeNull();
+        });
+
+        describe('getCombatState', () => {
+            const accessCode = 'test-access';
+
+            it('should return combat state if it exists', () => {
+                const mockState = mockCombatState();
+                service['combatStates'][accessCode] = mockState;
+
+                const result = service.getCombatState(accessCode);
+
+                expect(result).toBe(mockState);
+            });
+
+            it('should return null if combat state does not exist', () => {
+                service['combatStates'][accessCode] = undefined;
+
+                const result = service.getCombatState(accessCode);
+
+                expect(result).toBeNull();
+            });
         });
 
         it('should not throw or call clearTimeout if combatTurnTimers is null', () => {

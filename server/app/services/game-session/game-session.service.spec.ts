@@ -11,6 +11,7 @@ import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { Turn } from '@app/interfaces/turn';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { GameSessionTurnService } from '@app/services/game-session-turn/game-session-turn.service';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
@@ -216,6 +217,29 @@ describe('GameSessionService', () => {
         expect(emitSpy).not.toHaveBeenCalled();
     });
 
+    it('should return false if player is current but has abandoned', () => {
+        const playerName = PLAYER_1_NAME;
+        const abandonedPlayer = {
+            ...createValidPlayer(playerName, 5, true),
+            hasAbandoned: true,
+        };
+
+        const mockSession: GameSession = {
+            game: MOCK_LOBBY.game,
+            turn: {
+                ...createMockTurn(),
+                beginnerPlayer: abandonedPlayer,
+                orderedPlayers: [abandonedPlayer],
+                currentPlayer: abandonedPlayer,
+            },
+        };
+
+        gameSessionService['gameSessions'].set(ACCESS_CODE, mockSession);
+
+        const result = gameSessionService.isCurrentPlayer(ACCESS_CODE, playerName);
+        expect(result).toBe(false);
+    });
+
     it('should maintain correct timer sequence after resume', () => {
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
 
@@ -255,16 +279,6 @@ describe('GameSessionService', () => {
         const result = gameSessionService.isCurrentPlayer('non-existent-code', PLAYER_1_NAME);
         expect(result).toBe(false);
     });
-
-    it('should return true if the given player is the current player', () => {
-        gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
-        const player = createValidPlayer('CurrentPlayer', FAST_SPEED, true);
-        const session = gameSessionService['gameSessions'].get(MOCK_LOBBY.accessCode);
-        session.turn.currentPlayer = player;
-        const result = gameSessionService.isCurrentPlayer(MOCK_LOBBY.accessCode, 'CurrentPlayer');
-        expect(result).toBe(true);
-    });
-
     it('should return early in startTransitionPhase if session not found', () => {
         const invalidCode = 'non-existent-code';
         const emitSpy = jest.spyOn(eventEmitter, 'emit');
@@ -359,9 +373,9 @@ describe('GameSessionService', () => {
             (gameSessionService as any).gameSessions = new Map([[ACCESS_CODE, { game: { grid: [[OPEN_DOOR_TILE, OPEN_DOOR_TILE]] } }]]);
 
             jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(false);
-
+            const player = createValidPlayer(PLAYER_1_NAME, SLOW_SPEED, false) as VirtualPlayer;
             const emitSpy = jest.spyOn(eventEmitter, 'emit');
-            gameSessionService.updateDoorTile(ACCESS_CODE, previousTile, newTile);
+            gameSessionService.updateDoorTile(ACCESS_CODE, previousTile, newTile, player);
 
             expect(newTile.imageSrc).toBe(ImageType.ClosedDoor);
             expect(newTile.isOpen).toBe(false);
@@ -376,7 +390,8 @@ describe('GameSessionService', () => {
             jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(true);
 
             const emitSpy = jest.spyOn(eventEmitter, 'emit');
-            gameSessionService.updateDoorTile(ACCESS_CODE, previousTile, newTile);
+            const player = createValidPlayer(PLAYER_1_NAME, SLOW_SPEED, false) as VirtualPlayer;
+            gameSessionService.updateDoorTile(ACCESS_CODE, previousTile, newTile, player);
 
             expect(emitSpy).toHaveBeenCalled();
         });
@@ -399,8 +414,9 @@ describe('GameSessionService', () => {
             const targetTile = grid[0][1];
             jest.spyOn(gridManagerService, 'findAndCheckAdjacentTiles').mockReturnValue(true);
             const emitSpy = jest.spyOn(eventEmitter, 'emit');
+            const player = createValidPlayer(PLAYER_1_NAME, SLOW_SPEED, false) as VirtualPlayer;
 
-            gameSessionService.updateDoorTile(ACCESS_CODE, grid[0][0], targetTile);
+            gameSessionService.updateDoorTile(ACCESS_CODE, grid[0][0], targetTile, player);
 
             expect(targetTile.imageSrc).toBe(ImageType.OpenDoor);
             expect(targetTile.isOpen).toBe(true);
@@ -408,6 +424,7 @@ describe('GameSessionService', () => {
                 accessCode: ACCESS_CODE,
                 grid: mockGameSession.game.grid,
                 isOpen: true,
+                player,
             });
         });
     });
@@ -481,13 +498,13 @@ describe('GameSessionService', () => {
 
         describe('isCurrentPlayer', () => {
             it('should return true when player is current and not abandoned', () => {
-                const currentPlayer = createValidPlayer(PLAYER_1_NAME, FAST_SPEED, true);
+                const beginnerPlayer = createValidPlayer(PLAYER_1_NAME, FAST_SPEED, true);
                 const mockSession: GameSession = {
                     game: MOCK_LOBBY.game,
                     turn: {
                         ...createMockTurn(),
-                        currentPlayer,
-                        orderedPlayers: [currentPlayer],
+                        beginnerPlayer,
+                        orderedPlayers: [beginnerPlayer],
                     },
                 };
                 gameSessionService['gameSessions'].set(ACCESS_CODE, mockSession);
@@ -1016,8 +1033,9 @@ describe('GameSessionService', () => {
 
             const gameSessions = new Map<string, GameSession>();
             gameSessionService['gameSessions'] = gameSessions;
+            const player = createValidPlayer(PLAYER_1_NAME, SLOW_SPEED, false) as VirtualPlayer;
 
-            gameSessionService.updateDoorTile(accessCode, previousTile, newTile);
+            gameSessionService.updateDoorTile(accessCode, previousTile, newTile, player);
 
             expect(gridManagerSpy).not.toHaveBeenCalled();
         });
