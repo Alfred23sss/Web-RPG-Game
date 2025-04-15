@@ -1,5 +1,5 @@
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
-import { ItemType, ItemName, ItemDescription, DiceType, Behavior } from '@common/enums';
+import { Behavior, DiceType, ItemDescription, ItemName, ItemType } from '@common/enums';
 
 export const RANDOM_ITEMS = [
     {
@@ -80,6 +80,8 @@ export const WATER_COST = 2;
 export const DEFAULT_COST = 1;
 export const DOOR_COST = 1;
 export const WALL_COST = Infinity;
+
+export const ORDER_RANDOMIZER = 0.5;
 
 export const AGGRESSIVE_ITEM_ORDER: ItemName[] = [
     ItemName.Flag,

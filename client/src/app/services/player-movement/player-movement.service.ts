@@ -99,8 +99,7 @@ export class PlayerMovementService {
     }
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
-        // faut recheck ça, quand j'enlève le undefined ca met une erreur de tests, mais on a perdu des points
-        return adjacentTiles.some((tile) => (tile.type === TileType.Door && !tile.isOpen) || tile.player !== undefined);
+        return adjacentTiles.some((tile) => (tile.type === TileType.Door && !tile.isOpen) || tile.player);
     }
 
     getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
@@ -167,7 +166,7 @@ export class PlayerMovementService {
     }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
-        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen);
+        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || !!neighbor.player;
     }
 
     private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {
