@@ -12,6 +12,13 @@
     box-sizing: border-box;
 }
 
+.pixel-code {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
 .waiting-view {
     width: 60%;
     max-width: 1000px;
