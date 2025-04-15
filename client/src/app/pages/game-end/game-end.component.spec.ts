@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { GameData } from '@app/classes/game-data/game-data';
@@ -93,6 +94,63 @@ describe('GameEndComponent', () => {
             expect(mockGameData.clientPlayer.hasAbandoned).toBeTrue();
             expect(mockSocketService.emit).toHaveBeenCalledWith(SocketEvent.ManualDisconnect, { isInGame: false });
             expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+        });
+    });
+
+    describe('ngOnInit', () => {
+        beforeEach(() => {
+            spyOn(sessionStorage, 'getItem').and.callThrough();
+            spyOn(sessionStorage, 'setItem').and.callThrough();
+
+            Object.defineProperty(mockGameStateService, 'gameDataSubjectValue', {
+                get: () => mockGameData,
+            });
+
+            fixture = TestBed.createComponent(GameEndComponent);
+            component = fixture.componentInstance;
+        });
+
+        it('should navigate to homepage if page is refreshed', () => {
+            sessionStorage.setItem(REFRESH_STORAGE, 'true');
+            component.ngOnInit();
+
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+        });
+
+        it('should navigate to homepage if gameStats is missing', () => {
+            mockGameData.gameStats = undefined as unknown as GameStatistics;
+            sessionStorage.setItem(REFRESH_STORAGE, 'false');
+            component.ngOnInit();
+
+            expect(mockRouter.navigate).toHaveBeenCalledWith(['/home']);
+        });
+
+        it('should initialize game data and sort player stats by name', () => {
+            mockGameData.gameStats = {
+                playerStats: {
+                    zed: { playerName: 'Zed' } as PlayerStatistics,
+                    alice: { playerName: 'Alice' } as PlayerStatistics,
+                    bob: { playerName: 'Bob' } as PlayerStatistics,
+                },
+            } as unknown as GameStatistics;
+
+            sessionStorage.setItem(REFRESH_STORAGE, 'false');
+            component.ngOnInit();
+
+            expect(component.gameData).toBe(mockGameData);
+            expect(component.gameStats).toEqual(mockGameData.gameStats);
+            expect(component.sortedStats.map((s) => s.playerName)).toEqual(['Alice', 'Bob', 'Zed']);
+            expect(sessionStorage.setItem).toHaveBeenCalledWith(REFRESH_STORAGE, 'true');
+        });
+
+        it('should initialize sortedStats as empty if playerStats is empty', () => {
+            mockGameData.gameStats = {
+                playerStats: {},
+            } as GameStatistics;
+
+            component.ngOnInit();
+
+            expect(component.sortedStats).toEqual([]);
         });
     });
 });
