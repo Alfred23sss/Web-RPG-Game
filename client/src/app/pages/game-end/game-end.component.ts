@@ -6,6 +6,7 @@ import { ChatComponent } from '@app/components/chat/chat.component';
 import { REFRESH_STORAGE } from '@app/constants/global.constants';
 import { SocketEvent } from '@app/enums/global.enums';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
+import { CharacterService } from '@app/services/character-form/character-form.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { Routes } from '@common/enums';
@@ -29,12 +30,14 @@ export class GameEndComponent implements OnInit, OnDestroy {
         private readonly gameStateSocketService: GameStateSocketService,
         private readonly socketClientService: SocketClientService,
         private readonly router: Router,
+        private readonly characterService: CharacterService,
     ) {}
 
     ngOnInit(): void {
         const wasRefreshed = sessionStorage.getItem(REFRESH_STORAGE) === 'true';
         if (wasRefreshed || !this.gameStateSocketService.gameDataSubjectValue?.gameStats) {
             this.router.navigate([Routes.HomePage]);
+            this.refreshAvatarChoice();
         }
         sessionStorage.setItem(REFRESH_STORAGE, 'true');
         this.gameData = this.gameStateSocketService.gameDataSubjectValue;
@@ -70,6 +73,7 @@ export class GameEndComponent implements OnInit, OnDestroy {
     }
 
     goHome(): void {
+        this.refreshAvatarChoice();
         this.abandonGame(this.gameData);
         this.router.navigate([Routes.HomePage]);
     }
@@ -78,5 +82,9 @@ export class GameEndComponent implements OnInit, OnDestroy {
         gameData.clientPlayer.hasAbandoned = true;
         gameData.turnTimer = 0;
         this.socketClientService.emit(SocketEvent.ManualDisconnect, { isInGame: false });
+    }
+
+    private refreshAvatarChoice(): void {
+        this.characterService.unavailableAvatarsSubject.next([]);
     }
 }
