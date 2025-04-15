@@ -1,5 +1,5 @@
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
-import { ItemType, ItemName, ItemDescription, DiceType, Behavior } from '@common/enums';
+import { Behavior, DiceType, ItemDescription, ItemName, ItemType } from '@common/enums';
 
 export const RANDOM_ITEMS = [
     {
@@ -81,6 +81,7 @@ export const DEFAULT_COST = 1;
 export const DOOR_COST = 1;
 export const WALL_COST = Infinity;
 
+export const TRANSITION_PHASE_DURATION = 3000;
 export const AGGRESSIVE_ITEM_ORDER: ItemName[] = [
     ItemName.Flag,
     ItemName.BlackSword,
@@ -91,6 +92,7 @@ export const AGGRESSIVE_ITEM_ORDER: ItemName[] = [
     ItemName.Pickaxe,
 ];
 
+export const TURN_DURATION = 30000;
 export const DEFENSIVE_ITEM_ORDER: ItemName[] = [
     ItemName.Flag,
     ItemName.GreatShield,
