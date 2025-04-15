@@ -78,33 +78,33 @@ describe('GridComponent', () => {
     describe('onTileClick()', () => {
         it('should emit playerAttacked if the tile contains a player', () => {
             spyOn(component.playerAttacked, 'emit');
-            component.onTileClick(playerTile);
+            component.onTileClick(playerTile, new MouseEvent('click'));
             expect(component.playerAttacked.emit).toHaveBeenCalledWith(playerTile);
         });
 
         it('should emit doorClicked if the tile is a door', () => {
             spyOn(component.doorClicked, 'emit');
-            component.onTileClick(doorTile);
+            component.onTileClick(doorTile, new MouseEvent('click'));
             expect(component.doorClicked.emit).toHaveBeenCalledWith(doorTile);
         });
 
         it('should emit wallClicked if the tile is a wall', () => {
             spyOn(component.wallClicked, 'emit');
-            component.onTileClick(wallTile);
+            component.onTileClick(wallTile, new MouseEvent('click'));
             expect(component.wallClicked.emit).toHaveBeenCalledWith(wallTile);
         });
 
         it('should emit tileClicked if the tile is in availablePath', () => {
             spyOn(component.tileClicked, 'emit');
             component.availablePath = [mockTile1];
-            component.onTileClick(mockTile1);
+            component.onTileClick(mockTile1, new MouseEvent('click'));
             expect(component.tileClicked.emit).toHaveBeenCalledWith(mockTile1);
         });
 
         it('should not emit tileClicked if the tile is not in availablePath', () => {
             spyOn(component.tileClicked, 'emit');
             component.availablePath = [];
-            component.onTileClick(mockTile1);
+            component.onTileClick(mockTile1, new MouseEvent('click'));
             expect(component.tileClicked.emit).not.toHaveBeenCalled();
         });
     });

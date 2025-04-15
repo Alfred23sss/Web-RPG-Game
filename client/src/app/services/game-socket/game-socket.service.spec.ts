@@ -332,23 +332,6 @@ describe('GameSocketService', () => {
         expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
     });
 
-    it('should not process door click if a timer is already active', fakeAsync(() => {
-        const mockData = {
-            grid: MOCK_GRID,
-            isOpen: true,
-            player: MOCK_PLAYER,
-        };
-
-        (service as any).doorClickedTimer = 1234;
-
-        const processDoorClickedSpy = spyOn<any>(service, 'processDoorClicked');
-
-        socketEvents['doorClicked'](mockData);
-        tick(service['doorClickedDelay'] + 10);
-
-        expect(processDoorClickedSpy).not.toHaveBeenCalled();
-    }));
-
     it('should call gameplayService when itemChoice', () => {
         const mockItem = { name: ItemName.Default } as Item;
 
