@@ -923,7 +923,7 @@ describe('GameSessionService', () => {
                     [regularTile, MOCK_TILE],
                 ];
 
-                const IceShieldItem: Item = {
+                const iceShieldItem: Item = {
                     name: ItemName.IceShield,
                     id: 'IceShield-item',
                     imageSrc: 'IceShield.png',
@@ -934,7 +934,7 @@ describe('GameSessionService', () => {
 
                 const testPlayerWithIceShield: Player = {
                     ...testPlayer,
-                    inventory: [IceShieldItem, null],
+                    inventory: [iceShieldItem, null],
                 };
 
                 gameSessionService['gameSessions'].set(ACCESS_CODE, {
@@ -950,7 +950,7 @@ describe('GameSessionService', () => {
                 await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
                 expect(itemService.addEffect).toHaveBeenCalledWith(
                     testPlayerWithIceShield,
-                    IceShieldItem,
+                    iceShieldItem,
                     expect.objectContaining({
                         id: 'ice-tile',
                         type: TileType.Ice,

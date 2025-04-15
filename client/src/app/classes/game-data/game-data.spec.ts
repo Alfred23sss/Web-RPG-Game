@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameData } from './game-data';
