@@ -390,7 +390,7 @@ describe('VirtualPlayerActionsService', () => {
             expect(result).toBe(true);
         });
 
-        it('should return true when hasPickaxe and no wall adjacent with only action points left', () => {
+        it('should return true when hasPickaxe and wall adjacent with only action points left', () => {
             mockPlayer = createMockPlayer({
                 actionPoints: 1,
                 movementPoints: 0,
@@ -400,7 +400,7 @@ describe('VirtualPlayerActionsService', () => {
             const mockVirtualTile = createMockTile({ player: mockPlayer });
 
             mockGridManagerService.findTileByPlayer.mockReturnValue(mockVirtualTile);
-            mockPlayerMovementService.hasAdjacentTileType.mockImplementation((_, __, type) => (type === TileType.Wall ? false : false));
+            mockPlayerMovementService.hasAdjacentTileType.mockImplementation((_, __, type) => (type === TileType.Wall ? true : true));
             mockPlayerMovementService.hasAdjacentPlayerOrDoor.mockReturnValue(false);
 
             const result = service.checkAvailableActions(mockPlayer, mockLobby);
