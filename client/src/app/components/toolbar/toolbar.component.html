@@ -1,23 +1,42 @@
-<div class="tool-container">
-    <h1 class="header-item">
-        <p class="selected-header">Sélectionné:</p>
-        <p class="selected-tool">{{ activeTool?.tool || 'None' }}</p>
-    </h1>
+<div class="tool-container pixel-panel">
+    <h2 class="pixel-title">Tuiles</h2>
 
-    <div class="tool" id="wall-tool" title="Mur : Prévient le passage" (click)="selectTool(tileType.Wall, imageType.Wall)">
-        <span class="tool-name">Mur</span>
-        <img [src]="imageType.Wall" alt="Mur" draggable="false" />
-    </div>
-    <div class="tool" id="door-tool" title="Porte : Donne le passage" (click)="selectTool(tileType.Door, imageType.ClosedDoor)">
-        <span class="tool-name">Porte</span>
-        <img [src]="imageType.ClosedDoor" alt="Porte" draggable="false" />
-    </div>
-    <div class="tool" id="water-tool" title="Eau : Bloque certaines unités" (click)="selectTool(tileType.Water, imageType.Water)">
-        <span class="tool-name">Eau</span>
-        <img [src]="imageType.Water" alt="Eau" draggable="false" />
-    </div>
-    <div class="tool" id="ice-tool" title="Glace : Diminue la vitesse de déplacement" (click)="selectTool(tileType.Ice, imageType.Ice)">
-        <span class="tool-name">Glace</span>
-        <img [src]="imageType.Ice" alt="Glace" draggable="false" />
+    <div class="tool-grid">
+        <div
+            class="tool pixel-tool"
+            [class.selected]="isSelected(tileType.Wall)"
+            title="Mur : Prévient le passage"
+            (click)="selectTool(tileType.Wall, imageType.Wall)"
+        >
+            <img [src]="imageType.Wall" alt="Mur" draggable="false" />
+            <span class="tool-name">Mur</span>
+        </div>
+        <div
+            class="tool pixel-tool"
+            [class.selected]="isSelected(tileType.Door)"
+            title="Porte : Donne le passage"
+            (click)="selectTool(tileType.Door, imageType.ClosedDoor)"
+        >
+            <img [src]="imageType.ClosedDoor" alt="Porte" draggable="false" />
+            <span class="tool-name">Porte</span>
+        </div>
+        <div
+            class="tool pixel-tool"
+            [class.selected]="isSelected(tileType.Water)"
+            title="Eau : Bloque certaines unités"
+            (click)="selectTool(tileType.Water, imageType.Water)"
+        >
+            <img [src]="imageType.Water" alt="Eau" draggable="false" />
+            <span class="tool-name">Eau</span>
+        </div>
+        <div
+            class="tool pixel-tool"
+            [class.selected]="isSelected(tileType.Ice)"
+            title="Glace : Diminue la vitesse de déplacement"
+            (click)="selectTool(tileType.Ice, imageType.Ice)"
+        >
+            <img [src]="imageType.Ice" alt="Glace" draggable="false" />
+            <span class="tool-name">Glace</span>
+        </div>
     </div>
 </div>

@@ -1,37 +1,39 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
-import { TileType } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item/item';
+import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
+import { GameMode, TileType } from '@common/enums';
 import { ItemBarComponent } from './item-bar.component';
 
 const TEST_ITEM = new Item({
     id: '1',
-    name: 'potion',
+    name: 'BlackSword',
     imageSrc: '',
     imageSrcGrey: '',
     itemCounter: 1,
-    description: 'Potion',
+    description: 'BlackSword',
 });
 
 const TARGET_ITEM = new Item({
     id: '1',
-    name: 'potion',
+    name: 'BlackSword',
     imageSrc: '',
     imageSrcGrey: '',
     itemCounter: 1,
-    description: 'Potion',
+    description: 'BlackSword',
 });
 
 const DRAGGED_ITEM = new Item({
     id: '1',
-    name: 'potion',
+    name: 'BlackSword',
     imageSrc: '',
     imageSrcGrey: '',
     itemCounter: 1,
-    description: 'Potion',
+    description: 'BlackSword',
 });
 
 describe('ItemBarComponent', () => {
@@ -39,33 +41,37 @@ describe('ItemBarComponent', () => {
     let fixture: ComponentFixture<ItemBarComponent>;
     let itemDragServiceMock: jasmine.SpyObj<ItemDragService>;
     let itemServiceMock: jasmine.SpyObj<ItemService>;
+    let gameModeServiceMock: jasmine.SpyObj<GameModeService>;
 
     beforeEach(async () => {
         itemDragServiceMock = jasmine.createSpyObj('ItemDragService', ['setSelectedItem', 'getSelectedItem', 'getPreviousTile', 'clearSelection']);
         itemServiceMock = jasmine.createSpyObj('ItemService', ['setItems', 'setItemCount']);
+        gameModeServiceMock = jasmine.createSpyObj('GameModeService', ['getGameMode']);
 
         await TestBed.configureTestingModule({
             imports: [ItemBarComponent, CommonModule, DragDropModule],
             providers: [
                 { provide: ItemDragService, useValue: itemDragServiceMock },
                 { provide: ItemService, useValue: itemServiceMock },
+                { provide: GameModeService, useValue: gameModeServiceMock },
             ],
         }).compileComponents();
 
         fixture = TestBed.createComponent(ItemBarComponent);
         component = fixture.componentInstance;
+
+        const mockItems = [
+            new Item({ id: '1', name: 'BlackSword', itemCounter: 1, description: 'BlackSword' }),
+            new Item({ id: '2', name: 'flag', itemCounter: 1, description: 'Flag' }),
+        ];
+        component.items = mockItems;
+
         fixture.detectChanges();
         TEST_ITEM.itemCounter = 1;
     });
 
     it('should create the component', () => {
         expect(component).toBeTruthy();
-    });
-
-    it('should initialize items and set them in the service', () => {
-        expect(component.items.length).toBeGreaterThan(0);
-        expect(itemServiceMock.setItems).toHaveBeenCalledWith(component.items);
-        expect(itemServiceMock.setItemCount).toHaveBeenCalled();
     });
 
     it('should select an item', () => {
@@ -82,12 +88,12 @@ describe('ItemBarComponent', () => {
     });
 
     it('should disable dragging when itemCounter is 0', () => {
-        const testItem = new Item({ id: '2', name: 'fire', imageSrc: '', imageSrcGrey: '', itemCounter: 0, description: 'Fire' });
+        const testItem = new Item({ id: '2', name: 'IceSword', imageSrc: '', imageSrcGrey: '', itemCounter: 0, description: 'IceSword' });
         expect(testItem.itemCounter <= 0).toBeTrue();
     });
 
     it('should allow dragging when itemCounter is greater than 0', () => {
-        const testItem = new Item({ id: '3', name: 'swap', imageSrc: '', imageSrcGrey: '', itemCounter: 1, description: 'Swap' });
+        const testItem = new Item({ id: '3', name: 'IceShield', imageSrc: '', imageSrcGrey: '', itemCounter: 1, description: 'IceShield' });
         expect(testItem.itemCounter <= 0).toBeFalse();
     });
 
@@ -106,11 +112,11 @@ describe('ItemBarComponent', () => {
     it('should handle drop event correctly', () => {
         const draggedItem = new Item({
             id: '2',
-            name: 'potion',
+            name: 'BlackSword',
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion',
+            description: 'BlackSword',
         });
 
         itemDragServiceMock.getSelectedItem.and.returnValue(draggedItem);
@@ -145,6 +151,7 @@ describe('ItemBarComponent', () => {
 
         component.onContainerDrop(new DragEvent('drop'), TEST_ITEM);
 
+        // eslint-disable-next-line @typescript-eslint/no-magic-numbers
         expect(TEST_ITEM.itemCounter).toBe(2);
         expect(itemDragServiceMock.clearSelection).toHaveBeenCalled();
     });
@@ -173,5 +180,21 @@ describe('ItemBarComponent', () => {
 
         component.onContainerDrop(event, TARGET_ITEM);
         expect(itemDragServiceMock.clearSelection).not.toHaveBeenCalled();
+    });
+
+    it('should filter out "flag" item when game mode is Classique', () => {
+        gameModeServiceMock.getGameMode.and.returnValue(GameMode.Classic);
+
+        component.ngOnInit();
+
+        expect(component.items.some((item) => item.name === 'flag')).toBeFalse();
+    });
+
+    it('should not filter out "flag" item when game mode is not Classique', () => {
+        gameModeServiceMock.getGameMode.and.returnValue(GameMode.CTF);
+
+        component.ngOnInit();
+
+        expect(component.items.some((item) => item.name === 'flag')).toBeTrue();
     });
 });

@@ -1,0 +1,22 @@
+<div class="journal-container">
+    <h3>Journal de Bord</h3>
+
+    <div class="journal-header">
+        <button class="button filter-button" (click)="toggleFilter()">
+            <i class="fas fa-filter"></i>
+            {{ filterByPlayer ? 'Afficher tous' : 'Filtrer par joueur' }}
+        </button>
+    </div>
+
+    <div #logContainer class="journal-content">
+        @if (filteredLogs.length === 0) {
+        <p class="empty-message">Aucun message pour le moment.</p>
+        } @else {
+        <ul>
+            @for (log of filteredLogs; track $index) {
+            <li class="journal-item">{{ log }}</li>
+            }
+        </ul>
+        }
+    </div>
+</div>

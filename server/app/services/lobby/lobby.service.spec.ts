@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */ // the original file respects this condition
-import { GameSize, GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
+import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
+import { DiceType } from '@app/interfaces/dice';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Logger } from '@nestjs/common';
+import { GameSize } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
 
 const ACCESS_CODE = 'test-code';
+const SOCKED_ID = 'test-id';
 const GAME = { size: GameSizeTileCount.Small } as Game;
 
 const MOCK_PLAYER: Player = {
     name: 'Player1',
     avatar: 'avatar1',
     speed: 5,
-    vitality: 10,
     attack: { value: 4, bonusDice: DiceType.D6 },
     defense: { value: 4, bonusDice: DiceType.D4 },
     hp: { current: 10, max: 10 },
@@ -28,6 +28,7 @@ const MOCK_PLAYER: Player = {
     hasAbandoned: false,
     isActive: false,
     combatWon: 0,
+    isVirtual: false,
 };
 
 describe('LobbyService', () => {
@@ -43,12 +44,6 @@ describe('LobbyService', () => {
                     useValue: {
                         generateAccessCode: jest.fn().mockReturnValue('ACCESS_CODE'),
                         removeAccessCode: jest.fn(),
-                    },
-                },
-                {
-                    provide: Logger,
-                    useValue: {
-                        log: jest.fn(),
                     },
                 },
             ],
@@ -477,6 +472,98 @@ describe('LobbyService', () => {
                 names: ['Player1', 'Player2'],
                 avatars: ['avatar1', 'avatar2'],
             });
+        });
+    });
+
+    describe('addPlayerToRoom', () => {
+        it('should add player to room mapping', () => {
+            const socketId = 'socket-123';
+            const roomId = 'ROOM_ID';
+
+            lobbyService.addPlayerToRoom(socketId, roomId);
+
+            expect(lobbyService.getRoomForPlayer(socketId)).toBe(roomId);
+        });
+    });
+
+    describe('getPlayerBySocketId', () => {
+        it('should find player in lobby by socket ID', () => {
+            const playerName = 'TestPlayer';
+            const accessCode = 'ROOM_ID';
+
+            (lobbyService as any).playerSockets.set(playerName, SOCKED_ID);
+
+            (lobbyService as any).playerRoomMap.set(SOCKED_ID, accessCode);
+
+            const mockPlayer = {
+                ...MOCK_PLAYER,
+                name: playerName,
+            };
+            const lobby = {
+                accessCode,
+                players: [mockPlayer],
+                game: GAME,
+                isLocked: false,
+                maxPlayers: 4,
+                waitingPlayers: [],
+            };
+            (lobbyService as any).lobbies.set(accessCode, lobby);
+
+            const result = lobbyService.getPlayerBySocketId(SOCKED_ID);
+
+            expect(result).toEqual(mockPlayer);
+        });
+
+        it('should return undefined when playerEntry does not exist', () => {
+            const unknownSocketId = 'unknown-socket';
+
+            const result = lobbyService.getPlayerBySocketId(unknownSocketId);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should return undefined when lobbyId is not found for socket ID', () => {
+            const playerName = 'TestPlayer';
+
+            (lobbyService as any).playerSockets.set(playerName, SOCKED_ID);
+
+            const result = lobbyService.getPlayerBySocketId(SOCKED_ID);
+
+            expect(result).toBeUndefined();
+        });
+
+        it('should return undefined when lobby does not exist', () => {
+            const playerName = 'test-player';
+            const invalidAccessCode = 'invalid-room';
+
+            (lobbyService as any).playerSockets.set(playerName, SOCKED_ID);
+            (lobbyService as any).playerRoomMap.set(SOCKED_ID, invalidAccessCode);
+
+            const result = lobbyService.getPlayerBySocketId(SOCKED_ID);
+            expect(result).toBeUndefined();
+        });
+    });
+
+    describe('removePlayerFromRoom', () => {
+        it('should remove player from room mapping', () => {
+            const roomId = 'ROOM_ID';
+
+            lobbyService.addPlayerToRoom(SOCKED_ID, roomId);
+            expect(lobbyService.getRoomForPlayer(SOCKED_ID)).toBe(roomId);
+
+            lobbyService.removePlayerFromRoom(SOCKED_ID);
+
+            expect(lobbyService.getRoomForPlayer(SOCKED_ID)).toBeNull();
+        });
+
+        it('should handle non-existent socket ID', () => {
+            const invalidSocketId = 'invalid-socket';
+
+            expect(() => {
+                lobbyService.removePlayerFromRoom(invalidSocketId);
+            }).not.toThrow();
+
+            expect(lobbyService.getRoomForPlayer(invalidSocketId)).toBeNull();
         });
     });
 });

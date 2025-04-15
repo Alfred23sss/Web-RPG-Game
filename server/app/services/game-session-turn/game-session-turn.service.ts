@@ -1,14 +1,11 @@
+import { RANDOMIZER, SECOND, TRANSITION_PHASE_DURATION, TURN_DURATION } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
-import { Turn } from '@app/interfaces/Turn';
+import { Player } from '@app/interfaces/player';
+import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { TeamType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-const TRANSITION_PHASE_DURATION = 3000;
-const TURN_DURATION = 30000;
-const SECOND = 1000;
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GameSessionTurnService {
@@ -30,10 +27,24 @@ export class GameSessionTurnService {
         };
     }
 
+    initializeTurnCTF(accessCode: string) {
+        const turn = this.initializeTurn(accessCode);
+        const shuffledPlayers = [...turn.orderedPlayers].sort(() => Math.random() - RANDOMIZER);
+        const teamSize = Math.ceil(shuffledPlayers.length / 2);
+
+        shuffledPlayers.forEach((player, index) => {
+            player.team = index < teamSize ? TeamType.RED : TeamType.BLUE;
+        });
+
+        return turn;
+    }
+
     startTransitionPhase(accessCode: string, turn: Turn): Turn {
         turn.isTransitionPhase = true;
+
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
-        const nextPlayer = this.getNextPlayer(accessCode, turn);
+        const nextPlayer = this.getNextPlayer(turn);
+        turn.beginnerPlayer = nextPlayer;
         this.emitEvent(EventEmit.GameTransitionStarted, { accessCode, nextPlayer });
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
@@ -130,7 +141,7 @@ export class GameSessionTurnService {
         return turn;
     }
 
-    getNextPlayer(accessCode: string, turn: Turn): Player {
+    getNextPlayer(turn: Turn): Player {
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
         if (!turn.currentPlayer) {
@@ -145,13 +156,15 @@ export class GameSessionTurnService {
     orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = [...players].sort((a, b) => {
             if (a.speed === b.speed) {
-                return Math.random() < RANDOMIZER ? -1 : 1;
+                return Math.random() - RANDOMIZER;
             }
             return b.speed - a.speed;
         });
+
         if (playerList.length > 0) {
             playerList[0].isActive = true;
         }
+
         return playerList;
     }
 

@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { TileComponent } from '@app/components/tile/tile.component';
-import { ImageType, ItemDescription, ItemType, TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { ItemService } from '@app/services/item/item.service';
 import { TileService } from '@app/services/tile/tile.service';
 import { ToolService } from '@app/services/tool/tool.service';
+import { ImageType, ItemDescription, ItemType, TileType } from '@common/enums';
 
 describe('TileService', () => {
     let service: TileService;
@@ -74,11 +74,11 @@ describe('TileService', () => {
             toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Door, image: ImageType.ClosedDoor });
             tile.item = Object.assign(new Item(), {
                 id: '0',
-                name: 'lightning',
-                imageSrc: ItemType.Lightning,
-                imageSrcGrey: ItemType.LightningGray,
+                name: 'Pickaxe',
+                imageSrc: ItemType.Pickaxe,
+                imageSrcGrey: ItemType.PickaxeGray,
                 itemCounter: 1,
-                description: ItemDescription.Lightning,
+                description: ItemDescription.Pickaxe,
             });
             service.applyTool(tile);
             expect(tile.type).toBe(TileType.Default);

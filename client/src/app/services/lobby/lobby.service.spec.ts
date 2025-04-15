@@ -115,9 +115,8 @@ describe('LobbyService', () => {
             service.initializeLobby();
             service.removePlayerAndCleanup(mockPlayer, mockLobby);
 
-            expect(socketSpy.emit).toHaveBeenCalledWith('leaveLobby', {
-                accessCode: '1234',
-                playerName: 'test',
+            expect(socketSpy.emit).toHaveBeenCalledWith('manualDisconnect', {
+                isInGame: false,
             });
 
             expect(socketSpy.emit).toHaveBeenCalledTimes(1);
@@ -238,8 +237,7 @@ describe('LobbyService', () => {
         it('should update lobby on lock event', (done) => {
             service.initializeLobby();
 
-            // Simuler l'écouteur 'lobbyLocked'
-            const lockCallback = socketSpy.on.calls.argsFor(4)[1]; // Index 4 pour 'lobbyLocked'
+            const lockCallback = socketSpy.on.calls.argsFor(4)[1];
             lockCallback({ accessCode: '1234', isLocked: true });
 
             service.lobby$.subscribe((lobby) => {
@@ -251,8 +249,7 @@ describe('LobbyService', () => {
         it('should update lobby on unlock event', (done) => {
             service.initializeLobby();
 
-            // Simuler l'écouteur 'lobbyUnlocked'
-            const unlockCallback = socketSpy.on.calls.argsFor(5)[1]; // Index 5 pour 'lobbyUnlocked'
+            const unlockCallback = socketSpy.on.calls.argsFor(5)[1];
             unlockCallback({ accessCode: '1234', isLocked: false });
 
             service.lobby$.subscribe((lobby) => {
@@ -307,7 +304,7 @@ describe('LobbyService', () => {
 
             expect(socketSpy.socket.off).toHaveBeenCalledWith('joinLobby');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('lobbyUpdate');
-            expect(socketSpy.socket.off).toHaveBeenCalledWith('leaveLobby');
+            expect(socketSpy.socket.off).toHaveBeenCalledWith('manualDisconnect');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('kicked');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('lobbyLocked');
             expect(socketSpy.socket.off).toHaveBeenCalledWith('lobbyUnlocked');

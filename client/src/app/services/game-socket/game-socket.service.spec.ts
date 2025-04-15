@@ -1,712 +1,572 @@
-/* eslint-disable max-lines */
-/* eslint-disable @typescript-eslint/no-explicit-any */ // all any uses are to allow the testing of a private service.
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-/* eslint-disable @typescript-eslint/no-empty-function */
-
-import { TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
-import { DiceType, TileType } from '@app/enums/global.enums';
+/* eslint-disable max-lines */
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { Item } from '@app/classes/item/item';
+import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, MOCK_GAME, MOCK_GRID, MOCK_PLAYER, NO_ACTION_POINTS } from '@app/constants/global.constants';
 import { Game } from '@app/interfaces/game';
-import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
-import { GamePageComponent } from '@app/pages/game-page/game-page.component';
-import { GameSocketService } from '@app/services/game-socket/game-socket.service';
-import { LogBookService } from '@app/services/logbook/logbook.service';
+import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
+import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
-import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-
-const CLIENT_PLAYER_POSITION: Tile = {
-    id: 'tile1',
-    type: TileType.Default,
-    isOccupied: true,
-    imageSrc: 'player-tile.png',
-    isOpen: true,
-};
-
-const MOCK_GRID: Tile[][] = [
-    [
-        {
-            id: 'tile1',
-            type: TileType.Default,
-            isOccupied: false,
-            imageSrc: 'default-tile.png',
-            isOpen: true,
-        },
-        {
-            id: 'tile2',
-            type: TileType.Wall,
-            isOccupied: true,
-            imageSrc: 'wall-tile.png',
-            isOpen: false,
-        },
-    ],
-    [
-        {
-            id: 'tile3',
-            type: TileType.Ice,
-            isOccupied: false,
-            imageSrc: 'ice-tile.png',
-            isOpen: true,
-        },
-        {
-            id: 'tile4',
-            type: TileType.Door,
-            isOccupied: true,
-            imageSrc: 'door-tile.png',
-            isOpen: false,
-        },
-    ],
-];
-
-const PLAYER_1_NAME = 'Player1';
-const PLAYER_2_NAME = 'Player2';
-
-const delayBeforeEndingGame = 5000;
-const MOCK_PLAYER_1: Player = {
-    name: PLAYER_1_NAME,
-    avatar: '',
-    speed: 0,
-    attack: {
-        value: 0,
-        bonusDice: DiceType.D4,
-    },
-    defense: {
-        value: 0,
-        bonusDice: DiceType.D4,
-    },
-    hp: {
-        current: 0,
-        max: 0,
-    },
-    movementPoints: 0,
-    actionPoints: 0,
-    inventory: [null, null],
-    isAdmin: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
-};
-
-const MOCK_PLAYER_2: Player = {
-    ...MOCK_PLAYER_1,
-    name: PLAYER_2_NAME,
-};
+import { DiceType, ItemName, TeamType, TileType } from '@common/enums';
+import { GameSocketService } from './game-socket.service';
 
 describe('GameSocketService', () => {
     let service: GameSocketService;
-    let mockSocketClientService: jasmine.SpyObj<SocketClientService>;
-    let mockPlayerMovementService: jasmine.SpyObj<PlayerMovementService>;
-    let mockLogbookService: jasmine.SpyObj<LogBookService>;
-    let mockSnackbarService: jasmine.SpyObj<SnackbarService>;
-    let mockComponent: jasmine.SpyObj<GamePageComponent>;
+    let gameStateServiceSpy: jasmine.SpyObj<GameStateSocketService>;
+    let gameplayServiceSpy: jasmine.SpyObj<GameplayService>;
+    let clientNotifierSpy: jasmine.SpyObj<ClientNotifierServices>;
+    let socketClientServiceSpy: jasmine.SpyObj<SocketClientService>;
 
-    const events = [
-        'abandonGame',
-        'gameDeleted',
-        'gameEnded',
-        'transitionStarted',
-        'turnStarted',
-        'timerUpdate',
-        'alertGameStarted',
-        'playerMovement',
-        'gameCombatStarted',
-        'attackResult',
-        'playerUpdate',
-        'playerListUpdate',
-        'doorClickedUpdate',
-        'gameCombatTurnStarted',
-        'gameCombatTimerUpdate',
-        'gridUpdate',
-        'noMoreEscapesLeft',
-        'combatEnded',
-        'adminModeChangedServerSide',
-    ];
+    const socketEvents: { [event: string]: any } = {};
 
     beforeEach(() => {
-        mockSocketClientService = jasmine.createSpyObj<SocketClientService>('SocketClientService', ['on'], {
-            socket: jasmine.createSpyObj('socket', ['off', 'on']),
+        const gameStateSpy = jasmine.createSpyObj('GameStateSocketService', ['updateGameData'], {
+            gameDataSubjectValue: {
+                lobby: { players: [] },
+                game: { grid: MOCK_GRID },
+                clientPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
+                currentPlayer: { name: 'testPlayer', actionPoints: 3, movementPoints: 10 } as unknown as Player,
+                isDebugMode: true,
+                movementPointsRemaining: 10,
+            },
         });
-
-        mockPlayerMovementService = jasmine.createSpyObj<PlayerMovementService>('PlayerMovementService', [
-            'calculateRemainingMovementPoints',
-            'hasAdjacentIce',
-            'hasAdjacentPlayerOrDoor',
-        ]);
-        mockLogbookService = jasmine.createSpyObj<LogBookService>('LogBookService', ['addEntry']);
-        mockSnackbarService = jasmine.createSpyObj<SnackbarService>('SnackbarService', ['showMessage', 'showMultipleMessages']);
-
-        mockComponent = jasmine.createSpyObj<GamePageComponent>('GamePageComponent', [
-            'handlePageRefresh',
-            'backToHome',
+        const gameplaySpy = jasmine.createSpyObj('GameplayService', [
             'abandonGame',
+            'backToHome',
             'updateAvailablePath',
+            'checkAvailableActions',
             'getClientPlayerPosition',
-            'endTurn',
-            'updateAttackResult',
+            'createItemPopUp',
+            'navigateToFinalPage',
         ]);
+        clientNotifierSpy = jasmine.createSpyObj('ClientNotifierServices', ['displayMessage', 'addLogbookEntry']);
+        const socketSpy = jasmine.createSpyObj('SocketClientService', ['on', 'emit']);
+        socketSpy.socket = {
+            on: (event: string, callback: any): void => {
+                socketEvents[event] = callback;
+            },
+        };
+        socketSpy.on.and.callFake((event: string, callback: any) => {
+            socketSpy.socket.on(event, callback);
+        });
+        const playerMoveSpy = jasmine.createSpyObj('PlayerMovementService', ['calculateRemainingMovementPoints']);
 
         TestBed.configureTestingModule({
             providers: [
                 GameSocketService,
-                { provide: SocketClientService, useValue: mockSocketClientService },
-                { provide: PlayerMovementService, useValue: mockPlayerMovementService },
-                { provide: LogBookService, useValue: mockLogbookService },
-                { provide: SnackbarService, useValue: mockSnackbarService },
+                { provide: GameStateSocketService, useValue: gameStateSpy },
+                { provide: GameplayService, useValue: gameplaySpy },
+                { provide: ClientNotifierServices, useValue: clientNotifierSpy },
+                { provide: SocketClientService, useValue: socketSpy },
+                { provide: PlayerMovementService, useValue: playerMoveSpy },
             ],
         });
 
         service = TestBed.inject(GameSocketService);
+        gameStateServiceSpy = TestBed.inject(GameStateSocketService) as jasmine.SpyObj<GameStateSocketService>;
+        gameplayServiceSpy = TestBed.inject(GameplayService) as jasmine.SpyObj<GameplayService>;
+        socketClientServiceSpy = TestBed.inject(SocketClientService) as jasmine.SpyObj<SocketClientService>;
+
+        service.initializeSocketListeners();
+
+        sessionStorage.clear();
+        sessionStorage.setItem('refreshed', 'true');
     });
 
-    it('should handle adminModeDisabled event correctly when debug mode is active', () => {
-        let adminModeDisabledCallback: () => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'adminModeDisabled') {
-                adminModeDisabledCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(adminModeDisabledCallback).toBeDefined();
-        mockComponent.isDebugMode = true;
-        adminModeDisabledCallback();
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith("Mode debug 'désactivé'");
-        expect(mockComponent.isDebugMode).toBeFalse();
+    afterEach(() => {
+        sessionStorage.clear();
     });
 
-    it('should handle abandonGame event correctly when player is not found', () => {
-        let abandonGameCallback: (data: { player: Player }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'abandonGame') {
-                abandonGameCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(abandonGameCallback).toBeDefined();
-        mockComponent.playerList = [MOCK_PLAYER_1];
-        abandonGameCallback({ player: MOCK_PLAYER_2 });
-        const abandonedPlayer = mockComponent.playerList.find((p) => p.name === MOCK_PLAYER_2.name);
-        expect(abandonedPlayer).toBeUndefined();
-        expect(mockLogbookService.addEntry).not.toHaveBeenCalled();
+    it('should initialize and set refreshed flag in session storage on first load', () => {
+        expect(sessionStorage.getItem('refreshed')).toBe('true');
     });
 
-    it('should handle gameDeleted event correctly', fakeAsync(() => {
-        let gameDeletedCallback: () => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'gameDeleted') {
-                gameDeletedCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(gameDeletedCallback).toBeDefined();
-        gameDeletedCallback();
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(
+    it('should handle game-abandoned event', () => {
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [MOCK_PLAYER];
+
+        const data = { player: MOCK_PLAYER };
+
+        socketEvents['game-abandoned'](data);
+
+        expect(MOCK_PLAYER.hasAbandoned).toBeTrue();
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should handle gameDeleted event', fakeAsync(() => {
+        socketEvents['gameDeleted']();
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
             "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
         );
-        discardPeriodicTasks();
+        tick(DELAY_BEFORE_HOME);
+        expect(gameplayServiceSpy.backToHome).toHaveBeenCalled();
     }));
 
-    it('should handle gameEnded event correctly', fakeAsync(() => {
-        let gameEndedCallback: (data: { winner: string }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'gameEnded') {
-                gameEndedCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(gameEndedCallback).toBeDefined();
-        const winnerName = PLAYER_1_NAME;
-        gameEndedCallback({ winner: winnerName });
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`👑 ${winnerName} a remporté la partie ! Redirection vers l'accueil sous peu`);
-        tick(delayBeforeEndingGame);
-        expect(mockComponent.abandonGame).toHaveBeenCalled();
-        discardPeriodicTasks();
-    }));
-
-    it('should handle transitionStarted event correctly when nextPlayer is the clientPlayer', () => {
-        let transitionStartedCallback: (data: { nextPlayer: Player; transitionDuration: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'transitionStarted') {
-                transitionStartedCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(transitionStartedCallback).toBeDefined();
-        const player1 = { name: PLAYER_1_NAME } as Player;
-        mockComponent.clientPlayer = player1;
-        transitionStartedCallback({ nextPlayer: player1, transitionDuration: 5 });
-        expect(mockSnackbarService.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${player1.name} commence dans 5 secondes`);
-        expect(mockComponent.clientPlayer).toEqual(player1);
-    });
-
-    it('should handle transitionStarted event correctly when nextPlayer is not the clientPlayer', () => {
-        let transitionStartedCallback: (data: { nextPlayer: Player; transitionDuration: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'transitionStarted') {
-                transitionStartedCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(transitionStartedCallback).toBeDefined();
-        mockComponent.clientPlayer = MOCK_PLAYER_1;
-        transitionStartedCallback({ nextPlayer: MOCK_PLAYER_2, transitionDuration: 3 });
-        expect(mockSnackbarService.showMultipleMessages).toHaveBeenCalledWith(`Le tour à ${MOCK_PLAYER_2.name} commence dans 3 secondes`);
-        expect(mockComponent.clientPlayer).toEqual(MOCK_PLAYER_1);
-    });
-
-    it('should handle turnStarted event correctly', () => {
-        let turnStartedCallback: (data: { player: Player; turnDuration: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'turnStarted') {
-                turnStartedCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(turnStartedCallback).toBeDefined();
-        const turnDuration = 60;
-        mockComponent.clientPlayer = MOCK_PLAYER_1;
-        turnStartedCallback({ player: MOCK_PLAYER_1, turnDuration });
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`C'est à ${MOCK_PLAYER_1.name} de jouer`);
-        expect(mockComponent.currentPlayer).toEqual(MOCK_PLAYER_1);
-        expect(mockComponent.isCurrentlyMoving).toBeFalse();
-        expect(mockComponent.isActionMode).toBeFalse();
-        expect(mockComponent.isInCombatMode).toBeFalse();
-        expect(mockComponent.clientPlayer.movementPoints).toEqual(MOCK_PLAYER_1.speed);
-        expect(mockComponent.turnTimer).toEqual(turnDuration);
-        expect(mockComponent.updateAvailablePath).toHaveBeenCalled();
-    });
-
-    it('should handle timerUpdate event correctly', () => {
-        let timerUpdateCallback: (data: { timeLeft: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'timerUpdate') {
-                timerUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(timerUpdateCallback).toBeDefined();
-        const timeLeft = 30;
-        timerUpdateCallback({ timeLeft });
-        expect(mockComponent.turnTimer).toEqual(timeLeft);
-    });
-
-    it('should handle playerMovement event correctly when clientPlayer is moving', () => {
-        let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'playerMovement') {
-                playerMovementCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(playerMovementCallback).toBeDefined();
-
-        const player: Player = { ...MOCK_PLAYER_1, movementPoints: 5, actionPoints: 1, speed: 5 } as Player;
-        const isCurrentlyMoving = true;
-        mockComponent.clientPlayer = player;
-        const grid = MOCK_GRID;
-        mockComponent.game = { grid } as Game;
-
-        mockComponent.getClientPlayerPosition.and.returnValue(CLIENT_PLAYER_POSITION);
-        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(2);
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
-        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-        playerMovementCallback({ grid, player, isCurrentlyMoving });
-        expect(mockComponent.game.grid).toEqual(grid);
-        expect(mockComponent.movementPointsRemaining).toEqual(3);
-        expect(mockComponent.isCurrentlyMoving).toEqual(isCurrentlyMoving);
-        expect(mockComponent.updateAvailablePath).toHaveBeenCalled();
-        expect(mockComponent.endTurn).not.toHaveBeenCalled();
-    });
-
-    it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice', () => {
-        let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'playerMovement') {
-                playerMovementCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(playerMovementCallback).toBeDefined();
-        const grid = MOCK_GRID;
-        const player = MOCK_PLAYER_1;
-        const isCurrentlyMoving = false;
-        mockComponent.clientPlayer = player;
-        mockComponent.game = { grid } as Game;
-        const clientPlayerPosition = CLIENT_PLAYER_POSITION;
-        mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
-        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0);
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
-        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-        playerMovementCallback({ grid, player, isCurrentlyMoving });
-        expect(mockComponent.endTurn).toHaveBeenCalled();
-    });
-
-    it('should not call endTurn when clientPlayer has no action points, no movement points, but has adjacent ice--222', () => {
-        let playerMovementCallback: (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'playerMovement') {
-                playerMovementCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(playerMovementCallback).toBeDefined();
-        const grid = MOCK_GRID;
-        const player: Player = { ...MOCK_PLAYER_1, actionPoints: 1, speed: 5 } as Player;
-        const isCurrentlyMoving = false;
-        mockComponent.clientPlayer = player;
-        mockComponent.game = { grid } as Game;
-        const clientPlayerPosition = CLIENT_PLAYER_POSITION;
-        mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
-        mockPlayerMovementService.calculateRemainingMovementPoints.and.returnValue(0);
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
-        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-        playerMovementCallback({ grid, player, isCurrentlyMoving });
-        expect(mockComponent.endTurn).toHaveBeenCalled();
-    });
-
-    it('should handle attackResult event correctly', () => {
-        let attackResultCallback: (data: { success: boolean; attackScore: number; defenseScore: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'attackResult') {
-                attackResultCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(attackResultCallback).toBeDefined();
-        const attackResultData = {
-            success: true,
-            attackScore: 15,
-            defenseScore: 10,
-        };
-        attackResultCallback(attackResultData);
-        expect(mockComponent.updateAttackResult).toHaveBeenCalledWith(attackResultData);
-    });
-
-    it('should update clientPlayer if updated player is the same as clientPlayer', () => {
-        let playerUpdateCallback: (data: { player: Player }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'playerUpdate') {
-                playerUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(playerUpdateCallback).toBeDefined();
-        const player: Player = { name: 'Player1', movementPoints: 5, actionPoints: 1, speed: 5 } as Player;
-        const updatedPlayer: Player = { name: 'Player1', movementPoints: 3, actionPoints: 0, speed: 5 } as Player;
-        mockComponent.clientPlayer = player;
-        playerUpdateCallback({ player: updatedPlayer });
-        expect(mockComponent.clientPlayer).toEqual(updatedPlayer);
-    });
-
-    it('should handle playerListUpdate event correctly', () => {
-        let playerListUpdateCallback: (data: { players: Player[] }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'playerListUpdate') {
-                playerListUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(playerListUpdateCallback).toBeDefined();
-        const players: Player[] = [
-            { ...MOCK_PLAYER_1, movementPoints: 5, actionPoints: 1, speed: 5 } as Player,
-            { ...MOCK_PLAYER_2, movementPoints: 3, speed: 5 } as Player,
-        ];
-        playerListUpdateCallback({ players });
-        expect(mockComponent.playerList).toEqual(players);
-    });
-
-    it('should not update grid or properties if game or grid does not exist', () => {
-        let doorClickedUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'doorClickedUpdate') {
-                doorClickedUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(doorClickedUpdateCallback).toBeDefined();
-        const grid = MOCK_GRID;
-        mockComponent.game = null;
-        mockComponent.clientPlayer = { actionPoints: 1 } as Player;
-        mockComponent.isActionMode = true;
-        doorClickedUpdateCallback({ grid });
-        expect(mockComponent.clientPlayer.actionPoints).toEqual(1);
-        expect(mockComponent.isActionMode).toBeTrue();
-        expect(mockComponent.updateAvailablePath).not.toHaveBeenCalled();
-    });
-
-    it('should handle gameCombatTimerUpdate event correctly', () => {
-        let gameCombatTimerUpdateCallback: (data: { timeLeft: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'timerUpdate') {
-                gameCombatTimerUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(gameCombatTimerUpdateCallback).toBeDefined();
-        const timeLeft = 30;
-        gameCombatTimerUpdateCallback({ timeLeft });
-        expect(mockComponent.turnTimer).toEqual(timeLeft);
-    });
-
-    it('should handle gridUpdate event correctly when game and grid exist', () => {
-        let gridUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'gridUpdate') {
-                gridUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(gridUpdateCallback).toBeDefined();
-        const grid = MOCK_GRID;
-        mockComponent.game = { grid } as Game;
-        gridUpdateCallback({ grid });
-        expect(mockComponent.game.grid).toEqual(grid);
-    });
-
-    it('should not update grid if game or grid does not exist', () => {
-        let gridUpdateCallback: (data: { grid: Tile[][] }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'gridUpdate') {
-                gridUpdateCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(gridUpdateCallback).toBeDefined();
-        const grid = MOCK_GRID;
-        mockComponent.game = null;
-        gridUpdateCallback({ grid });
-        expect(mockComponent.game).toBeNull();
-    });
-
-    it('should handle noMoreEscapesLeft event correctly', () => {
-        let noMoreEscapesLeftCallback: (data: { player: Player; attemptsLeft: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'noMoreEscapesLeft') {
-                noMoreEscapesLeftCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        expect(noMoreEscapesLeftCallback).toBeDefined();
-        const player: Player = { name: 'Player1', movementPoints: 5, actionPoints: 1, speed: 5 } as Player;
-        const attemptsLeft = 1;
-        noMoreEscapesLeftCallback({ player, attemptsLeft });
-    });
-
-    it('should toggle debug mode to true and show "Mode debug activé" when adminModeChangedServerSide is triggered', () => {
-        let adminModeChangedCallback: () => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'adminModeChangedServerSide') {
-                adminModeChangedCallback = callback;
-            }
-            return () => {};
-        });
-        service.initializeSocketListeners(mockComponent);
-        mockComponent.isDebugMode = false;
-        adminModeChangedCallback();
-        expect(mockComponent.isDebugMode).toBeTrue();
-        expect(mockSnackbarService.showMessage).toHaveBeenCalledWith('Mode debug activé');
-    });
-
-    it('should unsubscribe from all socket events', () => {
-        service.unsubscribeSocketListeners();
-        events.forEach((event) => {
-            expect(mockSocketClientService.socket.off).toHaveBeenCalledWith(event);
-        });
-        expect(mockSocketClientService.socket.off).toHaveBeenCalledTimes(events.length);
-    });
-
-    it('should handle combat ended with actionPoints 1 and movementPoints 0 and no adjacent ice, no action available', () => {
-        let combatEndedCallback: (data: { winner: Player; hasEvaded: boolean }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'combatEnded') {
-                combatEndedCallback = callback;
-            }
-            return () => {};
-        });
-
-        const mockPlayer = {
-            name: 'Player1',
-            speed: 5,
-            movementPoints: 0,
-            actionPoints: 1,
-            inventory: [null, null],
-            isAdmin: false,
-            hasAbandoned: false,
-            isActive: true,
-            combatWon: 0,
-        } as Player;
-
-        service.initializeSocketListeners(mockComponent);
-        mockComponent.clientPlayer = mockPlayer;
-
-        mockComponent.currentPlayer = mockPlayer;
-
-        mockComponent.movementPointsRemaining = 0;
-
-        mockComponent.game = {
-            id: 'game1',
-            name: 'Test Game',
-            size: '10x10',
-            mode: 'classic',
-            lastModified: new Date('2023-10-01'),
-            isVisible: true,
-            previewImage: 'image-url',
-            description: 'This is a test game',
-            grid: [],
-        } as Game;
-
-        const clientPlayerPosition: Tile = {
-            id: 'tile1',
-            type: TileType.Default,
-            isOccupied: true,
-            imageSrc: 'player-tile.png',
-            isOpen: true,
-        };
-        mockComponent.getClientPlayerPosition.and.returnValue(clientPlayerPosition);
-        mockPlayerMovementService.hasAdjacentIce.and.returnValue(false);
-        mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-        const winner: Player = {
-            name: 'Player1',
-            speed: 5,
-            movementPoints: 0,
-            actionPoints: 1,
-            inventory: [null, null],
-            isAdmin: false,
-            hasAbandoned: false,
-            isActive: true,
-            combatWon: 1,
-        } as Player;
-
-        combatEndedCallback({ winner, hasEvaded: false });
-        expect(mockComponent.endTurn).toHaveBeenCalled();
-    });
-
-    it('should handle combatTimerUpdate event correctly', () => {
-        let combatTimerUpdateCallback: (data: { timeLeft: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'combatTimerUpdate') {
-                combatTimerUpdateCallback = callback;
-            }
-            return () => {};
-        });
-
-        service.initializeSocketListeners(mockComponent);
-        expect(combatTimerUpdateCallback).toBeDefined();
-
-        const timeLeft = 15;
-        combatTimerUpdateCallback({ timeLeft });
-
-        expect(mockComponent.turnTimer).toEqual(timeLeft);
-    });
-
-    it('should handle combatTurnStarted event correctly', () => {
-        let combatTurnStartedCallback: (data: { fighter: Player; duration: number; escapeAttemptsLeft: number }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'combatTurnStarted') {
-                combatTurnStartedCallback = callback;
-            }
-            return () => {};
-        });
-
-        service.initializeSocketListeners(mockComponent);
-        expect(combatTurnStartedCallback).toBeDefined();
-
-        const fighter: Player = {
-            name: 'CombatFighter',
-            speed: 6,
-            movementPoints: 3,
-            actionPoints: 1,
-            inventory: [null, null],
-            isAdmin: false,
-            hasAbandoned: false,
-            isActive: true,
-            combatWon: 2,
-        } as Player;
-
-        combatTurnStartedCallback({
-            fighter,
-            duration: 30,
-            escapeAttemptsLeft: 1,
-        });
-
-        expect(mockComponent.currentPlayer).toEqual(fighter);
-    });
-
-    it('should handle combatStarted event correctly', () => {
-        let combatStartedCallback: () => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'combatStarted') {
-                combatStartedCallback = callback;
-            }
-            return () => {};
-        });
-
-        service.initializeSocketListeners(mockComponent);
-        expect(combatStartedCallback).toBeDefined();
-
-        mockComponent.isInCombatMode = false;
-        combatStartedCallback();
-
-        expect(mockComponent.isInCombatMode).toBeTrue();
-    });
-
-    it('should handle game-abandoned event correctly when player is found', () => {
-        mockComponent = jasmine.createSpyObj<GamePageComponent>(
-            'GamePageComponent',
-            ['handlePageRefresh', 'backToHome', 'abandonGame', 'updateAvailablePath', 'getClientPlayerPosition', 'endTurn', 'updateAttackResult'],
-            {
-                lobby: { players: [MOCK_PLAYER_1, MOCK_PLAYER_2] } as Lobby,
-                clientPlayer: {} as Player,
-                playerList: [MOCK_PLAYER_1, MOCK_PLAYER_2],
-                game: {} as Game,
-                wasRefreshed: false,
-                currentPlayer: {} as Player,
-                availablePath: [],
-                quickestPath: [],
-                isCurrentlyMoving: false,
-                isActionMode: false,
-                isInCombatMode: false,
-                turnTimer: 0,
-                movementPointsRemaining: 0,
-                isDebugMode: false,
-            },
+    it('should handle gameEnded event', fakeAsync(() => {
+        const data = { winner: ['WinnerPlayer'] };
+        socketEvents['gameEnded'](data);
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
+            `👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`,
         );
-        spyOn(sessionStorage, 'getItem').and.callFake((key: string) => {
-            if (key === 'lobby') {
-                return JSON.stringify(mockComponent.lobby);
-            }
-            return null;
+        tick(DELAY_BEFORE_ENDING_GAME);
+        expect(gameplayServiceSpy.navigateToFinalPage).toHaveBeenCalled();
+    }));
+
+    it('should handle gameEnded event with multiple winnners', fakeAsync(() => {
+        const data = { winner: ['WinnerPlayer1', 'WinnerPlayer2'] };
+        socketEvents['gameEnded'](data);
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith(
+            `👑 ${data.winner.join(', ')} ont remporté la partie ! Redirection vers la page de fin sous peu`,
+        );
+        tick(DELAY_BEFORE_ENDING_GAME);
+        expect(gameplayServiceSpy.navigateToFinalPage).toHaveBeenCalled();
+    }));
+
+    it('should handle adminModeDisabled event', () => {
+        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = true;
+        socketEvents['adminModeDisabled']();
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith("Mode debug 'désactivé'");
+        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeFalse();
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should handle gameStarted event', () => {
+        const data = {
+            orderedPlayers: [MOCK_PLAYER, { ...MOCK_PLAYER, name: 'Player2' }],
+            updatedGame: {
+                ...MOCK_GAME,
+                grid: MOCK_GRID,
+            },
+        };
+
+        const callback = socketEvents['gameStarted'];
+
+        callback(data);
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toEqual(data.orderedPlayers);
+        expect(gameStateServiceSpy.gameDataSubjectValue.game).toEqual(data.updatedGame);
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should handle playerListUpdate event', () => {
+        const players = [MOCK_PLAYER, MOCK_PLAYER];
+        socketEvents['playerListUpdate']({ players });
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players).toEqual(players);
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should handle gridUpdate event', () => {
+        gameStateServiceSpy.gameDataSubjectValue.game = MOCK_GAME;
+        const newGrid = MOCK_GRID;
+        socketEvents['gridUpdate']({ grid: newGrid });
+        expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(newGrid);
+        expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalled();
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should not update grid when game data is missing in onGridUpdate', () => {
+        gameStateServiceSpy.gameDataSubjectValue.game = undefined as unknown as Game;
+        const initialGrid = gameStateServiceSpy.gameDataSubjectValue.game?.grid;
+        const testGrid = MOCK_GRID;
+        socketEvents['gridUpdate']({ grid: testGrid });
+        expect(gameStateServiceSpy.gameDataSubjectValue.game?.grid).toEqual(initialGrid);
+        expect(gameplayServiceSpy.updateAvailablePath).not.toHaveBeenCalled();
+        expect(gameStateServiceSpy.updateGameData).not.toHaveBeenCalled();
+    });
+
+    it('should update game grid if game and grid are defined in onPlayerMovement', () => {
+        const newGrid: Tile[][] = [[{ id: 't1', type: TileType.Default } as Tile]];
+        const testPlayer: Player = {
+            ...MOCK_PLAYER,
+            name: 'testPlayer',
+            inventory: [null, null],
+            hp: { current: 10, max: 10 },
+            attack: { value: 5, bonusDice: DiceType.D6 },
+            defense: { value: 5, bonusDice: DiceType.D6 },
+            speed: 2,
+            isAdmin: false,
+            isVirtual: false,
+            movementPoints: 5,
+            actionPoints: 3,
+            combatWon: 0,
+            hasAbandoned: false,
+            isActive: true,
+        };
+
+        gameStateServiceSpy.gameDataSubjectValue.game = { grid: MOCK_GRID } as Game;
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = testPlayer;
+        gameStateServiceSpy.gameDataSubjectValue.currentPlayer = testPlayer;
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [testPlayer];
+
+        const data = {
+            grid: newGrid,
+            player: { ...testPlayer },
+            isCurrentlyMoving: false,
+        };
+
+        (gameplayServiceSpy.getClientPlayerPosition as jasmine.Spy).and.returnValue({ x: 0, y: 0 });
+        (TestBed.inject(PlayerMovementService).calculateRemainingMovementPoints as jasmine.Spy).and.returnValue(1);
+
+        socketEvents['playerMovement'](data);
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(newGrid);
+    });
+
+    it('should log when player picks up the flag during movement', () => {
+        const flagItem = new Item({
+            id: 'item1',
+            name: 'flag',
+            imageSrc: '',
+            imageSrcGrey: '',
+            itemCounter: 1,
+            description: 'Le drapeau',
         });
-        let gameAbandonedCallback: (data: { player: Player }) => void = () => {};
-        mockSocketClientService.on.and.callFake((event: string, callback: any) => {
-            if (event === 'game-abandoned') {
-                gameAbandonedCallback = callback;
-            }
-            return () => {};
+
+        const testPlayer: Player = {
+            ...MOCK_PLAYER,
+            name: 'testPlayer',
+            inventory: [flagItem, null],
+        };
+
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [
+            {
+                ...testPlayer,
+                inventory: [null, null],
+            },
+        ];
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = testPlayer;
+        gameStateServiceSpy.gameDataSubjectValue.currentPlayer = testPlayer;
+
+        (gameplayServiceSpy.getClientPlayerPosition as jasmine.Spy).and.returnValue({ x: 0, y: 0 });
+        (TestBed.inject(PlayerMovementService).calculateRemainingMovementPoints as jasmine.Spy).and.returnValue(1);
+
+        socketEvents['playerMovement']({
+            grid: MOCK_GRID,
+            player: testPlayer,
+            isCurrentlyMoving: false,
         });
-        service.initializeSocketListeners(mockComponent);
-        expect(gameAbandonedCallback).toBeDefined();
-        gameAbandonedCallback({ player: MOCK_PLAYER_1 });
-        const abandonedPlayer = mockComponent.playerList.find((p) => p.name === 'Player1');
-        expect(abandonedPlayer?.hasAbandoned).toBeTrue();
+
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith(`${testPlayer.name} a pris le drapeau!`, [testPlayer]);
+    });
+
+    it('should log when player picks up a non-flag item during movement', () => {
+        const swordItem = new Item({
+            id: 'item2',
+            name: 'sword',
+            imageSrc: '',
+            imageSrcGrey: '',
+            itemCounter: 1,
+            description: 'Épée',
+        });
+
+        const testPlayer: Player = {
+            ...MOCK_PLAYER,
+            name: 'testPlayer',
+            inventory: [swordItem, null],
+        };
+
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [
+            {
+                ...testPlayer,
+                inventory: [null, null],
+            },
+        ];
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = testPlayer;
+        gameStateServiceSpy.gameDataSubjectValue.currentPlayer = testPlayer;
+
+        (gameplayServiceSpy.getClientPlayerPosition as jasmine.Spy).and.returnValue({ x: 0, y: 0 });
+        (TestBed.inject(PlayerMovementService).calculateRemainingMovementPoints as jasmine.Spy).and.returnValue(1);
+
+        socketEvents['playerMovement']({
+            grid: MOCK_GRID,
+            player: testPlayer,
+            isCurrentlyMoving: false,
+        });
+
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith(`${testPlayer.name} a pris un item!`, [testPlayer]);
+    });
+
+    it('should not process door click when grid is missing in onDoorClicked', () => {
+        /* eslint-disable-next-line @typescript-eslint/no-non-null-assertion */ // necessary for the test
+        gameStateServiceSpy.gameDataSubjectValue.game = { ...MOCK_GAME, grid: undefined! };
+        const initialActionPoints = gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints;
+        socketEvents['doorClicked']({ grid: MOCK_GRID });
+        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toEqual(initialActionPoints);
+        expect(gameplayServiceSpy.updateAvailablePath).not.toHaveBeenCalled();
+        expect(gameStateServiceSpy.updateGameData).not.toHaveBeenCalled();
+    });
+
+    it('should abandon game when refresh flag exists in handlePageRefresh', () => {
+        sessionStorage.setItem('refreshed', 'true');
+        service['handlePageRefresh']();
+        expect(gameplayServiceSpy.abandonGame).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(sessionStorage.getItem('refreshed')).toBe('true');
+    });
+
+    it('should handle missing player in onGameAbandoned', () => {
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [];
+        const initialPlayerCount = gameStateServiceSpy.gameDataSubjectValue.lobby.players.length;
+        const testPlayer = { ...MOCK_PLAYER, name: 'non-existent-player' };
+
+        socketEvents['game-abandoned']({ player: testPlayer });
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.lobby.players.length).toEqual(initialPlayerCount);
+        expect(gameStateServiceSpy.updateGameData).not.toHaveBeenCalled();
+    });
+
+    it('should handle adminModeChangedServerSide event and update debug mode', () => {
+        gameStateServiceSpy.gameDataSubjectValue.isDebugMode = true;
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [{ ...MOCK_PLAYER, isAdmin: true }];
+
+        socketEvents['adminModeChangedServerSide']();
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.isDebugMode).toBeFalse();
+        expect(clientNotifierSpy.displayMessage).toHaveBeenCalledWith('Mode debug désactivé');
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Mode debug désactivé', [
+            gameStateServiceSpy.gameDataSubjectValue.lobby.players[0],
+        ]);
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+    });
+
+    it('should call gameplayService when itemChoice', () => {
+        const mockItem = { name: ItemName.Default } as Item;
+
+        const data = { items: [mockItem, mockItem, mockItem] as [Item, Item, Item] };
+        socketEvents['itemChoice'](data);
+        expect(gameplayServiceSpy.createItemPopUp).toHaveBeenCalledWith(data.items, gameStateServiceSpy.gameDataSubjectValue);
+    });
+
+    it('should emit itemDrop event with received data when itemDropped is triggered', () => {
+        const mockData = {
+            accessCode: 'ABCD',
+            player: MOCK_PLAYER,
+            item: new Item({
+                id: '1',
+                name: ItemName.Flag,
+                imageSrc: 'flag.png',
+                itemCounter: 1,
+                description: 'Test flag',
+            }),
+        };
+
+        socketEvents['itemDropped'](mockData);
+
+        expect(socketClientServiceSpy.emit).toHaveBeenCalledWith('itemDrop', mockData);
+    });
+
+    describe('onWallClicked', () => {
+        it('should update grid and client state when game data is valid', () => {
+            const mockGrid = [[{ id: 'tile1', type: TileType.Wall } as Tile]];
+            gameStateServiceSpy.gameDataSubjectValue.game = { grid: MOCK_GRID } as Game;
+            gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints = 3;
+            gameStateServiceSpy.gameDataSubjectValue.isActionMode = true;
+
+            socketEvents['wallClicked']({ grid: mockGrid });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(mockGrid);
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(NO_ACTION_POINTS);
+            expect(gameStateServiceSpy.gameDataSubjectValue.isActionMode).toBeFalse();
+            expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+            expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+            expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Un joueur a effectue une action sur un mur!', [
+                gameStateServiceSpy.gameDataSubjectValue.clientPlayer,
+            ]);
+        });
+        it('should do nothing when grid is missing', () => {
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            gameStateServiceSpy.gameDataSubjectValue.game = { ...MOCK_GAME, grid: undefined! };
+            const initialActionPoints = gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints;
+
+            socketEvents['wallClicked']({ grid: MOCK_GRID });
+
+            expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(initialActionPoints);
+            expect(gameplayServiceSpy.updateAvailablePath).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('onPlayerClientUpdate', () => {
+        let mockPlayer: Player;
+
+        let mockItem: Item;
+
+        beforeEach(() => {
+            mockItem = new Item({
+                id: 'item1',
+                imageSrc: 'sword.png',
+                imageSrcGrey: 'sword-grey.png',
+                name: 'sword',
+                itemCounter: 1,
+                description: 'A sharp sword',
+            });
+
+            mockPlayer = {
+                name: 'testPlayer',
+                avatar: 'avatar1.png',
+                speed: 2,
+                attack: { value: 10, bonusDice: DiceType.D6 },
+                defense: { value: 5, bonusDice: DiceType.D6 },
+                hp: { current: 100, max: 100 },
+                movementPoints: 10,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                isVirtual: false,
+                hasAbandoned: false,
+                isActive: true,
+                combatWon: 0,
+                team: TeamType.RED,
+            };
+        });
+
+        it('should update player in lobby when found', () => {
+            gameStateServiceSpy.gameDataSubjectValue.lobby.players = [mockPlayer];
+            const updatedPlayer = {
+                ...mockPlayer,
+                inventory: [mockItem, null],
+            };
+            socketEvents['playerClientUpdate']({ player: updatedPlayer });
+            const lobbyPlayer = gameStateServiceSpy.gameDataSubjectValue.lobby.players[0];
+            expect(lobbyPlayer.inventory).toEqual([mockItem, null]);
+        });
+    });
+
+    it('should log when player picks up flag', () => {
+        const flagItem = new Item({
+            name: 'flag',
+            imageSrc: 'flag.png',
+            imageSrcGrey: 'flag-grey.png',
+            description: 'Drapeau du jeu',
+        });
+
+        const initialPlayer: Player = {
+            ...MOCK_PLAYER,
+            inventory: [null, null] as [Item | null, Item | null],
+        };
+
+        gameStateServiceSpy.gameDataSubjectValue.lobby.players = [initialPlayer];
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer = { ...initialPlayer };
+
+        const updatedPlayer: Player = {
+            ...initialPlayer,
+            inventory: [flagItem, null] as [Item | null, Item | null],
+        };
+        socketEvents['playerClientUpdate']({ player: updatedPlayer });
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith(`${updatedPlayer.name} a pris le drapeau!`, [updatedPlayer]);
+
+        const lobbyPlayer = gameStateServiceSpy.gameDataSubjectValue.lobby.players[0];
+        expect(lobbyPlayer.inventory?.[0]?.name).toBe('flag');
+
+        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.inventory?.[0]?.name).toBe('flag');
+
+        const clonedItem = lobbyPlayer.inventory?.[0]?.clone();
+        expect(clonedItem?.name).toBe('flag');
+        expect(clonedItem?.id).not.toBe(flagItem.id);
+    });
+
+    describe('onPlayerUpdate', () => {
+        let mockClientPlayer: Player;
+        let mockOtherPlayer: Player;
+        let mockPlayerInFight: Player;
+        let mockItem: Item;
+        let currentGameState: any;
+
+        beforeEach(() => {
+            mockItem = new Item({
+                name: 'sword',
+                imageSrc: 'sword.png',
+                imageSrcGrey: 'sword-grey.png',
+                description: 'Une épée tranchante',
+            });
+            mockClientPlayer = {
+                name: 'clientPlayer',
+                avatar: 'avatar1.png',
+                speed: 2,
+                attack: { value: 5, bonusDice: DiceType.D6 },
+                defense: { value: 3, bonusDice: DiceType.D6 },
+                hp: { current: 100, max: 100 },
+                movementPoints: 10,
+                actionPoints: 3,
+                inventory: [null, null],
+                isAdmin: false,
+                isVirtual: false,
+                hasAbandoned: false,
+                isActive: true,
+                combatWon: 0,
+                team: TeamType.RED,
+            };
+
+            mockOtherPlayer = { ...mockClientPlayer, name: 'otherPlayer' };
+            mockPlayerInFight = { ...mockClientPlayer, name: 'playerInFight' };
+            currentGameState = {
+                clientPlayer: { ...mockClientPlayer },
+                playersInFight: [{ ...mockPlayerInFight }],
+                lobby: { players: [mockClientPlayer, mockOtherPlayer, mockPlayerInFight] },
+                currentPlayer: { ...mockClientPlayer },
+            };
+            Object.defineProperty(gameStateServiceSpy, 'gameDataSubjectValue', {
+                get: () => currentGameState,
+                configurable: true,
+            });
+            gameStateServiceSpy.updateGameData.and.callFake((newState) => {
+                currentGameState = { ...currentGameState, ...newState };
+            });
+        });
+
+        it('should update client player correctly', () => {
+            const updatedPlayer: Player = {
+                ...mockClientPlayer,
+                hp: { current: 90, max: 100 },
+                inventory: [mockItem, null],
+            };
+            socketEvents['playerUpdate']({ player: updatedPlayer });
+
+            expect(currentGameState.clientPlayer.hp.current).toBe(90);
+            expect(currentGameState.clientPlayer.inventory[0]?.name).toBe('sword');
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+        });
+
+        it('should update correct player in fight list when index is found', () => {
+            const secondPlayerInFight: Player = {
+                ...mockPlayerInFight,
+                name: 'secondPlayerInFight',
+                hp: { current: 75, max: 100 },
+            };
+            currentGameState.playersInFight.push(secondPlayerInFight);
+
+            const updatedPlayer: Player = {
+                ...mockPlayerInFight,
+                hp: { current: 30, max: 100 },
+                inventory: [mockItem, null],
+            };
+            socketEvents['playerUpdate']({ player: updatedPlayer });
+            expect(gameStateServiceSpy.updateGameData).toHaveBeenCalled();
+        });
+    });
+
+    it('should process door clicked correctly when grid and game exist and player is current player', () => {
+        const mockGrid = MOCK_GRID;
+        const mockPlayer = { ...MOCK_PLAYER, name: 'testPlayer' };
+        const data = {
+            grid: mockGrid,
+            isOpen: true,
+            player: mockPlayer,
+        };
+        gameStateServiceSpy.gameDataSubjectValue.game = { grid: MOCK_GRID } as Game;
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
+        gameStateServiceSpy.gameDataSubjectValue.currentPlayer.name = 'testPlayer';
+        gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints = 3;
+        (service as any).processDoorClicked(data);
+        expect(gameStateServiceSpy.gameDataSubjectValue.game.grid).toEqual(mockGrid);
+        expect(gameStateServiceSpy.gameDataSubjectValue.clientPlayer.actionPoints).toBe(NO_ACTION_POINTS);
+        expect(gameStateServiceSpy.gameDataSubjectValue.isActionMode).toBeFalse();
+        expect(gameplayServiceSpy.updateAvailablePath).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameplayServiceSpy.checkAvailableActions).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(gameStateServiceSpy.updateGameData).toHaveBeenCalledWith(gameStateServiceSpy.gameDataSubjectValue);
+        expect(clientNotifierSpy.addLogbookEntry).toHaveBeenCalledWith('Un joueur a fermé une porte', [mockPlayer]);
     });
 });

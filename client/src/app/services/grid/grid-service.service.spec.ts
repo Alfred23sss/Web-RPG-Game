@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { GameSize, ImageType, TileType } from '@app/enums/global.enums';
-import { Tile } from '@app/interfaces/tile';
 import { GridService } from './grid-service.service';
+import { MOCK_GRID } from '@app/constants/global.constants';
+import { ImageType, GameSize, TileType } from '@common/enums';
 
 const SMALL_GRID_SIZE = 10;
 const MEDIUM_GRID_SIZE = 15;
@@ -33,20 +33,10 @@ describe('GridService', () => {
     });
 
     it('should set and get the grid', () => {
-        const newGrid: Tile[][] = [
-            [
-                { id: 'tile-0-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-                { id: 'tile-0-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-            ],
-            [
-                { id: 'tile-1-0', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-                { id: 'tile-1-1', imageSrc: ImageType.Default, isOccupied: false, type: TileType.Default, isOpen: true },
-            ],
-        ];
-        service.setGrid(newGrid);
+        service.setGrid(MOCK_GRID);
         const grid = service.getGrid();
 
-        expect(grid).toBe(newGrid);
+        expect(grid).toBe(MOCK_GRID);
     });
 
     it('should return the correct grid size for valid game sizes', () => {

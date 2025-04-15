@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */
 import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { AttributeType, DiceType } from '@app/enums/global.enums';
+import { AttributeType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
 import { CharacterFormComponent } from './character-form.component';
+import { DiceType } from '@common/enums';
 
 describe('CharacterFormComponent', () => {
     let component: CharacterFormComponent;
@@ -37,10 +39,11 @@ describe('CharacterFormComponent', () => {
             ],
             {
                 unavailableAvatars$: new BehaviorSubject<string[]>([]).asObservable(),
+                onCharacterSubmitted$: new BehaviorSubject<void>(undefined),
                 attributes: {
                     [AttributeType.Vitality]: 4,
                     [AttributeType.Speed]: 4,
-                    [AttributeType.Attack]: 4, // Ajout des valeurs manquantes
+                    [AttributeType.Attack]: 4,
                     [AttributeType.Defense]: 4,
                 },
                 bonusAssigned: {
@@ -102,8 +105,8 @@ describe('CharacterFormComponent', () => {
     });
 
     it('should call assignDice on characterService', () => {
-        component.assignDice(AttributeType.Attack);
-        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(component.createdPlayer, AttributeType.Attack);
+        component.assignDice(AttributeType.Attack, DiceType.D4);
+        expect(mockCharacterService.assignDice).toHaveBeenCalledWith(component.createdPlayer, AttributeType.Attack, DiceType.D4);
     });
 
     it('should call selectAvatar on characterService', () => {
@@ -154,17 +157,15 @@ describe('CharacterFormComponent', () => {
             component.currentAccessCode,
             component.isLobbyCreated,
             component.game as Game,
-            jasmine.any(Function),
         );
     });
 
-    it('should call resetPopup after submitCharacter completes successfully', async () => {
+    it('should call resetPopup when onCharacterSubmitted$ emits after submitCharacter', async () => {
         spyOn(component, 'resetPopup');
-        mockCharacterService.submitCharacter.and.callFake(async (player, accessCode, isLobbyCreated, game, closePopup) => {
-            closePopup();
-        });
 
         await component.submitCharacter();
+
+        (mockCharacterService.onCharacterSubmitted$ as BehaviorSubject<void>).next();
 
         expect(component.resetPopup).toHaveBeenCalled();
     });
@@ -177,12 +178,111 @@ describe('CharacterFormComponent', () => {
 
     it('should execute resetPopup when submitCharacter completes', async () => {
         spyOn(component, 'resetPopup');
-        mockCharacterService.submitCharacter.and.callFake(async (player, accessCode, isLobbyCreated, game, closePopup) => {
-            closePopup();
+        mockCharacterService.submitCharacter.and.callFake(async () => {
+            (mockCharacterService.onCharacterSubmitted$ as BehaviorSubject<void>).next();
         });
 
         await component.submitCharacter();
 
         expect(component.resetPopup).toHaveBeenCalled();
+    });
+
+    describe('getSegmentCount', () => {
+        it('should return half value for Vitality (rounded down)', () => {
+            mockCharacterService.attributes[AttributeType.Vitality] = 5;
+            const result = component.getSegmentCount(AttributeType.Vitality);
+            expect(result).toBe(2);
+        });
+
+        it('should return half value for Speed (rounded down)', () => {
+            mockCharacterService.attributes[AttributeType.Speed] = 7;
+            const result = component.getSegmentCount(AttributeType.Speed);
+            expect(result).toBe(3);
+        });
+
+        it('should return full value for Attack', () => {
+            mockCharacterService.attributes[AttributeType.Attack] = 4;
+            const result = component.getSegmentCount(AttributeType.Attack);
+            expect(result).toBe(4);
+        });
+
+        it('should return full value for Defense', () => {
+            mockCharacterService.attributes[AttributeType.Defense] = 6;
+            const result = component.getSegmentCount(AttributeType.Defense);
+            expect(result).toBe(6);
+        });
+    });
+
+    describe('getDisplayValue', () => {
+        beforeEach(() => {
+            component.createdPlayer = {
+                attack: { value: 4, bonusDice: DiceType.D6 },
+                defense: { value: 4, bonusDice: DiceType.D4 },
+            } as Player;
+        });
+
+        it('should return value + dice for Attack', () => {
+            mockCharacterService.attributes[AttributeType.Attack] = 4;
+            const result = component.getDisplayValue(AttributeType.Attack);
+            expect(result).toBe('4 + D6');
+        });
+
+        it('should return value + dice for Defense', () => {
+            mockCharacterService.attributes[AttributeType.Defense] = 5;
+            const result = component.getDisplayValue(AttributeType.Defense);
+            expect(result).toBe('5 + D4');
+        });
+
+        it('should return simple value for Vitality', () => {
+            mockCharacterService.attributes[AttributeType.Vitality] = 6;
+            const result = component.getDisplayValue(AttributeType.Vitality);
+            expect(result).toBe('6');
+        });
+
+        it('should return simple value for Speed', () => {
+            mockCharacterService.attributes[AttributeType.Speed] = 7;
+            const result = component.getDisplayValue(AttributeType.Speed);
+            expect(result).toBe('7');
+        });
+    });
+
+    describe('getDiceValue', () => {
+        beforeEach(() => {
+            component.createdPlayer = {
+                attack: { bonusDice: DiceType.D6 },
+                defense: { bonusDice: DiceType.D4 },
+            } as Player;
+        });
+
+        it('should return attack bonus dice when attribute is Attack', () => {
+            const result = component.getDiceValue(AttributeType.Attack);
+            expect(result).toBe(DiceType.D6);
+        });
+
+        it('should return defense bonus dice when attribute is Defense', () => {
+            const result = component.getDiceValue(AttributeType.Defense);
+            expect(result).toBe(DiceType.D4);
+        });
+
+        it('should return D4 as default for other attributes', () => {
+            const result = component.getDiceValue(AttributeType.Vitality);
+            expect(result).toBe(DiceType.D4);
+        });
+    });
+
+    describe('handleKeyDown', () => {
+        it('should call closePopup when Escape key is pressed', () => {
+            spyOn(component, 'closePopup');
+            const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
+            component['handleKeyDown'](escapeEvent);
+            expect(component.closePopup).toHaveBeenCalled();
+        });
+
+        it('should not call closePopup when other keys are pressed', () => {
+            spyOn(component, 'closePopup');
+            const otherKeyEvent = new KeyboardEvent('keydown', { key: 'Enter' });
+            component['handleKeyDown'](otherKeyEvent);
+            expect(component.closePopup).not.toHaveBeenCalled();
+        });
     });
 });

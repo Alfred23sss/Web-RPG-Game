@@ -1,0 +1,15 @@
+<div class="popup-overlay">
+    <div class="popup-container">
+        <h2 class="popup-title">Vous avez trop d'items! <br> Clickez sur l'objet à jeter:</h2>
+        <div class="items-container">
+            @for (item of data.items; track item.id){
+                <div class="item-container" (click)="selectItem(item)">
+                    <img [src]="item.imageSrc" alt="{{ item.name }}" class="item-image" />
+                    <div class="item-info">
+                        <span class="item-name">{{ item.name }}</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>

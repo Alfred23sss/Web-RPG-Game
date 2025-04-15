@@ -1,13 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { ErrorMessages, GameMode, GameSize, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { GameModeService } from '@app/services/game-mode/game-mode.service';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { PopUpComponent } from './pop-up.component';
+import { GameMode, Routes, GameSize } from '@common/enums';
 
 describe('PopUpComponent', () => {
     let component: PopUpComponent;
@@ -78,16 +79,9 @@ describe('PopUpComponent', () => {
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GameMode.Classic);
         });
 
-        it('should reset the mode and show an error if CTF is selected', () => {
+        it('should set CTF when CTF is selected', () => {
             component.setGameType(GameMode.CTF);
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GameMode.CTF);
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.UnavailableGameMode);
-            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('' as GameMode);
-        });
-
-        it('should set the mode even if it is invalid', () => {
-            component.setGameType('invalid-mode' as GameMode);
-            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('invalid-mode' as GameMode);
         });
     });
 

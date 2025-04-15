@@ -3,6 +3,7 @@ import { MouseButton } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { TileService } from '@app/services/tile/tile.service';
+import { ItemType, ItemName } from '@common/enums';
 
 @Component({
     selector: 'app-tile',
@@ -92,5 +93,19 @@ export class TileComponent {
             TileComponent.activeButton = null;
         }
         TileComponent.isDraggedTest = false;
+    }
+
+    hasFlagInInventory(): boolean {
+        if (!this.tile?.player?.inventory) return false;
+
+        return this.tile.player.inventory.some((item) => item !== null && item.name === ItemName.Flag);
+    }
+
+    getFlagImage(): string {
+        if (!this.tile?.player?.inventory) return '';
+
+        const flagItem = this.tile.player.inventory.find((item) => item !== null && item.name === ItemName.Flag);
+
+        return flagItem?.imageSrc || ItemType.Flag;
     }
 }

@@ -2,10 +2,11 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { DiceType } from '@app/interfaces/Dice';
-import { Player } from '@app/interfaces/Player';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Player } from '@app/interfaces/player';
+import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { TeamType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameSessionTurnService } from './game-session-turn.service';
@@ -19,7 +20,6 @@ describe('GameSessionTurnService', () => {
         name,
         avatar: `avatar${name}`,
         speed,
-        vitality: 100,
         attack: { value: 5, bonusDice: DiceType.D6 },
         defense: { value: 3, bonusDice: DiceType.D4 },
         hp: { current: 100, max: 100 },
@@ -30,6 +30,7 @@ describe('GameSessionTurnService', () => {
         hasAbandoned: false,
         isActive,
         combatWon: 0,
+        isVirtual: false,
     });
 
     const createTurn = (players: Player[], currentPlayer: Player | null = null): Turn => ({
@@ -223,7 +224,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10), createPlayer('Player2', 20)];
             const turn = createTurn(players, players[0]);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[1]);
         });
@@ -232,7 +233,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10), createPlayer('Player2', 20)];
             const turn = createTurn(players);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[0]);
         });
@@ -241,7 +242,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10, true), createPlayer('Player2', 20, true)];
             const turn = createTurn(players);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[0]);
         });
@@ -320,6 +321,90 @@ describe('GameSessionTurnService', () => {
 
             expect(orderedPlayers[0].name).toBe('Player1');
             expect(orderedPlayers[1].name).toBe('Player2');
+        });
+    });
+    describe('initializeTurnCTF', () => {
+        it('should initialize a CTF turn with players divided into RED and BLUE teams', () => {
+            const accessCode = 'test-code';
+            const players = [
+                createPlayer('Player1', 10),
+                createPlayer('Player2', 8),
+                createPlayer('Player3', 12),
+                createPlayer('Player4', 7),
+                createPlayer('Player5', 9),
+                createPlayer('Player6', 11),
+            ];
+
+            const mockTurn = createTurn(players, players[0]);
+
+            jest.spyOn(service, 'initializeTurn').mockReturnValue(mockTurn);
+
+            const mockRandom = jest.spyOn(global.Math, 'random');
+            mockRandom.mockReturnValue(0.5);
+
+            const result = service.initializeTurnCTF(accessCode);
+
+            expect(service.initializeTurn).toHaveBeenCalledWith(accessCode);
+            expect(result).toBeDefined();
+            expect(result.orderedPlayers).toHaveLength(6);
+
+            const redTeamCount = result.orderedPlayers.filter((p) => p.team === TeamType.RED).length;
+            const blueTeamCount = result.orderedPlayers.filter((p) => p.team === TeamType.BLUE).length;
+
+            expect(redTeamCount).toBe(3);
+            expect(blueTeamCount).toBe(3);
+
+            result.orderedPlayers.forEach((player) => {
+                expect(player.team).toBeDefined();
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                expect([TeamType.RED, TeamType.BLUE].includes(player.team!)).toBeTruthy();
+            });
+
+            mockRandom.mockRestore();
+        });
+
+        it('should handle odd number of players correctly', () => {
+            const accessCode = 'test-code';
+            const players = [
+                createPlayer('Player1', 10),
+                createPlayer('Player2', 8),
+                createPlayer('Player3', 12),
+                createPlayer('Player4', 7),
+                createPlayer('Player5', 9),
+            ];
+
+            const mockTurn = createTurn(players, players[0]);
+            jest.spyOn(service, 'initializeTurn').mockReturnValue(mockTurn);
+
+            const mockRandom = jest.spyOn(global.Math, 'random');
+            mockRandom.mockReturnValue(0.5);
+
+            const result = service.initializeTurnCTF(accessCode);
+
+            const redTeamCount = result.orderedPlayers.filter((p) => p.team === TeamType.RED).length;
+            const blueTeamCount = result.orderedPlayers.filter((p) => p.team === TeamType.BLUE).length;
+
+            expect(redTeamCount).toBe(3);
+            expect(blueTeamCount).toBe(2);
+
+            mockRandom.mockRestore();
+        });
+
+        it('should maintain the return structure from initializeTurn', () => {
+            const accessCode = 'test-code';
+            const players = [createPlayer('Player1', 10), createPlayer('Player2', 8)];
+
+            const mockTurn = createTurn(players, players[0]);
+            mockTurn.currentTurnCountdown = 30;
+            mockTurn.isTransitionPhase = true;
+
+            jest.spyOn(service, 'initializeTurn').mockReturnValue(mockTurn);
+
+            const result = service.initializeTurnCTF(accessCode);
+            expect(result.currentTurnCountdown).toBe(30);
+            expect(result.isTransitionPhase).toBe(true);
+            expect(result.currentPlayer).toBe(players[0]);
+            expect(result.beginnerPlayer.name).toBe('Player1');
         });
     });
 });

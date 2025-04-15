@@ -1,0 +1,68 @@
+<div class="player-info">
+    <h3>{{ gameData.clientPlayer.name }}</h3>
+    <div class="player-header">
+        <img [src]="gameData.clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
+    </div>
+    <div class="player-stats">
+        <div class="attributes-grid">
+            <div class="attribute">
+                <span class="attribute-label">HP: </span>
+                <div class="health-bar">
+                    @for (segment of [].constructor(gameData.clientPlayer.hp.max); track $index) {
+                    <div class="health-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.hp.current"></div>
+                    }
+                </div>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Rapidité: </span>
+                <div class="stat-bar">
+                    @for (segment of [].constructor(gameData.clientPlayer.speed); track $index) {
+                    <div class="stat-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.speed"></div>
+                    }
+                </div>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Attaque: </span>
+                <div class="stat-bar">
+                    <span class="attribute-label">{{ hasGreatShield() ? diceType.D6 : gameData.clientPlayer.attack.bonusDice }}</span>
+
+                    @for (segment of [].constructor(gameData.clientPlayer.attack.value); track $index) {
+                    <div class="stat-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.attack.value"></div>
+                    }
+                </div>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Défense: </span>
+                <div class="stat-bar">
+                    <span class="attribute-label">{{ hasGreatShield() ? diceType.D6 : gameData.clientPlayer.defense.bonusDice }}</span>
+
+                    @for (segment of [].constructor(gameData.clientPlayer.defense.value); track $index) {
+                    <div class="stat-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.defense.value"></div>
+                    }
+                </div>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Mouvements restants: </span>
+                <span class="attribute-value">{{ gameData.clientPlayer.movementPoints }}</span>
+            </div>
+            <div class="attribute">
+                <span class="attribute-label">Actions restantes: </span>
+                <span class="attribute-value">{{ gameData.clientPlayer.actionPoints }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="inventory">
+        @for (slot of [0, 1]; track slot) { @if (gameData.clientPlayer.inventory[slot]) {
+        <div class="inventory-slot">
+            <img
+                [src]="gameData.clientPlayer.inventory[slot].imageSrc"
+                [title]="gameData.clientPlayer.inventory[slot].description"
+                alt="Item Image"
+                class="item-image"
+            />
+        </div>
+        } @else {
+        <div class="inventory-slot">(Vide)</div>
+        } }
+    </div>
+</div>

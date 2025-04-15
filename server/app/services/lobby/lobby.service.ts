@@ -1,6 +1,6 @@
 import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
+import { Lobby, WaitingPlayers } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { Injectable } from '@nestjs/common';
@@ -9,6 +9,7 @@ import { Injectable } from '@nestjs/common';
 export class LobbyService {
     private lobbies: Map<string, Lobby> = new Map<string, Lobby>();
     private playerSockets: Map<string, string> = new Map<string, string>();
+    private playerRoomMap = new Map<string, string>();
 
     constructor(private readonly accessCodeService: AccessCodesService) {}
 
@@ -105,7 +106,7 @@ export class LobbyService {
         this.playerSockets.delete(playerName);
     }
 
-    getWaitingAvatars(accessCode: string): WaintingPlayers[] {
+    getWaitingAvatars(accessCode: string): WaitingPlayers[] {
         return this.getLobby(accessCode).waitingPlayers;
     }
 
@@ -114,6 +115,35 @@ export class LobbyService {
         if (!lobby) return false;
 
         return lobby.players.some((p) => p.name === playerName && p.isAdmin);
+    }
+
+    addPlayerToRoom(socketId: string, roomId: string) {
+        this.playerRoomMap.set(socketId, roomId);
+    }
+
+    removePlayerFromRoom(socketId: string) {
+        this.playerRoomMap.delete(socketId);
+    }
+
+    getRoomForPlayer(socketId: string): string | null {
+        return this.playerRoomMap.get(socketId) || null;
+    }
+
+    getPlayerBySocketId(socketId: string): Player | undefined {
+        const allLobbies = Array.from(this.lobbies.values());
+        const matchingPlayer = allLobbies.flatMap((lobby) => lobby?.players || []).find((player) => this.playerSockets.get(player.name) === socketId);
+        if (matchingPlayer) {
+            this.playerSockets.set(matchingPlayer.name, socketId);
+            return matchingPlayer;
+        }
+
+        const playerEntry = Array.from(this.playerSockets.entries()).find(([, sId]) => sId === socketId);
+        if (!playerEntry) return undefined;
+        const playerName = playerEntry[0];
+        const lobbyId = this.getRoomForPlayer(socketId);
+        if (!lobbyId) return undefined;
+        const playerLobby = this.getLobby(lobbyId);
+        return playerLobby?.players.find((p) => p.name === playerName);
     }
 
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {

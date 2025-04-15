@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { CharacterFormComponent } from '@app/components/character-form/character-form.component';
+import { SnackBarMessage } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { AccessCodesCommunicationService } from '@app/services/access-codes-communication/access-codes-communication.service';
@@ -34,14 +35,20 @@ export class AccessCodeComponent {
             .then(async () => this.fetchLobbyData())
             .then((lobby) => {
                 if (this.isLobbyLocked(lobby)) {
-                    this.snackbarService.showMessage('Le lobby est verrouillé et ne peut pas être rejoint.');
+                    this.snackbarService.showMessage(SnackBarMessage.LobbyLocked);
                 } else {
                     this.openCharacterForm(lobby);
                 }
             })
             .catch((err) => {
-                this.snackbarService.showMessage(err.message || "Une erreur s'est produite.");
+                this.snackbarService.showMessage(err.message || SnackBarMessage.Error);
             });
+    }
+
+    validateNumericInput(event: KeyboardEvent): void {
+        if (!/^[0-9]$/.test(event.key)) {
+            event.preventDefault();
+        }
     }
 
     private async validateAccessCode(): Promise<void> {
@@ -51,7 +58,7 @@ export class AccessCodeComponent {
                     if (response.isValid) {
                         resolve();
                     } else {
-                        reject(new Error("La partie que vous souhaitez rejoindre n'existe pas!"));
+                        reject(new Error(SnackBarMessage.NonExistent));
                     }
                 },
             });
@@ -61,7 +68,7 @@ export class AccessCodeComponent {
     private async fetchLobbyData(): Promise<Lobby> {
         return this.accessCodeService.getLobbyData(this.accessCode).then((lobby) => {
             if (!lobby || !lobby.game) {
-                throw new Error('Impossible de récupérer la partie.');
+                throw new Error(SnackBarMessage.GetImpossible);
             }
             return lobby;
         });

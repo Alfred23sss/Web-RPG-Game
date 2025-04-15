@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
-import { ITEM_COUNTS, ITEMS_TO_UPDATE } from '@app/constants/global.constants';
-import { GameSize } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item/item';
+import { ITEM_COUNTS, ITEMS_TO_UPDATE, SIZE_MAPPING } from '@app/constants/global.constants';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
+import { GameMode, GameSize, ItemName } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -13,8 +13,9 @@ export class ItemService {
 
     constructor(private gameService: GameService) {}
 
-    setItems(items: Item[]): void {
-        this.items = items;
+    setItems(items: Item[], gameMode: string | undefined): void {
+        const isCTFMode = gameMode === GameMode.CTF;
+        this.items = isCTFMode ? items : items.filter((item) => item.name !== ItemName.Flag);
     }
 
     getItems(): Item[] {
@@ -35,13 +36,8 @@ export class ItemService {
         }
 
         const rawSize = currentGame.size as unknown as number;
-        const sizeMapping: Record<'size10' | 'size15' | 'size20', GameSize> = {
-            size10: GameSize.Small,
-            size15: GameSize.Medium,
-            size20: GameSize.Large,
-        };
 
-        const mappedSize = sizeMapping[`size${rawSize}` as keyof typeof sizeMapping] ?? GameSize.Small;
+        const mappedSize = SIZE_MAPPING[`size${rawSize}` as keyof typeof SIZE_MAPPING] ?? GameSize.Small;
 
         const count = ITEM_COUNTS[mappedSize];
 

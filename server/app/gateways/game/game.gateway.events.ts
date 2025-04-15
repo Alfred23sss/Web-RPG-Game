@@ -1,12 +1,16 @@
 export enum GameEvents {
     AbandonedGame = 'abandonedGame',
+    DecrementItem = 'decrement.item',
     EndTurn = 'endTurn',
     CreateGame = 'createGame',
     StartCombat = 'startCombat',
     PerformAttack = 'performAttack',
     PlayerMovementUpdate = 'playerMovementUpdate',
     DoorUpdate = 'doorUpdate',
+    WallUpdate = 'wallUpdate',
     Evade = 'evade',
     AdminModeUpdate = 'adminModeUpdate',
     TeleportPlayer = 'teleportPlayer',
+    ItemDrop = 'itemDrop',
+    PlayerItemReset = 'playerItemReset',
 }

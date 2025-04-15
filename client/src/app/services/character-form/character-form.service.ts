@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
+import { BONUS_VALUE, INITIAL_VALUES, PLAYER_STORAGE, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
+import { AttributeType, ErrorMessages, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { BehaviorSubject } from 'rxjs';
+import { DiceType, HttpStatus, JoinLobbyResult, Routes } from '@common/enums';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
     providedIn: 'root',
@@ -16,6 +17,7 @@ import { BehaviorSubject } from 'rxjs';
 export class CharacterService {
     unavailableAvatarsSubject = new BehaviorSubject<string[]>([]);
     unavailableAvatars$ = this.unavailableAvatarsSubject.asObservable();
+    onCharacterSubmitted$ = new Subject<void>();
     attributes = { ...INITIAL_VALUES.attributes };
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
@@ -29,30 +31,20 @@ export class CharacterService {
     ) {}
 
     initializePlayer(player: Player): void {
-        player.name = '';
-        player.avatar = '';
-        player.speed = 4;
-        player.attack = { value: 4, bonusDice: DiceType.Uninitialized };
-        player.defense = { value: 4, bonusDice: DiceType.Uninitialized };
-        player.hp = { current: 4, max: 4 };
-        player.movementPoints = 4;
-        player.actionPoints = 1;
-        player.inventory = [null, null];
-        player.isAdmin = false;
-        player.hasAbandoned = false;
-        player.isActive = false;
-        player.combatWon = 0;
+        Object.assign(player, { ...UNINITIALIZED_PLAYER });
+        player.attack.bonusDice = DiceType.Uninitialized;
+        player.defense.bonusDice = DiceType.Uninitialized;
     }
 
     initializeLobby(accessCode: string): void {
-        this.socketClientService.emit('joinRoom', accessCode);
+        this.socketClientService.emit(SocketEvent.JoinRoom, accessCode);
 
-        this.socketClientService.on<{ avatars?: string[] }>('updateUnavailableOptions', (data) => {
+        this.socketClientService.on<{ avatars?: string[] }>(SocketEvent.UnavailableOption, (data) => {
             if (!data.avatars) return;
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
 
-        this.socketClientService.emit('requestUnavailableOptions', accessCode);
+        this.socketClientService.emit(SocketEvent.RequestUnavailableOptions, accessCode);
     }
 
     assignBonus(player: Player, attribute: AttributeType): void {
@@ -64,17 +56,14 @@ export class CharacterService {
         this.updatePlayerStats(player, attribute);
     }
 
-    assignDice(player: Player, attribute: AttributeType): void {
+    assignDice(player: Player, attribute: AttributeType, diceType: DiceType): void {
         if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
-            this.diceAssigned[attribute] = true;
-            this.diceAssigned[attribute === AttributeType.Attack ? AttributeType.Defense : AttributeType.Attack] = false;
             if (attribute === AttributeType.Attack) {
-                player.attack.bonusDice = DiceType.D6;
-                player.defense.bonusDice = DiceType.D4;
-            }
-            if (attribute === AttributeType.Defense) {
-                player.attack.bonusDice = DiceType.D4;
-                player.defense.bonusDice = DiceType.D6;
+                player.attack.bonusDice = diceType;
+                player.defense.bonusDice = diceType === DiceType.D6 ? DiceType.D4 : DiceType.D6;
+            } else {
+                player.defense.bonusDice = diceType;
+                player.attack.bonusDice = diceType === DiceType.D6 ? DiceType.D4 : DiceType.D6;
             }
         }
     }
@@ -86,7 +75,7 @@ export class CharacterService {
 
         if (!this.unavailableAvatarsSubject.value.includes(avatar)) {
             player.avatar = avatar;
-            this.socketClientService.emit('selectAvatar', { accessCode: currentAccessCode, avatar });
+            this.socketClientService.emit(SocketEvent.SelectAvatar, { accessCode: currentAccessCode, avatar });
 
             const updatedAvatars = [...this.unavailableAvatarsSubject.value, avatar];
             this.unavailableAvatarsSubject.next(updatedAvatars);
@@ -95,7 +84,7 @@ export class CharacterService {
 
     deselectAvatar(player: Player, currentAccessCode: string): void {
         if (player.avatar) {
-            this.socketClientService.emit('deselectAvatar', { accessCode: currentAccessCode });
+            this.socketClientService.emit(SocketEvent.DeselectAvatar, { accessCode: currentAccessCode });
 
             const updatedAvatars = this.unavailableAvatarsSubject.value.filter((av) => av !== player.avatar);
             this.unavailableAvatarsSubject.next(updatedAvatars);
@@ -103,7 +92,7 @@ export class CharacterService {
         }
     }
 
-    async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game, closePopup: () => void): Promise<void> {
+    async submitCharacter(player: Player, currentAccessCode: string, isLobbyCreated: boolean, game: Game): Promise<void> {
         if (!this.isCharacterValid(player)) {
             this.showMissingDetailsError();
             return;
@@ -113,11 +102,11 @@ export class CharacterService {
 
         if (isLobbyCreated) {
             const joinResult = await this.joinExistingLobby(currentAccessCode, player);
-            this.handleLobbyJoining(joinResult, player, game, currentAccessCode, closePopup);
+            this.handleLobbyJoining(joinResult, player, game);
         } else {
             player.isAdmin = true;
             await this.createAndJoinLobby(game, player);
-            this.finalizeCharacterSubmission(player, closePopup);
+            this.finalizeCharacterSubmission(player);
         }
     }
 
@@ -126,17 +115,12 @@ export class CharacterService {
             this.socketClientService.getLobby(accessCode).subscribe({
                 next: (lobby) => {
                     if (lobby.isLocked) {
-                        this.snackbarService
-                            .showConfirmation("La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil")
-                            .subscribe({
-                                next: (result) => {
-                                    if (result) {
-                                        resolve(JoinLobbyResult.RedirectToHome);
-                                    } else {
-                                        resolve(JoinLobbyResult.StayInLobby);
-                                    }
-                                },
-                            });
+                        this.snackbarService.showConfirmation(ErrorMessages.LockedRoom).subscribe({
+                            next: (result) => {
+                                const joinLobbyResult = result ? JoinLobbyResult.RedirectToHome : JoinLobbyResult.StayInLobby;
+                                resolve(joinLobbyResult);
+                            },
+                        });
                     } else {
                         this.socketClientService.joinLobby(accessCode, player);
                         resolve(JoinLobbyResult.JoinedLobby);
@@ -157,9 +141,9 @@ export class CharacterService {
     }
 
     checkCharacterNameLength(characterName: string): void {
-        const maxLength = 20;
-        if (characterName.length >= maxLength) {
-            this.snackbarService.showMessage(`La longueur maximale du nom est de ${maxLength} caractères`);
+        const maxLength = 19;
+        if (characterName.length > maxLength) {
+            this.snackbarService.showMessage(ErrorMessages.MaxNameLength);
         }
     }
 
@@ -198,39 +182,32 @@ export class CharacterService {
         }
     }
 
-    private finalizeCharacterSubmission(player: Player, closePopup: () => void): void {
+    private finalizeCharacterSubmission(player: Player): void {
         if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
+            sessionStorage.setItem(PLAYER_STORAGE, JSON.stringify(player));
+            this.proceedToWaitingView();
+            this.onCharacterSubmitted$.next();
         } else {
             this.showMissingDetailsError();
         }
     }
 
-    private handleLobbyJoining(joinStatus: string, player: Player, game: Game, currentAccessCode: string, closePopup: () => void): void {
+    private handleLobbyJoining(joinStatus: string, player: Player, game: Game): void {
         switch (joinStatus) {
             case JoinLobbyResult.JoinedLobby:
-                this.finalizeCharacterSubmission(player, closePopup);
+                this.finalizeCharacterSubmission(player);
                 break;
             case JoinLobbyResult.StayInLobby:
                 return;
             case JoinLobbyResult.RedirectToHome:
                 this.returnHome();
-                this.socketClientService.emit('leaveLobby', {
-                    accessCode: currentAccessCode,
-                    playerName: '',
+                this.socketClientService.emit(SocketEvent.ManualDisconnect, {
+                    isInGame: false,
                 });
-                closePopup();
+
                 return;
         }
-        this.validateGameAvailability(game, closePopup);
-
-        if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
-            this.proceedToWaitingView(closePopup);
-        } else {
-            this.showMissingDetailsError();
-        }
+        this.validateGameAvailability(game);
     }
 
     private hasBonusAssigned(player: Player): boolean {
@@ -241,20 +218,18 @@ export class CharacterService {
         return player.attack.bonusDice !== DiceType.Uninitialized && player.defense.bonusDice !== DiceType.Uninitialized;
     }
 
-    private validateGameAvailability(game: Game, closePopup: () => void): void {
+    private validateGameAvailability(game: Game): void {
         this.gameCommunicationService.getGameById(game.id).subscribe({
             error: (error) => {
                 if (error.status === HttpStatus.InternalServerError || error.status === HttpStatus.Forbidden) {
                     this.snackbarService.showMessage(ErrorMessages.UnavailableGame);
                     this.router.navigate([Routes.CreateView]);
-                    closePopup();
                 }
             },
         });
     }
 
-    private proceedToWaitingView(closePopup: () => void): void {
+    private proceedToWaitingView(): void {
         this.router.navigate([Routes.WaitingView]);
-        closePopup();
     }
 }

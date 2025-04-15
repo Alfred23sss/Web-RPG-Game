@@ -1,84 +1,11 @@
-export enum GameDecorations {
-    Background = '../../../assets/game-decorations/background.png',
-    Door = './assets/game-decorations/door.png',
-    ExampleGame = './assets/game-decorations/example.png',
-    Logo = './assets/game-decorations/logo.png',
-    Forge = './assets/game-decorations/medieval-forge.png',
-    XSwords = './assets/game-decorations/X-sword.png',
-    X = './assets/game-decorations/X.png',
-    Default = './assets/game-decorations/logo.png',
-}
-
-export enum GameModeType {
-    Classic = './assets/gamemodes/classic-game.png',
-    CTF = './assets/gamemodes/CTF-game.png',
-    Default = './assets/gamemodes/classic-game.png',
-}
-
-export enum AvatarType {
-    Alchemist = './assets/avatars/avatar_alchemist.png',
-    Archer = './assets/avatars/avatar_archer.png',
-    Assassin = './assets/avatars/avatar_assassin.png',
-    Barbarian = './assets/avatars/avatar_barbarian.png',
-    Bard = './assets/avatars/avatar_bard.png',
-    Druid = './assets/avatars/avatar_druid.png',
-    Goblin = './assets/avatars/avatar_goblin.png',
-    Paladin = './assets/avatars/avatar_paladin.png',
-    Ranger = './assets/avatars/avatar_ranger.png',
-    Valkyrie = './assets/avatars/avatar_valkyrie.png',
-    Vampire = './assets/avatars/avatar_vampire.png',
-    Wizard = './assets/avatars/avatar_wizard.png',
-}
-
-export enum ImageType {
-    Water = './assets/tile-items/water.png',
-    Wall = './assets/tile-items/wall.png',
-    OpenDoor = './assets/tile-items/opened-door.png',
-    ClosedDoor = './assets/tile-items/closed-door.png',
-    Ice = './assets/tile-items/ice.png',
-    Default = './assets/tile-items/clay.png',
-}
-
-export enum ItemType {
-    Home = './assets/items/home.png',
-    HomeGray = './assets/items/home-gray.png',
-    Lightning = './assets/items/lightning.png',
-    LightningGray = './assets/items/lightning-gray.png',
-    Potion = './assets/items/potion.png',
-    PotionGray = './assets/items/potion-gray.png',
-    Stop = './assets/items/stop.png',
-    StopGray = './assets/items/stop-gray.png',
-    QuestionMark = './assets/items/question-mark.png',
-    QuestionMarkGray = './assets/items/question-mark-gray.png',
-    Fire = './assets/items/fire.png',
-    FireGray = './assets/items/fire-gray.png',
-    Rubik = './assets/items/rubik.png',
-    RubikGray = './assets/items/rubik-gray.png',
-    Swap = './assets/items/swap.png',
-    SwapGray = './assets/items/swap-gray.png',
-    Default = './assets/items/question-mark.png',
-}
-
-export enum BonusValue {
-    Default = 2,
-}
-
-export enum DiceType {
-    D4 = 'D4',
-    D6 = 'D6',
-    Uninitialized = '',
-}
-
-export enum JoinLobbyResult {
-    RedirectToHome = 'redirectToHome',
-    StayInLobby = 'stayInLobby',
-    JoinedLobby = 'joinedLobby',
-}
-
-export enum GameMode {
-    Classic = 'Classique',
-    CTF = 'CTF',
-    None = '',
+// =====================
+// Game Configuration
+// =====================
+export enum AttributeType {
+    Vitality = 'Vitalité',
+    Speed = 'Vitesse',
+    Attack = 'Attaque',
+    Defense = 'Défense',
 }
 
 export enum GameModeLabel {
@@ -86,11 +13,10 @@ export enum GameModeLabel {
     CTF = 'Capture Le Drapeau',
 }
 
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
+export enum GameModeType {
+    Classic = './assets/gamemodes/classic.png',
+    CTF = './assets/gamemodes/CTF.png',
+    Default = './assets/gamemodes/classic.png',
 }
 
 export enum GameSizeNumber {
@@ -100,44 +26,182 @@ export enum GameSizeNumber {
     Default = '',
 }
 
-export enum AttributeType {
-    Vitality = 'Vitalité',
-    Speed = 'Vitesse',
-    Attack = 'Attaque',
-    Defense = 'Défense',
+export enum ItemCount {
+    SmallItemCount = 2,
+    MediumItemCount = 4,
+    LargeItemCount = 6,
 }
 
-export enum Routes {
-    WaitingView = '/waiting-view',
-    EditionView = '/edition',
-    AdminPage = '/admin',
-    HomePage = '/home',
-    CreatePage = '/create',
-    CreateView = '/create',
-    Game = '/game',
+// =====================
+// Access & Security
+// =====================
+export enum AccessCodeGenerator {
+    Minimum = 1000,
+    Maximum = 9000,
 }
 
-export enum ItemName {
-    Home = 'home',
-    Lightning = 'lightning',
-    Potion = 'potion',
-    Stop = 'stop',
-    QuestionMark = 'question',
-    Fire = 'fire',
-    Rubik = 'rubik',
-    Swap = 'swap',
-    Flag = 'flag',
-    Default = 'default',
+export enum MouseButton {
+    Left = 0,
+    Right = 2,
 }
 
-export enum HttpStatus {
-    InternalServerError = 500,
-    Forbidden = 403,
+// =====================
+// UI & Input Events
+// =====================
+export enum Keys {
+    Escape = 'Escape',
+    D = 'd',
 }
 
-export enum TimeConstants {
-    SecondDivider = 1000,
-    SecondModulo = 60,
+// =====================
+// Chat & Communication
+// =====================
+export enum ChatEvents {
+    Validate = 'validate',
+    ValidateACK = 'validateWithAck',
+    BroadcastAll = 'broadcastAll',
+    JoinRoom = 'joinRoom',
+    RoomMessage = 'roomMessage',
+
+    WordValidated = 'wordValidated',
+    MassMessage = 'massMessage',
+    Hello = 'hello',
+    Clock = 'clock',
+    Error = 'error',
+}
+
+// =====================
+// Socket Events
+// =====================
+export enum SocketEvent {
+    GameAbandoned = 'game-abandoned',
+    GameDeleted = 'gameDeleted',
+    GameEnded = 'gameEnded',
+    AdminModeDisabled = 'adminModeDisabled',
+    GameStarted = 'gameStarted',
+    PlayerMovement = 'playerMovement',
+    PlayerUpdate = 'playerUpdate',
+    PlayerListUpdate = 'playerListUpdate',
+    DoorClicked = 'doorClicked',
+    WallClicked = 'wallClicked',
+    GridUpdate = 'gridUpdate',
+    AdminModeChangedServerSide = 'adminModeChangedServerSide',
+    ItemChoice = 'itemChoice',
+    ItemDropped = 'itemDropped',
+    ItemDrop = 'itemDrop',
+    PlayerClientUpdate = 'playerClientUpdate',
+    JoinRoom = 'joinRoom',
+    UnavailableOption = 'updateUnavailableOptions',
+    RequestUnavailableOptions = 'requestUnavailableOptions',
+    SelectAvatar = 'selectAvatar',
+    DeselectAvatar = 'deselectAvatar',
+    ManualDisconnect = 'manualDisconnect',
+    UnlockLobby = 'unlockLobby',
+    LockLobby = 'lockLobby',
+    KickPlayer = 'kickPlayer',
+    KickVirtualPlayer = 'kickVirtualPlayer',
+    CreateGame = 'createGame',
+    CreateVirtualPlayer = 'createVirtualPlayer',
+    CombatStarted = 'combatStarted',
+    AttackResult = 'attackResult',
+    CombatTurnStarted = 'combatTurnStarted',
+    CombatTimerUpdate = 'combatTimerUpdate',
+    EscapeAttempt = 'escapeAttempt',
+    CombatEnded = 'combatEnded',
+    CombatEndedLog = 'combatEndedLog',
+    CombatStartedLog = 'combatStartedLog',
+    DecrementItem = 'decrement.item',
+    EndTurn = 'endTurn',
+    DoorUpdate = 'doorUpdate',
+    WallUpdate = 'wallUpdate',
+    StartCombat = 'startCombat',
+    TeleportPlayer = 'teleportPlayer',
+    PerformAttack = 'performAttack',
+    Evade = 'evade',
+    AdminModeUpdate = 'adminModeUpdate',
+    JoinLobby = 'joinLobby',
+    JoinedLobby = 'joinedLobby',
+    LobbyUpdate = 'lobbyUpdate',
+    Kicked = 'kicked',
+    LobbyLocked = 'lobbyLocked',
+    LobbyUnlocked = 'lobbyUnlocked',
+    LobbyDeleted = 'lobbyDeleted',
+    AlertGameStarted = 'alertGameStarted',
+    LeftLobby = 'leftLobby',
+    UpdatePlayers = 'updatePlayers',
+    AdminLeft = 'adminLeft',
+    CreateLobby = 'createLobby',
+    LobbyCreated = 'lobbyCreated',
+    Error = 'error',
+    JoinError = 'joinError',
+    GetLobbyPlayers = 'getLobbyPlayers',
+    GetLobby = 'getLobby',
+    UpdateLobby = 'updateLobby',
+    PlayerMovementUpdate = 'playerMovementUpdate',
+    TurnStarted = 'turnStarted',
+    TimerUpdate = 'timerUpdate',
+    TransitionStarted = 'transitionStarted',
+    GameTurnResumed = 'gameTurnResumed',
+}
+
+// =====================
+// Gameplay Events
+// =====================
+export enum AdminEvent {
+    AdminModeChangedServerSide = 'adminModeChangedServerSide',
+}
+
+export enum CombatEvent {
+    GameCombatStarted = 'gameCombatStarted',
+    AttackResult = 'attackResult',
+    GameCombatTurnStarted = 'gameCombatTurnStarted',
+    GameCombatTimerUpdate = 'gameCombatTimerUpdate',
+    CombatEnded = 'combatEnded',
+    NoMoreEscapesLeft = 'noMoreEscapesLeft',
+}
+
+export enum GameLifecycleEvent {
+    AbandonGame = 'abandonGame',
+    GameDeleted = 'gameDeleted',
+    GameEnded = 'gameEnded',
+    TransitionStarted = 'transitionStarted',
+}
+
+export enum GridEvent {
+    DoorClickedUpdate = 'doorClickedUpdate',
+    GridUpdate = 'gridUpdate',
+}
+
+export enum NotificationEvent {
+    AlertGameStarted = 'alertGameStarted',
+}
+
+export enum PlayerEvent {
+    PlayerMovement = 'playerMovement',
+    PlayerUpdate = 'playerUpdate',
+    PlayerListUpdate = 'playerListUpdate',
+}
+
+export enum TurnEvent {
+    TurnStarted = 'turnStarted',
+    TimerUpdate = 'timerUpdate',
+}
+
+// =====================
+// 🔔 Messages & Logs
+// =====================
+export enum ClientNotifierMessage {
+    CombatWon = 'a gagné le combat !',
+    CombatEvaded = 'a evadé le combat !',
+    RedirectHome = "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
+    SoloWin = 'a remporté la partie ! Redirection vers la page de fin sous peu',
+    TeamWin = 'ont remporté la partie ! Redirection vers la page de fin sous peu',
+    DeactivatedDebug = "Mode debug 'désactivé'",
+    PlayerTurnStart = "C'est à",
+    PlayerTurnEnd = 'de jouer',
+    TurnStartingStart = 'Le tour à',
+    TurnStartingMiddle = 'commence dans',
+    TurnStartingEnd = 'secondes',
 }
 
 export enum ErrorMessages {
@@ -163,40 +227,55 @@ export enum ErrorMessages {
     TooManyItemsPlaced = '❌ Trop d’items ont été placés',
     NotEnoughPlayers = '❌ Il n’y a pas assez de joueurs pour commencer la partie',
     LobbyNotLocked = '❌ Le lobby n’est pas verrouillé',
+    LockedRoom = "La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil",
+    MaxNameLength = 'La longueur maximale de 20 caractères est atteinte',
+    MaxPlayersReached = '❌ Le nombre maximal de joueurs est atteint pour cette partie',
+    NoAccessCode = 'Failed to create lobby: No access code received',
+    LobbyCreationFailed = 'Lobby creation failed:',
+    JoinFailed = 'Join failed:',
+    InvalidAccessCode = 'Invalid access code',
+    ValidationFailed = 'Access code validation failed',
 }
 
-export enum TileType {
-    Water = 'eau',
-    Ice = 'glace',
-    Wall = 'mur',
-    Door = 'porte',
-    Default = 'défaut',
+export enum LogBookEntry {
+    CombatStartedExclamation = 'Combat commencé!',
+    CombatStarted = 'Combat commencé',
+    AttackResultSuccess = 'réussie',
+    AttackResultFail = 'échouée',
+    EvadeResultSuccess = 'réussi',
+    EvadeResultFail = 'raté',
+    Attack = 'Attaque',
+    AttackStart = '(Attaque:',
+    Defense = ', Défense:',
+    EvadeAttempt = "Tentative d'évasion",
+    CombatWon = 'Combat gagné par',
+    CombatEvaded = 'Combat évadé par',
+    PlayerAbandoned = 'Un joueur a abandonne la partie',
+    ItemDropped = 'a déposé un item!',
+    FlagPickedUp = 'a pris le drapeau!',
+    ItemPickedUp = 'a pris un item!',
+    GameEnded = 'Fin de la partie',
+    DoorClosed = 'Un joueur a fermé une porte',
+    DoorOpened = 'Un joueur a ouvert une porte',
+    WallAction = 'Un joueur a effectue une action sur un mur!',
+    DebugMode = 'Mode debug',
+    Activated = 'activé',
+    Deactivated = 'désactivé',
 }
 
-export enum ItemDescription {
-    Home = 'Point de départ',
-    Lightning = 'paralyse',
-    Potion = 'soigne',
-    Stop = 'arrêt le jeu',
-    QuestionMark = 'objet aléatoire',
-    Fire = 'inflige des brûlure',
-    Rubik = 'bouge les colonnes ou les rangés',
-    Swap = 'échange les personnages',
-    Default = 'rien',
+export enum SnackBarMessage {
+    LobbyLocked = 'Le lobby est verrouillé et ne peut pas être rejoint.',
+    Error = "Une erreur s'est produite.",
+    NonExistent = "La partie que vous souhaitez rejoindre n'existe pas!",
+    GetImpossible = 'Impossible de récupérer la partie.',
+    LobbyFull = 'Le lobby est plein, impossible de le déverrouiller.',
+    FriendlyFire = "TRAITRE!!! C'EST MOI TON AMI",
+    ActivatedMode = 'Mode action activé',
+    DeactivatedMode = 'Mode action désactivé',
+    LobbyExpulsion = 'Vous avez été expulsé du lobby.',
 }
 
-export enum AccessCodeGenerator {
-    Minimum = 1000,
-    Maximum = 9000,
-}
-
-export enum MouseButton {
-    Left = 0,
-    Right = 2,
-}
-
-export enum ItemCount {
-    SmallItemCount = 2,
-    MediumItemCount = 4,
-    LargeItemCount = 6,
+export enum Tab {
+    Chat = 'chat',
+    Log = 'log',
 }

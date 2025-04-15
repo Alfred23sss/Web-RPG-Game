@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { ATTRIBUTE_KEYS } from '@app/constants/global.constants';
-import { AttributeType, AvatarType, DiceType, GameDecorations } from '@app/enums/global.enums';
+import { ATTRIBUTE_KEYS, KEY_DOWN_EVENT_LISTENER } from '@app/constants/global.constants';
+import { AttributeType, Keys, SocketEvent } from '@app/enums/global.enums';
 import { CharacterDialogData } from '@app/interfaces/character-dialog-data';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { CharacterService } from '@app/services/character-form/character-form.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { AvatarType, DiceType, GameDecorations } from '@common/enums';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -25,12 +26,13 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
     isLobbyCreated: boolean;
     currentAccessCode: string;
     game?: Game;
-    createdPlayer: Player = {} as Player; //
+    createdPlayer: Player = {} as Player;
     avatarTypes: string[] = Object.values(AvatarType);
     attributes = this.characterService.attributes;
     bonusAssigned = this.characterService.bonusAssigned;
     diceAssigned = this.characterService.diceAssigned;
-    unavailableAvatars: string[] = []; //
+    unavailableAvatars: string[] = [];
+
     protected attributeKeys = ATTRIBUTE_KEYS;
     protected attributeTypes = AttributeType;
     protected diceTypes = DiceType;
@@ -57,14 +59,21 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
                 this.cdr.detectChanges();
             }),
         );
+        this.subscriptions.add(
+            this.characterService.onCharacterSubmitted$.subscribe(() => {
+                this.resetPopup();
+            }),
+        );
+
+        document.addEventListener(KEY_DOWN_EVENT_LISTENER, this.handleKeyDown);
     }
 
     assignBonus(attribute: AttributeType): void {
         this.characterService.assignBonus(this.createdPlayer, attribute);
     }
 
-    assignDice(attribute: AttributeType): void {
-        this.characterService.assignDice(this.createdPlayer, attribute);
+    assignDice(attribute: AttributeType, diceType: DiceType): void {
+        this.characterService.assignDice(this.createdPlayer, attribute, diceType);
     }
 
     selectAvatar(avatar: string): void {
@@ -88,17 +97,14 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
             this.returnHome();
             return;
         }
-        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game, () =>
-            this.resetPopup(),
-        );
+        await this.characterService.submitCharacter(this.createdPlayer, this.currentAccessCode, this.isLobbyCreated, this.game);
     }
 
     closePopup(): void {
         this.createdPlayer.name = '';
         this.characterService.deselectAvatar(this.createdPlayer, this.currentAccessCode);
-        this.socketClientService.emit('leaveLobby', {
-            accessCode: this.currentAccessCode,
-            playerName: this.createdPlayer.name,
+        this.socketClientService.emit(SocketEvent.ManualDisconnect, {
+            isInGame: false,
         });
         this.characterService.resetAttributes();
         this.dialogRef.close();
@@ -111,7 +117,38 @@ export class CharacterFormComponent implements OnInit, OnDestroy {
 
     ngOnDestroy(): void {
         this.subscriptions.unsubscribe();
+        document.removeEventListener(KEY_DOWN_EVENT_LISTENER, this.handleKeyDown);
     }
+
+    getSegmentCount(attribute: AttributeType): number {
+        if (attribute === AttributeType.Vitality || attribute === AttributeType.Speed) {
+            return Math.floor(this.attributes[attribute] / 2);
+        }
+        return this.attributes[attribute];
+    }
+
+    getDisplayValue(attribute: AttributeType): string {
+        const value = this.attributes[attribute];
+        if (attribute === AttributeType.Attack || attribute === AttributeType.Defense) {
+            return `${value} + ${this.getDiceValue(attribute)}`;
+        }
+        return value.toString();
+    }
+
+    getDiceValue(attribute: AttributeType): DiceType {
+        if (attribute === AttributeType.Attack) {
+            return this.createdPlayer.attack.bonusDice;
+        } else if (attribute === AttributeType.Defense) {
+            return this.createdPlayer.defense.bonusDice;
+        }
+        return DiceType.D4;
+    }
+
+    private handleKeyDown = (event: KeyboardEvent): void => {
+        if (event.key === Keys.Escape) {
+            this.closePopup();
+        }
+    };
 
     private returnHome(): void {
         this.closePopup();

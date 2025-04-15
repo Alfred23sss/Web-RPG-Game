@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { GameMode, GameSize } from '@app/enums/global.enums';
+import { GameMode, GameSize } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',

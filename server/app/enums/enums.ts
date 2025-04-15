@@ -1,96 +1,16 @@
-export enum GameDecorations {
-    Background = 'assets/game-decorations/background.png',
-    Door = 'assets/game-decorations/door.png',
-    ExampleGame = 'assets/game-decorations/example.png',
-    Logo = 'assets/game-decorations/logo.png',
-    Forge = 'assets/game-decorations/medieval-forge.png',
-    XSwords = 'assets/game-decorations/X-sword.png',
-    X = 'assets/game-decorations/X.png',
-    Default = 'assets/game-decorations/logo.png',
+// =====================
+// Game Configuration
+// =====================
+export enum AttributeType {
+    Hp = 'hp',
+    Speed = 'Vitesse',
+    Attack = 'Attaque',
+    Defense = 'Défense',
 }
 
 export enum GameModeType {
-    Classic = 'assets/gamemodes/classic-game.png',
-    CTF = 'assets/gamemodes/CTF-game.png',
-    Default = 'assets/gamemodes/classic-game.png',
-}
-
-export enum AvatarType {
-    Alchemist = 'assets/avatars/avatar_alchemist.png',
-    Archer = 'assets/avatars/avatar_archer.png',
-    Assassin = 'assets/avatars/avatar_assassin.png',
-    Barbarian = 'assets/avatars/avatar_barbarian.png',
-    Bard = 'assets/avatars/avatar_bard.png',
-    Druid = 'assets/avatars/avatar_druid.png',
-    Goblin = 'assets/avatars/avatar_goblin.png',
-    Paladin = 'assets/avatars/avatar_paladin.png',
-    Ranger = 'assets/avatars/avatar_ranger.png',
-    Valkyrie = 'assets/avatars/avatar_valkyrie.png',
-    Vampire = 'assets/avatars/avatar_vampire.png',
-    Wizard = 'assets/avatars/avatar_wizard.png',
-}
-
-export enum ImageType {
-    Water = 'assets/tile-items/water.png',
-    Wall = 'assets/tile-items/wall.png',
-    OpenDoor = 'assets/tile-items/opened-door.png',
-    ClosedDoor = 'assets/tile-items/closed-door.png',
-    Ice = 'assets/tile-items/ice.png',
-    Default = 'assets/tile-items/clay.png',
-}
-
-export enum ItemType {
-    Home = 'assets/items/home.png',
-    HomeGray = 'assets/items/home-gray.png',
-    Lightning = 'assets/items/lightning.png',
-    LightningGray = 'assets/items/lightning-gray.png',
-    Potion = 'assets/items/potion.png',
-    PotionGray = 'assets/items/potion-gray.png',
-    Stop = 'assets/items/stop.png',
-    StopGray = 'assets/items/stop-gray.png',
-    QuestionMark = 'assets/items/question-mark.png',
-    QuestionMarkGray = 'assets/items/question-mark-gray.png',
-    Fire = 'assets/items/fire.png',
-    FireGray = 'assets/items/fire-gray.png',
-    Rubik = 'assets/items/rubik.png',
-    RubikGray = 'assets/items/rubik-gray.png',
-    Swap = 'assets/items/swap.png',
-    SwapGray = 'assets/items/swap-gray.png',
-    Default = 'assets/items/question-mark.png',
-}
-
-export enum BonusValue {
-    Default = 2,
-}
-
-export enum DiceType {
-    D4 = 'D4',
-    D6 = 'D6',
-    Uninitialized = '',
-}
-
-export enum JoinLobbyResult {
-    RedirectToHome = 'redirectToHome',
-    StayInLobby = 'stayInLobby',
-    JoinedLobby = 'joinedLobby',
-}
-
-export enum GameMode {
-    Classic = 'Classique',
+    Classic = 'Classic',
     CTF = 'CTF',
-    None = '',
-}
-export enum GameSize {
-    Small = 'small',
-    Medium = 'medium',
-    Large = 'large',
-    None = '',
-}
-
-export enum GameSizeTileCount {
-    Small = '10',
-    Medium = '15',
-    Large = '20',
 }
 
 export enum GameSizePlayerCount {
@@ -99,45 +19,23 @@ export enum GameSizePlayerCount {
     Large = 6,
 }
 
-export enum AttributeType {
-    Vitality = 'Vitalité',
-    Speed = 'Vitesse',
-    Attack = 'Attaque',
-    Defense = 'Défense',
+export enum GameSizeTileCount {
+    Small = '10',
+    Medium = '15',
+    Large = '20',
 }
 
-export enum Routes {
-    WaitingView = '/waiting-view',
-    EditionView = '/edition',
-    AdminPage = '/admin',
-    HomePage = '/home',
-    CreatePage = '/create',
-    CreateView = '/create',
+// =====================
+// Gameplay
+// =====================
+export enum MoveType {
+    Attack = 'attack',
+    Item = 'item',
 }
 
-export enum ItemName {
-    Home = 'home',
-    Lightning = 'lightning',
-    Potion = 'potion',
-    Stop = 'stop',
-    QuestionMark = 'question',
-    Fire = 'fire',
-    Rubik = 'rubik',
-    Swap = 'swap',
-    Flag = 'flag',
-    Default = 'default',
-}
-
-export enum HttpStatus {
-    InternalServerError = 500,
-    Forbidden = 403,
-}
-
-export enum TimeConstants {
-    SecondDivider = 1000,
-    SecondModulo = 60,
-}
-
+// =====================
+// Error Messages
+// =====================
 export enum ErrorMessages {
     MissingCharacterDetails = 'Veuillez vous assurer d’avoir attribué des bonus et des dés, et d’avoir saisi un nom et un avatar.',
     InvalidGameSize = 'Taille de jeu invalide sélectionnée !',
@@ -160,32 +58,16 @@ export enum ErrorMessages {
     MustPlaceHouseItems = 'items maisons doivent être placées',
 }
 
-export enum TileType {
-    Water = 'eau',
-    Ice = 'glace',
-    Wall = 'mur',
-    Door = 'porte',
-    Default = 'défaut',
-}
-
-export enum ItemDescription {
-    Home = 'Point de départ',
-    Lightning = 'paralyse',
-    Potion = 'soigne',
-    Stop = 'arrêt le jeu',
-    QuestionMark = 'objet aléatoire',
-    Fire = 'inflige des brûlure',
-    Rubik = 'bouge les colonnes ou les rangés',
-    Swap = 'échange les personnages',
-    Default = 'rien',
-}
-
+// =====================
+// WebSocket Emit Events
+// =====================
 export enum EventEmit {
     GameCombatTimer = 'game.combat.timer',
     GameCombatTurnStarted = 'game.combat.turn.started',
     UpdatePlayerList = 'update.player.list',
     UpdatePlayer = 'update.player',
     GameCombatStarted = 'game.combat.started',
+    DecrementItem = 'decrement.item',
     GameCombatAttackResult = 'game.combat.attack.result',
     GameCombatEscape = 'game.combat.escape',
     GameCombatEnded = 'game.combat.ended',
@@ -200,4 +82,15 @@ export enum EventEmit {
     GameTurnStarted = 'game.turn.started',
     GameTurnTimer = 'game.turn.timer',
     GameTurnResumed = 'game.turn.resumed',
+    GameWallUpdate = 'game.wall.update',
+    ItemChoice = 'item.choice',
+    PlayerUpdate = 'player.client.update',
+    TeamCreated = 'team.created',
+    GameItemCollected = 'game.item.collected',
+    GameTileVisited = 'game.tile.visited',
+    GameFlagPossessed = 'game.flag.possessed',
+    InitializeGameStatistics = 'initialize.game.statistics',
+    ShowGlobalStats = 'show.global.stats',
+    UpdateDoorStats = 'update.door.stats',
+    VPActionDone = 'vp.action.done',
 }

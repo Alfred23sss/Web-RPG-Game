@@ -1,5 +1,5 @@
-import { Item } from '@app/classes/item';
-import { DiceType } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item/item';
+import { DiceType, TeamType } from '@common/enums';
 
 export interface Player {
     name: string;
@@ -12,8 +12,10 @@ export interface Player {
     actionPoints: number;
     inventory: [Item | null, Item | null];
     isAdmin: boolean;
+    isVirtual: boolean;
     hasAbandoned: boolean;
     isActive: boolean;
     combatWon: number;
     spawnPoint?: { x: number; y: number; tileId: string } | undefined;
+    team?: TeamType;
 }

@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Item } from '@app/classes/item';
-import { ImageType, ItemDescription, ItemType, MouseButton, TileType } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item/item';
+import { MouseButton } from '@app/enums/global.enums';
+import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { ItemDragService } from '@app/services/item-drag/Item-drag.service';
 import { TileService } from '@app/services/tile/tile.service';
+import { ImageType, ItemDescription, ItemName, ItemType, TileType } from '@common/enums';
 import { TileComponent } from './tile.component';
 
 describe('TileComponent', () => {
@@ -53,11 +55,11 @@ describe('TileComponent', () => {
         it('should handle right click removal with item', () => {
             component.tile.item = new Item({
                 id: '0',
-                name: 'lightning',
-                imageSrc: ItemType.Lightning,
-                imageSrcGrey: ItemType.LightningGray,
+                name: 'Pickaxe',
+                imageSrc: ItemType.Pickaxe,
+                imageSrcGrey: ItemType.PickaxeGray,
                 itemCounter: 1,
-                description: ItemDescription.Lightning,
+                description: ItemDescription.Pickaxe,
             });
 
             spyOn(component.tile.item, 'clone').and.callThrough();
@@ -253,6 +255,42 @@ describe('TileComponent', () => {
 
             expect(TileComponent.activeButton).toBe(MouseButton.Left);
             expect(TileComponent.isDraggedTest).toBeTrue();
+        });
+    });
+
+    describe('getFlagImage', () => {
+        it('should return an empty string when there is no player or inventory', () => {
+            component.tile.player = undefined;
+            expect(component.getFlagImage()).toEqual('');
+        });
+
+        it('should return the image source of the first flag in the inventory', () => {
+            const expectedImage = 'flag.png';
+            component.tile.player = {
+                inventory: [{ name: ItemName.Flag, imageSrc: expectedImage } as Item, { name: 'OtherItem', imageSrc: 'item.png' } as Item],
+            } as Player;
+            expect(component.getFlagImage()).toEqual(expectedImage);
+        });
+    });
+
+    describe('hasFlagInInventory', () => {
+        it('should return false when there is no player or inventory', () => {
+            component.tile.player = undefined;
+            expect(component.hasFlagInInventory()).toBeFalse();
+        });
+
+        it('should return true when inventory contains a flag', () => {
+            component.tile.player = {
+                inventory: [{ name: 'OtherItem', imageSrc: 'item.png' } as Item, { name: ItemName.Flag, imageSrc: 'flag.png' } as Item],
+            } as Player;
+            expect(component.hasFlagInInventory()).toBeTrue();
+        });
+
+        it('should return the default flag type if the flag has no image source', () => {
+            component.tile.player = {
+                inventory: [{ name: ItemName.Flag } as Item, null],
+            } as Player;
+            expect(component.getFlagImage()).toEqual(ItemType.Flag);
         });
     });
 

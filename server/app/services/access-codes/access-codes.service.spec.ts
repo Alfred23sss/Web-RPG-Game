@@ -33,13 +33,4 @@ describe('AccessCodesService', () => {
         accessCodesService.removeAccessCode(code);
         expect(accessCodesService.validateAccessCode(code)).toBe(false);
     });
-
-    // it('should return all access codes', () => {
-    //     const code1 = accessCodesService.generateAccessCode();
-    //     const code2 = accessCodesService.generateAccessCode();
-    //     const allCodes = accessCodesService.getAllAccessCodes();
-    //     expect(allCodes).toContain(code1);
-    //     expect(allCodes).toContain(code2);
-    //     expect(allCodes.length).toBe(2);
-    // });
 });

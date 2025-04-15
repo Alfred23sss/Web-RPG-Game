@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { DiceType, ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
+import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
@@ -10,6 +10,9 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
 import { WaitingViewComponent } from './waiting-view.component';
+import { Routes, DiceType } from '@common/enums';
+
+const MIN_PLAYERS = 2;
 
 describe('WaitingViewComponent', () => {
     let component: WaitingViewComponent;
@@ -39,10 +42,12 @@ describe('WaitingViewComponent', () => {
         movementPoints: 0,
         actionPoints: 0,
         inventory: [null, null],
+        isVirtual: false,
         hasAbandoned: false,
         isActive: false,
         combatWon: 0,
     };
+
     const mockLobby: Lobby = {
         accessCode: '1234',
         players: [MOCK_PLAYER],
@@ -53,26 +58,29 @@ describe('WaitingViewComponent', () => {
 
     beforeEach(async () => {
         mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+
         mockLobbyService = jasmine.createSpyObj(
             'LobbyService',
             ['initializeLobby', 'removePlayerAndCleanup', 'removeSocketListeners', 'setIsGameStarting'],
             {
-                player$: new BehaviorSubject<Player | null>(MOCK_PLAYER),
-                lobby$: new BehaviorSubject<Lobby | null>(mockLobby),
-                isLoading$: new BehaviorSubject<boolean>(false),
-                isGameStarting$: new BehaviorSubject<boolean>(false),
+                player$: new BehaviorSubject(MOCK_PLAYER),
+                lobby$: new BehaviorSubject(mockLobby),
+                isLoading$: new BehaviorSubject(false),
+                isGameStarting$: new BehaviorSubject(false),
                 accessCode: '1234',
             },
         );
+
         mockSnackbarService = jasmine.createSpyObj('SnackbarService', ['showMessage']);
+
         mockSocketClientService = jasmine.createSpyObj('SocketClientService', [
+            'emit',
+            'on',
             'unlockLobby',
             'lockLobby',
             'kickPlayer',
             'alertGameStarted',
-            'emit', // Add the emit method to the mock
         ]);
-
         await TestBed.configureTestingModule({
             imports: [WaitingViewComponent],
             providers: [
@@ -82,23 +90,21 @@ describe('WaitingViewComponent', () => {
                 { provide: SocketClientService, useValue: mockSocketClientService },
             ],
         }).compileComponents();
-
         fixture = TestBed.createComponent(WaitingViewComponent);
         component = fixture.componentInstance;
         fixture.detectChanges();
     });
 
-    it('should create', () => {
+    it('should create the component', () => {
         expect(component).toBeTruthy();
     });
 
-    describe('ngOnInit', () => {
-        it('should initialize lobby and set up subscriptions', () => {
-            expect(mockLobbyService.initializeLobby).toHaveBeenCalled();
-            expect(component.accessCode).toBe('1234');
-            expect(component.player).toEqual(MOCK_PLAYER);
-            expect(component.lobby).toEqual(mockLobby);
-        });
+    it('should initialize with correct default values', () => {
+        expect(component.accessCode).toBe('1234');
+        expect(component.player).toEqual(MOCK_PLAYER);
+        expect(component.lobby).toEqual(mockLobby);
+        expect(component.isLoading).toBeFalse();
+        expect(component.isGameStarting).toBeFalse();
     });
 
     describe('ngOnDestroy', () => {
@@ -185,6 +191,17 @@ describe('WaitingViewComponent', () => {
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.NotEnoughPlayers);
         });
 
+        it('should show error if CTF and player count not even', () => {
+            component.lobby = {
+                ...mockLobby,
+                isLocked: true,
+                players: new Array(MIN_PLAYERS + 1).fill(MOCK_PLAYER),
+                game: { mode: 'CTF' } as Game,
+            };
+            component.navigateToGame();
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.NotEnoughPlayers);
+        });
+
         it('should emit createGame event and navigate if conditions met', fakeAsync(() => {
             component.lobby = {
                 ...mockLobby,
@@ -196,7 +213,7 @@ describe('WaitingViewComponent', () => {
             component.navigateToGame();
             tick();
 
-            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234' });
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createGame', { accessCode: '1234', gameMode: undefined });
             expect(mockLobbyService.setIsGameStarting).toHaveBeenCalledWith(true);
             expect(sessionStorage.getItem('lobby')).toBe(JSON.stringify(component.lobby));
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.Game]);
@@ -232,5 +249,39 @@ describe('WaitingViewComponent', () => {
         component.navigateToHome();
 
         expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.HomePage]);
+    });
+
+    describe('kickVirtualPlayer', () => {
+        it('should emit kickVirtualPlayer event with correct parameters', () => {
+            const testPlayer = { name: 'TestVirtual', isVirtual: true } as Player;
+            component.kickVirtualPlayer(testPlayer);
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('kickVirtualPlayer', {
+                accessCode: '1234',
+                player: testPlayer,
+            });
+        });
+    });
+
+    describe('Virtual Player Dialog', () => {
+        it('should open dialog when createVirtualPlayer is called', () => {
+            component.createVirtualPlayer();
+            expect(component.isDialogOpen).toBeTrue();
+        });
+
+        it('should set behavior and close dialog when setBehavior is called', () => {
+            const testBehavior = 'Aggressive' as any;
+            component.setBehavior(testBehavior);
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('createVirtualPlayer', {
+                behavior: testBehavior,
+                accessCode: '1234',
+            });
+            expect(component.isDialogOpen).toBeFalse();
+        });
+
+        it('should close dialog when cancelVirtualPlayer is called', () => {
+            component.isDialogOpen = true;
+            component.cancelVirtualPlayer();
+            expect(component.isDialogOpen).toBeFalse();
+        });
     });
 });

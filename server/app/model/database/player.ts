@@ -1,7 +1,8 @@
+import { DiceType } from '@app/interfaces/dice';
+import { TeamType } from '@common/enums';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Item } from './item';
-import { DiceType } from '@app/interfaces/Dice';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Item } from './item';
 
 const spawnPointSchema = new MongooseSchema({
     x: { type: Number, required: true },
@@ -20,9 +21,6 @@ export class Player {
 
     @Prop({ required: true })
     speed: number;
-
-    @Prop({ required: true })
-    vitality: number;
 
     @Prop({ required: true, type: Object })
     attack: { value: number; bonusDice: DiceType };
@@ -46,6 +44,9 @@ export class Player {
     isAdmin: boolean;
 
     @Prop({ required: true })
+    isVirtual: boolean;
+
+    @Prop({ required: true })
     hasAbandoned: boolean;
 
     @Prop({ required: true })
@@ -63,6 +64,9 @@ export class Player {
         y: number;
         tileId: string;
     };
+
+    @Prop({ required: false, enum: TeamType })
+    team?: TeamType;
 }
 
 export const playerSchema = SchemaFactory.createForClass(Player);

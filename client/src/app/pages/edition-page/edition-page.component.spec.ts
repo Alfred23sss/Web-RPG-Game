@@ -6,7 +6,6 @@ import { Router, RouterModule } from '@angular/router';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
-import { ImageType, TileType } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
@@ -16,6 +15,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { ToolService } from '@app/services/tool/tool.service';
 import { of } from 'rxjs';
 import { EditionPageComponent } from './edition-page.component';
+import { ImageType, TileType } from '@common/enums';
 
 function createBaseGrid(size: number): Tile[][] {
     return Array.from({ length: size }, (_, rowIndex) =>

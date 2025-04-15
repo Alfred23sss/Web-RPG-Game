@@ -1,56 +1,71 @@
 <div [class.gray-background]="showForm" class="character-form-container">
     @if (showForm) {
     <div class="character-form_header">
-        <div class="character-form_cancel">
-            <button class="character-form_cancel-button" (click)="closePopup()">
-                <img [src]="xSword" alt="xSword" class="cancel-swords" />
-            </button>
-        </div>
+        <button class="button cancel-button" (click)="closePopup()">Quitter</button>
         <h1 id="character-form_title">Créer un personnage</h1>
+        <button class="button custom-button" (click)="submitCharacter()">Confirmer</button>
     </div>
 
-    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" maxlength="20" />
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="15" />
 
     <div class="character-form_body">
-        <div class="character-form_avatars">
-            @for (avatar of avatarTypes; track avatar) {
-            <img
-                (click)="selectAvatar(avatar)"
-                [src]="avatar"
-                [class.selected]="createdPlayer.avatar === avatar"
-                [class.disabled]="unavailableAvatars.includes(avatar) && createdPlayer.avatar !== avatar"
-                alt="Avatar"
-            />
-            }
-        </div>
-
-        <div class="character-form_attributes">
-            @for (attribute of attributeKeys; track attribute) {
-            <div>
-                <span>
-                    {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }} : {{ attributes[attribute] }} 
-                    @if (attribute === attributeTypes.Attack && createdPlayer.attack.bonusDice) { 
-                        + {{ createdPlayer.attack.bonusDice }} 
-                    } 
-                    @if (attribute === attributeTypes.Defense && createdPlayer.defense.bonusDice) { 
-                        + {{ createdPlayer.defense.bonusDice }} 
-                    }
-                </span>
-
-                @if (attribute === attributeTypes.Vitality || attribute === attributeTypes.Speed) {
-                <button (click)="assignBonus(attribute)" [disabled]="bonusAssigned[attribute]">
-                    +2 {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
-                </button>
-                } @if (attribute === attributeTypes.Attack || attribute === attributeTypes.Defense) {
-                <button (click)="assignDice(attribute)" [disabled]="diceAssigned[attribute]">
-                    {{ diceTypes.D6.toUpperCase() }} {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}
-                </button>
+        <div class="character-form_content">
+            <div class="character-form_attributes">
+                <div class="selected-avatar-container">
+                    <div class="selected-avatar-frame">
+                        <img [src]="createdPlayer.avatar" alt="" class="selected-avatar" />
+                        <div class="avatar-glow"></div>
+                    </div>
+                    <h3 class="avatar-name">{{ createdPlayer.name }}</h3>
+                </div>
+                @for (attribute of attributeKeys; track attribute) {
+                <div class="attribute-row">
+                    <span class="attribute-name"> {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}: </span>
+                    <div class="attribute-bar-container">
+                        <div class="attribute-bar">
+                            @for (segment of (attribute === attributeTypes.Attack || attribute === attributeTypes.Defense ? [1,2,3,4] :
+                            [1,2,3,4,5,6]); track segment) {
+                            <div class="bar-segment" [class.filled]="segment <= attributes[attribute]"></div>
+                            }
+                        </div>
+                    </div>
+                    <div class="attribute-buttons">
+                        @if (attribute === attributeTypes.Vitality || attribute === attributeTypes.Speed) {
+                        <button (click)="assignBonus(attribute)" [disabled]="bonusAssigned[attribute]">+2</button>
+                        } @if (attribute === attributeTypes.Attack || attribute === attributeTypes.Defense) {
+                        <div class="dice-buttons">
+                            <button (click)="assignDice(attribute, diceTypes.D6)" [class.active]="getDiceValue(attribute) === diceTypes.D6">
+                                D6
+                            </button>
+                            <button (click)="assignDice(attribute, diceTypes.D4)" [class.active]="getDiceValue(attribute) === diceTypes.D4">
+                                D4
+                            </button>
+                        </div>
+                        }
+                    </div>
+                </div>
                 }
             </div>
-            }
+
+            <div class="character-form_avatars">
+                @for (row of [0,1,2,3]; track row) {
+                <div class="avatar-row">
+                    @for (col of [0,1,2]; track col) { @if (row * 3 + col < avatarTypes.length) {
+                    <img
+                        (click)="selectAvatar(avatarTypes[row * 3 + col])"
+                        [src]="avatarTypes[row * 3 + col]"
+                        [class.selected]="createdPlayer.avatar === avatarTypes[row * 3 + col]"
+                        [class.disabled]="
+                            unavailableAvatars.includes(avatarTypes[row * 3 + col]) && createdPlayer.avatar !== avatarTypes[row * 3 + col]
+                        "
+                        alt="Avatar"
+                    />
+                    } }
+                </div>
+                }
+            </div>
         </div>
     </div>
 
-    <button (click)="submitCharacter()">Confirmer</button>
     }
 </div>

@@ -1,0 +1,23 @@
+<div class="game-messages">
+    <h3>MESSAGES - {{ author | uppercase }}</h3>
+
+    <div class="messages-content" #messagesContent>
+        @for (message of messages; track message) {
+        <div class="message-bubble">
+            <span class="message-text">{{ message }}</span>
+        </div>
+        }
+    </div>
+
+    <div class="message-input-container">
+        <input
+            type="text"
+            [(ngModel)]="newMessage"
+            maxlength="144"
+            placeholder="Écrire un message..."
+            class="message-field"
+            (keydown)="handleKeyDown($event)"
+        />
+        <button class="button send-button" (click)="sendMessage()"><i class="fas fa-paper-plane"></i> ENVOYER</button>
+    </div>
+</div>

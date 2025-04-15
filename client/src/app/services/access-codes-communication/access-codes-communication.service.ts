@@ -1,14 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from 'src/environments/environment';
 
 @Injectable({
     providedIn: 'root',
 })
 export class AccessCodesCommunicationService {
-    private apiUrl = `${environment.serverUrl}/accessCodes`;
-    // private apiUrl = 'http://localhost:3000/api/accessCodes';
+    private apiUrl = 'http://localhost:3000/api/accessCodes';
 
     constructor(private readonly http: HttpClient) {}
 

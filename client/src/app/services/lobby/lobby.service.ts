@@ -1,15 +1,14 @@
-/* eslint-disable @typescript-eslint/member-ordering */
-// disabled, car l'ordre n'est pas possible à respecter, car les subject doivent etre defini avant d'etre utilisé...
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { GAME_STORAGE, LOBBY_STORAGE, MIN_PLAYERS, ORDERED_PLAYERS_STORAGE, PLAYER_STORAGE } from '@app/constants/global.constants';
+import { ErrorMessages, SnackBarMessage, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Routes } from '@common/enums';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
@@ -22,11 +21,6 @@ export class LobbyService {
     private playerSubject = new BehaviorSubject<Player | null>(null);
     private isGameStartingSubject = new BehaviorSubject<boolean>(false);
 
-    lobby$ = this.lobbySubject.asObservable();
-    isLoading$ = this.isLoadingSubject.asObservable();
-    player$ = this.playerSubject.asObservable();
-    isGameStarting$ = this.isGameStartingSubject.asObservable();
-
     constructor(
         private router: Router,
         private socketClientService: SocketClientService,
@@ -34,6 +28,21 @@ export class LobbyService {
         private snackbarService: SnackbarService,
     ) {}
 
+    get lobby$() {
+        return this.lobbySubject.asObservable();
+    }
+
+    get isLoading$() {
+        return this.isLoadingSubject.asObservable();
+    }
+
+    get player$() {
+        return this.playerSubject.asObservable();
+    }
+
+    get isGameStarting$() {
+        return this.isGameStartingSubject.asObservable();
+    }
     setIsGameStarting(isStarting: boolean): void {
         this.isGameStartingSubject.next(isStarting);
     }
@@ -42,7 +51,7 @@ export class LobbyService {
         this.accessCode = this.accessCodeService.getAccessCode();
         this.isLoadingSubject.next(true);
 
-        const storedPlayer = sessionStorage.getItem('player');
+        const storedPlayer = sessionStorage.getItem(PLAYER_STORAGE);
         if (storedPlayer) {
             this.playerSubject.next(JSON.parse(storedPlayer));
         }
@@ -66,10 +75,7 @@ export class LobbyService {
 
         const isPlayerInLobby = lobby.players.some((p) => p.name === player.name);
         if (this.accessCode && isPlayerInLobby && !this.isGameStartingSubject.value) {
-            this.socketClientService.emit('leaveLobby', {
-                accessCode: this.accessCode,
-                playerName: player.name,
-            });
+            this.socketClientService.emit(SocketEvent.ManualDisconnect, { isInGame: false });
         }
     }
     navigateToHome(): void {
@@ -87,26 +93,26 @@ export class LobbyService {
             return;
         }
         this.setIsGameStarting(true);
-        sessionStorage.setItem('lobby', JSON.stringify(lobby));
+        sessionStorage.setItem(LOBBY_STORAGE, JSON.stringify(lobby));
         this.router.navigate([Routes.Game]);
     }
 
     removeSocketListeners(): void {
-        this.socketClientService.socket.off('joinLobby');
-        this.socketClientService.socket.off('lobbyUpdate');
-        this.socketClientService.socket.off('leaveLobby');
-        this.socketClientService.socket.off('kicked');
-        this.socketClientService.socket.off('lobbyLocked');
-        this.socketClientService.socket.off('lobbyUnlocked');
-        this.socketClientService.socket.off('lobbyDeleted');
-        this.socketClientService.socket.off('alertGameStarted');
+        this.socketClientService.socket.off(SocketEvent.JoinLobby);
+        this.socketClientService.socket.off(SocketEvent.LobbyUpdate);
+        this.socketClientService.socket.off(SocketEvent.ManualDisconnect);
+        this.socketClientService.socket.off(SocketEvent.Kicked);
+        this.socketClientService.socket.off(SocketEvent.LobbyLocked);
+        this.socketClientService.socket.off(SocketEvent.LobbyUnlocked);
+        this.socketClientService.socket.off(SocketEvent.LobbyDeleted);
+        this.socketClientService.socket.off(SocketEvent.AlertGameStarted);
     }
 
     private initializeSocketListeners(): void {
-        this.socketClientService.on('joinedLobby', () => this.updatePlayers());
-        this.socketClientService.on('leftLobby', () => this.updatePlayers());
+        this.socketClientService.on(SocketEvent.JoinLobby, () => this.updatePlayers());
+        this.socketClientService.on(SocketEvent.LeftLobby, () => this.updatePlayers());
 
-        this.socketClientService.on('updatePlayers', (players: Player[]) => {
+        this.socketClientService.on(SocketEvent.UpdatePlayers, (players: Player[]) => {
             const lobby = this.lobbySubject.value;
             if (lobby) {
                 lobby.players = players;
@@ -117,45 +123,45 @@ export class LobbyService {
                     const updatedPlayer = players.find((p) => p.avatar === currentPlayer.avatar);
                     if (updatedPlayer) {
                         currentPlayer.name = updatedPlayer.name;
-                        sessionStorage.setItem('player', JSON.stringify(currentPlayer));
+                        sessionStorage.setItem(PLAYER_STORAGE, JSON.stringify(currentPlayer));
                         this.playerSubject.next({ ...currentPlayer });
                     }
                 }
             }
         });
 
-        this.socketClientService.on<{ accessCode: string; playerName: string }>('kicked', (data) => {
+        this.socketClientService.on<{ accessCode: string; playerName: string }>(SocketEvent.Kicked, (data) => {
             const { accessCode, playerName } = data;
 
             if (accessCode === this.accessCode && playerName === this.playerSubject.value?.name) {
-                this.snackbarService.showMessage('Vous avez été expulsé du lobby.');
+                this.snackbarService.showMessage(SnackBarMessage.LobbyExpulsion);
                 this.navigateToHome();
             }
         });
 
-        this.socketClientService.on<{ accessCode: string; isLocked: boolean }>('lobbyLocked', ({ accessCode, isLocked }) => {
+        this.socketClientService.on<{ accessCode: string; isLocked: boolean }>(SocketEvent.LobbyLocked, ({ accessCode, isLocked }) => {
             const lobby = this.lobbySubject.value;
             if (lobby && accessCode === this.accessCode) {
                 this.lobbySubject.next({ ...lobby, isLocked });
             }
         });
 
-        this.socketClientService.on<{ accessCode: string; isLocked: boolean }>('lobbyUnlocked', ({ accessCode, isLocked }) => {
+        this.socketClientService.on<{ accessCode: string; isLocked: boolean }>(SocketEvent.LobbyUnlocked, ({ accessCode, isLocked }) => {
             const lobby = this.lobbySubject.value;
             if (lobby && accessCode === this.accessCode) {
                 this.lobbySubject.next({ ...lobby, isLocked });
             }
         });
 
-        this.socketClientService.on('lobbyDeleted', () => this.navigateToHome());
+        this.socketClientService.on(SocketEvent.LobbyDeleted, () => this.navigateToHome());
 
-        this.socketClientService.on('gameStarted', (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
-            sessionStorage.setItem('game', JSON.stringify(data.updatedGame));
-            sessionStorage.setItem('orderedPlayers', JSON.stringify(data.orderedPlayers));
+        this.socketClientService.on(SocketEvent.GameStarted, (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
+            sessionStorage.setItem(GAME_STORAGE, JSON.stringify(data.updatedGame));
+            sessionStorage.setItem(ORDERED_PLAYERS_STORAGE, JSON.stringify(data.orderedPlayers));
             this.navigateToGame();
         });
 
-        this.socketClientService.on('adminLeft', (data: { playerSocketId: string; message: string }) => {
+        this.socketClientService.on(SocketEvent.AdminLeft, (data: { playerSocketId: string; message: string }) => {
             if (this.socketClientService.getSocketId() !== data.playerSocketId) {
                 this.snackbarService.showMessage(data.message);
             }

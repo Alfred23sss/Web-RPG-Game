@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 import { TestBed } from '@angular/core/testing';
-import { TileType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { TileType } from '@common/enums';
 
 describe('PlayerMovementService', () => {
     let service: PlayerMovementService;
@@ -69,6 +69,18 @@ describe('PlayerMovementService', () => {
             expect(result.map((t) => t.id)).toEqual(jasmine.arrayWithExactContents(['tile-0-0', 'tile-0-1', 'tile-1-0', 'tile-1-1']));
         });
 
+        it('should handle undefined dequeued element gracefully', () => {
+            const grid = [
+                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Ice)],
+                [createTile('tile-1-0', TileType.Water), createTile('tile-1-1', TileType.Default)],
+            ];
+            mockGridService.getGrid.and.returnValue(grid);
+            spyOn<any>(service, 'getNeighborAndCost').and.returnValue(undefined);
+
+            const result = service.availablePath(grid[0][0], 3, grid);
+            expect(result.map((t) => t.id)).toEqual(jasmine.arrayWithExactContents(['tile-0-0', 'tile-0-1', 'tile-1-0']));
+        });
+
         it('should handle invalid tile ID in getNeighbors', () => {
             const grid = [[createTile('invalid_id', TileType.Default), createTile('tile-0-1', TileType.Default)]];
             mockGridService.getGrid.and.returnValue(grid);
@@ -101,6 +113,18 @@ describe('PlayerMovementService', () => {
             });
         });
 
+        it('should handle undefined dequeued element gracefully', () => {
+            const grid = [
+                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Water)],
+                [createTile('tile-1-0', TileType.Ice), createTile('tile-1-1', TileType.Default)],
+            ];
+            mockGridService.getGrid.and.returnValue(grid);
+            spyOn<any>(service, 'getNeighborAndCost').and.returnValue(undefined);
+
+            const path = service.quickestPath(grid[0][0], grid[1][1], grid);
+            expect(path?.map((t) => t.id)).toBe(undefined);
+        });
+
         it('should find shortest path considering movement costs', () => {
             const grid = [
                 [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Water)],
@@ -117,18 +141,6 @@ describe('PlayerMovementService', () => {
             mockGridService.getGrid.and.returnValue(grid);
 
             expect(service.quickestPath(grid[0][0], grid[1][0], grid)).toBeUndefined();
-        });
-
-        it('should return undefined when path is completely blocked', () => {
-            const grid = [
-                [createTile('tile-0-0', TileType.Default), createTile('tile-0-1', TileType.Wall)],
-                [createTile('tile-1-0', TileType.Door, false), createTile('tile-1-1', TileType.Water)],
-            ];
-            mockGridService.getGrid.and.returnValue(grid);
-
-            const start = grid[0][0];
-            const target = grid[1][1];
-            expect(service.quickestPath(start, target, grid)).toBeUndefined();
         });
     });
 
@@ -231,44 +243,6 @@ describe('PlayerMovementService', () => {
         });
     });
 
-    describe('hasAdjacentIce', () => {
-        it('should return true when there is adjacent ice', () => {
-            const centerTile = createTile('center', TileType.Default);
-            const grid = mockTiles();
-            const iceTile = createTile('ice', TileType.Ice);
-            spyOn<any>(service, 'getNeighbors').and.returnValue([
-                createTile('normal', TileType.Default),
-                iceTile,
-                createTile('water', TileType.Water),
-            ]);
-            const result = service.hasAdjacentIce(centerTile, grid);
-            expect(result).toBeTrue();
-            expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
-        });
-
-        it('should return false when there is no adjacent ice', () => {
-            const centerTile = createTile('center', TileType.Default);
-            const grid = mockTiles();
-            spyOn<any>(service, 'getNeighbors').and.returnValue([
-                createTile('normal1', TileType.Default),
-                createTile('normal2', TileType.Default),
-                createTile('water', TileType.Water),
-            ]);
-            const result = service.hasAdjacentIce(centerTile, grid);
-
-            expect(result).toBeFalse();
-            expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
-        });
-        it('should return false when there are no neighbors', () => {
-            const centerTile = createTile('center', TileType.Default);
-            const grid = mockTiles();
-            spyOn<any>(service, 'getNeighbors').and.returnValue([]);
-            const result = service.hasAdjacentIce(centerTile, grid);
-            expect(result).toBeFalse();
-            expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
-        });
-    });
-
     describe('hasAdjacentPlayerOrDoor', () => {
         it('should return true when there is an adjacent player', () => {
             const centerTile = createTile('center', TileType.Default);
@@ -331,5 +305,15 @@ describe('PlayerMovementService', () => {
             expect(result).toBeFalse();
             expect((service as any).getNeighbors).toHaveBeenCalledWith(centerTile, grid);
         });
+    });
+
+    it('should return true when adjacent tile matches type', () => {
+        const clientPlayerTile = createTile('tile-0-0', TileType.Default);
+        const grid = mockTiles();
+        const neighborsWithTargetType = [createTile('tile-0-1', TileType.Water), createTile('tile-1-0', TileType.Ice)];
+        spyOn<any>(service, 'getNeighbors').and.returnValue(neighborsWithTargetType);
+
+        expect(service.hasAdjacentTileType(clientPlayerTile, grid, TileType.Water)).toBeTrue();
+        expect(service['getNeighbors']).toHaveBeenCalledWith(clientPlayerTile, grid);
     });
 });

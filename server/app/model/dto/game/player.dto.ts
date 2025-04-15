@@ -1,5 +1,5 @@
+import { DiceType } from '@app/interfaces/dice';
 import { IsBoolean, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator';
-import { DiceType } from '@app/interfaces/Dice';
 import { ItemDto } from './item.dto';
 
 export class PlayerDto {
@@ -11,9 +11,6 @@ export class PlayerDto {
 
     @IsNumber()
     speed: number;
-
-    @IsNumber()
-    vitality: number;
 
     @IsOptional()
     @ValidateNested()

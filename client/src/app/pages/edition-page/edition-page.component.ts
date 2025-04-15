@@ -1,13 +1,12 @@
-/* eslint-disable max-params */
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { ItemBarComponent } from '@app/components/item-bar/item-bar.component';
 import { ToolbarComponent } from '@app/components/toolbar/toolbar.component';
-import { Routes } from '@app/enums/global.enums';
+import { Routes } from '@common/enums';
 import { Game } from '@app/interfaces/game';
 import { GameValidationService } from '@app/services/game-validation/game-validation.service';
 import { GameService } from '@app/services/game/game.service';
@@ -46,7 +45,9 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     ngAfterViewInit(): void {
         if (this.itemBar && this.itemBar.items) {
             this.originalItemBar = this.makeDeepCopy(this.itemBar.items);
-            this.itemService.setItems(this.itemBar.items);
+            const gameMode = this.gameService.getCurrentGame()?.mode;
+            this.itemService.setItems(this.itemBar.items, gameMode);
+            this.itemBar.items = this.itemService.getItems();
         }
     }
 
@@ -60,8 +61,9 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         this.gridService.setGrid(this.game.grid);
         this.updateGame();
         if (this.itemBar) {
-            const restoredItems = this.makeDeepCopy(this.originalItemBar);
-            this.itemService.setItems(restoredItems);
+            const restoredItems = this.makeDeepCopy(JSON.parse(this.originalItemBar));
+            const gameMode = this.gameService.getCurrentGame()?.mode;
+            this.itemService.setItems(restoredItems, gameMode);
             this.itemBar.items = this.itemService.getItems();
         }
         this.cloneInitialGame();

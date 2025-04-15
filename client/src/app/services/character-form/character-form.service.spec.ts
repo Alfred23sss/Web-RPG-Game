@@ -5,7 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
+import { AttributeType, ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -15,6 +15,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
+import { DiceType, JoinLobbyResult, Routes, HttpStatus } from '@common/enums';
 
 describe('CharacterService', () => {
     let service: CharacterService;
@@ -87,6 +88,7 @@ describe('CharacterService', () => {
             actionPoints: UNINITIALIZED_ATTRIBUTE_VALUE,
             inventory: [null, null],
             isAdmin: false,
+            isVirtual: false,
             hasAbandoned: false,
             isActive: false,
             combatWon: 0,
@@ -165,7 +167,7 @@ describe('CharacterService', () => {
     it('should show error message if character is not valid', async () => {
         spyOn(service, 'isCharacterValid').and.returnValue(false);
         spyOn(service, 'showMissingDetailsError');
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+        await service.submitCharacter(player, currentAccessCode, true, mockGame);
         expect(service.showMissingDetailsError).toHaveBeenCalled();
         expect(mockAccessCodeService.setAccessCode).not.toHaveBeenCalled();
     });
@@ -176,28 +178,21 @@ describe('CharacterService', () => {
     });
 
     it('should assign D6 to attack and D4 to defense when attack is selected', () => {
-        service.assignDice(player, AttributeType.Attack);
-        expect(service.diceAssigned[AttributeType.Attack]).toBeTrue();
-        expect(service.diceAssigned[AttributeType.Defense]).toBeFalse();
+        service.assignDice(player, AttributeType.Attack, DiceType.D6);
         expect(player.attack.bonusDice).toBe(DiceType.D6);
         expect(player.defense.bonusDice).toBe(DiceType.D4);
     });
 
     it('should assign D6 to defense and D4 to attack when defense is selected', () => {
-        service.assignDice(player, AttributeType.Defense);
-        expect(service.diceAssigned[AttributeType.Defense]).toBeTrue();
-        expect(service.diceAssigned[AttributeType.Attack]).toBeFalse();
-        expect(player.attack.bonusDice).toBe(DiceType.D4);
-        expect(player.defense.bonusDice).toBe(DiceType.D6);
+        service.assignDice(player, AttributeType.Defense, DiceType.D4);
+        expect(player.attack.bonusDice).toBe(DiceType.D6);
+        expect(player.defense.bonusDice).toBe(DiceType.D4);
     });
 
-    it('should call finalizeCharacterSubmission when joinStatus is JoinedLobby', () => {
-        spyOn(service as any, 'finalizeCharacterSubmission');
-        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
-
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
-
-        expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
+    it('should assign D6 to defense and D4 to attack when defense is selected with D6', () => {
+        service.assignDice(player, AttributeType.Defense, DiceType.D6);
+        expect(player.defense.bonusDice).toBe(DiceType.D6);
+        expect(player.attack.bonusDice).toBe(DiceType.D4);
     });
 
     describe('joinExistingLobby', () => {
@@ -385,20 +380,20 @@ describe('CharacterService', () => {
         spyOn(service as any, 'showMissingDetailsError');
         mockCommunicationService.getGameById.and.returnValue(of({ id: '1', name: 'Test Game' } as Game));
 
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+        await service.submitCharacter(player, currentAccessCode, true, mockGame);
 
         expect((service as any).showMissingDetailsError).toHaveBeenCalled();
         expect(mockAccessCodeService.setAccessCode).not.toHaveBeenCalled();
     });
 
-    it('should call finalizeCharacterSubmission when joinStatus is JoinedLobby', () => {
+    it('should set player as admin, create and join lobby, and finalize submission if lobby is not created', async () => {
+        spyOn(service, 'isCharacterValid').and.returnValue(true);
         spyOn(service as any, 'finalizeCharacterSubmission');
-        mockCommunicationService.getGameById.and.returnValue(of(mockGame));
-
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
-        service['handleLobbyJoining'](JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
-
-        expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player, closePopupSpy);
+        spyOn(service, 'createAndJoinLobby').and.returnValue(Promise.resolve());
+        await service.submitCharacter(player, currentAccessCode, false, mockGame);
+        expect(player.isAdmin).toBeTrue();
+        expect(service.createAndJoinLobby).toHaveBeenCalledWith(mockGame, player);
+        expect((service as any).finalizeCharacterSubmission).toHaveBeenCalledWith(player);
     });
 
     it('should do nothing when joinStatus is StayInLobby', () => {
@@ -414,10 +409,9 @@ describe('CharacterService', () => {
     it('should call returnHome when joinStatus is RedirectToHome', () => {
         spyOn(service as any, 'returnHome');
 
-        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame, currentAccessCode, closePopupSpy);
+        service['handleLobbyJoining'](JoinLobbyResult.RedirectToHome, player, mockGame);
 
         expect((service as any).returnHome).toHaveBeenCalled();
-        expect(closePopupSpy).toHaveBeenCalled();
     });
 
     it('should call joinExistingLobby and handleLobbyJoining when isLobbyCreated is true', async () => {
@@ -425,16 +419,10 @@ describe('CharacterService', () => {
         spyOn(service, 'joinExistingLobby').and.resolveTo(JoinLobbyResult.JoinedLobby);
         spyOn(service as any, 'handleLobbyJoining');
 
-        await service.submitCharacter(player, currentAccessCode, true, mockGame, closePopupSpy);
+        await service.submitCharacter(player, currentAccessCode, true, mockGame);
 
         expect(service.joinExistingLobby).toHaveBeenCalledWith(currentAccessCode, player);
-        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(
-            JoinLobbyResult.JoinedLobby,
-            player,
-            mockGame,
-            currentAccessCode,
-            closePopupSpy,
-        );
+        expect((service as any).handleLobbyJoining).toHaveBeenCalledWith(JoinLobbyResult.JoinedLobby, player, mockGame);
     });
 
     it('should validate game availability', () => {
@@ -443,7 +431,7 @@ describe('CharacterService', () => {
 
         (service as any).handleLobbyJoining(JoinLobbyResult.JoinedLobby, player, mockGame, currentAccessCode, closePopupSpy);
 
-        expect(service['validateGameAvailability']).toHaveBeenCalledWith(mockGame, closePopupSpy);
+        expect(service['validateGameAvailability']).toHaveBeenCalledWith(mockGame);
     });
 
     describe('validateGameAvailability', () => {
@@ -454,7 +442,7 @@ describe('CharacterService', () => {
         it('should do nothing when game is available', () => {
             mockCommunicationService.getGameById.and.returnValue(of(mockGame));
 
-            service['validateGameAvailability'](mockGame, closePopupSpy);
+            service['validateGameAvailability'](mockGame);
 
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
             expect(closePopupSpy).not.toHaveBeenCalled();
@@ -463,18 +451,17 @@ describe('CharacterService', () => {
 
         it('should handle FORBIDDEN error and navigate to CREATE_VIEW', () => {
             mockCommunicationService.getGameById.and.returnValue(throwError(() => ({ status: HttpStatus.Forbidden })));
-            service['validateGameAvailability'](mockGame, closePopupSpy);
+            service['validateGameAvailability'](mockGame);
             expect(mockCommunicationService.getGameById).toHaveBeenCalledWith('1');
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.UnavailableGame);
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.CreateView]);
-            expect(closePopupSpy).toHaveBeenCalled();
         });
     });
 
     describe('isCharacterValid', () => {
         it('should return true when all parameters are valid', () => {
             service.assignBonus(player, AttributeType.Vitality);
-            service.assignDice(player, AttributeType.Attack);
+            service.assignDice(player, AttributeType.Attack, DiceType.D4);
 
             expect(service.isCharacterValid(player)).toBeTrue();
         });
@@ -494,15 +481,8 @@ describe('CharacterService', () => {
     describe('proceedToWaitingView', () => {
         it('should navigate to WAITING_VIEW', () => {
             closePopupSpy = jasmine.createSpy();
-            service['proceedToWaitingView'](closePopupSpy);
+            service['proceedToWaitingView']();
             expect(mockRouter.navigate).toHaveBeenCalledWith([Routes.WaitingView]);
-            expect(closePopupSpy).toHaveBeenCalled();
-        });
-
-        it('should call closePopup', () => {
-            closePopupSpy = jasmine.createSpy();
-            service['proceedToWaitingView'](closePopupSpy);
-            expect(closePopupSpy).toHaveBeenCalled();
         });
     });
 
@@ -529,9 +509,9 @@ describe('CharacterService', () => {
         });
 
         it('should show a message if the name exceeds the maximum length', () => {
-            const longName = 'A'.repeat(maxLength + 1);
+            const longName = 'A'.repeat(maxLength);
             service.checkCharacterNameLength(longName);
-            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(`La longueur maximale du nom est de ${maxLength} caractères`);
+            expect(mockSnackbarService.showMessage).toHaveBeenCalledWith(ErrorMessages.MaxNameLength);
         });
 
         it('should handle an empty name without showing a message', () => {
@@ -563,19 +543,11 @@ describe('CharacterService', () => {
         spyOn(sessionStorage, 'setItem');
         spyOn(service as any, 'proceedToWaitingView');
 
-        service['finalizeCharacterSubmission'](player, closePopupSpy);
+        service['finalizeCharacterSubmission'](player);
 
         expect(service.isCharacterValid).toHaveBeenCalledWith(player);
         expect(sessionStorage.setItem).toHaveBeenCalledWith('player', JSON.stringify(player));
-        expect(service['proceedToWaitingView']).toHaveBeenCalledWith(closePopupSpy);
-    });
-
-    it('should do nothing if attribute is neither Vitality nor Speed', () => {
-        spyOn(service, 'assignBonus');
-
-        service.assignBonus(player, AttributeType.Attack);
-
-        expect(service.assignBonus).toHaveBeenCalledWith(player, AttributeType.Attack);
+        expect(service['proceedToWaitingView']).toHaveBeenCalled();
     });
 
     it('should assign bonus when attribute is Vitality', () => {
@@ -602,18 +574,6 @@ describe('CharacterService', () => {
         service.initializeLobby('testAccessCode');
 
         expect(service.unavailableAvatarsSubject.next).toHaveBeenCalledWith([]);
-    });
-
-    it('should store player in sessionStorage and proceed to waiting view if character is valid', () => {
-        spyOn(service, 'isCharacterValid').and.returnValue(true);
-        spyOn(sessionStorage, 'setItem');
-        spyOn(service as any, 'proceedToWaitingView');
-
-        (service as any).finalizeCharacterSubmission(player, closePopupSpy);
-
-        expect(service.isCharacterValid).toHaveBeenCalledWith(player);
-        expect(sessionStorage.setItem).toHaveBeenCalledWith('player', JSON.stringify(player));
-        expect((service as any).proceedToWaitingView).toHaveBeenCalledWith(closePopupSpy);
     });
 
     it('should not update unavailable avatars if avatars is undefined', () => {

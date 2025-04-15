@@ -1,0 +1,153 @@
+<div class="character-form-container stats-container">
+    <div class="character-form_header">
+        <h1 id="character-form_title">Statistiques de Partie</h1>
+    </div>
+
+    <div class="character-form_body stats-body">
+        <div class="top-row">
+            <div class="global-stats-container">
+                <h2 class="stats-section-title">Statistiques globales</h2>
+                <ul class="global-stats-list">
+                    <li>
+                        <span class="stat-name">Durée:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.formattedDuration || 'N/A' }}</span>
+                    </li>
+                    <li>
+                        <span class="stat-name">Total de tours:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.totalTurns }}</span>
+                    </li>
+                    <li>
+                        <span class="stat-name">% Record de tuiles visitées:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.tilesVisitedPercentage }}%</span>
+                    </li>
+                    <li>
+                        <span class="stat-name">% Portes manipulées:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.doorsManipulatedPercentage }}%</span>
+                    </li>
+                    <li>
+                        <span class="stat-name">Nombre de porteurs du drapeau:</span>
+                        <span class="stat-value">{{ gameStats.globalStats.uniqueFlagHolders || 0 }}</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="chat-wrapper">
+                <app-chat [author]="gameData.clientPlayer.name"></app-chat>
+            </div>
+        </div>
+
+        <div class="player-stats-container">
+            <h2 class="stats-section-title">Statistiques des joueurs</h2>
+            <div class="legend">
+                <p>
+                    <strong>Légende:</strong> La flèche vers le haut (↑) indique un ordre ascendant, et la flèche vers le bas (↓) indique un ordre
+                    descendant.
+                </p>
+            </div>
+            <div class="table-container">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th (click)="sortBy('playerName')">
+                                Nom @if (sortKey === 'playerName') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('combats')">
+                                Combats @if (sortKey === 'combats') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('escapes')">
+                                Évasions @if (sortKey === 'escapes') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('victories')">
+                                Victoires @if (sortKey === 'victories') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('defeats')">
+                                Défaites @if (sortKey === 'defeats') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('healthLost')">
+                                PV perdus @if (sortKey === 'healthLost') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('damageCaused')">
+                                PV infligés @if (sortKey === 'damageCaused') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('uniqueItemsCollected')">
+                                Objets ramassés @if (sortKey === 'uniqueItemsCollected') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                            <th (click)="sortBy('tilesVisitedPercentage')">
+                                Tuiles visitées % @if (sortKey === 'tilesVisitedPercentage') { @if (sortAsc) {
+                                <span>&#8593;</span>
+                                } @else {
+                                <span>&#8595;</span>
+                                } } @else {
+                                <span>&#8597;</span>
+                                }
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (player of sortedStats; track player.playerName) {
+                        <tr>
+                            <td>{{ player.playerName }}</td>
+                            <td>{{ player.combats }}</td>
+                            <td>{{ player.escapes }}</td>
+                            <td>{{ player.victories }}</td>
+                            <td>{{ player.defeats }}</td>
+                            <td>{{ player.healthLost }}</td>
+                            <td>{{ player.damageCaused }}</td>
+                            <td>{{ objectKeys(player.uniqueItemsCollected).length }}</td>
+                            <td>{{ player.tilesVisitedPercentage }}%</td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <button class="killer-button" (click)="goHome()">💀 Quitter la partie</button>
+</div>

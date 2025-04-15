@@ -1,13 +1,12 @@
 .character-form-container {
     width: 100%;
-    height: 90%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
     align-items: center;
-    padding-bottom: 1000px;
-    padding-top: 30px;
-    overflow: scroll;
+    padding: 20px 0;
+    overflow-y: auto;
+    background: linear-gradient(135deg, #0a1929 0%, #0f2a3d 100%);
 }
 
 .gray-background {
@@ -15,176 +14,320 @@
     top: 0;
     left: 0;
     width: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    height: 100%;
+    background: rgba(0, 20, 40, 0.9);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .character-form_header {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-#character-form_title {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
-    font-size: 50px;
-    font-weight: bold;
-    color: #ffd700;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-    margin: 0;
-    text-align: center;
-}
-
-input[type='text'] {
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
-    padding: 10px;
-    margin: 10px 0 40px 0;
-    font-size: 1em;
-    border: 2px solid #ffd700;
-    border-radius: 8px;
-    box-sizing: border-box;
-    color: white;
-    outline: none;
-    background-color: rgba(38, 33, 42, 0.137);
-    text-align: center;
-}
-
-input[type='text']:focus {
-    border-color: #ffdf00;
-    background-color: rgba(38, 33, 42, 0.2);
-    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
-}
-
-input[type='text']:hover {
-    transform: scale(1.05);
-    transition: transform 0.3s ease;
-}
-
-.character-form_body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-}
-
-.character-form_avatars {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-}
-
-.character-form_avatars img {
-    width: 12%;
-    max-width: 120px;
-    height: auto;
-    border: 2px solid transparent;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-}
-
-.character-form_avatars img:hover {
-    transform: scale(1.1);
-    border-color: #ffd700;
-    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
-}
-
-.character-form_avatars img.selected {
-    border-color: #ffd700;
-    box-shadow: 0px 4px 6px rgba(255, 255, 255, 0.8);
-}
-
-.character-form_attributes {
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    max-width: 90%;
-    margin: 0 auto;
-}
-
-.character-form_attributes div {
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
+    max-width: 800px;
+    margin: 0 auto 20px;
+    padding: 0 20px;
+    gap: 20px;
 }
 
-.character-form_attributes span {
-    font-size: 1.3rem;
+#character-form_title {
+    font-family: 'Pixel', sans-serif;
+    font-size: 2.2rem;
     font-weight: bold;
+    color: #d4f1ff;
+    text-shadow: 0 0 10px rgba(0, 200, 255, 0.8);
+    padding: 15px 30px;
+    transform: perspective(500px) rotateX(5deg);
+    margin: 0;
+    background: rgba(10, 40, 60, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    white-space: nowrap;
+    flex-grow: 1;
+    text-align: center;
+}
+
+.cancel-button,
+.custom-button {
+    width: 150px;
+    height: 50px;
+    border: none;
+    font-size: 1.1rem;
+    padding: 12px 20px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+
+.cancel-button {
+    background: linear-gradient(135deg, #ff6b6b, #ff3838);
     color: white;
+    box-shadow: 0 4px 8px rgba(255, 0, 0, 0.2);
+}
+
+.cancel-button:hover {
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.7);
+    background: linear-gradient(135deg, #ff7b7b, #ff4848);
+}
+
+input[type='text'] {
+    font-family: 'Pixel', sans-serif;
+    padding: 12px;
+    margin: 15px 0 30px;
+    font-size: 1rem;
+    border: 2px solid #64c8ff;
+    border-radius: 8px;
+    color: #d4f1ff;
+    outline: none;
+    background-color: rgba(10, 40, 60, 0.3);
+    text-align: center;
+    width: 80%;
+    max-width: 400px;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+}
+
+input[type='text']:focus {
+    border-color: #00c8ff;
+    box-shadow: 0 0 15px rgba(0, 200, 255, 0.5);
+}
+
+.character-form_body {
+    width: 90%;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.character-form_content {
+    display: flex;
+    justify-content: space-between;
+    gap: 30px;
+    width: 100%;
+}
+
+.character-form_attributes,
+.character-form_avatars {
+    flex: 1;
+    padding: 15px;
+    background: rgba(10, 30, 50, 0.5);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 20, 40, 0.5);
+    border: 1px solid rgba(100, 200, 255, 0.1);
+}
+
+.character-form_attributes {
+    min-width: 320px;
+}
+
+.character-form_avatars {
+    min-width: 400px;
+}
+
+.attribute-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding: 12px;
+    background: rgba(20, 80, 120, 0.2);
+    border-radius: 10px;
+    border: 1px solid rgba(100, 200, 255, 0.1);
+}
+
+.attribute-name {
+    font-weight: bold;
+    color: #d4f1ff;
+    text-shadow: 0 0 8px rgba(0, 200, 255, 0.6);
+    width: 100px;
+    font-size: 1.1rem;
+    font-family: 'Pixel', sans-serif;
+}
+
+.attribute-bar-container {
+    display: flex;
+    align-items: center;
+    flex: 1;
+}
+
+.attribute-bar {
+    display: flex;
+    gap: 4px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.bar-segment {
+    width: 16px;
+    height: 100%;
+    background-color: rgba(100, 200, 255, 0.1);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.bar-segment.filled {
+    background-color: #64c8ff;
+    box-shadow: 0 0 8px rgba(100, 200, 255, 0.7);
+}
+
+.attribute-value-text {
+    color: #d4f1ff;
+    font-size: 1rem;
+    min-width: 30px;
+    text-align: center;
+    font-family: 'Pixel', sans-serif;
+    text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+}
+
+.attribute-buttons {
+    display: flex;
+    gap: 10px;
+    width: 150px;
+    justify-content: flex-end;
 }
 
 button {
-    font-family: 'Papyrus', 'Comic Sans MS', cursive;
-    width: 200px;
-    font-size: 1rem;
-    background: linear-gradient(135deg, #ffd700, #ff8c00);
-    color: black;
+    font-family: 'Pixel', sans-serif;
+    padding: 8px;
+    font-size: 0.9rem;
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 5px rgba(100, 200, 255, 0.5);
+}
+
+.attribute-buttons > button {
+    width: 60px;
+    background: linear-gradient(135deg, #64c8ff, #0088cc);
+    color: #0a1929;
     font-weight: bold;
-    transition: transform 0.2s ease;
 }
 
-button:hover {
-    transform: scale(1.05);
+.dice-buttons {
+    display: flex;
+    gap: 5px;
 }
 
-button:hover {
-    transform: scale(1.05);
+.dice-buttons button {
+    width: 45px;
+    background: rgba(20, 80, 120, 0.3);
+    color: #d4f1ff;
+    border: 1px solid #64c8ff;
+}
+
+.dice-buttons button.active {
+    background: linear-gradient(135deg, #64c8ff, #0088cc);
+    color: #0a1929;
+    font-weight: bold;
+}
+
+.dice-buttons button:not(.active):hover {
+    background: rgba(100, 200, 255, 0.3);
 }
 
 button:disabled {
-    background: linear-gradient(135deg, #f0e68c, #d3d3d3);
+    background: linear-gradient(135deg, #506070, #304050);
     cursor: not-allowed;
     opacity: 0.6;
 }
 
-.character-form_cancel-button {
-    position: absolute;
-    left: 20px;
+.avatar-row {
     display: flex;
     justify-content: center;
-    align-items: center;
-    width: 50px;
-    height: 50px;
-    border-radius: 100%;
-    border: 1px solid;
-    color: white;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.character-form_avatars img {
+    width: 80px;
+    height: 80px;
+    border: 2px solid transparent;
+    border-radius: 10px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    object-fit: cover;
+    background: rgba(20, 80, 120, 0.2);
 }
 
-.cancel-swords {
-    width: 50px;
-    height: 50px;
-    object-fit: contain;
-    object-position: center;
-    border-radius: 50%;
-    background-color: white;
+.character-form_avatars img:hover {
+    border-color: #64c8ff;
+    box-shadow: 0 0 15px rgba(100, 200, 255, 0.5);
 }
 
-.cancel-button:hover {
-    background-color: rgb(255, 255, 255);
-    transform: none;
-    transform: scale(1.05);
-    transition: transform 0.2s ease;
+.character-form_avatars img.selected {
+    border: 2px solid #64c8ff;
+    box-shadow: 0 0 20px rgba(100, 200, 255, 0.7);
 }
 
 .disabled {
-    opacity: 0.5; 
-    pointer-events: none; 
-    filter: grayscale(100%); 
+    opacity: 0.5;
+    pointer-events: none;
+    filter: grayscale(100%) brightness(0.7);
 }
 
+.selected-avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 150px;
+}
 
+.selected-avatar-frame {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #64c8ff;
+    box-shadow: 0 0 20px rgba(100, 200, 255, 0.5);
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: rgba(20, 80, 120, 0.2);
+}
 
+.selected-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+}
+
+.avatar-glow {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: radial-gradient(circle, rgba(100, 200, 255, 0.3) 0%, rgba(100, 200, 255, 0) 70%);
+    border-radius: 50%;
+    z-index: 1;
+    animation: pulse-glow 2s infinite alternate;
+}
+
+.avatar-name {
+    font-family: 'Pixel', sans-serif;
+    color: #d4f1ff;
+    text-shadow: 0 0 8px rgba(0, 200, 255, 0.6);
+    font-size: 1.2rem;
+    margin: 0;
+    text-align: center;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 1.4rem;
+}
+
+@keyframes pulse-glow {
+    0% {
+        opacity: 0.6;
+        transform: scale(0.98);
+    }
+    100% {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+}
