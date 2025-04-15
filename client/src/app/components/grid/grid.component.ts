@@ -101,7 +101,7 @@ export class GridComponent implements OnChanges {
 
     ngOnChanges(): void {
         if (this.clientPlayer) {
-            this.cdr.detectChanges(); // Manually trigger change detection
+            this.cdr.detectChanges();
         }
     }
 }

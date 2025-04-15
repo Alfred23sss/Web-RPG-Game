@@ -1,3 +1,4 @@
+import { ORDER_RANDOMIZER } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { Turn } from '@app/interfaces/turn';
@@ -149,7 +150,6 @@ export class GameSessionTurnService {
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
         if (!turn.currentPlayer) {
-            // at first doesnt go here why?
             return activePlayers[0];
         }
         const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer.name);
@@ -161,10 +161,11 @@ export class GameSessionTurnService {
     orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = [...players].sort((a, b) => {
             if (a.speed === b.speed) {
-                return Math.random() < RANDOMIZER ? -1 : 1;
+                return Math.random() - ORDER_RANDOMIZER;
             }
             return b.speed - a.speed;
         });
+
         if (playerList.length > 0) {
             playerList[0].isActive = true;
         }

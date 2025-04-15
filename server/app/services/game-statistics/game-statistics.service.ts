@@ -7,7 +7,7 @@ import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { GameMode } from '@common/enums';
 import { AttackScore } from '@common/interfaces/attack-score';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 const TIME_DIVIDER = 1000;
@@ -22,10 +22,7 @@ export class GameStatisticsService {
     private flagHolders: Map<string, Set<string>> = new Map<string, Set<string>>();
     private turnCounts: Map<string, number> = new Map<string, number>();
 
-    constructor(
-        private readonly gridManager: GridManagerService,
-        private readonly logger: Logger,
-    ) {}
+    constructor(private readonly gridManager: GridManagerService) {}
 
     @OnEvent(EventEmit.GameTurnStarted)
     handleTurnStarted(payload: { accessCode: string; player: Player }): void {
