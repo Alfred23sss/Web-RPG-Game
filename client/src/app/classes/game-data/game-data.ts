@@ -1,9 +1,9 @@
-import { AttackScore } from '@common/interfaces/attack-score';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics } from '@app/interfaces/statistics';
 import { Tile } from '@app/interfaces/tile';
+import { AttackScore } from '@common/interfaces/attack-score';
 
 export class GameData {
     game: Game;
