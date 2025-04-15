@@ -88,7 +88,9 @@ export class CombatSocketService {
 
             gameData.escapeAttempts = data.attemptsLeft;
             const hasEvaded = data.isEscapeSuccessful ? LogBookEntry.EvadeResultSuccess : LogBookEntry.EvadeResultFail;
-            this.clientNotifier.addLogbookEntry(`${LogBookEntry.EvadeAttempt} ${hasEvaded}`, []);
+            if (!data.isEscapeSuccessful) {
+                this.clientNotifier.addLogbookEntry(`${LogBookEntry.EvadeAttempt} ${hasEvaded}`, [data.player]);
+            }
             this.gameStateService.updateGameData(gameData);
         });
     }
@@ -145,8 +147,9 @@ export class CombatSocketService {
 
     private onCombatStartedLog(): void {
         this.socketClientService.on(SocketEvent.CombatStartedLog, (data: { attacker: Player; defender: Player }) => {
-            this.gameStateService.gameDataSubjectValue.isInCombatMode = true;
-            this.clientNotifier.addLogbookEntry(LogBookEntry.CombatStarted, [data.attacker, data.defender]);
+            if (this.gameStateService.gameDataSubjectValue.isInCombatMode) {
+                this.clientNotifier.addLogbookEntry(LogBookEntry.CombatStarted, [data.attacker, data.defender]);
+            }
         });
     }
 }

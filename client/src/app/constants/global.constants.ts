@@ -15,27 +15,6 @@ export const DELAY_BEFORE_HOME = 2000;
 export const DELAY_BEFORE_ENDING_GAME = 5000;
 export const DEFAULT_ESCAPE_ATTEMPTS = 2;
 export const DELAY_MESSAGE_AFTER_COMBAT_ENDED = 3000;
-export const EVENTS = [
-    'abandonGame',
-    'gameDeleted',
-    'gameEnded',
-    'transitionStarted',
-    'turnStarted',
-    'timerUpdate',
-    'alertGameStarted',
-    'playerMovement',
-    'gameCombatStarted',
-    'attackResult',
-    'playerUpdate',
-    'playerListUpdate',
-    'doorClickedUpdate',
-    'gameCombatTurnStarted',
-    'gameCombatTimerUpdate',
-    'gridUpdate',
-    'noMoreEscapesLeft',
-    'combatEnded',
-    'adminModeChangedServerSide',
-];
 
 export const INITIAL_VALUES = {
     attributes: {

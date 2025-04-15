@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { EVENTS } from '@app/constants/global.constants';
+import { SocketEvent } from '@app/enums/global.enums';
 import { CombatSocketService } from '@app/services/combat-socket/combat-socket.service';
 import { GameSocketService } from '@app/services/game-socket/game-socket.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
@@ -26,7 +26,7 @@ export class SocketListenerService {
     }
 
     unsubscribeSocketListeners(): void {
-        EVENTS.forEach((event) => {
+        Object.values(SocketEvent).forEach((event: string) => {
             this.socketClientService.off(event);
         });
     }

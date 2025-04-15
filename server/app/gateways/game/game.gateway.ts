@@ -10,6 +10,7 @@ import { GameSessionService } from '@app/services/game-session/game-session.serv
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { AttackScore } from '@common/interfaces/attack-score';
+import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -133,6 +134,7 @@ export class GameGateway {
             defender: payload.defender,
             hasEvaded: payload.hasEvaded,
         });
+        Logger.log('combat ended log emit');
     }
 
     @OnEvent(EventEmit.GameTurnResumed)
@@ -149,6 +151,7 @@ export class GameGateway {
             isEscapeSuccessful: payload.isEscapeSuccessful,
             player: payload.player,
         });
+        Logger.log('escape attempt emit');
     }
 
     @OnEvent(EventEmit.GameDoorUpdate)
@@ -263,7 +266,7 @@ export class GameGateway {
             attacker: payload.attacker,
             defender: payload.defender,
         });
-
+        Logger.log('combat log emit');
         this.server.to(payload.accessCode).emit('combatStartedLog', {
             attacker: payload.attacker,
             defender: payload.defender,

@@ -18,8 +18,6 @@ import { ItemName } from '@common/enums';
     providedIn: 'root',
 })
 export class GameSocketService {
-    private doorClickedTimer: number | null = null;
-    private readonly doorClickedDelay = 50;
     constructor(
         private gameStateService: GameStateSocketService,
         private gameplayService: GameplayService,
@@ -228,17 +226,10 @@ export class GameSocketService {
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on<{ grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }>(SocketEvent.DoorClicked, (data) => {
-            if (this.doorClickedTimer !== null) {
-                return;
-            }
-            this.doorClickedTimer = window.setTimeout(() => {
-                this.processDoorClicked(data);
-                this.doorClickedTimer = null;
-            }, this.doorClickedDelay);
+        this.socketClientService.on(SocketEvent.DoorClicked, (data: { grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }) => {
+            this.processDoorClicked(data);
         });
     }
-
     private onWallClicked(): void {
         this.socketClientService.on(SocketEvent.WallClicked, (data: { grid: Tile[][] }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
