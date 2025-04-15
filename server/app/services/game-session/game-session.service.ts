@@ -214,7 +214,7 @@ export class GameSessionService {
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.emitGridUpdate(accessCode, gameSession.game.grid);
         }
-        if (gameSession.turn.currentPlayer.name === playerName) {
+        if (gameSession.turn.beginnerPlayer.name === playerName) {
             this.endTurn(accessCode);
         }
         if (player.isAdmin) {
