@@ -1,12 +1,16 @@
+// =====================
+// Game Configuration
+// =====================
+export enum AttributeType {
+    Hp = 'hp',
+    Speed = 'Vitesse',
+    Attack = 'Attaque',
+    Defense = 'Défense',
+}
+
 export enum GameModeType {
     Classic = 'Classic',
     CTF = 'CTF',
-}
-
-export enum GameSizeTileCount {
-    Small = '10',
-    Medium = '15',
-    Large = '20',
 }
 
 export enum GameSizePlayerCount {
@@ -15,12 +19,25 @@ export enum GameSizePlayerCount {
     Large = 6,
 }
 
-export enum AttributeType {
-    Hp = 'hp',
-    Speed = 'Vitesse',
-    Attack = 'Attaque',
-    Defense = 'Défense',
+export enum GameSizeTileCount {
+    Small = '10',
+    Medium = '15',
+    Large = '20',
 }
+
+// =====================
+// Gameplay
+// =====================
+export enum MoveType {
+    Attack = 'attack',
+    Item = 'item',
+}
+
+// =====================
+// Error Messages
+// =====================
+
+//bhjfbwhbwhfbhesbfhjqbbjblsasblabdjvbavsjhbvjlabvlvdjabvjbdshjbvbvjabjlbajvdbjhabvhjlsabvjlvbajhdalbvahjdvjlabvhdjlabvhdlvhdbavdhjla
 
 export enum ErrorMessages {
     MissingCharacterDetails = 'Veuillez vous assurer d’avoir attribué des bonus et des dés, et d’avoir saisi un nom et un avatar.',
@@ -44,11 +61,9 @@ export enum ErrorMessages {
     MustPlaceHouseItems = 'items maisons doivent être placées',
 }
 
-export enum MoveType {
-    Attack = 'attack',
-    Item = 'item',
-}
-
+// =====================
+// WebSocket Emit Events
+// =====================
 export enum EventEmit {
     GameCombatTimer = 'game.combat.timer',
     GameCombatTurnStarted = 'game.combat.turn.started',
@@ -56,18 +71,15 @@ export enum EventEmit {
     UpdatePlayer = 'update.player',
     GameCombatStarted = 'game.combat.started',
     DecrementItem = 'decrement.item',
-    // stat
     GameCombatAttackResult = 'game.combat.attack.result',
     GameCombatEscape = 'game.combat.escape',
     GameCombatEnded = 'game.combat.ended',
     AdminModeDisabled = 'admin.mode.disabled',
-    // stat
     GameDoorUpdate = 'game.door.update',
     GameTurnTimeout = 'game.turn.timeout',
     GamePlayerMovement = 'game.player.movement',
     GameEnded = 'game.ended',
     GameGridUpdate = 'game.grid.update',
-    // stat
     GameTransitionStarted = 'game.transition.started',
     GameTransitionCountdown = 'game.transition.countdown',
     GameTurnStarted = 'game.turn.started',
