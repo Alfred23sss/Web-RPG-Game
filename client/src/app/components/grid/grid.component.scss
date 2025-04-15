@@ -21,17 +21,9 @@ spawn-highlight {
     background-color: rgba(0, 255, 0, 0.1);
     z-index: 2;
 }
-
+.highlight-door,
+.highlight-wall,
 .highlight-player {
-    border-color: red;
-    border: 1px solid red;
-}
-.highlight-door {
-    border-color: red;
-    border: 1px solid red;
-}
-
-.highlight-wall {
     border-color: red;
     border: 1px solid red;
 }

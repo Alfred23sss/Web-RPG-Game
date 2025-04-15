@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/member-ordering */
-// disabled, because the order is impossible to respect since the subjects need to be defined before we can use them...
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { GAME_STORAGE, LOBBY_STORAGE, MIN_PLAYERS, ORDERED_PLAYERS_STORAGE, PLAYER_STORAGE } from '@app/constants/global.constants';
@@ -23,13 +21,6 @@ export class LobbyService {
     private playerSubject = new BehaviorSubject<Player | null>(null);
     private isGameStartingSubject = new BehaviorSubject<boolean>(false);
 
-    // COMMENT TO KEEP : REFACTOR THE OBSERVABLES TO BE PRIVATE AND ADD GETTERS TO THEM (TEO WILL DO IT) SO WE CAN REMOVE THE DISABLE LINT
-
-    lobby$ = this.lobbySubject.asObservable();
-    isLoading$ = this.isLoadingSubject.asObservable();
-    player$ = this.playerSubject.asObservable();
-    isGameStarting$ = this.isGameStartingSubject.asObservable();
-
     constructor(
         private router: Router,
         private socketClientService: SocketClientService,
@@ -37,6 +28,21 @@ export class LobbyService {
         private snackbarService: SnackbarService,
     ) {}
 
+    get lobby$() {
+        return this.lobbySubject.asObservable();
+    }
+
+    get isLoading$() {
+        return this.isLoadingSubject.asObservable();
+    }
+
+    get player$() {
+        return this.playerSubject.asObservable();
+    }
+
+    get isGameStarting$() {
+        return this.isGameStartingSubject.asObservable();
+    }
     setIsGameStarting(isStarting: boolean): void {
         this.isGameStartingSubject.next(isStarting);
     }
