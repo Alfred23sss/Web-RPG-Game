@@ -253,6 +253,26 @@ describe('ItemEffectsService', () => {
             expect(MOCK_TILE.item).toBe(MOCK_ITEM);
             expect(gridManager.findClosestAvailableTile).toHaveBeenCalled();
         });
+
+        it('should subtract BONUS_VALUE from defense when removing IceShield item', () => {
+            const iceShieldItem: Item = {
+                ...MOCK_ITEM,
+                name: ItemName.IceShield,
+                modifiers: [{ attribute: AttributeType.Defense, value: BONUS_VALUE }],
+                isActive: true,
+            };
+            const initialDefenseValue = DEFAULT_STAT_VALUE;
+            const player: Player = {
+                ...MOCK_PLAYER,
+                inventory: [iceShieldItem, null],
+                defense: {
+                    value: initialDefenseValue + BONUS_VALUE,
+                    bonusDice: DiceType.D4,
+                },
+            };
+            service.handlePlayerItemReset(player, [[MOCK_TILE]], TEST_CODE);
+            expect(player.defense.value).toBe(2);
+        });
     });
 
     describe('addItemToPlayer', () => {
