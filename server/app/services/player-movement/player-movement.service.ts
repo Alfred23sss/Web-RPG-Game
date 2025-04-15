@@ -27,7 +27,7 @@ export class PlayerMovementService {
         while (queue.length > 0) {
             this.sortQueueByCost(queue);
             const next = queue.shift();
-            if (!next) break;
+            if (!next) break; //test
 
             const { tile: currentTile, cost: currentCost } = next;
 
@@ -66,7 +66,7 @@ export class PlayerMovementService {
 
     getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
         const neighbors: Tile[] = [];
-        if (!tile) return;
+        if (!tile) return; //test
 
         const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
         if (!match) return neighbors;
@@ -130,7 +130,7 @@ export class PlayerMovementService {
 
     getFarthestReachableTile(virtualPlayerTile: Tile, targetTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
         const path = this.quickestPath(virtualPlayerTile, targetTile, grid);
-        if (!path || path.length === 0) return undefined;
+        if (!path || path.length === 0) return undefined; //test
         let movementCost = 0;
         let farthestReachableTile = virtualPlayerTile;
 
@@ -160,7 +160,7 @@ export class PlayerMovementService {
     private isValidNeighborForVirtualPlayer(tile: Tile, virtualPlayer: Player): boolean {
         if (tile.type === TileType.Wall) return false;
 
-        if (tile.player !== undefined && tile.player.name !== virtualPlayer.name) return false;
+        if (tile.player !== undefined && tile.player.name !== virtualPlayer.name) return false; //test
 
         return this.movementCosts.has(tile.type);
     }
@@ -194,6 +194,7 @@ export class PlayerMovementService {
             const newCost = currentCost + moveCost;
 
             if (!costs.has(neighbor) || newCost < (costs.get(neighbor) ?? Infinity)) {
+                //test
                 costs.set(neighbor, newCost);
                 previous.set(neighbor, currentTile);
                 queue.push(this.getNeighborAndCost(neighbor, newCost));
