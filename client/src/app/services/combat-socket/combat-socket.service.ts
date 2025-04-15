@@ -99,7 +99,10 @@ export class CombatSocketService {
             gameData.isInCombatMode = false;
             gameData.escapeAttempts = DEFAULT_ESCAPE_ATTEMPTS;
             gameData.isActionMode = false;
-            if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
+            const isWinnerEvaded = data.winner.name !== gameData.clientPlayer.name && data.hasEvaded;
+            const isCurrentPlayer = gameData.clientPlayer.name === gameData.currentPlayer.name;
+
+            if (isCurrentPlayer || isWinnerEvaded) {
                 gameData.clientPlayer.actionPoints = NO_ACTION_POINTS;
             }
             gameData.clientPlayer.hp.current = gameData.clientPlayer.hp.max;
@@ -118,7 +121,7 @@ export class CombatSocketService {
                     DELAY_MESSAGE_AFTER_COMBAT_ENDED,
                 );
             }
-            if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
+            if (isCurrentPlayer) {
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
             this.gameStateService.updateGameData(gameData);

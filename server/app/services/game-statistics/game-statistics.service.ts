@@ -78,6 +78,7 @@ export class GameStatisticsService {
     @OnEvent(EventEmit.GameItemCollected)
     handleItemCollected(payload: { accessCode: string; item: Item; player: Player }): void {
         const { accessCode, item, player } = payload;
+        if (!item) return;
         const gameStats = this.gameStatistics.get(accessCode);
         if (!gameStats) return;
         const playerStats = gameStats.playerStats.get(player.name);
