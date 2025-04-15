@@ -74,11 +74,11 @@ describe('TileService', () => {
             toolServiceSpy.getSelectedTool.and.returnValue({ tool: TileType.Door, image: ImageType.ClosedDoor });
             tile.item = Object.assign(new Item(), {
                 id: '0',
-                name: 'lightning',
-                imageSrc: ItemType.Lightning,
-                imageSrcGrey: ItemType.LightningGray,
+                name: 'Pickaxe',
+                imageSrc: ItemType.Pickaxe,
+                imageSrcGrey: ItemType.PickaxeGray,
                 itemCounter: 1,
-                description: ItemDescription.Lightning,
+                description: ItemDescription.Pickaxe,
             });
             service.applyTool(tile);
             expect(tile.type).toBe(TileType.Default);

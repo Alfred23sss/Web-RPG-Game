@@ -122,7 +122,7 @@ export class GridManagerService {
     assignItemsToRandomItems(grid: Tile[][]): Tile[][] {
         const getExistingItems = (): Set<string> => {
             const items = grid.flatMap((row) =>
-                row.map((tile) => tile.item?.name).filter((name) => name && name !== ItemName.QuestionMark && name !== ItemName.Home),
+                row.map((tile) => tile.item?.name).filter((name) => name && name !== ItemName.Chest && name !== ItemName.Home),
             );
             return new Set(items);
         };
@@ -131,7 +131,7 @@ export class GridManagerService {
         let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
 
         grid.flat().forEach((tile) => {
-            if (tile.item?.name === ItemName.QuestionMark) {
+            if (tile.item?.name === ItemName.Chest) {
                 const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)] ?? null;
                 if (randomItem) {
                     tile.item = randomItem;

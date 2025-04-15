@@ -46,7 +46,7 @@ const MOCK_PLAYER: Player = {
 
 const MOCK_ITEM: Item = {
     id: 'test-item',
-    name: ItemName.Potion,
+    name: ItemName.BlackSword,
     modifiers: [
         { attribute: AttributeType.Attack, value: BONUS_VALUE },
         { attribute: AttributeType.Defense, value: PENALTY_VALUE },
@@ -104,7 +104,7 @@ describe('ItemEffectsService', () => {
         it('should handle unknown attribute types', () => {
             const mockItem = {
                 ...MOCK_ITEM,
-                name: ItemName.Rubik,
+                name: ItemName.Armor,
                 modifiers: [{ attribute: INVALID_ATTRIBUTE_VALUE as unknown as AttributeType, value: INVALID_ATTRIBUTE_VALUE }],
             };
 
@@ -137,7 +137,7 @@ describe('ItemEffectsService', () => {
         it('should apply speed and hp modifiers and activate item', () => {
             const mockItem = {
                 ...MOCK_ITEM,
-                name: ItemName.Rubik,
+                name: ItemName.Armor,
                 modifiers: [
                     { attribute: AttributeType.Speed, value: BONUS_VALUE },
                     { attribute: AttributeType.Hp, value: PENALTY_VALUE },
@@ -154,21 +154,21 @@ describe('ItemEffectsService', () => {
 
         it('should not activate item if conditions fail', () => {
             const mockPlayer = { ...MOCK_PLAYER, hp: { current: 4, max: 6 } };
-            const fireItem: Item = {
+            const IceSwordItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Fire,
+                name: ItemName.IceSword,
                 modifiers: null,
                 isActive: false,
             };
 
-            service.addEffect(mockPlayer, fireItem, MOCK_TILE);
-            expect(fireItem.isActive).toBe(false);
+            service.addEffect(mockPlayer, IceSwordItem, MOCK_TILE);
+            expect(IceSwordItem.isActive).toBe(false);
         });
 
-        it('should exit for Fire item when health above threshold', () => {
-            const fireItem: Item = {
+        it('should exit for IceSword item when health above threshold', () => {
+            const IceSwordItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Fire,
+                name: ItemName.IceSword,
                 modifiers: null,
             };
             const highHealthPlayer = {
@@ -176,24 +176,24 @@ describe('ItemEffectsService', () => {
                 hp: { current: 4, max: 6 },
             };
 
-            service.addEffect(highHealthPlayer, fireItem, MOCK_TILE);
+            service.addEffect(highHealthPlayer, IceSwordItem, MOCK_TILE);
 
-            expect(fireItem.isActive).toBe(false);
+            expect(IceSwordItem.isActive).toBe(false);
             expect(highHealthPlayer.attack.value).toBe(6);
         });
 
-        it('should exit for Swap item on non-ice tile', () => {
+        it('should exit for IceShield item on non-ice tile', () => {
             const mockPlayer = MOCK_PLAYER;
-            const swapItem: Item = {
+            const IceShieldItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Swap,
+                name: ItemName.IceShield,
                 modifiers: null,
             };
 
             const mockWaterTile: Tile = { ...MOCK_TILE, type: TileType.Water };
-            service.addEffect(mockPlayer, swapItem, mockWaterTile);
+            service.addEffect(mockPlayer, IceShieldItem, mockWaterTile);
 
-            expect(swapItem.isActive).toBe(false);
+            expect(IceShieldItem.isActive).toBe(false);
             expect(mockPlayer.defense.value).toBe(MOCK_PLAYER.defense.value);
         });
     });
@@ -216,10 +216,10 @@ describe('ItemEffectsService', () => {
     });
 
     describe('handleItemDropped', () => {
-        it('should swap items between player and tile', () => {
+        it('should IceShield items between player and tile', () => {
             const tileItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Fire,
+                name: ItemName.IceSword,
             };
             MOCK_TILE.item = tileItem;
             MOCK_PLAYER.inventory[0] = MOCK_ITEM;
@@ -303,16 +303,16 @@ describe('ItemEffectsService', () => {
     });
 
     describe('applyItemModifiers', () => {
-        it('should set correct modifiers for Potion', () => {
-            const potion: Item = { id: 'potion', name: ItemName.Potion } as Item;
-            service.applyItemModifiers(potion);
-            expect(potion.modifiers).toHaveLength(2);
+        it('should set correct modifiers for BlackSword', () => {
+            const BlackSword: Item = { id: 'BlackSword', name: ItemName.BlackSword } as Item;
+            service.applyItemModifiers(BlackSword);
+            expect(BlackSword.modifiers).toHaveLength(2);
         });
 
-        it('should set correct modifiers for Swap', () => {
-            const swap: Item = { id: 'swap', name: ItemName.Swap } as Item;
-            service.applyItemModifiers(swap);
-            expect(swap.modifiers[0].attribute).toBe(AttributeType.Defense);
+        it('should set correct modifiers for IceShield', () => {
+            const IceShield: Item = { id: 'IceShield', name: ItemName.IceShield } as Item;
+            service.applyItemModifiers(IceShield);
+            expect(IceShield.modifiers[0].attribute).toBe(AttributeType.Defense);
         });
 
         it('should return early when item is not valid', () => {
@@ -349,85 +349,85 @@ describe('ItemEffectsService', () => {
             description: '',
         };
 
-        it('should configure Rubik cube modifiers correctly', () => {
-            const rubikItem: Item = {
+        it('should configure Armor cube modifiers correctly', () => {
+            const ArmorItem: Item = {
                 ...BASE_ITEM,
-                id: 'rubik',
-                name: ItemName.Rubik,
+                id: 'Armor',
+                name: ItemName.Armor,
             } as Item;
 
-            service.applyItemModifiers(rubikItem);
+            service.applyItemModifiers(ArmorItem);
 
-            expect(rubikItem.modifiers).toEqual([
+            expect(ArmorItem.modifiers).toEqual([
                 { attribute: AttributeType.Hp, value: BONUS_VALUE },
                 { attribute: AttributeType.Speed, value: PENALTY_VALUE },
             ]);
-            expect(rubikItem.isActive).toBe(false);
+            expect(ArmorItem.isActive).toBe(false);
         });
 
-        it('should configure Fire modifiers correctly', () => {
-            const fireItem: Item = {
+        it('should configure IceSword modifiers correctly', () => {
+            const IceSwordItem: Item = {
                 ...BASE_ITEM,
-                id: 'fire',
-                name: ItemName.Fire,
+                id: 'IceSword',
+                name: ItemName.IceSword,
             } as Item;
 
-            service.applyItemModifiers(fireItem);
+            service.applyItemModifiers(IceSwordItem);
 
-            expect(fireItem.modifiers).toEqual([{ attribute: AttributeType.Attack, value: BONUS_VALUE }]);
-            expect(fireItem.isActive).toBe(false);
+            expect(IceSwordItem.modifiers).toEqual([{ attribute: AttributeType.Attack, value: BONUS_VALUE }]);
+            expect(IceSwordItem.isActive).toBe(false);
         });
 
-        it('should configure Swap modifiers correctly', () => {
-            const swapItem: Item = {
+        it('should configure IceShield modifiers correctly', () => {
+            const IceShieldItem: Item = {
                 ...BASE_ITEM,
-                id: 'swap',
-                name: ItemName.Swap,
+                id: 'IceShield',
+                name: ItemName.IceShield,
             } as Item;
 
-            service.applyItemModifiers(swapItem);
+            service.applyItemModifiers(IceShieldItem);
 
-            expect(swapItem.modifiers).toEqual([{ attribute: AttributeType.Defense, value: BONUS_VALUE }]);
-            expect(swapItem.isActive).toBe(false);
+            expect(IceShieldItem.modifiers).toEqual([{ attribute: AttributeType.Defense, value: BONUS_VALUE }]);
+            expect(IceShieldItem.isActive).toBe(false);
         });
     });
 
     describe('condition checks', () => {
         it('should validate health condition correctly', () => {
-            const fireItem: Item = {
+            const IceSwordItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Fire,
+                name: ItemName.IceSword,
             };
 
             const validPlayer = { ...MOCK_PLAYER, hp: { current: 3, max: 6 } };
-            const valid = service.isHealthConditionValid(validPlayer, fireItem);
+            const valid = service.isHealthConditionValid(validPlayer, IceSwordItem);
             expect(valid).toBe(true);
 
             const invalidPlayer = { ...MOCK_PLAYER, hp: { current: 4, max: 6 } };
-            const invalid = service.isHealthConditionValid(invalidPlayer, fireItem);
+            const invalid = service.isHealthConditionValid(invalidPlayer, IceSwordItem);
             expect(invalid).toBe(false);
         });
 
         it('should validate ice condition correctly', () => {
-            const swapItem: Item = {
+            const IceShieldItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Swap,
+                name: ItemName.IceShield,
             };
 
             const iceTile: Tile = { ...MOCK_TILE, type: TileType.Ice };
-            const valid = service.isIceConditionValid(iceTile, swapItem);
+            const valid = service.isIceConditionValid(iceTile, IceShieldItem);
             expect(valid).toBe(true);
 
-            const invalid = service.isIceConditionValid(MOCK_TILE, swapItem);
+            const invalid = service.isIceConditionValid(MOCK_TILE, IceShieldItem);
             expect(invalid).toBe(false);
         });
 
         it('should return false when tile is undefined', () => {
-            const swapItem: Item = {
+            const IceShieldItem: Item = {
                 ...MOCK_ITEM,
-                name: ItemName.Swap,
+                name: ItemName.IceShield,
             };
-            const result = service['isIceConditionValid'](undefined, swapItem);
+            const result = service['isIceConditionValid'](undefined, IceShieldItem);
             expect(result).toBe(false);
         });
     });

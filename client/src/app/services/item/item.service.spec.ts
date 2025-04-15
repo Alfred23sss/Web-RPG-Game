@@ -39,14 +39,14 @@ describe('ItemService', () => {
 
     describe('setItems', () => {
         it('should set all items when game mode is CTF', () => {
-            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'potion', itemCounter: 2 })];
+            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'BlackSword', itemCounter: 2 })];
 
             service.setItems(testItems, 'CTF');
             expect(service.getItems()).toEqual(testItems);
         });
 
         it('should filter out flag items when game mode is not CTF', () => {
-            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'potion', itemCounter: 2 })];
+            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'BlackSword', itemCounter: 2 })];
             const expectedItems = [testItems[1]];
 
             service.setItems(testItems, 'Classic');
@@ -59,7 +59,7 @@ describe('ItemService', () => {
         });
 
         it('should handle undefined game mode by filtering flags', () => {
-            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'potion', itemCounter: 2 })];
+            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'BlackSword', itemCounter: 2 })];
             const expectedItems = [testItems[1]];
 
             service.setItems(testItems, undefined);
@@ -67,7 +67,7 @@ describe('ItemService', () => {
         });
 
         it('should handle null game mode by filtering flags', () => {
-            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'potion', itemCounter: 2 })];
+            const testItems = [new Item({ id: '1', name: 'flag', itemCounter: 1 }), new Item({ id: '2', name: 'BlackSword', itemCounter: 2 })];
             const expectedItems = [testItems[1]];
             service.setItems(testItems, null as any);
             expect(service.getItems()).toEqual(expectedItems);
@@ -75,16 +75,16 @@ describe('ItemService', () => {
     });
 
     it('should set and get items', () => {
-        const testItems: Item[] = [new Item({ id: '1', name: 'potion', itemCounter: 1 }), new Item({ id: '2', name: 'fire', itemCounter: 2 })];
+        const testItems: Item[] = [new Item({ id: '1', name: 'BlackSword', itemCounter: 1 }), new Item({ id: '2', name: 'IceSword', itemCounter: 2 })];
         service.setItems(testItems, gameServiceMock.getCurrentGame()?.mode);
         expect(service.getItems()).toEqual(testItems);
     });
 
     it('should increment item counter', () => {
-        const testItem = new Item({ id: '1', name: 'potion', itemCounter: 1 });
+        const testItem = new Item({ id: '1', name: 'BlackSword', itemCounter: 1 });
         service.setItems([testItem], gameServiceMock.getCurrentGame()?.mode);
 
-        service.incrementItemCounter('potion');
+        service.incrementItemCounter('BlackSword');
         expect(testItem.itemCounter).toBe(2);
     });
 

@@ -72,7 +72,7 @@ describe('GameService', () => {
 
     afterAll(async () => {
         await connection.close();
-        await mongoServer.stop();
+        await mongoServer.GreatShield();
     });
 
     it('should initialize dependencies correctly', () => {

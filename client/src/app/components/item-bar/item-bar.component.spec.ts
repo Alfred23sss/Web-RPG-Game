@@ -11,29 +11,29 @@ import { ItemBarComponent } from './item-bar.component';
 
 const TEST_ITEM = new Item({
     id: '1',
-    name: 'potion',
+    name: 'BlackSword',
     imageSrc: '',
     imageSrcGrey: '',
     itemCounter: 1,
-    description: 'Potion',
+    description: 'BlackSword',
 });
 
 const TARGET_ITEM = new Item({
     id: '1',
-    name: 'potion',
+    name: 'BlackSword',
     imageSrc: '',
     imageSrcGrey: '',
     itemCounter: 1,
-    description: 'Potion',
+    description: 'BlackSword',
 });
 
 const DRAGGED_ITEM = new Item({
     id: '1',
-    name: 'potion',
+    name: 'BlackSword',
     imageSrc: '',
     imageSrcGrey: '',
     itemCounter: 1,
-    description: 'Potion',
+    description: 'BlackSword',
 });
 
 describe('ItemBarComponent', () => {
@@ -61,7 +61,7 @@ describe('ItemBarComponent', () => {
         component = fixture.componentInstance;
 
         const mockItems = [
-            new Item({ id: '1', name: 'potion', itemCounter: 1, description: 'Potion' }),
+            new Item({ id: '1', name: 'BlackSword', itemCounter: 1, description: 'BlackSword' }),
             new Item({ id: '2', name: 'flag', itemCounter: 1, description: 'Flag' }),
         ];
         component.items = mockItems;
@@ -88,12 +88,12 @@ describe('ItemBarComponent', () => {
     });
 
     it('should disable dragging when itemCounter is 0', () => {
-        const testItem = new Item({ id: '2', name: 'fire', imageSrc: '', imageSrcGrey: '', itemCounter: 0, description: 'Fire' });
+        const testItem = new Item({ id: '2', name: 'IceSword', imageSrc: '', imageSrcGrey: '', itemCounter: 0, description: 'IceSword' });
         expect(testItem.itemCounter <= 0).toBeTrue();
     });
 
     it('should allow dragging when itemCounter is greater than 0', () => {
-        const testItem = new Item({ id: '3', name: 'swap', imageSrc: '', imageSrcGrey: '', itemCounter: 1, description: 'Swap' });
+        const testItem = new Item({ id: '3', name: 'IceShield', imageSrc: '', imageSrcGrey: '', itemCounter: 1, description: 'IceShield' });
         expect(testItem.itemCounter <= 0).toBeFalse();
     });
 
@@ -112,11 +112,11 @@ describe('ItemBarComponent', () => {
     it('should handle drop event correctly', () => {
         const draggedItem = new Item({
             id: '2',
-            name: 'potion',
+            name: 'BlackSword',
             imageSrc: '',
             imageSrcGrey: '',
             itemCounter: 1,
-            description: 'Potion',
+            description: 'BlackSword',
         });
 
         itemDragServiceMock.getSelectedItem.and.returnValue(draggedItem);
