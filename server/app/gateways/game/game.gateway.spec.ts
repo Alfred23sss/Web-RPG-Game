@@ -4,7 +4,6 @@
 
 import { EventEmit, GameModeType } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
-import { AttackScore } from '@app/interfaces/attack-score';
 import { DiceType } from '@app/interfaces/dice';
 import { Item } from '@app/interfaces/item';
 import { Player } from '@app/interfaces/player';
@@ -15,6 +14,7 @@ import { GameCombatService } from '@app/services/combat-manager/combat-manager.s
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { AttackScore } from '@common/interfaces/attack-score';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Server, Socket } from 'socket.io';
 
