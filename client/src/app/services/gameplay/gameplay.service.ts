@@ -5,13 +5,14 @@ import { GameData } from '@app/classes/game-data/game-data';
 import { Item } from '@app/classes/item/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
 import { NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { AttackScore } from '@common/interfaces/attack-score';
+import { Keys, SnackBarMessage, SocketEvent } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
-import { ItemName, Routes, TileType } from '@common/enums';
+import { GameMode, ItemName, Routes, TileType } from '@common/enums';
+import { AttackScore } from '@common/interfaces/attack-score';
 
 @Injectable({
     providedIn: 'root',
@@ -39,7 +40,7 @@ export class GameplayService {
                 this.checkAvailableActions(gameData);
             }
             if (selectedItem === items[2]) {
-                this.socketClientService.emit('decrement.item', {
+                this.socketClientService.emit(SocketEvent.DecrementItem, {
                     selectedItem,
                     accessCode: gameData.lobby.accessCode,
                     player: gameData.clientPlayer,
@@ -55,13 +56,13 @@ export class GameplayService {
     endTurn(gameData: GameData): void {
         gameData.hasTurnEnded = true;
         gameData.turnTimer = 0;
-        this.socketClientService.emit('endTurn', { accessCode: gameData.lobby.accessCode });
+        this.socketClientService.emit(SocketEvent.EndTurn, { accessCode: gameData.lobby.accessCode });
     }
 
     abandonGame(gameData: GameData): void {
         gameData.clientPlayer.hasAbandoned = true;
         gameData.turnTimer = 0;
-        this.socketClientService.emit('manualDisconnect', { isInGame: true });
+        this.socketClientService.emit(SocketEvent.ManualDisconnect, { isInGame: true });
         this.backToHome();
     }
 
@@ -128,7 +129,7 @@ export class GameplayService {
         const currentTile = this.validateAction(gameData);
         if (!currentTile) return;
 
-        this.socketClientService.emit('doorUpdate', {
+        this.socketClientService.emit(SocketEvent.DoorUpdate, {
             currentTile,
             targetTile,
             accessCode: gameData.lobby.accessCode,
@@ -140,7 +141,7 @@ export class GameplayService {
         if (!currentTile) return;
 
         if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning)) {
-            this.socketClientService.emit('wallUpdate', {
+            this.socketClientService.emit(SocketEvent.WallUpdate, {
                 currentTile,
                 targetTile,
                 accessCode: gameData.lobby.accessCode,
@@ -150,14 +151,20 @@ export class GameplayService {
     }
 
     handleAttackCTF(gameData: GameData, targetTile: Tile) {
-        if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
+        const isSelfAttack = targetTile.player?.name === gameData.clientPlayer?.name;
+        const hasNoActionPoints = gameData.clientPlayer?.actionPoints === NO_ACTION_POINTS;
+        const shouldAbort = isSelfAttack || hasNoActionPoints;
+        if (shouldAbort) return;
+
         const currentTile = this.getClientPlayerPosition(gameData);
+        if (!targetTile.player) return;
+
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
             if (this.isTeamate(targetTile.player.name, currentTile.player.name, gameData)) {
-                this.snackBarService.showMessage("TRAITRE!!! C'EST MOI TON AMI");
+                this.snackBarService.showMessage(SnackBarMessage.FriendlyFire);
                 return;
             } else if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
-                this.socketClientService.emit('startCombat', {
+                this.socketClientService.emit(SocketEvent.StartCombat, {
                     attackerName: currentTile.player.name,
                     defenderName: targetTile.player.name,
                     accessCode: gameData.lobby.accessCode,
@@ -170,15 +177,16 @@ export class GameplayService {
 
     handleAttackClick(gameData: GameData, targetTile: Tile): void {
         if (!targetTile.player || targetTile.player === gameData.clientPlayer || gameData.clientPlayer.actionPoints === NO_ACTION_POINTS) return;
-        if (gameData.game.mode === 'CTF') {
+        if (gameData.game.mode === GameMode.CTF) {
             this.handleAttackCTF(gameData, targetTile);
             return;
         }
         const currentTile = this.getClientPlayerPosition(gameData);
+        const canAttack = gameData.isActionMode && currentTile;
 
-        if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
+        if (canAttack && gameData.game.grid && currentTile.player) {
             if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
-                this.socketClientService.emit('startCombat', {
+                this.socketClientService.emit(SocketEvent.StartCombat, {
                     attackerName: currentTile.player.name,
                     defenderName: targetTile.player.name,
                     accessCode: gameData.lobby.accessCode,
@@ -201,7 +209,7 @@ export class GameplayService {
     handleTeleport(gameData: GameData, targetTile: Tile): void {
         if (gameData.isInCombatMode) return;
         if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
-            this.socketClientService.emit('teleportPlayer', {
+            this.socketClientService.emit(SocketEvent.TeleportPlayer, {
                 accessCode: gameData.lobby.accessCode,
                 player: gameData.clientPlayer,
                 targetTile,
@@ -210,7 +218,7 @@ export class GameplayService {
     }
 
     handleItemDropped(gameData: GameData, item: Item) {
-        this.socketClientService.emit('itemDrop', {
+        this.socketClientService.emit(SocketEvent.ItemDrop, {
             accessCode: gameData.lobby.accessCode,
             player: gameData.clientPlayer,
             item,
@@ -228,29 +236,29 @@ export class GameplayService {
 
     executeNextAction(gameData: GameData): void {
         gameData.isActionMode = !gameData.isActionMode;
-        const message = gameData.isActionMode ? 'Mode action activé' : 'Mode action désactivé';
+        const message = gameData.isActionMode ? SnackBarMessage.ActivatedMode : SnackBarMessage.DeactivatedMode;
         this.snackBarService.showMessage(message);
     }
 
     attack(gameData: GameData): void {
-        this.socketClientService.emit('performAttack', {
+        this.socketClientService.emit(SocketEvent.PerformAttack, {
             accessCode: gameData.lobby.accessCode,
             attackerName: gameData.clientPlayer.name,
         });
     }
 
     evade(gameData: GameData): void {
-        this.socketClientService.emit('evade', { accessCode: gameData.lobby.accessCode, player: gameData.clientPlayer });
+        this.socketClientService.emit(SocketEvent.Evade, { accessCode: gameData.lobby.accessCode, player: gameData.clientPlayer });
     }
 
     handleKeyPress(gameData: GameData, event: KeyboardEvent): void {
-        if (event.key.toLowerCase() === 'd' && gameData.clientPlayer.isAdmin) {
-            this.socketClientService.emit('adminModeUpdate', { accessCode: gameData.lobby.accessCode });
+        if (event.key.toLowerCase() === Keys.D && gameData.clientPlayer.isAdmin) {
+            this.socketClientService.emit(SocketEvent.AdminModeUpdate, { accessCode: gameData.lobby.accessCode });
         }
     }
 
     emitAdminModeUpdate(gameData: GameData): void {
-        this.socketClientService.emit('adminModeUpdate', { accessCode: gameData.lobby.accessCode });
+        this.socketClientService.emit(SocketEvent.AdminModeUpdate, { accessCode: gameData.lobby.accessCode });
     }
 
     private validateAction(gameData: GameData): Tile | undefined {
@@ -271,22 +279,29 @@ export class GameplayService {
     }
 
     private findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
-        let tile1Pos: { row: number; col: number } | null = null;
-        let tile2Pos: { row: number; col: number } | null = null;
+        const tile1Pos = this.findTilePosition(tileId1, grid);
+        const tile2Pos = this.findTilePosition(tileId2, grid);
+
+        if (!tile1Pos || !tile2Pos) return false;
+
+        return this.areTilesAdjacent(tile1Pos, tile2Pos);
+    }
+
+    private findTilePosition(tileId: string, grid: Tile[][]): { row: number; col: number } | null {
         for (let row = 0; row < grid.length; row++) {
             for (let col = 0; col < grid[row].length; col++) {
-                if (grid[row][col].id === tileId1) {
-                    tile1Pos = { row, col };
+                if (grid[row][col].id === tileId) {
+                    return { row, col };
                 }
-                if (grid[row][col].id === tileId2) {
-                    tile2Pos = { row, col };
-                }
-                if (tile1Pos && tile2Pos) break;
             }
-            if (tile1Pos && tile2Pos) break;
         }
-        if (!tile1Pos || !tile2Pos) return false;
-        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+        return null;
+    }
+
+    private areTilesAdjacent(pos1: { row: number; col: number }, pos2: { row: number; col: number }): boolean {
+        const rowDiff = Math.abs(pos1.row - pos2.row);
+        const colDiff = Math.abs(pos1.col - pos2.col);
+        return rowDiff + colDiff === 1;
     }
 
     private isTeamate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {

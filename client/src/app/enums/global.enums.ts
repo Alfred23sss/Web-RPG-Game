@@ -69,6 +69,11 @@ export enum ErrorMessages {
     LockedRoom = "La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil",
     MaxNameLength = 'La longueur maximale de 20 caractères est atteinte',
     MaxPlayersReached = '❌ Le nombre maximal de joueurs est atteint pour cette partie',
+    NoAccessCode = 'Failed to create lobby: No access code received',
+    LobbyCreationFailed = 'Lobby creation failed:',
+    JoinFailed = 'Join failed:',
+    InvalidAccessCode = 'Invalid access code',
+    ValidationFailed = 'Access code validation failed',
 }
 
 export enum AccessCodeGenerator {
@@ -118,6 +123,38 @@ export enum SocketEvent {
     CombatEnded = 'combatEnded',
     CombatEndedLog = 'combatEndedLog',
     CombatStartedLog = 'combatStartedLog',
+    DecrementItem = 'decrement.item',
+    EndTurn = 'endTurn',
+    DoorUpdate = 'doorUpdate',
+    WallUpdate = 'wallUpdate',
+    StartCombat = 'startCombat',
+    TeleportPlayer = 'teleportPlayer',
+    PerformAttack = 'performAttack',
+    Evade = 'evade',
+    AdminModeUpdate = 'adminModeUpdate',
+    JoinLobby = 'joinLobby',
+    JoinedLobby = 'joinedLobby',
+    LobbyUpdate = 'lobbyUpdate',
+    Kicked = 'kicked',
+    LobbyLocked = 'lobbyLocked',
+    LobbyUnlocked = 'lobbyUnlocked',
+    LobbyDeleted = 'lobbyDeleted',
+    AlertGameStarted = 'alertGameStarted',
+    LeftLobby = 'leftLobby',
+    UpdatePlayers = 'updatePlayers',
+    AdminLeft = 'adminLeft',
+    CreateLobby = 'createLobby',
+    LobbyCreated = 'lobbyCreated',
+    Error = 'error',
+    JoinError = 'joinError',
+    GetLobbyPlayers = 'getLobbyPlayers',
+    GetLobby = 'getLobby',
+    UpdateLobby = 'updateLobby',
+    PlayerMovementUpdate = 'playerMovementUpdate',
+    TurnStarted = 'turnStarted',
+    TimerUpdate = 'timerUpdate',
+    TransitionStarted = 'transitionStarted',
+    GameTurnResumed = 'gameTurnResumed',
 }
 
 export enum SnackBarMessage {
@@ -126,6 +163,10 @@ export enum SnackBarMessage {
     NonExistent = "La partie que vous souhaitez rejoindre n'existe pas!",
     GetImpossible = 'Impossible de récupérer la partie.',
     LobbyFull = 'Le lobby est plein, impossible de le déverrouiller.',
+    FriendlyFire = "TRAITRE!!! C'EST MOI TON AMI",
+    ActivatedMode = 'Mode action activé',
+    DeactivatedMode = 'Mode action désactivé',
+    LobbyExpulsion = 'Vous avez été expulsé du lobby.',
 }
 
 export enum LogBookEntry {
@@ -157,12 +198,18 @@ export enum LogBookEntry {
 export enum ClientNotifierMessage {
     CombatWon = 'a gagné le combat !',
     CombatEvaded = 'a evadé le combat !',
-    redirectHome = "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
+    RedirectHome = "Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil",
     SoloWin = 'a remporté la partie ! Redirection vers la page de fin sous peu',
     TeamWin = 'ont remporté la partie ! Redirection vers la page de fin sous peu',
     DeactivatedDebug = "Mode debug 'désactivé'",
+    PlayerTurnStart = "C'est à",
+    PlayerTurnEnd = 'de jouer',
+    TurnStartingStart = 'Le tour à',
+    TurnStartingMiddle = 'commence dans',
+    TurnStartingEnd = 'secondes',
 }
 
 export enum Keys {
     Escape = 'Escape',
+    D = 'd',
 }

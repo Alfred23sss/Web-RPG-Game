@@ -16,7 +16,13 @@ export class PlayerMovementService {
     ]);
 
     availablePath(startTile: Tile | undefined, maxMovement: number, grid: Tile[][]): Tile[] {
-        if (!startTile || !grid || startTile.type === TileType.Wall || (startTile.type === TileType.Door && !startTile.isOpen)) return [];
+        const isStartMissing = !startTile;
+        const isGridInvalid = !grid;
+        const isStartWall = startTile?.type === TileType.Wall;
+        const isClosedDoor = startTile?.type === TileType.Door && !startTile?.isOpen;
+        const shouldAbort = isStartMissing || isGridInvalid || isStartWall || isClosedDoor;
+
+        if (shouldAbort) return [];
 
         const reachableTiles = new Set<Tile>();
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: maxMovement }];
@@ -47,7 +53,14 @@ export class PlayerMovementService {
     }
 
     quickestPath(startTile: Tile | undefined, targetTile: Tile | undefined, grid: Tile[][]): Tile[] | undefined {
-        if (!startTile || !targetTile || targetTile.type === TileType.Wall || !grid) return undefined;
+        const isStartTileInvalid = !startTile;
+        const isTargetTileInvalid = !targetTile;
+        const isTargetWall = targetTile?.type === TileType.Wall;
+        const isGridInvalid = !grid;
+
+        const shouldAbortPathfinding = isStartTileInvalid || isTargetTileInvalid || isTargetWall || isGridInvalid;
+
+        if (shouldAbortPathfinding) return undefined;
 
         const queue: { tile: Tile; cost: number }[] = [{ tile: startTile, cost: 0 }];
         const costs = new Map<Tile, number>();
@@ -86,6 +99,7 @@ export class PlayerMovementService {
     }
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
+        // faut recheck ça, quand j'enlève le undefined ca met une erreur de tests, mais on a perdu des points
         return adjacentTiles.some((tile) => (tile.type === TileType.Door && !tile.isOpen) || tile.player !== undefined);
     }
 
@@ -153,7 +167,7 @@ export class PlayerMovementService {
     }
 
     private isNeighborBlocked(neighbor: Tile): boolean {
-        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined;
+        return neighbor.type === TileType.Wall || (neighbor.type === TileType.Door && !neighbor.isOpen);
     }
 
     private canMoveToTile(newRemaining: number, neighborRemaining: number): boolean {

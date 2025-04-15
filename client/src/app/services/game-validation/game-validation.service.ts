@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ErrorMessages, ItemCount, GameSizeNumber } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
-import { GridPosition } from '@app/interfaces/tile';
+import { GridPosition, Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { GameMode, ItemName, TileType } from '@common/enums';
@@ -49,28 +49,25 @@ export class GameValidationService {
             errors.push(ErrorMessages.GridNotFound);
             return errors;
         }
-        const numRows = game.grid.length;
-        const numCols = game.grid[0].length;
-        let doorErrorFound = false;
-        for (let i = 0; i < numRows; i++) {
-            for (let j = 0; j < numCols; j++) {
-                const tile = game.grid[i][j];
-                if (tile.type === TileType.Door) {
-                    if (i === 0 || j === 0 || i === numRows - 1 || j === numCols - 1) {
-                        doorErrorFound = true;
-                    }
-                    const hasWallOnSameAxis = this.hasWallsOnSameAxis(game, i, j);
-                    const hasTerrainOnOtherAxis = this.hasTerrainOnOtherAxis(game, i, j);
-                    if (!hasWallOnSameAxis || !hasTerrainOnOtherAxis) {
-                        doorErrorFound = true;
-                    }
-                }
-            }
-        }
-        if (doorErrorFound) {
+        if (this.findInvalidDoor(game.grid, game)) {
             errors.push(ErrorMessages.InvalidDoorPlacement);
         }
         return errors;
+    }
+
+    private findInvalidDoor(grid: Tile[][], game: Game): boolean {
+        const numRows = grid.length;
+        const numCols = grid[0].length;
+        return grid.some((row, i) => row.some((tile, j) => tile.type === TileType.Door && this.isDoorPositionInvalid(game, i, j, numRows, numCols)));
+    }
+
+    private isDoorPositionInvalid(game: Game, i: number, j: number, numRows: number, numCols: number): boolean {
+        if (i === 0 || j === 0 || i === numRows - 1 || j === numCols - 1) {
+            return true;
+        }
+        const hasWallOnSameAxis = this.hasWallsOnSameAxis(game, i, j);
+        const hasTerrainOnOtherAxis = this.hasTerrainOnOtherAxis(game, i, j);
+        return !hasWallOnSameAxis || !hasTerrainOnOtherAxis;
     }
 
     private validateHalfTerrain(game: Game): string[] {

@@ -103,7 +103,7 @@ export class GameSocketService {
     private onGameDeleted(): void {
         this.socketClientService.on(SocketEvent.GameDeleted, () => {
             this.gameStateService.gameDataSubjectValue.turnTimer = 0;
-            this.clientNotifier.displayMessage(ClientNotifierMessage.redirectHome);
+            this.clientNotifier.displayMessage(ClientNotifierMessage.RedirectHome);
             setTimeout(() => {
                 this.gameplayService.backToHome();
             }, DELAY_BEFORE_HOME);
@@ -151,47 +151,60 @@ export class GameSocketService {
 
     private onPlayerMovement(): void {
         this.socketClientService.on(SocketEvent.PlayerMovement, (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
-            if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
-                this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
-            }
-
-            const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
-            if (playerBeforeUpdate) {
-                const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
-                const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
-                const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
-                if (addedItems.length > 0) {
-                    if (addedItems.includes(ItemName.Flag)) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
-                    } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
-                    }
-                }
-            }
+            this.updateGameGridAndCheckInventory(data);
 
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
-                this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
-                    this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
-                    this.playerMovementService.calculateRemainingMovementPoints(
-                        this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
-                        data.player,
-                    );
-                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-                player.inventory = data.player.inventory;
-                player.hp = data.player.hp;
-                player.attack.value = data.player.attack.value;
-                player.defense.value = data.player.defense.value;
-                player.speed = data.player.speed;
-
-                this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
-                    this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
-                this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
-                this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
+                this.updateClientPlayerStats(data);
             }
 
-            this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
-            this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+            this.finalizeMovementUpdate();
         });
+    }
+
+    private updateGameGridAndCheckInventory(data: { grid: Tile[][]; player: Player }): void {
+        if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
+            this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
+        }
+
+        const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
+        if (playerBeforeUpdate) {
+            const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
+            const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
+            const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
+
+            if (addedItems.length > 0) {
+                if (addedItems.includes(ItemName.Flag)) {
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
+                } else {
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
+                }
+            }
+        }
+    }
+
+    private updateClientPlayerStats(data: { player: Player; isCurrentlyMoving: boolean }): void {
+        const clientPlayer = this.gameStateService.gameDataSubjectValue.clientPlayer;
+        const gameData = this.gameStateService.gameDataSubjectValue;
+
+        clientPlayer.movementPoints =
+            clientPlayer.movementPoints -
+            this.playerMovementService.calculateRemainingMovementPoints(this.gameplayService.getClientPlayerPosition(gameData), data.player);
+
+        clientPlayer.inventory = data.player.inventory;
+        clientPlayer.hp = data.player.hp;
+        clientPlayer.attack.value = data.player.attack.value;
+        clientPlayer.defense.value = data.player.defense.value;
+        clientPlayer.speed = data.player.speed;
+
+        gameData.movementPointsRemaining = clientPlayer.movementPoints;
+        gameData.isCurrentlyMoving = data.isCurrentlyMoving;
+
+        this.gameplayService.updateAvailablePath(gameData);
+    }
+
+    private finalizeMovementUpdate(): void {
+        this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
+        this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
     }
 
     private onPlayerUpdate(): void {
