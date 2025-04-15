@@ -1,19 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data/game-data';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
-import { ItemName, ItemType, TeamType } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
 import { Subscription } from 'rxjs';
+import { TeamType, ItemType, ItemName } from '@common/enums';
 
 @Component({
     selector: 'app-game-page',
@@ -30,7 +28,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
     private gameDataSubscription: Subscription;
 
     constructor(
-        private readonly dialog: MatDialog,
         private readonly gameplayService: GameplayService,
         private readonly gameStateSocketService: GameStateSocketService,
         private readonly socketListenerService: SocketListenerService,
@@ -95,21 +92,6 @@ export class GamePageComponent implements OnInit, OnDestroy {
         sessionStorage.setItem('refreshed', 'false');
     }
 
-    attack(): void {
-        this.gameplayService.attack(this.gameData);
-    }
-
-    evade(): void {
-        this.gameplayService.evade(this.gameData);
-    }
-
-    openCombatPopup(): void {
-        this.dialog.open(GameCombatComponent, {
-            width: '650px',
-            disableClose: true,
-        });
-    }
-
     hasFlag(player: Player): boolean {
         return player.inventory.some((item) => item?.name.toLowerCase() === ItemName.Flag);
     }
@@ -118,6 +100,10 @@ export class GamePageComponent implements OnInit, OnDestroy {
         const flagItem = player.inventory.find((item) => item !== null && item.name === ItemName.Flag);
 
         return flagItem?.imageSrc || ItemType.Flag;
+    }
+
+    toggleTab(): void {
+        this.activeTab = this.activeTab === 'chat' ? 'log' : 'chat';
     }
 
     private handleKeyPress(event: KeyboardEvent): void {

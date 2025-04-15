@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { DiceType, ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -10,6 +10,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { BehaviorSubject } from 'rxjs';
 import { WaitingViewComponent } from './waiting-view.component';
+import { Routes, DiceType } from '@common/enums';
 
 const MIN_PLAYERS = 2;
 

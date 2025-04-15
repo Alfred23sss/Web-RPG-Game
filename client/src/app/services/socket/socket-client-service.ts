@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ErrorMessages, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
@@ -34,19 +35,19 @@ export class SocketClientService {
 
     async createLobby(game: Game, player: Player): Promise<string> {
         return new Promise((resolve, reject) => {
-            this.socket.emit('createLobby', { game });
+            this.socket.emit(SocketEvent.CreateLobby, { game });
 
-            this.socket.once('lobbyCreated', async (data) => {
+            this.socket.once(SocketEvent.LobbyCreated, async (data) => {
                 if (data?.accessCode) {
                     await this.joinLobby(data.accessCode, player);
                     resolve(data.accessCode);
                 } else {
-                    reject(new Error('Failed to create lobby: No access code received'));
+                    reject(new Error(ErrorMessages.NoAccessCode));
                 }
             });
 
-            this.socket.once('error', (errorMessage) => {
-                reject(new Error(`Lobby creation failed: ${errorMessage}`));
+            this.socket.once(SocketEvent.Error, (errorMessage) => {
+                reject(new Error(`${ErrorMessages.LobbyCreationFailed} ${errorMessage}`));
             });
         });
     }
@@ -56,21 +57,21 @@ export class SocketClientService {
             this.accessCodeService.validateAccessCode(accessCode).subscribe({
                 next: (isValid) => {
                     if (isValid) {
-                        this.socket.emit('joinLobby', { accessCode, player });
+                        this.socket.emit(SocketEvent.JoinLobby, { accessCode, player });
 
-                        this.socket.once('joinedLobby', () => {
+                        this.socket.once(SocketEvent.JoinedLobby, () => {
                             resolve();
                         });
 
-                        this.socket.once('joinError', (errorMessage) => {
-                            reject(new Error(`Join failed: ${errorMessage}`));
+                        this.socket.once(SocketEvent.JoinError, (errorMessage) => {
+                            reject(new Error(`${ErrorMessages.JoinFailed} ${errorMessage}`));
                         });
                     } else {
-                        reject(new Error('Invalid access code'));
+                        reject(new Error(ErrorMessages.InvalidAccessCode));
                     }
                 },
                 error: () => {
-                    reject(new Error('Access code validation failed'));
+                    reject(new Error(ErrorMessages.ValidationFailed));
                 },
             });
         });
@@ -81,18 +82,18 @@ export class SocketClientService {
     }
 
     kickPlayer(accessCode: string, playerName: string): void {
-        this.socket.emit('kickPlayer', { accessCode, playerName });
+        this.socket.emit(SocketEvent.KickPlayer, { accessCode, playerName });
     }
 
     getLobbyPlayers(accessCode: string) {
         return new Observable<Player[]>((observer) => {
-            this.socket.emit('getLobbyPlayers', accessCode);
+            this.socket.emit(SocketEvent.GetLobbyPlayers, accessCode);
 
-            this.socket.on('updatePlayers', (players: Player[]) => {
+            this.socket.on(SocketEvent.UpdatePlayers, (players: Player[]) => {
                 observer.next(players);
             });
 
-            this.socket.on('error', (errorMessage: string) => {
+            this.socket.on(SocketEvent.Error, (errorMessage: string) => {
                 observer.error(errorMessage);
             });
         });
@@ -100,14 +101,14 @@ export class SocketClientService {
 
     getLobby(accessCode: string): Observable<Lobby> {
         return new Observable<Lobby>((observer) => {
-            this.socket.emit('getLobby', accessCode);
+            this.socket.emit(SocketEvent.GetLobby, accessCode);
 
-            this.socket.once('updateLobby', (lobby: Lobby) => {
+            this.socket.once(SocketEvent.UpdateLobby, (lobby: Lobby) => {
                 observer.next(lobby);
                 observer.complete();
             });
 
-            this.socket.once('error', (errorMessage: string) => {
+            this.socket.once(SocketEvent.Error, (errorMessage: string) => {
                 observer.error(errorMessage);
             });
         });
@@ -132,7 +133,7 @@ export class SocketClientService {
             movement: movementPath,
             accessCode,
         };
-        this.emit('playerMovementUpdate', payload);
+        this.emit(SocketEvent.PlayerMovementUpdate, payload);
     }
 
     on<T>(event: string, callback: (data: T) => void): void {

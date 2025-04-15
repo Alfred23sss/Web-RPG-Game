@@ -1,60 +1,64 @@
 <div class="player-info">
-    <h3>Informations du joueur</h3>
+    <h3>{{ gameData.clientPlayer.name }}</h3>
     <div class="player-header">
-        <p class="player-name">{{ gameData.clientPlayer.name }}</p>
         <img [src]="gameData.clientPlayer.avatar" alt="Avatar du joueur" class="player-avatar" />
     </div>
     <div class="player-stats">
-        <div class="health-bar">
-            <span class="health-label">Points de vie: {{ gameData.clientPlayer.hp.current }} / {{ gameData.clientPlayer.hp.max }}</span>
-            <div class="health-bar-outer">
-                <div class="health-bar-inner" [style.width.%]="(gameData.clientPlayer.hp.current / gameData.clientPlayer.hp.max) * 100"></div>
-            </div>
-        </div>
         <div class="attributes-grid">
             <div class="attribute">
+                <span class="attribute-label">HP: </span>
+                <div class="health-bar">
+                    @for (segment of [].constructor(gameData.clientPlayer.hp.max); track $index) {
+                    <div class="health-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.hp.current"></div>
+                    }
+                </div>
+            </div>
+            <div class="attribute">
                 <span class="attribute-label">Rapidité: </span>
-                <span class="attribute-value">{{ gameData.clientPlayer.speed }}</span>
+                <div class="stat-bar">
+                    @for (segment of [].constructor(gameData.clientPlayer.speed); track $index) {
+                    <div class="stat-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.speed"></div>
+                    }
+                </div>
             </div>
             <div class="attribute">
                 <span class="attribute-label">Attaque: </span>
-                <span class="attribute-value"> {{ gameData.clientPlayer.attack.value }} (Bonus: {{ gameData.clientPlayer.attack.bonusDice }}) </span>
+                <div class="stat-bar">
+                    <span class="attribute-label">{{ gameData.clientPlayer.attack.bonusDice }}</span>
+
+                    @for (segment of [].constructor(gameData.clientPlayer.attack.value); track $index) {
+                    <div class="stat-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.attack.value"></div>
+                    }
+                </div>
             </div>
             <div class="attribute">
                 <span class="attribute-label">Défense: </span>
-                <span class="attribute-value">
-                    {{ gameData.clientPlayer.defense.value }} (Bonus: {{ gameData.clientPlayer.defense.bonusDice }})
-                </span>
+                <div class="stat-bar">
+                    <span class="attribute-label">{{ gameData.clientPlayer.defense.bonusDice }}</span>
+
+                    @for (segment of [].constructor(gameData.clientPlayer.defense.value); track $index) {
+                    <div class="stat-segment" [class.filled]="$index + 1 <= gameData.clientPlayer.defense.value"></div>
+                    }
+                </div>
             </div>
-        </div>
-        <div class="dice-type">
-            <span class="dice-label">Dés assignés: </span>
-            <span class="dice-value">{{ gameData.clientPlayer.attack.bonusDice }}</span>
-        </div>
-        <div class="resources">
-            <div class="resource">
-                <span class="resource-label">Mouvements restants: </span>
-                <span class="resource-value">{{ gameData.clientPlayer.movementPoints }}</span>
+            <div class="attribute">
+                <span class="attribute-label">Mouvements restants: </span>
+                <span class="attribute-value">{{ gameData.clientPlayer.movementPoints }}</span>
             </div>
-            <div class="resource">
-                <span class="resource-label">Actions restantes: </span>
-                <span class="resource-value">{{ gameData.clientPlayer.actionPoints }}</span>
+            <div class="attribute">
+                <span class="attribute-label">Actions restantes: </span>
+                <span class="attribute-value">{{ gameData.clientPlayer.actionPoints }}</span>
             </div>
         </div>
     </div>
-</div>
-<div class="inventory">
-    <h3>Inventaire</h3>
-    @for (slot of [0, 1]; track slot) { @if (gameData.clientPlayer.inventory[slot]) {
-    <div class="inventory-slot">
-        <img
-            [src]="gameData.clientPlayer.inventory[slot].imageSrc"
-            alt="Item Image"
-            class="item-image"
-            [title]="gameData.clientPlayer.inventory[slot].description"
-        />
+    <div class="inventory">
+        <!-- <h3>Inventaire</h3> -->
+        @for (slot of [0, 1]; track slot) { @if (gameData.clientPlayer.inventory[slot]) {
+        <div class="inventory-slot">
+            <img [src]="gameData.clientPlayer.inventory[slot].imageSrc" alt="Item Image" class="item-image" />
+        </div>
+        } @else {
+        <div class="inventory-slot">(Vide)</div>
+        } }
     </div>
-    } @else {
-    <div class="inventory-slot">(Vide)</div>
-    } }
 </div>

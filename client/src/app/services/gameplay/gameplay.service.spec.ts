@@ -4,10 +4,9 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
-import { GameData } from '@app/classes/gameData';
-import { Item } from '@app/classes/item';
+import { GameData } from '@app/classes/game-data/game-data';
+import { Item } from '@app/classes/item/item';
 import { ItemPopUpComponent } from '@app/components/item-pop-up/item-pop-up.component';
-import { DiceType, ImageType, ItemName, Routes, TileType } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -16,6 +15,7 @@ import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
 import { of } from 'rxjs';
 import { GameplayService } from './gameplay.service';
+import { ImageType, ItemName, Routes, DiceType, TileType } from '@common/enums';
 
 describe('GameplayService', () => {
     let service: GameplayService;
@@ -298,6 +298,21 @@ describe('GameplayService', () => {
             );
         });
 
+        it('should not open item popup if a dialog is already open', () => {
+            const mockItem = [{ id: '1', name: 'Item1' } as Item, { id: '2', name: 'Item2' } as Item, { id: '3', name: 'Item3' } as Item] as [
+                Item,
+                Item,
+                Item,
+            ];
+            const mockOpenGameData = createMockGameData();
+            Object.defineProperty(mockMatDialog, 'openDialogs', {
+                get: () => [{}],
+            });
+
+            service.createItemPopUp(mockItem, mockOpenGameData);
+            expect(mockMatDialog.open).not.toHaveBeenCalled();
+        });
+
         it('should handle item selection and update game state', () => {
             const selectedItem = mockItems[0];
             mockDialogRef.afterClosed.and.returnValue(of(selectedItem));
@@ -306,6 +321,24 @@ describe('GameplayService', () => {
 
             expect(service['handleItemDropped']).toHaveBeenCalledWith(mockGameData, selectedItem);
             expect(service.checkAvailableActions).toHaveBeenCalledWith(mockGameData);
+        });
+        it('should emit "decrement.item" if selectedItem is the third item in the popup', () => {
+            const mockPopupItems = [{ id: '1', name: 'Item1' } as Item, { id: '2', name: 'Item2' } as Item, { id: '3', name: 'Item3' } as Item] as [
+                Item,
+                Item,
+                Item,
+            ];
+            const mockPopupGameData = createMockGameData();
+
+            mockDialogRef.afterClosed.and.returnValue(of(mockPopupItems[2]));
+
+            service.createItemPopUp(mockPopupItems, mockPopupGameData);
+
+            expect(mockSocketClientService.emit).toHaveBeenCalledWith('decrement.item', {
+                selectedItem: mockPopupItems[2],
+                accessCode: mockPopupGameData.lobby.accessCode,
+                player: mockPopupGameData.clientPlayer,
+            });
         });
     });
 
@@ -416,7 +449,21 @@ describe('GameplayService', () => {
     describe('updateAttackResult', () => {
         it('should update the attackResult in gameData', () => {
             const gameData = {} as GameData;
-            const mockData = { success: true, attackScore: 5, defenseScore: 3 };
+            const mockData = {
+                success: true,
+                attackScore: {
+                    value: 5,
+                    bonusDice: DiceType.D6,
+                    score: 8,
+                    diceRolled: 4,
+                },
+                defenseScore: {
+                    value: 3,
+                    bonusDice: DiceType.D4,
+                    score: 5,
+                    diceRolled: 3,
+                },
+            };
 
             service.updateAttackResult(gameData, mockData);
 

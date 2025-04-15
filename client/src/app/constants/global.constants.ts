@@ -1,22 +1,11 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */ // needed to justify the numbers, but they are explained with the constant's name
-import {
-    AttributeType,
-    DiceType,
-    GameMode,
-    GameModeLabel,
-    GameModeType,
-    GameSize,
-    ImageType,
-    ItemDescription,
-    ItemName,
-    ItemType,
-    TileType,
-} from '@app/enums/global.enums';
+import { AttributeType, GameModeLabel, GameModeType } from '@app/enums/global.enums';
 import { BonusAssigned, DiceAssigned } from '@app/interfaces/character-attributes';
 import { Game } from '@app/interfaces/game';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { DiceType, GameMode, GameSize, ImageType, ItemDescription, ItemName, ItemType, TileType } from '@common/enums';
 export const BONUS_VALUE = 2;
 export const MAX_GAMES_SHOWN = 3;
 export const POPUP_DELAY = 2000;
@@ -138,6 +127,49 @@ export const MOCK_GAMES = [
 export const ESCAPE_CHANCE = 0.3;
 export const NO_ESCAPES_TIMER = 3;
 
+export const UNINITIALIZED_PLAYER: Player = {
+    name: '',
+    avatar: '',
+    speed: 4,
+    attack: { value: 4, bonusDice: DiceType.Uninitialized },
+    defense: { value: 4, bonusDice: DiceType.Uninitialized },
+    hp: { current: 4, max: 4 },
+    movementPoints: 4,
+    actionPoints: 1,
+    inventory: [null, null],
+    isAdmin: false,
+    isVirtual: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
+export const MOCK_PLAYER: Player = {
+    name: 'testPlayer',
+    avatar: 'testAvatar',
+    speed: 4,
+    attack: {
+        value: 4,
+        bonusDice: DiceType.D6,
+    },
+    defense: {
+        value: 4,
+        bonusDice: DiceType.D4,
+    },
+    hp: {
+        current: 10,
+        max: 10,
+    },
+    movementPoints: 3,
+    actionPoints: 3,
+    inventory: [null, null],
+    isAdmin: false,
+    isVirtual: false,
+    hasAbandoned: false,
+    isActive: false,
+    combatWon: 0,
+};
+
 export const ITEM_BAR_ITEMS = [
     {
         id: '0',
@@ -222,31 +254,13 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 
 export const ITEMS_TO_UPDATE = new Set(['home']);
 
-export const MOCK_PLAYER: Player = {
-    name: 'testPlayer',
-    avatar: 'testAvatar',
-    speed: 4,
-    attack: {
-        value: 4,
-        bonusDice: DiceType.D6,
-    },
-    defense: {
-        value: 4,
-        bonusDice: DiceType.D4,
-    },
-    hp: {
-        current: 10,
-        max: 10,
-    },
-    movementPoints: 3,
-    actionPoints: 3,
-    inventory: [null, null],
-    isAdmin: false,
-    isVirtual: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
-};
+export const PLAYER_STORAGE = 'player';
+export const LOBBY_STORAGE = 'lobby';
+export const GAME_STORAGE = 'game';
+export const ORDERED_PLAYERS_STORAGE = 'orderedPlayers';
+
+export const REFRESH_STORAGE = 'refreshed';
+export const KEY_DOWN_EVENT_LISTENER = 'keydown';
 
 export const MOCK_GRID: Tile[][] = [
     [
@@ -281,21 +295,10 @@ export const DEFAULT_LOBBY: Lobby = {
     maxPlayers: 0,
 };
 
-export const UNINITIALIZED_PLAYER: Player = {
-    name: '',
-    avatar: '',
-    speed: 4,
-    attack: { value: 4, bonusDice: DiceType.Uninitialized },
-    defense: { value: 4, bonusDice: DiceType.Uninitialized },
-    hp: { current: 4, max: 4 },
-    movementPoints: 4,
-    actionPoints: 1,
-    inventory: [null, null],
-    isAdmin: false,
-    isVirtual: false,
-    hasAbandoned: false,
-    isActive: false,
-    combatWon: 0,
+export const sizeMapping: Record<'size10' | 'size15' | 'size20', GameSize> = {
+    size10: GameSize.Small,
+    size15: GameSize.Medium,
+    size20: GameSize.Large,
 };
 
 export const MOCK_LOBBY = DEFAULT_LOBBY;

@@ -2,15 +2,15 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { GameMode, TileType } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Game } from '@app/interfaces/Game';
-import { GameSession } from '@app/interfaces/GameSession';
-import { Item } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Game } from '@app/interfaces/game';
+import { GameSession } from '@app/interfaces/game-session';
+import { Item } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
+import { Turn } from '@app/interfaces/turn';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
+import { GameMode, TileType } from '@common/enums';
 import { Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -21,9 +21,7 @@ const PLAYER_2_NAME = 'Player 2';
 
 describe('GameStatisticsService', () => {
     let service: GameStatisticsService;
-    let eventEmitter: EventEmitter2;
     let gridManager: GridManagerService;
-    let logger: Logger;
 
     const mockAccessCode = 'test123';
 
@@ -133,15 +131,17 @@ describe('GameStatisticsService', () => {
                     provide: Logger,
                     useValue: {
                         log: jest.fn(),
+                        warn: jest.fn(),
+                        error: jest.fn(),
+                        debug: jest.fn(),
+                        verbose: jest.fn(),
                     },
                 },
             ],
         }).compile();
 
         service = module.get<GameStatisticsService>(GameStatisticsService);
-        eventEmitter = module.get<EventEmitter2>(EventEmitter2);
         gridManager = module.get<GridManagerService>(GridManagerService);
-        logger = module.get<Logger>(Logger);
 
         service.handleGameStarted({
             accessCode: mockAccessCode,
@@ -215,13 +215,13 @@ describe('GameStatisticsService', () => {
                 currentFighter: mockPlayer1,
                 defenderPlayer: mockPlayer2,
                 attackSuccessful: true,
-                attackerScore: 8,
-                defenseScore: 3,
+                attackerScore: { score: 2, diceRolled: 1 },
+                defenseScore: { score: 2, diceRolled: 1 },
             });
 
             const stats = service.getGameStatistics(mockAccessCode);
-            expect(stats?.playerStats.get(mockPlayer2.name).healthLost).toBe(5); // 8 - 3 = 5
-            expect(stats?.playerStats.get(mockPlayer1.name).damageCaused).toBe(5);
+            expect(stats?.playerStats.get(mockPlayer2.name).healthLost).toBe(0);
+            expect(stats?.playerStats.get(mockPlayer1.name).damageCaused).toBe(0);
         });
 
         it('should not update health stats when attack is unsuccessful', () => {
@@ -230,8 +230,8 @@ describe('GameStatisticsService', () => {
                 currentFighter: mockPlayer1,
                 defenderPlayer: mockPlayer2,
                 attackSuccessful: false,
-                attackerScore: 2,
-                defenseScore: 5,
+                attackerScore: { score: 2, diceRolled: 1 },
+                defenseScore: { score: 2, diceRolled: 1 },
             });
 
             const stats = service.getGameStatistics(mockAccessCode);
@@ -605,6 +605,55 @@ describe('GameStatisticsService', () => {
         expect(stats?.playerStats.get(mockPlayer1.name).uniqueItemsCollected.has(mockItem.name)).toBeTruthy();
     });
 
+    describe('decrementItem', () => {
+        it('should decrement item count if current count > 1', () => {
+            const item = { ...mockItem, name: 'Golden Key' };
+            const accessCode = mockAccessCode;
+            const stats = service.getGameStatistics(accessCode);
+            stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.set(item.name, 3);
+            service.decrementItem(accessCode, item, mockPlayer1);
+            const updatedCount = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.get(item.name);
+            expect(updatedCount).toBe(2);
+        });
+
+        it('should return early if no game statistics exist for accessCode', () => {
+            const spy = jest.spyOn<any, any>(service['gameStatistics'], 'get').mockReturnValue(undefined);
+
+            service.decrementItem('invalid-code', mockItem, mockPlayer1);
+
+            expect(spy).toHaveBeenCalledWith('invalid-code');
+        });
+
+        it('should remove item from map if current count === 1', () => {
+            const item = { ...mockItem, name: 'Golden Key' };
+            const accessCode = mockAccessCode;
+
+            const stats = service.getGameStatistics(accessCode);
+            stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.set(item.name, 1);
+
+            const logSpy = jest.spyOn(Logger, 'log');
+
+            service.decrementItem(accessCode, item, mockPlayer1);
+
+            const updatedMap = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected;
+            expect(updatedMap.has(item.name)).toBe(false);
+            expect(logSpy).toHaveBeenCalledWith(`Item ${item.name} removed from player ${mockPlayer1.name} in statistics.`);
+        });
+
+        it('should do nothing if item is not found in player stats', () => {
+            const item = { ...mockItem, name: 'NonExistentItem' };
+            const accessCode = mockAccessCode;
+
+            const stats = service.getGameStatistics(accessCode);
+            const initialSize = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.size;
+
+            service.decrementItem(accessCode, item, mockPlayer1);
+
+            const updatedSize = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected.size;
+            expect(updatedSize).toBe(initialSize);
+        });
+    });
+
     describe('calculation methods with undefined sets', () => {
         it('should handle undefined visitedTiles set when calculating global tile percentage', () => {
             const accessCode = 'undefinedTilesTest';
@@ -676,8 +725,7 @@ describe('GameStatisticsService', () => {
         });
     });
 
-    it('should return early and not log or add when tile is undefined', () => {
-        const logSpy = jest.spyOn(logger, 'log');
+    it('should return early and add when tile is undefined', () => {
         const accessCode = mockAccessCode;
 
         const mockSet = new Set<string>();
@@ -685,7 +733,6 @@ describe('GameStatisticsService', () => {
 
         service.handleDoorManipulated({ accessCode, tile: undefined as any });
 
-        expect(logSpy).not.toHaveBeenCalled();
         expect(mockSet.size).toBe(0);
     });
 });

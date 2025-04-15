@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable max-lines */ // the original file respects this condition
-import { GameSize, GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { DiceType } from '@app/interfaces/Dice';
-import { Lobby } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
+import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
+import { DiceType } from '@app/interfaces/dice';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Logger } from '@nestjs/common';
+import { GameSize } from '@common/enums';
 import { Test, TestingModule } from '@nestjs/testing';
 import { LobbyService } from './lobby.service';
 
@@ -44,12 +44,6 @@ describe('LobbyService', () => {
                     useValue: {
                         generateAccessCode: jest.fn().mockReturnValue('ACCESS_CODE'),
                         removeAccessCode: jest.fn(),
-                    },
-                },
-                {
-                    provide: Logger,
-                    useValue: {
-                        log: jest.fn(),
                     },
                 },
             ],

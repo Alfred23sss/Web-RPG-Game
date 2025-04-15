@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
-import { ITEM_COUNTS, ITEMS_TO_UPDATE } from '@app/constants/global.constants';
-import { GameSize } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item/item';
+import { ITEM_COUNTS, ITEMS_TO_UPDATE, sizeMapping } from '@app/constants/global.constants';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
+import { GameMode, GameSize, ItemName } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
@@ -14,10 +14,10 @@ export class ItemService {
     constructor(private gameService: GameService) {}
 
     setItems(items: Item[], gameMode: string | undefined): void {
-        if (gameMode === 'CTF') {
+        if (gameMode === GameMode.CTF) {
             this.items = items;
         } else {
-            this.items = items.filter((item) => item.name !== 'flag');
+            this.items = items.filter((item) => item.name !== ItemName.Flag);
         }
     }
 
@@ -39,11 +39,6 @@ export class ItemService {
         }
 
         const rawSize = currentGame.size as unknown as number;
-        const sizeMapping: Record<'size10' | 'size15' | 'size20', GameSize> = {
-            size10: GameSize.Small,
-            size15: GameSize.Medium,
-            size20: GameSize.Large,
-        };
 
         const mappedSize = sizeMapping[`size${rawSize}` as keyof typeof sizeMapping] ?? GameSize.Small;
 

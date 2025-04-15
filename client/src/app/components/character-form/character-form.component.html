@@ -6,7 +6,7 @@
         <button class="button custom-button" (click)="submitCharacter()">Confirmer</button>
     </div>
 
-    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="20" />
+    <input type="text" placeholder="Nom du personnage" [(ngModel)]="createdPlayer.name" (input)="checkCharacterNameLength()" maxlength="15" />
 
     <div class="character-form_body">
         <div class="character-form_content">
@@ -23,7 +23,8 @@
                     <span class="attribute-name"> {{ attribute.charAt(0).toUpperCase() + attribute.slice(1) }}: </span>
                     <div class="attribute-bar-container">
                         <div class="attribute-bar">
-                            @for (segment of [1,2,3,4,5,6]; track segment) {
+                            @for (segment of (attribute === attributeTypes.Attack || attribute === attributeTypes.Defense ? [1,2,3,4] :
+                            [1,2,3,4,5,6]); track segment) {
                             <div class="bar-segment" [class.filled]="segment <= attributes[attribute]"></div>
                             }
                         </div>

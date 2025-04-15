@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { GameData } from '@app/classes/gameData';
+import { Router } from '@angular/router';
+import { GameData } from '@app/classes/game-data/game-data';
 import { ChatComponent } from '@app/components/chat/chat.component';
+import { Routes } from '@common/enums';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
-import { GameplayService } from '@app/services/gameplay/gameplay.service';
+import { SocketClientService } from '@app/services/socket/socket-client-service';
 
 @Component({
     selector: 'app-game-end',
@@ -22,14 +24,23 @@ export class GameEndComponent implements OnInit, OnDestroy {
     objectKeys = Object.keys;
 
     constructor(
-        private gameStateSocketService: GameStateSocketService,
-        private gameplayService: GameplayService,
+        private readonly gameStateSocketService: GameStateSocketService,
+        private readonly socketClientService: SocketClientService,
+        private readonly router: Router,
     ) {}
 
     ngOnInit(): void {
-        this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
-        this.sortedStats = Object.values(this.gameStats.playerStats);
-        this.sortedStats.sort((a, b) => a.playerName.localeCompare(b.playerName));
+        const wasRefreshed = sessionStorage.getItem('refreshed') === 'true';
+        if (wasRefreshed || !this.gameStateSocketService.gameDataSubjectValue?.gameStats) {
+            this.router.navigate(['/home']);
+        }
+        sessionStorage.setItem('refreshed', 'true');
+        this.gameData = this.gameStateSocketService.gameDataSubjectValue;
+        if (this.gameStateSocketService.gameDataSubjectValue?.gameStats) {
+            this.gameStats = this.gameStateSocketService.gameDataSubjectValue.gameStats;
+            this.sortedStats = Object.values(this.gameStats.playerStats);
+            this.sortedStats.sort((a, b) => a.playerName.localeCompare(b.playerName));
+        }
     }
 
     ngOnDestroy(): void {
@@ -57,6 +68,13 @@ export class GameEndComponent implements OnInit, OnDestroy {
     }
 
     goHome(): void {
-        this.gameplayService.abandonGame(this.gameStateSocketService.gameDataSubjectValue);
+        this.abandonGame(this.gameData);
+        this.router.navigate([Routes.HomePage]);
+    }
+
+    private abandonGame(gameData: GameData): void {
+        gameData.clientPlayer.hasAbandoned = true;
+        gameData.turnTimer = 0;
+        this.socketClientService.emit('manualDisconnect', { isInGame: false });
     }
 }

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { RouterLink } from '@angular/router';
 import { AccessCodeComponent } from '@app/components/access-code/access-code.component';
-import { GameDecorations } from '@app/enums/global.enums';
+import { GameDecorations } from '@common/enums';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 
 @Component({

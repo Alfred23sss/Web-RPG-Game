@@ -1,13 +1,14 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatComponent } from '@app/components/chat/chat.component';
-import { MIN_PLAYERS } from '@app/constants/global.constants';
-import { Behavior, ErrorMessages, Routes } from '@app/enums/global.enums';
+import { LOBBY_STORAGE, MIN_PLAYERS } from '@app/constants/global.constants';
+import { ErrorMessages, SnackBarMessage, SocketEvent } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Behavior, GameMode, Routes } from '@common/enums';
 import { Subscription } from 'rxjs';
 @Component({
     selector: 'app-waiting-view',
@@ -79,18 +80,18 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
         if (!this.lobby) return;
         if (this.lobby.isLocked) {
             if (this.lobby.players.length < this.lobby.maxPlayers) {
-                this.socketClientService.emit('unlockLobby', this.accessCode);
+                this.socketClientService.emit(SocketEvent.UnlockLobby, this.accessCode);
             } else {
-                this.snackbarService.showMessage('Le lobby est plein, impossible de le déverrouiller.');
+                this.snackbarService.showMessage(SnackBarMessage.LobbyFull);
             }
         } else {
-            this.socketClientService.emit('lockLobby', this.accessCode);
+            this.socketClientService.emit(SocketEvent.LockLobby, this.accessCode);
         }
     }
 
     kickPlayer(player: Player): void {
         if (this.accessCode) {
-            this.socketClientService.emit('kickPlayer', {
+            this.socketClientService.emit(SocketEvent.KickPlayer, {
                 accessCode: this.accessCode,
                 playerName: player.name,
             });
@@ -98,7 +99,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     kickVirtualPlayer(player: Player): void {
-        this.socketClientService.emit('kickVirtualPlayer', {
+        this.socketClientService.emit(SocketEvent.KickVirtualPlayer, {
             accessCode: this.accessCode,
             player,
         });
@@ -116,17 +117,17 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
             this.snackbarService.showMessage(ErrorMessages.LobbyNotLocked);
             return;
         }
-        if (this.lobby.players.length < MIN_PLAYERS || (this.lobby.game?.mode === 'CTF' && this.lobby.players.length % 2 !== 0)) {
+        if (this.lobby.players.length < MIN_PLAYERS || (this.lobby.game?.mode === GameMode.CTF && this.lobby.players.length % 2 !== 0)) {
             this.snackbarService.showMessage(ErrorMessages.NotEnoughPlayers);
             return;
         }
         if (this.player.isAdmin && !this.isGameStartedEmitted) {
             this.isGameStartedEmitted = true;
-            this.socketClientService.emit('createGame', { accessCode: this.accessCode, gameMode: this.lobby.game?.mode });
+            this.socketClientService.emit(SocketEvent.CreateGame, { accessCode: this.accessCode, gameMode: this.lobby.game?.mode });
         }
 
         this.lobbyService.setIsGameStarting(true);
-        sessionStorage.setItem('lobby', JSON.stringify(this.lobby));
+        sessionStorage.setItem(LOBBY_STORAGE, JSON.stringify(this.lobby));
         this.router.navigate([Routes.Game]);
     }
 
@@ -135,7 +136,7 @@ export class WaitingViewComponent implements OnInit, OnDestroy {
     }
 
     setBehavior(behavior: Behavior): void {
-        this.socketClientService.emit('createVirtualPlayer', { behavior, accessCode: this.accessCode });
+        this.socketClientService.emit(SocketEvent.CreateVirtualPlayer, { behavior, accessCode: this.accessCode });
         this.isDialogOpen = false;
     }
 

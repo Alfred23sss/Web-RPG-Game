@@ -1,18 +1,17 @@
 import { RANDOM_ITEMS } from '@app/constants/constants';
-import { EventEmit, ImageType, ItemName } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
+import { EventEmit } from '@app/enums/enums';
+import { Player } from '@app/interfaces/player';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { Tile, TileType } from '@app/model/database/tile';
-import { Injectable, Logger } from '@nestjs/common';
+import { ImageType, ItemName } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
 const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GridManagerService {
-    constructor(
-        private readonly logger: Logger,
-        private readonly eventEmitter: EventEmitter2,
-    ) {}
+    constructor(private readonly eventEmitter: EventEmitter2) {}
 
     findTileById(grid: Tile[][], tileId: string): Tile | undefined {
         return grid.flat().find((tile) => tile.id === tileId);
@@ -27,35 +26,23 @@ export class GridManagerService {
     }
 
     findAndCheckAdjacentTiles(tileId1: string, tileId2: string, grid: Tile[][]): boolean {
-        let tile1Pos: { row: number; col: number } | null = null;
-        let tile2Pos: { row: number; col: number } | null = null;
-        for (let row = 0; row < grid.length; row++) {
-            for (let col = 0; col < grid[row].length; col++) {
-                if (grid[row][col].id === tileId1) {
-                    tile1Pos = { row, col };
-                }
-                if (grid[row][col].id === tileId2) {
-                    tile2Pos = { row, col };
-                }
-                if (tile1Pos && tile2Pos) break;
-            }
-            if (tile1Pos && tile2Pos) break;
-        }
+        const tile1Pos = this.findTilePosition(tileId1, grid);
+        const tile2Pos = this.findTilePosition(tileId2, grid);
+
         if (!tile1Pos || !tile2Pos) return false;
-        return Math.abs(tile1Pos.row - tile2Pos.row) + Math.abs(tile1Pos.col - tile2Pos.col) === 1;
+
+        return this.areTilesAdjacent(tile1Pos, tile2Pos);
     }
 
     clearPlayerFromGrid(grid: Tile[][], playerName: string): void {
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.player?.name === playerName) {
-                    tile.player = undefined;
-                }
+        for (const tile of grid.flat()) {
+            if (tile.player?.name === playerName) {
+                tile.player = undefined;
             }
         }
     }
 
-    updateDoorTile(grid: Tile[][], accessCode: string, previousTile: Tile, newTile: Tile): Tile[][] {
+    updateDoorTile(grid: Tile[][], accessCode: string, previousTile: Tile, newTile: Tile, player: VirtualPlayer): Tile[][] {
         const isAdjacent = this.findAndCheckAdjacentTiles(previousTile.id, newTile.id, grid);
         if (!isAdjacent) return grid;
         const targetTile = grid.flat().find((tile) => tile.id === newTile.id);
@@ -66,9 +53,12 @@ export class GridManagerService {
             targetTile.imageSrc = ImageType.OpenDoor;
         }
         targetTile.isOpen = !targetTile.isOpen;
-        this.logger.log('emitting door update');
         this.eventEmitter.emit(EventEmit.UpdateDoorStats, { accessCode, tile: previousTile });
-        this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: newTile.isOpen });
+        if (player.isVirtual) {
+            this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: !newTile.isOpen, player });
+        } else {
+            this.eventEmitter.emit(EventEmit.GameDoorUpdate, { accessCode, grid, isOpen: newTile.isOpen, player });
+        }
         return grid;
     }
 
@@ -92,13 +82,9 @@ export class GridManagerService {
     }
 
     setPlayerOnTile(grid: Tile[][], targetTile: Tile, player: Player): void {
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.id === targetTile.id) {
-                    tile.player = player;
-                    return;
-                }
-            }
+        const tile = grid.flat().find((t) => t.id === targetTile.id);
+        if (tile) {
+            tile.player = player;
         }
     }
 
@@ -134,31 +120,32 @@ export class GridManagerService {
     }
 
     assignItemsToRandomItems(grid: Tile[][]): Tile[][] {
-        const existingItems = new Set<string>();
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.item?.name && tile.item.name !== ItemName.QuestionMark && tile.item.name !== ItemName.Home) {
-                    existingItems.add(tile.item.name);
-                }
-            }
-        }
+        const getExistingItems = (): Set<string> => {
+            const items = grid.flatMap((row) =>
+                row.map((tile) => tile.item?.name).filter((name) => name && name !== ItemName.QuestionMark && name !== ItemName.Home),
+            );
+            return new Set(items);
+        };
+
+        const existingItems = getExistingItems();
         let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
-        for (const row of grid) {
-            for (const tile of row) {
-                if (tile.item?.name === ItemName.QuestionMark) {
-                    const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)];
+
+        grid.flat().forEach((tile) => {
+            if (tile.item?.name === ItemName.QuestionMark) {
+                const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)] ?? null;
+                if (randomItem) {
                     tile.item = randomItem;
                     remainingItems = remainingItems.filter((item) => item.name !== randomItem.name);
                 }
             }
-        }
+        });
+
         return grid;
     }
 
     teleportPlayer(grid: Tile[][], player: Player, targetTile: Tile): Tile[][] {
         const currentPlayerTile = this.findTileByPlayer(grid, player);
         if (!currentPlayerTile) {
-            this.logger.warn(`Player ${player.name} not found on any tile.`);
             return grid;
         }
         if (currentPlayerTile === targetTile) {
@@ -210,16 +197,9 @@ export class GridManagerService {
     }
 
     isFlagOnSpawnPoint(grid: Tile[][], player: Player): boolean {
-        const playerTile = this.findTileByPlayer(grid, player);
-        const playerSpawnPoint = this.findTileBySpawnPoint(grid, player);
-        if (playerTile && playerSpawnPoint && playerTile.id === playerSpawnPoint.id) {
-            for (const item of player.inventory || []) {
-                if (item?.name === ItemName.Flag) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        const isAtSpawn = this.findTileByPlayer(grid, player)?.id === this.findTileBySpawnPoint(grid, player)?.id;
+
+        return (isAtSpawn && player.inventory?.some((item) => item?.name === ItemName.Flag)) ?? false;
     }
 
     private getAdjacentTiles(grid: Tile[][], tile: Tile): Tile[] {
@@ -237,12 +217,28 @@ export class GridManagerService {
     private parseTileCoordinates(tileId: string): { row: number; col: number } | null {
         const match = tileId.match(/tile-(\d+)-(\d+)/);
         if (!match) {
-            this.logger.error(`Invalid tile ID format: ${tileId}`);
             return null;
         }
         return {
             row: parseInt(match[1], 10),
             col: parseInt(match[2], 10),
         };
+    }
+
+    private findTilePosition(tileId: string, grid: Tile[][]): { row: number; col: number } | null {
+        for (let row = 0; row < grid.length; row++) {
+            for (let col = 0; col < grid[row].length; col++) {
+                if (grid[row][col].id === tileId) {
+                    return { row, col };
+                }
+            }
+        }
+        return null;
+    }
+
+    private areTilesAdjacent(pos1: { row: number; col: number }, pos2: { row: number; col: number }): boolean {
+        const rowDiff = Math.abs(pos1.row - pos2.row);
+        const colDiff = Math.abs(pos1.col - pos2.col);
+        return rowDiff + colDiff === 1;
     }
 }

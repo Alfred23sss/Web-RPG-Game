@@ -21,8 +21,9 @@
                 'valid-drop': tile.type !== tileType.Wall && !tile.isOccupied,
                 'available-path': isAvailablePath(tile),
                 'quickest-path': isInQuickestPath(tile) && isAvailablePath(tile),
-                'highlight-player': isActionMode && tile.player,
-                'highlight-door': isActionMode && tile.type === tileType.Door && !tile.item,
+                'highlight-player': isActionMode && tile.player && isAccessible(tile),
+                'highlight-door': isActionMode && tile.type === tileType.Door && !tile.item && isAccessible(tile),
+                'highlight-wall': isActionMode && hasLightningItem() && isAccessible(tile) && tile.type === tileType.Wall,
                 'highlight-spawn': tile.id === clientPlayer.spawnPoint?.tileId
             }"
             [isEditionMode]="isEditionMode"

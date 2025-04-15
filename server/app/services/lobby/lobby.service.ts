@@ -1,9 +1,9 @@
 import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { Lobby, WaintingPlayers } from '@app/interfaces/Lobby';
-import { Player } from '@app/interfaces/Player';
+import { Lobby, WaintingPlayers } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class LobbyService {
@@ -130,16 +130,20 @@ export class LobbyService {
     }
 
     getPlayerBySocketId(socketId: string): Player | undefined {
+        const allLobbies = Array.from(this.lobbies.values());
+        const matchingPlayer = allLobbies.flatMap((lobby) => lobby?.players || []).find((player) => this.playerSockets.get(player.name) === socketId);
+        if (matchingPlayer) {
+            this.playerSockets.set(matchingPlayer.name, socketId);
+            return matchingPlayer;
+        }
+
         const playerEntry = Array.from(this.playerSockets.entries()).find(([, sId]) => sId === socketId);
         if (!playerEntry) return undefined;
-        Logger.log('Player isnt undefined');
         const playerName = playerEntry[0];
         const lobbyId = this.getRoomForPlayer(socketId);
-        Logger.log('lobbyId', lobbyId);
         if (!lobbyId) return undefined;
-
-        const lobby = this.getLobby(lobbyId);
-        return lobby?.players.find((p) => p.name === playerName);
+        const playerLobby = this.getLobby(lobbyId);
+        return playerLobby?.players.find((p) => p.name === playerName);
     }
 
     private generateUniqueName(lobby: Lobby, duplicatedName: string): string {

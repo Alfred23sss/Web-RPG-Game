@@ -6,11 +6,12 @@
 
 import { TestBed } from '@angular/core/testing';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Item } from '@app/classes/item';
-import { ErrorMessages, GameMode, GameSize, GameSizeNumber, TileType } from '@app/enums/global.enums';
+import { Item } from '@app/classes/item/item';
+import { ErrorMessages, GameSizeNumber } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
+import { GameMode, GameSize, TileType } from '@common/enums';
 import { GameValidationService } from './game-validation.service';
 
 describe('GameValidationService', () => {

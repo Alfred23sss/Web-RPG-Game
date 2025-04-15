@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Item } from '@app/classes/item';
+import { Item } from '@app/classes/item/item';
 
 @Component({
     selector: 'app-item-pop-up',

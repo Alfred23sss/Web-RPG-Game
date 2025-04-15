@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */ // all any uses are to allow the testing of a private service.
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { POPUP_DELAY } from '@app/constants/global.constants';
-import { TileType } from '@app/enums/global.enums';
 import { Tile } from '@app/interfaces/tile';
+import { ItemName, TileType } from '@common/enums';
 import { of } from 'rxjs';
 import { GridComponent } from './grid.component';
 
@@ -105,6 +106,52 @@ describe('GridComponent', () => {
             component.availablePath = [];
             component.onTileClick(mockTile1);
             expect(component.tileClicked.emit).not.toHaveBeenCalled();
+        });
+    });
+
+    describe('hasLightningItem()', () => {
+        it('should return true if player has Lightning item', () => {
+            component.clientPlayer = {
+                inventory: [{ name: ItemName.Lightning }, null],
+            } as any;
+
+            expect(component.hasLightningItem()).toBeTrue();
+        });
+
+        it('should return false if player does not have Lightning item', () => {
+            component.clientPlayer = {
+                inventory: [{ name: ItemName.Fire }, null],
+            } as any;
+
+            expect(component.hasLightningItem()).toBeFalse();
+        });
+    });
+
+    describe('isAccessible()', () => {
+        it('should return true when one of the neighbor tiles has the same player name', () => {
+            const tile = { id: 'A', type: TileType.Default } as Tile;
+            const neighborWithPlayer = { player: { name: 'Mehdi' } } as Tile;
+            component.grid = [[tile]];
+            component.clientPlayer = { name: 'Mehdi' } as any;
+            component['playerMovementService'] = {
+                getNeighbors: () => [neighborWithPlayer],
+            } as any;
+
+            expect(component.isAccessible(tile)).toBeTrue();
+        });
+
+        it('should return false when no neighbors match the player name', () => {
+            const tile = { id: 'B', type: TileType.Default } as Tile;
+            const otherNeighbor = { player: { name: 'Other' } } as Tile;
+
+            component.grid = [[tile]];
+            component.clientPlayer = { name: 'Mehdi' } as any;
+
+            component['playerMovementService'] = {
+                getNeighbors: () => [otherNeighbor],
+            } as any;
+
+            expect(component.isAccessible(tile)).toBeFalse();
         });
     });
 

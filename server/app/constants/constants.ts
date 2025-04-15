@@ -1,5 +1,5 @@
-import { Behavior, DiceType, ItemDescription, ItemName, ItemType } from '@app/enums/enums';
-import { VirtualPlayer } from '@app/interfaces/VirtualPlayer';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
+import { ItemType, ItemName, ItemDescription, DiceType, Behavior } from '@common/enums';
 
 export const RANDOM_ITEMS = [
     {
@@ -129,5 +129,5 @@ export const VIRTUAL_PLAYER_NAMES: string[] = [
     'RacletteOP',
     'PoutinePower',
     'MacaronFou',
-    'OmeletteDuRisk',
+    'LebronsVAD',
 ];

@@ -2,14 +2,14 @@
 /* eslint-disable max-lines */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-magic-numbers */
-import { DiceType } from '@app/interfaces/Dice';
-import { Player } from '@app/interfaces/Player';
-import { Turn } from '@app/interfaces/Turn';
+import { DiceType } from '@app/interfaces/dice';
+import { Player } from '@app/interfaces/player';
+import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { TeamType } from '@common/enums';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Test, TestingModule } from '@nestjs/testing';
 import { GameSessionTurnService } from './game-session-turn.service';
-import { TeamType } from '@app/enums/enums';
 
 describe('GameSessionTurnService', () => {
     let service: GameSessionTurnService;
@@ -224,7 +224,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10), createPlayer('Player2', 20)];
             const turn = createTurn(players, players[0]);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[1]);
         });
@@ -233,7 +233,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10), createPlayer('Player2', 20)];
             const turn = createTurn(players);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[0]);
         });
@@ -242,7 +242,7 @@ describe('GameSessionTurnService', () => {
             const players = [createPlayer('Player1', 10, true), createPlayer('Player2', 20, true)];
             const turn = createTurn(players);
 
-            const nextPlayer = service.getNextPlayer('1234', turn);
+            const nextPlayer = service.getNextPlayer(turn);
 
             expect(nextPlayer).toBe(players[0]);
         });

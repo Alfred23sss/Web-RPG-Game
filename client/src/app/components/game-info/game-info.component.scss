@@ -10,8 +10,7 @@
         6px 6px 12px rgba(0, 0, 0, 0.2);
     cursor: pointer;
     user-select: none;
-    width: auto;
-    max-width: 300px;
+    width: 300px;
     max-height: 480px;
     transition:
         box-shadow 0.3s,
@@ -26,22 +25,32 @@
 
 .game-preview {
     position: relative;
-    width: 100%;
-    height: auto;
+    width: 300px;
+    height: 300px;
     border-radius: 10px;
+    // border: 1px solid white;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.game-preview img {
+.image-wrapper {
     width: 100%;
-    height: auto;
-    max-height: 250px;
-    object-fit: contain;
-    border-radius: 10px;
-    border: 2px solid #aeb4be;
+    height: 100%;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-wrapper img {
+    // display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover; // used to be conain
+    // border-radius: 10px;
+    // border: 2px solid #aeb4be;
 }
 
 .game-info {

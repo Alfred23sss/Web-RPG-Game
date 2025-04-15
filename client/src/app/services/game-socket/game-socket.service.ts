@@ -1,20 +1,25 @@
 import { Injectable } from '@angular/core';
-import { Item } from '@app/classes/item';
-import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS } from '@app/constants/global.constants';
+import { Item } from '@app/classes/item/item';
+import { DELAY_BEFORE_ENDING_GAME, DELAY_BEFORE_HOME, NO_ACTION_POINTS, REFRESH_STORAGE } from '@app/constants/global.constants';
+import { ClientNotifierMessage, LogBookEntry, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics } from '@app/interfaces/statistics';
 import { Tile } from '@app/interfaces/tile';
+import { VirtualPlayer } from '@app/interfaces/virtual-player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { ItemName } from '@common/enums';
 
 @Injectable({
     providedIn: 'root',
 })
 export class GameSocketService {
+    private doorClickedTimer: number | null = null;
+    private readonly doorClickedDelay = 50;
     constructor(
         private gameStateService: GameStateSocketService,
         private gameplayService: GameplayService,
@@ -42,42 +47,38 @@ export class GameSocketService {
     }
 
     private handlePageRefresh(): void {
-        if (sessionStorage.getItem('refreshed') === 'true') {
+        if (sessionStorage.getItem(REFRESH_STORAGE) === 'true') {
             this.gameplayService.abandonGame(this.gameStateService.gameDataSubjectValue);
         } else {
-            sessionStorage.setItem('refreshed', 'true');
+            sessionStorage.setItem(REFRESH_STORAGE, 'true');
         }
     }
 
     private onGameAbandoned(): void {
-        this.socketClientService.on('game-abandoned', (data: { player: Player }) => {
+        this.socketClientService.on(SocketEvent.GameAbandoned, (data: { player: Player }) => {
             const abandonedPlayer = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
             if (!abandonedPlayer) return;
             abandonedPlayer.hasAbandoned = true;
-            // this.gameStateService.gameDataSubjectValue.lobby.players = this.gameStateService.gameDataSubjectValue.lobby.players.filter(
-            //     (p) => p.name !== data.player.name,
-            // );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joeur a abandonne la partie', [data.player]);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.PlayerAbandoned, [data.player]);
         });
     }
 
     private onItemChoice(): void {
-        this.socketClientService.on('itemChoice', (data: { items: [Item, Item, Item] }) => {
+        this.socketClientService.on(SocketEvent.ItemChoice, (data: { items: [Item, Item, Item] }) => {
             this.gameplayService.createItemPopUp(data.items, this.gameStateService.gameDataSubjectValue);
         });
     }
 
-    // no need to be client side dont even know if its used
     private onItemDropped(): void {
-        this.socketClientService.on('itemDropped', (data: { accessCode: string; player: Player; item: Item }) => {
-            this.clientNotifier.addLogbookEntry(`${data.player.name} a déposé un item!`, [data.player]);
-            this.socketClientService.emit('itemDrop', data);
+        this.socketClientService.on(SocketEvent.ItemDropped, (data: { accessCode: string; player: Player; item: Item }) => {
+            this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemDropped}`, [data.player]);
+            this.socketClientService.emit(SocketEvent.ItemDrop, data);
         });
     }
 
     private onPlayerClientUpdate(): void {
-        this.socketClientService.on('playerClientUpdate', (data: { player: Player }) => {
+        this.socketClientService.on(SocketEvent.PlayerClientUpdate, (data: { player: Player }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
             const playerBeforeUpdate = gameData.lobby.players.find((p) => p.name === data.player.name);
             if (playerBeforeUpdate) {
@@ -86,9 +87,9 @@ export class GameSocketService {
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
                 if (addedItems.length > 0) {
                     if (addedItems.includes('flag')) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
                     } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
+                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
                     }
                 }
                 playerBeforeUpdate.inventory = data.player.inventory;
@@ -100,8 +101,9 @@ export class GameSocketService {
     }
 
     private onGameDeleted(): void {
-        this.socketClientService.on('gameDeleted', () => {
-            this.clientNotifier.displayMessage("Trop de joueurs ont abandonné la partie, vous allez être redirigé vers la page d'accueil");
+        this.socketClientService.on(SocketEvent.GameDeleted, () => {
+            this.gameStateService.gameDataSubjectValue.turnTimer = 0;
+            this.clientNotifier.displayMessage(ClientNotifierMessage.RedirectHome);
             setTimeout(() => {
                 this.gameplayService.backToHome();
             }, DELAY_BEFORE_HOME);
@@ -109,16 +111,17 @@ export class GameSocketService {
     }
 
     private onGameEnded(): void {
-        this.socketClientService.on('gameEnded', (data: { winner: string[]; stats: GameStatistics }) => {
+        this.socketClientService.on(SocketEvent.GameEnded, (data: { winner: string[]; stats: GameStatistics }) => {
             const players = this.gameStateService.gameDataSubjectValue.lobby.players.filter((player) => player.hasAbandoned === false);
             if (data.winner.length <= 1) {
-                this.clientNotifier.displayMessage(`👑 ${data.winner} a remporté la partie ! Redirection vers la page de fin sous peu`);
+                this.clientNotifier.displayMessage(`👑 ${data.winner} ${ClientNotifierMessage.SoloWin}`);
             } else {
                 const winnerNames = data.winner.join(', ');
-                this.clientNotifier.displayMessage(`👑 ${winnerNames} ont remporté la partie ! Redirection vers la page de fin sous peu`);
+                this.clientNotifier.displayMessage(`👑 ${winnerNames} ${ClientNotifierMessage.TeamWin}`);
             }
-            this.clientNotifier.addLogbookEntry('Fin de la partie', players);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.GameEnded, players);
             this.gameStateService.gameDataSubjectValue.gameStats = data.stats;
+            this.gameStateService.gameDataSubjectValue.turnTimer = 0;
             setTimeout(() => {
                 this.gameplayService.navigateToFinalPage();
             }, DELAY_BEFORE_ENDING_GAME);
@@ -126,9 +129,9 @@ export class GameSocketService {
     }
 
     private onAdminModeDisabled(): void {
-        this.socketClientService.on('adminModeDisabled', () => {
+        this.socketClientService.on(SocketEvent.AdminModeDisabled, () => {
             if (this.gameStateService.gameDataSubjectValue.isDebugMode) {
-                this.clientNotifier.displayMessage("Mode debug 'désactivé'");
+                this.clientNotifier.displayMessage(ClientNotifierMessage.DeactivatedDebug);
             }
             this.gameStateService.gameDataSubjectValue.isDebugMode = false;
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
@@ -136,7 +139,7 @@ export class GameSocketService {
     }
 
     private onGameStarted(): void {
-        this.socketClientService.socket.on('gameStarted', (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
+        this.socketClientService.socket.on(SocketEvent.GameStarted, (data: { orderedPlayers: Player[]; updatedGame: Game }) => {
             this.gameStateService.gameDataSubjectValue.lobby.players = data.orderedPlayers;
             this.gameStateService.gameDataSubjectValue.clientPlayer =
                 data.orderedPlayers.find((p) => p.name === this.gameStateService.gameDataSubjectValue.clientPlayer.name) ||
@@ -146,90 +149,98 @@ export class GameSocketService {
         });
     }
 
-    // refactor for god sake
     private onPlayerMovement(): void {
-        this.socketClientService.on('playerMovement', (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
-            if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
-                this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
-            }
-
-            const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
-            if (playerBeforeUpdate) {
-                const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
-                const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
-                const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
-                if (addedItems.length > 0) {
-                    if (addedItems.includes('flag')) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris le drapeau!`, [data.player]);
-                    } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} a pris un item!`, [data.player]);
-                    }
-                }
-            }
+        this.socketClientService.on(SocketEvent.PlayerMovement, (data: { grid: Tile[][]; player: Player; isCurrentlyMoving: boolean }) => {
+            this.updateGameGridAndCheckInventory(data);
 
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
-                this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints =
-                    this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints -
-                    this.playerMovementService.calculateRemainingMovementPoints(
-                        this.gameplayService.getClientPlayerPosition(this.gameStateService.gameDataSubjectValue),
-                        data.player,
-                    );
-                const player = this.gameStateService.gameDataSubjectValue.clientPlayer;
-                // repetition
-                player.inventory = data.player.inventory;
-                player.hp = data.player.hp;
-                player.attack.value = data.player.attack.value;
-                player.defense.value = data.player.defense.value;
-                player.speed = data.player.speed;
-
-                this.gameStateService.gameDataSubjectValue.movementPointsRemaining =
-                    this.gameStateService.gameDataSubjectValue.clientPlayer.movementPoints;
-
-                this.gameStateService.gameDataSubjectValue.isCurrentlyMoving = data.isCurrentlyMoving;
-                this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
+                this.updateClientPlayerStats(data);
             }
 
-            this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
-            this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+            this.finalizeMovementUpdate();
         });
     }
 
+    private updateGameGridAndCheckInventory(data: { grid: Tile[][]; player: Player }): void {
+        if (this.gameStateService.gameDataSubjectValue.game && this.gameStateService.gameDataSubjectValue.game.grid) {
+            this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
+        }
+
+        const playerBeforeUpdate = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.name === data.player.name);
+        if (playerBeforeUpdate) {
+            const oldInventoryNames = (playerBeforeUpdate.inventory ?? []).map((item) => item?.name);
+            const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
+            const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
+
+            if (addedItems.length > 0) {
+                if (addedItems.includes(ItemName.Flag)) {
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
+                } else {
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
+                }
+            }
+        }
+    }
+
+    private updateClientPlayerStats(data: { player: Player; isCurrentlyMoving: boolean }): void {
+        const clientPlayer = this.gameStateService.gameDataSubjectValue.clientPlayer;
+        const gameData = this.gameStateService.gameDataSubjectValue;
+
+        clientPlayer.movementPoints =
+            clientPlayer.movementPoints -
+            this.playerMovementService.calculateRemainingMovementPoints(this.gameplayService.getClientPlayerPosition(gameData), data.player);
+
+        clientPlayer.inventory = data.player.inventory;
+        clientPlayer.hp = data.player.hp;
+        clientPlayer.attack.value = data.player.attack.value;
+        clientPlayer.defense.value = data.player.defense.value;
+        clientPlayer.speed = data.player.speed;
+
+        gameData.movementPointsRemaining = clientPlayer.movementPoints;
+        gameData.isCurrentlyMoving = data.isCurrentlyMoving;
+
+        this.gameplayService.updateAvailablePath(gameData);
+    }
+
+    private finalizeMovementUpdate(): void {
+        this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
+        this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+    }
+
     private onPlayerUpdate(): void {
-        this.socketClientService.on('playerUpdate', (data: { player: Player }) => {
+        this.socketClientService.on(SocketEvent.PlayerUpdate, (data: { player: Player }) => {
             if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === data.player.name) {
                 this.gameStateService.gameDataSubjectValue.clientPlayer = data.player;
+            }
+            const affectedPlayerIndex = this.gameStateService.gameDataSubjectValue.playersInFight.findIndex((p) => p.name === data.player.name);
+            if (affectedPlayerIndex !== -1) {
+                this.gameStateService.gameDataSubjectValue.playersInFight[affectedPlayerIndex] = data.player;
             }
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }
 
     private onPlayerListUpdate(): void {
-        this.socketClientService.on('playerListUpdate', (data: { players: Player[] }) => {
+        this.socketClientService.on(SocketEvent.PlayerListUpdate, (data: { players: Player[] }) => {
             this.gameStateService.gameDataSubjectValue.lobby.players = data.players;
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on('doorClicked', (data: { grid: Tile[][]; isOpen: boolean }) => {
-            if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
+        this.socketClientService.on<{ grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }>(SocketEvent.DoorClicked, (data) => {
+            if (this.doorClickedTimer !== null) {
                 return;
             }
-            this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
-            if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
-                this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
-            }
-            this.gameStateService.gameDataSubjectValue.isActionMode = false;
-            this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
-            this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
-            this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            const action = data.isOpen ? 'fermé une porte' : 'ouvert une porte';
-            this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [this.gameStateService.gameDataSubjectValue.clientPlayer]);
+            this.doorClickedTimer = window.setTimeout(() => {
+                this.processDoorClicked(data);
+                this.doorClickedTimer = null;
+            }, this.doorClickedDelay);
         });
     }
 
     private onWallClicked(): void {
-        this.socketClientService.on('wallClicked', (data: { grid: Tile[][] }) => {
+        this.socketClientService.on(SocketEvent.WallClicked, (data: { grid: Tile[][] }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -241,14 +252,12 @@ export class GameSocketService {
             this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
             this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
-            this.clientNotifier.addLogbookEntry('Un joueur a effectue une action sur un mur!', [
-                this.gameStateService.gameDataSubjectValue.clientPlayer,
-            ]);
+            this.clientNotifier.addLogbookEntry(LogBookEntry.WallAction, [this.gameStateService.gameDataSubjectValue.clientPlayer]);
         });
     }
 
     private onGridUpdate(): void {
-        this.socketClientService.on('gridUpdate', (data: { grid: Tile[][] }) => {
+        this.socketClientService.on(SocketEvent.GridUpdate, (data: { grid: Tile[][] }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
                 return;
             }
@@ -259,15 +268,38 @@ export class GameSocketService {
     }
 
     private onAdminModeChangedServerSide(): void {
-        this.socketClientService.on('adminModeChangedServerSide', () => {
+        this.socketClientService.on(SocketEvent.AdminModeChangedServerSide, () => {
             this.gameStateService.gameDataSubjectValue.isDebugMode = !this.gameStateService.gameDataSubjectValue.isDebugMode;
             const playerAdmin = this.gameStateService.gameDataSubjectValue.lobby.players.find((p) => p.isAdmin === true);
             if (!playerAdmin) return;
-            this.clientNotifier.displayMessage(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`);
-            this.clientNotifier.addLogbookEntry(`Mode debug ${this.gameStateService.gameDataSubjectValue.isDebugMode ? 'activé' : 'désactivé'}`, [
-                playerAdmin,
-            ]);
+            this.clientNotifier.displayMessage(
+                `${LogBookEntry.DebugMode} ${
+                    this.gameStateService.gameDataSubjectValue.isDebugMode ? LogBookEntry.Activated : LogBookEntry.Deactivated
+                }`,
+            );
+            this.clientNotifier.addLogbookEntry(
+                `${LogBookEntry.DebugMode} ${
+                    this.gameStateService.gameDataSubjectValue.isDebugMode ? LogBookEntry.Activated : LogBookEntry.Deactivated
+                }`,
+                [playerAdmin],
+            );
             this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
         });
+    }
+
+    private processDoorClicked(data: { grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }): void {
+        if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {
+            return;
+        }
+        this.gameStateService.gameDataSubjectValue.game.grid = data.grid;
+        if (this.gameStateService.gameDataSubjectValue.clientPlayer.name === this.gameStateService.gameDataSubjectValue.currentPlayer.name) {
+            this.gameStateService.gameDataSubjectValue.clientPlayer.actionPoints = NO_ACTION_POINTS;
+        }
+        this.gameStateService.gameDataSubjectValue.isActionMode = false;
+        this.gameplayService.updateAvailablePath(this.gameStateService.gameDataSubjectValue);
+        this.gameplayService.checkAvailableActions(this.gameStateService.gameDataSubjectValue);
+        this.gameStateService.updateGameData(this.gameStateService.gameDataSubjectValue);
+        const action = data.isOpen ? 'fermé une porte' : 'ouvert une porte';
+        this.clientNotifier.addLogbookEntry(`Un joueur a ${action}`, [data.player]);
     }
 }

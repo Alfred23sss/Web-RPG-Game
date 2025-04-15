@@ -1,10 +1,11 @@
-import { AttributeType, EventEmit, ItemName, TileType } from '@app/enums/enums';
-import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtualPlayer.gateway.events';
-import { Item, ItemModifier } from '@app/interfaces/Item';
-import { Player } from '@app/interfaces/Player';
-import { Tile } from '@app/interfaces/Tile';
+import { AttributeType, EventEmit } from '@app/enums/enums';
+import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
+import { Item, ItemModifier } from '@app/interfaces/item';
+import { Player } from '@app/interfaces/player';
+import { Tile } from '@app/interfaces/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
-import { Injectable, Logger } from '@nestjs/common';
+import { ItemName, TileType } from '@common/enums';
+import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
 const HEALTH_CONDITION_THRESHOLD = 0.5;
@@ -24,13 +25,7 @@ export class ItemEffectsService {
         if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
             this.applyItemModifiers(item);
         }
-        if (
-            item.isActive ||
-            (item.name === ItemName.Fire && !this.isHealthConditionValid(player, item)) ||
-            (item.name === ItemName.Swap && !this.isIceConditionValid(tile, item))
-        ) {
-            return;
-        }
+        if (this.shouldSkipItemApplication(item, player, tile)) return;
         if (item.modifiers) {
             item.modifiers.forEach((mod) => this.applyModifier(player, mod, MULTIPLIER));
         }
@@ -41,7 +36,6 @@ export class ItemEffectsService {
         const item = player.inventory[index];
 
         if (!item || !item.isActive) {
-            Logger.log('Remove conditions failed');
             return;
         }
 
@@ -184,9 +178,8 @@ export class ItemEffectsService {
             }
         }
         const items = [player.inventory[0], player.inventory[1], item];
-        Logger.log('Items:', items);
         if (player.isVirtual) {
-            this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items });
+            this.eventEmitter.emit(VirtualPlayerEvents.ChooseItem, { accessCode, player, items, item });
         } else {
             this.eventEmitter.emit(EventEmit.ItemChoice, { player, items });
             this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
@@ -217,6 +210,19 @@ export class ItemEffectsService {
                 break;
             default:
                 break;
+        }
+    }
+
+    private shouldSkipItemApplication(item: Item, player: Player, tile: Tile): boolean {
+        if (item.isActive) return true;
+
+        switch (item.name) {
+            case ItemName.Fire:
+                return !this.isHealthConditionValid(player, item);
+            case ItemName.Swap:
+                return !this.isIceConditionValid(tile, item);
+            default:
+                return false;
         }
     }
 }

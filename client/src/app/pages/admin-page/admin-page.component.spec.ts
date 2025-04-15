@@ -3,12 +3,13 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PopUpComponent } from '@app/components/pop-up/pop-up.component';
 import { MOCK_GAMES } from '@app/constants/global.constants';
-import { ErrorMessages, Routes } from '@app/enums/global.enums';
+import { ErrorMessages } from '@app/enums/global.enums';
 import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { of, throwError } from 'rxjs';
 import { AdminPageComponent } from './admin-page.component';
+import { Routes } from '@common/enums';
 
 describe('AdminPageComponent', () => {
     let component: AdminPageComponent;

@@ -1,6 +1,8 @@
 <div class="game-preview-container">
     <div class="game-preview">
-        <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
+        <div class="image-wrapper">
+            <img [src]="game.previewImage" matTooltip="{{ game.description }}" matTooltipPosition="above" />
+        </div>
         <div class="game-overlay">{{ game.size }}x{{ game.size }} • {{ game.mode }}</div>
     </div>
     <div class="game-info">

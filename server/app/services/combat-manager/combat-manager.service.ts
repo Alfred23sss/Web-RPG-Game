@@ -1,10 +1,12 @@
-import { EventEmit, GameMode } from '@app/enums/enums';
-import { CombatState } from '@app/interfaces/CombatState';
-import { GameCombatMap } from '@app/interfaces/GameCombatMap';
-import { Player } from '@app/interfaces/Player';
+import { EventEmit } from '@app/enums/enums';
+import { AttackScore } from '@common/interfaces/attack-score';
+import { CombatState } from '@app/interfaces/combat-state';
+import { GameCombatMap } from '@app/interfaces/game-combat-map';
+import { Player } from '@app/interfaces/player';
 import { CombatHelperService } from '@app/services/combat-helper/combat-helper.service';
 import { GameSessionService } from '@app/services/game-session/game-session.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
+import { GameMode } from '@common/enums';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -36,7 +38,7 @@ export class GameCombatService {
         const shouldEndCombat = (areFightersVirtual && !arePlayersLeft) || isAbandonnedPlayerInCombat;
         if (shouldEndCombat) {
             Logger.log('Combat session abandoned, ending combat');
-            const playerToUpdate = combatState.currentFighter.name === playerName ? combatState.currentFighter : combatState.defender;
+            const playerToUpdate = combatState.attacker.name !== playerName ? combatState.attacker : combatState.defender;
             this.updateWinningPlayerAfterCombat(playerToUpdate, accessCode);
             this.emitEvent(EventEmit.UpdatePlayerList, { players: this.gameSessionService.getPlayers(accessCode), accessCode });
             this.endCombat(accessCode);
@@ -86,7 +88,7 @@ export class GameCombatService {
 
         remainingEscapeAttempts.set(player.name, attemptsLeft);
         const isEscapeSuccessful = Math.random() < ESCAPE_THRESHOLD;
-        this.emitEvent(EventEmit.GameCombatEscape, { player, attemptsLeft, isEscapeSuccessful });
+        this.emitEvent(EventEmit.GameCombatEscape, { player, attemptsLeft, isEscapeSuccessful, accessCode });
         if (isEscapeSuccessful) {
             this.resetHealth([attacker, defender], accessCode);
             combatState.hasEvaded = true;
@@ -109,15 +111,18 @@ export class GameCombatService {
     endCombat(accessCode: string, isEscape: boolean = false): void {
         const combatState = this.combatStates[accessCode];
         if (!combatState) return;
+
         this.resetCombatTimers(accessCode);
         const { attacker, defender, currentFighter, pausedGameTurnTimeRemaining, hasEvaded } = combatState;
         this.emitEvent(EventEmit.GameCombatEnded, { attacker, defender, currentFighter, hasEvaded, accessCode });
         delete this.combatStates[accessCode];
         if (!this.gameSessionService.getGameSession(accessCode)) return;
         this.gameSessionService.setCombatState(accessCode, false);
-        if (!isEscape && currentFighter && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name)) {
+        const isAttackerPlayerWon = !isEscape && this.gameSessionService.isCurrentPlayer(accessCode, currentFighter.name);
+        const isDefenderPlayerWon = !isEscape;
+        if (isAttackerPlayerWon) {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
-        } else if (!isEscape && currentFighter) {
+        } else if (isDefenderPlayerWon) {
             this.gameSessionService.endTurn(accessCode);
         } else {
             this.gameSessionService.resumeGameTurn(accessCode, pausedGameTurnTimeRemaining);
@@ -218,7 +223,7 @@ export class GameCombatService {
             this.gameSessionService.getGameSession(accessCode).game.grid,
         );
         return {
-            attackSuccessful: attackerScore > defenseScore,
+            attackSuccessful: attackerScore.score > defenseScore.score,
             attackerScore,
             defenseScore,
             defenderPlayer,
@@ -227,20 +232,20 @@ export class GameCombatService {
 
     private handleSuccessfulAttack(
         combatState: CombatState,
-        attackerScore: number,
-        defenseScore: number,
+        attackerScore: AttackScore,
+        defenseScore: AttackScore,
         defenderPlayer: Player,
         accessCode: string,
     ): void {
-        const attackDamage = attackerScore - defenseScore;
+        const attackDamage = attackerScore.score - defenseScore.score;
         defenderPlayer.hp.current = Math.max(0, defenderPlayer.hp.current - attackDamage);
 
         defenderPlayer.inventory.forEach((item) => {
             this.itemEffectsService.addEffect(defenderPlayer, item, undefined);
         });
-
-        this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer });
-        if (defenderPlayer.hp.current === 0) {
+        Logger.log(`Player defender ${defenderPlayer.name}, current HP`);
+        this.emitEvent(EventEmit.UpdatePlayer, { player: defenderPlayer, accessCode });
+        if (defenderPlayer.hp.current <= 0) {
             this.handleCombatEnd(combatState, defenderPlayer, accessCode);
         } else {
             this.endCombatTurn(accessCode);

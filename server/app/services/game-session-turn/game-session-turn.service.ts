@@ -1,8 +1,9 @@
-import { EventEmit, TeamType } from '@app/enums/enums';
-import { Player } from '@app/interfaces/Player';
-import { Turn } from '@app/interfaces/Turn';
+import { EventEmit } from '@app/enums/enums';
+import { Player } from '@app/interfaces/player';
+import { Turn } from '@app/interfaces/turn';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { Injectable } from '@nestjs/common';
+import { TeamType } from '@common/enums';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 const TRANSITION_PHASE_DURATION = 3000;
@@ -44,8 +45,11 @@ export class GameSessionTurnService {
 
     startTransitionPhase(accessCode: string, turn: Turn): Turn {
         turn.isTransitionPhase = true;
+
         turn.transitionTimeRemaining = TRANSITION_PHASE_DURATION / SECOND;
-        const nextPlayer = this.getNextPlayer(accessCode, turn);
+        Logger.log('called in transi');
+        const nextPlayer = this.getNextPlayer(turn);
+        turn.beginnerPlayer = nextPlayer;
         this.emitEvent(EventEmit.GameTransitionStarted, { accessCode, nextPlayer });
         let transitionTimeLeft = TRANSITION_PHASE_DURATION / SECOND;
         turn.countdownInterval = setInterval(() => {
@@ -123,6 +127,7 @@ export class GameSessionTurnService {
 
     resumeTurn(accessCode: string, turn: Turn, remainingTime: number): Turn {
         turn.currentTurnCountdown = remainingTime;
+        Logger.log('begin plyer', turn.beginnerPlayer);
         this.emitEvent(EventEmit.GameTurnResumed, { accessCode, player: turn.beginnerPlayer });
         let timeLeft = remainingTime;
         turn.countdownInterval = setInterval(() => {
@@ -142,15 +147,17 @@ export class GameSessionTurnService {
         return turn;
     }
 
-    getNextPlayer(accessCode: string, turn: Turn): Player {
+    getNextPlayer(turn: Turn): Player {
         const activePlayers = turn.orderedPlayers.filter((p) => !p.hasAbandoned);
         if (activePlayers.length === 0) return null;
         if (!turn.currentPlayer) {
+            // at first doesnt go here why?
             return activePlayers[0];
         }
         const currentIndex = activePlayers.findIndex((p) => p.name === turn.currentPlayer.name);
 
         const nextIndex = (currentIndex + 1) % activePlayers.length;
+        Logger.log('next player', activePlayers[nextIndex]);
         return activePlayers[nextIndex];
     }
 
@@ -164,6 +171,9 @@ export class GameSessionTurnService {
         if (playerList.length > 0) {
             playerList[0].isActive = true;
         }
+        playerList.forEach((player, index) => {
+            Logger.log('player', player, index);
+        });
         return playerList;
     }
 

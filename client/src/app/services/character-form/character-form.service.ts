@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { BONUS_VALUE, INITIAL_VALUES, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
-import { AttributeType, DiceType, ErrorMessages, HttpStatus, JoinLobbyResult, Routes } from '@app/enums/global.enums';
+import { BONUS_VALUE, INITIAL_VALUES, PLAYER_STORAGE, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
+import { AttributeType, ErrorMessages, SocketEvent } from '@app/enums/global.enums';
 import { Game } from '@app/interfaces/game';
 import { Player } from '@app/interfaces/player';
 import { AccessCodeService } from '@app/services/access-code/access-code.service';
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, HttpStatus, JoinLobbyResult, Routes } from '@common/enums';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
@@ -36,15 +37,14 @@ export class CharacterService {
     }
 
     initializeLobby(accessCode: string): void {
-        this.socketClientService.emit('joinRoom', accessCode);
+        this.socketClientService.emit(SocketEvent.JoinRoom, accessCode);
 
-        this.socketClientService.on<{ avatars?: string[] }>('updateUnavailableOptions', (data) => {
-            console.log('updateUnavailableOptions', data);
+        this.socketClientService.on<{ avatars?: string[] }>(SocketEvent.UnavailableOption, (data) => {
             if (!data.avatars) return;
             this.unavailableAvatarsSubject.next([...data.avatars]);
         });
 
-        this.socketClientService.emit('requestUnavailableOptions', accessCode);
+        this.socketClientService.emit(SocketEvent.RequestUnavailableOptions, accessCode);
     }
 
     assignBonus(player: Player, attribute: AttributeType): void {
@@ -75,7 +75,7 @@ export class CharacterService {
 
         if (!this.unavailableAvatarsSubject.value.includes(avatar)) {
             player.avatar = avatar;
-            this.socketClientService.emit('selectAvatar', { accessCode: currentAccessCode, avatar });
+            this.socketClientService.emit(SocketEvent.SelectAvatar, { accessCode: currentAccessCode, avatar });
 
             const updatedAvatars = [...this.unavailableAvatarsSubject.value, avatar];
             this.unavailableAvatarsSubject.next(updatedAvatars);
@@ -84,7 +84,7 @@ export class CharacterService {
 
     deselectAvatar(player: Player, currentAccessCode: string): void {
         if (player.avatar) {
-            this.socketClientService.emit('deselectAvatar', { accessCode: currentAccessCode });
+            this.socketClientService.emit(SocketEvent.DeselectAvatar, { accessCode: currentAccessCode });
 
             const updatedAvatars = this.unavailableAvatarsSubject.value.filter((av) => av !== player.avatar);
             this.unavailableAvatarsSubject.next(updatedAvatars);
@@ -187,7 +187,7 @@ export class CharacterService {
 
     private finalizeCharacterSubmission(player: Player): void {
         if (this.isCharacterValid(player)) {
-            sessionStorage.setItem('player', JSON.stringify(player));
+            sessionStorage.setItem(PLAYER_STORAGE, JSON.stringify(player));
             this.proceedToWaitingView();
             this.onCharacterSubmitted$.next();
         } else {
@@ -203,9 +203,8 @@ export class CharacterService {
             case JoinLobbyResult.StayInLobby:
                 return;
             case JoinLobbyResult.RedirectToHome:
-                console.log('alsdmaksdma');
                 this.returnHome();
-                this.socketClientService.emit('manualDisconnect', {
+                this.socketClientService.emit(SocketEvent.ManualDisconnect, {
                     isInGame: false,
                 });
 

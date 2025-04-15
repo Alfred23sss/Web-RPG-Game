@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ImageType, TileType } from '@app/enums/global.enums';
 import { ToolService } from '@app/services/tool/tool.service';
 import { of } from 'rxjs';
 import { ToolbarComponent } from './toolbar.component';
+import { ImageType, TileType } from '@common/enums';
 
 describe('ToolbarComponent', () => {
     let component: ToolbarComponent;

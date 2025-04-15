@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { GameData } from '@app/classes/gameData';
+import { GameData } from '@app/classes/game-data/game-data';
 import { Player } from '@app/interfaces/player';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -27,8 +27,10 @@ export class GameCombatComponent implements OnDestroy {
         @Inject(MAT_DIALOG_DATA) public data: { gameData: GameData; attacker: Player; defender: Player },
     ) {
         this.gameData = data.gameData;
-        this.attacker = data.attacker;
-        this.defender = data.defender;
+        if (this.gameData.playersInFight) {
+            this.attacker = data.gameData.playersInFight[0];
+            this.defender = data.gameData.playersInFight[1];
+        }
 
         this.gameDataSubscription = this.gameStateService.gameData$.subscribe((gameData) => {
             this.gameData = gameData;
@@ -45,10 +47,12 @@ export class GameCombatComponent implements OnDestroy {
     }
 
     onAttack() {
+        this.gameStateService.gameDataSubjectValue.actionTaken = true;
         this.gameplayService.attack(this.gameData);
     }
 
     onEvade() {
+        this.gameStateService.gameDataSubjectValue.actionTaken = true;
         this.gameplayService.evade(this.gameData);
     }
 

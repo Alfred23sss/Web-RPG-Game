@@ -7,10 +7,8 @@ import { Component, Input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { GameData } from '@app/classes/gameData';
-import { Item } from '@app/classes/item';
-import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
-import { DiceType, ItemName, TileType } from '@app/enums/global.enums';
+import { GameData } from '@app/classes/game-data/game-data';
+import { Item } from '@app/classes/item/item';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -20,6 +18,7 @@ import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { MessageService } from '@app/services/message/message.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, ItemName, TileType } from '@common/enums';
 import { BehaviorSubject, of } from 'rxjs';
 import { GamePageComponent } from './game-page.component';
 
@@ -247,25 +246,6 @@ describe('GamePageComponent', () => {
         component.executeNextAction();
         expect(mockGameplayService.executeNextAction).toHaveBeenCalledWith(mockGameData);
     });
-
-    it('should call attack on gameplay service', () => {
-        component.attack();
-        expect(mockGameplayService.attack).toHaveBeenCalledWith(mockGameData);
-    });
-
-    it('should call evade on gameplay service', () => {
-        component.evade();
-        expect(mockGameplayService.evade).toHaveBeenCalledWith(mockGameData);
-    });
-
-    it('should open combat popup dialog', () => {
-        component.openCombatPopup();
-        expect(mockDialog.open).toHaveBeenCalledWith(GameCombatComponent, {
-            width: '650px',
-            disableClose: true,
-        });
-    });
-
     it('should emit admin mode update when admin presses "d"', () => {
         component.gameData.clientPlayer.isAdmin = true;
         const event = new KeyboardEvent('keydown', { key: 'd' });
@@ -287,5 +267,14 @@ describe('GamePageComponent', () => {
         expect(component.getFlagImage(mockPlayer)).toBe('./assets/items/banner-medieval.png');
         mockPlayer.inventory = [{ name: ItemName.Flag, imageSrc: 'test' } as Item, null];
         expect(component.getFlagImage(mockPlayer)).toBe('test');
+    });
+
+    it('should toggle activeTab between "chat" and "log"', () => {
+        component.activeTab = 'chat';
+        component.toggleTab();
+        expect(component.activeTab).toBe('log');
+
+        component.toggleTab();
+        expect(component.activeTab).toBe('chat');
     });
 });
