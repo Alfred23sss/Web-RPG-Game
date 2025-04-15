@@ -10,6 +10,7 @@ import { GameSessionService } from '@app/services/game-session/game-session.serv
 import { GameStatisticsService } from '@app/services/game-statistics/game-statistics.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
 import { AttackScore } from '@common/interfaces/attack-score';
+import { Logger } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
@@ -29,7 +30,7 @@ export class GameGateway {
     ) {}
 
     @SubscribeMessage(GameEvents.CreateGame)
-    handleCreateGame(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; gameMode: GameModeType }) {
+    handleCreateGame(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string; gameMode: GameModeType }) {
         this.gameSessionService.createGameSession(payload.accessCode, payload.gameMode);
         const gameSession = this.gameSessionService.getGameSession(payload.accessCode);
         this.server.to(payload.accessCode).emit('gameStarted', {
@@ -39,26 +40,26 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.EndTurn)
-    handleEndTurn(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+    handleEndTurn(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string }) {
         this.gameSessionService.endTurn(payload.accessCode);
     }
 
     @SubscribeMessage(GameEvents.StartCombat)
     handleStartCombat(
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() _: Socket,
         @MessageBody() payload: { accessCode: string; attackerName: string; defenderName: string; isDebugMode: boolean },
     ) {
         this.gameCombatService.startCombat(payload.accessCode, payload.attackerName, payload.defenderName, payload.isDebugMode);
     }
 
     @SubscribeMessage(GameEvents.PerformAttack)
-    handlePerformAttack(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; attackerName: string }) {
+    handlePerformAttack(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string; attackerName: string }) {
         this.gameCombatService.performAttack(payload.accessCode, payload.attackerName);
     }
 
     @SubscribeMessage(GameEvents.PlayerMovementUpdate)
     async handlePlayerMovementUpdate(
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() _: Socket,
         @MessageBody() payload: { accessCode: string; previousTile: Tile; newTile: Tile; movement: Tile[] },
     ): Promise<void> {
         const player: Player = payload.previousTile.player;
@@ -74,7 +75,7 @@ export class GameGateway {
 
     @SubscribeMessage(GameEvents.WallUpdate)
     handleWallUpdate(
-        @ConnectedSocket() client: Socket,
+        @ConnectedSocket() _: Socket,
         @MessageBody() payload: { accessCode: string; currentTile: Tile; targetTile: Tile; player: Player },
     ) {
         this.gameSessionService.updateWallTile(payload.accessCode, payload.currentTile, payload.targetTile, payload.player);
@@ -86,27 +87,27 @@ export class GameGateway {
     }
 
     @SubscribeMessage(GameEvents.AdminModeUpdate)
-    handleAdminModeUpdate(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string }) {
+    handleAdminModeUpdate(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string }) {
         this.server.to(payload.accessCode).emit('adminModeChangedServerSide');
     }
 
     @SubscribeMessage(GameEvents.TeleportPlayer)
-    handleTeleportPlayer(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; targetTile: Tile }) {
+    handleTeleportPlayer(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string; player: Player; targetTile: Tile }) {
         this.gameSessionService.callTeleport(payload.accessCode, payload.player, payload.targetTile);
     }
 
     @SubscribeMessage(GameEvents.DecrementItem)
-    handleDecrementItem(@ConnectedSocket() client: Socket, @MessageBody() payload: { selectedItem: Item; accessCode: string; player: Player }): void {
+    handleDecrementItem(@ConnectedSocket() _: Socket, @MessageBody() payload: { selectedItem: Item; accessCode: string; player: Player }): void {
         this.statisticsService.decrementItem(payload.accessCode, payload.selectedItem, payload.player);
     }
 
     @SubscribeMessage(GameEvents.ItemDrop)
-    handleItemDrop(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
+    handleItemDrop(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string; player: Player; item: Item }) {
         this.gameSessionService.handleItemDropped(payload.accessCode, payload.player, payload.item);
     }
 
     @SubscribeMessage(GameEvents.PlayerItemReset)
-    handlePlayerItemReset(@ConnectedSocket() client: Socket, @MessageBody() payload: { accessCode: string; player: Player }) {
+    handlePlayerItemReset(@ConnectedSocket() _: Socket, @MessageBody() payload: { accessCode: string; player: Player }) {
         this.gameSessionService.handlePlayerItemReset(payload.accessCode, payload.player);
     }
 
@@ -133,6 +134,7 @@ export class GameGateway {
             defender: payload.defender,
             hasEvaded: payload.hasEvaded,
         });
+        Logger.log('combat ended log emit');
     }
 
     @OnEvent(EventEmit.GameTurnResumed)
@@ -149,6 +151,7 @@ export class GameGateway {
             isEscapeSuccessful: payload.isEscapeSuccessful,
             player: payload.player,
         });
+        Logger.log('escape attempt emit');
     }
 
     @OnEvent(EventEmit.GameDoorUpdate)
@@ -263,7 +266,7 @@ export class GameGateway {
             attacker: payload.attacker,
             defender: payload.defender,
         });
-
+        Logger.log('combat log emit');
         this.server.to(payload.accessCode).emit('combatStartedLog', {
             attacker: payload.attacker,
             defender: payload.defender,

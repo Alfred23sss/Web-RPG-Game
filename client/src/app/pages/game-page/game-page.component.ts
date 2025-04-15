@@ -5,13 +5,15 @@ import { ChatComponent } from '@app/components/chat/chat.component';
 import { GridComponent } from '@app/components/grid/grid.component';
 import { LogBookComponent } from '@app/components/log-book/log-book.component';
 import { PlayerInfoComponent } from '@app/components/player-info/player-info.component';
+import { KEY_DOWN_EVENT_LISTENER, REFRESH_STORAGE } from '@app/constants/global.constants';
+import { Keys, Tab } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
+import { ItemName, ItemType, TeamType } from '@common/enums';
 import { Subscription } from 'rxjs';
-import { TeamType, ItemType, ItemName } from '@common/enums';
 
 @Component({
     selector: 'app-game-page',
@@ -23,7 +25,7 @@ import { TeamType, ItemType, ItemName } from '@common/enums';
 export class GamePageComponent implements OnInit, OnDestroy {
     gameData: GameData = new GameData();
     teamType = TeamType;
-    activeTab: 'chat' | 'log' = 'chat';
+    activeTab: Tab.Chat | Tab.Log = Tab.Chat;
     private keyPressHandler: (event: KeyboardEvent) => void;
     private gameDataSubscription: Subscription;
 
@@ -44,7 +46,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
 
         this.socketListenerService.initializeAllSocketListeners();
         this.keyPressHandler = this.handleKeyPress.bind(this);
-        document.addEventListener('keydown', this.keyPressHandler);
+        document.addEventListener(KEY_DOWN_EVENT_LISTENER, this.keyPressHandler);
     }
 
     handleDoorClick(targetTile: Tile): void {
@@ -87,9 +89,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (this.gameDataSubscription) {
             this.gameDataSubscription.unsubscribe();
         }
-        document.removeEventListener('keydown', this.keyPressHandler);
+        document.removeEventListener(KEY_DOWN_EVENT_LISTENER, this.keyPressHandler);
         this.socketListenerService.unsubscribeSocketListeners();
-        sessionStorage.setItem('refreshed', 'false');
+        sessionStorage.setItem(REFRESH_STORAGE, 'false');
     }
 
     hasFlag(player: Player): boolean {
@@ -103,11 +105,11 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     toggleTab(): void {
-        this.activeTab = this.activeTab === 'chat' ? 'log' : 'chat';
+        this.activeTab = this.activeTab === Tab.Chat ? Tab.Log : Tab.Chat;
     }
 
     private handleKeyPress(event: KeyboardEvent): void {
-        if (event.key.toLowerCase() === 'd' && this.gameData.clientPlayer.isAdmin) {
+        if (event.key.toLowerCase() === Keys.D && this.gameData.clientPlayer.isAdmin) {
             this.gameplayService.emitAdminModeUpdate(this.gameData);
         }
     }

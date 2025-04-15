@@ -35,7 +35,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-
+    max-height: 120px;
     scrollbar-width: thin;
     scrollbar-color: #00c8ff #1b2a3b;
     &::-webkit-scrollbar {
@@ -53,7 +53,7 @@
 }
 
 .message-bubble {
-    padding: 10px 15px;
+    padding: 5px 10px;
     background: rgba(30, 70, 100, 0.4);
     border-left: 3px solid #64c8ff;
     border-radius: 0 8px 8px 0;
@@ -61,6 +61,7 @@
     overflow-wrap: anywhere;
     white-space: pre-wrap;
     max-width: 100%;
+    font-size: 0.9rem;
     animation: messageAppear 0.3s ease-out;
 }
 
@@ -118,25 +119,10 @@
     width: 100%;
     padding: 10px 20px;
     text-align: center;
-    font-family: 'Pixel', sans-serif;
-    background: linear-gradient(135deg, #64c8ff, #0088cc);
-    border: none;
     border-radius: 8px;
-    color: #0a1929;
-    font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 5px;
-
-    &:hover {
-        background: linear-gradient(135deg, #74d8ff, #1098dc);
-        box-shadow: 0 0 15px rgba(100, 200, 255, 0.5);
-    }
-
-    &:active {
-        transform: scale(0.98);
-    }
 }

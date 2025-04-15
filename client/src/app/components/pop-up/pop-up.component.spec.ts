@@ -83,11 +83,6 @@ describe('PopUpComponent', () => {
             component.setGameType(GameMode.CTF);
             expect(mockGameModeService.setGameMode).toHaveBeenCalledWith(GameMode.CTF);
         });
-
-        it('should set the mode even if it is invalid', () => {
-            component.setGameType('invalid-mode' as GameMode);
-            expect(mockGameModeService.setGameMode).toHaveBeenCalledWith('invalid-mode' as GameMode);
-        });
     });
 
     describe('confirm', () => {

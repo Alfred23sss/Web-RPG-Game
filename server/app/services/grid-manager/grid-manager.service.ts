@@ -1,4 +1,4 @@
-import { RANDOM_ITEMS } from '@app/constants/constants';
+import { RANDOMIZER, RANDOM_ITEMS } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
@@ -6,8 +6,6 @@ import { Tile, TileType } from '@app/model/database/tile';
 import { ImageType, ItemName } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
-
-const RANDOMIZER = 0.5;
 
 @Injectable()
 export class GridManagerService {
@@ -122,7 +120,7 @@ export class GridManagerService {
     assignItemsToRandomItems(grid: Tile[][]): Tile[][] {
         const getExistingItems = (): Set<string> => {
             const items = grid.flatMap((row) =>
-                row.map((tile) => tile.item?.name).filter((name) => name && name !== ItemName.QuestionMark && name !== ItemName.Home),
+                row.map((tile) => tile.item?.name).filter((name) => name && name !== ItemName.Chest && name !== ItemName.Home),
             );
             return new Set(items);
         };
@@ -131,7 +129,7 @@ export class GridManagerService {
         let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
 
         grid.flat().forEach((tile) => {
-            if (tile.item?.name === ItemName.QuestionMark) {
+            if (tile.item?.name === ItemName.Chest) {
                 const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)] ?? null;
                 if (randomItem) {
                     tile.item = randomItem;

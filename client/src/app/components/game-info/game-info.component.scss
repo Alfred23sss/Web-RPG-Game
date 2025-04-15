@@ -28,7 +28,6 @@
     width: 300px;
     height: 300px;
     border-radius: 10px;
-    // border: 1px solid white;
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -45,12 +44,9 @@
 }
 
 .image-wrapper img {
-    // display: block;
     max-width: 100%;
     max-height: 100%;
-    object-fit: cover; // used to be conain
-    // border-radius: 10px;
-    // border: 2px solid #aeb4be;
+    object-fit: cover;
 }
 
 .game-info {

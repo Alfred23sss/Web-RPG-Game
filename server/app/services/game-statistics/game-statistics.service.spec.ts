@@ -637,7 +637,6 @@ describe('GameStatisticsService', () => {
 
             const updatedMap = stats.playerStats.get(mockPlayer1.name).uniqueItemsCollected;
             expect(updatedMap.has(item.name)).toBe(false);
-            expect(logSpy).toHaveBeenCalledWith(`Item ${item.name} removed from player ${mockPlayer1.name} in statistics.`);
         });
 
         it('should do nothing if item is not found in player stats', () => {

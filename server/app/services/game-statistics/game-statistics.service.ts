@@ -1,5 +1,4 @@
 import { EventEmit } from '@app/enums/enums';
-import { AttackScore } from '@common/interfaces/attack-score';
 import { GameSession } from '@app/interfaces/game-session';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistic';
@@ -7,7 +6,8 @@ import { Item } from '@app/model/database/item';
 import { Tile } from '@app/model/database/tile';
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { GameMode } from '@common/enums';
-import { Injectable, Logger } from '@nestjs/common';
+import { AttackScore } from '@common/interfaces/attack-score';
+import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
 const TIME_DIVIDER = 1000;
@@ -22,10 +22,7 @@ export class GameStatisticsService {
     private flagHolders: Map<string, Set<string>> = new Map<string, Set<string>>();
     private turnCounts: Map<string, number> = new Map<string, number>();
 
-    constructor(
-        private readonly gridManager: GridManagerService,
-        private readonly logger: Logger,
-    ) {}
+    constructor(private readonly gridManager: GridManagerService) {}
 
     @OnEvent(EventEmit.GameTurnStarted)
     handleTurnStarted(payload: { accessCode: string; player: Player }): void {
@@ -78,12 +75,12 @@ export class GameStatisticsService {
     @OnEvent(EventEmit.GameItemCollected)
     handleItemCollected(payload: { accessCode: string; item: Item; player: Player }): void {
         const { accessCode, item, player } = payload;
+        if (!item) return;
         const gameStats = this.gameStatistics.get(accessCode);
         if (!gameStats) return;
         const playerStats = gameStats.playerStats.get(player.name);
         const currentCount = playerStats.uniqueItemsCollected.get(item.name) || 0;
         playerStats.uniqueItemsCollected.set(item.name, currentCount + 1);
-        Logger.log(`Item ${item.name} added to player ${player.name} in statistics.`);
         if (item.name === 'flag') {
             const flagHolderSet = this.flagHolders.get(accessCode);
             if (flagHolderSet) {
@@ -137,7 +134,6 @@ export class GameStatisticsService {
         if (!tile) return;
         const doorSet = this.manipulatedDoors.get(accessCode);
         if (doorSet) {
-            this.logger.log(`Door manipulated in statistics: ${tile.id}`);
             doorSet.add(tile.id);
         }
     }
@@ -168,7 +164,6 @@ export class GameStatisticsService {
             playerStats.uniqueItemsCollected.set(item.name, currentCount - 1);
         } else if (currentCount === 1) {
             playerStats.uniqueItemsCollected.delete(item.name);
-            Logger.log(`Item ${item.name} removed from player ${player.name} in statistics.`);
         }
     }
 
@@ -182,7 +177,6 @@ export class GameStatisticsService {
         this.manipulatedDoors.delete(accessCode);
         this.flagHolders.delete(accessCode);
         this.turnCounts.delete(accessCode);
-        this.logger.log(`Cleaned up statistics for game: ${accessCode}`);
     }
 
     private getPlayerKey(accessCode: string, playerName: string): string {

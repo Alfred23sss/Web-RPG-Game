@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AccessCodesController } from './access-code.controller';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
 import { HttpException, HttpStatus } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { AccessCodesController } from './access-code.controller';
 
 describe('AccessCodesController', () => {
     let controller: AccessCodesController;
@@ -71,25 +71,6 @@ describe('AccessCodesController', () => {
             );
         });
     });
-
-    // describe('getAllAccessCodes', () => {
-    //     it('should return an array of access codes', () => {
-    //         const mockCodes = ['123456', '654321'];
-    //         jest.spyOn(service, 'getAllAccessCodes').mockReturnValue(mockCodes);
-
-    //         expect(controller.getAllAccessCodes()).toEqual(mockCodes);
-    //     });
-
-    //     it('should throw an error if fetching fails', () => {
-    //         jest.spyOn(service, 'getAllAccessCodes').mockImplementation(() => {
-    //             throw new Error('Service error');
-    //         });
-
-    //         expect(() => controller.getAllAccessCodes()).toThrow(
-    //             new HttpException({ message: 'Failed to fetch access codes', error: 'Service error' }, HttpStatus.INTERNAL_SERVER_ERROR),
-    //         );
-    //     });
-    // });
 
     describe('removeAccessCode', () => {
         it('should remove an access code and return a success message', () => {

@@ -117,11 +117,8 @@ export class CharacterService {
                     if (lobby.isLocked) {
                         this.snackbarService.showConfirmation(ErrorMessages.LockedRoom).subscribe({
                             next: (result) => {
-                                if (result) {
-                                    resolve(JoinLobbyResult.RedirectToHome);
-                                } else {
-                                    resolve(JoinLobbyResult.StayInLobby);
-                                }
+                                const joinLobbyResult = result ? JoinLobbyResult.RedirectToHome : JoinLobbyResult.StayInLobby;
+                                resolve(joinLobbyResult);
                             },
                         });
                     } else {

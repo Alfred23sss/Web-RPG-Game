@@ -78,7 +78,7 @@ describe('VirtualPlayerScoreService', () => {
     const itemTile: Tile = {
         ...mockTile,
         item: {
-            name: ItemName.Fire,
+            name: ItemName.IceSword,
             imageSrc: '',
             id: '',
             imageSrcGrey: '',
@@ -262,7 +262,7 @@ describe('VirtualPlayerScoreService', () => {
     });
 
     describe('calculateItemScore', () => {
-        it('should add aggressive item score for fire/potion', () => {
+        it('should add aggressive item score for IceSword/BlackSword', () => {
             const move: Move = {
                 tile: itemTile,
                 type: MoveType.Item,
@@ -337,20 +337,20 @@ describe('VirtualPlayerScoreService', () => {
     });
 
     describe('calculateDefensiveItemScore', () => {
-        it('should add defensive item score for swap/rubik', () => {
-            const swapTile = {
+        it('should add defensive item score for IceShield/Armor', () => {
+            const iceShieldTile = {
                 ...mockTile,
                 item: {
-                    name: ItemName.Swap,
+                    name: ItemName.IceShield,
                     imageSrc: '',
-                    id: 'swap-item-id',
+                    id: 'IceShield-item-id',
                     imageSrcGrey: '',
-                    description: 'Swap item description',
+                    description: 'IceShield item description',
                     itemCounter: 0,
                 },
             };
             const move: Move = {
-                tile: swapTile,
+                tile: iceShieldTile,
                 type: MoveType.Item,
                 score: 0,
                 inRange: false,

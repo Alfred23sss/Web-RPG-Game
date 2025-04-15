@@ -78,52 +78,52 @@ describe('GridComponent', () => {
     describe('onTileClick()', () => {
         it('should emit playerAttacked if the tile contains a player', () => {
             spyOn(component.playerAttacked, 'emit');
-            component.onTileClick(playerTile);
+            component.onTileClick(playerTile, new MouseEvent('click'));
             expect(component.playerAttacked.emit).toHaveBeenCalledWith(playerTile);
         });
 
         it('should emit doorClicked if the tile is a door', () => {
             spyOn(component.doorClicked, 'emit');
-            component.onTileClick(doorTile);
+            component.onTileClick(doorTile, new MouseEvent('click'));
             expect(component.doorClicked.emit).toHaveBeenCalledWith(doorTile);
         });
 
         it('should emit wallClicked if the tile is a wall', () => {
             spyOn(component.wallClicked, 'emit');
-            component.onTileClick(wallTile);
+            component.onTileClick(wallTile, new MouseEvent('click'));
             expect(component.wallClicked.emit).toHaveBeenCalledWith(wallTile);
         });
 
         it('should emit tileClicked if the tile is in availablePath', () => {
             spyOn(component.tileClicked, 'emit');
             component.availablePath = [mockTile1];
-            component.onTileClick(mockTile1);
+            component.onTileClick(mockTile1, new MouseEvent('click'));
             expect(component.tileClicked.emit).toHaveBeenCalledWith(mockTile1);
         });
 
         it('should not emit tileClicked if the tile is not in availablePath', () => {
             spyOn(component.tileClicked, 'emit');
             component.availablePath = [];
-            component.onTileClick(mockTile1);
+            component.onTileClick(mockTile1, new MouseEvent('click'));
             expect(component.tileClicked.emit).not.toHaveBeenCalled();
         });
     });
 
-    describe('hasLightningItem()', () => {
-        it('should return true if player has Lightning item', () => {
+    describe('hasPickaxeItem()', () => {
+        it('should return true if player has Pickaxe item', () => {
             component.clientPlayer = {
-                inventory: [{ name: ItemName.Lightning }, null],
+                inventory: [{ name: ItemName.Pickaxe }, null],
             } as any;
 
-            expect(component.hasLightningItem()).toBeTrue();
+            expect(component.hasPickaxeItem()).toBeTrue();
         });
 
-        it('should return false if player does not have Lightning item', () => {
+        it('should return false if player does not have Pickaxe item', () => {
             component.clientPlayer = {
-                inventory: [{ name: ItemName.Fire }, null],
+                inventory: [{ name: ItemName.IceSword }, null],
             } as any;
 
-            expect(component.hasLightningItem()).toBeFalse();
+            expect(component.hasPickaxeItem()).toBeFalse();
         });
     });
 
@@ -185,5 +185,18 @@ describe('GridComponent', () => {
         component.onTileRightClick(mockEvent, testTile);
         expect(component.teleportClicked.emit).toHaveBeenCalledWith(testTile);
         expect(mockDialog.open).not.toHaveBeenCalled();
+    });
+
+    it('should not emit any event when gameData.hasTurnEnded is true and left click event', () => {
+        spyOnProperty((component as any).gameStateService, 'gameDataSubjectValue', 'get').and.returnValue({ hasTurnEnded: true } as any);
+        spyOn(component.tileClicked, 'emit');
+        spyOn(component.playerAttacked, 'emit');
+        spyOn(component.doorClicked, 'emit');
+        spyOn(component.wallClicked, 'emit');
+        component.onTileClick(mockTile1, new MouseEvent('click'));
+        expect(component.tileClicked.emit).not.toHaveBeenCalled();
+        expect(component.playerAttacked.emit).not.toHaveBeenCalled();
+        expect(component.doorClicked.emit).not.toHaveBeenCalled();
+        expect(component.wallClicked.emit).not.toHaveBeenCalled();
     });
 });

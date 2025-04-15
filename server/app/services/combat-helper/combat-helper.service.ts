@@ -26,7 +26,7 @@ export class CombatHelperService {
         if (tile && tile.type === TileType.Ice) {
             iceDisadvantage = ICE_PENALTY;
         }
-        const diceValue = this.hasStopItem(defender) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(defender.defense.bonusDice);
+        const diceValue = this.hasGreatShieldItem(defender) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(defender.defense.bonusDice);
         const diceRolled = Math.floor(Math.random() * diceValue);
         const defenseBonus = isDebugMode ? diceValue : diceRolled + 1;
         const score = defender.defense.value + defenseBonus + iceDisadvantage;
@@ -39,7 +39,7 @@ export class CombatHelperService {
         if (tile && tile.type === TileType.Ice) {
             iceDisadvantage = ICE_PENALTY;
         }
-        const diceValue = this.hasStopItem(attacker) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(attacker.attack.bonusDice);
+        const diceValue = this.hasGreatShieldItem(attacker) ? this.extractDiceValue(DiceType.D6) : this.extractDiceValue(attacker.attack.bonusDice);
         const diceRolled = Math.floor(Math.random() * diceValue);
         const attackBonus = isDebugMode ? diceValue : diceRolled + 1;
         const score = attacker.attack.value + attackBonus + iceDisadvantage;
@@ -64,7 +64,7 @@ export class CombatHelperService {
         return parseInt(dice.replace(/\D/g, ''), 10) || 1;
     }
 
-    private hasStopItem(player: Player): boolean {
-        return Array.isArray(player.inventory) && player.inventory.some((item) => item?.name === ItemName.Stop);
+    private hasGreatShieldItem(player: Player): boolean {
+        return Array.isArray(player.inventory) && player.inventory.some((item) => item?.name === ItemName.GreatShield);
     }
 }

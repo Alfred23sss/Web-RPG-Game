@@ -18,8 +18,6 @@ import { ItemName } from '@common/enums';
     providedIn: 'root',
 })
 export class GameSocketService {
-    private doorClickedTimer: number | null = null;
-    private readonly doorClickedDelay = 50;
     constructor(
         private gameStateService: GameStateSocketService,
         private gameplayService: GameplayService,
@@ -86,11 +84,8 @@ export class GameSocketService {
                 const newInventoryNames = (data.player.inventory ?? []).map((item) => item?.name);
                 const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
                 if (addedItems.length > 0) {
-                    if (addedItems.includes('flag')) {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
-                    } else {
-                        this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
-                    }
+                    const logbookEntry = addedItems.includes(ItemName.Flag) ? LogBookEntry.FlagPickedUp : LogBookEntry.ItemPickedUp;
+                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${logbookEntry}`, [data.player]);
                 }
                 playerBeforeUpdate.inventory = data.player.inventory;
             }
@@ -173,11 +168,8 @@ export class GameSocketService {
             const addedItems = newInventoryNames.filter((name) => !oldInventoryNames.includes(name));
 
             if (addedItems.length > 0) {
-                if (addedItems.includes(ItemName.Flag)) {
-                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.FlagPickedUp}`, [data.player]);
-                } else {
-                    this.clientNotifier.addLogbookEntry(`${data.player.name} ${LogBookEntry.ItemPickedUp}`, [data.player]);
-                }
+                const logBookEntry = addedItems.includes(ItemName.Flag) ? LogBookEntry.FlagPickedUp : LogBookEntry.ItemPickedUp;
+                this.clientNotifier.addLogbookEntry(`${data.player.name} ${logBookEntry}`, [data.player]);
             }
         }
     }
@@ -228,17 +220,10 @@ export class GameSocketService {
     }
 
     private onDoorClicked(): void {
-        this.socketClientService.on<{ grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }>(SocketEvent.DoorClicked, (data) => {
-            if (this.doorClickedTimer !== null) {
-                return;
-            }
-            this.doorClickedTimer = window.setTimeout(() => {
-                this.processDoorClicked(data);
-                this.doorClickedTimer = null;
-            }, this.doorClickedDelay);
+        this.socketClientService.on(SocketEvent.DoorClicked, (data: { grid: Tile[][]; isOpen: boolean; player: VirtualPlayer }) => {
+            this.processDoorClicked(data);
         });
     }
-
     private onWallClicked(): void {
         this.socketClientService.on(SocketEvent.WallClicked, (data: { grid: Tile[][] }) => {
             if (!this.gameStateService.gameDataSubjectValue.game || !this.gameStateService.gameDataSubjectValue.game.grid) {

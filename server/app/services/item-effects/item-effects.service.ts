@@ -1,3 +1,4 @@
+import { BONUS_VALUE, HEALTH_CONDITION_THRESHOLD, MULTIPLIER, PENALTY_VALUE, RANDOMIZER } from '@app/constants/constants';
 import { AttributeType, EventEmit } from '@app/enums/enums';
 import { VirtualPlayerEvents } from '@app/gateways/virtual-player/virtual-player.gateway.events';
 import { Item, ItemModifier } from '@app/interfaces/item';
@@ -8,12 +9,6 @@ import { ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
-const HEALTH_CONDITION_THRESHOLD = 0.5;
-const BONUS_VALUE = 2;
-const PENALTY_VALUE = -1;
-const MULTIPLIER = 1;
-const RANDOMIZER = 0.5;
-
 @Injectable()
 export class ItemEffectsService {
     constructor(
@@ -22,7 +17,7 @@ export class ItemEffectsService {
     ) {}
     addEffect(player: Player, item: Item, tile: Tile) {
         if (item === null) return;
-        if (!item.modifiers && item.name !== ItemName.Stop && item.name !== ItemName.Lightning) {
+        if (!item.modifiers && item.name !== ItemName.GreatShield && item.name !== ItemName.Pickaxe) {
             this.applyItemModifiers(item);
         }
         if (this.shouldSkipItemApplication(item, player, tile)) return;
@@ -48,22 +43,22 @@ export class ItemEffectsService {
 
     applyItemModifiers(item: Item) {
         switch (item.name) {
-            case ItemName.Potion:
+            case ItemName.BlackSword:
                 item.modifiers = [
                     { attribute: AttributeType.Attack, value: BONUS_VALUE },
                     { attribute: AttributeType.Defense, value: PENALTY_VALUE },
                 ];
                 break;
-            case ItemName.Rubik:
+            case ItemName.Armor:
                 item.modifiers = [
                     { attribute: AttributeType.Hp, value: BONUS_VALUE },
                     { attribute: AttributeType.Speed, value: PENALTY_VALUE },
                 ];
                 break;
-            case ItemName.Fire:
+            case ItemName.IceSword:
                 item.modifiers = [{ attribute: AttributeType.Attack, value: BONUS_VALUE }];
                 break;
-            case ItemName.Swap:
+            case ItemName.IceShield:
                 item.modifiers = [{ attribute: AttributeType.Defense, value: BONUS_VALUE }];
                 break;
             default:
@@ -74,12 +69,12 @@ export class ItemEffectsService {
     }
 
     isHealthConditionValid(player: Player, item: Item): boolean {
-        return item.name !== ItemName.Fire || player.hp.current <= player.hp.max * HEALTH_CONDITION_THRESHOLD;
+        return item.name !== ItemName.IceSword || player.hp.current <= player.hp.max * HEALTH_CONDITION_THRESHOLD;
     }
 
     isIceConditionValid(tile: Tile, item: Item): boolean {
         if (tile === undefined) return false;
-        return item.name !== ItemName.Swap || tile.type === TileType.Ice;
+        return item.name !== ItemName.IceShield || tile.type === TileType.Ice;
     }
 
     handleItemDropped(player: Player, item: Item, grid: Tile[][], accessCode: string): { name: string; player: Player } {
@@ -119,6 +114,9 @@ export class ItemEffectsService {
         player.inventory.forEach((item, index) => {
             if (item !== null) {
                 this.removeEffects(player, index);
+                if (item.name === ItemName.IceShield) {
+                    player.defense.value -= BONUS_VALUE;
+                }
             }
         });
         const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);
@@ -217,9 +215,9 @@ export class ItemEffectsService {
         if (item.isActive) return true;
 
         switch (item.name) {
-            case ItemName.Fire:
+            case ItemName.IceSword:
                 return !this.isHealthConditionValid(player, item);
-            case ItemName.Swap:
+            case ItemName.IceShield:
                 return !this.isIceConditionValid(tile, item);
             default:
                 return false;

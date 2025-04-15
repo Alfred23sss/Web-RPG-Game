@@ -75,9 +75,7 @@
         <div class="timer">
             @if (gameData.turnTimer === 0) {
             <p>Transition de tour...</p>
-            } @else {@if (!gameData.isInCombatMode) {
-            <p>Tour de</p>
-            @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
+            } @else {@if (!gameData.isInCombatMode) { @if (gameData.currentPlayer.name === gameData.clientPlayer.name) {
             <p>{{ gameData.clientPlayer.name }}</p>
             } @else { @if (gameData.currentPlayer) {
             <p>{{ gameData.currentPlayer.name }}</p>

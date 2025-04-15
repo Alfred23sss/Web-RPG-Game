@@ -25,7 +25,7 @@ export class ChatGateway implements OnGatewayInit {
     }
 
     @SubscribeMessage(ChatEvents.RoomMessage)
-    roomMessage(socket: Socket, payload: { message: string; author: string; room: string }) {
+    roomMessage(_: Socket, payload: { message: string; author: string; room: string }) {
         const { message, room, author } = payload;
         if (!room) return;
         if (this.server.sockets.adapter.rooms.has(room)) {

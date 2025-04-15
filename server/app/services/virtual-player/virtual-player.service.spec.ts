@@ -112,9 +112,9 @@ describe('VirtualPlayerService', () => {
     describe('itemChoice', () => {
         const mockItems = [
             createMockItem(ItemName.Flag),
-            createMockItem(ItemName.Potion),
-            createMockItem(ItemName.Lightning),
-            createMockItem(ItemName.Rubik),
+            createMockItem(ItemName.BlackSword),
+            createMockItem(ItemName.Pickaxe),
+            createMockItem(ItemName.Armor),
         ];
 
         it('should return undefined for Null behavior', () => {
@@ -124,16 +124,16 @@ describe('VirtualPlayerService', () => {
 
         it('should return non-preferred item for Aggressive behavior', () => {
             const result = service.itemChoice(Behavior.Aggressive, mockItems);
-            expect(result?.name).toBe(ItemName.Lightning);
+            expect(result?.name).toBe(ItemName.Pickaxe);
         });
 
         it('should return non-preferred item for Defensive behavior', () => {
             const result = service.itemChoice(Behavior.Defensive, mockItems);
-            expect(result?.name).toBe(ItemName.Potion);
+            expect(result?.name).toBe(ItemName.BlackSword);
         });
 
         it('should return null when all items are preferred', () => {
-            const preferredItems = [createMockItem(ItemName.Flag), createMockItem(ItemName.Potion)];
+            const preferredItems = [createMockItem(ItemName.Flag), createMockItem(ItemName.BlackSword)];
             const result = service.itemChoice(Behavior.Aggressive, preferredItems);
             expect(result).toBeNull();
         });
@@ -145,7 +145,7 @@ describe('VirtualPlayerService', () => {
     });
 
     describe('itemChoice', () => {
-        const mockItems = [createMockItem('HealthPotion'), createMockItem('Flag'), createMockItem('Lightning')];
+        const mockItems = [createMockItem('HealthBlackSword'), createMockItem('Flag'), createMockItem('Pickaxe')];
 
         it('should return null for Null behavior', () => {
             const result = service.itemChoice(Behavior.Null, mockItems);

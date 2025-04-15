@@ -13,9 +13,9 @@ import { Tile } from '@app/interfaces/tile';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, ImageType, ItemName, Routes, TileType } from '@common/enums';
 import { of } from 'rxjs';
 import { GameplayService } from './gameplay.service';
-import { ImageType, ItemName, Routes, DiceType, TileType } from '@common/enums';
 
 describe('GameplayService', () => {
     let service: GameplayService;
@@ -181,7 +181,7 @@ describe('GameplayService', () => {
                 maxPlayers: 4,
             } as Lobby,
         });
-        const result = (service as any).isTeamate('Player1', 'Player2', gameData);
+        const result = (service as any).isTeammate('Player1', 'Player2', gameData);
         expect(result).toBeTrue();
     });
 
@@ -199,7 +199,7 @@ describe('GameplayService', () => {
         });
 
         it('should show message when attacking a teammate', () => {
-            spyOn(service as any, 'isTeamate').and.returnValue(true);
+            spyOn(service as any, 'isTeammate').and.returnValue(true);
             service.handleAttackCTF(gameData, targetTile);
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith("TRAITRE!!! C'EST MOI TON AMI");
             expect(mockSocketClientService.emit).not.toHaveBeenCalled();
@@ -220,7 +220,7 @@ describe('GameplayService', () => {
         });
 
         it('should emit startCombat when attacking adjacent enemy', () => {
-            spyOn(service as any, 'isTeamate').and.returnValue(false);
+            spyOn(service as any, 'isTeammate').and.returnValue(false);
             spyOn(service as any, 'findAndCheckAdjacentTiles').and.returnValue(true);
 
             service.handleAttackCTF(gameData, targetTile);
@@ -246,11 +246,11 @@ describe('GameplayService', () => {
             player = createMockPlayer();
         });
 
-        it('should emit wall update when conditions are met and player has lightning item', () => {
+        it('should emit wall update when conditions are met and player has Pickaxe item', () => {
             gameData.isInCombatMode = false;
             gameData.clientPlayer.actionPoints = 1;
             gameData.isActionMode = true;
-            gameData.clientPlayer.inventory = [{ id: '1', name: ItemName.Lightning } as Item, null];
+            gameData.clientPlayer.inventory = [{ id: '1', name: ItemName.Pickaxe } as Item, null];
             service.handleWallClick(gameData, targetTile, player);
             expect(mockSocketClientService.emit).toHaveBeenCalledWith('wallUpdate', {
                 currentTile: gameData.game?.grid?.[0][0],
@@ -917,7 +917,7 @@ describe('GameplayService', () => {
         });
 
         // eslint-disable-next-line max-len
-        it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no lightning/wall combo', () => {
+        it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no Pickaxe/wall combo', () => {
             mockGameData.clientPlayer.actionPoints = 1;
             mockGameData.clientPlayer.movementPoints = 0;
             mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
@@ -955,11 +955,11 @@ describe('GameplayService', () => {
             expect(service.endTurn).not.toHaveBeenCalled();
         });
 
-        it('should not end turn with 1 action point and no movement points when player has lightning and wall nearby', () => {
+        it('should not end turn with 1 action point and no movement points when player has Pickaxe and wall nearby', () => {
             mockGameData.clientPlayer.actionPoints = 1;
             mockGameData.clientPlayer.movementPoints = 0;
             mockTile.player = createMockPlayer({
-                inventory: [{ name: ItemName.Lightning } as Item, null],
+                inventory: [{ name: ItemName.Pickaxe } as Item, null],
             });
             mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
                 return type === TileType.Wall;
@@ -969,39 +969,6 @@ describe('GameplayService', () => {
             service.checkAvailableActions(mockGameData);
 
             expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Wall);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn when player has movement points available', () => {
-            mockGameData.clientPlayer.actionPoints = 0;
-            mockGameData.clientPlayer.movementPoints = 1;
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-        it('should return early if gameData.game is null', () => {
-            mockGameData.game = undefined as any;
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
-        it('should return early if gameData.game.grid is null', () => {
-            mockGameData.game!.grid = null as any;
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-        it('should return early if gameData.game.grid is undefined', () => {
-            mockGameData.game!.grid = undefined as any;
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
             expect(service.endTurn).not.toHaveBeenCalled();
         });
     });

@@ -1,3 +1,4 @@
+import { PLAYER_MOVE_DELAY } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { GameSession } from '@app/interfaces/game-session';
 import { Turn } from '@app/interfaces/turn';
@@ -9,11 +10,9 @@ import { GameSessionTurnService } from '@app/services/game-session-turn/game-ses
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { GameMode, ItemName, TileType } from '@common/enums';
+import { GameMode, ItemName } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-
-const PLAYER_MOVE_DELAY = 150;
 
 @Injectable()
 export class GameSessionService {
@@ -46,7 +45,7 @@ export class GameSessionService {
             await this.delayMove();
             this.updatePlayerLocation(gameSession, movement[i], player);
             this.emitTileVisitedEvent(accessCode, player, movement[i]);
-            this.handleSwapItems(player, movement[i]);
+            this.handleIceShieldItem(player, movement[i], accessCode);
 
             isCurrentlyMoving = this.updateMovementStatus(i, movement);
 
@@ -214,7 +213,7 @@ export class GameSessionService {
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.emitGridUpdate(accessCode, gameSession.game.grid);
         }
-        if (gameSession.turn.currentPlayer.name === playerName) {
+        if (gameSession.turn.beginnerPlayer.name === playerName) {
             this.endTurn(accessCode);
         }
         if (player.isAdmin) {
@@ -240,14 +239,15 @@ export class GameSessionService {
         });
     }
 
-    private handleSwapItems(player: Player, tile: Tile): void {
+    private handleIceShieldItem(player: Player, tile: Tile, accessCode: string): void {
         player.inventory.forEach((item, index) => {
-            if (item?.name === ItemName.Swap) {
-                if (tile.type === TileType.Ice) {
+            if (item) {
+                if (this.itemEffectsService.isIceConditionValid(tile, item)) {
                     this.itemEffectsService.addEffect(player, item, tile);
                 } else {
                     this.itemEffectsService.removeEffects(player, index);
                 }
+                this.updateGameSessionPlayerList(accessCode, player.name, { defense: player.defense });
             }
         });
     }

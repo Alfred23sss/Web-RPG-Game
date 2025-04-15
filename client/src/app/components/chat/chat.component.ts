@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy } from '@angular/core';
+import { AfterViewChecked, Component, ElementRef, Input, OnDestroy, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MessageService } from '@app/services/message/message.service';
 import { Subscription } from 'rxjs';
@@ -11,8 +11,9 @@ import { Subscription } from 'rxjs';
     templateUrl: './chat.component.html',
     styleUrl: './chat.component.scss',
 })
-export class ChatComponent implements OnDestroy {
+export class ChatComponent implements OnDestroy, AfterViewChecked {
     @Input() author: string = '';
+    @ViewChild('messagesContent') private messagesContent!: ElementRef;
     newMessage: string = '';
     messages: string[];
     private messageSubscription: Subscription;
@@ -22,6 +23,10 @@ export class ChatComponent implements OnDestroy {
             this.messages = messages;
         });
         this.messageService.updateAccessCode();
+    }
+
+    ngAfterViewChecked(): void {
+        this.scrollToBottom();
     }
 
     sendMessage() {
@@ -44,5 +49,10 @@ export class ChatComponent implements OnDestroy {
         if (this.messageSubscription) {
             this.messageSubscription.unsubscribe();
         }
+    }
+
+    private scrollToBottom(): void {
+        const container = this.messagesContent.nativeElement;
+        container.scrollTop = container.scrollHeight;
     }
 }

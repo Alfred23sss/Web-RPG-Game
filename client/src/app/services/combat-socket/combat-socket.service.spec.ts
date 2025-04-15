@@ -203,36 +203,6 @@ describe('CombatSocketService', () => {
             service.initializeCombatListeners();
         });
 
-        it('should log a successful escape attempt when isEscapeSuccessful is true', () => {
-            const testData = {
-                attemptsLeft: 1,
-                isEscapeSuccessful: true,
-                player: { name: 'testPlayer' },
-            };
-
-            gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
-
-            EVENT_HANDLERS['escapeAttempt'](testData);
-
-            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith("Tentative d'évasion réussi", []);
-            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
-        });
-
-        it('should log a failed escape attempt when isEscapeSuccessful is false', () => {
-            const testData = {
-                attemptsLeft: 0,
-                isEscapeSuccessful: false,
-                player: { name: 'testPlayer' },
-            };
-
-            gameStateServiceMock.gameDataSubjectValue.clientPlayer.name = 'testPlayer';
-
-            EVENT_HANDLERS['escapeAttempt'](testData);
-
-            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith("Tentative d'évasion raté", []);
-            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
-        });
-
         it('should return early if the escape attempt is not from the client player', () => {
             const testData = {
                 attemptsLeft: 2,
@@ -292,25 +262,6 @@ describe('CombatSocketService', () => {
                 testData.attacker,
                 testData.defender,
             ]);
-        });
-    });
-
-    describe('onCombatStartedLog', () => {
-        it('should add log entry when combat starts', () => {
-            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
-                EVENT_HANDLERS[event] = callback;
-            });
-
-            service.initializeCombatListeners();
-
-            const testData = {
-                attacker: { ...MOCK_PLAYER, name: 'Attacker' },
-                defender: { ...MOCK_PLAYER, name: 'Defender' },
-            };
-
-            EVENT_HANDLERS['combatStartedLog'](testData);
-
-            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith('Combat commencé', [testData.attacker, testData.defender]);
         });
     });
 

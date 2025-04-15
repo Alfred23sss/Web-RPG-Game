@@ -7,6 +7,7 @@ import { TileComponent } from '@app/components/tile/tile.component';
 import { POPUP_DELAY } from '@app/constants/global.constants';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
 import { ItemName, TileType } from '@common/enums';
 
@@ -40,6 +41,7 @@ export class GridComponent implements OnChanges {
         private dialog: MatDialog,
         private cdr: ChangeDetectorRef,
         private playerMovementService: PlayerMovementService,
+        private gameStateService: GameStateSocketService,
     ) {}
 
     isInQuickestPath(tile: Tile): boolean {
@@ -50,7 +52,12 @@ export class GridComponent implements OnChanges {
         return this.availablePath ? this.availablePath.some((t) => t.id === tile.id) : false;
     }
 
-    onTileClick(tile: Tile): void {
+    onTileClick(tile: Tile, event: MouseEvent): void {
+        const gameData = this.gameStateService.gameDataSubjectValue;
+        if (gameData.hasTurnEnded && event.button === 0) {
+            // test this
+            return;
+        }
         if (tile.player) {
             this.playerAttacked.emit(tile);
         } else if (tile.type === TileType.Door && !tile.item) {
@@ -84,8 +91,8 @@ export class GridComponent implements OnChanges {
         }
     }
 
-    hasLightningItem(): boolean {
-        return this.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
+    hasPickaxeItem(): boolean {
+        return this.clientPlayer.inventory.some((item) => item?.name === ItemName.Pickaxe);
     }
 
     isAccessible(tile: Tile): boolean {
@@ -95,7 +102,7 @@ export class GridComponent implements OnChanges {
 
     ngOnChanges(): void {
         if (this.clientPlayer) {
-            this.cdr.detectChanges(); // Manually trigger change detection
+            this.cdr.detectChanges();
         }
     }
 }

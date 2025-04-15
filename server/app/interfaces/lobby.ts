@@ -7,10 +7,10 @@ export interface Lobby {
     game: Game | null;
     players: Player[];
     maxPlayers: number;
-    waitingPlayers: WaintingPlayers[];
+    waitingPlayers: WaitingPlayers[];
 }
 
-export interface WaintingPlayers {
+export interface WaitingPlayers {
     socketId: string;
     avatar: string;
 }
