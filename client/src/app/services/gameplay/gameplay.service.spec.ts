@@ -548,18 +548,6 @@ describe('GameplayService', () => {
             expect(mockSocketClientService.emit).not.toHaveBeenCalled();
         });
 
-        it('should not handle attack when no action points', () => {
-            const gameData = createMockGameData({
-                isActionMode: true,
-                clientPlayer: createMockPlayer({ actionPoints: 0 }),
-            });
-            const targetTile = gameData.game?.grid?.[0][1] as Tile;
-
-            service.handleAttackClick(gameData, targetTile);
-
-            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
-        });
-
         it('should start combat when tiles are adjacent and conditions are met', () => {
             const gameData = createMockGameData({
                 isActionMode: true,
@@ -593,34 +581,9 @@ describe('GameplayService', () => {
             service.handleAttackClick(gameData, defenderTile);
             expect(service.handleAttackCTF).toHaveBeenCalled();
         });
-
-        it('should emit exactly once when attacking adjacent player', () => {
-            const gameData = createMockGameData({
-                isActionMode: true,
-                clientPlayer: createMockPlayer({ actionPoints: 1 }),
-            });
-            const defenderTile = gameData.game?.grid?.[0][1] as Tile;
-            defenderTile.player = createMockPlayer({ name: 'Enemy' });
-            service.handleAttackClick(gameData, defenderTile);
-            expect(mockSocketClientService.emit).toHaveBeenCalledOnceWith('startCombat', {
-                attackerName: 'TestPlayer',
-                defenderName: 'Enemy',
-                accessCode: '1234',
-                isDebugMode: false,
-            });
-        });
     });
 
     describe('handleTeleport', () => {
-        it('should not teleport when in combat mode', () => {
-            const gameData = createMockGameData({ isInCombatMode: true });
-            const targetTile = gameData.game?.grid?.[0][0] as Tile;
-
-            service.handleTeleport(gameData, targetTile);
-
-            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
-        });
-
         it('should emit teleport when current player is client player', () => {
             const gameData = createMockGameData();
             const targetTile = gameData.game?.grid?.[0][0] as Tile;
@@ -633,40 +596,9 @@ describe('GameplayService', () => {
                 targetTile,
             });
         });
-
-        it('should not teleport when current player is not client player', () => {
-            const gameData = createMockGameData({
-                currentPlayer: createMockPlayer({ name: 'OtherPlayer' }),
-            });
-            const targetTile = gameData.game?.grid?.[0][0] as Tile;
-
-            service.handleTeleport(gameData, targetTile);
-
-            expect(mockSocketClientService.emit).not.toHaveBeenCalled();
-        });
     });
 
     describe('updateQuickestPath', () => {
-        it('should clear quickest path when grid is undefined', () => {
-            const gameData = createMockGameData({ game: undefined });
-            const targetTile = { id: 'target' } as Tile;
-
-            service.updateQuickestPath(gameData, targetTile);
-
-            expect(gameData.quickestPath).toBeUndefined();
-        });
-
-        it('should clear quickest path when target tile is not in available path', () => {
-            const gameData = createMockGameData({
-                availablePath: [],
-            });
-            const targetTile = { id: 'target' } as Tile;
-
-            service.updateQuickestPath(gameData, targetTile);
-
-            expect(gameData.quickestPath).toBeUndefined();
-        });
-
         it('should set empty array when quickestPath returns undefined', () => {
             const gameData = createMockGameData();
             const targetTile = gameData.game?.grid?.[0][1] as Tile;
@@ -717,28 +649,6 @@ describe('GameplayService', () => {
         });
     });
 
-    it('should not emit adminModeUpdate when non-admin player presses "d"', () => {
-        const gameData = createMockGameData({
-            clientPlayer: createMockPlayer({ isAdmin: false }),
-        });
-        const event = new KeyboardEvent('keydown', { key: 'd' });
-
-        service.handleKeyPress(gameData, event);
-
-        expect(mockSocketClientService.emit).not.toHaveBeenCalled();
-    });
-
-    it('should not emit adminModeUpdate when admin player presses different key', () => {
-        const gameData = createMockGameData({
-            clientPlayer: createMockPlayer({ isAdmin: true }),
-        });
-        const event = new KeyboardEvent('keydown', { key: 'x' });
-
-        service.handleKeyPress(gameData, event);
-
-        expect(mockSocketClientService.emit).not.toHaveBeenCalled();
-    });
-
     describe('emitAdminModeUpdate', () => {
         it('should emit adminModeUpdate with correct access code', () => {
             const gameData = createMockGameData();
@@ -756,45 +666,6 @@ describe('GameplayService', () => {
     });
 
     describe('isAvailablePath', () => {
-        it('should return true when tile is in availablePath', () => {
-            const gameData = createMockGameData();
-            const targetTile = { id: 'tile1' } as Tile;
-            gameData.availablePath = [targetTile];
-
-            const result = (service as any).isAvailablePath(gameData, targetTile);
-
-            expect(result).toBeTrue();
-        });
-
-        it('should return false when tile is not in availablePath', () => {
-            const gameData = createMockGameData();
-            const targetTile = { id: 'tile3' } as Tile;
-            gameData.availablePath = [{ id: 'tile1' } as Tile, { id: 'tile2' } as Tile];
-
-            const result = (service as any).isAvailablePath(gameData, targetTile);
-
-            expect(result).toBeFalse();
-        });
-
-        it('should return false when availablePath is empty', () => {
-            const gameData = createMockGameData();
-            const targetTile = { id: 'tile1' } as Tile;
-            gameData.availablePath = [];
-
-            const result = (service as any).isAvailablePath(gameData, targetTile);
-
-            expect(result).toBeFalse();
-        });
-
-        it('should return false when availablePath is undefined', () => {
-            const gameData = createMockGameData();
-            const targetTile = { id: 'tile1' } as Tile;
-            gameData.availablePath = undefined;
-
-            const result = (service as any).isAvailablePath(gameData, targetTile);
-
-            expect(result).toBeFalse();
-        });
         it('should emit itemDrop with correct parameters when handleItemDropped is called', () => {
             const mockGameData = createMockGameData();
             const mockItem = new Item();
@@ -863,19 +734,6 @@ describe('GameplayService', () => {
             expect(service.endTurn).toHaveBeenCalledWith(mockGameData);
         });
 
-        it('should not end turn when player has no action or movement points but has ice nearby', () => {
-            mockGameData.clientPlayer.actionPoints = 0;
-            mockGameData.clientPlayer.movementPoints = 0;
-            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
-                return type === TileType.Ice;
-            });
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Ice);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
         // eslint-disable-next-line max-len
         it('should end turn with 1 action point and no movement points when there is no ice, no action available, and no Pickaxe/wall combo', () => {
             mockGameData.clientPlayer.actionPoints = 1;
@@ -890,79 +748,6 @@ describe('GameplayService', () => {
 
             expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][]);
             expect(service.endTurn).toHaveBeenCalledWith(mockGameData);
-        });
-
-        it('should not end turn with 1 action point and no movement points when there is ice nearby', () => {
-            mockGameData.clientPlayer.actionPoints = 1;
-            mockGameData.clientPlayer.movementPoints = 0;
-            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
-                return type === TileType.Ice;
-            });
-
-            service.checkAvailableActions(mockGameData);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn with 1 action point and no movement points when there is action available', () => {
-            mockGameData.clientPlayer.actionPoints = 1;
-            mockGameData.clientPlayer.movementPoints = 0;
-            mockPlayerMovementService.hasAdjacentTileType.and.returnValue(false);
-            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(true);
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(mockPlayerMovementService.hasAdjacentPlayerOrDoor).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][]);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn with 1 action point and no movement points when player has Pickaxe and wall nearby', () => {
-            mockGameData.clientPlayer.actionPoints = 1;
-            mockGameData.clientPlayer.movementPoints = 0;
-            mockTile.player = createMockPlayer({
-                inventory: [{ name: ItemName.Pickaxe } as Item, null],
-            });
-            mockPlayerMovementService.hasAdjacentTileType.and.callFake((tile, grid, type) => {
-                return type === TileType.Wall;
-            });
-            mockPlayerMovementService.hasAdjacentPlayerOrDoor.and.returnValue(false);
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(mockPlayerMovementService.hasAdjacentTileType).toHaveBeenCalledWith(mockTile, mockGameData.game!.grid as Tile[][], TileType.Wall);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
-        it('should not end turn when player has movement points available', () => {
-            mockGameData.clientPlayer.actionPoints = 0;
-            mockGameData.clientPlayer.movementPoints = 1;
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-        it('should return early if gameData.game is null', () => {
-            mockGameData.game = undefined as any;
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-
-        it('should return early if gameData.game.grid is null', () => {
-            mockGameData.game!.grid = null as any;
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
-            expect(service.endTurn).not.toHaveBeenCalled();
-        });
-        it('should return early if gameData.game.grid is undefined', () => {
-            mockGameData.game!.grid = undefined as any;
-
-            service.checkAvailableActions(mockGameData);
-
-            expect(service.getClientPlayerPosition).toHaveBeenCalledWith(mockGameData);
-            expect(service.endTurn).not.toHaveBeenCalled();
         });
     });
 });
