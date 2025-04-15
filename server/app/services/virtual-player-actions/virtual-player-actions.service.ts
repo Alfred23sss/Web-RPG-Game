@@ -81,7 +81,7 @@ export class VirtualPlayerActionsService {
         if (virtualPlayer.actionPoints === NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             return hasIce;
         } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
-            return hasIce || hasActionAvailable || (hasLightning && !hasWall);
+            return hasIce || hasActionAvailable || (hasLightning && hasWall);
         }
         return true;
     }
