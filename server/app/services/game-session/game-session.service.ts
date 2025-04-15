@@ -71,7 +71,9 @@ export class GameSessionService {
     callTeleport(accessCode: string, player: Player, targetTile: Tile): void {
         const updatedGrid = this.gridManager.teleportPlayer(this.getGameSession(accessCode).game.grid, player, targetTile);
         this.getGameSession(accessCode).game.grid = updatedGrid;
+        this.handleIceShieldItem(player, targetTile, accessCode);
         this.emitGridUpdate(accessCode, updatedGrid);
+        this.emitMovementEvent(accessCode, this.getGameSession(accessCode), player, false);
     }
 
     handleItemDropped(accessCode: string, player: Player, item: Item): void {

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, NO_ACTION_POINTS } from '@app/constants/global.constants';
-import { ClientNotifierMessage, LogBookEntry, SocketEvent } from '@app/enums/global.enums';
+import { AttackMessages, ClientNotifierMessage, LogBookEntry, SocketEvent } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
@@ -49,12 +49,12 @@ export class CombatSocketService {
             const gameData = this.gameStateService.gameDataSubjectValue;
             this.gameplayService.updateAttackResult(gameData, data);
 
-            const attackOutcome = data.success ? 'réussie' : 'échouée';
+            const attackOutcome = data.success ? AttackMessages.Success : AttackMessages.Failure;
             const diff = data.attackScore.score - data.defenseScore.score;
             const attackScore = diff > 0 ? diff : 0;
             this.clientNotifier.addLogbookEntry(
-                `${LogBookEntry.Attack} ${attackOutcome} (Dé d'Attaque: ${data.attackScore.diceRolled}, ` +
-                    `Dé de Défense: ${data.defenseScore.diceRolled}, Résultat d'Attaque: ${attackScore})`,
+                `${LogBookEntry.Attack} ${attackOutcome} (${AttackMessages.AttackDice}: ${data.attackScore.diceRolled}, ` +
+                    `${AttackMessages.DefenseDice}: ${data.defenseScore.diceRolled}, ${AttackMessages.AttackResult}: ${attackScore})`,
             );
 
             gameData.evadeResult = null;
