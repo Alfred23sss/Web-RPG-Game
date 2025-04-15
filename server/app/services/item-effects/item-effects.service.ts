@@ -9,12 +9,6 @@ import { ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 
-// const HEALTH_CONDITION_THRESHOLD = 0.5;
-// const BONUS_VALUE = 2;
-// const PENALTY_VALUE = -1;
-// const MULTIPLIER = 1;
-// // const RANDOMIZER = 0.5;
-
 @Injectable()
 export class ItemEffectsService {
     constructor(
