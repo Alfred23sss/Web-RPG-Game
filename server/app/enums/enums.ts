@@ -36,9 +36,6 @@ export enum MoveType {
 // =====================
 // Error Messages
 // =====================
-
-//bhjfbwhbwhfbhesbfhjqbbjblsasblabdjvbavsjhbvjlabvlvdjabvjbdshjbvbvjabjlbajvdbjhabvhjlsabvjlvbajhdalbvahjdvjlabvhdjlabvhdlvhdbavdhjla
-
 export enum ErrorMessages {
     MissingCharacterDetails = 'Veuillez vous assurer d’avoir attribué des bonus et des dés, et d’avoir saisi un nom et un avatar.',
     InvalidGameSize = 'Taille de jeu invalide sélectionnée !',
