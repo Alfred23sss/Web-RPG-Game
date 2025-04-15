@@ -279,3 +279,11 @@ export enum Tab {
     Chat = 'chat',
     Log = 'log',
 }
+
+export enum AttackMessages {
+    Success = 'réussie',
+    Failure = 'échouée',
+    AttackDice = "Dé d'Attaque",
+    DefenseDice = 'Dé de Défense',
+    AttackResult = "Résultat d'Attaque",
+}
