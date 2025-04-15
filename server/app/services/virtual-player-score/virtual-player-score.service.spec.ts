@@ -338,7 +338,7 @@ describe('VirtualPlayerScoreService', () => {
 
     describe('calculateDefensiveItemScore', () => {
         it('should add defensive item score for IceShield/Armor', () => {
-            const IceShieldTile = {
+            const iceShieldTile = {
                 ...mockTile,
                 item: {
                     name: ItemName.IceShield,
@@ -350,7 +350,7 @@ describe('VirtualPlayerScoreService', () => {
                 },
             };
             const move: Move = {
-                tile: IceShieldTile,
+                tile: iceShieldTile,
                 type: MoveType.Item,
                 score: 0,
                 inRange: false,

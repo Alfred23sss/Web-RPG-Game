@@ -75,7 +75,10 @@ describe('ItemService', () => {
     });
 
     it('should set and get items', () => {
-        const testItems: Item[] = [new Item({ id: '1', name: 'BlackSword', itemCounter: 1 }), new Item({ id: '2', name: 'IceSword', itemCounter: 2 })];
+        const testItems: Item[] = [
+            new Item({ id: '1', name: 'BlackSword', itemCounter: 1 }),
+            new Item({ id: '2', name: 'IceSword', itemCounter: 2 }),
+        ];
         service.setItems(testItems, gameServiceMock.getCurrentGame()?.mode);
         expect(service.getItems()).toEqual(testItems);
     });
