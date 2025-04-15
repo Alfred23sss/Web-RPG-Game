@@ -1,5 +1,5 @@
 import { GameSizePlayerCount, GameSizeTileCount } from '@app/enums/enums';
-import { Lobby, WaintingPlayers } from '@app/interfaces/lobby';
+import { Lobby, WaitingPlayers } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Game } from '@app/model/database/game';
 import { AccessCodesService } from '@app/services/access-codes/access-codes.service';
@@ -106,7 +106,7 @@ export class LobbyService {
         this.playerSockets.delete(playerName);
     }
 
-    getWaitingAvatars(accessCode: string): WaintingPlayers[] {
+    getWaitingAvatars(accessCode: string): WaitingPlayers[] {
         return this.getLobby(accessCode).waitingPlayers;
     }
 

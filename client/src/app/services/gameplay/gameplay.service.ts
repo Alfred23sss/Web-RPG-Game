@@ -160,7 +160,7 @@ export class GameplayService {
         if (!targetTile.player) return;
 
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
-            if (this.isTeamate(targetTile.player.name, currentTile.player.name, gameData)) {
+            if (this.isTeammate(targetTile.player.name, currentTile.player.name, gameData)) {
                 this.snackBarService.showMessage(SnackBarMessage.FriendlyFire);
                 return;
             } else if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
@@ -304,7 +304,7 @@ export class GameplayService {
         return rowDiff + colDiff === 1;
     }
 
-    private isTeamate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
+    private isTeammate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
         const players = gameData.lobby.players;
         const defender = players.find((p) => p.name === defenderPlayer);
         const attacker = players.find((p) => p.name === attackerPlayer);

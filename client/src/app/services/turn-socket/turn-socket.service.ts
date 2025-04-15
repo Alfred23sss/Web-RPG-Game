@@ -36,7 +36,6 @@ export class TurnSocketService {
             gameData.isCurrentlyMoving = false;
             gameData.isActionMode = false;
             gameData.isInCombatMode = false;
-            // action etait dn un if client player a  meme nom que le data.player
             gameData.clientPlayer.actionPoints = DEFAULT_ACTION_POINTS;
             gameData.clientPlayer.movementPoints = gameData.clientPlayer.speed;
             gameData.movementPointsRemaining = gameData.clientPlayer.speed;

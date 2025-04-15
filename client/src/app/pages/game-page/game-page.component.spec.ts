@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { GameData } from '@app/classes/game-data/game-data';
 import { Item } from '@app/classes/item/item';
+import { Tab } from '@app/enums/global.enums';
 import { Lobby } from '@app/interfaces/lobby';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
@@ -270,7 +271,7 @@ describe('GamePageComponent', () => {
     });
 
     it('should toggle activeTab between "chat" and "log"', () => {
-        component.activeTab = 'chat';
+        component.activeTab = Tab.Chat;
         component.toggleTab();
         expect(component.activeTab).toBe('log');
 

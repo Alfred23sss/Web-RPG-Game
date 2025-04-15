@@ -213,3 +213,8 @@ export enum Keys {
     Escape = 'Escape',
     D = 'd',
 }
+
+export enum Tab {
+    Chat = 'chat',
+    Log = 'log',
+}
