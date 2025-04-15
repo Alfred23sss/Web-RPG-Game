@@ -344,7 +344,7 @@ describe('GameSocketService', () => {
         const processDoorClickedSpy = spyOn<any>(service, 'processDoorClicked');
 
         socketEvents['doorClicked'](mockData);
-        tick(service['DoorClickedDelay'] + 10);
+        tick(service['doorClickedDelay'] + 10);
 
         expect(processDoorClickedSpy).not.toHaveBeenCalled();
     }));
