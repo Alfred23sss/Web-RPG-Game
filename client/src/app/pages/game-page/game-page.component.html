@@ -46,7 +46,7 @@
         <app-player-info></app-player-info>
     </div>
 
-    <div class="game-map-container" [ngClass]="{ 'combat-mode': gameData.isInCombatMode }">
+    <div class="game-map-container">
         @if (gameData.isActionMode || gameData.isInCombatMode) {
         <div class="mode-indicator">
             {{ gameData.isInCombatMode ? 'Mode combat' : 'Faites une action' }}
