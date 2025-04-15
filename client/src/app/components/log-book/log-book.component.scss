@@ -1,7 +1,7 @@
 .journal-container {
     flex: 1;
     padding: 15px;
-    background-color: #0d1b2a;
+    background: rgba(20, 50, 80, 0.3);
     display: flex;
     flex-direction: column;
     border-radius: 10px;
@@ -31,21 +31,10 @@
 }
 
 .filter-button {
-    background: linear-gradient(90deg, #00bfff, #008cff);
-    color: #0d1b2a;
     border: none;
     padding: 6px 12px;
     border-radius: 6px;
-    font-weight: bold;
     cursor: pointer;
-    transition:
-        transform 0.2s,
-        box-shadow 0.2s;
-
-    &:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 10px #00bfff;
-    }
 }
 
 .journal-content {
@@ -77,5 +66,27 @@
         text-align: center;
         color: #666;
         font-style: italic;
+    }
+
+    &::-webkit-scrollbar {
+        width: 8px;
+        background: #1b2a3b;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #2f486f;
+        border-radius: 4px;
+        margin: 5px 0;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #d4f1ff, #00c8ff);
+        border-radius: 4px;
+        box-shadow: 0px 0px 10px rgba(0, 200, 255, 0.8);
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #aad4e6, #0094cc);
+        box-shadow: 0px 0px 12px rgba(0, 200, 255, 1);
     }
 }
