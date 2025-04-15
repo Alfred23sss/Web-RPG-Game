@@ -5,9 +5,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { TileTooltipComponent } from '@app/components/tile-tooltip/tile-tooltip.component';
 import { TileComponent } from '@app/components/tile/tile.component';
 import { POPUP_DELAY } from '@app/constants/global.constants';
-import { TileType } from '@common/enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { PlayerMovementService } from '@app/services/player-movement/player-movement.service';
+import { ItemName, TileType } from '@common/enums';
 
 @Component({
     selector: 'app-grid',
@@ -38,6 +39,7 @@ export class GridComponent implements OnChanges {
     constructor(
         private dialog: MatDialog,
         private cdr: ChangeDetectorRef,
+        private playerMovementService: PlayerMovementService,
     ) {}
 
     isInQuickestPath(tile: Tile): boolean {
@@ -80,6 +82,15 @@ export class GridComponent implements OnChanges {
                 dialogRef.close();
             }, POPUP_DELAY);
         }
+    }
+
+    hasLightningItem(): boolean {
+        return this.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
+    }
+
+    isAccessible(tile: Tile): boolean {
+        const accessibleTiles = this.playerMovementService.getNeighbors(tile, this.grid as Tile[][]);
+        return accessibleTiles.some((t) => t.player?.name === this.clientPlayer.name);
     }
 
     ngOnChanges(): void {

@@ -44,7 +44,7 @@ export class VirtualPlayerBehaviorService {
             }
 
             return true;
-        }
+        } else await this.attack(virtualPlayer, accessCode);
         return false;
     }
 

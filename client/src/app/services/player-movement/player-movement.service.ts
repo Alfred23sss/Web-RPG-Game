@@ -89,6 +89,34 @@ export class PlayerMovementService {
         return adjacentTiles.some((tile) => (tile.type === TileType.Door && !tile.isOpen) || tile.player !== undefined);
     }
 
+    getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
+        const neighbors: Tile[] = [];
+
+        const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
+        if (!match) return neighbors;
+
+        const x = parseInt(match[1], 10);
+        const y = parseInt(match[2], 10);
+
+        const directions = [
+            [0, 1],
+            [1, 0],
+            [0, -1],
+            [-1, 0],
+        ];
+
+        for (const [dx, dy] of directions) {
+            const nx = x + dx;
+            const ny = y + dy;
+
+            if (nx >= 0 && ny >= 0 && nx < grid.length && ny < grid[0].length && grid[nx][ny]) {
+                neighbors.push(grid[nx][ny]);
+            }
+        }
+
+        return neighbors;
+    }
+
     private sortQueueByCost(queue: { tile: Tile; cost: number }[]): void {
         queue.sort((a, b) => a.cost - b.cost);
     }
@@ -136,35 +164,6 @@ export class PlayerMovementService {
         if ((neighbor.type === TileType.Door && !neighbor.isOpen) || neighbor.player !== undefined) return false;
         return this.movementCosts.has(neighbor.type);
     }
-
-    private getNeighbors(tile: Tile, grid: Tile[][]): Tile[] {
-        const neighbors: Tile[] = [];
-
-        const match = tile.id.match(/^tile-(\d+)-(\d+)$/);
-        if (!match) return neighbors;
-
-        const x = parseInt(match[1], 10);
-        const y = parseInt(match[2], 10);
-
-        const directions = [
-            [0, 1],
-            [1, 0],
-            [0, -1],
-            [-1, 0],
-        ];
-
-        for (const [dx, dy] of directions) {
-            const nx = x + dx;
-            const ny = y + dy;
-
-            if (nx >= 0 && ny >= 0 && nx < grid.length && ny < grid[0].length && grid[nx][ny]) {
-                neighbors.push(grid[nx][ny]);
-            }
-        }
-
-        return neighbors;
-    }
-
     private reconstructPath(previous: Map<Tile, Tile | null>, target: Tile | null): Tile[] {
         const path: Tile[] = [];
         let current: Tile | null = target;
