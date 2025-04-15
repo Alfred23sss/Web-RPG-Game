@@ -359,6 +359,27 @@ describe('GameCombatService', () => {
             expect(service['combatStates'][accessCode].combatTurnTimers).toBeNull();
         });
 
+        describe('getCombatState', () => {
+            const accessCode = 'test-access';
+
+            it('should return combat state if it exists', () => {
+                const mockState = mockCombatState();
+                service['combatStates'][accessCode] = mockState;
+
+                const result = service.getCombatState(accessCode);
+
+                expect(result).toBe(mockState);
+            });
+
+            it('should return null if combat state does not exist', () => {
+                service['combatStates'][accessCode] = undefined;
+
+                const result = service.getCombatState(accessCode);
+
+                expect(result).toBeNull();
+            });
+        });
+
         it('should not throw or call clearTimeout if combatTurnTimers is null', () => {
             const accessCode = 'reset-test-null';
             const combatState = mockCombatState();

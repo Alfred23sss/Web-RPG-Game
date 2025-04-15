@@ -109,5 +109,26 @@ describe('ChatGateway', () => {
             expect(message).toContain('user: test -');
             expect(message).toMatch(/\d{2}:\d{2}:\d{2}/);
         });
+        it('should not emit anything if room is undefined', () => {
+            const payload = { message: 'test', author: 'user', room: undefined as unknown as string };
+            const emitSpy = jest.fn();
+            (mockServer.to as jest.Mock).mockReturnValue({ emit: emitSpy });
+
+            gateway.roomMessage(mockSocket, payload);
+
+            expect(mockServer.to).not.toHaveBeenCalled();
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
+
+        it('should not emit anything if room is empty string', () => {
+            const payload = { message: 'test', author: 'user', room: '' };
+            const emitSpy = jest.fn();
+            (mockServer.to as jest.Mock).mockReturnValue({ emit: emitSpy });
+
+            gateway.roomMessage(mockSocket, payload);
+
+            expect(mockServer.to).not.toHaveBeenCalled();
+            expect(emitSpy).not.toHaveBeenCalled();
+        });
     });
 });

@@ -217,6 +217,29 @@ describe('GameSessionService', () => {
         expect(emitSpy).not.toHaveBeenCalled();
     });
 
+    it('should return false if player is current but has abandoned', () => {
+        const playerName = PLAYER_1_NAME;
+        const abandonedPlayer = {
+            ...createValidPlayer(playerName, 5, true),
+            hasAbandoned: true,
+        };
+
+        const mockSession: GameSession = {
+            game: MOCK_LOBBY.game,
+            turn: {
+                ...createMockTurn(),
+                beginnerPlayer: abandonedPlayer,
+                orderedPlayers: [abandonedPlayer],
+                currentPlayer: abandonedPlayer,
+            },
+        };
+
+        gameSessionService['gameSessions'].set(ACCESS_CODE, mockSession);
+
+        const result = gameSessionService.isCurrentPlayer(ACCESS_CODE, playerName);
+        expect(result).toBe(false);
+    });
+
     it('should maintain correct timer sequence after resume', () => {
         gameSessionService.createGameSession(MOCK_LOBBY.accessCode, 'Classic');
 
