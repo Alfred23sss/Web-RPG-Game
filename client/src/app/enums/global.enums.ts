@@ -69,6 +69,11 @@ export enum ErrorMessages {
     LockedRoom = "La salle est verrouillée, voulez-vous être redirigé vers la page d'accueil",
     MaxNameLength = 'La longueur maximale de 20 caractères est atteinte',
     MaxPlayersReached = '❌ Le nombre maximal de joueurs est atteint pour cette partie',
+    NoAccessCode = 'Failed to create lobby: No access code received',
+    LobbyCreationFailed = 'Lobby creation failed:',
+    JoinFailed = 'Join failed:',
+    InvalidAccessCode = 'Invalid access code',
+    ValidationFailed = 'Access code validation failed',
 }
 
 export enum AccessCodeGenerator {
@@ -127,6 +132,25 @@ export enum SocketEvent {
     PerformAttack = 'performAttack',
     Evade = 'evade',
     AdminModeUpdate = 'adminModeUpdate',
+    JoinLobby = 'joinLobby',
+    JoinedLobby = 'joinedLobby',
+    LobbyUpdate = 'lobbyUpdate',
+    Kicked = 'kicked',
+    LobbyLocked = 'lobbyLocked',
+    LobbyUnlocked = 'lobbyUnlocked',
+    LobbyDeleted = 'lobbyDeleted',
+    AlertGameStarted = 'alertGameStarted',
+    LeftLobby = 'leftLobby',
+    UpdatePlayers = 'updatePlayers',
+    AdminLeft = 'adminLeft',
+    CreateLobby = 'createLobby',
+    LobbyCreated = 'lobbyCreated',
+    Error = 'error',
+    JoinError = 'joinError',
+    GetLobbyPlayers = 'getLobbyPlayers',
+    GetLobby = 'getLobby',
+    UpdateLobby = 'updateLobby',
+    PlayerMovementUpdate = 'playerMovementUpdate',
 }
 
 export enum SnackBarMessage {
@@ -138,6 +162,7 @@ export enum SnackBarMessage {
     FriendlyFire = "TRAITRE!!! C'EST MOI TON AMI",
     ActivatedMode = 'Mode action activé',
     DeactivatedMode = 'Mode action désactivé',
+    LobbyExpulsion = 'Vous avez été expulsé du lobby.',
 }
 
 export enum LogBookEntry {

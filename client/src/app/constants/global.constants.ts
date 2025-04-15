@@ -256,6 +256,9 @@ export const ITEMS_TO_UPDATE = new Set(['home']);
 
 export const PLAYER_STORAGE = 'player';
 export const LOBBY_STORAGE = 'lobby';
+export const GAME_STORAGE = 'game';
+export const ORDERED_PLAYERS_STORAGE = 'orderedPlayers';
+
 export const REFRESH_STORAGE = 'refreshed';
 export const KEY_DOWN_EVENT_LISTENER = 'keydown';
 
@@ -290,6 +293,12 @@ export const DEFAULT_LOBBY: Lobby = {
     players: [],
     game: MOCK_GAME,
     maxPlayers: 0,
+};
+
+export const sizeMapping: Record<'size10' | 'size15' | 'size20', GameSize> = {
+    size10: GameSize.Small,
+    size15: GameSize.Medium,
+    size20: GameSize.Large,
 };
 
 export const MOCK_LOBBY = DEFAULT_LOBBY;
