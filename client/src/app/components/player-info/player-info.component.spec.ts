@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { GameData } from '@app/classes/game-data/game-data';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
