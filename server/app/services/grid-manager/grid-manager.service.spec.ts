@@ -27,12 +27,12 @@ describe('GridManagerService', () => {
             [
                 { id: 'tile-0-0', type: TileType.Default, isOpen: true, player: null } as Tile,
                 { id: 'tile-0-1', type: TileType.Default, isOpen: true, player: null } as Tile,
-                { id: 'tile-0-2', type: TileType.Default, isOpen: true, player: null, item: { name: ItemName.QuestionMark } as Item } as Tile,
+                { id: 'tile-0-2', type: TileType.Default, isOpen: true, player: null, item: { name: ItemName.Chest } as Item } as Tile,
             ],
             [
                 { id: 'tile-1-0', type: TileType.Default, isOpen: true, player: null } as Tile,
                 { id: 'tile-1-1', type: TileType.Wall, isOpen: false, player: null } as Tile,
-                { id: 'tile-1-2', type: TileType.Wall, isOpen: false, player: null, item: { name: ItemName.Fire } as Item } as Tile,
+                { id: 'tile-1-2', type: TileType.Wall, isOpen: false, player: null, item: { name: ItemName.IceSword } as Item } as Tile,
             ],
         ];
 
@@ -327,28 +327,28 @@ describe('GridManagerService', () => {
     });
 
     describe('assignItemsToRandomItems', () => {
-        it('should ignore QuestionMark and Home items when collecting existing items', () => {
+        it('should ignore Chest and Home items when collecting existing items', () => {
             const grid: Tile[][] = [
                 [
-                    { id: 'tile-0-0', item: { name: ItemName.QuestionMark } } as Tile,
+                    { id: 'tile-0-0', item: { name: ItemName.Chest } } as Tile,
                     { id: 'tile-0-1', item: { name: ItemName.Home } } as Tile,
-                    { id: 'tile-0-2', item: { name: ItemName.Fire } } as Tile,
+                    { id: 'tile-0-2', item: { name: ItemName.IceSword } } as Tile,
                 ],
             ];
 
             const result = service.assignItemsToRandomItems(grid);
 
-            expect(result[0][0].item?.name).not.toBe(ItemName.QuestionMark);
+            expect(result[0][0].item?.name).not.toBe(ItemName.Chest);
             expect(result[0][1].item?.name).toBe(ItemName.Home);
         });
 
         it('should not modify tiles without items', () => {
-            const grid: Tile[][] = [[{ id: 'tile-0-0', item: null } as Tile, { id: 'tile-0-1', item: { name: ItemName.QuestionMark } } as Tile]];
+            const grid: Tile[][] = [[{ id: 'tile-0-0', item: null } as Tile, { id: 'tile-0-1', item: { name: ItemName.Chest } } as Tile]];
 
             const result = service.assignItemsToRandomItems(grid);
 
             expect(result[0][0].item).toBeNull();
-            expect(result[0][1].item?.name).not.toBe(ItemName.QuestionMark);
+            expect(result[0][1].item?.name).not.toBe(ItemName.Chest);
         });
     });
     describe('updateWallTile', () => {
@@ -567,7 +567,7 @@ describe('GridManagerService', () => {
             const resultWithNoNameItem = service.isFlagOnSpawnPoint(mockGrid, playerWithNoNameItem);
             expect(resultWithNoNameItem).toBe(false);
 
-            const differentNameItem = { name: ItemName.Swap } as Item;
+            const differentNameItem = { name: ItemName.IceShield } as Item;
             const playerWithDifferentNameItem = {
                 ...mockPlayer,
                 inventory: [differentNameItem, emptyItem] as [Item, Item],

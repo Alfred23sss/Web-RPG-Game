@@ -498,7 +498,7 @@ describe('GameValidationService', () => {
         grid[3][3].item = createDummyItem('home');
         grid[3][4].item = createDummyItem('home');
         grid[3][9].item = createDummyItem('question');
-        grid[3][2].item = createDummyItem('stop');
+        grid[3][2].item = createDummyItem('GreatShield');
         return grid;
     }
 
@@ -508,10 +508,10 @@ describe('GameValidationService', () => {
         grid[3][4].item = createDummyItem('home');
         grid[1][8].item = createDummyItem('home');
         grid[1][9].item = createDummyItem('home');
-        grid[3][9].item = createDummyItem('potion');
-        grid[3][0].item = createDummyItem('fire');
-        grid[3][1].item = createDummyItem('rubik');
-        grid[3][2].item = createDummyItem('stop');
+        grid[3][9].item = createDummyItem('BlackSword');
+        grid[3][0].item = createDummyItem('IceSword');
+        grid[3][1].item = createDummyItem('Armor');
+        grid[3][2].item = createDummyItem('GreatShield');
         return grid;
     }
 
@@ -524,11 +524,11 @@ describe('GameValidationService', () => {
         grid[1][2].item = createDummyItem('home');
         grid[1][3].item = createDummyItem('home');
         grid[3][5].item = createDummyItem('question');
-        grid[3][8].item = createDummyItem('lightning');
-        grid[3][9].item = createDummyItem('potion');
-        grid[3][0].item = createDummyItem('fire');
-        grid[3][1].item = createDummyItem('rubik');
-        grid[3][2].item = createDummyItem('stop');
+        grid[3][8].item = createDummyItem('Pickaxe');
+        grid[3][9].item = createDummyItem('BlackSword');
+        grid[3][0].item = createDummyItem('IceSword');
+        grid[3][1].item = createDummyItem('Armor');
+        grid[3][2].item = createDummyItem('GreatShield');
         return grid;
     }
 

@@ -55,11 +55,11 @@ describe('TileComponent', () => {
         it('should handle right click removal with item', () => {
             component.tile.item = new Item({
                 id: '0',
-                name: 'lightning',
-                imageSrc: ItemType.Lightning,
-                imageSrcGrey: ItemType.LightningGray,
+                name: 'Pickaxe',
+                imageSrc: ItemType.Pickaxe,
+                imageSrcGrey: ItemType.PickaxeGray,
                 itemCounter: 1,
-                description: ItemDescription.Lightning,
+                description: ItemDescription.Pickaxe,
             });
 
             spyOn(component.tile.item, 'clone').and.callThrough();
@@ -190,14 +190,14 @@ describe('TileComponent', () => {
 
             const event = new MouseEvent('contextmenu');
             spyOn(event, 'preventDefault');
-            spyOn(event, 'stopPropagation');
+            spyOn(event, 'GreatShieldPropagation');
 
             component.onRightClick(event);
 
             expect(tileServiceSpy.removeTileObject).toHaveBeenCalledWith(mockTile);
             expect(TileComponent.activeButton).toBeNull();
             expect(event.preventDefault).toHaveBeenCalled();
-            expect(event.stopPropagation).toHaveBeenCalled();
+            expect(event.GreatShieldPropagation).toHaveBeenCalled();
         });
     });
 

@@ -112,14 +112,14 @@ export class GameplayService {
         if (!clientPlayerPosition || !gameData.game || !gameData.game.grid) return;
         const hasIce = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Ice);
         const hasWall = this.playerMovementService.hasAdjacentTileType(clientPlayerPosition, gameData.game.grid, TileType.Wall);
-        const hasLightning = clientPlayerPosition.player?.inventory.some((item) => item?.name === ItemName.Lightning);
+        const hasPickaxe = clientPlayerPosition.player?.inventory.some((item) => item?.name === ItemName.Pickaxe);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(clientPlayerPosition, gameData.game.grid);
         if (gameData.clientPlayer.actionPoints === 0 && gameData.clientPlayer.movementPoints === 0) {
             if (!hasIce) {
                 this.endTurn(gameData);
             }
         } else if (gameData.clientPlayer.actionPoints === 1 && gameData.clientPlayer.movementPoints === 0) {
-            if (!hasIce && !hasActionAvailable && (!hasLightning || !hasWall)) {
+            if (!hasIce && !hasActionAvailable && (!hasPickaxe || !hasWall)) {
                 this.endTurn(gameData);
             }
         }
@@ -140,7 +140,7 @@ export class GameplayService {
         const currentTile = this.validateAction(gameData);
         if (!currentTile) return;
 
-        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Lightning)) {
+        if (gameData.clientPlayer.inventory.some((item) => item?.name === ItemName.Pickaxe)) {
             this.socketClientService.emit(SocketEvent.WallUpdate, {
                 currentTile,
                 targetTile,
@@ -160,8 +160,8 @@ export class GameplayService {
         if (!targetTile.player) return;
 
         if (gameData.isActionMode && currentTile && currentTile.player && gameData.game && gameData.game.grid) {
-            if (this.isTeamate(targetTile.player.name, currentTile.player.name, gameData)) {
-                this.snackBarService.showMessage(SnackBarMessage.FriendlyFire);
+            if (this.isTeammate(targetTile.player.name, currentTile.player.name, gameData)) {
+                this.snackBarService.showMessage(SnackBarMessage.FriendlyIceSword);
                 return;
             } else if (this.findAndCheckAdjacentTiles(targetTile.id, currentTile.id, gameData.game.grid)) {
                 this.socketClientService.emit(SocketEvent.StartCombat, {
@@ -303,7 +303,7 @@ export class GameplayService {
         return rowDiff + colDiff === 1;
     }
 
-    private isTeamate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
+    private isTeammate(defenderPlayer: string, attackerPlayer: string, gameData: GameData): boolean {
         const players = gameData.lobby.players;
         const defender = players.find((p) => p.name === defenderPlayer);
         const attacker = players.find((p) => p.name === attackerPlayer);

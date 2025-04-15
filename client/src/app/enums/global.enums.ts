@@ -163,7 +163,7 @@ export enum SnackBarMessage {
     NonExistent = "La partie que vous souhaitez rejoindre n'existe pas!",
     GetImpossible = 'Impossible de récupérer la partie.',
     LobbyFull = 'Le lobby est plein, impossible de le déverrouiller.',
-    FriendlyFire = "TRAITRE!!! C'EST MOI TON AMI",
+    FriendlyIceSword = "TRAITRE!!! C'EST MOI TON AMI",
     ActivatedMode = 'Mode action activé',
     DeactivatedMode = 'Mode action désactivé',
     LobbyExpulsion = 'Vous avez été expulsé du lobby.',
@@ -212,4 +212,9 @@ export enum ClientNotifierMessage {
 export enum Keys {
     Escape = 'Escape',
     D = 'd',
+}
+
+export enum Tab {
+    Chat = 'chat',
+    Log = 'log',
 }

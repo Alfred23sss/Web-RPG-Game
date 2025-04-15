@@ -896,8 +896,8 @@ describe('GameSessionService', () => {
             expect(addItemSpy).toHaveBeenCalledWith(ACCESS_CODE, testPlayer, mockItem, gameSession);
         });
 
-        describe('updatePlayerPosition with Swap item', () => {
-            it('should add/remove swap effects when moving on/off ice tiles', async () => {
+        describe('updatePlayerPosition with IceShield item', () => {
+            it('should add/remove IceShield effects when moving on/off ice tiles', async () => {
                 const startTile: Tile = {
                     ...MOCK_TILE,
                     id: 'start-tile',
@@ -923,18 +923,18 @@ describe('GameSessionService', () => {
                     [regularTile, MOCK_TILE],
                 ];
 
-                const swapItem: Item = {
-                    name: ItemName.Swap,
-                    id: 'swap-item',
-                    imageSrc: 'swap.png',
-                    imageSrcGrey: 'swap-grey.png',
-                    description: 'Swap item',
+                const IceShieldItem: Item = {
+                    name: ItemName.IceShield,
+                    id: 'IceShield-item',
+                    imageSrc: 'IceShield.png',
+                    imageSrcGrey: 'IceShield-grey.png',
+                    description: 'IceShield item',
                     itemCounter: 0,
                 };
 
-                const testPlayerWithSwap: Player = {
+                const testPlayerWithIceShield: Player = {
                     ...testPlayer,
-                    inventory: [swapItem, null],
+                    inventory: [IceShieldItem, null],
                 };
 
                 gameSessionService['gameSessions'].set(ACCESS_CODE, {
@@ -945,12 +945,12 @@ describe('GameSessionService', () => {
                     turn: createMockTurn(),
                 });
 
-                const updatePromise = gameSessionService.updatePlayerPosition(ACCESS_CODE, testMovementPath, testPlayerWithSwap);
+                const updatePromise = gameSessionService.updatePlayerPosition(ACCESS_CODE, testMovementPath, testPlayerWithIceShield);
 
                 await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
                 expect(itemService.addEffect).toHaveBeenCalledWith(
-                    testPlayerWithSwap,
-                    swapItem,
+                    testPlayerWithIceShield,
+                    IceShieldItem,
                     expect.objectContaining({
                         id: 'ice-tile',
                         type: TileType.Ice,
@@ -959,7 +959,7 @@ describe('GameSessionService', () => {
 
                 await jest.advanceTimersByTimeAsync(PLAYER_MOVE_DELAY);
                 await updatePromise;
-                expect(itemService.removeEffects).toHaveBeenCalledWith(testPlayerWithSwap, 0);
+                expect(itemService.removeEffects).toHaveBeenCalledWith(testPlayerWithIceShield, 0);
             });
         });
 

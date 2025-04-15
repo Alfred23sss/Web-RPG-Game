@@ -46,7 +46,7 @@ export class GameSessionService {
             await this.delayMove();
             this.updatePlayerLocation(gameSession, movement[i], player);
             this.emitTileVisitedEvent(accessCode, player, movement[i]);
-            this.handleSwapItems(player, movement[i]);
+            this.handleIceShieldItems(player, movement[i]);
 
             isCurrentlyMoving = this.updateMovementStatus(i, movement);
 
@@ -240,9 +240,9 @@ export class GameSessionService {
         });
     }
 
-    private handleSwapItems(player: Player, tile: Tile): void {
+    private handleIceShieldItems(player: Player, tile: Tile): void {
         player.inventory.forEach((item, index) => {
-            if (item?.name === ItemName.Swap) {
+            if (item?.name === ItemName.IceShield) {
                 if (tile.type === TileType.Ice) {
                     this.itemEffectsService.addEffect(player, item, tile);
                 } else {

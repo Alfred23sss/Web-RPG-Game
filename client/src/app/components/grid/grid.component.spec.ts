@@ -109,21 +109,21 @@ describe('GridComponent', () => {
         });
     });
 
-    describe('hasLightningItem()', () => {
-        it('should return true if player has Lightning item', () => {
+    describe('hasPickaxeItem()', () => {
+        it('should return true if player has Pickaxe item', () => {
             component.clientPlayer = {
-                inventory: [{ name: ItemName.Lightning }, null],
+                inventory: [{ name: ItemName.Pickaxe }, null],
             } as any;
 
-            expect(component.hasLightningItem()).toBeTrue();
+            expect(component.hasPickaxeItem()).toBeTrue();
         });
 
-        it('should return false if player does not have Lightning item', () => {
+        it('should return false if player does not have Pickaxe item', () => {
             component.clientPlayer = {
-                inventory: [{ name: ItemName.Fire }, null],
+                inventory: [{ name: ItemName.IceSword }, null],
             } as any;
 
-            expect(component.hasLightningItem()).toBeFalse();
+            expect(component.hasPickaxeItem()).toBeFalse();
         });
     });
 

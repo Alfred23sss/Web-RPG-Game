@@ -743,7 +743,7 @@ describe('GameGateway', () => {
         const mockItems = [
             { id: 'item1', name: 'Sword', description: '', effect: () => {} },
             { id: 'item2', name: 'Shield', description: '', effect: () => {} },
-            { id: 'item3', name: 'Potion', description: '', effect: () => {} },
+            { id: 'item3', name: 'BlackSword', description: '', effect: () => {} },
         ] as unknown as [Item, Item, Item];
 
         const mockPlayer = { ...MOCK_PLAYER, name: 'ItemPlayer' };

@@ -76,12 +76,12 @@ export class VirtualPlayerActionsService {
         const virtualPlayerTile = this.gridManagerService.findTileByPlayer(grid, virtualPlayer);
         const hasIce = this.playerMovementService.hasAdjacentTileType(virtualPlayerTile, grid, TileType.Ice);
         const hasWall = this.playerMovementService.hasAdjacentTileType(virtualPlayerTile, grid, TileType.Wall);
-        const hasLightning = virtualPlayer.inventory.some((item) => item?.name === ItemName.Lightning);
+        const hasPickaxe = virtualPlayer.inventory.some((item) => item?.name === ItemName.Pickaxe);
         const hasActionAvailable = this.playerMovementService.hasAdjacentPlayerOrDoor(virtualPlayerTile, grid);
         if (virtualPlayer.actionPoints === NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
             return hasIce;
         } else if (virtualPlayer.actionPoints > NO_SCORE && virtualPlayer.movementPoints === NO_SCORE) {
-            return hasIce || hasActionAvailable || (hasLightning && hasWall);
+            return hasIce || hasActionAvailable || (hasPickaxe && hasWall);
         }
         return true;
     }

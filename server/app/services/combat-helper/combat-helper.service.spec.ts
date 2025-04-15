@@ -155,28 +155,28 @@ describe('CombatHelperService', () => {
         expect(service.getDefender(combatState as CombatState)).toBe(combatState.attacker);
     });
 
-    describe('hasStopItem', () => {
+    describe('hasGreatShieldItem', () => {
         it('should return false when player inventory is undefined', () => {
             const player: Player = {} as Player;
-            const result = service['hasStopItem'](player);
+            const result = service['hasGreatShieldItem'](player);
             expect(result).toBe(false);
         });
 
         it('should handle null item in inventory array', () => {
-            const player: Player = { inventory: [null, { name: ItemName.Stop }, null] } as unknown as Player;
-            const result = service['hasStopItem'](player);
+            const player: Player = { inventory: [null, { name: ItemName.GreatShield }, null] } as unknown as Player;
+            const result = service['hasGreatShieldItem'](player);
             expect(result).toBe(true);
         });
     });
 
     describe('getRandomAttackScore', () => {
-        it('should use D6 dice when player has Stop item', () => {
+        it('should use D6 dice when player has GreatShield item', () => {
             const attacker: Player = {
                 attack: {
                     value: 10,
                     bonusDice: DiceType.D4,
                 },
-                inventory: [{ name: ItemName.Stop }],
+                inventory: [{ name: ItemName.GreatShield }],
             } as unknown as Player;
 
             const grid: Tile[][] = [[]];
@@ -184,7 +184,7 @@ describe('CombatHelperService', () => {
 
             jest.spyOn(global.Math, 'random').mockReturnValue(0.5);
             jest.spyOn(service as any, 'extractDiceValue').mockReturnValue(6);
-            jest.spyOn(service as any, 'hasStopItem').mockReturnValue(true);
+            jest.spyOn(service as any, 'hasGreatShieldItem').mockReturnValue(true);
             (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(null);
 
             const result = service.getRandomAttackScore(attacker, isDebugMode, grid);
@@ -192,19 +192,19 @@ describe('CombatHelperService', () => {
             expect(result).toStrictEqual({ diceRolled: 3, score: 16 });
             expect((service as any).extractDiceValue).toHaveBeenCalledWith(DiceType.D6);
             expect((service as any).extractDiceValue).not.toHaveBeenCalledWith(DiceType.D4);
-            expect((service as any).hasStopItem).toHaveBeenCalledWith(attacker);
+            expect((service as any).hasGreatShieldItem).toHaveBeenCalledWith(attacker);
             jest.spyOn(global.Math, 'random').mockRestore();
         });
     });
 
     describe('getRandomDefenseScore', () => {
-        it('should use D6 dice when player has Stop item', () => {
+        it('should use D6 dice when player has GreatShield item', () => {
             const defender: Player = {
                 defense: {
                     value: 8,
                     bonusDice: DiceType.D4,
                 },
-                inventory: [{ name: ItemName.Stop }],
+                inventory: [{ name: ItemName.GreatShield }],
             } as unknown as Player;
 
             const grid: Tile[][] = [[]];
@@ -212,14 +212,14 @@ describe('CombatHelperService', () => {
 
             jest.spyOn(global.Math, 'random').mockReturnValue(0.5);
             jest.spyOn(service as any, 'extractDiceValue').mockReturnValue(6);
-            jest.spyOn(service as any, 'hasStopItem').mockReturnValue(true);
+            jest.spyOn(service as any, 'hasGreatShieldItem').mockReturnValue(true);
             (gridManagerService.findTileByPlayer as jest.Mock).mockReturnValue(null);
 
             const result = service.getRandomDefenseScore(defender, isDebugMode, grid);
             expect(result).toStrictEqual({ diceRolled: 3, score: 14 });
             expect((service as any).extractDiceValue).toHaveBeenCalledWith(DiceType.D6);
             expect((service as any).extractDiceValue).not.toHaveBeenCalledWith(DiceType.D4);
-            expect((service as any).hasStopItem).toHaveBeenCalledWith(defender);
+            expect((service as any).hasGreatShieldItem).toHaveBeenCalledWith(defender);
             jest.spyOn(global.Math, 'random').mockRestore();
         });
     });

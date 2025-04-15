@@ -67,8 +67,8 @@ export class VirtualPlayerScoreService {
         if (move.type !== MoveType.Item || !move.tile.item) return;
         const item = move.tile.item;
         switch (item.name) {
-            case ItemName.Swap:
-            case ItemName.Rubik:
+            case ItemName.IceShield:
+            case ItemName.Armor:
                 move.score += DEFENSIVE_ITEM_SCORE;
                 break;
             case ItemName.Flag:
@@ -127,8 +127,8 @@ export class VirtualPlayerScoreService {
         if (shouldSkipItemCalculation) return;
         const item = move.tile.item;
         switch (item.name) {
-            case ItemName.Fire:
-            case ItemName.Potion:
+            case ItemName.IceSword:
+            case ItemName.BlackSword:
                 move.score += AGGRESSIVE_ITEM_SCORE;
                 break;
             case ItemName.Flag:
