@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-magic-numbers */ // approved by education team, disabling magic numbers in tests
 import { Item } from '@app/interfaces/item';
 import { Tile } from '@app/interfaces/tile';
 import { VirtualPlayer } from '@app/interfaces/virtual-player';
@@ -79,7 +80,7 @@ describe('VirtualPlayerGateway', () => {
 
     describe('handleCreateVirtualPlayer', () => {
         it('should create virtual player and emit updates', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const behavior = Behavior.Aggressive;
             const mockLobby = {
                 players: [],
@@ -100,7 +101,7 @@ describe('VirtualPlayerGateway', () => {
         });
 
         it('should emit lobbyLocked if lobby is locked', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const behavior = Behavior.Aggressive;
             const mockLobby = {
                 players: [],
@@ -118,7 +119,7 @@ describe('VirtualPlayerGateway', () => {
 
     describe('handleKickVirtualPlayer', () => {
         it('should kick virtual player and emit updates', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const player = new Player();
             player.name = 'Bot';
             const mockLobby = {
@@ -139,7 +140,7 @@ describe('VirtualPlayerGateway', () => {
 
     describe('handleVirtualPlayerMove', () => {
         it('should update player position successfully', async () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const virtualPlayer = { name: 'vp1' } as Player;
             const data = {
                 virtualPlayerTile: { player: virtualPlayer } as Tile,
@@ -156,17 +157,27 @@ describe('VirtualPlayerGateway', () => {
 
     describe('handleEndVirtualPlayerTurn', () => {
         it('should reset stats and end turn', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
 
             gateway.handleEndVirtualPlayerTurn({ accessCode });
 
             expect(mockVirtualPlayerService.resetStats).toHaveBeenCalled();
         });
+        it('should reset stats and call endTurn after delay', () => {
+            jest.useFakeTimers();
+            const accessCode = '1234';
+            gateway.handleEndVirtualPlayerTurn({ accessCode });
+            expect(mockVirtualPlayerService.resetStats).toHaveBeenCalled();
+            jest.advanceTimersByTime(9999);
+            jest.advanceTimersByTime(1);
+            expect(mockGameSessionService.endTurn).toHaveBeenCalledWith(accessCode);
+            jest.useRealTimers();
+        });
     });
 
     describe('handleItemChoice', () => {
         it('should choose item and handle drop', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const player = { behavior: Behavior.Aggressive } as VirtualPlayer;
             const items = [{ id: 'item1' } as Item];
             const removedItem = { id: 'item1' } as Item;
@@ -177,11 +188,26 @@ describe('VirtualPlayerGateway', () => {
             expect(mockVirtualPlayerService.itemChoice).toHaveBeenCalledWith(Behavior.Aggressive, items);
             expect(mockGameSessionService.handleItemDropped).toHaveBeenCalledWith(accessCode, player, removedItem);
         });
+
+        it('should decrement item if removedItem matches itemPickUp', () => {
+            const accessCode = '1234';
+            const player = { behavior: Behavior.Aggressive } as VirtualPlayer;
+            const items = [{ id: 'item1', name: 'fire' } as Item, { id: 'item2', name: 'shield' } as Item];
+            const itemPickUp = { name: 'fire' } as Item;
+
+            const removedItem = { name: 'fire' } as Item;
+            mockVirtualPlayerService.itemChoice = jest.fn().mockReturnValue(removedItem);
+
+            gateway.handleItemChoice({ accessCode, player, items, itemPickUp });
+
+            expect(mockGameStatisticsService.decrementItem).toHaveBeenCalledWith(accessCode, itemPickUp, player);
+            expect(mockGameSessionService.handleItemDropped).toHaveBeenCalledWith(accessCode, player, removedItem);
+        });
     });
 
     describe('handleVirtualPlayerTurnStarted', () => {
         it('should handle turn start', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const player = {} as VirtualPlayer;
 
             gateway.handleVirtualPlayerTurnStarted({ accessCode, player });
@@ -192,7 +218,7 @@ describe('VirtualPlayerGateway', () => {
 
     describe('handleCombatTurnStarted', () => {
         it('should handle combat turn start', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
             const player = {} as VirtualPlayer;
 
             gateway.handleCombatTurnStarted({ accessCode, player });
@@ -203,7 +229,7 @@ describe('VirtualPlayerGateway', () => {
 
     describe('handleActionDone', () => {
         it('should delay next action', () => {
-            const accessCode = 'TEST123';
+            const accessCode = '1234';
 
             gateway.handleActionDone(accessCode);
 
