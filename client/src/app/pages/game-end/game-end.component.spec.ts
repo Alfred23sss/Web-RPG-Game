@@ -6,8 +6,10 @@ import { REFRESH_STORAGE } from '@app/constants/global.constants';
 import { SocketEvent } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { GameStatistics, PlayerStatistics } from '@app/interfaces/statistics';
+import { CharacterService } from '@app/services/character-form/character-form.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { Subject } from 'rxjs';
 import { GameEndComponent } from './game-end.component';
 
 describe('GameEndComponent', () => {
@@ -16,6 +18,7 @@ describe('GameEndComponent', () => {
     let mockRouter: jasmine.SpyObj<Router>;
     let mockSocketService: jasmine.SpyObj<SocketClientService>;
     let mockGameStateService: jasmine.SpyObj<GameStateSocketService>;
+    let mockCharacterService: { unavailableAvatarsSubject: Subject<string[]> };
 
     const mockGameData: GameData = new GameData();
     mockGameData.clientPlayer = { hasAbandoned: false } as Player;
@@ -33,6 +36,9 @@ describe('GameEndComponent', () => {
         mockGameStateService = jasmine.createSpyObj('GameStateSocketService', [], {
             gameDataSubjectValue: mockGameData,
         });
+        mockCharacterService = {
+            unavailableAvatarsSubject: new Subject<string[]>(),
+        };
 
         await TestBed.configureTestingModule({
             imports: [GameEndComponent],
@@ -40,6 +46,7 @@ describe('GameEndComponent', () => {
                 { provide: Router, useValue: mockRouter },
                 { provide: SocketClientService, useValue: mockSocketService },
                 { provide: GameStateSocketService, useValue: mockGameStateService },
+                { provide: CharacterService, useValue: mockCharacterService },
             ],
         }).compileComponents();
 

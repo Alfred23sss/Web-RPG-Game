@@ -265,8 +265,6 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
 
 export const ITEMS_TO_UPDATE = new Set(['home']);
 
-
-
 export const ESCAPE_CHANCE = 0.3;
 
 export const DELAY_BEFORE_ENDING_GAME = 5000;

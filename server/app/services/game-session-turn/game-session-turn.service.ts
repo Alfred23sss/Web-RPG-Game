@@ -1,5 +1,4 @@
 import { RANDOMIZER, SECOND, TRANSITION_PHASE_DURATION, TURN_DURATION } from '@app/constants/constants';
-import { ORDER_RANDOMIZER } from '@app/constants/constants';
 import { EventEmit } from '@app/enums/enums';
 import { Player } from '@app/interfaces/player';
 import { Turn } from '@app/interfaces/turn';
@@ -157,7 +156,7 @@ export class GameSessionTurnService {
     orderPlayersBySpeed(players: Player[]): Player[] {
         const playerList = [...players].sort((a, b) => {
             if (a.speed === b.speed) {
-                return Math.random() - ORDER_RANDOMIZER;
+                return Math.random() - RANDOMIZER;
             }
             return b.speed - a.speed;
         });
