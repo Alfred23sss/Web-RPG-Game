@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Item } from '@app/classes/item/item';
-import { ITEM_COUNTS, ITEMS_TO_UPDATE, sizeMapping } from '@app/constants/global.constants';
+import { ITEM_COUNTS, ITEMS_TO_UPDATE, SIZE_MAPPING } from '@app/constants/global.constants';
 import { Tile } from '@app/interfaces/tile';
 import { GameService } from '@app/services/game/game.service';
 import { GameMode, GameSize, ItemName } from '@common/enums';
@@ -40,7 +40,7 @@ export class ItemService {
 
         const rawSize = currentGame.size as unknown as number;
 
-        const mappedSize = sizeMapping[`size${rawSize}` as keyof typeof sizeMapping] ?? GameSize.Small;
+        const mappedSize = SIZE_MAPPING[`size${rawSize}` as keyof typeof SIZE_MAPPING] ?? GameSize.Small;
 
         const count = ITEM_COUNTS[mappedSize];
 
