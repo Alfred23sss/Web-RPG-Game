@@ -54,7 +54,7 @@ export class CombatSocketService {
             const attackScore = diff > 0 ? diff : 0;
             this.clientNotifier.addLogbookEntry(
                 `${LogBookEntry.Attack} ${attackOutcome} (${AttackMessages.AttackDice}: ${data.attackScore.diceRolled}, ` +
-                    `${AttackMessages.AttackDice}: ${data.defenseScore.diceRolled}, ${AttackMessages.AttackResult}: ${attackScore})`,
+                    `${AttackMessages.DefenseDice}: ${data.defenseScore.diceRolled}, ${AttackMessages.AttackResult}: ${attackScore})`,
             );
 
             gameData.evadeResult = null;
