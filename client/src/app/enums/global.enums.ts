@@ -276,6 +276,6 @@ export enum SnackBarMessage {
 }
 
 export enum Tab {
-    Chat = '',
-    Log = '',
+    Chat = 'chat',
+    Log = 'log',
 }
