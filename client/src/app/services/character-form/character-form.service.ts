@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES, PLAYER_STORAGE, UNINITIALIZED_PLAYER } from '@app/constants/global.constants';
 import { AttributeType, ErrorMessages, SocketEvent } from '@app/enums/global.enums';
@@ -22,12 +23,18 @@ export class CharacterService {
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
+    // In this service, six parameters are necessary because the service’s role is to manage character creation.
+    // First, we must use gameCommunicationService to check if the game is available, then use the access code communication service
+    // to validate the access code, and finally use the socket service to create and join the room.
+    // MatDialog, router, and snackbar are simply used to display messages and navigate between pages.
+    // eslint-disable-next-line max-params
     constructor(
         private readonly router: Router,
         private readonly snackbarService: SnackbarService,
         private readonly gameCommunicationService: GameCommunicationService,
         private readonly socketClientService: SocketClientService,
         private readonly accessCodeService: AccessCodeService,
+        private readonly matDialog: MatDialog,
     ) {}
 
     initializePlayer(player: Player): void {
@@ -157,6 +164,8 @@ export class CharacterService {
     }
 
     returnHome(): void {
+        this.matDialog.closeAll();
+        this.resetAttributes();
         this.router.navigate([Routes.HomePage]);
     }
 

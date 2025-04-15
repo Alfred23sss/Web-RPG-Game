@@ -27,7 +27,7 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
     game: Game;
     isSaving: boolean = false;
     originalGame: Game;
-    originalItemBar: string;
+    originalItemBar: Item[];
 
     constructor(
         private gameService: GameService,
@@ -59,9 +59,9 @@ export class EditionPageComponent implements OnInit, AfterViewInit {
         this.game = this.makeDeepCopy(this.originalGame);
         this.updateGameAndDescription();
         this.gridService.setGrid(this.game.grid);
-        this.updateGame();
+        this.gameService.updateCurrentGame(this.game);
         if (this.itemBar) {
-            const restoredItems = this.makeDeepCopy(JSON.parse(this.originalItemBar));
+            const restoredItems = this.makeDeepCopy(this.originalItemBar);
             const gameMode = this.gameService.getCurrentGame()?.mode;
             this.itemService.setItems(restoredItems, gameMode);
             this.itemBar.items = this.itemService.getItems();

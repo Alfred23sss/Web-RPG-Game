@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { ToolService } from '@app/services/tool/tool.service';
 import { ImageType, TileType } from '@common/enums';
 
@@ -12,11 +12,16 @@ export class ToolbarComponent implements OnInit {
     tileType = TileType;
     imageType = ImageType;
 
-    constructor(private toolService: ToolService) {}
+    constructor(
+        private toolService: ToolService,
+        private cdr: ChangeDetectorRef,
+    ) {}
 
     ngOnInit(): void {
         this.toolService.selectedTool$.subscribe((tool) => {
             this.activeTool = tool;
+
+            this.cdr.detectChanges();
         });
 
         this.activeTool = this.toolService.getSelectedTool();

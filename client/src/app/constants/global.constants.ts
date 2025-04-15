@@ -243,7 +243,7 @@ export const ITEM_BAR_ITEMS = [
         name: ItemName.Chest,
         imageSrc: ItemType.Chest,
         imageSrcGrey: ItemType.ChestGray,
-        itemCounter: 1,
+        itemCounter: 2,
         description: ItemDescription.Chest,
     },
     {
@@ -263,7 +263,7 @@ export const ITEM_COUNTS: Record<GameSize, number> = {
     [GameSize.None]: 0,
 };
 
-export const ITEMS_TO_UPDATE = new Set(['home']);
+export const ITEMS_TO_UPDATE = new Set(['home', 'chest']);
 
 export const ESCAPE_CHANCE = 0.3;
 
