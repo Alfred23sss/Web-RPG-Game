@@ -125,15 +125,20 @@ export class GridManagerService {
             return new Set(items);
         };
 
+        const shuffleArray = <T>(array: T[]): T[] => {
+            return [...array].sort(() => Math.random() - RANDOMIZER);
+        };
+
         const existingItems = getExistingItems();
         let remainingItems = RANDOM_ITEMS.filter((item) => !existingItems.has(item.name));
 
+        remainingItems = shuffleArray(remainingItems);
+
         grid.flat().forEach((tile) => {
             if (tile.item?.name === ItemName.Chest) {
-                const randomItem = remainingItems[Math.floor(Math.random() * remainingItems.length)] ?? null;
+                const randomItem = remainingItems.pop() ?? null;
                 if (randomItem) {
                     tile.item = randomItem;
-                    remainingItems = remainingItems.filter((item) => item.name !== randomItem.name);
                 }
             }
         });

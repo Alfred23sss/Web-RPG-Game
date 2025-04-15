@@ -1,3 +1,15 @@
+.pixel-item.inactive {
+    background: rgba(80, 80, 80, 0.4);
+    border-color: rgba(150, 150, 150, 0.6);
+}
+
+.pixel-item.inactive:hover {
+    background: rgba(100, 100, 100, 0.5);
+    border-color: rgba(180, 180, 180, 0.8);
+    box-shadow: 0 0 10px rgba(200, 200, 200, 0.3);
+}
+
+
 .object-container {
     display: flex;
     flex-direction: column;

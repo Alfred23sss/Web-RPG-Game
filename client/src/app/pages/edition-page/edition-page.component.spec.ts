@@ -13,9 +13,9 @@ import { GameService } from '@app/services/game/game.service';
 import { GridService } from '@app/services/grid/grid-service.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { ToolService } from '@app/services/tool/tool.service';
+import { ImageType, TileType } from '@common/enums';
 import { of } from 'rxjs';
 import { EditionPageComponent } from './edition-page.component';
-import { ImageType, TileType } from '@common/enums';
 
 function createBaseGrid(size: number): Tile[][] {
     return Array.from({ length: size }, (_, rowIndex) =>
@@ -143,7 +143,7 @@ describe('EditionPageComponent', () => {
             grid: createBaseGrid(baseGridSize),
         };
         component['originalGame'] = mockGame;
-        component.originalItemBar = JSON.stringify([]);
+        component.originalItemBar = [];
         component.reset();
         expect(component.game.id).toEqual(mockGame.id);
         expect(component.game.name).toEqual(mockGame.name);

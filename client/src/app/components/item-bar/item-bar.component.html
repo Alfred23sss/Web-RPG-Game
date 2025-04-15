@@ -5,6 +5,7 @@
         @for (item of items; track item.id) {
         <div
             class="item pixel-item"
+            [ngClass]="{ 'inactive': item.itemCounter <= 0 }"
             (mousedown)="selectObject(item)"
             (mouseup)="removeObject()"
             (drop)="onContainerDrop($event, item)"

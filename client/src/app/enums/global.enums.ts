@@ -217,7 +217,7 @@ export enum ErrorMessages {
     GridNotFound = '❌ Aucune grille trouvée',
     InvalidDoorPlacement = '❌ Une ou plusieurs portes ne sont pas correctement placées',
     InvalidTerrainAmount = '❌ La grille doit être au moins 50% de terrain (Défaut, eau ou glace)',
-    InvalidNameSize = '❌ Le nom doit être entre 1 et 30 caractères uniques',
+    InvalidNameSize = '❌ Le nom doit être entre 1 et 30 caractères et uniques',
     InvalidDescriptionSize = '❌La description ne peut être vide et doit être de moins de 100 caractères',
     InvalidFlagPlacement = '❌ Le drapeau doit être placé sur la grille',
     ItemsNotPlaced = '❌ Tous les items doivent être placées',
@@ -278,4 +278,12 @@ export enum SnackBarMessage {
 export enum Tab {
     Chat = 'chat',
     Log = 'log',
+}
+
+export enum AttackMessages {
+    Success = 'réussie',
+    Failure = 'échouée',
+    AttackDice = "Dé d'Attaque",
+    DefenseDice = 'Dé de Défense',
+    AttackResult = "Résultat d'Attaque",
 }

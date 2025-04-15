@@ -2,8 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
+import { GameData } from '@app/classes/game-data/game-data';
 import { GameCombatComponent } from '@app/components/game-combat/game-combat.component';
 import { DEFAULT_ESCAPE_ATTEMPTS, DELAY_MESSAGE_AFTER_COMBAT_ENDED, MOCK_PLAYER } from '@app/constants/global.constants';
+import { LogBookEntry } from '@app/enums/global.enums';
+import { Lobby } from '@app/interfaces/lobby';
+import { Player } from '@app/interfaces/player';
 import { ClientNotifierServices } from '@app/services/client-notifier/client-notifier.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
@@ -320,6 +324,73 @@ describe('CombatSocketService', () => {
             EVENT_HANDLERS['combatTurnStarted'](testData);
             expect(gameStateServiceMock.gameDataSubjectValue.currentPlayer).toEqual(newPlayer);
             expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(gameStateServiceMock.gameDataSubjectValue);
+        });
+    });
+
+    describe('onEscapeAttempt (client player branch)', () => {
+        beforeEach(() => {
+            Object.keys(EVENT_HANDLERS).forEach((key) => delete EVENT_HANDLERS[key]);
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+            });
+            service.initializeCombatListeners();
+        });
+
+        it('should update escapeAttempts and add a log entry when escape fails for client player', () => {
+            const testGameData: GameData = {
+                ...gameStateServiceMock.gameDataSubjectValue,
+                clientPlayer: { name: 'testPlayer' } as Player,
+                currentPlayer: { name: 'testPlayer' } as Player,
+                escapeAttempts: 2,
+                movementPointsRemaining: 5,
+                evadeResult: null,
+                attackResult: null,
+                isInCombatMode: false,
+                isActionMode: false,
+                turnTimer: 0,
+                lobby: {
+                    players: [
+                        { ...MOCK_PLAYER, name: 'Attacker' },
+                        { ...MOCK_PLAYER, name: 'Defender' },
+                    ],
+                } as unknown as Lobby,
+            } as unknown as GameData;
+            Object.defineProperty(gameStateServiceMock, 'gameDataSubjectValue', { value: testGameData, configurable: true });
+            const escapeData = {
+                attemptsLeft: 3,
+                isEscapeSuccessful: false,
+                player: { name: 'testPlayer' } as Player,
+            };
+            EVENT_HANDLERS['escapeAttempt'](escapeData);
+            expect(testGameData.escapeAttempts).toBe(3);
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(`${LogBookEntry.EvadeAttempt} ${LogBookEntry.EvadeResultFail}`, [
+                escapeData.player,
+            ]);
+            expect(gameStateServiceMock.updateGameData).toHaveBeenCalledWith(testGameData);
+        });
+    });
+
+    describe('onCombatStartedLog', () => {
+        beforeEach(() => {
+            Object.keys(EVENT_HANDLERS).forEach((key) => delete EVENT_HANDLERS[key]);
+            socketClientServiceMock.on.and.callFake((event: string, callback: (data?: any) => void) => {
+                EVENT_HANDLERS[event] = callback;
+            });
+            service.initializeCombatListeners();
+        });
+
+        it('should add a log entry when isInCombatMode is true', () => {
+            const testGameData: GameData = {
+                ...gameStateServiceMock.gameDataSubjectValue,
+                isInCombatMode: true,
+            } as unknown as GameData;
+            Object.defineProperty(gameStateServiceMock, 'gameDataSubjectValue', { value: testGameData, configurable: true });
+            const testData = {
+                attacker: { name: 'Attacker' } as Player,
+                defender: { name: 'Defender' } as Player,
+            };
+            EVENT_HANDLERS['combatStartedLog'](testData);
+            expect(clientNotifierMock.addLogbookEntry).toHaveBeenCalledWith(LogBookEntry.CombatStarted, [testData.attacker, testData.defender]);
         });
     });
 });

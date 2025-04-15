@@ -3,6 +3,7 @@
 
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { BONUS_VALUE, INITIAL_VALUES } from '@app/constants/global.constants';
 import { AttributeType, ErrorMessages } from '@app/enums/global.enums';
@@ -13,9 +14,9 @@ import { AccessCodeService } from '@app/services/access-code/access-code.service
 import { GameCommunicationService } from '@app/services/game-communication/game-communication.service';
 import { SnackbarService } from '@app/services/snackbar/snackbar.service';
 import { SocketClientService } from '@app/services/socket/socket-client-service';
+import { DiceType, HttpStatus, JoinLobbyResult, Routes } from '@common/enums';
 import { of, throwError } from 'rxjs';
 import { CharacterService } from './character-form.service';
-import { DiceType, JoinLobbyResult, Routes, HttpStatus } from '@common/enums';
 
 describe('CharacterService', () => {
     let service: CharacterService;
@@ -24,6 +25,7 @@ describe('CharacterService', () => {
     let mockSnackbarService: jasmine.SpyObj<SnackbarService>;
     let mockSocketClientService: jasmine.SpyObj<SocketClientService>;
     let mockAccessCodeService: jasmine.SpyObj<AccessCodeService>;
+    let mockDialog: jasmine.SpyObj<MatDialog>;
     let player: Player;
     let currentAccessCode: string;
     let closePopupSpy: jasmine.Spy<jasmine.Func>;
@@ -62,6 +64,7 @@ describe('CharacterService', () => {
             'getSocketId',
         ]);
         mockAccessCodeService = jasmine.createSpyObj('AccessCodeService', ['setAccessCode']);
+        mockDialog = jasmine.createSpyObj('MatDialog', ['closeAll']);
 
         TestBed.configureTestingModule({
             providers: [
@@ -72,6 +75,7 @@ describe('CharacterService', () => {
                 { provide: SnackbarService, useValue: mockSnackbarService },
                 { provide: SocketClientService, useValue: mockSocketClientService },
                 { provide: AccessCodeService, useValue: mockAccessCodeService },
+                { provide: MatDialog, useValue: mockDialog },
             ],
         });
 
@@ -216,6 +220,7 @@ describe('CharacterService', () => {
                 {} as GameCommunicationService,
                 mockSocketClientService,
                 {} as AccessCodeService,
+                mockDialog,
             );
         });
 
