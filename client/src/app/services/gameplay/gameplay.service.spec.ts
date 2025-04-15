@@ -181,7 +181,7 @@ describe('GameplayService', () => {
                 maxPlayers: 4,
             } as Lobby,
         });
-        const result = (service as any).isTeamate('Player1', 'Player2', gameData);
+        const result = (service as any).isTeammate('Player1', 'Player2', gameData);
         expect(result).toBeTrue();
     });
 
@@ -199,7 +199,7 @@ describe('GameplayService', () => {
         });
 
         it('should show message when attacking a teammate', () => {
-            spyOn(service as any, 'isTeamate').and.returnValue(true);
+            spyOn(service as any, 'isTeammate').and.returnValue(true);
             service.handleAttackCTF(gameData, targetTile);
             expect(mockSnackbarService.showMessage).toHaveBeenCalledWith("TRAITRE!!! C'EST MOI TON AMI");
             expect(mockSocketClientService.emit).not.toHaveBeenCalled();
@@ -220,7 +220,7 @@ describe('GameplayService', () => {
         });
 
         it('should emit startCombat when attacking adjacent enemy', () => {
-            spyOn(service as any, 'isTeamate').and.returnValue(false);
+            spyOn(service as any, 'isTeammate').and.returnValue(false);
             spyOn(service as any, 'findAndCheckAdjacentTiles').and.returnValue(true);
 
             service.handleAttackCTF(gameData, targetTile);

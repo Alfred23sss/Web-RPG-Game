@@ -105,19 +105,8 @@ export class CombatSocketService {
             gameData.clientPlayer.hp.current = gameData.clientPlayer.hp.max;
             gameData.evadeResult = null;
             gameData.attackResult = null;
-            if (data && data.winner && !data.hasEvaded) {
-                this.clientNotifier.showMultipleMessages(
-                    `${data.winner.name} ${ClientNotifierMessage.CombatWon}`,
-                    undefined,
-                    DELAY_MESSAGE_AFTER_COMBAT_ENDED,
-                );
-            } else {
-                this.clientNotifier.showMultipleMessages(
-                    `${data.winner.name} ${ClientNotifierMessage.CombatEvaded}`,
-                    undefined,
-                    DELAY_MESSAGE_AFTER_COMBAT_ENDED,
-                );
-            }
+            const eventToSend = data && data.winner && !data.hasEvaded ? ClientNotifierMessage.CombatWon : ClientNotifierMessage.CombatEvaded;
+            this.clientNotifier.showMultipleMessages(`${data.winner.name} ${eventToSend}`, undefined, DELAY_MESSAGE_AFTER_COMBAT_ENDED);
             if (gameData.clientPlayer.name === gameData.currentPlayer.name) {
                 gameData.clientPlayer.movementPoints = gameData.movementPointsRemaining;
             }
@@ -131,11 +120,8 @@ export class CombatSocketService {
             SocketEvent.CombatEndedLog,
             (data: { winner: Player; attacker: Player; defender: Player; hasEvaded: boolean }) => {
                 this.gameStateService.gameDataSubjectValue.isInCombatMode = false;
-                if (!data.hasEvaded) {
-                    this.clientNotifier.addLogbookEntry(`${LogBookEntry.CombatWon} ${data.winner.name}`, [data.attacker, data.defender]);
-                } else {
-                    this.clientNotifier.addLogbookEntry(`${LogBookEntry.CombatEvaded} ${data.winner.name}`, [data.attacker, data.defender]);
-                }
+                const logbookEntry = data.hasEvaded ? LogBookEntry.CombatEvaded : LogBookEntry.CombatWon;
+                this.clientNotifier.addLogbookEntry(`${logbookEntry} ${data.winner.name}`, [data.attacker, data.defender]);
             },
         );
     }
