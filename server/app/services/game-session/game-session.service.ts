@@ -7,9 +7,9 @@ import { GameSessionTurnService } from '@app/services/game-session-turn/game-ses
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
+import { GameMode, ItemName, TileType } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { GameMode, ItemName, TileType } from '@common/enums';
 
 const PLAYER_MOVE_DELAY = 150;
 
@@ -37,69 +37,27 @@ export class GameSessionService {
         this.startTransitionPhase(accessCode);
     }
 
-    // bouge ca
     async updatePlayerPosition(accessCode: string, movement: Tile[], player: Player): Promise<void> {
         const gameSession = this.gameSessions.get(accessCode);
         let isCurrentlyMoving = true;
+
         for (let i = 1; i < movement.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
-            this.gridManager.clearPlayerFromGrid(gameSession.game.grid, player.name);
-            this.gridManager.setPlayerOnTile(gameSession.game.grid, movement[i], player);
+            await this.delayMove();
+            this.updatePlayerLocation(gameSession, movement[i], player);
+            this.emitTileVisitedEvent(accessCode, player, movement[i]);
+            this.handleSwapItems(player, movement[i]);
 
-            this.eventEmitter.emit(EventEmit.GameTileVisited, {
-                accessCode,
-                player,
-                tile: movement[i],
-            });
+            isCurrentlyMoving = this.updateMovementStatus(i, movement);
 
-            player.inventory.forEach((item, index) => {
-                if (item?.name === ItemName.Swap) {
-                    if (movement[i].type === TileType.Ice) {
-                        this.itemEffectsService.addEffect(player, item, movement[i]);
-                    } else {
-                        this.itemEffectsService.removeEffects(player, index);
-                    }
-                }
-            });
+            if (!isCurrentlyMoving && this.shouldCollectItem(movement[i])) {
+                this.collectItem(accessCode, player, movement[i]);
+                break;
+            }
 
-            if (i === movement.length - 1) {
-                isCurrentlyMoving = false;
-            }
-            if (movement[i].item && movement[i].item !== undefined) {
-                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
-                if (movement[i].item.name !== ItemName.Home) {
-                    isCurrentlyMoving = false;
-                }
-            }
-            if (!isCurrentlyMoving && movement[i].item && movement[i].item !== undefined) {
-                // peut etre que le check pour undefined nest pas necessaire, a voir durant les tests
-                if (movement[i].item.name !== ItemName.Home) {
-                    this.addItemToPlayer(accessCode, player, movement[i].item, this.getGameSession(accessCode));
-                    this.emitEvent(EventEmit.GameItemCollected, {
-                        accessCode,
-                        item: movement[i].item,
-                        player,
-                    });
-                    break;
-                }
-            }
-            this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
-                accessCode,
-                grid: gameSession.game.grid,
-                player,
-                isCurrentlyMoving,
-            });
+            this.emitMovementEvent(accessCode, gameSession, player, isCurrentlyMoving);
 
             if (this.gridManager.isFlagOnSpawnPoint(gameSession.game.grid, player)) {
-                const sameTeamPlayers: string[] = [];
-
-                for (const playerOfList of gameSession.turn.orderedPlayers) {
-                    if (playerOfList.team === player.team) {
-                        sameTeamPlayers.push(playerOfList.name);
-                    }
-                }
-
-                this.endGameSession(accessCode, sameTeamPlayers);
+                this.handleWinCondition(accessCode, player, gameSession);
             }
         }
     }
@@ -257,7 +215,6 @@ export class GameSessionService {
             this.gridManager.clearPlayerFromGrid(gameSession.game.grid, playerName);
             this.emitGridUpdate(accessCode, gameSession.game.grid);
         }
-        // ici
         if (gameSession.turn.currentPlayer.name === playerName) {
             this.endTurn(accessCode);
         }
@@ -265,6 +222,84 @@ export class GameSessionService {
             this.eventEmitter.emit(EventEmit.AdminModeDisabled, { accessCode });
         }
         return player;
+    }
+
+    private async delayMove(): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, PLAYER_MOVE_DELAY));
+    }
+
+    private updatePlayerLocation(gameSession: GameSession, tile: Tile, player: Player): void {
+        this.gridManager.clearPlayerFromGrid(gameSession.game.grid, player.name);
+        this.gridManager.setPlayerOnTile(gameSession.game.grid, tile, player);
+    }
+
+    private emitTileVisitedEvent(accessCode: string, player: Player, tile: Tile): void {
+        this.eventEmitter.emit(EventEmit.GameTileVisited, {
+            accessCode,
+            player,
+            tile,
+        });
+    }
+
+    private handleSwapItems(player: Player, tile: Tile): void {
+        player.inventory.forEach((item, index) => {
+            if (item?.name === ItemName.Swap) {
+                if (tile.type === TileType.Ice) {
+                    this.itemEffectsService.addEffect(player, item, tile);
+                } else {
+                    this.itemEffectsService.removeEffects(player, index);
+                }
+            }
+        });
+    }
+
+    private updateMovementStatus(currentIndex: number, movement: Tile[]): boolean {
+        if (currentIndex === movement.length - 1) {
+            return false;
+        }
+
+        const currentTile = movement[currentIndex];
+        if (currentTile.item && currentTile.item !== undefined) {
+            if (currentTile.item.name !== ItemName.Home) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private shouldCollectItem(tile: Tile): boolean {
+        return tile.item !== undefined && tile.item && tile.item.name !== ItemName.Home;
+    }
+
+    private collectItem(accessCode: string, player: Player, tile: Tile): void {
+        this.addItemToPlayer(accessCode, player, tile.item, this.getGameSession(accessCode));
+        this.emitEvent(EventEmit.GameItemCollected, {
+            accessCode,
+            item: tile.item,
+            player,
+        });
+    }
+
+    private emitMovementEvent(accessCode: string, gameSession: GameSession, player: Player, isCurrentlyMoving: boolean): void {
+        this.eventEmitter.emit(EventEmit.GamePlayerMovement, {
+            accessCode,
+            grid: gameSession.game.grid,
+            player,
+            isCurrentlyMoving,
+        });
+    }
+
+    private handleWinCondition(accessCode: string, player: Player, gameSession: GameSession): void {
+        const sameTeamPlayers: string[] = [];
+
+        for (const playerOfList of gameSession.turn.orderedPlayers) {
+            if (playerOfList.team === player.team) {
+                sameTeamPlayers.push(playerOfList.name);
+            }
+        }
+
+        this.endGameSession(accessCode, sameTeamPlayers);
     }
 
     private startTransitionPhase(accessCode: string): void {
