@@ -23,11 +23,10 @@ export class CharacterService {
     bonusAssigned = { ...INITIAL_VALUES.bonusAssigned };
     diceAssigned = { ...INITIAL_VALUES.diceAssigned };
 
-    // Dans ce service, six parametres sont nécessaires car le rôle du service est de gérer la création de personnage on
-    // doit donc d'abord utiliser gameCommunicationService pour vérifier si le jeu est disponible, puis utiliser le service de
-    // communication de code d'accès pour valider le code d'accès, et enfin utiliser le service de socket pour créer la salle et
-    // rejoindre la salle. MatDialog, router et snackbar sont simplement utiliser pour afficher des messages et naviguer entre les
-    // pages.
+    // In this service, six parameters are necessary because the service’s role is to manage character creation.
+    // First, we must use gameCommunicationService to check if the game is available, then use the access code communication service
+    // to validate the access code, and finally use the socket service to create and join the room.
+    // MatDialog, router, and snackbar are simply used to display messages and navigate between pages.
     // eslint-disable-next-line max-params
     constructor(
         private readonly router: Router,
