@@ -119,6 +119,9 @@ export class ItemEffectsService {
         player.inventory.forEach((item, index) => {
             if (item !== null) {
                 this.removeEffects(player, index);
+                if (item.name === ItemName.IceShield) {
+                    player.defense.value -= BONUS_VALUE;
+                }
             }
         });
         const shuffledInventory = [...player.inventory].sort(() => Math.random() - RANDOMIZER);

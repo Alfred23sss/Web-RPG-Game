@@ -46,7 +46,7 @@ export class GameSessionService {
             await this.delayMove();
             this.updatePlayerLocation(gameSession, movement[i], player);
             this.emitTileVisitedEvent(accessCode, player, movement[i]);
-            this.handleIceShieldItem(player, movement[i]);
+            this.handleIceShieldItem(player, movement[i], accessCode);
 
             isCurrentlyMoving = this.updateMovementStatus(i, movement);
 
@@ -240,7 +240,7 @@ export class GameSessionService {
         });
     }
 
-    private handleIceShieldItem(player: Player, tile: Tile): void {
+    private handleIceShieldItem(player: Player, tile: Tile, accessCode: string): void {
         player.inventory.forEach((item, index) => {
             if (item) {
                 if (this.itemEffectsService.isIceConditionValid(tile, item)) {
@@ -248,6 +248,7 @@ export class GameSessionService {
                 } else {
                     this.itemEffectsService.removeEffects(player, index);
                 }
+                this.updateGameSessionPlayerList(accessCode, player.name, { defense: player.defense });
             }
         });
     }
