@@ -14,11 +14,8 @@ export class ItemService {
     constructor(private gameService: GameService) {}
 
     setItems(items: Item[], gameMode: string | undefined): void {
-        if (gameMode === GameMode.CTF) {
-            this.items = items;
-        } else {
-            this.items = items.filter((item) => item.name !== ItemName.Flag);
-        }
+        const isCTFMode = gameMode === GameMode.CTF;
+        this.items = isCTFMode ? items : items.filter((item) => item.name !== ItemName.Flag);
     }
 
     getItems(): Item[] {
