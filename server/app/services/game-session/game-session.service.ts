@@ -9,7 +9,7 @@ import { GameSessionTurnService } from '@app/services/game-session-turn/game-ses
 import { GridManagerService } from '@app/services/grid-manager/grid-manager.service';
 import { ItemEffectsService } from '@app/services/item-effects/item-effects.service';
 import { LobbyService } from '@app/services/lobby/lobby.service';
-import { GameMode, ItemName, TileType } from '@common/enums';
+import { GameMode, ItemName } from '@common/enums';
 import { Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -46,7 +46,7 @@ export class GameSessionService {
             await this.delayMove();
             this.updatePlayerLocation(gameSession, movement[i], player);
             this.emitTileVisitedEvent(accessCode, player, movement[i]);
-            this.handleIceShieldItems(player, movement[i]);
+            this.handleIceShieldItem(player, movement[i]);
 
             isCurrentlyMoving = this.updateMovementStatus(i, movement);
 
@@ -240,10 +240,10 @@ export class GameSessionService {
         });
     }
 
-    private handleIceShieldItems(player: Player, tile: Tile): void {
+    private handleIceShieldItem(player: Player, tile: Tile): void {
         player.inventory.forEach((item, index) => {
-            if (item?.name === ItemName.IceShield) {
-                if (tile.type === TileType.Ice) {
+            if (item) {
+                if (this.itemEffectsService.isIceConditionValid(tile, item)) {
                     this.itemEffectsService.addEffect(player, item, tile);
                 } else {
                     this.itemEffectsService.removeEffects(player, index);
