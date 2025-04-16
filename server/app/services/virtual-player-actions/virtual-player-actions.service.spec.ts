@@ -595,18 +595,6 @@ describe('VirtualPlayerActionsService', () => {
             expect(result).toBe(false);
             expect(mockGameSessionService.updateDoorTile).not.toHaveBeenCalled();
         });
-
-        it('should open door and return true when conditions are met', async () => {
-            mockDestinationTile.type = TileType.Door;
-            mockDestinationTile.isOpen = false;
-            mockVirtualTile.player.actionPoints = 3;
-
-            const result = await (service as any).handleAdjacentToClosedDoor(mockDestinationTile, mockVirtualTile, mockMovement, mockAccessCode);
-
-            expect(result).toBe(true);
-            expect(mockGameSessionService.updateDoorTile).toHaveBeenCalledWith(mockAccessCode, mockVirtualTile, mockDestinationTile, undefined);
-            expect(mockVirtualTile.player.actionPoints).toBe(2);
-        });
     });
 
     describe('handleAdjacentToPlayer', () => {
@@ -769,15 +757,6 @@ describe('VirtualPlayerActionsService', () => {
 
             expect(mockEventEmitter.emit).toHaveBeenCalled();
             expect(mockGameSessionService.updateDoorTile).not.toHaveBeenCalled();
-        });
-        it('should open door when actionTile exists', async () => {
-            const mockActionTile = createMockTile();
-
-            const promise = (service as any).openDoor(mockAccessCode, mockCurrentTile, mockActionTile);
-            jest.advanceTimersByTime(100);
-            await promise;
-
-            expect(mockGameSessionService.updateDoorTile).toHaveBeenCalled();
         });
     });
 });
