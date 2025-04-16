@@ -68,7 +68,7 @@ export class VirtualPlayerGateway {
     @OnEvent(VirtualPlayerEvents.ChooseItem)
     handleItemChoice(@MessageBody() data: { accessCode: string; player: VirtualPlayer; items: Item[]; itemPickUp: Item }) {
         const removedItem = this.virtualPlayerService.itemChoice(data.player.behavior, data.items);
-        if (removedItem.name === data.itemPickUp.name) {
+        if (removedItem?.name === data.itemPickUp?.name) {
             this.gameStatistics.decrementItem(data.accessCode, data.itemPickUp, data.player);
         }
         this.gameSessionService.handleItemDropped(data.accessCode, data.player, removedItem);
