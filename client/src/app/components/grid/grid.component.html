@@ -24,7 +24,7 @@
                 'highlight-player': isActionMode && tile.player && isAccessible(tile),
                 'highlight-door': isActionMode && tile.type === tileType.Door && !tile.item && isAccessible(tile),
                 'highlight-wall': isActionMode && hasPickaxeItem() && isAccessible(tile) && tile.type === tileType.Wall,
-                'highlight-spawn': tile.id === clientPlayer.spawnPoint?.tileId
+                'highlight-spawn': clientPlayer.spawnPoint?.tileId === tile.id
             }"
             [isEditionMode]="isEditionMode"
         ></app-tile>

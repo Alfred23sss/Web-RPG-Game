@@ -9,6 +9,7 @@ import { KEY_DOWN_EVENT_LISTENER, REFRESH_STORAGE } from '@app/constants/global.
 import { Keys, Tab } from '@app/enums/global.enums';
 import { Player } from '@app/interfaces/player';
 import { Tile } from '@app/interfaces/tile';
+import { CharacterService } from '@app/services/character-form/character-form.service';
 import { GameStateSocketService } from '@app/services/game-state-socket/game-state-socket.service';
 import { GameplayService } from '@app/services/gameplay/gameplay.service';
 import { SocketListenerService } from '@app/services/socket-listener/socket-listener.service';
@@ -33,6 +34,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
         private readonly gameplayService: GameplayService,
         private readonly gameStateSocketService: GameStateSocketService,
         private readonly socketListenerService: SocketListenerService,
+        private readonly characterService: CharacterService,
     ) {}
 
     get activePlayerCount(): number {
@@ -82,6 +84,7 @@ export class GamePageComponent implements OnInit, OnDestroy {
     }
 
     abandonGame(): void {
+        this.refreshAvatarChoice();
         this.gameplayService.abandonGame(this.gameData);
     }
 
@@ -112,5 +115,9 @@ export class GamePageComponent implements OnInit, OnDestroy {
         if (event.key.toLowerCase() === Keys.D && this.gameData.clientPlayer.isAdmin) {
             this.gameplayService.emitAdminModeUpdate(this.gameData);
         }
+    }
+
+    private refreshAvatarChoice(): void {
+        this.characterService.unavailableAvatarsSubject.next([]);
     }
 }
