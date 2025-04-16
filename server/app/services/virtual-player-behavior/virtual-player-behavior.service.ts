@@ -83,8 +83,8 @@ export class VirtualPlayerBehaviorService {
                 scoredMoves = this.virtualPlayerScoreService.scoreDefensiveMoves(moves, virtualPlayer, lobby);
                 break;
         }
-
         scoredMoves.sort((a, b) => (b.score || 0) - (a.score || 0));
+
         return scoredMoves[0];
     }
 }
