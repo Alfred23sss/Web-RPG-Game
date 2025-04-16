@@ -55,13 +55,15 @@ export class PlayerMovementService {
     }
 
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
+        if (!clientPlayerTile || !grid) return false;
         const adjacentTiles = this.getNeighbors(clientPlayerTile, grid);
-        return adjacentTiles.some((tile) => tile.type === TileType.Door || tile.player);
+        return (adjacentTiles || []).some((tile) => tile.type === TileType.Door || tile.player);
     }
 
     hasAdjacentPlayer(vPTile: Tile, grid: Tile[][]): boolean {
+        if (!vPTile || !grid) return false;
         const adjacentTiles = this.getNeighbors(vPTile, grid);
-        return adjacentTiles.some((tile) => tile.player);
+        return (adjacentTiles || []).some((tile) => tile.player);
     }
 
     findClosestReachableTile(moveTile: Tile, virtualPlayerTile: Tile, grid: Tile[][], movementPoints: number): Tile | undefined {
