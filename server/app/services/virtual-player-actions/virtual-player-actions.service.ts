@@ -203,7 +203,7 @@ export class VirtualPlayerActionsService {
         }
         await new Promise((resolve) => setTimeout(resolve, this.getRandomDelay(DOOR_ACTION_MIN_MS, DOOR_ACTION_MAX_MS)));
         this.gameSessionService.updateDoorTile(accessCode, currentTile, actionTile, virtualPlayer);
-        this.updateActionPoints(virtualPlayer); // changed to virtualPlayer
+        this.updateActionPoints(virtualPlayer);
         this.emitEvent(EventEmit.VPActionDone, accessCode);
     }
 
