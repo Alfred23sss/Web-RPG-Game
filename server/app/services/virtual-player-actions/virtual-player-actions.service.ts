@@ -159,6 +159,7 @@ export class VirtualPlayerActionsService {
     }
 
     private updateActionPoints(virtualPlayer: Player): void {
+        if (!virtualPlayer) return;
         virtualPlayer.actionPoints -= ACTION_COST;
     }
 
