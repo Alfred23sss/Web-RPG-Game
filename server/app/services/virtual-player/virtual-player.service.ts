@@ -11,7 +11,7 @@ import { LobbyService } from '@app/services/lobby/lobby.service';
 import { VirtualPlayerActionsService } from '@app/services/virtual-player-actions/virtual-player-actions.service';
 import { VirtualPlayerBehaviorService } from '@app/services/virtual-player-behavior/virtual-player-behavior.service';
 import { Behavior } from '@common/enums';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from 'eventemitter2';
 @Injectable()
 export class VirtualPlayerService {
@@ -72,7 +72,13 @@ export class VirtualPlayerService {
 
     delay(accessCode: string): void {
         const randomDelay = this.virtualPlayerActions.getRandomDelay(ACTION_MIN_MS, ACTION_MAX_MS);
-        setTimeout(() => this.executeVirtualPlayerTurn(accessCode), randomDelay);
+        setTimeout(() => {
+            try {
+                this.executeVirtualPlayerTurn(accessCode);
+            } catch (error) {
+                Logger.log(error);
+            }
+        }, randomDelay);
     }
 
     private executeVirtualPlayerTurn(accessCode: string): void {
