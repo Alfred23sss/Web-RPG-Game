@@ -49,7 +49,9 @@ export class PlayerMovementService {
     }
 
     hasAdjacentTileType(clientPlayerTile: Tile, grid: Tile[][], tileType: TileType): boolean {
-        return this.getNeighbors(clientPlayerTile, grid).some((tile) => tile.type === tileType);
+        if (!clientPlayerTile || !grid || !tileType) return false;
+        const neighbors = this.getNeighbors(clientPlayerTile, grid);
+        return (neighbors || []).some((tile) => tile.type === tileType);
     }
 
     hasAdjacentPlayerOrDoor(clientPlayerTile: Tile, grid: Tile[][]): boolean {
