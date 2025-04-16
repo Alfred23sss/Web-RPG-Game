@@ -58,6 +58,7 @@ export class TurnSocketService {
     private onTransitionStarted(): void {
         this.socketClientService.on(SocketEvent.TransitionStarted, (data: { nextPlayer: Player; transitionDuration: number }) => {
             const gameData = this.gameStateService.gameDataSubjectValue;
+            gameData.hasTurnEnded = true;
             this.gameplayService.closePopUp();
 
             const message =

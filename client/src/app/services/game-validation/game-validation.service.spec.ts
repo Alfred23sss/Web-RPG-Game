@@ -119,7 +119,7 @@ describe('GameValidationService', () => {
 
         expect(service.validateGame(game)).toBeFalse();
         expect(snackBarMock.open).toHaveBeenCalledWith(
-            '❌ Le nom doit être entre 1 et 30 caractères et uniques\n❌La description ne peut être vide et doit être de moins de 100 caractères',
+            '❌ Le nom doit être entre 1 et 30 caractères et unique\n❌La description ne peut être vide et doit être de moins de 100 caractères',
             'Close',
             { duration: 10000 },
         );
